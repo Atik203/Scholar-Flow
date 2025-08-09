@@ -783,5 +783,3 @@ model VerificationToken {
 - Implement vector search queries using pgvector + raw SQL; add ivfflat index.
 - Wire Stripe/SSLCommerz checkout and webhooks; create Subscription/Payment write paths.
 - Harden RBAC at workspace and collection boundaries; add activity logging for sensitive flows.
-
-If you want, I can generate a base Express project structure (controllers, routers, middleware, Prisma client, BullMQ setup) and a Next.js starter wired to this API.
