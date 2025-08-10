@@ -16,7 +16,7 @@ const paperFilterSchema = z.object({
 });
 
 // GET /papers - List papers with filtering
-router.get('/', async (req: AuthRequest, res) => {
+router.get('/', async (req: AuthRequest, res): Promise<void> => {
   try {
     const { page, limit, search, workspaceId, semantic } = paperFilterSchema.parse(req.query);
     const offset = (page - 1) * limit;
@@ -41,13 +41,14 @@ router.get('/', async (req: AuthRequest, res) => {
     // For semantic search, we'll need to implement vector search later
     if (semantic && search) {
       // TODO: Implement vector similarity search using pgvector
-      return res.json({
+      res.json({
         papers: [],
         total: 0,
         page,
         totalPages: 0,
         message: 'Semantic search not yet implemented',
       });
+      return;
     }
 
     const [papers, total] = await Promise.all([
@@ -89,7 +90,7 @@ router.get('/', async (req: AuthRequest, res) => {
 });
 
 // GET /papers/:id - Get paper details
-router.get('/:id', async (req: AuthRequest, res) => {
+router.get('/:id', async (req: AuthRequest, res): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -130,7 +131,8 @@ router.get('/:id', async (req: AuthRequest, res) => {
     });
 
     if (!paper) {
-      return res.status(404).json({ error: 'Paper not found' });
+      res.status(404).json({ error: 'Paper not found' });
+      return;
     }
 
     res.json(paper);
@@ -169,7 +171,7 @@ router.post('/import', async (req: AuthRequest, res) => {
 });
 
 // DELETE /papers/:id - Soft delete paper
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete('/:id', async (req: AuthRequest, res): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.user!.id;
@@ -180,13 +182,15 @@ router.delete('/:id', async (req: AuthRequest, res) => {
     });
 
     if (!paper) {
-      return res.status(404).json({ error: 'Paper not found' });
+      res.status(404).json({ error: 'Paper not found' });
+      return;
     }
 
     // Check if user can delete this paper (owner or admin)
     if (paper.uploaderId !== userId) {
       // TODO: Check if user is admin or workspace owner
-      return res.status(403).json({ error: 'Not authorized to delete this paper' });
+      res.status(403).json({ error: 'Not authorized to delete this paper' });
+      return;
     }
 
     await prisma.paper.update({

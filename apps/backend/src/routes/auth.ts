@@ -12,13 +12,14 @@ const sessionValidationSchema = z.object({
 });
 
 // POST /auth/session/validate - Validate JWT session
-router.post('/session/validate', async (req, res) => {
+router.post('/session/validate', async (req, res): Promise<void> => {
   try {
     const { token } = sessionValidationSchema.parse(req.body);
     const jwtSecret = process.env.NEXTAUTH_SECRET;
 
     if (!jwtSecret) {
-      return res.status(500).json({ error: 'JWT secret not configured' });
+      res.status(500).json({ error: 'JWT secret not configured' });
+      return;
     }
 
     // Verify JWT token
@@ -38,7 +39,8 @@ router.post('/session/validate', async (req, res) => {
     });
 
     if (!user || user.isDeleted) {
-      return res.status(401).json({ error: 'Invalid token or user not found' });
+      res.status(401).json({ error: 'Invalid token or user not found' });
+      return;
     }
 
     res.json({
