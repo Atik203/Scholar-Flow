@@ -16,12 +16,13 @@ export const authMiddleware = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No token provided' });
+      res.status(401).json({ error: 'No token provided' });
+      return;
     }
 
     const token = authHeader.substring(7);
@@ -41,7 +42,8 @@ export const authMiddleware = async (
     });
 
     if (!user || user.isDeleted) {
-      return res.status(401).json({ error: 'Invalid token or user not found' });
+      res.status(401).json({ error: 'Invalid token or user not found' });
+      return;
     }
 
     req.user = {
@@ -53,18 +55,20 @@ export const authMiddleware = async (
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    return res.status(401).json({ error: 'Invalid token' });
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
 
 export const requireRole = (roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      res.status(401).json({ error: 'Authentication required' });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+      res.status(403).json({ error: 'Insufficient permissions' });
+      return;
     }
 
     next();
