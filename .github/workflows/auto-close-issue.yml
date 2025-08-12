@@ -1,0 +1,21 @@
+name: Auto Close Old Issues
+
+on:
+  pull_request:
+    types: [opened, closed]
+  push:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  auto-close-old-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto Closer
+        uses: lowply/auto-closer@v0.0.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          AC_LABEL: "auto-generated"
+          AC_KEEP: 1

@@ -1,5 +1,5 @@
 {
-  "name": "scholar-sphere",
+  "name": "scholar-flow",
   "version": "1.0.0",
   "description": "AI-Powered Research Paper Collaboration Hub",
   "private": true,
@@ -13,20 +13,25 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
-    "clean": "turbo run clean && rm -rf node_modules",
+    "clean": "turbo run clean && rimraf node_modules",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
+    "setup": "npm install && npm run db:generate",
     "db:migrate": "cd apps/backend && npx prisma migrate dev",
     "db:generate": "cd apps/backend && npx prisma generate",
-    "db:studio": "cd apps/backend && npx prisma studio"
+    "db:studio": "cd apps/backend && npx prisma studio",
+    "db:seed": "cd apps/backend && npx ts-node prisma/seed.ts",
+    "db:reset": "cd apps/backend && npx prisma migrate reset --force"
   },
   "devDependencies": {
     "@turbo/gen": "^1.10.12",
+    "@types/node": "^20",
     "prettier": "^3.0.3",
+    "rimraf": "^5.0.5",
     "turbo": "^1.10.12",
     "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "yarn": ">=4.0.0"
   }
 }

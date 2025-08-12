@@ -1,4 +1,4 @@
-// Prisma schema for ScholarSphere (Postgres + pgvector)
+// Prisma schema for Scholar-Flow (Postgres + pgvector)
 // - All ids are String UUIDs
 // - Every model includes createdAt, updatedAt, isDeleted
 

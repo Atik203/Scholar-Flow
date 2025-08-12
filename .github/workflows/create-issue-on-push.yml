@@ -1,0 +1,25 @@
+on: ["push"]
+name: Create an issue on push
+permissions:
+  contents: read
+  issues: write
+jobs:
+  stuff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get commit details
+        id: get-commit
+        run: |
+          echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+          echo "COMMIT_URL=https://github.com/${{ github.repository }}/commit/$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
+      - name: Create an issue
+        uses: JasonEtco/create-an-issue@v2.9.2
+        with:
+          filename: .github/ISSUE_TEMPLATE.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          COMMIT_MESSAGE: ${{ env.COMMIT_MESSAGE }}
+          COMMIT_AUTHOR: ${{ env.COMMIT_AUTHOR }}
+          COMMIT_URL: ${{ env.COMMIT_URL }}

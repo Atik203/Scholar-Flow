@@ -1,8 +1,8 @@
-# ScholarSphere - AI-Powered Research Paper Collaboration Hub
+# Scholar-Flow - AI-Powered Research Paper Collaboration Hub
 
 ## 🚀 Project Template Status
 
-**This repository now contains a complete project template!** The firewall issues have been resolved and the ScholarSphere application template has been successfully created based on the comprehensive specification below.
+**This repository now contains a complete project template!** The firewall issues have been resolved and the Scholar-Flow application template has been successfully created based on the comprehensive specification below.
 
 ### What's Included
 
@@ -15,13 +15,17 @@
 
 ### Quick Start
 
+For Windows users:
 ```bash
-# Clone and setup
+# Clone the repository
 git clone <repository-url>
-cd Project-Info
-npm install
+cd Scholar-Flow
 
-# Setup environment
+# Run the Windows setup script
+setup.bat
+
+# Or setup manually:
+npm install
 cp apps/backend/.env.example apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env.local
 
@@ -37,11 +41,11 @@ npm run dev
 ## Original Specification
 
 Updated for Postgres + pgvector, Next.js (App Router) frontend, and a separate Node.js + Express backend with Prisma.
-This document outlines the architecture, features, and implementation details for ScholarSphere, a SaaS platform designed to help researchers manage academic papers, collaborate with teams, and leverage AI for enhanced workflows.
+This document outlines the architecture, features, and implementation details for Scholar-Flow, a SaaS platform designed to help researchers manage academic papers, collaborate with teams, and leverage AI for enhanced workflows.
 
 ## 1) Product Overview
 
-- Name: ScholarSphere
+- Name: Scholar-Flow
 - Type: SaaS platform for research paper organization, collaboration, and AI assistance
 - Audience: Researchers, students, professors, academic teams, institutions
 - Goal: Help users upload, manage, annotate, and collaborate on academic papers; power workflows with AI (summaries, semantic search, citation tooling, literature review assistance); provide team workspaces and paid plans.

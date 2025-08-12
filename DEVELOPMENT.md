@@ -1,6 +1,6 @@
-# ScholarSphere Project Template
+# Scholar-Flow Project Template
 
-This project template provides a complete foundation for the ScholarSphere AI-powered research paper collaboration platform as described in the [comprehensive README](README.md).
+This project template provides a complete foundation for the Scholar-Flow AI-powered research paper collaboration platform as described in the [comprehensive README](README.md).
 
 ## Project Structure
 
@@ -26,6 +26,10 @@ This project template provides a complete foundation for the ScholarSphere AI-po
 
 1. **Clone and install dependencies:**
    ```bash
+   # For Windows users, run the setup script
+   setup.bat
+   
+   # Or manually:
    npm install
    ```
 
@@ -58,19 +62,26 @@ This will start:
 ### ✅ Basic Structure
 - [x] Monorepo setup with Turbo
 - [x] Next.js frontend with TypeScript
-- [x] Express backend with TypeScript  
+- [x] Express backend with TypeScript following Apollo Healthcare pattern
 - [x] Prisma schema with complete data model
-- [x] Auth.js (NextAuth) setup
-- [x] Redux Toolkit Query for API state management
-- [x] Basic UI components with Tailwind CSS
+- [x] Backend modular architecture (modules/User, modules/Auth, etc.)
+- [x] Windows setup script (setup.bat)
+- [x] Environment configuration files
+- [x] GitHub Copilot instructions
 
-### 🚧 In Progress
-- [ ] File upload with S3 integration
+### 🚧 In Progress (Phase 1)
+- [ ] Complete User authentication module
+- [ ] Frontend Auth.js setup
+- [ ] Paper upload and management
+- [ ] Database migrations
+- [ ] Frontend-backend integration
+
+### ⏳ Planned (Phase 1)
+- [ ] File upload with cloud storage
 - [ ] Vector search with pgvector
-- [ ] Payment integration (Stripe/SSLCommerz)
 - [ ] AI features (OpenAI integration)
-- [ ] Real-time collaboration
-- [ ] PDF processing and OCR
+- [ ] Basic collections functionality
+- [ ] User profile management
 
 ## API Endpoints
 

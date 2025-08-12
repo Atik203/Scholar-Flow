@@ -1,0 +1,148 @@
+name: Auto Merge Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'auto-generated') && github.event.pull_request.head.ref == 'dev'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Wait before merging
+        run: |
+          echo "Waiting 10 seconds to allow any checks to start..."
+          sleep 10
+
+      - name: Setup Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Update dev branch with main first
+        run: |
+          # Ensure we have the latest from both branches
+          git fetch origin main
+          git fetch origin dev
+
+          # Check if there are any differences between main and dev
+          git checkout main
+          git checkout dev
+
+          # Check if merge is needed
+          if git merge-base --is-ancestor main dev; then
+            echo "Dev is already up to date with main"
+          else
+            echo "Merging main into dev to resolve potential conflicts"
+            if git merge main --no-edit; then
+              echo "✅ Successfully merged main into dev"
+              git push origin dev
+            else
+              echo "⚠️ Merge conflicts detected - will proceed with PR merge anyway"
+              git merge --abort
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Check PR status
+        id: pr-status
+        run: |
+          # Wait a bit more for checks to complete
+          sleep 5
+
+          # Get PR details with retry
+          for i in {1..3}; do
+            if pr_state=$(gh pr view ${{ github.event.pull_request.number }} --json state --jq '.state') && \
+               mergeable=$(gh pr view ${{ github.event.pull_request.number }} --json mergeable --jq '.mergeable'); then
+              break
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+
+          echo "PR State: $pr_state"
+          echo "Mergeable: $mergeable"
+
+          # Check if PR is ready for merge
+          if [ "$pr_state" = "OPEN" ] && [ "$mergeable" = "MERGEABLE" ]; then
+            echo "can_merge=true" >> $GITHUB_OUTPUT
+            echo "✅ PR is ready for merge"
+          else
+            echo "can_merge=false" >> $GITHUB_OUTPUT
+            echo "❌ PR cannot be merged. State: $pr_state, Mergeable: $mergeable"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Add comment before merging
+        if: steps.pr-status.outputs.can_merge == 'true'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "🤖 **Auto-merging this pull request from dev to main...**
+            
+          ✅ All checks passed - proceeding with automatic merge."
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Auto-merge PR
+        if: steps.pr-status.outputs.can_merge == 'true'
+        run: |
+          echo "Auto-merging PR #${{ github.event.pull_request.number }}"
+
+          # Try merge strategies in order of preference
+          if gh pr merge ${{ github.event.pull_request.number }} --merge --delete-branch=false; then
+            echo "✅ Successfully merged PR #${{ github.event.pull_request.number }} with merge commit"
+          elif gh pr merge ${{ github.event.pull_request.number }} --squash --delete-branch=false; then
+            echo "✅ Successfully merged PR #${{ github.event.pull_request.number }} with squash merge"
+          else
+            echo "❌ All merge strategies failed"
+            exit 1
+          fi
+            
+          echo "📝 Dev branch preserved for continued development"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Handle merge failure
+        if: failure() || steps.pr-status.outputs.can_merge == 'false'
+        run: |
+          echo "Merge failed or PR not ready. Getting more details..."
+
+          # Get detailed status
+          pr_checks=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup --jq '.statusCheckRollup[]?.state' | sort | uniq -c || echo "No checks")
+          pr_reviews=$(gh pr view ${{ github.event.pull_request.number }} --json reviewDecision --jq '.reviewDecision' || echo "No reviews")
+
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "⚠️ **Auto-merge failed or cannot proceed**
+            
+          **Status Details:**
+          - Check Status: \`$pr_checks\`
+          - Review Status: \`$pr_reviews\`
+
+          **Possible reasons:**
+          - Merge conflicts need to be resolved
+          - PR is not in a mergeable state  
+          - Required status checks are failing
+          - Rebase strategy failed (branch history conflicts)
+
+          **Next steps:**
+          1. Check for merge conflicts and resolve them
+          2. Ensure all required checks pass
+          3. Try manual merge with different strategy (merge commit or squash)
+
+          Please review and merge manually when ready."
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
