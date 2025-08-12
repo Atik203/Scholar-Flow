@@ -7,6 +7,8 @@
 **Architecture**: Monorepo with Next.js frontend and Express.js backend  
 **Phase**: Phase 1 Development (MVP)
 
+- Package manager: Yarn (Berry). Do not use npm in this repo.
+
 ## Technology Stack
 
 ### Frontend (apps/frontend)
@@ -38,6 +40,12 @@
   └── shared/              # Shared utilities (prisma, catchAsync, etc.)
   ```
 
+## Roadmap-driven workflow
+
+- Always consult `Roadmap.md` and work sequentially: complete Phase 1 before Phase 2, then Phase 3.
+- When proposing changes, map them to the current phase; defer out-of-phase work to "Next steps".
+- Prefer small PRs that align with the current milestone; avoid mixing cross-phase scope in one change.
+
 ## Development Guidelines
 
 ### Code Style & Patterns
@@ -60,34 +68,25 @@
    - Password reset functionality
 
 2. **Paper Upload & Storage**
-   - PDF/DOCX upload with metadata extraction
-   - Cloud storage integration (planned: AWS S3)
    - File processing and text extraction
 
 3. **Basic Collections**
    - Create and manage paper collections
    - Add/remove papers from collections
-   - Basic search and filtering
-
-4. **AI Features (Basic)**
-   - Paper summarization using OpenAI API
-   - Basic semantic search (planned: pgvector)
-
-5. **Collaboration (Basic)**
    - Share collections with other users
    - Basic permission management
 
-### File Naming Conventions
-
-- **Backend Modules**: `moduleName.service.ts`, `moduleName.controller.ts`, `moduleName.routes.ts`
-- **Frontend Components**: PascalCase for components, camelCase for files
-- **API Routes**: RESTful conventions (`/api/users`, `/api/papers/:id`)
-
 ### Environment Setup
 
-- **Backend**: Port 5000, uses apps/backend/.env
-- **Frontend**: Port 3000, uses apps/frontend/.env.local
+- **Backend**: Port 5000, uses `apps/backend/.env`
+- **Frontend**: Port 3002 (per script), uses `apps/frontend/.env.local`
 - **Database**: PostgreSQL with pgvector extension (future)
+
+Environment discipline:
+
+- Before changing behavior, check both env files for active config: `apps/backend/.env` and `apps/frontend/.env.local`.
+- Backend config keys load via `apps/backend/src/config/index.ts`. Respect `FRONTEND_URL` (use `http://localhost:3002` in dev) for CORS.
+- Never commit secrets; propose placeholders and document required variables when adding features.
 
 ## Current Project Status
 
@@ -100,66 +99,43 @@
 - [x] Frontend setup with Next.js and basic UI components
 - [x] Windows setup script (setup.bat)
 
-### 🚧 In Progress (Phase 1)
-
-- [ ] Complete User authentication module
-- [ ] Paper upload and management
-- [ ] Basic collections functionality
-- [ ] Database migrations and seeding
-- [ ] Frontend-backend integration
-
-### 📋 Todo (Phase 1)
-
 - [ ] File upload with cloud storage
-- [ ] AI summarization integration
-- [ ] Basic search functionality
-- [ ] User profile management
-- [ ] Collection sharing
 
 ## Important Commands
 
 ```bash
-# Setup project (Windows)
-setup.bat
+# Bootstrap
+yarn install
 
-# Development
-npm run dev              # Start both frontend and backend
-npm run db:migrate       # Run database migrations
-npm run db:generate      # Generate Prisma client
-npm run db:studio        # Open Prisma Studio
+# Development via turbo (if configured)
 
-# Backend only
-cd apps/backend
-npm run dev              # Start backend on port 5000
 
-# Frontend only
-cd apps/frontend
-npm run dev              # Start frontend on port 3000
-```
-
+# Prisma (from repo root)
 ## Key Files to Understand
 
+yarn db:migrate   # Run database migrations
+
+# Backend only
 1. **Backend Entry**: `apps/backend/src/server.ts`
-2. **Database Schema**: `apps/backend/prisma/schema.prisma`
+
+# Frontend only
 3. **API Routes**: `apps/backend/src/app/routes/index.ts`
+```
+
 4. **Frontend Layout**: `apps/frontend/src/app/layout.tsx`
-5. **Main Config**: Root `package.json` and `turbo.json`
 
 ## Common Patterns
 
-### Backend Service Pattern
-
-```typescript
-// user.service.ts
 export const userService = {
-  getAllFromDB: async (params: any, options: IPaginationOptions) => {
-    // Implementation with pagination
-  },
-  getByIdFromDB: async (id: string) => {
-    // Implementation
-  },
+getAllFromDB: async (params: any, options: IPaginationOptions) => {
+// Implementation with pagination
+},
+getByIdFromDB: async (id: string) => {
+// Implementation
+},
 };
-```
+
+````
 
 ### Backend Controller Pattern
 
@@ -174,7 +150,7 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-```
+````
 
 ### Frontend API Pattern
 
@@ -184,8 +160,6 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
-    prepareHeaders: (headers, { getState }) => {
-      // Add auth headers
     },
   }),
   endpoints: (builder) => ({
@@ -241,42 +215,16 @@ export const apiSlice = createApi({
 
 ### Auth, Security, and Middleware
 
-- Protect routes with `middleware.ts` and role checks; avoid exposing secrets to the client
-- With NextAuth, keep tokens server-only; use secure cookies and short-lived JWTs
-- Rate limit sensitive API routes; validate inputs on server with Zod
-
-### Forms, State, and Data Fetching
-
-- Use React Hook Form + Zod; provide optimistic updates when safe (RTK Query)
 - Keep client state minimal; prefer server data flows via RSC
 - Handle loading/empty/error states explicitly in UI components
-
-### Analytics & Consent
-
-- Add analytics (Vercel Analytics/GA4) with consent; anonymize and avoid PII
-- Fire product events for signup, upload, share; disable analytics in development
-
-### PWA & Web Vitals
 
 - Consider a PWA manifest for offline reading; track Core Web Vitals and fix regressions
 - Load third-party scripts with `next/script` and non-blocking strategies
 
-### Marketing Pages (SaaS)
-
-- Create `(marketing)` group for landing, pricing, blog/docs; statically generate with periodic revalidation
-- Add FAQ/cost sections with schema.org `FAQPage`; use canonical URLs to avoid duplicates
-
-## Production (SaaS) Guidance
-
 ### Environments & Config
 
 - Separate envs: development, staging, production
-- Centralize config with strongly-typed env parsing (e.g., Zod) and fail-fast on boot
-- Secrets in platform store (GitHub Encrypted Secrets, Vercel/Cloud envs); never commit .env
 
-### CI/CD
-
-- GitHub Actions: lint, type-check, test, build on PR; deploy on main
 - Database migrations via Prisma in CI prior to deploy; generate client on build
 - Protect main with required checks; use preview deployments for PRs (frontend)
 
@@ -321,10 +269,10 @@ export const apiSlice = createApi({
 
 ### Common Issues
 
-- **Database Connection**: Check DATABASE_URL in .env files
-- **TypeScript Errors**: Run `npm run type-check` to see all errors
+- **Database Connection**: Check `DATABASE_URL` in env files
+- **TypeScript Errors**: Run `yarn type-check` to see all errors
 - **Build Failures**: Check dependencies and TypeScript configuration
-- **Port Conflicts**: Ensure ports 3000 and 5000 are available
+- **Port Conflicts**: Ensure ports 3002 (frontend) and 5000 (backend) are available
 
 ### Getting Help
 
@@ -334,4 +282,4 @@ export const apiSlice = createApi({
 ---
 
 **Last Updated**: Phase 1 MVP Development  
-**Next Milestone**: Complete user authentication and paper upload functionality
+**Next Milestone**: Follow Roadmap.md — finish Phase 1 (auth, uploads, collections) before Phase 2.
