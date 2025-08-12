@@ -1,21 +1,12 @@
-import express from 'express';
-import { userController } from './user.controller';
+import express from "express";
+import { userController } from "./user.controller";
 
-const router = express.Router();
+const router: import("express").Router = express.Router();
 
-router.get(
-    '/',
-    userController.getAllFromDB
-);
+router.get("/", userController.getAllFromDB);
 
-router.get(
-    '/me',
-    userController.getMyProfile
-);
+router.get("/me", userController.getMyProfile);
 
-router.post(
-    '/change-password',
-    userController.changePassword
-);
+router.post("/change-password", userController.changePassword);
 
 export const userRoutes = router;
