@@ -30,6 +30,7 @@
     "turbo": "^1.10.12",
     "typescript": "^5.2.2"
   },
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=18.0.0",
     "yarn": ">=4.0.0"
