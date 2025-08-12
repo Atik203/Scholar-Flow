@@ -14,7 +14,7 @@ This project follows the Contributor Covenant Code of Conduct, Version 2.1.
 If you experience or witness unacceptable behavior, please report it to:
 
 - Maintainer: Md. Atikur Rahaman
-- Email: <mailto:atikurrahaman0304@gmail.com>
+- Email: <atikurrahaman0305@gmail.com>
 
 Reports will be handled confidentially and reviewed within a reasonable time frame. Consequences may include a warning, temporary ban, or permanent removal from the community.
 

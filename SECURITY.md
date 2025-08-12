@@ -8,7 +8,7 @@ We aim to support the latest main branch. Security fixes are prioritized for act
 
 ## Reporting a Vulnerability
 
-- Email the maintainer at <mailto:atikurrahaman0304@gmail.com>.
+- Email the maintainer at <matikurrahaman0305@gmail.com>.
 - Provide a detailed description, steps to reproduce, and potential impact.
 - If possible, include a minimal proof of concept.
 - Do not disclose the issue publicly until we have released a fix and coordinated a disclosure window.
