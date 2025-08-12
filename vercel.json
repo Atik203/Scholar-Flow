@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "yarn turbo run build",
+  "installCommand": "yarn install --immutable",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . || echo 'changes'",
+  "env": {
+    "TURBO_TEAM": "",
+    "TURBO_TOKEN": ""
+  }
+}

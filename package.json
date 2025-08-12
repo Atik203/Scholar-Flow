@@ -8,14 +8,15 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev",
+    "dev:turbo": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean && rimraf node_modules",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
-    "setup": "npm install && npm run db:generate",
+    "setup": "yarn install --immutable && yarn db:generate",
     "db:migrate": "cd apps/backend && npx prisma migrate dev",
     "db:generate": "cd apps/backend && npx prisma generate",
     "db:studio": "cd apps/backend && npx prisma studio",
@@ -23,11 +24,12 @@
     "db:reset": "cd apps/backend && npx prisma migrate reset --force"
   },
   "devDependencies": {
-    "@turbo/gen": "^1.10.12",
+    "@turbo/gen": "^2.5.5",
     "@types/node": "^20",
     "prettier": "^3.0.3",
+    "prisma": "^6.14.0",
     "rimraf": "^5.0.5",
-    "turbo": "^1.10.12",
+    "turbo": "^2.5.5",
     "typescript": "^5.2.2"
   },
   "license": "UNLICENSED",
@@ -35,5 +37,8 @@
     "node": ">=20.0.0",
     "yarn": ">=4.5.0"
   },
-  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c"
+  "packageManager": "yarn@4.9.2+sha512.1fc009bc09d13cfd0e19efa44cbfc2b9cf6ca61482725eb35bbc5e257e093ebf4130db6dfe15d604ff4b79efd8e1e8e99b25fa7d0a6197c9f9826358d4d65c3c",
+  "dependencies": {
+    "@prisma/client": "^6.14.0"
+  }
 }

@@ -4,8 +4,8 @@ echo      Scholar-Flow Setup Script (Windows)
 echo ==========================================
 echo.
 
-echo [1/5] Installing dependencies...
-call npm install
+echo [1/6] Installing dependencies with Yarn (Berry)...
+call yarn install --immutable
 if %errorlevel% neq 0 (
     echo Error: Failed to install dependencies
     pause
@@ -13,7 +13,7 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [2/5] Setting up environment files...
+echo [2/6] Setting up environment files...
 
 if not exist "apps\backend\.env" (
     if exist "apps\backend\.env.example" (
@@ -25,11 +25,11 @@ if not exist "apps\backend\.env" (
             echo NODE_ENV=development
             echo PORT=5000
             echo DATABASE_URL=postgresql://username:password@localhost:5432/scholar_flow
-            echo JWT_SECRET=your-super-secret-jwt-key-here
+            echo NEXTAUTH_SECRET=your-nextauth-secret-key
             echo EXPIRES_IN=1d
             echo REFRESH_TOKEN_SECRET=your-refresh-token-secret
             echo REFRESH_TOKEN_EXPIRES_IN=7d
-            echo FRONTEND_URL=http://localhost:3000
+            echo FRONTEND_URL=http://localhost:3002
         ) > "apps\backend\.env"
         echo Basic backend .env file created
     )
@@ -43,6 +43,7 @@ if not exist "apps\frontend\.env.local" (
         echo Creating basic frontend .env.local file...
         (
             echo NEXTAUTH_SECRET=your-nextauth-secret-key
+            echo NEXTAUTH_URL=http://localhost:3002
             echo NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api
             echo DATABASE_URL=postgresql://username:password@localhost:5432/scholar_flow
         ) > "apps\frontend\.env.local"
@@ -51,28 +52,32 @@ if not exist "apps\frontend\.env.local" (
 )
 
 echo.
-echo [3/5] Generating Prisma client...
+echo [3/6] Generating Prisma client...
 cd apps\backend
-call npx prisma generate
+call yarn prisma generate || call npx prisma generate
 if %errorlevel% neq 0 (
     echo Warning: Prisma generate failed. Make sure your database is configured.
 )
 cd ..\..
 
 echo.
-echo [4/5] Building the project...
-call npm run build
+echo [4/6] Building the project with Turbo...
+call yarn build
 if %errorlevel% neq 0 (
     echo Warning: Build failed. Check for any configuration issues.
 )
 
 echo.
-echo [5/5] Setup complete!
+echo [5/6] Database migrations (optional)...
+echo You can run: yarn db:migrate
+
+echo.
+echo [6/6] Setup complete!
 echo.
 echo Next steps:
 echo 1. Configure your database connection in apps\backend\.env
-echo 2. Run database migrations: npm run db:migrate
-echo 3. Start development servers: npm run dev
+echo 2. Run database migrations: yarn db:migrate
+echo 3. Start development servers: yarn dev
 echo.
 echo For more details, see DEVELOPMENT.md
 echo.

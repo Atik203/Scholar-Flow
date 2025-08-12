@@ -11,11 +11,12 @@
 ✅ **Express Backend** with Prisma, PostgreSQL, and JWT authentication  
 ✅ **Comprehensive Database Schema** with pgvector support for AI features  
 ✅ **Development Setup Scripts** and environment configuration  
-✅ **Production-Ready Architecture** following the detailed specifications below  
+✅ **Production-Ready Architecture** following the detailed specifications below
 
 ### Quick Start
 
 For Windows users:
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -25,13 +26,13 @@ cd Scholar-Flow
 setup.bat
 
 # Or setup manually:
-npm install
+yarn install
 cp apps/backend/.env.example apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env.local
 
 # Configure database and start development
-npm run db:migrate
-npm run dev
+yarn db:migrate
+yarn dev
 ```
 
 **See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed setup instructions.**
@@ -40,7 +41,7 @@ npm run dev
 
 ## Original Specification
 
-Updated for Postgres + pgvector, Next.js (App Router) frontend, and a separate Node.js + Express backend with Prisma.
+Updated for Postgres + pgvector, Next.js (App Router) frontend on port 3002, and a separate Node.js + Express backend with Prisma.
 This document outlines the architecture, features, and implementation details for Scholar-Flow, a SaaS platform designed to help researchers manage academic papers, collaborate with teams, and leverage AI for enhanced workflows.
 
 ## 1) Product Overview

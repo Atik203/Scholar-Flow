@@ -39,11 +39,11 @@ yarn-error.log*
 
 # IDE
 .vscode/
-.idea/
+
 
 # Database
 *.db
-*.sqlite
+
 
 # Logs
 logs

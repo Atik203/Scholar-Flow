@@ -18,7 +18,7 @@ app.use(compression() as unknown as RequestHandler);
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:3002",
     credentials: true,
   }) as unknown as RequestHandler
 );
