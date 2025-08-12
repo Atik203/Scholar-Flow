@@ -41,11 +41,36 @@ yarn dev
 
 ## Branching and Commits
 
-- Use feature branches: `feat/<topic>`, `fix/<topic>`, `chore/<topic>`
-- Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, etc.
-- Keep PRs small and focused.
+Main branches:
 
-## Coding Standards
+- `main` – production, protected
+- `dev` – active development, staging
+
+Personal/feature branches:
+
+- Preferred naming: `username` or `feat/<topic>` / `fix/<topic>` / `chore/<topic>`
+- Example: `atik` (admin branch), `feat/auth-flow`, `fix/upload-limit`
+
+Flow:
+
+- Developers branch off `dev`
+- Open PRs into `dev`
+- `dev` is regularly merged into `main` via automation after checks
+
+Admin fast‑path (Atik):
+
+- Push to `atik` branch
+- GitHub Actions auto‑merges `atik → dev` and then triggers `dev → main`
+- No manual review required for `atik`
+
+Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, etc.
+Keep PRs small and focused.
+
+### Automation
+
+When commits land on `dev`, an action creates a PR to `main` and auto‑merges it when mergeable (see `.github/workflows/auto-create-pr-dev-to-main.yml` and `auto-merge-pr.yml`).
+
+When commits land on `atik`, an action merges `atik → dev` (or opens a PR if conflicts) and pushes `dev`, which triggers the `dev → main` flow (see `.github/workflows/auto-merge-atik-to-dev.yml`).
 
 - TypeScript strict, no implicit any.
 - Backend: use `catchAsync`, `ApiError`, `sendResponse`, and Zod validation.

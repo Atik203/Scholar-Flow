@@ -1,12 +1,9 @@
-# ScholarSphere Project Template - Setup Guide
-
-## ✅ Template Created Successfully
-
-This project template provides a complete foundation for the ScholarSphere AI-powered research paper collaboration platform. The template resolves the firewall issues encountered earlier and provides a production-ready starting point.
+# ScholarFlow Project - Setup Guide
 
 ## 🏗️ Architecture Overview
 
 ### Monorepo Structure
+
 ```
 Project-Info/
 ├── apps/
@@ -21,6 +18,7 @@ Project-Info/
 ### Technology Stack
 
 **Frontend (Next.js App)**
+
 - ⚡ Next.js 15 with App Router
 - 🎨 Tailwind CSS + ShadCN UI components
 - 🔐 NextAuth.js for authentication
@@ -29,6 +27,7 @@ Project-Info/
 - 🎯 TypeScript for type safety
 
 **Backend (Node.js API)**
+
 - 🚀 Express.js with TypeScript
 - 🗄️ Prisma ORM with PostgreSQL
 - 🔒 JWT authentication with role-based access
@@ -39,27 +38,32 @@ Project-Info/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
+
+- Node.js 20+ (LTS recommended)
+- Yarn 4.5+ (Berry)
 - PostgreSQL 15+ with pgvector extension
-- Redis (for background jobs - optional for basic setup)
+- Redis (optional, for background jobs)
 
 ### 1. Install Dependencies
+
 ```bash
-npm install --legacy-peer-deps
+yarn install
 ```
 
 ### 2. Environment Setup
+
 ```bash
 # Backend configuration
 cp apps/backend/.env.example apps/backend/.env
 
-# Frontend configuration  
+# Frontend configuration
 cp apps/frontend/.env.example apps/frontend/.env.local
 ```
 
 ### 3. Configure Environment Variables
 
-**Backend (.env)**
+#### Backend (.env)
+
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/scholar_sphere"
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
@@ -68,7 +72,8 @@ FRONTEND_URL="http://localhost:3000"
 NODE_ENV=development
 ```
 
-**Frontend (.env.local)**
+#### Frontend (.env.local)
+
 ```env
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
 NEXTAUTH_URL="http://localhost:3000"
@@ -77,49 +82,53 @@ DATABASE_URL="postgresql://username:password@localhost:5432/scholar_sphere"
 ```
 
 ### 4. Database Setup
+
 ```bash
 # Generate Prisma client
-npm run db:generate
+yarn db:generate
 
 # Run database migrations
-npm run db:migrate
+yarn db:migrate
 
 # Seed sample data (optional)
-npm run db:seed
+yarn db:seed
 ```
 
 ### 5. Start Development Servers
+
 ```bash
-npm run dev
+yarn dev
 ```
 
 This starts:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000
+
+- **Frontend**: <http://localhost:3002> (per apps/frontend/package.json)
+- **Backend API**: <http://localhost:5000>
 
 ## 📋 Available Scripts
 
 ```bash
 # Development
-npm run dev                # Start both frontend and backend
-npm run build             # Build both applications
-npm run type-check        # TypeScript type checking
-npm run lint              # Lint both applications
+yarn dev                 # Start both frontend and backend
+yarn build               # Build both applications
+yarn type-check          # TypeScript type checking
+yarn lint                # Lint both applications
 
 # Database
-npm run db:migrate        # Run Prisma migrations
-npm run db:generate       # Generate Prisma client
-npm run db:studio         # Open Prisma Studio
-npm run db:seed           # Seed sample data
+yarn db:migrate          # Run Prisma migrations
+yarn db:generate         # Generate Prisma client
+yarn db:studio           # Open Prisma Studio
+yarn db:seed             # Seed sample data
 
 # Individual apps
-cd apps/frontend && npm run dev    # Frontend only
-cd apps/backend && npm run dev     # Backend only
+cd apps/frontend && yarn dev    # Frontend only
+cd apps/backend && yarn dev     # Backend only
 ```
 
 ## 🎯 What's Included
 
 ### ✅ Completed Features
+
 - **🏗️ Complete Project Structure**: Monorepo with frontend and backend
 - **🔐 Authentication System**: NextAuth.js setup with JWT sessions
 - **📊 Database Schema**: Complete Prisma schema with all models
@@ -131,6 +140,7 @@ cd apps/backend && npm run dev     # Backend only
 - **📝 TypeScript**: Full TypeScript configuration
 
 ### 🚧 Ready for Implementation
+
 - **📄 File Upload**: S3 pre-signed URLs structure ready
 - **🤖 AI Features**: OpenAI integration placeholder
 - **🔍 Vector Search**: pgvector schema ready for embeddings
@@ -141,46 +151,90 @@ cd apps/backend && npm run dev     # Backend only
 ## 🔧 Development Workflow
 
 ### 1. Frontend Development
+
 ```bash
 cd apps/frontend
-npm run dev
+yarn dev
 ```
+
 - Modify pages in `src/app/`
 - Add components in `src/components/`
 - Update API calls in `src/store/api/`
 
-### 2. Backend Development  
+### 2. Backend Development
+
 ```bash
 cd apps/backend
-npm run dev
+yarn dev
 ```
+
 - Add routes in `src/routes/`
 - Modify middleware in `src/middleware/`
 - Update database schema in `prisma/schema.prisma`
 
 ### 3. Database Changes
+
 ```bash
 # After modifying schema.prisma
-npm run db:migrate
-npm run db:generate
+yarn db:migrate
+yarn db:generate
 ```
 
 ## 🚀 Deployment
 
-### Frontend (Vercel)
-1. Connect GitHub repository to Vercel
-2. Set build command: `cd apps/frontend && npm run build`
-3. Set environment variables in Vercel dashboard
+### Frontend and Backend (Vercel Monorepo)
 
-### Backend (Railway/Render/Fly.io)
-1. Deploy as Node.js application
-2. Set start command: `cd apps/backend && npm start`
-3. Configure environment variables
-4. Add PostgreSQL database addon
+We deploy both apps on Vercel using the Monorepo + Turborepo flow. See: <https://vercel.com/docs/monorepos/turborepo>
+
+Create two Vercel Projects pointing to different root directories in this repo:
+
+1. Frontend Project
+
+- Root Directory: `apps/frontend`
+- Framework Preset: Next.js
+- Install Command: `yarn install`
+- Build Command: `yarn build`
+- Output: auto (Next.js)
+- Env vars: copy from `apps/frontend/.env.example` to Vercel Project settings
+
+2. Backend Project (Express/Node)
+
+- Root Directory: `apps/backend`
+- Runtime: Node.js
+- Install Command: `yarn install`
+- Build Command: `yarn build` (runs `tsc` per package.json)
+- Start Command (Preview/Dev only): `node dist/server.js`
+- Env vars: copy from `apps/backend/.env.example` to Vercel Project settings
+
+Important notes for the backend on Vercel:
+
+- Vercel is serverless-first. Long-running servers (`app.listen`) are not supported on the Edge or Serverless Functions.
+- For production on Vercel, expose your API via Serverless Functions. The common pattern is to export the Express `app` as the default handler from an `api/index.ts` and remove direct `app.listen` calls in that path.
+- Until refactoring is complete, you can use Preview deployments for quick checks or deploy the backend to another host. We’ll add a serverless entrypoint in a follow-up.
+
+Optional serverless entry (to be implemented later):
+
+```ts
+// apps/backend/api/index.ts
+import app from "../src/serverless-app"; // express app without app.listen
+export default app;
+```
+
+Then in `apps/backend/vercel.json` (optional):
+
+```json
+{
+  "functions": {
+    "api/**/*.ts": { "runtime": "nodejs22.x" }
+  },
+  "routes": [{ "src": "/(.*)", "dest": "/api/index.ts" }]
+}
+```
 
 ## 🧪 Testing
 
 The project is ready for testing:
+
 - ✅ TypeScript compilation passes
 - ✅ Build process completes successfully
 - ✅ Development servers start correctly
@@ -213,20 +267,23 @@ The project is ready for testing:
 ### Common Issues
 
 **Dependency Conflicts**
+
 ```bash
-rm -rf node_modules package-lock.json
-npm install --legacy-peer-deps
+rm -rf node_modules .yarn/cache
+yarn install
 ```
 
 **Database Connection**
+
 - Ensure PostgreSQL is running
 - Check DATABASE_URL format
 - Install pgvector extension: `CREATE EXTENSION vector;`
 
 **Build Errors**
+
 ```bash
-npm run type-check  # Check for TypeScript errors
-npm run lint        # Check for linting issues
+yarn type-check  # Check for TypeScript errors
+yarn lint        # Check for linting issues
 ```
 
 ## 📞 Support
