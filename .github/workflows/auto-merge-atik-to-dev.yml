@@ -1,0 +1,77 @@
+name: Auto Merge atik → dev (and trigger dev → main flow)
+
+on:
+  push:
+    branches:
+      - atik
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-atik-to-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Setup Git identity
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Ensure branches are up to date
+        run: |
+          git fetch --all --prune
+          git checkout dev
+          git pull origin dev
+          # Make sure we have the latest atik branch
+          git fetch origin atik:refs/remotes/origin/atik
+
+      - name: Merge atik into dev
+        id: merge
+        run: |
+          set -e
+          echo "Merging origin/atik into dev"
+          if git merge --no-edit origin/atik; then
+            echo "merge_result=success" >> $GITHUB_OUTPUT
+          else
+            echo "merge_result=conflict" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Push dev after successful merge
+        if: steps.merge.outputs.merge_result == 'success'
+        run: |
+          git push origin dev
+          echo "✅ atik → dev merge pushed. Existing workflow will create PR dev → main and auto-merge it."
+
+      - name: Handle merge conflicts by opening PR atik → dev
+        if: steps.merge.outputs.merge_result == 'conflict'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "⚠️ Merge conflicts detected. Creating or updating PR from atik to dev."
+          git merge --abort || true
+
+          # Check if PR already exists
+          pr_number=$(gh pr list --head atik --base dev --state open --json number -q '.[0].number' || echo "")
+
+          pr_body="Automated PR due to merge conflicts when merging 'atik' into 'dev'.\n\nPlease resolve conflicts and merge."
+
+          if [ -n "$pr_number" ]; then
+            gh pr comment "$pr_number" --body "🔁 Update: New commits pushed to 'atik'. Conflicts remain; please resolve."
+            echo "ℹ️ Updated existing PR #$pr_number"
+          else
+            gh pr create \
+              --title "Auto PR: atik → dev (conflict resolution needed)" \
+              --body "$pr_body" \
+              --head atik \
+              --base dev \
+              --label "auto-generated" \
+              --assignee "Atik203"
+            echo "📌 Created new PR for conflict resolution."
+          fi

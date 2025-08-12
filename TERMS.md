@@ -51,4 +51,4 @@ You shall not (except where expressly permitted in writing):
 
 ## 11. Contact
 
-- For questions or permissions, contact: <mailto:atikurrahaman0304@gmail.com>
+- For questions or permissions, contact: <atikurrahaman0305@gmail.com>
