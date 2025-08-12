@@ -4,7 +4,7 @@
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint src/**/*.ts",
@@ -18,7 +18,8 @@
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.1",
+    "@prisma/client": "^6.14.0",
+    "@scholar-flow/types": "workspace:*",
     "aws-sdk": "^2.1524.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
@@ -36,7 +37,7 @@
     "node-cron": "^3.0.3",
     "openai": "^4.20.1",
     "pdf-parse": "^1.1.1",
-    "prisma": "^5.7.1",
+    "prisma": "^6.14.0",
     "redis": "^4.6.11",
     "sslcommerz-lts": "^1.0.3",
     "stripe": "^14.10.0",
@@ -63,6 +64,7 @@
     "rimraf": "^5.0.5",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   },
   "keywords": [

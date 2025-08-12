@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "yarn build",
+  "installCommand": "yarn install --immutable",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . || echo 'changes'"
+}

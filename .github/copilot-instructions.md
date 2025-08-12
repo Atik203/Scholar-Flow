@@ -8,6 +8,8 @@
 **Phase**: Phase 1 Development (MVP)
 
 - Package manager: Yarn (Berry). Do not use npm in this repo.
+- Check for any .env file changes
+- Document any new environment variables required for features
 
 ## Technology Stack
 
