@@ -1,34 +1,15 @@
-import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
+import express from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import compression from 'compression';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
-
-// Load environment variables
-dotenv.config();
-
-// Import routes
-import authRoutes from './routes/auth';
-import paperRoutes from './routes/papers';
-import annotationRoutes from './routes/annotations';
-import collectionRoutes from './routes/collections';
-import searchRoutes from './routes/search';
-import workspaceRoutes from './routes/workspaces';
-import billingRoutes from './routes/billing';
-import adminRoutes from './routes/admin';
-
-// Import middleware
-import { errorHandler } from './middleware/errorHandler';
-import { authMiddleware } from './middleware/auth';
+import globalErrorHandler from './app/middlewares/globalErrorHandler';
+import router from './app/routes';
+import config from './config';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Initialize Prisma client
-export const prisma = new PrismaClient();
+const PORT = config.port || 5000;
 
 // Security middleware
 app.use(helmet());
@@ -47,6 +28,46 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 app.use('/api/', limiter);
+
+// Request parsing
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Logging
+if (config.env !== 'production') {
+  app.use(morgan('dev'));
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Scholar-Flow API is running!',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// API routes
+app.use('/api', router);
+
+// Global error handler
+app.use(globalErrorHandler);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API endpoint not found',
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Scholar-Flow API running on port ${PORT}`);
+  console.log(`📖 Environment: ${config.env}`);
+});
+
+export default app;
 
 // AI endpoints rate limiting (stricter)
 const aiLimiter = rateLimit({

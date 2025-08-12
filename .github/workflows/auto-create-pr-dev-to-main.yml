@@ -1,0 +1,175 @@
+name: Auto Create Pull Request from Dev to Main
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+  checks: read
+  repository-projects: write
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get commit details
+        id: get-commit
+        run: |
+          echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+          echo "COMMIT_URL=https://github.com/${{ github.repository }}/commit/$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
+          echo "COMMIT_HASH=$(git log -1 --pretty=format:'%H')" >> $GITHUB_ENV
+
+      - name: Check if PR already exists
+        id: check-pr
+        run: |
+          # Check for existing open PR from dev to main
+          pr_data=$(gh pr list --head dev --base main --state open --limit 1 --json number 2>/dev/null || echo "[]")
+          pr_number=$(echo "$pr_data" | jq -r '.[0].number // empty')
+
+          if [ -n "$pr_number" ] && [ "$pr_number" != "null" ]; then
+            echo "Found existing PR #$pr_number"
+            echo "pr_exists=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          else
+            echo "No existing PR found"
+            echo "pr_exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Check for commits between branches
+        id: check-commits
+        run: |
+          # Fetch latest from both branches
+          git fetch origin main
+          git fetch origin dev
+
+          # Check if there are commits in dev that aren't in main
+          commits_ahead=$(git rev-list --count origin/main..origin/dev)
+          commits_behind=$(git rev-list --count origin/dev..origin/main)
+
+          echo "Commits ahead (dev ahead of main): $commits_ahead"
+          echo "Commits behind (main ahead of dev): $commits_behind"
+
+          if [ "$commits_ahead" -gt 0 ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Found $commits_ahead new commits in dev branch"
+            
+            # Get the list of new commits
+            echo "### New commits to be merged:" >> commit_summary.txt
+            git log --oneline origin/main..origin/dev >> commit_summary.txt
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No new commits found - branches are in sync"
+          fi
+
+      - name: Create Pull Request
+        if: steps.check-pr.outputs.pr_exists == 'false' && steps.check-commits.outputs.has_changes == 'true'
+        id: create-pr
+        run: |
+          # Include commit summary if available
+          if [ -f commit_summary.txt ]; then
+            commit_list=$(cat commit_summary.txt)
+          else
+            commit_list="No specific commit details available"
+          fi
+
+          pr_body="### Pull Request Details
+
+          **Description:** ${COMMIT_MESSAGE}
+          **Author:** ${COMMIT_AUTHOR}
+          **Source Branch:** dev
+          **Target Branch:** main
+          **Latest Commit:** [${COMMIT_HASH:0:7}](${COMMIT_URL})
+
+          ### Changes Made
+
+          ${COMMIT_MESSAGE}
+
+          ### Commits in this PR
+
+          \`\`\`
+          $commit_list
+          \`\`\`
+
+          ### Auto-Merge Status
+
+          This pull request will be automatically merged after successful checks.
+
+          ---
+          *Auto-generated on $(date)*"
+
+          gh pr create \
+            --title "Auto PR: ${COMMIT_MESSAGE}" \
+            --body "$pr_body" \
+            --head dev \
+            --base main \
+            --label "auto-generated" \
+            --assignee "Atik203"
+            
+          echo "✅ Created new pull request"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Update existing PR
+        if: steps.check-pr.outputs.pr_exists == 'true'
+        run: |
+          pr_body="### Pull Request Details
+
+          **Description:** ${COMMIT_MESSAGE}
+          **Author:** ${COMMIT_AUTHOR}
+          **Source Branch:** dev
+          **Target Branch:** main
+          **Latest Commit:** [${COMMIT_HASH:0:7}](${COMMIT_URL})
+
+          ### Changes Made
+
+          ${COMMIT_MESSAGE}
+
+          ### Auto-Merge Status
+
+          This pull request will be automatically merged after successful checks.
+
+          ---
+          *Last updated on $(date)*"
+
+          gh pr edit ${{ steps.check-pr.outputs.pr_number }} \
+            --title "Auto PR: ${COMMIT_MESSAGE}" \
+            --body "$pr_body"
+            
+          gh pr comment ${{ steps.check-pr.outputs.pr_number }} \
+            --body "🔄 **Updated with latest changes**
+            
+          **New commit:** [${COMMIT_HASH:0:7}](${COMMIT_URL})
+          **Message:** ${COMMIT_MESSAGE}
+          **Author:** ${COMMIT_AUTHOR}"
+            
+          echo "✅ Updated existing pull request #${{ steps.check-pr.outputs.pr_number }}"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: No changes to merge
+        if: steps.check-commits.outputs.has_changes == 'false'
+        run: |
+          echo "ℹ️ **No Pull Request needed**"
+          echo ""
+          echo "The dev and main branches are currently in sync."
+          echo "No new commits found in dev branch that aren't already in main."
+          echo ""
+          echo "This is normal after a successful merge and indicates that:"
+          echo "- Previous PR was successfully merged"
+          echo "- No new changes have been made to dev branch yet"
+          echo "- Branches are properly synchronized"
+          echo ""
+          echo "A new PR will be created automatically when new commits are pushed to dev."
