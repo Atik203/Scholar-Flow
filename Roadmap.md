@@ -1,5 +1,7 @@
 # 📅 Week-by-Week Sprint Plan
 
+> Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
+
 Phase 1 – MVP (Weeks 1–6)
 Goal: Get a working core platform with minimal but functional features.
 

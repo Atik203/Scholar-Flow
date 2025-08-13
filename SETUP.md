@@ -60,6 +60,8 @@ cp apps/backend/.env.example apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env.local
 ```
 
+For a complete list of variables and how to obtain them (Google/GitHub OAuth, S3, Stripe, etc.), see: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+
 ### 3. Configure Environment Variables
 
 #### Backend (.env)
@@ -205,7 +207,7 @@ Create two Vercel Projects pointing to different root directories in this repo:
 - Output: auto (Next.js)
 - Env vars: copy from `apps/frontend/.env.example` to Vercel Project settings
 
-2. Backend Project (Express/Node)
+1. Backend Project (Express/Node)
 
 - Root Directory: `apps/backend`
 - Runtime: Node.js
@@ -274,20 +276,20 @@ The project is ready for testing:
 
 ### Common Issues
 
-**Dependency Conflicts**
+### Dependency Conflicts
 
 ```bash
 rm -rf node_modules .yarn/cache
 yarn install
 ```
 
-**Database Connection**
+### Database Connection
 
 - Ensure PostgreSQL is running
 - Check DATABASE_URL format
 - Install pgvector extension: `CREATE EXTENSION vector;`
 
-**Build Errors**
+### Build Errors
 
 ```bash
 yarn type-check  # Check for TypeScript errors
