@@ -58,7 +58,7 @@ This project template provides a complete foundation for the Scholar-Flow AI-pow
 
 This will start:
 
-- Frontend: http://localhost:3002
+- Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
 ## Features Implemented
@@ -108,7 +108,7 @@ The backend provides the following API endpoints:
 DATABASE_URL=postgresql://...
 NEXTAUTH_SECRET=your-secret-key
 PORT=5000
-FRONTEND_URL=http://localhost:3002
+FRONTEND_URL=http://localhost:3000
 # Additional keys for AWS, OpenAI, Stripe, etc.
 ```
 

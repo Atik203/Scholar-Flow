@@ -1,18 +1,22 @@
+# Prisma Data Model
+
+Canonical Prisma schema extracted from the main README for easier maintenance and IDE highlighting.
+
+> Note: Runtime schema (including pgvector and TypedSQL preview features) may evolve. Always check `apps/backend/prisma/schema.prisma` for the authoritative version used by the application.
+
+```prisma
 // Prisma schema for Scholar-Flow (Postgres + pgvector)
 // - All ids are String UUIDs
 // - Every model includes createdAt, updatedAt, isDeleted
 
 generator client {
   provider        = "prisma-client-js"
-  engineType      = "binary"
-  previewFeatures = ["postgresqlExtensions", "typedSql"]
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
-  extensions = [pgvector] // Requires CREATE EXTENSION vector; on target DB
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -174,7 +178,7 @@ model PaperChunk {
   idx        Int
   page       Int?
   content    String
-  embedding  Unsupported("vector")? // pgvector column (dimension set at insertion time e.g. vector(1536))
+  embedding  Unsupported("vector")? // pgvector column (e.g., vector(1536))
   tokenCount Int?
 
   paper Paper @relation(fields: [paperId], references: [id])
@@ -527,3 +531,4 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+```

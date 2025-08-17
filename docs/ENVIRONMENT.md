@@ -46,7 +46,7 @@ Required unless marked optional.
 
 - FRONTEND_URL
   - What: CORS allowlist origin
-  - Dev: `http://localhost:3002`
+  - Dev: `http://localhost:3000`
 
 - NEXTAUTH_SECRET
   - What: Secret used by Auth.js JWT; also used by backend middleware for token verification
@@ -62,13 +62,13 @@ Required unless marked optional.
 
 - RESET_PASS_TOKEN, RESET_PASS_TOKEN_EXPIRES_IN, RESET_PASS_LINK
   - What: Password reset token secret, expiry, and frontend link to reset page
-  - Dev example: `RESET_PASS_TOKEN=<random>`, `RESET_PASS_TOKEN_EXPIRES_IN=5m`, `RESET_PASS_LINK=http://localhost:3002/reset-password`
+  - Dev example: `RESET_PASS_TOKEN=<random>`, `RESET_PASS_TOKEN_EXPIRES_IN=5m`, `RESET_PASS_LINK=http://localhost:3000/reset-password`
 
 - Email/SMTP (choose one approach)
   - EMAIL, APP_PASS (Gmail App Password)
     - What: Sender email and its app password
     - How: Enable 2FA in Google Account > Security > App passwords > create one for “Mail”
-  - OR SMTP_* (hosted SMTP)
+  - OR SMTP\_\* (hosted SMTP)
     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
     - How: Use your provider’s credentials (e.g., SendGrid, Mailgun)
 
@@ -79,9 +79,9 @@ Required unless marked optional.
 - AWS S3 (for file uploads)
   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME, AWS_REGION
   - How:
-    1) AWS Console > IAM > Users > Create user with Programmatic access
-    2) Attach policy for S3 access (at minimum bucket-limited put/get)
-    3) Create an S3 bucket (e.g., `scholar-flow-uploads`) and note the region (e.g., `us-east-1`)
+    1. AWS Console > IAM > Users > Create user with Programmatic access
+    2. Attach policy for S3 access (at minimum bucket-limited put/get)
+    3. Create an S3 bucket (e.g., `scholar-flow-uploads`) and note the region (e.g., `us-east-1`)
 
 - Stripe (payments; optional in MVP)
   - STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
@@ -91,7 +91,7 @@ Required unless marked optional.
 - SSLCommerz (BD local payments; optional)
   - STORE_ID, STORE_PASS, SUCCESS_URL, CANCEL_URL, FAIL_URL, SSL_PAYMENT_API, SSL_VALIDATIOIN_API
   - How: Sandbox credentials from [SSLCommerz Developer](https://developer.sslcommerz.com/)
-  - Dev URLs: `http://localhost:3002/payment/{success|cancel|fail}`
+  - Dev URLs: `http://localhost:3000/payment/{success|cancel|fail}`
 
 - Redis (optional; background jobs/cache)
   - REDIS_URL
@@ -99,11 +99,11 @@ Required unless marked optional.
 
 ## Frontend (.env.local)
 
-Required unless marked optional. These run in Next.js (some are public via NEXT_PUBLIC_*).
+Required unless marked optional. These run in Next.js (some are public via NEXT*PUBLIC*\*).
 
 - NEXTAUTH_URL
   - What: Site URL for NextAuth
-  - Dev: `http://localhost:3002`
+  - Dev: `http://localhost:3000`
 
 - NEXTAUTH_SECRET
   - What: Must match backend/auth validator secret usage (used by Auth.js JWT)
@@ -116,18 +116,12 @@ Required unless marked optional. These run in Next.js (some are public via NEXT_
 - OAuth Providers (optional but recommended)
   - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
     - How (Google Cloud Console):
-  1) [Google Cloud Console](https://console.cloud.google.com/) > APIs & Services
-      2) Create project > OAuth consent screen: External > add test users (your Gmail)
-      3) Credentials > Create Credentials > OAuth client ID (Web application)
-      4) Authorized redirect URIs:
-         - `http://localhost:3002/api/auth/callback/google`
-      5) Copy Client ID/Secret to env
+  1. [Google Cloud Console](https://console.cloud.google.com/) > APIs & Services 2) Create project > OAuth consent screen: External > add test users (your Gmail) 3) Credentials > Create Credentials > OAuth client ID (Web application) 4) Authorized redirect URIs: - `http://localhost:3000/api/auth/callback/google` 5) Copy Client ID/Secret to env
   - GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
     - How (GitHub):
-  1) [GitHub OAuth Apps](https://github.com/settings/developers) > OAuth Apps > New OAuth App
-      2) Homepage URL: `http://localhost:3002`
-      3) Authorization callback URL: `http://localhost:3002/api/auth/callback/github`
-      4) Copy Client ID/Secret to env
+  1. [GitHub OAuth Apps](https://github.com/settings/developers) > OAuth Apps > New OAuth App
+  2. Homepage URL: `http://localhost:3000`
+  3. Authorization callback URL: `http://localhost:3000/api/auth/callback/github` 4) Copy Client ID/Secret to env
 
 - Database (optional here unless using an adapter in NextAuth)
   - DATABASE_URL (only if Auth.js adapter is used)
@@ -139,10 +133,10 @@ Required unless marked optional. These run in Next.js (some are public via NEXT_
 
 ## Redirect URIs Summary (Dev)
 
-- Google: `http://localhost:3002/api/auth/callback/google`
-- GitHub: `http://localhost:3002/api/auth/callback/github`
+- Google: `http://localhost:3000/api/auth/callback/google`
+- GitHub: `http://localhost:3000/api/auth/callback/github`
 
-Set NEXTAUTH_URL=`http://localhost:3002` in dev.
+Set NEXTAUTH_URL=`http://localhost:3000` in dev.
 
 ## Webhooks (Dev)
 
@@ -176,7 +170,7 @@ yarn db:seed # optional
 yarn dev
 ```
 
-- Frontend: <http://localhost:3002>
+- Frontend: <http://localhost:3000>
 - Backend: <http://localhost:5000>
 
 ## Production Notes

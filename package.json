@@ -18,7 +18,7 @@
     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
     "setup": "yarn install --immutable && yarn db:generate",
     "db:migrate": "cd apps/backend && npx prisma migrate dev",
-    "db:generate": "cd apps/backend && npx prisma generate",
+    "db:generate": "cd apps/backend && npx prisma generate --sql",
     "db:studio": "cd apps/backend && npx prisma studio",
     "db:seed": "cd apps/backend && npx ts-node prisma/seed.ts",
     "db:reset": "cd apps/backend && npx prisma migrate reset --force"
