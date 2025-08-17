@@ -1,0 +1,24 @@
+---
+description: Frontend (Next.js) usage standards and constraints
+globs:
+  - "apps/frontend/**"
+alwaysApply: false
+---
+
+# Frontend Rules (apps/frontend)
+
+See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standards.
+
+1. Next.js App Router: Prefer Server Components; add `"use client"` only for interactivity/state.
+2. State/Data: RTK Query for server data. Derive UI state locally when possible.
+3. Forms: React Hook Form + Zod for validation both client + server.
+4. Auth: NextAuth (JWT). Keep sensitive logic server-side. No direct Prisma usage in client components.
+5. Styling: Tailwind + ShadCN. Put reusable primitives in `components/ui`.
+6. Performance: Use `next/image`, `next/font`; stream large UI with Suspense; avoid unnecessary client bundles.
+7. SEO: Use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
+8. Error States: Provide loading / empty / error UI for each data fetch.
+9. Ports: App runs on 3002. Update backend CORS if changed.
+10. Accessibility: Maintain focus states, labels, keyboard navigation.
+11. No Secrets: Never expose private keys or tokens in client code.
+12. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
+13. Do not use npm; use Yarn v4 workspaces.

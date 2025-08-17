@@ -21,7 +21,7 @@ Roadmap discipline:
 Env discipline:
 
 - Always check both envs: `apps/backend/.env` and `apps/frontend/.env.local` for integration points.
-- Backend CORS should use `FRONTEND_URL` (use `http://localhost:3002` in dev). Never commit secrets; document new keys.
+- Backend CORS should use `FRONTEND_URL` (use `http://localhost:3000` in dev). Never commit secrets; document new keys.
 
 Phase overview (summary):
 

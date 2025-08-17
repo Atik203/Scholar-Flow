@@ -1,0 +1,17 @@
+---
+description: Core repository standards (package manager, typing, security, ports)
+alwaysApply: true
+---
+
+# Core Repository Rules
+
+1. Package Manager: Use Yarn Berry (v4). Never introduce npm or package-lock.json.
+2. TypeScript: Strict typing; avoid `any`. Run `yarn type-check` before committing major changes.
+3. Linting/Formatting: Use existing ESLint/Prettier configs. Don't reformat unrelated code in a patch.
+4. Monorepo: Keep concerns separated (frontend vs backend). Shared logic belongs in `packages/*`.
+5. Env Files: Do not commit secrets. When adding a variable, update docs and example envs.
+6. Roadmap Alignment: Only build features in the current phase (see `Roadmap.md`). Defer out-of-scope items to "Next steps" section in PR.
+7. Commits/PRs: Small, focused, conventional messages. Reference related issue when possible.
+8. Error Handling: Backend must use `ApiError`, `catchAsync`, and central `globalErrorHandler`.
+9. Security: No plaintext secrets in code. Validate and sanitize all external input.
+10. Ports: Frontend 3000, Backend 5000.

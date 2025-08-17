@@ -1,0 +1,28 @@
+---
+description: Backend architecture, patterns, and constraints
+globs:
+  - "apps/backend/**"
+alwaysApply: false
+---
+
+# Backend Rules (apps/backend)
+
+See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standards.
+
+1. Structure: Feature modules under `src/app/modules` (controller, service, routes, validation schemas).
+2. Routes: Register in `src/app/routes` only. No ad-hoc route registration elsewhere.
+3. Controllers: Thin. Business logic belongs in services.
+4. Services: Use Prisma client from shared singleton. Handle transactions explicitly when needed.
+5. Validation: Zod for request bodies, params, queries. Reject early on failure.
+6. Auth: JWT access + refresh. Use `auth` middleware for protected endpoints.
+7. CORS: Use `FRONTEND_URL` env; default `http://localhost:3002` in dev.
+8. Prisma: After modifying schema run migrations then `yarn db:generate` (includes TypedSQL). Keep raw SQL in `prisma/sql` (one statement per file).
+9. TypedSQL: Import from `@prisma/client/sql`; execute with `$queryRawTyped`. Add a comment referencing the originating `.sql` file.
+10. pgvector: Only run similarity queries if `USE_PGVECTOR=true`. Ensure extension exists before deploying usage.
+11. Pagination: Use provided pagination helper; never return unbounded lists.
+12. Errors: Throw `ApiError(status, message)`; avoid returning partial successes silently.
+13. Logging: Avoid console noise. Use structured logs for important events.
+14. Testing: Add unit tests for non-trivial service logic; integration tests for new routes.
+15. Dependencies: Prefer standard libs and already-installed packages. Justify new deps in PR.
+16. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
+17. Do not use npm; use Yarn v4 workspaces.

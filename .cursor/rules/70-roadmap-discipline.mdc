@@ -1,0 +1,14 @@
+---
+description: Enforcing roadmap phase discipline and scope control
+alwaysApply: true
+---
+
+# Roadmap Discipline
+
+1. Phases: Implement features strictly in current phase (see `Roadmap.md`).
+2. Out-of-Scope Requests: Document and defer unless they unblock current milestone.
+3. Minimal Viable: Prefer shipping a thin vertical slice over broad incomplete scaffolding.
+4. Tech Debt: Track as TODO comments + issues; don't silently accumulate.
+5. Metrics: For performance or DB related changes, note baseline and expected improvement in PR.
+6. Feature Flags: Gate experimental features; remove flags once stable.
+7. Cleanup: Remove unused code/feature toggles at phase transitions.

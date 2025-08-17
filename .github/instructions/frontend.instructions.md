@@ -3,7 +3,7 @@ applyTo: "apps/frontend/**"
 ---
 
 - Use Next.js 15 App Router with TypeScript (strict). Prefer Server Components; add "use client" only where interactivity/state is needed.
-- Dev server runs on port 3002. Backend CORS should allow `http://localhost:3002` in dev.
+- Dev server runs on port 3000. Backend CORS should allow `http://localhost:3000` in dev.
 - State/data: RTK Query + React Redux. Set `baseUrl: "/api"`; attach auth headers in `prepareHeaders` when available.
 - Forms: React Hook Form + Zod. Validate on server too for trust boundaries.
 - Auth: NextAuth (JWT). Keep tokens server-only; never expose secrets; wrap app with provided `NextAuthProvider` and `ReduxProvider`.
@@ -22,7 +22,7 @@ Roadmap discipline:
 Env discipline:
 
 - Always check both envs before changing behavior: `apps/frontend/.env.local` and `apps/backend/.env`.
-- Ensure `FRONTEND_URL=http://localhost:3002` in backend `.env` for CORS in dev; do not commit secrets.
+- Ensure `FRONTEND_URL=http://localhost:3000` in backend `.env` for CORS in dev; do not commit secrets.
 
 Phase overview (summary):
 
