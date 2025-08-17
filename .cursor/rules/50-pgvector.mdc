@@ -1,0 +1,19 @@
+---
+description: pgvector similarity search usage and performance guidance
+globs:
+  - "apps/backend/src/app/modules/Paper/**"
+  - "apps/backend/prisma/**"
+alwaysApply: false
+---
+
+# pgvector Rules
+
+1. Feature Flag: Only run vector operations if `USE_PGVECTOR=true`.
+2. Extension: Ensure `CREATE EXTENSION IF NOT EXISTS vector;` has run (requires superuser, uses DIRECT_DATABASE_URL).
+3. Column Type: `PaperChunk.embedding` must be `vector`; migrations manage transition from JSON fallback.
+4. Insertion: Use service helper to format float arrays into vector literals (`[x,y,z]`).
+5. Similarity: Use `<->` for L2 distance, `<=>` for cosine, `<#>` for negative inner product. Align index operator class.
+6. Indexing: Create IVF index (`ivfflat`) only after sufficient data volume; document chosen lists parameter.
+7. Performance: Limit result sets (e.g., `LIMIT 10`); avoid full scans; measure distance distribution.
+8. Safety: Guard against mismatched dimensionality; validate embedding array length before insert.
+9. Testing: Add round-trip test (insert + similarity query) when modifying embedding logic.

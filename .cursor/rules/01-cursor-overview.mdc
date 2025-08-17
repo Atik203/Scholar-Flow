@@ -1,0 +1,31 @@
+---
+alwaysApply: true
+description: High-level project overview and coding standards for Scholar-Flow (Cursor AI)
+---
+
+# Scholar-Flow: Cursor AI Project Overview (Cursor)
+
+This project is a monorepo for an AI-powered research paper collaboration hub, with a Next.js frontend and Express.js backend. All contributors and AI agents must:
+
+- Use Yarn Berry (v4) as the package manager (never npm)
+- Strictly type all code (TypeScript, no `any` unless unavoidable)
+- Never commit secrets; document new environment variables
+- Follow the current phase in [Roadmap.md](mdc:../../Roadmap.md) and keep PRs small and focused
+- Update documentation after notable changes
+
+## Technology Stack
+
+- **Frontend:** Next.js 15 (App Router), TypeScript, Tailwind CSS, ShadCN UI, Redux Toolkit Query, NextAuth.js, React Hook Form + Zod
+- **Backend:** Express.js, TypeScript, PostgreSQL, Prisma ORM (TypedSQL, pgvector), JWT (bcrypt)
+
+## Coding Guidelines
+
+- See [10-backend.mdc](mdc:10-backend.mdc) for backend architecture, patterns, and constraints
+- See [20-frontend.mdc](mdc:20-frontend.mdc) for frontend (Next.js) usage standards and constraints
+- See [00-core.mdc](mdc:00-core.mdc) for core repository rules
+- See [30-env-and-config.mdc](mdc:30-env-and-config.mdc) for environment and config discipline
+- See [40-typed-sql-and-db.mdc](mdc:40-typed-sql-and-db.mdc) for TypedSQL and raw query guidance
+- See [50-pgvector.mdc](mdc:50-pgvector.mdc) for pgvector similarity search usage
+- See [60-quality-gates.mdc](mdc:60-quality-gates.mdc) for code review and merge quality gates
+- See [70-roadmap-discipline.mdc](mdc:70-roadmap-discipline.mdc) for roadmap discipline
+- See [80-troubleshooting.mdc](mdc:80-troubleshooting.mdc) for troubleshooting

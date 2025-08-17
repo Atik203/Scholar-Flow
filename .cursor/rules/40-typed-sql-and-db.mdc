@@ -1,0 +1,20 @@
+---
+description: TypedSQL patterns and database raw query guidance
+globs:
+  - "apps/backend/prisma/sql/**"
+  - "apps/backend/src/app/modules/**"
+alwaysApply: false
+---
+
+# TypedSQL & Database Rules
+
+1. Raw SQL Location: Put each statement in its own file under `apps/backend/prisma/sql/`.
+2. Naming: Filenames must be valid JS identifiers (no dashes at start) for generated function names.
+3. Parameters: Use positional `$1`, `$2` with optional `-- @param {Type} $1:name` comments for clarity.
+4. Generation: Run `yarn db:generate` after adding/modifying SQL to re-generate typed functions.
+5. Execution: Use `prisma.$queryRawTyped(queryName(...params))` for type safety.
+6. Prefer Prisma Client for simple CRUD; reserve raw SQL for complex joins/aggregations or performance.
+7. Tests: Every new TypedSQL query should have at least one test verifying shape/performance assumptions.
+8. Indexing: Add indexes via Prisma migrations when query performance needs it. Document rationale in migration comment.
+9. Safety: Avoid dynamic column interpolation. If unavoidable, validate against allowlist and document.
+10. Traceability: Above usages add a comment referencing the source `.sql` file.
