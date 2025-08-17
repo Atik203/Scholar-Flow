@@ -25,22 +25,106 @@
 ### Backend (apps/backend)
 
 - **Framework**: Express.js with TypeScript
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: PostgreSQL with Prisma ORM with raw query using TypeSQL
 - **Authentication**: JWT-based with bcrypt
 - **Architecture**: Modular feature-based structure (controllers, services, routes, schemas)
 - **File Structure**:
-  ```
-  src/
-  ├── app/
-  │   ├── modules/          # Feature modules (User, Auth, Paper, etc.)
-  │   ├── interfaces/       # TypeScript interfaces
-  │   ├── middlewares/      # Express middlewares
-  │   ├── routes/          # Route definitions
-  │   └── errors/          # Error handling
-  ├── config/              # Configuration
-  ├── helpers/             # Utility functions
-  └── shared/              # Shared utilities (prisma, catchAsync, etc.)
-  ```
+
+## Raw Queries & TypedSQL
+
+TypedSQL preview feature is enabled in `schema.prisma` (`previewFeatures = ["postgresqlExtensions", "typedSql"]`).
+
+Workflow:
+
+1. Add `.sql` files under `apps/backend/prisma/sql/` (filenames must be valid JS identifiers, not start with `$`).
+2. Run `yarn db:generate` (root script) or `yarn workspace @scholar-flow/backend db:generate` – both invoke `prisma generate --sql` to produce typed functions.
+3. Import generated functions from `@prisma/client/sql`.
+4. Execute with `prisma.$queryRawTyped(queryFunction(...params))` for full type safety.
+
+Current helper scripts:
+
+- Backend: `db:generate` (one-off) and `db:generate:watch` (continuous) include `--sql`.
+- Root: `db:generate` also includes `--sql`.
+
+Example simple pagination query files now present:
+
+```
+prisma/sql/getUsersWithPagination.sql
+prisma/sql/countUsers.sql
+```
+
+Example usage in service (see `apps/backend/src/app/modules/User/user.service.ts`):
+
+```ts
+import { getUsersWithPagination, countUsers } from "@prisma/client/sql";
+// const rows = await prisma.$queryRawTyped(getUsersWithPagination(limit, skip));
+// const totalRow = await prisma.$queryRawTyped(countUsers());
+```
+
+Guidelines:
+
+- Prefer Prisma Client query builder for dynamic filters; introduce TypedSQL when:
+  - Complex joins / aggregations not ergonomic in Prisma Client
+  - Performance-critical read paths where explicit SQL + indexes are tuned
+- When adding parameters, use positional `$1`, `$2`, etc. and optionally type comments:
+  `-- @param {Int} $1:limit` `-- @param {Int} $2:skip`
+- For array parameters in Postgres, use `= ANY($1)` (inference supported).
+- Keep SQL files focused (one statement per file) for clearer generated types.
+
+Quality & Safety:
+
+- Always apply pending migrations before running `prisma generate --sql`.
+- Avoid dynamic column injection; if unavoidable, fall back to `$queryRawUnsafe` with strong validation.
+- Ensure any new raw queries are covered by at least one unit/integration test before merging.
+
+Add a short comment referencing the originating `.sql` file above any usage site in code for traceability.
+
+### pgvector Integration (Similarity Search)
+
+We use the `pgvector` Postgres extension for embedding similarity on `PaperChunk.embedding`.
+
+Current state:
+
+- Schema defines `embedding Unsupported("vector")?`
+- Migration `20250817165000_add_pgvector_column` enables the extension and converts the column.
+- Fallback before extension: earlier migration used JSON; new migration upgrades when extension available.
+
+Environment variables:
+
+```
+DATABASE_URL=...                # Normal connection (can be Accelerate)
+DIRECT_DATABASE_URL=...         # Superuser / direct connection for extension management
+USE_PGVECTOR=true               # Feature flag to run similarity code
+```
+
+Install dependency (already added): `pgvector` (Node helper – mainly for future client-side formatting if needed).
+
+Manual steps (run once per database):
+
+1. Connect with superuser: `psql $DIRECT_DATABASE_URL`
+2. `CREATE EXTENSION IF NOT EXISTS vector;`
+3. Run migrations: `yarn db:migrate`
+4. (Optional) Create IVF index after data grows: `CREATE INDEX paperchunk_embedding_ivfflat_idx ON "PaperChunk" USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);`
+
+Inserting embeddings:
+Use `embedding.service.ts` (`embeddingService.saveChunkEmbedding(id, floatArray)`) which builds a vector literal and updates the row.
+
+Similarity search (raw SQL example):
+
+```sql
+SELECT id, "paperId", idx, page, content, (embedding <-> $1) AS distance
+FROM "PaperChunk"
+ORDER BY embedding <-> $1
+LIMIT 10;
+```
+
+Use `<->` (L2), `<#>` (negative inner product), `<=>` (cosine distance) depending on model; adjust index ops accordingly.
+
+Testing checklist before enabling in prod:
+
+- Extension exists (`SELECT extname FROM pg_extension WHERE extname='vector';`)
+- Column type is `vector` (`\d+ "PaperChunk"`)
+- Insert & search round trip works.
 
 ## Roadmap-driven workflow
 

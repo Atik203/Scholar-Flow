@@ -1,5 +1,9 @@
 import { paginationHelper } from "../../../helpers/paginationHelper";
 import prisma from "../../../shared/prisma";
+// TypedSQL generated functions (after running `yarn db:generate` which includes --sql)
+// These come from files in prisma/sql/*.sql
+// If not yet generated (first run), ensure you executed prisma generate with --sql
+import { countUsers } from "@prisma/client/sql";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 
@@ -41,6 +45,8 @@ const getAllFromDB = async (params: any, options: IPaginationOptions) => {
   const whereConditions =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
+  // For now, keep dynamic filtering using Prisma Client (TypedSQL current queries are static examples)
+  // TODO: Extend generated SQL to accept search/filter args when stabilizing filter set.
   const result = await prisma.user.findMany({
     where: whereConditions,
     skip,
@@ -58,9 +64,14 @@ const getAllFromDB = async (params: any, options: IPaginationOptions) => {
     },
   });
 
-  const total = await prisma.user.count({
-    where: whereConditions,
-  });
+  // Example usage of TypedSQL (static total & page query if no filters applied)
+  let total: number;
+  if (Object.keys(whereConditions).length === 0) {
+    const totalRow = await prisma.$queryRawTyped(countUsers());
+    total = (totalRow[0] as any).total;
+  } else {
+    total = await prisma.user.count({ where: whereConditions });
+  }
 
   return {
     meta: {

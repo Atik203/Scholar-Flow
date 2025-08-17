@@ -12,7 +12,8 @@
     "test": "jest",
     "clean": "rimraf dist",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate --sql",
+    "db:generate:watch": "prisma generate --sql --watch",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
     "db:reset": "prisma migrate reset --force"
@@ -37,6 +38,7 @@
     "node-cron": "^3.0.3",
     "openai": "^4.20.1",
     "pdf-parse": "^1.1.1",
+    "pgvector": "^0.2.0",
     "prisma": "^6.14.0",
     "redis": "^4.6.11",
     "sslcommerz-lts": "^1.0.3",

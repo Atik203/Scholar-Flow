@@ -70,7 +70,7 @@ For a complete list of variables and how to obtain them (Google/GitHub OAuth, S3
 DATABASE_URL="postgresql://username:password@localhost:5432/scholar_flow"
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
 PORT=5000
-FRONTEND_URL="http://localhost:3002"
+FRONTEND_URL="http://localhost:3000"
 NODE_ENV=development
 ```
 
@@ -78,7 +78,7 @@ NODE_ENV=development
 
 ```env
 NEXTAUTH_SECRET="your-secret-key-change-in-production"
-NEXTAUTH_URL="http://localhost:3002"
+NEXTAUTH_URL="http://localhost:3000"
 NEXT_PUBLIC_API_BASE_URL="http://localhost:5000/api"
 DATABASE_URL="postgresql://username:password@localhost:5432/scholar_flow"
 ```
@@ -104,7 +104,7 @@ yarn dev
 
 This starts:
 
-- **Frontend**: <http://localhost:3002> (per apps/frontend/package.json)
+- **Frontend**: <http://localhost:3000> (per apps/frontend/package.json)
 - **Backend API**: <http://localhost:5000>
 
 Optional (Turborepo):
@@ -113,7 +113,7 @@ Optional (Turborepo):
 yarn dev:turbo
 ```
 
-Note: Ensure ports 3002 and 5000 are free before running the Turbo dev task.
+Note: Ensure ports 3000 and 5000 are free before running the Turbo dev task.
 
 ## 📋 Available Scripts
 

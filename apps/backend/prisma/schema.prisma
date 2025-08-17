@@ -5,13 +5,14 @@
 generator client {
   provider        = "prisma-client-js"
   engineType      = "binary"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "typedSql"]
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [pgvector]
+  directUrl  = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
+  extensions = [pgvector] // Requires CREATE EXTENSION vector; on target DB
 }
 
 enum Role {
@@ -173,7 +174,7 @@ model PaperChunk {
   idx        Int
   page       Int?
   content    String
-  embedding  Unsupported("vector")? // pgvector column (e.g., vector(1536))
+  embedding  Unsupported("vector")? // pgvector column (dimension set at insertion time e.g. vector(1536))
   tokenCount Int?
 
   paper Paper @relation(fields: [paperId], references: [id])
