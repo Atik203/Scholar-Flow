@@ -43,6 +43,19 @@ const config: Config = {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        chart: {
+          "1": "var(--chart-1)",
+          "2": "var(--chart-2)",
+          "3": "var(--chart-3)",
+          "4": "var(--chart-4)",
+          "5": "var(--chart-5)",
+        },
+      },
+      boxShadow: {
+        "3xl": "0 35px 60px -12px rgba(0, 0, 0, 0.25)",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
     },
   },
