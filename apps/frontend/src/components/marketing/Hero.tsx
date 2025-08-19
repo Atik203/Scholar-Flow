@@ -1,5 +1,6 @@
 "use client";
 import { MarketingVideo } from "@/components/marketing/MarketingVideo";
+import { Button } from "@/components/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
 import React from "react";
 
@@ -37,25 +38,19 @@ export const Hero: React.FC = () => {
           transition={{ delay: 0.3, duration: 0.6 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-4"
         >
-          <a
-            href="#features"
-            className="inline-flex items-center rounded-md bg-primary text-primary-foreground px-6 py-3 text-sm font-medium shadow hover:shadow-lg transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          >
-            Explore Features
-          </a>
-          <a
-            href="#how-it-works"
-            className="inline-flex items-center rounded-md border px-6 py-3 text-sm font-medium hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          >
-            How it Works
-          </a>
+          <Button asChild size="lg" variant="gradient">
+            <a href="#features">Explore Features</a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="backdrop-blur">
+            <a href="#how-it-works">How it Works</a>
+          </Button>
         </motion.div>
         <motion.div
           initial={prefersReducedMotion ? false : { opacity: 0, y: 32 }}
           whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ delay: 0.4, duration: 0.7 }}
-          className="mt-16 relative mx-auto max-w-5xl rounded-xl border bg-gradient-to-b from-muted/40 to-background p-3 md:p-4 shadow-lg"
+          className="mt-16 relative mx-auto max-w-5xl rounded-xl border bg-gradient-to-b from-muted/40 to-background p-3 md:p-4 shadow-lg after:absolute after:inset-0 after:rounded-xl after:pointer-events-none after:bg-[radial-gradient(circle_at_85%_15%,theme(colors.primary/25),transparent_60%)]"
         >
           <div className="aspect-video w-full rounded-md overflow-hidden bg-black/5 dark:bg-white/5">
             <MarketingVideo

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import React from "react";
@@ -39,18 +40,12 @@ export const CTA: React.FC = () => {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="mt-10 flex flex-wrap items-center justify-center gap-4"
         >
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center rounded-md bg-primary text-primary-foreground px-6 py-3 text-sm font-medium shadow hover:shadow-lg transition-shadow"
-          >
-            Launch App →
-          </Link>
-          <a
-            href="#faq"
-            className="inline-flex items-center rounded-md border px-6 py-3 text-sm font-medium hover:bg-muted transition-colors"
-          >
-            FAQs
-          </a>
+          <Button asChild size="lg" variant="gradient">
+            <Link href="/dashboard">Launch App →</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline">
+            <a href="#faq">FAQs</a>
+          </Button>
         </motion.div>
       </div>
     </section>
