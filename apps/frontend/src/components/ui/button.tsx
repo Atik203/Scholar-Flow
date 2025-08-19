@@ -22,7 +22,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // Modern gradient / primary emphasis variant
         gradient:
-          "relative bg-gradient-to-tr from-primary via-primary/90 to-primary/70 text-primary-foreground shadow-sm hover:from-primary/90 hover:via-primary/80 hover:to-primary/60 focus-visible:ring-ring/60 active:scale-[0.97] transition-all before:absolute before:inset-0 before:rounded-md before:bg-[linear-gradient(var(--primary)_0%,transparent_120%)] before:opacity-0 hover:before:opacity-20 before:transition-opacity",
+          "relative bg-gradient-to-br from-primary via-primary/90 to-chart-1/80 text-primary-foreground shadow-lg hover:shadow-xl hover:from-primary/95 hover:via-primary/85 hover:to-chart-1/75 focus-visible:ring-ring/60 active:scale-[0.97] transition-all duration-300 before:absolute before:inset-0 before:rounded-md before:bg-[linear-gradient(45deg,var(--primary)_0%,transparent_100%)] before:opacity-0 hover:before:opacity-30 before:transition-opacity before:duration-300",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
