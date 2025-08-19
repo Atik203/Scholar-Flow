@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
     // For Next 15, prefer the 'transpilePackages' option at the root level
   },
   transpilePackages: ["@scholar-flow/types", "@scholar-flow/seo"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
+    ],
+  },
 };
 
 export default nextConfig;
