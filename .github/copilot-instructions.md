@@ -18,7 +18,7 @@
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS + ShadCN UI components
+- **Styling**: Tailwind CSS + ShadCN UI components + Styled Coloring + Animation
 - **State Management**: Redux Toolkit Query (RTK Query)
 - **Authentication**: NextAuth.js (Auth.js) with JWT strategy
 - **Forms**: React Hook Form + Zod validation
