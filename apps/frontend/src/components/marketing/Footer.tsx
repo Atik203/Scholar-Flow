@@ -57,10 +57,14 @@ export const Footer: React.FC = () => {
               id="footer-heading"
               className="font-bold text-xl tracking-tight flex items-center gap-2"
             >
+
+              <Shield className="h-5 w-5 text-primary" /> ScholarFlow
+
               <Shield className="h-6 w-6 text-primary" />{" "}
               <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text font-bold">
                 ScholarFlow
               </span>
+
             </h3>
             <p className="mt-4 text-sm text-muted-foreground/90 leading-relaxed max-w-sm">
               AI-powered research paper collaboration. Organize, annotate, and
