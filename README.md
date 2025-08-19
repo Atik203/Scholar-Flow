@@ -4,7 +4,7 @@
 
 Smart ingestion, semantic search, structured collaboration, and citation intelligence for researchers & academic teams.
 
-[Roadmap](./Roadmap.md) · [Schema](./SCHEMA.md) · [UI Design Blueprint](./docs/UI_DESIGN.md) · [Environment](./docs/ENVIRONMENT.md) · [.cursor Rules](./.cursor/rules/00-core.mdc)
+[Roadmap](./Roadmap.md) · [Schema](./SCHEMA.md) · [UI Design Blueprint](./docs/UI_DESIGN.md) · [Environment](./docs/ENVIRONMENT.md)
 
 ---
 
