@@ -10,7 +10,7 @@ import { Testimonials } from "@/components/marketing/Testimonials";
 
 export default function HomePage() {
   return (
-    <div className="relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden before:absolute before:inset-0 before:-z-10 before:bg-[radial-gradient(circle_at_20%_15%,theme(colors.primary/12),transparent_60%)] after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(circle_at_80%_85%,theme(colors.primary/8),transparent_55%)]">
       <Navbar />
       <main>
         <Hero />

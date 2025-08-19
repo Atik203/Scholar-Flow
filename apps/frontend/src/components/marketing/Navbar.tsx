@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { signIn, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -21,7 +22,7 @@ export const Navbar: React.FC = () => {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 inset-x-0 z-40 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50"
+      className="fixed top-0 inset-x-0 z-40 border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/50 after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-primary/10 after:to-transparent"
       aria-label="Main"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -43,27 +44,23 @@ export const Navbar: React.FC = () => {
           </ul>
         </div>
         <div className="flex items-center gap-3">
-          <button
+          <Button
             onClick={toggleTheme}
-            className="text-xs md:text-sm px-2 py-1 rounded border hover:bg-muted transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            variant="outline"
+            size="sm"
             aria-label="Toggle color theme"
+            className="w-9 px-0"
           >
-            {theme === "dark" ? "☀️" : "🌙"}
-          </button>
+            <span aria-hidden>{theme === "dark" ? "☀️" : "🌙"}</span>
+          </Button>
           {session ? (
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium shadow hover:shadow-md transition-shadow"
-            >
-              Dashboard →
-            </Link>
+            <Button asChild size="sm" variant="gradient">
+              <Link href="/dashboard">Dashboard →</Link>
+            </Button>
           ) : (
-            <button
-              onClick={() => signIn()}
-              className="inline-flex items-center gap-1 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium shadow hover:shadow-md transition-shadow"
-            >
+            <Button size="sm" variant="gradient" onClick={() => signIn()}>
               Get Started
-            </button>
+            </Button>
           )}
         </div>
       </div>
