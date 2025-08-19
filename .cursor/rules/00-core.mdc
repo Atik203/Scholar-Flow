@@ -15,3 +15,4 @@ alwaysApply: true
 8. Error Handling: Backend must use `ApiError`, `catchAsync`, and central `globalErrorHandler`.
 9. Security: No plaintext secrets in code. Validate and sanitize all external input.
 10. Ports: Frontend 3000, Backend 5000.
+11. UI/UX Changes: Consult `docs/UI_DESIGN.md` first; keep README high-level and only document deltas in PR descriptions.

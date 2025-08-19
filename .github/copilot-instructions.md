@@ -10,6 +10,7 @@
 - Package manager: Yarn (Berry). Do not use npm in this repo.
 - Check for any .env file changes
 - Document any new environment variables required for features
+- For any UI/UX changes or component decisions, FIRST consult `docs/UI_DESIGN.md` (canonical phased UI blueprint) and only summarize deltas in PRs.
 
 ## Technology Stack
 
@@ -266,6 +267,9 @@ export const apiSlice = createApi({
 6. **Performance**: Paginate, index DB queries, cache hot reads (Redis)
 7. **Observability**: Structured logs, minimal PII; add tracing hooks for later OpenTelemetry
 8. **Docs**: Update README/DEVELOPMENT after notable changes
+
+- Also update `docs/UI_DESIGN.md` when altering navigation, global layout, or introducing new surface areas; keep README high‑level only.
+
 9. **Release discipline**: Keep main green; use PR checks; avoid breaking changes without migration notes
 
 ## Frontend (Next.js) Best Practices for SaaS

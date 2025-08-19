@@ -1,122 +1,84 @@
-# Scholar-Flow - AI-Powered Research Paper Collaboration Hub
+# Scholar-Flow
 
-## 🚀 Project Template Status
+## AI-Powered Research Paper Collaboration Hub
 
-**This repository now contains a complete project template!** The firewall issues have been resolved and the Scholar-Flow application template has been successfully created based on the comprehensive specification below.
+Smart ingestion, semantic search, structured collaboration, and citation intelligence for researchers & academic teams.
 
-### What's Included
+[Roadmap](./Roadmap.md) · [Schema](./SCHEMA.md) · [UI Design Blueprint](./docs/UI_DESIGN.md) · [Environment](./docs/ENVIRONMENT.md) · [.cursor Rules](./.cursor/rules/00-core.mdc)
 
-✅ **Complete Monorepo Structure** with frontend and backend applications  
-✅ **Next.js Frontend** with TypeScript, Tailwind CSS, and Auth.js  
-✅ **Express Backend** with Prisma, PostgreSQL, and JWT authentication  
-✅ **Comprehensive Database Schema** with pgvector support for AI features  
-✅ **Development Setup Scripts** and environment configuration  
-✅ **Production-Ready Architecture** following the detailed specifications below
+---
 
-### Quick Start
+## ✨ Key Capabilities (Phased Delivery)
 
-For Windows users:
+| Area            | Phase 1 (MVP)                | Phase 2                         | Phase 3                                    |
+| --------------- | ---------------------------- | ------------------------------- | ------------------------------------------ |
+| Auth & Profiles | Email / OAuth, basic profile | Password reset, roles expansion | Org SSO (future)                           |
+| Papers          | Upload, metadata store       | OCR & full AI summaries         | Versioning & multi-format ingest           |
+| Collections     | Create & list                | Sharing, activity feed          | Advanced permissions & workspace analytics |
+| Semantic Search | Flagged (pgvector infra)     | Vector search & recommendations | Multi-doc chat assistant                   |
+| Annotations     | Placeholder                  | Full highlights + realtime      | History diff & export                      |
+| Citation Graph  | Deferred                     | Interactive graph               | Advanced metrics & clustering              |
+| Billing         | Deferred                     | Plans integration (Stripe/SSL)  | Usage-based quotas                         |
+| Admin           | Deferred                     | Basic user mgmt                 | Platform analytics & moderation            |
+
+Detailed per‑page UX & component plan lives in: **`docs/UI_DESIGN.md`** (kept out of this README to stay concise).
+
+## 🚀 Quick Start
 
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd Scholar-Flow
-
-# Run the Windows setup script
-setup.bat
-
-# Or setup manually:
 yarn install
-cp apps/backend/.env.example apps/backend/.env
-cp apps/frontend/.env.example apps/frontend/.env.local
+copy apps\backend\.env.example apps\backend\.env        # Windows
+copy apps\frontend\.env.local.example apps\frontend\.env.local
 
-# Configure database and start development
 yarn db:migrate
 yarn dev
 ```
 
-**See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed setup instructions.**
+More: see `DEVELOPMENT.md`.
 
 ---
 
-## Original Specification
+## 🧩 Architecture Snapshot
 
-Updated for Postgres + pgvector, Next.js (App Router) frontend on port 3000, and a separate Node.js + Express backend with Prisma.
-This document outlines the architecture, features, and implementation details for Scholar-Flow, a SaaS platform designed to help researchers manage academic papers, collaborate with teams, and leverage AI for enhanced workflows.
+Monorepo (Yarn Berry + Turbo) with:
 
-## 1) Product Overview
+- `apps/frontend`: Next.js 15 (App Router, Tailwind, ShadCN, NextAuth, RTK Query)
+- `apps/backend`: Express + TypeScript + Prisma (Postgres + pgvector)
+- `packages/*`: Shared types / SEO utilities
 
-- Name: Scholar-Flow
-- Type: SaaS platform for research paper organization, collaboration, and AI assistance
-- Audience: Researchers, students, professors, academic teams, institutions
-- Goal: Help users upload, manage, annotate, and collaborate on academic papers; power workflows with AI (summaries, semantic search, citation tooling, literature review assistance); provide team workspaces and paid plans.
+Workers (future) will process ingestion (OCR, embeddings) via a queue (BullMQ/Redis).
 
-## 2) System Architecture (Separated Frontend and Backend)
+## 🎯 Product Overview
 
-High level
+Scholar-Flow helps researchers and teams:
 
-- Frontend Web App (Next.js, Vercel):
-  - Next.js App Router (React, TypeScript, Tailwind, ShadCN).
-  - Auth handled by Auth.js (NextAuth) with JWT sessions.
-  - Calls the backend API with Bearer JWT; uses RTK Query for data fetching.
-- Backend API (Node.js, Express, Prisma, Postgres):
-  - A dedicated service (Railway/Render/Fly.io). Single source of truth for business logic.
-  - Validates Auth.js JWT via shared NEXTAUTH_SECRET (HS256) or JWKS if using asymmetric signing.
-  - Exposes REST endpoints for papers, annotations, search, collections, workspaces, billing.
-  - Handles payment webhooks (Stripe/SSLCommerz) and writes Payment/Subscription records.
-- Worker/Jobs Service (optional but recommended):
-  - Handles heavy tasks: file parsing, OCR, chunking, embeddings, AI pipelines.
-  - Queue with Redis + BullMQ. Workers consume jobs and persist results via Prisma.
-- Database & Storage:
-  - Postgres 15+ with pgvector extension; accessed via Prisma.
-  - Object storage (S3-compatible) for PDFs and assets; signed URLs from backend.
-  - CDN in front of storage for fast delivery.
-- Observability & Operations:
-  - PostHog/Amplitude for product analytics; OpenTelemetry/logging for API observability.
-  - Alerting on queue backlogs, failed webhooks, and AI provider errors.
+- Ingest & organize academic papers
+- Generate AI summaries & semantic retrieval
+- Annotate & collaborate in collections
+- Explore citation relationships
+- Manage access, billing, and usage
 
-Data flow highlights
+## 🏗️ System Architecture (High Level)
 
-- Upload: Frontend uploads file -> Backend pre-signs S3 URL -> Client uploads -> Backend enqueues “ingest” job -> Worker parses/OCRs -> chunks + embeddings -> records in DB -> UI shows progress.
-- Auth: Frontend signs in via Auth.js -> stores JWT -> sends to Backend in Authorization header -> Backend enforces RBAC.
-- Billing: Frontend starts checkout -> redirects to provider -> provider posts webhook to Backend -> Backend activates Subscription -> notifies Frontend via polling or SSE/Webhook to client.
+Frontend (Next.js) ↔ Backend (Express/Prisma) ↔ Postgres (pgvector)  
+Optional Worker (embeddings/OCR) ← queue (Redis)  
+Object storage (S3/R2) for PDFs.  
+Feature flags gate unfinished surfaces (see example env files).
 
-## 3) Core Features
+## 📦 Core Feature Domains
 
-A. Paper Management
-
-- Upload PDFs/DOCX/LaTeX, import via DOI/arXiv/OpenAlex/Semantic Scholar.
-- OCR for scanned docs (Tesseract); parse text; extract title/authors/abstract via regex + NLP.
-- Smart tagging (topics/methods) via OpenAI/HF; short AI summaries.
-- Bulk import with progress tracking.
-
-B. Citation & References
-
-- Citation formatting (APA/MLA/IEEE).
-- Citation graph visualization; missing-citation suggestions (LLM + similarity).
-- Export citations; per-collection bibliography.
-
-C. Semantic Search & Discovery
-
-- Chunked text (500–1,000 tokens, 50–100 overlap), embeddings per chunk (1536 or 3072 dims).
-- pgvector with ivfflat index and cosine distance; filters by workspace, year, tags.
-- Similar papers recommender; trends via keyword extraction.
-
-D. Collaboration
-
-- Annotations: highlights, comments, notes; threading; version history and revert.
-- Collections per workspace with membership; activity logs; sharing controls.
-- Real-time comments/annotation updates via WebSocket/SSE.
-
-E. AI Writing Assistance
-
-- Abstract generator, literature review outliner.
-- Self-plagiarism check via cosine similarity across user’s papers.
-
-F. Payments & Plans
-
-- Stripe (global), SSLCommerz (BD). Freemium + Pro + Institutional.
-- Webhooks update Payments/Subscriptions; customer portal links for Stripe.
+| Domain                | Highlights (Current / Planned)                                  |
+| --------------------- | --------------------------------------------------------------- |
+| Paper Ingestion       | Upload, metadata extraction, queued processing (OCR/embeddings) |
+| Collections           | Organize papers, future sharing & activity feed                 |
+| Semantic Intelligence | pgvector-backed search (flagged until data + embeddings)        |
+| Annotations           | Placeholder now → full highlight + realtime threads             |
+| Citation Intelligence | Graph + formatting (Phase 2+)                                   |
+| AI Assistance         | Summaries, suggestions (progressive rollout)                    |
+| Billing & Plans       | Stripe + SSLCommerz integration (Phase 3)                       |
+| Admin & Governance    | User management, metrics, moderation (Phase 3)                  |
 
 ## 4) Detailed Tech Stack
 
@@ -190,77 +152,9 @@ Security and cross-cutting
 - Input validation: Zod schemas on every route; sanitize filters for search.
 - Audit logs and notifications for sensitive actions.
 
-## 7) UI/UX – Page-by-Page (Frontend Next.js)
+## 🖥️ UI / UX Documentation
 
-Global Chrome
-
-- Sidebar: Dashboard, Papers, Collections, Upload, Graph, Teams, Billing, Admin
-- Header: Global search, notifications, quick actions, profile menu
-- Mobile FAB: Upload / New annotation
-
-1. Landing (Marketing)
-
-- Hero CTA, features, pricing, testimonials; analytics events.
-
-1. Auth
-
-- OAuth (Google/ORCID/GitHub) or email magic link; profile completion (name, institution, role).
-
-1. Onboarding
-
-- Upload/import first paper; create workspace and collection; invite teammates; guided tips.
-
-1. Dashboard
-
-- Recent uploads, recommended papers, active collections, notifications; quick actions.
-
-1. Papers Library
-
-- Search bar with keyword/semantic toggle; filters; list/grid; bulk actions (add to collection, export citations).
-
-1. Paper Detail / Reader
-
-- PDF viewer + extracted-text toggle; annotation panel (threaded); AI actions (summarize, cite, paraphrase); versioning and revert.
-
-1. Collections
-
-- List + detail (papers grid, activity, access control); drag-and-drop; invites; export.
-
-1. Semantic Search / Discovery
-
-- Ranked results with similarity score; snippet previews; similar-papers panel; trends.
-
-1. Citation Graph
-
-- Interactive graph (D3/Cytoscape); cluster/filter; node panel with open/cite actions.
-
-1. Upload / Import
-
-- Drag-drop; OCR toggle; import by DOI/URL or providers; background job status.
-
-1. Annotation History
-
-- Version timeline; side-by-side diff; restore.
-
-1. Team / Workspace
-
-- Workspace list and details; members and roles; invites; activity log.
-
-1. Billing
-
-- Plan status; upgrade/checkout; payment history; invoices; customer portal link.
-
-1. Admin
-
-- User management; payments analytics (MRR, churn); system logs; API keys & quotas.
-
-1. Settings / Profile
-
-- Profile, security, integrations (ORCID, Scholar), BYO OpenAI key, data export/delete.
-
-1. Help / Docs
-
-- FAQs, tutorials, support tickets; in-app tooltips.
+Full screen-by-screen structure, component taxonomy, accessibility checklist, and feature flag strategy: **`docs/UI_DESIGN.md`**.
 
 ## 8) Non-Functional Requirements
 
@@ -288,10 +182,30 @@ The full Prisma data model has been moved to `SCHEMA.md` for clarity.
 - Workers: Same platform as backend, separate process using the same codebase (monorepo) or separate repo.
 - Migrations: Prisma migrate on backend deploy; maintain seed scripts for local/dev environments.
 
-## 12) Next Steps
+## ⏭️ Immediate Next Steps (Phase 1)
 
-- Implement Auth.js JWT strategy; add backend middleware to validate tokens and attach user context.
-- Build upload flow with S3 pre-signed URLs and background ingest job.
-- Implement vector search queries using pgvector + raw SQL; add ivfflat index.
-- Wire Stripe/SSLCommerz checkout and webhooks; create Subscription/Payment write paths.
-- Harden RBAC at workspace and collection boundaries; add activity logging for sensitive flows.
+1. Finalize Auth + profile endpoints integration
+2. Implement upload → ingest pipeline (with placeholder worker path)
+3. Add pgvector migration & embeddings service stub (feature-flagged)
+4. Collections basic CRUD + association
+5. Prepare semantic search API skeleton (disabled until embeddings exist)
+
+> For extended roadmap see `Roadmap.md`.
+
+---
+
+### 🤝 Contributing
+
+Follow conventional commits, keep PRs small, and align with current phase. See `.cursor/rules` and `docs/UI_DESIGN.md` before adding new UI routes.
+
+### 📄 Licensing
+
+Proprietary – see `LICENSE.md` and `TERMS.md`.
+
+### 📬 Contact
+
+Open an issue or start a discussion for feature proposals. Tag design-related issues with `ui-design`.
+
+---
+
+_Generated & maintained with structured AI assistance. UI details intentionally extracted to keep this README high signal._
