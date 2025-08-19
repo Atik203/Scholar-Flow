@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-**Project Name**: Scholar-Flow  
+**Project Name**: ScholarFlow  
 **Type**: AI-Powered Research Paper Collaboration Hub  
 **Architecture**: Monorepo with Next.js frontend and Express.js backend  
 **Phase**: Phase 1 Development (MVP)
