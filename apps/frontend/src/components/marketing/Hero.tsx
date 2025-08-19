@@ -28,7 +28,7 @@ export const Hero: React.FC = () => {
           transition={{ delay: 0.15, duration: 0.7, ease: "easeOut" }}
           className="mt-6 mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed"
         >
-          Scholar-Flow centralizes your papers, semantic search, AI summaries,
+          ScholarFlow centralizes your papers, semantic search, AI summaries,
           annotations, and collection sharing so your literature review
           accelerates.
         </motion.p>
