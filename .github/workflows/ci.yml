@@ -36,6 +36,9 @@ jobs:
         run: yarn install --immutable
       - name: Generate Prisma Client (incl. TypedSQL)
         run: yarn db:generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/scholar_flow
+          DIRECT_DATABASE_URL: postgresql://user:pass@localhost:5432/scholar_flow
       - name: Type Check
         run: yarn type-check
       - name: Lint
