@@ -34,11 +34,13 @@ jobs:
             ${{ runner.os }}-yarn-
       - name: Install
         run: yarn install --immutable
+      # Optional: Generate TypedSQL only when a CI database URL is provided
       - name: Generate Prisma Client (incl. TypedSQL)
+        if: ${{ secrets.CI_DATABASE_URL != '' }}
         run: yarn db:generate
         env:
-          DATABASE_URL: postgresql://user:pass@localhost:5432/scholar_flow
-          DIRECT_DATABASE_URL: postgresql://user:pass@localhost:5432/scholar_flow
+          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
+          DIRECT_DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
       - name: Type Check
         run: yarn type-check
       - name: Lint
