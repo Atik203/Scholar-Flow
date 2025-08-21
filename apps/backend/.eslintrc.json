@@ -18,6 +18,17 @@
       "warn",
       { "argsIgnorePattern": "^_" }
     ],
-    "prefer-const": "warn"
+    "prefer-const": "warn",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.property.name='$queryRawUnsafe']",
+        "message": "Use prisma.$queryRaw with parameters (tagged template or placeholders)."
+      },
+      {
+        "selector": "CallExpression[callee.property.name='$executeRawUnsafe']",
+        "message": "Use prisma.$executeRaw with parameters (tagged template or placeholders)."
+      }
+    ]
   }
 }
