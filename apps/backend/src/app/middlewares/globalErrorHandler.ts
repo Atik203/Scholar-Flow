@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import ApiError from "../errors/ApiError";
@@ -18,8 +17,9 @@ const globalErrorHandler = (
     statusCode = 400;
     message = "Validation error";
     error = err.issues;
-  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    switch (err.code) {
+  } else if (isPrismaKnownRequestError(err)) {
+    const code = (err as any).code as string;
+    switch (code) {
       case "P2002":
         statusCode = 409;
         message = "Unique constraint failed";
@@ -32,7 +32,7 @@ const globalErrorHandler = (
         statusCode = 400;
         message = "Database request error";
     }
-    error = { code: err.code, meta: err.meta };
+    error = { code, meta: (err as any).meta };
   } else if (err instanceof ApiError) {
     statusCode = err.statusCode || statusCode;
     message = err.message || message;
@@ -51,5 +51,12 @@ const globalErrorHandler = (
     error,
   });
 };
+
+function isPrismaKnownRequestError(
+  e: unknown
+): e is { code: string; meta?: unknown } {
+  const code = (e as any)?.code;
+  return typeof code === "string" && code.startsWith("P");
+}
 
 export default globalErrorHandler;
