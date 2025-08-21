@@ -45,6 +45,10 @@ Required unless marked optional.
   - Dev: `5000`
 
 - FRONTEND_URL
+- USE_PGVECTOR
+  - What: Feature flag to enable vector operations (embeddings & similarity)
+  - Dev: `false` by default; set `true` after pgvector extension and embeddings are ready
+
   - What: CORS allowlist origin
   - Dev: `http://localhost:3000`
 
@@ -94,6 +98,15 @@ Required unless marked optional.
   - Dev URLs: `http://localhost:3000/payment/{success|cancel|fail}`
 
 - Redis (optional; background jobs/cache)
+
+## Frontend Flags (.env.local)
+
+- NEXT_PUBLIC_FEATURE_SEMANTIC_SEARCH: `true|false`
+- NEXT_PUBLIC_FEATURE_ANNOTATIONS: `true|false`
+- NEXT_PUBLIC_FEATURE_CITATION_GRAPH: `false` (Phase 2+)
+- NEXT_PUBLIC_ENABLE_AI_FEATURES: `true|false`
+- NEXT_PUBLIC_ENABLE_PAYMENTS: `true|false`
+- NEXT_PUBLIC_USE_PGVECTOR: `true|false` (mirrors backend USE_PGVECTOR for UI gating)
   - REDIS_URL
   - Dev: `redis://localhost:6379`
 

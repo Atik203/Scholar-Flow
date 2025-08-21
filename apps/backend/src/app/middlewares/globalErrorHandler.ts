@@ -1,32 +1,55 @@
+import { Prisma } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
+import ApiError from "../errors/ApiError";
 
-const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-    let statusCode = 500;
-    let success = false;
-    let message = err.message || "Something went wrong!";
-    let error = err;
+const globalErrorHandler = (
+  err: unknown,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  let statusCode = 500;
+  const success = false;
+  let message = "Something went wrong!";
+  let error: unknown = undefined;
 
-    // Handle different types of errors
-    if (err.name === 'ValidationError') {
-        message = 'Validation Error';
-        error = err.message;
-    } else if (err.name === 'CastError') {
-        message = 'Invalid ID';
-        error = err.message;
-    } else if (err.code === 11000) {
-        message = 'Duplicate Entry';
-        error = err.message;
+  if (err instanceof ZodError) {
+    statusCode = 400;
+    message = "Validation error";
+    error = err.issues;
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case "P2002":
+        statusCode = 409;
+        message = "Unique constraint failed";
+        break;
+      case "P2025":
+        statusCode = 404;
+        message = "Record not found";
+        break;
+      default:
+        statusCode = 400;
+        message = "Database request error";
     }
+    error = { code: err.code, meta: err.meta };
+  } else if (err instanceof ApiError) {
+    statusCode = err.statusCode || statusCode;
+    message = err.message || message;
+  } else if (err instanceof Error) {
+    message = err.message || message;
+  }
 
-    if (err.statusCode) {
-        statusCode = err.statusCode;
-    }
+  const maybeStatus = (err as { statusCode?: number } | undefined)?.statusCode;
+  if (typeof maybeStatus === "number") {
+    statusCode = maybeStatus;
+  }
 
-    res.status(statusCode).json({
-        success,
-        message,
-        error
-    });
+  res.status(statusCode).json({
+    success,
+    message,
+    error,
+  });
 };
 
 export default globalErrorHandler;
