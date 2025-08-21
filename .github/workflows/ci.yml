@@ -16,6 +16,10 @@ jobs:
           cache: "yarn"
       - name: Enable Corepack
         run: corepack enable
+      - name: Activate Yarn Berry (4.9.2)
+        run: corepack prepare yarn@4.9.2 --activate
+      - name: Show Yarn version
+        run: yarn --version
       - name: Install
         run: yarn install --immutable
       - name: Type Check
