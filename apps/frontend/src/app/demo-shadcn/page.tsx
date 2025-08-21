@@ -32,15 +32,11 @@ export default function DemoShadcnPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="name" requiredMark>
-              Name
-            </Label>
+            <Label htmlFor="name">Name</Label>
             <Input id="name" placeholder="Ada Lovelace" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email" requiredMark>
-              Email
-            </Label>
+            <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="ada@example.com" />
           </div>
           <div className="grid gap-2">

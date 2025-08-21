@@ -1,9 +1,9 @@
-import express from 'express';
-import jwt from 'jsonwebtoken';
-import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import express from "express";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
 
-const router = express.Router();
+const router: import("express").Router = express.Router();
 const prisma = new PrismaClient();
 
 // Validation schema for session validation
@@ -12,19 +12,19 @@ const sessionValidationSchema = z.object({
 });
 
 // POST /auth/session/validate - Validate JWT session
-router.post('/session/validate', async (req, res): Promise<void> => {
+router.post("/session/validate", async (req, res): Promise<void> => {
   try {
     const { token } = sessionValidationSchema.parse(req.body);
     const jwtSecret = process.env.NEXTAUTH_SECRET;
 
     if (!jwtSecret) {
-      res.status(500).json({ error: 'JWT secret not configured' });
+      res.status(500).json({ error: "JWT secret not configured" });
       return;
     }
 
     // Verify JWT token
     const decoded = jwt.verify(token, jwtSecret) as any;
-    
+
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { id: decoded.sub },
@@ -35,11 +35,11 @@ router.post('/session/validate', async (req, res): Promise<void> => {
         role: true,
         image: true,
         isDeleted: true,
-      }
+      },
     });
 
     if (!user || user.isDeleted) {
-      res.status(401).json({ error: 'Invalid token or user not found' });
+      res.status(401).json({ error: "Invalid token or user not found" });
       return;
     }
 
@@ -54,10 +54,10 @@ router.post('/session/validate', async (req, res): Promise<void> => {
       },
     });
   } catch (error) {
-    console.error('Session validation error:', error);
-    res.status(401).json({ 
-      valid: false, 
-      error: 'Invalid token' 
+    console.error("Session validation error:", error);
+    res.status(401).json({
+      valid: false,
+      error: "Invalid token",
     });
   }
 });
