@@ -2,7 +2,7 @@ import Link from "next/link";
 import React from "react";
 import { ThemeToggle } from "./ThemeToggle";
 
-export const TopBar: React.FC = () => {
+const TopBar: React.FC = () => {
   return (
     <header className="h-14 border-b flex items-center justify-between px-4 gap-4 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center gap-3">
@@ -29,3 +29,5 @@ export const TopBar: React.FC = () => {
     </header>
   );
 };
+
+export default TopBar;

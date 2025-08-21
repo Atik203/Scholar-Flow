@@ -8,7 +8,7 @@ const navItems: { href: string; label: string }[] = [
   { href: "/collections", label: "Collections" },
 ];
 
-export const Sidebar: React.FC = () => {
+const Sidebar: React.FC = () => {
   return (
     <aside className="hidden md:flex md:flex-col w-56 shrink-0 border-r bg-muted/30">
       <div className="h-14 flex items-center px-4 font-semibold tracking-tight">
@@ -28,3 +28,5 @@ export const Sidebar: React.FC = () => {
     </aside>
   );
 };
+
+export default Sidebar;
