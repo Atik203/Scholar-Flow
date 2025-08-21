@@ -16,12 +16,12 @@
     "type-check": "turbo run type-check",
     "clean": "turbo run clean && rimraf node_modules",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
-    "setup": "yarn install --immutable && yarn db:generate",
-    "db:migrate": "cd apps/backend && npx prisma migrate dev",
-    "db:generate": "cd apps/backend && npx prisma generate --sql",
-    "db:studio": "cd apps/backend && npx prisma studio",
-    "db:seed": "cd apps/backend && npx ts-node prisma/seed.ts",
-    "db:reset": "cd apps/backend && npx prisma migrate reset --force"
+    "setup": "yarn install --immutable && yarn workspace @scholar-flow/backend prisma generate --sql",
+    "db:migrate": "yarn workspace @scholar-flow/backend prisma migrate dev",
+    "db:generate": "yarn workspace @scholar-flow/backend prisma generate --sql",
+    "db:studio": "yarn workspace @scholar-flow/backend prisma studio",
+    "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.ts",
+    "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force"
   },
   "devDependencies": {
     "@turbo/gen": "^2.5.5",

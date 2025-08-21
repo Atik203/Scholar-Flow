@@ -1,1 +1,2 @@
-// Navigation components temporarily removed for simplified home page setup.
+export { default as Sidebar } from "./Sidebar";
+export { default as TopBar } from "./TopBar";
