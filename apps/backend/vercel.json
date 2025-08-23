@@ -5,7 +5,7 @@
   "installCommand": "yarn install --immutable",
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs20.x"
+      "runtime": "nodejs22.x"
     }
   }
 }
