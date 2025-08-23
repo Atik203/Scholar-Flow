@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
     <div className="relative mx-auto max-w-7xl px-3 sm:px-5 lg:px-8 h-10 md:h-11 flex items-center justify-between gap-2 md:gap-4">
       <div className="flex items-center gap-3">
         <button
-          className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-primary/5 transition"
+          className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-primary/5 transition"
           onClick={() => setMobileOpen((v) => !v)}
           aria-label="Toggle menu"
           aria-expanded={mobileOpen}
@@ -48,7 +48,7 @@ export const Navbar: React.FC = () => {
         </Link>
       </div>
       <div className="flex items-center gap-2 md:gap-3">
-        <ul className="hidden md:flex items-center gap-5 text-sm">
+        <ul className="hidden lg:flex items-center gap-5 text-sm">
           {navItems.map((item) => (
             <li key={item.href}>
               <Link
@@ -99,7 +99,7 @@ export const Navbar: React.FC = () => {
         )}
       </div>
       {mobileOpen && (
-        <div className="md:hidden absolute inset-x-0 top-12 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="lg:hidden absolute inset-x-0 top-12 z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <nav className="mx-auto max-w-7xl px-3 py-2">
             <ul className="grid gap-1">
               {navItems.map((item) => (

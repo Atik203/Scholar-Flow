@@ -2910,6 +2910,7 @@ __metadata:
     next-themes: "npm:^0.3.0"
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
+    react-fast-marquee: "npm:^1.6.5"
     react-hook-form: "npm:^7.48.2"
     react-icons: "npm:^5.5.0"
     react-redux: "npm:^9.2.0"
@@ -11406,6 +11407,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-fast-marquee@npm:^1.6.5":
+  version: 1.6.5
+  resolution: "react-fast-marquee@npm:1.6.5"
+  peerDependencies:
+    react: ">= 16.8.0 || ^18.0.0"
+    react-dom: ">= 16.8.0 || ^18.0.0"
+  checksum: 10c0/ea2378c4cd1eb323d004e8c2ff6222a7a4def311e00f0bd0c99adebc906aa56a078c2101b3c6697109b15dcf177bfa31edd95b9f7a114887072e3103fe234ecd
+  languageName: node
+  linkType: hard
+
 "react-hook-form@npm:^7.48.2":
   version: 7.62.0
   resolution: "react-hook-form@npm:7.62.0"
@@ -12036,6 +12047,7 @@ __metadata:
     "@types/node": "npm:^20"
     prettier: "npm:^3.0.3"
     prisma: "npm:^6.14.0"
+    react-fast-marquee: "npm:^1.6.5"
     rimraf: "npm:^5.0.5"
     turbo: "npm:^2.5.6"
     typescript: "npm:^5.2.2"
