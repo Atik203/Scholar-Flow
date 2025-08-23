@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "yarn db:generate && yarn build",
-  "installCommand": "corepack enable && corepack prepare yarn@4.9.2 --activate && yarn install --immutable",
+  "installCommand": "corepack enable && corepack yarn install --immutable",
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs22.x"

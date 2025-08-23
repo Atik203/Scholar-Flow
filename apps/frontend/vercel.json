@@ -3,5 +3,5 @@
   "version": 2,
   "framework": "nextjs",
   "buildCommand": "yarn build",
-  "installCommand": "corepack enable && corepack prepare yarn@4.9.2 --activate && yarn install --immutable"
+  "installCommand": "corepack enable && corepack yarn install --immutable"
 }
