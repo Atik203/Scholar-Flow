@@ -48,9 +48,7 @@ export default function DemoShadcnPage() {
           <Button variant="outline" size="sm">
             Cancel
           </Button>
-          <Button variant="gradient" size="sm">
-            Submit
-          </Button>
+          <Button size="sm">Submit</Button>
         </CardFooter>
       </Card>
       <div className="text-xs text-muted-foreground text-center">
