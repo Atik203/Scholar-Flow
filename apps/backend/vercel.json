@@ -4,7 +4,7 @@
   "installCommand": "corepack enable && corepack yarn install --immutable",
   "buildCommand": "yarn db:generate && yarn build",
   "functions": {
-    "api/**/*.js": { "runtime": "nodejs20.x" }
+    "api/**/*.js": { "runtime": "vercel/node" }
   },
   "rewrites": [
     { "source": "/", "destination": "/api" },
