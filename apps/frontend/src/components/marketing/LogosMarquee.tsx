@@ -41,8 +41,14 @@ const companies = [
 
 export const LogosMarquee: React.FC = () => {
   return (
-    <section className="py-10" aria-label="Trusted by companies">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section
+      className="py-16 relative overflow-hidden"
+      aria-label="Trusted by companies"
+    >
+      {/* Subtle background enhancement */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-muted/10 to-transparent" />
+
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center text-xs uppercase tracking-wider text-muted-foreground/80 mb-6">
           Trusted by research teams at
         </div>
