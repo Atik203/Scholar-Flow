@@ -101,8 +101,8 @@ export const Testimonials: React.FC = () => {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Designed with researchers across academia & industry. Here's what
-            they're saying about ScholarFlow.
+            Designed with researchers across academia & industry. Here&apos;s what
+            they&apos;re saying about ScholarFlow.
           </p>
         </motion.div>
 
@@ -129,7 +129,7 @@ export const Testimonials: React.FC = () => {
                       <div className="relative rounded-3xl border border-border/30 bg-gradient-to-br from-card/95 via-card/80 to-card/60 backdrop-blur-xl p-8 md:p-12 shadow-2xl group-hover:shadow-3xl transition-all duration-700">
                         {/* Quote text */}
                         <blockquote className="text-xl md:text-2xl leading-relaxed text-foreground/90 font-medium mb-12 text-center max-w-3xl mx-auto">
-                          "{testimonial.quote}"
+                          &ldquo;{testimonial.quote}&rdquo;
                         </blockquote>
 
                         {/* Author info */}

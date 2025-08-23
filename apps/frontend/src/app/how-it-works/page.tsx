@@ -25,7 +25,7 @@ const workflow = [
     step: 1,
     title: "Upload Your Papers",
     description:
-      "Drag and drop PDFs or import from your existing reference manager. We'll automatically extract metadata, figures, and citations.",
+      "Drag and drop PDFs or import from your existing reference manager. We&apos;ll automatically extract metadata, figures, and citations.",
     icon: Upload,
     features: [
       "Bulk PDF upload",
@@ -297,7 +297,7 @@ export default function HowItWorksPage() {
           {/* Step Navigation */}
           <div className="mb-16">
             <div className="flex flex-wrap justify-center gap-4">
-              {workflow.map((step, index) => (
+              {workflow.map((step) => (
                 <Button
                   key={step.step}
                   onClick={() => setActiveStep(step.step)}
@@ -457,11 +457,11 @@ export default function HowItWorksPage() {
             </Button>
 
             <div className="flex items-center gap-2">
-              {workflow.map((_, index) => (
+              {workflow.map((_, idx) => (
                 <div
-                  key={index}
+                  key={idx}
                   className={`h-2 w-8 rounded-full transition-all duration-300 ${
-                    index + 1 === activeStep ? "bg-primary" : "bg-muted"
+                    idx + 1 === activeStep ? "bg-primary" : "bg-muted"
                   }`}
                 />
               ))}
@@ -593,7 +593,7 @@ export default function HowItWorksPage() {
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of researchers who have accelerated their work with
-              ScholarFlow's AI-powered platform.
+              ScholarFlow&apos;s AI-powered platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
