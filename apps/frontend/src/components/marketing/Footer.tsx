@@ -46,48 +46,50 @@ const sections: {
 export const Footer: React.FC = () => {
   return (
     <footer
-      className="relative mt-24 border-t bg-gradient-to-b from-muted/30 via-muted/50 to-muted/80"
+      className="relative mt-24 border-t bg-gradient-to-b from-slate-900 via-slate-950 to-black dark:from-slate-950 dark:via-black dark:to-slate-950"
       aria-labelledby="footer-heading"
     >
-      <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(circle_at_center,white,transparent_85%)] bg-[radial-gradient(ellipse_at_top,theme(colors.primary/20),transparent_70%)]" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 relative">
+      {/* Enhanced background patterns */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,theme(colors.primary/15),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,theme(colors.chart-1/10),transparent_50%)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-slate-900/50 dark:to-slate-950/50" />
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-16 relative">
         <div className="md:grid md:grid-cols-12 md:gap-10 lg:gap-14">
           <div className="md:col-span-4 lg:col-span-5">
             <h3
               id="footer-heading"
-              className="font-bold text-xl tracking-tight flex items-center gap-2"
+              className="font-bold text-xl tracking-tight flex items-center gap-3"
             >
-              <Shield className="h-5 w-5 text-primary" /> ScholarFlow
-              <Shield className="h-6 w-6 text-primary" />{" "}
-              <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text font-bold">
+              <Shield className="h-6 w-6 text-primary" />
+              <span className="bg-gradient-to-r from-white via-slate-100 to-white dark:from-white dark:via-slate-200 dark:to-white bg-clip-text text-transparent font-bold">
                 ScholarFlow
               </span>
             </h3>
-            <p className="mt-4 text-sm text-muted-foreground/90 leading-relaxed max-w-sm">
+            <p className="mt-6 text-sm text-slate-300 dark:text-slate-400 leading-relaxed max-w-sm">
               AI-powered research paper collaboration. Organize, annotate, and
               surface insight faster with semantic tooling.
             </p>
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-8 flex items-center gap-4">
               <a
                 href="https://github.com"
                 aria-label="GitHub"
-                className="h-10 w-10 inline-flex items-center justify-center rounded-lg border bg-background/60 backdrop-blur hover:bg-primary/10 hover:border-primary/30 hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md"
+                className="h-11 w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
               >
-                <Github className="h-4 w-4" />
+                <Github className="h-5 w-5 text-slate-300 group-hover:text-white transition-colors" />
               </a>
               <a
                 href="https://twitter.com"
                 aria-label="Twitter"
-                className="h-10 w-10 inline-flex items-center justify-center rounded-lg border bg-background/60 backdrop-blur hover:bg-primary/10 hover:border-primary/30 hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md"
+                className="h-11 w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
               >
-                <Twitter className="h-4 w-4" />
+                <Twitter className="h-5 w-5 text-slate-300 group-hover:text-white transition-colors" />
               </a>
             </div>
           </div>
           <div className="mt-12 md:mt-0 md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-10 sm:gap-12 lg:grid-cols-4">
             {sections.map((section) => (
               <div key={section.heading} className="space-y-4">
-                <h4 className="text-xs font-semibold tracking-wide uppercase text-primary/80">
+                <h4 className="text-xs font-semibold tracking-wide uppercase text-primary">
                   {section.heading}
                 </h4>
                 <ul className="space-y-3 text-sm">
@@ -95,7 +97,7 @@ export const Footer: React.FC = () => {
                     <li key={l.href}>
                       <a
                         href={l.href}
-                        className="relative text-muted-foreground/80 hover:text-foreground transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded px-1 py-1 hover:translate-x-1 after:absolute after:inset-x-1 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-primary/70 after:to-primary/30 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                        className="relative text-slate-400 dark:text-slate-500 hover:text-white dark:hover:text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded px-1 py-1 hover:translate-x-1 after:absolute after:inset-x-1 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-primary/70 after:to-primary/30 hover:after:scale-x-100 after:transition-transform after:duration-300"
                       >
                         {l.label}
                       </a>
@@ -106,13 +108,15 @@ export const Footer: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="mt-16 flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs text-muted-foreground/70 pt-8 border-t border-border/50">
-          <p>© {new Date().getFullYear()} ScholarFlow. All rights reserved.</p>
-          <p className="flex items-center gap-1.5 opacity-90">
+        <div className="mt-20 flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs pt-8 border-t border-slate-700 dark:border-slate-600">
+          <p className="text-slate-400 dark:text-slate-500">
+            © {new Date().getFullYear()} ScholarFlow. All rights reserved.
+          </p>
+          <p className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
             Built with{" "}
             <Heart className="h-3.5 w-3.5 text-primary animate-pulse" /> for
             researchers.{" "}
-            <span className="px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+            <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium border border-primary/30">
               Phase 1 MVP
             </span>
           </p>
