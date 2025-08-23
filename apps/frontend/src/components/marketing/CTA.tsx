@@ -61,7 +61,7 @@ export const CTA: React.FC = () => {
               size="lg"
               className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
             >
-              <Link href="/dashboard">Launch App →</Link>
+              <Link href="/login">Get Started →</Link>
             </Button>
             <Button
               asChild
@@ -69,7 +69,7 @@ export const CTA: React.FC = () => {
               variant="outline"
               className="border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
             >
-              <a href="#faq">FAQs</a>
+              <Link href="/faq">FAQs</Link>
             </Button>
           </motion.div>
 
