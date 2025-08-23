@@ -3,5 +3,9 @@
   "version": 2,
   "buildCommand": "yarn build",
   "installCommand": "yarn install --immutable",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . || echo 'changes'"
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }

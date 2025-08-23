@@ -72,43 +72,46 @@ app.use("*", ((
   });
 }) as unknown as RequestHandler);
 
-// Start server with graceful fallback & diagnostics
-const startServer = (desiredPort: number, attempt = 0) => {
-  const server = app.listen(desiredPort, () => {
-    console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
-    console.log(`📖 Environment: ${config.env}`);
-  });
+// Only start server if not in Vercel environment
+if (process.env.VERCEL !== "1") {
+  // Start server with graceful fallback & diagnostics
+  const startServer = (desiredPort: number, attempt = 0) => {
+    const server = app.listen(desiredPort, () => {
+      console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
+      console.log(`📖 Environment: ${config.env}`);
+    });
 
-  server.on("error", (err: any) => {
-    if (err.code === "EACCES") {
-      console.error(`\n⛔ Permission denied binding to port ${desiredPort}.`);
-      if (attempt < 3) {
-        const nextPort = desiredPort + 1;
-        console.log(
-          `🔁 Retrying on port ${nextPort} (attempt ${attempt + 1})...`
-        );
-        startServer(nextPort, attempt + 1);
+    server.on("error", (err: any) => {
+      if (err.code === "EACCES") {
+        console.error(`\n⛔ Permission denied binding to port ${desiredPort}.`);
+        if (attempt < 3) {
+          const nextPort = desiredPort + 1;
+          console.log(
+            `🔁 Retrying on port ${nextPort} (attempt ${attempt + 1})...`
+          );
+          startServer(nextPort, attempt + 1);
+        } else {
+          console.error("❌ Exhausted port fallback attempts.");
+          process.exit(1);
+        }
+      } else if (err.code === "EADDRINUSE") {
+        console.error(`\n⚠️ Port ${desiredPort} already in use.`);
+        if (attempt < 3) {
+          const nextPort = desiredPort + 1;
+          console.log(`🔁 Trying next port ${nextPort}...`);
+          startServer(nextPort, attempt + 1);
+        } else {
+          console.error("❌ Could not acquire a free port after retries.");
+          process.exit(1);
+        }
       } else {
-        console.error("❌ Exhausted port fallback attempts.");
+        console.error("❌ Failed to start server", err);
         process.exit(1);
       }
-    } else if (err.code === "EADDRINUSE") {
-      console.error(`\n⚠️ Port ${desiredPort} already in use.`);
-      if (attempt < 3) {
-        const nextPort = desiredPort + 1;
-        console.log(`🔁 Trying next port ${nextPort}...`);
-        startServer(nextPort, attempt + 1);
-      } else {
-        console.error("❌ Could not acquire a free port after retries.");
-        process.exit(1);
-      }
-    } else {
-      console.error("❌ Failed to start server", err);
-      process.exit(1);
-    }
-  });
-};
+    });
+  };
 
-startServer(Number(PORT));
+  startServer(Number(PORT));
+}
 
 export default app;
