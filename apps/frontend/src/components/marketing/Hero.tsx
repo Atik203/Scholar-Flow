@@ -2,6 +2,7 @@
 import { MarketingVideo } from "@/components/marketing/MarketingVideo";
 import { Button } from "@/components/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import React from "react";
 
 export const Hero: React.FC = () => {
@@ -53,7 +54,7 @@ export const Hero: React.FC = () => {
             size="lg"
             className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
           >
-            <a href="#features">Explore Features</a>
+            <Link href="/login">Get Started</Link>
           </Button>
           <Button
             asChild
@@ -61,7 +62,7 @@ export const Hero: React.FC = () => {
             variant="outline"
             className="backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
           >
-            <a href="#how-it-works">How it Works</a>
+            <Link href="/how-it-works">How it Works</Link>
           </Button>
         </motion.div>
         <motion.div
