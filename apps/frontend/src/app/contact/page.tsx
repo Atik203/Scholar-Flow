@@ -127,9 +127,9 @@ export default function ContactPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
-              Ready to revolutionize your research workflow? We'd love to hear
+              Ready to revolutionize your research workflow? We&apos;d love to hear
               from you. Reach out to discuss how ScholarFlow can accelerate your
-              team's productivity.
+              team&apos;s productivity.
             </p>
           </motion.div>
         </div>
