@@ -32,8 +32,11 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.48.2",
+    "react-icons": "^5.5.0",
     "react-redux": "^9.0.4",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^2.2.0",
+    "tw-animate-css": "^1.3.7",
     "zod": "^3.22.4"
   },
   "devDependencies": {
