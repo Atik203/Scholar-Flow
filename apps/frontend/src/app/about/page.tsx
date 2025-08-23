@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
   Award,
@@ -12,6 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const team = [
   {
@@ -465,12 +467,21 @@ export default function AboutPage() {
               already using ScholarFlow to accelerate their discoveries.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5">
-                Start Your Journey
-              </button>
-              <button className="px-8 py-4 rounded-xl border border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300">
-                Meet the Team
-              </button>
+              <Button
+                asChild
+                size="lg"
+                className="px-8 py-4 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <Link href="/login">Start Your Journey</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="px-8 py-4 border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300"
+              >
+                <Link href="/contact">Meet the Team</Link>
+              </Button>
             </div>
           </motion.div>
         </div>

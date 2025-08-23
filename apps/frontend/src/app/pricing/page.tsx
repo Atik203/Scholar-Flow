@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
   Check,
@@ -9,6 +10,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const plans = [
@@ -255,8 +257,16 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
-                  className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${
+                <Button
+                  asChild={plan.name !== "Enterprise"}
+                  variant={
+                    plan.name === "Enterprise"
+                      ? "outline"
+                      : plan.popular
+                        ? "default"
+                        : "outline"
+                  }
+                  className={`w-full py-3 px-4 font-semibold transition-all duration-300 ${
                     plan.name === "Enterprise"
                       ? "border border-border bg-background hover:bg-primary/5"
                       : plan.popular
@@ -264,12 +274,16 @@ export default function PricingPage() {
                         : "border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
                   }`}
                 >
-                  {plan.name === "Free"
-                    ? "Get Started"
-                    : plan.name === "Enterprise"
-                      ? "Contact Sales"
-                      : `Start ${plan.name} Trial`}
-                </button>
+                  {plan.name === "Enterprise" ? (
+                    "Contact Sales"
+                  ) : (
+                    <Link href="/login">
+                      {plan.name === "Free"
+                        ? "Get Started"
+                        : `Start ${plan.name} Trial`}
+                    </Link>
+                  )}
+                </Button>
               </motion.div>
             ))}
           </div>
@@ -306,9 +320,12 @@ export default function PricingPage() {
                     Our team can help you find the perfect plan for your
                     research needs.
                   </p>
-                  <button className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-                    Talk to Sales
-                  </button>
+                  <Button
+                    asChild
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    <Link href="/contact">Talk to Sales</Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -376,12 +393,21 @@ export default function PricingPage() {
               ScholarFlow. Start your free trial today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5">
-                Start Free Trial
-              </button>
-              <button className="px-8 py-4 rounded-xl border border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300">
-                View Demo
-              </button>
+              <Button
+                asChild
+                size="lg"
+                className="px-8 py-4 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <Link href="/login">Start Free Trial</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="px-8 py-4 border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300"
+              >
+                <Link href="/contact">View Demo</Link>
+              </Button>
             </div>
           </motion.div>
         </div>
