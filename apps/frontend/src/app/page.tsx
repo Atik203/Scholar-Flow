@@ -1,5 +1,4 @@
 "use client";
-"use client";
 import { CTA } from "@/components/marketing/CTA";
 import { Features } from "@/components/marketing/Features";
 import { Footer } from "@/components/marketing/Footer";
@@ -10,7 +9,7 @@ import { Testimonials } from "@/components/marketing/Testimonials";
 
 export default function HomePage() {
   return (
-    <div className="relative overflow-x-hidden pt-16 min-h-screen ">
+    <div className="relative overflow-x-hidden pt-6 min-h-screen ">
       <Navbar />
       <main className="relative">
         <Hero />
