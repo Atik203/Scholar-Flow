@@ -5,7 +5,7 @@
   "installCommand": "corepack enable && corepack yarn install --immutable",
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs22.x"
+      "runtime": "nodejs20.x"
     }
   }
 }
