@@ -12,7 +12,7 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-12 md:py-16">
       <section className="max-w-3xl">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight">FAQ</h1>
         <p className="mt-4 text-muted-foreground">

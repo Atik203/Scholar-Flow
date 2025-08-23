@@ -47,11 +47,14 @@ export const Features: React.FC = () => {
   return (
     <section
       id="features"
-      className="py-28 relative"
+      className="py-32 relative overflow-hidden"
       aria-labelledby="features-heading"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-primary/2 to-transparent" />
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative">
+      {/* Enhanced background patterns */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_40%_60%,theme(colors.chart-1/6),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_60%_40%,theme(colors.primary/8),transparent_50%)]" />
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-2xl">
           <h2
             id="features-heading"

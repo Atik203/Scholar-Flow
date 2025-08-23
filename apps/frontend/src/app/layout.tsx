@@ -27,7 +27,7 @@ export default function RootLayout({
         <NextAuthProvider>
           <ReduxProvider>
             <ThemeProvider>
-              <div className="relative overflow-x-hidden pt-6 min-h-screen flex flex-col">
+              <div className="relative overflow-x-hidden min-h-screen pt-6 flex flex-col">
                 <Navbar />
                 <main className="flex-1 relative">{children}</main>
                 <Footer />

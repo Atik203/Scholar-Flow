@@ -15,7 +15,7 @@ export const CTA: React.FC = () => {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,theme(colors.primary/20),transparent_50%)]" />
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_70%_80%,theme(colors.chart-1/15),transparent_50%)]" />
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -59,8 +59,7 @@ export const CTA: React.FC = () => {
             <Button
               asChild
               size="lg"
-              variant="gradient"
-              className="shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
             >
               <Link href="/dashboard">Launch App →</Link>
             </Button>
