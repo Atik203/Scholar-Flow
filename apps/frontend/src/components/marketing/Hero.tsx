@@ -52,7 +52,8 @@ export const Hero: React.FC = () => {
           <Button
             asChild
             size="lg"
-            className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
+            variant="gradient"
+            className="btn-hover-glow btn-shine btn-inner-glow shadow-xl hover:shadow-2xl transition-all duration-300"
           >
             <Link href="/login">Get Started</Link>
           </Button>
@@ -60,7 +61,7 @@ export const Hero: React.FC = () => {
             asChild
             size="lg"
             variant="outline"
-            className="backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
+            className="btn-hover-glow btn-inner-glow backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
           >
             <Link href="/how-it-works">How it Works</Link>
           </Button>
