@@ -3,7 +3,6 @@
   "version": 2,
   "buildCommand": "yarn db:generate && yarn build",
   "installCommand": "corepack enable && yarn install --immutable",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . || echo 'changes'",
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs22.x"
