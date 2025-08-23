@@ -10,7 +10,7 @@ import { Testimonials } from "@/components/marketing/Testimonials";
 
 export default function HomePage() {
   return (
-    <div className="relative overflow-x-hidden pt-16 min-h-screen bg-gradient-to-br from-background via-primary/2 to-background before:absolute before:inset-0 before:-z-10 before:bg-[radial-gradient(circle_at_20%_15%,theme(colors.primary/20),transparent_70%)] after:absolute after:inset-0 after:-z-10 after:bg-[radial-gradient(circle_at_80%_85%,theme(colors.chart-1/15),transparent_65%)]">
+    <div className="relative overflow-x-hidden pt-16 min-h-screen ">
       <Navbar />
       <main className="relative">
         <Hero />
