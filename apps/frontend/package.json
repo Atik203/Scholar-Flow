@@ -2,6 +2,7 @@
   "name": "@scholar-flow/frontend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "next dev --turbopack -p 3000",
     "build": "next build",

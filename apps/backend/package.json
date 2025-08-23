@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
