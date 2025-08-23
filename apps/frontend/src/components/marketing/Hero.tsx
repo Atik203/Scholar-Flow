@@ -8,11 +8,17 @@ export const Hero: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   return (
     <section
-      className="relative pt-40 pb-28 overflow-hidden"
+      className="relative pt-32 pb-32 overflow-hidden"
       aria-labelledby="hero-heading"
     >
-      <div className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(circle_at_center,white,transparent_80%)] bg-gradient-to-br from-primary/8 via-chart-1/5 to-background" />
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center">
+      {/* Enhanced background patterns */}
+      <div className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(circle_at_center,white,transparent_75%)] bg-gradient-to-br from-primary/12 via-chart-1/8 to-background" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_50%,theme(colors.primary/10),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,theme(colors.chart-1/8),transparent_50%)]" />
+
+      {/* Animated grid pattern */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,theme(colors.border/10)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/10)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(circle_at_center,white,transparent_70%)]" />
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center">
         <motion.h1
           id="hero-heading"
           initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
@@ -45,8 +51,7 @@ export const Hero: React.FC = () => {
           <Button
             asChild
             size="lg"
-            variant="gradient"
-            className="shadow-xl hover:shadow-2xl transition-all duration-300"
+            className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
           >
             <a href="#features">Explore Features</a>
           </Button>
