@@ -1,13 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Menu, Moon, Sun, X } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
 const navItems = [
+  { label: "Home", href: "/" },
   { label: "Features", href: "/features" },
   { label: "How it works", href: "/how-it-works" },
   { label: "Pricing", href: "/pricing" },
@@ -94,8 +95,13 @@ export const Navbar: React.FC = () => {
               <Link href="/dashboard">Dashboard →</Link>
             </Button>
           ) : (
-            <Button size="sm" onClick={() => signIn()}>
-              Get Started
+            <Button
+              asChild
+              size="sm"
+              variant="gradient"
+              className="btn-hover-glow btn-shine shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              <Link href="/login">Get Started</Link>
             </Button>
           )}
         </div>

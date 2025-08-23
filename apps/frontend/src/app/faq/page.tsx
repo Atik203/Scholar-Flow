@@ -276,9 +276,9 @@ export default function FAQPage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
-              Find quick answers to common questions about ScholarFlow's
-              features, pricing, security, and more. Can't find what you're
-              looking for? Contact our support team.
+              Find quick answers to common questions about ScholarFlow&apos;s
+              features, pricing, security, and more. Can&apos;t find what
+              you&apos;re looking for? Contact our support team.
             </p>
           </motion.div>
         </div>
@@ -301,7 +301,7 @@ export default function FAQPage() {
                 placeholder="Search questions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border border-border bg-background/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-lg"
+                className="w-full pl-12 pr-4 py-4 rounded-xl border border-border bg-background/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-lg dark:text-white dark:placeholder:text-white/60"
               />
             </div>
 
@@ -309,7 +309,7 @@ export default function FAQPage() {
             <div className="flex flex-wrap justify-center gap-3 mb-12">
               <button
                 onClick={() => setSelectedCategory("all")}
-                className={`px-6 py-3 rounded-xl transition-all duration-300 ${
+                className={`px-6 py-3 rounded-xl transition-all duration-300 dark:text-white btn-hover-glow ${
                   selectedCategory === "all"
                     ? "bg-primary text-primary-foreground shadow-lg"
                     : "bg-muted/50 hover:bg-primary/10 border border-border"
@@ -321,7 +321,7 @@ export default function FAQPage() {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 ${
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 dark:text-white btn-hover-glow ${
                     selectedCategory === category.id
                       ? "bg-primary text-primary-foreground shadow-lg"
                       : "bg-muted/50 hover:bg-primary/10 border border-border"
@@ -441,8 +441,8 @@ export default function FAQPage() {
               Still Have Questions?
             </h2>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Our support team is here to help. Get in touch and we'll respond
-              within 24 hours.
+              Our support team is here to help. Get in touch and we&apos;ll
+              respond within 24 hours.
             </p>
 
             <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
