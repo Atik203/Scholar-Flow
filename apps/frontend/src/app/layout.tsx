@@ -1,3 +1,5 @@
+import { Footer } from "@/components/marketing/Footer";
+import { Navbar } from "@/components/marketing/Navbar";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -9,7 +11,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ScholarSphere - AI-Powered Research Paper Hub",
+  title: "ScholarFlow - AI-Powered Research Paper Hub",
   description:
     "Organize, annotate, and collaborate on research papers with AI assistance",
 };
@@ -25,7 +27,11 @@ export default function RootLayout({
         <NextAuthProvider>
           <ReduxProvider>
             <ThemeProvider>
-              {children}
+              <div className="relative overflow-x-hidden pt-6 min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1 relative">{children}</main>
+                <Footer />
+              </div>
               <Toaster
                 theme="system"
                 position="top-right"
