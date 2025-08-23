@@ -47,13 +47,16 @@ if (config.env !== "production") {
 }
 
 // Health check endpoint
-app.get("/health", (req, res) => {
+const healthHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Scholar-Flow API is running!",
     timestamp: new Date().toISOString(),
   });
-});
+};
+app.get("/health", healthHandler as unknown as RequestHandler);
+// Support health check under /api as well (useful when deployed behind a rewrite to /api/$1)
+app.get("/api/health", healthHandler as unknown as RequestHandler);
 
 // API routes
 app.use("/api", router);
