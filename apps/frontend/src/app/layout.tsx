@@ -1,5 +1,5 @@
-import { Footer } from "@/components/marketing/Footer";
-import { Navbar } from "@/components/marketing/Navbar";
+import { Footer } from "@/components/customUI/Footer";
+import { Navbar } from "@/components/customUI/Navbar";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
