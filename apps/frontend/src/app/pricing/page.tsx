@@ -99,7 +99,7 @@ const faqs = [
       "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.",
   },
   {
-    question: "What's included in the free trial?",
+            question: "What&apos;s included in the free trial?",
     answer:
       "All paid plans include a 14-day free trial with full access to features. No credit card required to start.",
   },
@@ -146,7 +146,7 @@ export default function PricingPage() {
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
               Choose the perfect plan for your research needs. Start free,
-              upgrade when you're ready. All plans include our core AI-powered
+              upgrade when you&apos;re ready. All plans include our core AI-powered
               features.
             </p>
 
@@ -232,6 +232,7 @@ export default function PricingPage() {
                   </div>
                   {billingPeriod === "annual" &&
                     typeof plan.price.monthly === "number" &&
+                    typeof plan.price.annual === "number" &&
                     plan.price.monthly > 0 && (
                       <div className="text-sm text-muted-foreground mt-1">
                         ${Math.round(plan.price.annual / 12)}/month billed
@@ -304,7 +305,7 @@ export default function PricingPage() {
               Compare Features
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See exactly what's included in each plan
+              See exactly what&apos;s included in each plan
             </p>
           </motion.div>
 

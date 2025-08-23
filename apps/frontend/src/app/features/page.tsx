@@ -300,7 +300,7 @@ export default function FeaturesPage() {
             </h2>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of researchers who have accelerated their work with
-              ScholarFlow's AI-powered platform.
+              ScholarFlow&apos;s AI-powered platform.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button

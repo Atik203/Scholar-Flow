@@ -88,7 +88,7 @@ export default function RegisterPage() {
       toast.success("Account created successfully! Welcome to ScholarFlow.");
 
       // Redirect to dashboard would happen here
-    } catch (error) {
+    } catch {
       toast.error("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -100,7 +100,7 @@ export default function RegisterPage() {
 
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch (error) {
+    } catch {
       toast.error(`Failed to sign up with ${provider}`);
       setIsLoading(false);
     }
