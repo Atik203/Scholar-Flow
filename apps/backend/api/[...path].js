@@ -1,4 +1,4 @@
-const app = require('../dist/server.js');
+const app = require('../dist/server.js').default;
 
 // Export the Express app for Vercel serverless
 // This will handle all API routes automatically
