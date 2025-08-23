@@ -1,6 +1,13 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "installCommand": "corepack enable && corepack yarn install --immutable",
-  "builds": [{ "src": "dist/server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "dist/server.js" }]
+  "buildCommand": "yarn db:generate && yarn build",
+  "functions": {
+    "api/**/*.js": { "runtime": "nodejs20.x" }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api" },
+    { "source": "/health", "destination": "/api/health" }
+  ]
 }

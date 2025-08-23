@@ -1,0 +1,7 @@
+# Keep api/ for Vercel Serverless Function entry
+
+# Optional: common ignores (Vercel auto-detects gitignored files too)
+
+_.log
+_.tsbuildinfo
+node_modules/
