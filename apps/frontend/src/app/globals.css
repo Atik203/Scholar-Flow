@@ -121,6 +121,180 @@
   }
 }
 
+/* Enhanced Button Styles for Dark Mode */
+@layer components {
+  /* Button hover effects with enhanced shadows */
+  .btn-hover-glow {
+    @apply transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  /* Dark mode button enhancements */
+  .dark .btn-hover-glow:hover {
+    @apply shadow-2xl;
+  }
+
+  /* Enhanced focus states for dark mode */
+  .dark button:focus-visible,
+  .dark [role="button"]:focus-visible {
+    @apply ring-2 ring-primary/60 ring-offset-2 ring-offset-background;
+  }
+
+  /* Button shine effect */
+  .btn-shine::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  .btn-shine:hover::before {
+    left: 100%;
+  }
+
+  /* Enhanced dark mode shadows */
+  .dark .shadow-primary-glow {
+    box-shadow:
+      0 0 20px rgba(136, 58, 234, 0.3),
+      0 0 40px rgba(136, 58, 234, 0.1);
+  }
+
+  .dark .shadow-chart-glow {
+    box-shadow:
+      0 0 20px rgba(255, 107, 107, 0.3),
+      0 0 40px rgba(255, 107, 107, 0.1);
+  }
+
+  /* Button border glow effects */
+  .btn-border-glow {
+    @apply relative;
+  }
+
+  .btn-border-glow::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(
+      45deg,
+      var(--primary),
+      var(--chart-1),
+      var(--primary)
+    );
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-border-glow:hover::after {
+    opacity: 1;
+  }
+
+  /* Dark mode specific button enhancements */
+  .dark .btn-hover-glow:hover {
+    @apply shadow-2xl;
+  }
+
+  /* Enhanced dark mode button shadows */
+  .dark button[variant="gradient"]:hover {
+    box-shadow:
+      0 0 25px rgba(136, 58, 234, 0.4),
+      0 0 50px rgba(136, 58, 234, 0.2),
+      0 0 75px rgba(136, 58, 234, 0.1);
+  }
+
+  .dark button[variant="outline"]:hover {
+    box-shadow:
+      0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 40px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Button pulse effect for dark mode */
+  .dark .btn-pulse {
+    animation: pulse-glow 2s infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px rgba(136, 58, 234, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(136, 58, 234, 0.6);
+    }
+  }
+
+  /* Enhanced button states for dark mode */
+  .dark button:active {
+    @apply scale-95;
+  }
+
+  /* Button inner glow effect */
+  .btn-inner-glow {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-inner-glow::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-inner-glow:hover::before {
+    opacity: 1;
+  }
+
+  /* Dark mode text color overrides for better visibility */
+  .dark button {
+    @apply text-white;
+  }
+
+  .dark button[variant="outline"] {
+    @apply text-white;
+  }
+
+  .dark button[variant="ghost"] {
+    @apply text-white;
+  }
+
+  .dark button[variant="link"] {
+    @apply text-white;
+  }
+
+  /* Ensure SVG icons are also white in dark mode */
+  .dark button svg {
+    @apply text-white;
+  }
+
+  /* Enhanced button text contrast in dark mode */
+  .dark button[variant="gradient"] {
+    @apply text-white font-semibold;
+  }
+
+  .dark button[variant="default"] {
+    @apply text-white font-semibold;
+  }
+
+  .dark button[variant="destructive"] {
+    @apply text-white font-semibold;
+  }
+}
+
 /* This layer is by next-forge */
 @layer base {
   ::after,
