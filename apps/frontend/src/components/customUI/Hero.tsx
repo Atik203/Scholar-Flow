@@ -1,5 +1,5 @@
 "use client";
-import { MarketingVideo } from "@/components/marketing/MarketingVideo";
+import { MarketingVideo } from "@/components/customUI/MarketingVideo";
 import { Button } from "@/components/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
