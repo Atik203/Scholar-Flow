@@ -25,7 +25,7 @@ export default function Error({
             Something went wrong
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            We're sorry, but something unexpected happened. Please try again or
+            We&apos;re sorry, but something unexpected happened. Please try again or
             return to the home page.
           </p>
           {error.digest && (
