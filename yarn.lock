@@ -2997,7 +2997,6 @@ __metadata:
   resolution: "@scholar-flow/backend@workspace:apps/backend"
   dependencies:
     "@prisma/client": "npm:^6.14.0"
-    "@scholar-flow/types": "workspace:*"
     "@types/bcryptjs": "npm:^2.4.6"
     "@types/compression": "npm:^1.7.5"
     "@types/cors": "npm:^2.8.17"
