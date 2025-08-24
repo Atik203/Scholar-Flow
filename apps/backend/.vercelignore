@@ -1,13 +1,14 @@
 # Vercel ignore file for backend
-# Don't upload source files, only dist and necessary config
+# Upload source files for compilation, exclude unnecessary files
 
-src/
 *.md
 .env.example
 .turbo/
-node_modules/
 *.log
 .git/
 .vscode/
 *.test.*
 *.spec.*
+coverage/
+jest.config.*
+.eslintrc.*

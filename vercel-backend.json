@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "yarn install --ignore-engines",
+  "installCommand": "bash scripts/vercel-prebuild.sh",
   "buildCommand": "yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
   "rewrites": [
     {

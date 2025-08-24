@@ -4,7 +4,8 @@
     "YARN_IGNORE_ENGINES": "true"
   },
   "installCommand": "yarn install --ignore-engines",
-  "buildCommand": "yarn db:generate && yarn build",
+  "buildCommand": "yarn build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
