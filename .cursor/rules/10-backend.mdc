@@ -15,7 +15,7 @@ See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standa
 4. Services: Use Prisma client from shared singleton. Handle transactions explicitly when needed.
 5. Validation: Zod for request bodies, params, queries. Reject early on failure.
 6. Auth: JWT access + refresh. Use `auth` middleware for protected endpoints.
-7. CORS: Use `FRONTEND_URL` env; default `http://localhost:3002` in dev.
+7. CORS: Use `FRONTEND_URL` env; default `http://localhost:3000` in dev.
 8. Prisma: After modifying schema run migrations then `yarn db:generate` (includes TypedSQL). Keep raw SQL in `prisma/sql` (one statement per file).
 9. TypedSQL: Import from `@prisma/client/sql`; execute with `$queryRawTyped`. Add a comment referencing the originating `.sql` file.
 10. pgvector: Only run similarity queries if `USE_PGVECTOR=true`. Ensure extension exists before deploying usage.
