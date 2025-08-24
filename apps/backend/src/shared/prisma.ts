@@ -1,23 +1,36 @@
 import { PrismaClient } from "@prisma/client";
 
 const isDev = process.env.NODE_ENV !== "production";
-const prisma = new PrismaClient({
-  log: isDev
-    ? [
-        { emit: "event", level: "query" },
-        { emit: "event", level: "error" },
-        { emit: "event", level: "info" },
-        { emit: "event", level: "warn" },
-      ]
-    : [
-        { emit: "event", level: "error" },
-        { emit: "event", level: "warn" },
-      ],
-});
 
-// TODO: type the event payload properly when enabling query logging in prod
+// Use a global cached instance to avoid exhausting connections in serverless
+// Enrich global type for TypeScript
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
+
+const prismaClient =
+  global.prisma ||
+  new PrismaClient({
+    log: isDev
+      ? [
+          { emit: "event", level: "query" },
+          { emit: "event", level: "error" },
+          { emit: "event", level: "info" },
+          { emit: "event", level: "warn" },
+        ]
+      : [
+          { emit: "event", level: "error" },
+          { emit: "event", level: "warn" },
+        ],
+  });
+
+if (isDev) global.prisma = prismaClient;
+
+// Optional verbose query log only in dev
 if (isDev) {
-  prisma.$on("query", (e: any) => {
+  // @ts-expect-error: Prisma Client extension type issue
+  prismaClient.$on("query", (e: any) => {
     console.log("-------------------------------------------");
     console.log("Query: " + e.query);
     console.log("-------------------------------------------");
@@ -28,4 +41,4 @@ if (isDev) {
   });
 }
 
-export default prisma;
+export default prismaClient;
