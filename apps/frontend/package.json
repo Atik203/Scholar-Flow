@@ -2,6 +2,7 @@
   "name": "@scholar-flow/frontend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "next dev --turbopack -p 3000",
     "build": "next build",
@@ -36,6 +37,7 @@
     "react-hook-form": "^7.48.2",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
+    "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.2.0",
