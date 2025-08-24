@@ -1,10 +1,15 @@
 {
   "version": 2,
   "env": {
-    "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    "YARN_IGNORE_ENGINES": "true"
   },
-  "installCommand": "corepack enable && corepack prepare yarn@4.9.2 --activate && yarn install --immutable",
+  "installCommand": "yarn install --ignore-engines",
   "buildCommand": "yarn db:generate && yarn build",
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",

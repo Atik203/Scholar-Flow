@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "name": "scholar-flow-backend",
+  "installCommand": "yarn install --ignore-engines",
+  "buildCommand": "yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
+  "functions": {
+    "apps/backend/api/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/apps/backend/api/index.js"
+    }
+  ]
+}
