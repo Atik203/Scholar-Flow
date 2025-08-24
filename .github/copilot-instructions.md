@@ -166,13 +166,13 @@ Testing checklist before enabling in prod:
 ### Environment Setup
 
 - **Backend**: Port 5000, uses `apps/backend/.env`
-- **Frontend**: Port 3002 (per script), uses `apps/frontend/.env.local`
+- **Frontend**: Port 3000 (per script), uses `apps/frontend/.env.local`
 - **Database**: PostgreSQL with pgvector extension (future)
 
 Environment discipline:
 
 - Before changing behavior, check both env files for active config: `apps/backend/.env` and `apps/frontend/.env.local`.
-- Backend config keys load via `apps/backend/src/config/index.ts`. Respect `FRONTEND_URL` (use `http://localhost:3002` in dev) for CORS.
+- Backend config keys load via `apps/backend/src/config/index.ts`. Respect `FRONTEND_URL` (use `http://localhost:3000` in dev) for CORS.
 - Never commit secrets; propose placeholders and document required variables when adding features.
 
 ## Current Project Status
@@ -362,7 +362,7 @@ export const apiSlice = createApi({
 - **Database Connection**: Check `DATABASE_URL` in env files
 - **TypeScript Errors**: Run `yarn type-check` to see all errors
 - **Build Failures**: Check dependencies and TypeScript configuration
-- **Port Conflicts**: Ensure ports 3002 (frontend) and 5000 (backend) are available
+- **Port Conflicts**: Ensure ports 3000 (frontend) and 5000 (backend) are available
 
 ### Getting Help
 

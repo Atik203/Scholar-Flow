@@ -17,7 +17,7 @@ See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standa
 6. Performance: Use `next/image`, `next/font`; stream large UI with Suspense; avoid unnecessary client bundles.
 7. SEO: Use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
 8. Error States: Provide loading / empty / error UI for each data fetch.
-9. Ports: App runs on 3002. Update backend CORS if changed.
+9. Ports: App runs on 3000. Update backend CORS if changed.
 10. Accessibility: Maintain focus states, labels, keyboard navigation.
 11. No Secrets: Never expose private keys or tokens in client code.
 12. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
