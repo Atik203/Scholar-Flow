@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
+import { UserMenu } from "./UserMenu";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -91,9 +92,7 @@ export const Navbar: React.FC = () => {
             <span className="sr-only">Toggle theme</span>
           </Button>
           {session ? (
-            <Button asChild size="sm">
-              <Link href="/dashboard">Dashboard →</Link>
-            </Button>
+            <UserMenu />
           ) : (
             <Button
               asChild
