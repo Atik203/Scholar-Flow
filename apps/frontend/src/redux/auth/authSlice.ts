@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { TUser } from "@scholar-flow/types";
+import type { TUser } from "../../types/user";
 
 export interface AuthState {
   user: TUser | null;

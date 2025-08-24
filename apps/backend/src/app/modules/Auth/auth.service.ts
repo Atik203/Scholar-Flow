@@ -1,11 +1,14 @@
-import {
-  createSession,
-  createUser,
-  deleteSession,
-  getSessionByToken,
-  getUserByEmail,
-  getUserById,
-} from "@prisma/client/sql";
+// Temporarily commenting out TypedSQL imports due to build issues
+// import {
+//   createSession,
+//   deleteSession,
+//   getSessionByToken,
+// } from "@prisma/client/sql";
+// import {
+//   createUser,
+//   getUserByEmail,
+//   getUserById,
+// } from "@prisma/client/sql";
 import { v4 as uuidv4 } from "uuid";
 import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
@@ -26,15 +29,21 @@ class AuthService {
       const userId = userData.id || uuidv4();
       const role = userData.role || USER_ROLES.RESEARCHER;
 
-      const [user] = await prisma.$queryRawTyped(
-        createUser(
-          userId,
-          userData.email,
-          userData.name ?? "",
-          userData.image ?? "",
-          role
-        )
-      );
+      const user = await prisma.user.upsert({
+        where: { email: userData.email },
+        update: {
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+        },
+        create: {
+          id: userId,
+          email: userData.email,
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+        },
+      });
 
       return user;
     } catch (error) {
@@ -44,12 +53,14 @@ class AuthService {
   }
 
   /**
-   * Get user by email using raw SQL
+   * Get user by email using Prisma
    */
   async getUserByEmail(email: string) {
     try {
-      const users = await prisma.$queryRawTyped(getUserByEmail(email));
-      return users[0] || null;
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+      return user;
     } catch (error) {
       console.error("Error getting user by email:", error);
       throw new ApiError(500, "Failed to get user by email");
@@ -57,12 +68,14 @@ class AuthService {
   }
 
   /**
-   * Get user by ID using raw SQL
+   * Get user by ID using Prisma
    */
   async getUserById(id: string) {
     try {
-      const users = await prisma.$queryRawTyped(getUserById(id));
-      return users[0] || null;
+      const user = await prisma.user.findUnique({
+        where: { id },
+      });
+      return user;
     } catch (error) {
       console.error("Error getting user by ID:", error);
       throw new ApiError(500, "Failed to get user by ID");
@@ -115,17 +128,17 @@ class AuthService {
   }
 
   /**
-   * Create session using raw SQL
+   * Create session using Prisma
    */
   async createSession(userId: string, sessionData: ISessionData) {
     try {
-      const [session] = await prisma.$queryRawTyped(
-        createSession(
-          sessionData.sessionToken,
-          userId,
-          sessionData.expires.toISOString()
-        )
-      );
+      const session = await prisma.session.create({
+        data: {
+          sessionToken: sessionData.sessionToken,
+          userId: userId,
+          expires: sessionData.expires,
+        },
+      });
 
       return session;
     } catch (error) {
@@ -135,14 +148,15 @@ class AuthService {
   }
 
   /**
-   * Get session by token using raw SQL
+   * Get session by token using Prisma
    */
   async getSessionByToken(sessionToken: string) {
     try {
-      const sessions = await prisma.$queryRawTyped(
-        getSessionByToken(sessionToken)
-      );
-      return sessions[0] || null;
+      const session = await prisma.session.findUnique({
+        where: { sessionToken },
+        include: { user: true },
+      });
+      return session;
     } catch (error) {
       console.error("Error getting session by token:", error);
       throw new ApiError(500, "Failed to get session");
@@ -150,11 +164,13 @@ class AuthService {
   }
 
   /**
-   * Delete session using raw SQL
+   * Delete session using Prisma
    */
   async deleteSession(sessionToken: string) {
     try {
-      await prisma.$queryRawTyped(deleteSession(sessionToken));
+      await prisma.session.delete({
+        where: { sessionToken },
+      });
       return true;
     } catch (error) {
       console.error("Error deleting session:", error);
