@@ -1,7 +1,3 @@
-// Prisma schema for Scholar-Flow (Postgres + pgvector)
-// - All ids are String UUIDs
-// - Every model includes createdAt, updatedAt, isDeleted
-
 generator client {
   provider        = "prisma-client-js"
   engineType      = "binary"

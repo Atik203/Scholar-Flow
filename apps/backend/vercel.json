@@ -1,7 +1,15 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "yarn build",
-  "installCommand": "yarn install --immutable",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . || echo 'changes'"
+  "env": {
+    "YARN_IGNORE_ENGINES": "true"
+  },
+  "installCommand": "cd ../.. && corepack enable && corepack yarn install --immutable",
+  "buildCommand": "cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/index.js"
+    }
+  ]
 }
