@@ -166,11 +166,11 @@ export default function AboutPage() {
                 ScholarFlow
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
-              We're on a mission to accelerate human knowledge by building
-              AI-powered tools that help researchers discover, understand, and
-              build upon existing knowledge faster than ever before.
-            </p>
+                          <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
+                We&apos;re on a mission to accelerate human knowledge by building
+                AI-powered tools that help researchers discover, understand, and
+                build upon existing knowledge faster than ever before.
+              </p>
           </motion.div>
         </div>
       </section>

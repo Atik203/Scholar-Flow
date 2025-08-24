@@ -144,7 +144,7 @@ export const Reviews: React.FC = () => {
 
                     {/* Review text */}
                     <blockquote className="text-foreground/90 leading-relaxed mb-8 text-base">
-                      "{review.text}"
+                      &ldquo;{review.text}&rdquo;
                     </blockquote>
 
                     {/* User info */}
