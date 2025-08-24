@@ -1,16 +1,10 @@
 {
   "version": 2,
-  "installCommand": "corepack enable && yarn install --immutable",
   "buildCommand": "yarn db:generate && yarn build",
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+      "source": "/(.*)",
+      "destination": "/api/index.js"
     }
   ]
 }
