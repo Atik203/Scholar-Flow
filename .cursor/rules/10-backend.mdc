@@ -22,7 +22,9 @@ See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standa
 11. Pagination: Use provided pagination helper; never return unbounded lists.
 12. Errors: Throw `ApiError(status, message)`; avoid returning partial successes silently.
 13. Logging: Avoid console noise. Use structured logs for important events.
-14. Testing: Add unit tests for non-trivial service logic; integration tests for new routes.
+14. Testing: Add unit tests for non-trivial service logic; integration tests for new routes. Critical features require comprehensive test coverage.
 15. Dependencies: Prefer standard libs and already-installed packages. Justify new deps in PR.
 16. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
 17. Do not use npm; use Yarn v4 workspaces.
+18. **OAuth Authentication**: Use standard Prisma upsert for account management. Document any deviation with clear warnings about constraint errors.
+19. **Database Operations**: Prefer Prisma Client over raw SQL. Use TypedSQL only for complex queries not expressible in Prisma Client.
