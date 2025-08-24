@@ -13,6 +13,7 @@ out/
 
 # Production
 build/
+dist/
 
 
 # Misc
