@@ -3,6 +3,5 @@
   "installCommand": "corepack enable && corepack yarn install --immutable",
   "buildCommand": "yarn db:generate && yarn build",
   "builds": [{ "src": "dist/server.js", "use": "@vercel/node" }],
-  "routes": [{ "src": "/(.*)", "dest": "/dist/server.js" }],
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "routes": [{ "src": "/(.*)", "dest": "/dist/server.js" }]
 }
