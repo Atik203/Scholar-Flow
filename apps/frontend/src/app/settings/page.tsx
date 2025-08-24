@@ -1,0 +1,506 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Bell,
+  Database,
+  Eye,
+  Globe,
+  Lock,
+  Monitor,
+  Moon,
+  Palette,
+  Settings as SettingsIcon,
+  Shield,
+  Sun,
+  Trash2,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
+import { redirect } from "next/navigation";
+import { useState } from "react";
+
+export default function SettingsPage() {
+  const { data: session, status } = useSession();
+  const { theme, setTheme } = useTheme();
+  const [notifications, setNotifications] = useState({
+    email: true,
+    push: false,
+    newPapers: true,
+    collaborations: true,
+    comments: false,
+  });
+
+  const [privacy, setPrivacy] = useState({
+    profileVisible: true,
+    researchVisible: true,
+    collectionsPublic: false,
+  });
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const handleNotificationChange = (key: string, value: boolean) => {
+    setNotifications((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handlePrivacyChange = (key: string, value: boolean) => {
+    setPrivacy((prev) => ({ ...prev, [key]: value }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <SettingsIcon className="h-8 w-8" />
+            Settings
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Manage your account preferences and application settings
+          </p>
+        </div>
+
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 dark:bg-gray-800">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            <TabsTrigger value="privacy">Privacy</TabsTrigger>
+            <TabsTrigger value="appearance">Appearance</TabsTrigger>
+            <TabsTrigger value="account">Account</TabsTrigger>
+          </TabsList>
+
+          {/* General Settings */}
+          <TabsContent value="general">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="dark:text-white">
+                  General Preferences
+                </CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Configure your general application preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="language">Language</Label>
+                  <Input
+                    id="language"
+                    value="English (US)"
+                    readOnly
+                    className="bg-gray-50 dark:bg-gray-900"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    More languages coming soon
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="timezone">Timezone</Label>
+                  <Input
+                    id="timezone"
+                    value="UTC"
+                    readOnly
+                    className="bg-gray-50 dark:bg-gray-900"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Auto-save drafts</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Automatically save your work as you type
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Smart suggestions</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Get AI-powered research suggestions
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Notifications */}
+          <TabsContent value="notifications">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Choose how you want to be notified about activity
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Email notifications</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Receive notifications via email
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifications.email}
+                    onCheckedChange={(value: boolean) =>
+                      handleNotificationChange("email", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Push notifications</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Get notified in your browser
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifications.push}
+                    onCheckedChange={(value: boolean) =>
+                      handleNotificationChange("push", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>New papers in collections</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      When papers are added to your collections
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifications.newPapers}
+                    onCheckedChange={(value: boolean) =>
+                      handleNotificationChange("newPapers", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Collaboration invites</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      When someone invites you to collaborate
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifications.collaborations}
+                    onCheckedChange={(value: boolean) =>
+                      handleNotificationChange("collaborations", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Comments and mentions</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      When someone comments or mentions you
+                    </p>
+                  </div>
+                  <Switch
+                    checked={notifications.comments}
+                    onCheckedChange={(value: boolean) =>
+                      handleNotificationChange("comments", value)
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Privacy */}
+          <TabsContent value="privacy">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Shield className="h-5 w-5" />
+                  Privacy & Security
+                </CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Control your privacy and security settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex items-center gap-2">
+                    <Eye className="h-4 w-4 text-gray-400" />
+                    <div>
+                      <Label>Public profile</Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Make your profile visible to other researchers
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={privacy.profileVisible}
+                    onCheckedChange={(value: boolean) =>
+                      handlePrivacyChange("profileVisible", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex items-center gap-2">
+                    <Database className="h-4 w-4 text-gray-400" />
+                    <div>
+                      <Label>Research visibility</Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Show your research interests publicly
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={privacy.researchVisible}
+                    onCheckedChange={(value: boolean) =>
+                      handlePrivacyChange("researchVisible", value)
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-gray-400" />
+                    <div>
+                      <Label>Public collections</Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Make your collections discoverable
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={privacy.collectionsPublic}
+                    onCheckedChange={(value: boolean) =>
+                      handlePrivacyChange("collectionsPublic", value)
+                    }
+                  />
+                </div>
+
+                <div className="border-t pt-6 dark:border-gray-700">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium dark:text-white">
+                      Data & Security
+                    </h3>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="h-4 w-4 text-gray-400" />
+                        <div>
+                          <Label>Two-factor authentication</Label>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Add an extra layer of security
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">Coming Soon</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Database className="h-4 w-4 text-gray-400" />
+                        <div>
+                          <Label>Download your data</Label>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Export all your research data
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Request Export
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Appearance */}
+          <TabsContent value="appearance">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 dark:text-white">
+                  <Palette className="h-5 w-5" />
+                  Appearance
+                </CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Customize how ScholarFlow looks and feels
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label>Theme</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Button
+                      variant={theme === "light" ? "default" : "outline"}
+                      onClick={() => setTheme("light")}
+                      className="flex items-center gap-2 h-auto p-4"
+                    >
+                      <Sun className="h-4 w-4" />
+                      <span>Light</span>
+                    </Button>
+                    <Button
+                      variant={theme === "dark" ? "default" : "outline"}
+                      onClick={() => setTheme("dark")}
+                      className="flex items-center gap-2 h-auto p-4"
+                    >
+                      <Moon className="h-4 w-4" />
+                      <span>Dark</span>
+                    </Button>
+                    <Button
+                      variant={theme === "system" ? "default" : "outline"}
+                      onClick={() => setTheme("system")}
+                      className="flex items-center gap-2 h-auto p-4"
+                    >
+                      <Monitor className="h-4 w-4" />
+                      <span>System</span>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Font size</Label>
+                  <Input
+                    value="Medium"
+                    readOnly
+                    className="bg-gray-50 dark:bg-gray-900"
+                  />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Font size customization coming soon
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Compact mode</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Show more content in less space
+                    </p>
+                  </div>
+                  <Switch />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Animations</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Enable smooth transitions and animations
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Account */}
+          <TabsContent value="account">
+            <div className="space-y-6">
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="dark:text-white">
+                    Account Information
+                  </CardTitle>
+                  <CardDescription className="dark:text-gray-400">
+                    Your account details and subscription information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Email
+                      </Label>
+                      <p className="text-gray-900 dark:text-white">
+                        {session.user.email}
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                        Plan
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">Free</Badge>
+                        <Button variant="link" size="sm" className="h-auto p-0">
+                          Upgrade
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Account ID
+                    </Label>
+                    <p className="text-gray-900 dark:text-white font-mono text-sm">
+                      {session.user.id}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-red-200 dark:border-red-800 dark:bg-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
+                    <Trash2 className="h-5 w-5" />
+                    Danger Zone
+                  </CardTitle>
+                  <CardDescription className="dark:text-gray-400">
+                    Irreversible and destructive actions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-red-600 dark:text-red-400">
+                        Delete Account
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Permanently delete your account and all associated data
+                      </p>
+                    </div>
+                    <Button variant="destructive" size="sm">
+                      Delete Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

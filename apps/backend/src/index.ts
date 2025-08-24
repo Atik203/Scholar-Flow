@@ -4,9 +4,9 @@ import express, { RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
-import globalErrorHandler from "./app/middlewares/globalErrorHandler";
+import config from "./app/config";
+import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import router from "./app/routes";
-import config from "./config";
 
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
