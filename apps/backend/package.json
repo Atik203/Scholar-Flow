@@ -79,5 +79,8 @@
     "scholar-flow"
   ],
   "author": "Scholar-Flow Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }
