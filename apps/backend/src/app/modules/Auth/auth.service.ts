@@ -70,12 +70,29 @@ class AuthService {
   }
 
   /**
-   * Create account linking for OAuth provider using standard Prisma client
+   * Create account linking for OAuth provider using standard Prisma upsert
+   * NOTE: DO NOT change this to raw query - it causes database constraint errors
+   * The upsert operation handles both creating new accounts and updating existing ones
    */
   async createAccount(userId: string, accountData: IAccountData) {
     try {
-      const account = await prisma.account.create({
-        data: {
+      const account = await prisma.account.upsert({
+        where: {
+          provider_providerAccountId: {
+            provider: accountData.provider,
+            providerAccountId: accountData.providerAccountId,
+          },
+        },
+        update: {
+          refresh_token: accountData.refresh_token,
+          access_token: accountData.access_token,
+          expires_at: accountData.expires_at,
+          token_type: accountData.token_type,
+          scope: accountData.scope,
+          id_token: accountData.id_token,
+          session_state: accountData.session_state,
+        },
+        create: {
           userId,
           type: accountData.type,
           provider: accountData.provider,

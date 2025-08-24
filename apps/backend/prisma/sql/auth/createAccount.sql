@@ -1,18 +1,15 @@
--- @param {String} $1:id
--- @param {String} $2:userId
--- @param {String} $3:type
--- @param {String} $4:provider
--- @param {String} $5:providerAccountId
--- @param {String} $6:refreshToken
--- @param {String} $7:accessToken
--- @param {Int} $8:expiresAt
--- @param {String} $9:tokenType
--- @param {String} $10:scope
--- @param {String} $11:idToken
--- @param {String} $12:sessionState
+-- @param {String} $1:userId
+-- @param {String} $2:type
+-- @param {String} $3:provider
+-- @param {String} $4:providerAccountId
+-- @param {String} $5:refreshToken
+-- @param {String} $6:accessToken
+-- @param {Int} $7:expiresAt
+-- @param {String} $8:tokenType
+-- @param {String} $9:scope
+-- @param {String} $10:idToken
 
 INSERT INTO "Account" (
-  "id",
   "userId", 
   "type", 
   "provider", 
@@ -27,7 +24,7 @@ INSERT INTO "Account" (
   "createdAt", 
   "updatedAt"
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NULL, NOW(), NOW())
 ON CONFLICT ("provider", "providerAccountId") DO UPDATE SET
   "refresh_token" = EXCLUDED."refresh_token",
   "access_token" = EXCLUDED."access_token",
