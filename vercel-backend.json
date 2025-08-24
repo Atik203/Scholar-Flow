@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "installCommand": "bash scripts/vercel-prebuild.sh",
+  "installCommand": "yarn install --ignore-engines",
   "buildCommand": "yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
+  "outputDirectory": "apps/backend/dist",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/apps/backend/api/index.js"
     }
-  ]
+  ],
+  "env": {
+    "YARN_IGNORE_ENGINES": "true"
+  }
 }

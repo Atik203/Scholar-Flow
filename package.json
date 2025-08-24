@@ -4,7 +4,7 @@
   "description": "AI-Powered Research Paper Collaboration Hub",
   "private": true,
   "workspaces": [
-    "apps/*",
+    "apps/backend",
     "packages/*"
   ],
   "scripts": {
