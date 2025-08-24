@@ -1,4 +1,4 @@
-import prisma from "../../../shared/prisma";
+import prisma from "../../shared/prisma";
 // NOTE: pgvector column is Unsupported("vector") in Prisma schema.
 // Use parameterized raw queries and cast to ::vector to avoid SQL injection and ensure type correctness.
 
