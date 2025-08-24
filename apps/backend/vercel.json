@@ -3,9 +3,14 @@
   "env": {
     "YARN_IGNORE_ENGINES": "true"
   },
-  "installCommand": "yarn install --ignore-engines",
-  "buildCommand": "yarn db:generate && yarn build",
+  "installCommand": "cd ../.. && corepack enable && corepack yarn install --immutable",
+  "buildCommand": "cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
   "outputDirectory": "dist",
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
