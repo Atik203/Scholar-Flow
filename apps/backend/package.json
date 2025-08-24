@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
-    "@scholar-flow/types": "workspace:*",
     "aws-sdk": "^2.1524.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
