@@ -15,6 +15,7 @@ out/
 build/
 dist/
 
+
 # Misc
 .DS_Store
 *.pem
@@ -30,6 +31,7 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+apps/backend/.env.production
 
 # Vercel
 .vercel

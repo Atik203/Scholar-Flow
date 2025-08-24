@@ -1,21 +1,21 @@
-import express from 'express';
-import { AuthRequest } from '../middleware/auth';
+import express, { Router } from "express";
+import { AuthRequest } from "../middleware/auth";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // POST /workspaces
-router.post('/', async (req: AuthRequest, res) => {
-  res.status(501).json({ 
-    error: 'Workspaces not yet implemented',
-    message: 'This endpoint will create new workspaces'
+router.post("/", async (req: AuthRequest, res) => {
+  res.status(501).json({
+    error: "Workspaces not yet implemented",
+    message: "This endpoint will create new workspaces",
   });
 });
 
 // GET /workspaces
-router.get('/', async (req: AuthRequest, res) => {
-  res.status(501).json({ 
-    error: 'Workspaces not yet implemented',
-    message: 'This endpoint will return user workspaces'
+router.get("/", async (req: AuthRequest, res) => {
+  res.status(501).json({
+    error: "Workspaces not yet implemented",
+    message: "This endpoint will return user workspaces",
   });
 });
 

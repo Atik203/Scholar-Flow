@@ -1,0 +1,14 @@
+# Vercel ignore file for backend
+# Upload source files for compilation, exclude unnecessary files
+
+*.md
+.env.example
+.turbo/
+*.log
+.git/
+.vscode/
+*.test.*
+*.spec.*
+coverage/
+jest.config.*
+.eslintrc.*
