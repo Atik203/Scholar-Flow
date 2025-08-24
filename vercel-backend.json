@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "installCommand": "corepack enable && corepack yarn install --immutable",
+  "buildCommand": "yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
+  "outputDirectory": "apps/backend/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/apps/backend/api/index.js"
+    }
+  ],
+  "env": {
+    "YARN_IGNORE_ENGINES": "true"
+  }
+}
