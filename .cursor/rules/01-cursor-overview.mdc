@@ -5,13 +5,18 @@ description: High-level project overview and coding standards for Scholar-Flow (
 
 # Scholar-Flow: Cursor AI Project Overview (Cursor)
 
-This project is a monorepo for an AI-powered research paper collaboration hub, with a Next.js frontend and Express.js backend. All contributors and AI agents must:
+This project is a monorepo for an AI-powered research paper collaboration hub, with a Next.js frontend and Express.js backend. 
+
+**Current Status**: Phase 1 MVP in progress with **OAuth authentication system completed** ✅
+
+All contributors and AI agents must:
 
 - Use Yarn Berry (v4) as the package manager (never npm)
 - Strictly type all code (TypeScript, no `any` unless unavoidable)
 - Never commit secrets; document new environment variables
 - Follow the current phase in [Roadmap.md](mdc:../../Roadmap.md) and keep PRs small and focused
 - Update documentation after notable changes
+- **Authentication**: Use standard Prisma upsert patterns for OAuth; avoid raw queries
 
 ## Technology Stack
 
@@ -21,6 +26,7 @@ This project is a monorepo for an AI-powered research paper collaboration hub, w
 ## Coding Guidelines
 
 - See [10-backend.mdc](mdc:10-backend.mdc) for backend architecture, patterns, and constraints
+- See [15-authentication.mdc](mdc:15-authentication.mdc) for authentication patterns and security best practices
 - See [20-frontend.mdc](mdc:20-frontend.mdc) for frontend (Next.js) usage standards and constraints
 - See [00-core.mdc](mdc:00-core.mdc) for core repository rules
 - See [30-env-and-config.mdc](mdc:30-env-and-config.mdc) for environment and config discipline
