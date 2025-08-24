@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate --sql",
     "lint": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
     "test": "jest",
@@ -77,5 +79,8 @@
     "scholar-flow"
   ],
   "author": "Scholar-Flow Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }
