@@ -4,9 +4,10 @@ import express, { RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
-import globalErrorHandler from "./app/middlewares/globalErrorHandler";
+import config from "./app/config";
+import globalErrorHandler from "./app/middleware/globalErrorHandler";
+import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
-import config from "./config";
 
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
@@ -59,16 +60,9 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
 app.get("/", rootHandler as unknown as RequestHandler);
 
 // Health check endpoint
-const healthHandler: import("express").RequestHandler = (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Scholar-Flow API is running!",
-    timestamp: new Date().toISOString(),
-  });
-};
-app.get("/health", healthHandler as unknown as RequestHandler);
+app.get("/health", healthCheck as unknown as RequestHandler);
 // Support health check under /api as well (useful when deployed behind a rewrite to /api/$1)
-app.get("/api/health", healthHandler as unknown as RequestHandler);
+app.get("/api/health", healthCheck as unknown as RequestHandler);
 
 // API routes
 app.use("/api", router);
@@ -77,15 +71,7 @@ app.use("/api", router);
 app.use(globalErrorHandler as unknown as RequestHandler);
 
 // 404 handler
-app.use("*", ((
-  req: import("express").Request,
-  res: import("express").Response
-) => {
-  res.status(404).json({
-    success: false,
-    message: "API endpoint not found",
-  });
-}) as unknown as RequestHandler);
+app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {

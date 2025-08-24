@@ -8,10 +8,12 @@ alwaysApply: false
 1. Build: `yarn build` must succeed before merging.
 2. Types: `yarn type-check` must be clean (no errors).
 3. Lint: `yarn lint` with zero errors (warnings acceptable if justified).
-4. Tests: Add/adjust tests for new logic; no unrelated test breakage.
+4. Tests: Add/adjust tests for new logic; no unrelated test breakage. Critical features require comprehensive test coverage.
 5. Security: No secrets committed; env keys documented.
 6. Performance: No obvious N+1 or unbounded queries introduced.
 7. Accessibility (frontend): New UI components must have labels/roles as appropriate.
 8. Backwards Compatibility: Migrations are additive; note any breaking changes explicitly.
 9. Docs: Update README / SCHEMA.md / ENVIRONMENT docs for changed public behavior.
 10. Review: Keep PR scope tight; include summary + checklist mapping to these gates.
+11. **Authentication**: All authentication flows must be tested. OAuth implementations must use proper upsert patterns.
+12. **Database**: Prefer Prisma Client operations. Document any raw SQL usage with clear warnings about potential issues.

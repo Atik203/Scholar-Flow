@@ -1,76 +1,28 @@
-import { paginationHelper } from "../../../helpers/paginationHelper";
-import prisma from "../../../shared/prisma";
+import QueryBuilder from "../../builders/QueryBuilder";
+import prisma from "../../shared/prisma";
 // TypedSQL usage is optional; fallback to Prisma count in Phase 1
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 
 const getAllFromDB = async (params: any, options: IPaginationOptions) => {
-  const { page, limit, skip } = paginationHelper.calculatePagination(options);
-  const { searchTerm, ...filterData } = params;
+  // Combine params and options for QueryBuilder
+  const query = { ...params, ...options };
 
-  const andConditions: any[] = [];
+  // Define searchable fields for users
+  const searchableFields = ["email", "role"];
 
-  if (searchTerm) {
-    andConditions.push({
-      OR: [
-        {
-          name: {
-            contains: searchTerm,
-            mode: "insensitive",
-          },
-        },
-        {
-          email: {
-            contains: searchTerm,
-            mode: "insensitive",
-          },
-        },
-      ],
-    });
-  }
+  // Create QueryBuilder instance
+  const queryBuilder = QueryBuilder.create("user", query)
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields(["id", "email", "role", "createdAt", "updatedAt"]);
 
-  if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
-    });
-  }
+  // Execute query with metadata
+  const result = await queryBuilder.executeWithMeta(prisma.user);
 
-  const whereConditions =
-    andConditions.length > 0 ? { AND: andConditions } : {};
-
-  // For now, keep dynamic filtering using Prisma Client (TypedSQL current queries are static examples)
-  // TODO: Extend generated SQL to accept search/filter args when stabilizing filter set.
-  const result = await prisma.user.findMany({
-    where: whereConditions,
-    skip,
-    take: limit,
-    orderBy:
-      options.sortBy && options.sortOrder
-        ? { [options.sortBy]: options.sortOrder }
-        : { createdAt: "desc" },
-    select: {
-      id: true,
-      email: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-
-  const total: number = await prisma.user.count({ where: whereConditions });
-
-  return {
-    meta: {
-      total,
-      page,
-      limit,
-    },
-    data: result,
-  };
+  return result;
 };
 
 const getMyProfile = async (user: IAuthUser) => {
