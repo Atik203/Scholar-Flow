@@ -5,11 +5,6 @@
   },
   "installCommand": "yarn install --ignore-engines",
   "buildCommand": "yarn db:generate && yarn build",
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",
