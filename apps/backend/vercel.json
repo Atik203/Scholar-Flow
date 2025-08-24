@@ -12,5 +12,6 @@
       "source": "/(.*)",
       "destination": "/api/$1"
     }
-  ]
+  ],
+  "outputDirectory": "dist"
 }
