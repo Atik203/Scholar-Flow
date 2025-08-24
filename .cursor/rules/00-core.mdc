@@ -16,3 +16,5 @@ alwaysApply: true
 9. Security: No plaintext secrets in code. Validate and sanitize all external input.
 10. Ports: Frontend 3000, Backend 5000.
 11. UI/UX Changes: Consult `docs/UI_DESIGN.md` first; keep README high-level and only document deltas in PR descriptions.
+12. Testing: Comprehensive tests for critical features (auth, payments, data integrity). Test coverage required for authentication flows.
+13. Authentication: Use standard Prisma upsert for OAuth; never revert to problematic raw queries without clear documentation.
