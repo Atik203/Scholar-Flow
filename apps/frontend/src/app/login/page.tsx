@@ -51,7 +51,7 @@ export default function LoginPage() {
       toast.success("Welcome back! Redirecting to dashboard...");
 
       // Redirect to dashboard would happen here
-    } catch (error) {
+    } catch {
       toast.error("Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
     try {
       await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch (error) {
+    } catch {
       toast.error(`Failed to sign in with ${provider}`);
       setIsLoading(false);
     }
@@ -248,7 +248,7 @@ export default function LoginPage() {
             {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
                   className="text-primary hover:text-primary/80 transition-colors font-medium"
