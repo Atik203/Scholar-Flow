@@ -8,6 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate --sql",
     "lint": "eslint src/**/*.ts",
     "type-check": "tsc --noEmit",
     "test": "jest",

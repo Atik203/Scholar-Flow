@@ -118,3 +118,8 @@ if (process.env.VERCEL !== "1") {
 }
 
 export default app;
+
+// Also expose CommonJS export for Vercel @vercel/node when using dist/server.js directly
+// Note: TypeScript will emit both default and CJS exports under commonjs module target
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(module as any).exports = app;
