@@ -5,8 +5,7 @@
   "private": true,
   "workspaces": [
     "apps/backend",
-    "apps/frontend",
-    "packages/*"
+    "apps/frontend"
   ],
   "scripts": {
     "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev",
