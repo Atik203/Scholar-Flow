@@ -24,18 +24,10 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    if (!apiBaseUrl) return [];
-
-    // Extract backend URL from API base URL (remove /api suffix)
-    const backend = apiBaseUrl.replace(/\/api$/, "");
-
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${backend}/api/:path*`,
-      },
-    ];
+    // Don't rewrite any API routes - handle them directly
+    // NextAuth routes (/api/auth/*) stay on frontend
+    // Custom API routes will be handled by direct fetch calls to backend
+    return [];
   },
 };
 
