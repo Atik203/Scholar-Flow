@@ -1,7 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useAuthRoute } from "@/hooks/useAuthGuard";
-import { getCallbackUrl, handleAuthRedirect } from "@/lib/auth/redirects";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -19,7 +17,6 @@ import {
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,8 +33,8 @@ const registerSchema = z
       .string()
       .min(8, "Password must be at least 8 characters")
       .regex(
-        /^(?=.*[a-z])(?=.*\d)/,
-        "Password must contain at least one lowercase letter and one number"
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Password must contain at least one uppercase letter, one lowercase letter, and one number"
       ),
     confirmPassword: z.string(),
     acceptTerms: z
@@ -68,11 +65,6 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  // Auth guard - redirects to dashboard if already authenticated
-  const { isLoading: authLoading } = useAuthRoute();
 
   const {
     register,
@@ -83,74 +75,21 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  // Show loading state while checking authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   const password = watch("password");
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
 
     try {
-      // Call backend registration API
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          institution: data.institution,
-          fieldOfStudy: data.fieldOfStudy,
-          password: data.password,
-          role: "RESEARCHER", // Default role
-        }),
-      });
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Registration failed");
-      }
-
+      console.log("Register data:", data);
       toast.success("Account created successfully! Welcome to ScholarFlow.");
 
-      // Auto sign in after successful registration
-      const callbackUrl = getCallbackUrl(searchParams);
-      const signInResult = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
-
-      if (signInResult?.ok) {
-        // Use smart redirect
-        const redirectUrl = handleAuthRedirect(true, searchParams);
-        router.push(redirectUrl);
-      } else {
-        // If auto sign-in fails, redirect to login page with callback
-        const loginUrl = new URL("/login", window.location.origin);
-        if (callbackUrl !== "/dashboard") {
-          loginUrl.searchParams.set("callbackUrl", callbackUrl);
-        }
-        router.push(loginUrl.toString());
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again."
-      );
+      // Redirect to dashboard would happen here
+    } catch {
+      toast.error("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -160,8 +99,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const callbackUrl = getCallbackUrl(searchParams);
-      await signIn(provider, { callbackUrl });
+      await signIn(provider, { callbackUrl: "/dashboard" });
     } catch {
       toast.error(`Failed to sign up with ${provider}`);
       setIsLoading(false);
