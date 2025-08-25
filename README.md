@@ -1,5 +1,9 @@
 # Scholar-Flow
 
+[![Phase](https://img.shields.io/badge/Phase-1%20MVP%20Development-blue)](./Roadmap.md)
+[![Auth Status](https://img.shields.io/badge/Authentication-✅%20Complete-green)](./docs/AUTHENTICATION_ROUTING.md)
+[![UI Status](https://img.shields.io/badge/UI%20Design-📋%20Documented-orange)](./docs/UI_DESIGN.md)
+
 ## AI-Powered Research Paper Collaboration Hub
 
 Smart ingestion, semantic search, structured collaboration, and citation intelligence for researchers & academic teams.
@@ -10,9 +14,9 @@ Smart ingestion, semantic search, structured collaboration, and citation intelli
 
 ## ✨ Key Capabilities (Phased Delivery)
 
-| Area            | Phase 1 (MVP)                | Phase 2                         | Phase 3                                    |
+| Area            | Phase 1 (MVP) ✅             | Phase 2                         | Phase 3                                    |
 | --------------- | ---------------------------- | ------------------------------- | ------------------------------------------ |
-| Auth & Profiles | Email / OAuth, basic profile | Password reset, roles expansion | Org SSO (future)                           |
+| Auth & Profiles | ✅ Email/OAuth, JWT, Profile | Password reset, roles expansion | Org SSO (future)                           |
 | Papers          | Upload, metadata store       | OCR & full AI summaries         | Versioning & multi-format ingest           |
 | Collections     | Create & list                | Sharing, activity feed          | Advanced permissions & workspace analytics |
 | Semantic Search | Flagged (pgvector infra)     | Vector search & recommendations | Multi-doc chat assistant                   |
@@ -20,6 +24,8 @@ Smart ingestion, semantic search, structured collaboration, and citation intelli
 | Citation Graph  | Deferred                     | Interactive graph               | Advanced metrics & clustering              |
 | Billing         | Deferred                     | Plans integration (Stripe/SSL)  | Usage-based quotas                         |
 | Admin           | Deferred                     | Basic user mgmt                 | Platform analytics & moderation            |
+
+**✅ Recent Major Completion:** OAuth Authentication System with Google/GitHub, JWT management, and comprehensive testing.
 
 Detailed per‑page UX & component plan lives in: **`docs/UI_DESIGN.md`** (kept out of this README to stay concise).
 
@@ -154,7 +160,17 @@ Security and cross-cutting
 
 ## 🖥️ UI / UX Documentation
 
-Full screen-by-screen structure, component taxonomy, accessibility checklist, and feature flag strategy: **`docs/UI_DESIGN.md`**.
+**Full UI Design Blueprint:** [`docs/UI_DESIGN.md`](./docs/UI_DESIGN.md)
+
+This document provides:
+
+- Complete screen-by-screen structure and component taxonomy
+- Phased UI delivery plan (Phase 1 → Phase 2 → Phase 3)
+- Feature flag strategy and accessibility checklist
+- Authentication UI patterns and state management
+- Component architecture mapping and routing plan
+
+**✅ Phase 1 Authentication UI:** Login, signup, and OAuth flows with comprehensive form validation, error handling, and responsive design.
 
 ## 8) Non-Functional Requirements
 
