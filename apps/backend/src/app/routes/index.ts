@@ -1,4 +1,8 @@
 import express from "express";
+import {
+  getApiStatus,
+  getAvailableRoutes,
+} from "../controllers/status.controller";
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { userRoutes } from "../modules/User/user.routes";
 
@@ -7,6 +11,10 @@ import { userRoutes } from "../modules/User/user.routes";
 // import papersRouter from "../../routes/papers"; // TODO: migrate into app/modules/Paper
 
 const router: import("express").Router = express.Router();
+
+// Status and documentation routes
+router.get("/status", getApiStatus);
+router.get("/routes", getAvailableRoutes);
 
 // Feature module based routes
 router.use("/user", userRoutes);
