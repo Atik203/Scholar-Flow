@@ -1,4 +1,4 @@
-name: Auto Merge atik → dev (and trigger dev → main flow)
+name: Auto Merge atik → dev (One-Way Flow Only)
 
 on:
   push:
@@ -26,52 +26,82 @@ jobs:
 
       - name: Ensure branches are up to date
         run: |
+          echo "🔄 Starting atik → dev merge (one-way flow)"
+          echo "📋 Branch flow: atik → dev → main"
+          echo "🚫 Note: dev should NEVER merge back into atik"
+          
           git fetch --all --prune
           git checkout dev
           git pull origin dev
           # Make sure we have the latest atik branch
           git fetch origin atik:refs/remotes/origin/atik
 
-      - name: Merge atik into dev
+      - name: Merge atik into dev (one-way only)
         id: merge
         run: |
           set -e
-          echo "Merging origin/atik into dev"
+          echo "Merging origin/atik into dev (ONE-WAY FLOW)"
+          echo "🚫 This workflow enforces: atik → dev (never dev → atik)"
+          
           if git merge --no-edit origin/atik; then
             echo "merge_result=success" >> $GITHUB_OUTPUT
+            echo "✅ Successfully merged atik into dev"
           else
             echo "merge_result=conflict" >> $GITHUB_OUTPUT
+            echo "❌ Merge conflicts detected"
           fi
 
       - name: Push dev after successful merge
         if: steps.merge.outputs.merge_result == 'success'
         run: |
           git push origin dev
-          echo "✅ atik → dev merge pushed. Existing workflow will create PR dev → main and auto-merge it."
+          echo "✅ atik → dev merge pushed successfully"
+          echo "📝 Next: dev → main PR will be auto-created and merged"
+          echo "🔄 Complete flow: atik → dev → main"
 
       - name: Handle merge conflicts by opening PR atik → dev
         if: steps.merge.outputs.merge_result == 'conflict'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
-          echo "⚠️ Merge conflicts detected. Creating or updating PR from atik to dev."
+          echo "⚠️ Merge conflicts detected when merging atik → dev"
+          echo "🚫 IMPORTANT: Do NOT merge dev back into atik to resolve conflicts"
+          echo "✅ Instead: Resolve conflicts in the atik branch or manually in the PR"
+          
           git merge --abort || true
 
           # Check if PR already exists
           pr_number=$(gh pr list --head atik --base dev --state open --json number -q '.[0].number' || echo "")
 
-          pr_body="Automated PR due to merge conflicts when merging 'atik' into 'dev'.\n\nPlease resolve conflicts and merge."
+          pr_body="## ⚠️ Automated PR: Merge Conflicts Need Resolution
+
+          **Branch Flow:** atik → dev (ONE-WAY ONLY)
+
+          ### 🚫 Important: Do NOT Reverse Merge
+          - Never merge dev into atik to resolve conflicts
+          - This would break the intended branch flow
+          - Always resolve conflicts in the source branch (atik) or in this PR
+
+          ### ✅ How to Resolve Conflicts:
+          1. **Option A:** Resolve conflicts in this PR directly
+          2. **Option B:** Checkout atik branch locally, resolve conflicts, push to atik
+          3. **Option C:** Create a separate branch from atik, resolve conflicts, merge back to atik
+
+          ### 📋 Expected Flow
+          atik → dev → main (one direction only)
+
+          **Automated PR due to merge conflicts when merging atik into dev.**"
 
           if [ -n "$pr_number" ]; then
-            gh pr comment "$pr_number" --body "🔁 Update: New commits pushed to 'atik'. Conflicts remain; please resolve."
-            echo "ℹ️ Updated existing PR #$pr_number"
+            gh pr comment "$pr_number" --body "🔁 **Update:** New commits pushed to atik. Conflicts still need resolution. **Remember:** Never merge dev → atik. Resolve conflicts in atik branch or this PR directly."
+            echo "ℹ️ Updated existing PR #$pr_number with conflict resolution guidance"
           else
             gh pr create \
-              --title "Auto PR: atik → dev (conflict resolution needed)" \
+              --title "🔄 Auto PR: atik → dev (resolve conflicts - ONE-WAY FLOW)" \
               --body "$pr_body" \
               --head atik \
               --base dev \
-              --label "auto-generated" \
+              --label "auto-generated,conflicts" \
               --assignee "Atik203"
-            echo "📌 Created new PR for conflict resolution."
+            echo "📌 Created new PR for conflict resolution with one-way flow guidance"
           fi

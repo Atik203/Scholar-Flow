@@ -48,7 +48,7 @@ Monorepo (Yarn Berry + Turbo) with:
 - `apps/backend`: Express + TypeScript + Prisma (Postgres + pgvector)
 - `packages/*`: Shared types / SEO utilities
 
-Workers (future) will process ingestion (OCR, embeddings) via a queue (BullMQ/Redis).
+Workers will process ingestion (OCR, embeddings) via a queue
 
 ## 🎯 Product Overview
 
