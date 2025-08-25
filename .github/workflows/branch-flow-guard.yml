@@ -1,0 +1,101 @@
+name: Branch Flow Guard (Prevent Reverse Merges)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - atik
+      - dev
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-branch-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for invalid branch flow
+        id: flow-check
+        run: |
+          echo "🔍 Checking branch flow for PR #${{ github.event.pull_request.number }}"
+          echo "Source: ${{ github.event.pull_request.head.ref }}"
+          echo "Target: ${{ github.event.pull_request.base.ref }}"
+          
+          # Check for invalid flows
+          invalid_flow=false
+          error_message=""
+          
+          # Prevent dev → atik (reverse flow)
+          if [ "${{ github.event.pull_request.head.ref }}" = "dev" ] && [ "${{ github.event.pull_request.base.ref }}" = "atik" ]; then
+            invalid_flow=true
+            error_message="🚫 Invalid flow: dev → atik. Expected flow: atik → dev → main"
+          fi
+          
+          # Prevent main → dev (reverse flow)
+          if [ "${{ github.event.pull_request.head.ref }}" = "main" ] && [ "${{ github.event.pull_request.base.ref }}" = "dev" ]; then
+            invalid_flow=true
+            error_message="🚫 Invalid flow: main → dev. Expected flow: atik → dev → main"
+          fi
+          
+          # Prevent main → atik (reverse flow)
+          if [ "${{ github.event.pull_request.head.ref }}" = "main" ] && [ "${{ github.event.pull_request.base.ref }}" = "atik" ]; then
+            invalid_flow=true
+            error_message="🚫 Invalid flow: main → atik. Expected flow: atik → dev → main"
+          fi
+          
+          if [ "$invalid_flow" = true ]; then
+            echo "$error_message"
+            echo "invalid_flow=true" >> $GITHUB_OUTPUT
+            echo "error_message=$error_message" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Valid branch flow detected"
+            echo "invalid_flow=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on invalid flow PR
+        if: steps.flow-check.outputs.invalid_flow == 'true'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "## ⚠️ Invalid Branch Flow Detected
+
+          ${{ steps.flow-check.outputs.error_message }}
+
+          ### 📋 Correct Branch Flow
+          The expected branch flow for this repository is:
+          \`\`\`
+          atik → dev → main
+          \`\`\`
+
+          ### ✅ Valid Flows
+          - \`atik → dev\` (automatic via workflow)
+          - \`dev → main\` (automatic via PR + auto-merge)
+          - Feature branches → \`atik\` (manual PRs)
+
+          ### 🚫 Invalid Flows (Blocked)
+          - \`dev → atik\` (reverse flow)
+          - \`main → dev\` (reverse flow) 
+          - \`main → atik\` (reverse flow)
+
+          ### 🔧 How to Fix
+          1. Close this PR
+          2. If you need to sync changes, merge in the correct direction
+          3. Create a new PR following the correct flow
+
+          **This PR will be automatically closed to prevent reverse merging.**"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Close invalid flow PR
+        if: steps.flow-check.outputs.invalid_flow == 'true'
+        run: |
+          gh pr close ${{ github.event.pull_request.number }} \
+            --comment "🚫 Automatically closing PR due to invalid branch flow. Please follow the correct flow: atik → dev → main"
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Fail workflow for invalid flow
+        if: steps.flow-check.outputs.invalid_flow == 'true'
+        run: |
+          echo "❌ Workflow failed due to invalid branch flow"
+          exit 1

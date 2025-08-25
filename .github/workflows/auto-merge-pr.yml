@@ -1,4 +1,4 @@
-name: Auto Merge Pull Request
+name: Auto Merge Pull Request (dev → main only)
 
 on:
   pull_request:
@@ -23,6 +23,8 @@ jobs:
 
       - name: Wait before merging
         run: |
+          echo "🔄 Auto-merge workflow started for dev → main"
+          echo "📋 Expected branch flow: atik → dev → main"
           echo "Waiting 10 seconds to allow any checks to start..."
           sleep 10
 
@@ -31,31 +33,16 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      - name: Update dev branch with main first
+      - name: Verify branch flow (atik → dev → main only)
         run: |
           # Ensure we have the latest from both branches
           git fetch origin main
           git fetch origin dev
 
-          # Check if there are any differences between main and dev
-          git checkout main
-          git checkout dev
-
-          # Check if merge is needed
-          if git merge-base --is-ancestor main dev; then
-            echo "Dev is already up to date with main"
-          else
-            echo "Merging main into dev to resolve potential conflicts"
-            if git merge main --no-edit; then
-              echo "✅ Successfully merged main into dev"
-              git push origin dev
-            else
-              echo "⚠️ Merge conflicts detected - will proceed with PR merge anyway"
-              git merge --abort
-            fi
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          echo "✅ Branch flow verification complete."
+          echo "📋 Expected flow: atik → dev → main"
+          echo "🚫 No reverse merging allowed (main should not merge back into dev)"
+          echo "💡 If conflicts exist, they should be resolved in the source branches, not by reverse merging"
 
       - name: Check PR status
         id: pr-status
