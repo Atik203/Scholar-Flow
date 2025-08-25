@@ -173,9 +173,7 @@ const handler = NextAuth({
         try {
           // Use server-side API URL for backend calls
           const apiUrl =
-            process.env.API_BASE_URL ||
-            process.env.NEXT_PUBLIC_API_BASE_URL ||
-            "http://localhost:5000/api";
+            process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
           const signinUrl = `${apiUrl}/auth/signin`;
 
           console.log("🚀 Attempting signin with URL:", signinUrl);
@@ -248,9 +246,7 @@ const handler = NextAuth({
 
         // Create user in our backend when they sign in with OAuth
         const apiUrl =
-          process.env.API_BASE_URL ||
-          process.env.NEXT_PUBLIC_API_BASE_URL ||
-          "http://localhost:5000/api";
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
         const response = await fetch(`${apiUrl}/auth/oauth/signin`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
