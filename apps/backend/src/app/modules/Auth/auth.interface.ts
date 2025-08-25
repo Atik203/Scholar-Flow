@@ -17,6 +17,18 @@ export interface IUserData {
   role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
 }
 
+export interface IRoleUpdateData {
+  role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+  reason?: string;
+}
+
+export interface IUserFilters {
+  role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface IAccountData {
   type: string;
   provider: string;

@@ -1,10 +1,17 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { usePublicRoute } from "@/hooks/useAuthGuard";
+import { getGetStartedUrl } from "@/lib/auth/redirects";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 export const CTA: React.FC = () => {
+  const { isAuthenticated, isLoading } = usePublicRoute();
+  const pathname = usePathname();
+
+  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname);
   return (
     <section
       id="pricing"
@@ -60,8 +67,15 @@ export const CTA: React.FC = () => {
               asChild
               size="lg"
               className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
+              disabled={isLoading}
             >
-              <Link href="/login">Get Started →</Link>
+              <Link href={getStartedUrl}>
+                {isLoading
+                  ? "Loading..."
+                  : isAuthenticated
+                    ? "Go to Dashboard →"
+                    : "Get Started →"}
+              </Link>
             </Button>
             <Button
               asChild

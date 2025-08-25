@@ -5,10 +5,10 @@ generator client {
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
-  extensions = [pgvector] // Requires CREATE EXTENSION vector; on target DB
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
+  // extensions = [pgvector] // Temporarily disabled for password migration
 }
 
 enum Role {
@@ -50,11 +50,16 @@ enum PlanTier {
 }
 
 model User {
-  id    String  @id @default(uuid())
-  email String  @unique
-  name  String?
-  image String?
-  role  Role    @default(RESEARCHER)
+  id           String  @id @default(uuid())
+  email        String  @unique
+  name         String?
+  firstName    String?
+  lastName     String?
+  institution  String?
+  fieldOfStudy String?
+  image        String?
+  password     String? // Optional password for demo/test users
+  role         Role    @default(RESEARCHER)
 
   // Auth.js relations
   accounts Account[]
@@ -165,12 +170,12 @@ model PaperFile {
 }
 
 model PaperChunk {
-  id         String                 @id @default(uuid())
+  id         String @id @default(uuid())
   paperId    String
   idx        Int
   page       Int?
   content    String
-  embedding  Unsupported("vector")? // pgvector column (dimension set at insertion time e.g. vector(1536))
+  // embedding  Unsupported("vector")? // pgvector column - temporarily disabled
   tokenCount Int?
 
   paper Paper @relation(fields: [paperId], references: [id])

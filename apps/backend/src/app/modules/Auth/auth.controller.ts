@@ -1,16 +1,89 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { AuthRequest } from "../../middleware/auth";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "./auth.constant";
 import {
   IOAuthSignInRequest,
+  IRoleUpdateData,
   ISessionValidationRequest,
+  IUserFilters,
   IValidationRequest,
 } from "./auth.interface";
 import { authService } from "./auth.service";
 
 class AuthController {
+  /**
+   * Handle email/password sign-in
+   * POST /api/auth/signin
+   */
+  signIn = catchAsync(async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+
+    const user = await authService.signInWithPassword(email, password);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: AUTH_SUCCESS_MESSAGES.SIGNIN_SUCCESS,
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          role: user.role,
+        },
+      },
+    });
+  });
+
+  /**
+   * Handle user registration with email/password
+   * POST /api/auth/register
+   */
+  register = catchAsync(async (req: Request, res: Response) => {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      institution,
+      fieldOfStudy,
+      role,
+    } = req.body;
+
+    const user = await authService.registerWithPassword(
+      firstName,
+      lastName,
+      email,
+      password,
+      institution,
+      fieldOfStudy,
+      role
+    );
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "User registered successfully",
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          institution: user.institution,
+          fieldOfStudy: user.fieldOfStudy,
+          role: user.role,
+          createdAt: user.createdAt,
+        },
+      },
+    });
+  });
+
   /**
    * Handle OAuth sign-in from frontend
    * POST /api/auth/oauth/signin
@@ -31,6 +104,54 @@ class AuthController {
           name: user.name,
           image: user.image,
           role: user.role,
+        },
+      },
+    });
+  });
+
+  /**
+   * Update user role (Admin only)
+   * PUT /api/auth/users/:userId/role
+   */
+  updateUserRole = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { userId } = req.params;
+    const roleData = req.body as IRoleUpdateData;
+    const adminUserId = req.user?.id!;
+
+    const updatedUser = await authService.updateUserRole(
+      adminUserId,
+      userId,
+      roleData
+    );
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: AUTH_SUCCESS_MESSAGES.ROLE_UPDATED,
+      data: {
+        user: updatedUser,
+      },
+    });
+  });
+
+  /**
+   * Get all users with filtering (Admin/Team Lead only)
+   * GET /api/auth/users
+   */
+  getAllUsers = catchAsync(async (req: AuthRequest, res: Response) => {
+    const filters = req.query as IUserFilters;
+    const requestingUserId = req.user?.id!;
+
+    const users = await authService.getAllUsers(requestingUserId, filters);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Users retrieved successfully",
+      data: {
+        users,
+        meta: {
+          total: users.length,
         },
       },
     });
@@ -103,6 +224,29 @@ class AuthController {
       statusCode: 200,
       success: true,
       message: "Session retrieved successfully",
+      data: { session },
+    });
+  });
+
+  /**
+   * Create session
+   * POST /api/auth/session/create
+   */
+  createSession = catchAsync(async (req: Request, res: Response) => {
+    const { sessionToken, userId, expires } = req.body;
+
+    const sessionData = {
+      sessionToken,
+      userId,
+      expires: new Date(expires),
+    };
+
+    const session = await authService.createSession(userId, sessionData);
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Session created successfully",
       data: { session },
     });
   });

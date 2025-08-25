@@ -1,5 +1,7 @@
 "use client";
 
+import { RoleBadge } from "@/components/auth/RoleBadge";
+import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,26 +10,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { USER_ROLES } from "@/lib/auth/roles";
 import {
   BookOpen,
   Clock,
   FileText,
   Plus,
   Search,
+  Settings,
+  Shield,
   Star,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-const quickActions = [
+// Base quick actions available to all roles
+const baseQuickActions = [
   {
     title: "Upload Paper",
     description: "Add a new research paper to your collection",
     icon: Plus,
     href: "/papers/upload",
     color: "bg-blue-500 hover:bg-blue-600",
+    minRole: USER_ROLES.RESEARCHER,
   },
   {
     title: "Search Papers",
@@ -35,6 +41,7 @@ const quickActions = [
     icon: Search,
     href: "/papers/search",
     color: "bg-green-500 hover:bg-green-600",
+    minRole: USER_ROLES.RESEARCHER,
   },
   {
     title: "Create Collection",
@@ -42,6 +49,7 @@ const quickActions = [
     icon: BookOpen,
     href: "/collections/create",
     color: "bg-purple-500 hover:bg-purple-600",
+    minRole: USER_ROLES.RESEARCHER,
   },
   {
     title: "Collaborate",
@@ -49,8 +57,54 @@ const quickActions = [
     icon: Users,
     href: "/collaborate",
     color: "bg-orange-500 hover:bg-orange-600",
+    minRole: USER_ROLES.RESEARCHER,
   },
 ];
+
+// Role-specific actions
+const roleSpecificActions = {
+  [USER_ROLES.PRO_RESEARCHER]: [
+    {
+      title: "Advanced Analytics",
+      description: "Access detailed research analytics and insights",
+      icon: Settings,
+      href: "/analytics",
+      color: "bg-indigo-500 hover:bg-indigo-600",
+    },
+  ],
+  [USER_ROLES.TEAM_LEAD]: [
+    {
+      title: "Team Management",
+      description: "Manage team members and permissions",
+      icon: Users,
+      href: "/team/manage",
+      color: "bg-cyan-500 hover:bg-cyan-600",
+    },
+    {
+      title: "Project Overview",
+      description: "Monitor team projects and progress",
+      icon: BookOpen,
+      href: "/projects",
+      color: "bg-teal-500 hover:bg-teal-600",
+    },
+  ],
+  [USER_ROLES.ADMIN]: [
+    {
+      title: "Admin Panel",
+      description: "System administration and user management",
+      icon: Shield,
+      href: "/admin",
+      color: "bg-red-500 hover:bg-red-600",
+    },
+    {
+      title: "System Settings",
+      description: "Configure platform settings and policies",
+      icon: Settings,
+      href: "/admin/settings",
+      color: "bg-gray-500 hover:bg-gray-600",
+    },
+  ],
+};
 
 const recentStats = [
   {
@@ -84,9 +138,10 @@ const recentStats = [
 ];
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  // Protected route guard
+  const { isLoading, user, session } = useProtectedRoute();
 
-  if (status === "loading") {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -94,23 +149,44 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session) {
-    redirect("/login");
-  }
+  const userRole = user?.role || USER_ROLES.RESEARCHER;
 
-  const { user } = session;
+  // Get actions available to the user based on their role
+  const getAvailableActions = () => {
+    const actions = [...baseQuickActions];
+    const userRoleActions =
+      roleSpecificActions[userRole as keyof typeof roleSpecificActions] || [];
+    return [...actions, ...userRoleActions];
+  };
+
+  const availableActions = getAvailableActions();
+
+  // Handle quick action click with toast feedback
+  const handleActionClick = (actionTitle: string) => {
+    showSuccessToast(
+      `Opening ${actionTitle}`,
+      "Redirecting you to the page..."
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Header with Role Badge */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Welcome back, {user.name?.split(" ")[0] || "Researcher"}!
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Here's what's happening with your research today.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Welcome back, {user?.name?.split(" ")[0] || "Researcher"}!
+              </h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">
+                Here's what's happening with your research today.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <RoleBadge role={userRole} size="lg" />
+            </div>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -147,12 +223,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action, index) => (
+              {availableActions.map((action, index) => (
                 <Button
                   key={index}
                   asChild
                   variant="outline"
                   className="h-auto p-6 flex-col items-start space-y-3 hover:shadow-lg transition-all duration-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                  onClick={() => handleActionClick(action.title)}
                 >
                   <Link href={action.href}>
                     <div

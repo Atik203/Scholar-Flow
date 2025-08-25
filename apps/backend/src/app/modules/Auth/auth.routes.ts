@@ -1,10 +1,76 @@
 import express from "express";
-import { authMiddleware, optionalAuth } from "../../middleware/auth";
+import {
+  authMiddleware,
+  optionalAuth,
+  requireAdmin,
+  requireTeamLead,
+} from "../../middleware/auth";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { authController } from "./auth.controller";
 import { authValidation } from "./auth.validation";
 
 const router: express.Router = express.Router();
+
+// Public routes
+router.post(
+  "/register",
+  validateRequestBody(authValidation.register),
+  authController.register
+);
+
+router.post(
+  "/signin",
+  validateRequestBody(authValidation.signInRequest),
+  authController.signIn
+);
+
+router.post(
+  "/oauth/signin",
+  validateRequestBody(authValidation.oAuthSignInRequest),
+  authController.oauthSignin
+);
+
+router.post(
+  "/session/validate",
+  validateRequestBody(authValidation.sessionValidationRequest),
+  authController.validateSession
+);
+
+router.post(
+  "/session/get",
+  validateRequestBody(authValidation.sessionValidationRequest),
+  authController.getSession
+);
+
+router.post(
+  "/session/create",
+  validateRequestBody(authValidation.createSessionRequest),
+  authController.createSession
+);
+
+router.post(
+  "/session/delete",
+  validateRequestBody(authValidation.sessionValidationRequest),
+  authController.deleteSession
+);
+
+// Protected routes for user management
+router.get(
+  "/users",
+  authMiddleware,
+  requireTeamLead,
+  authController.getAllUsers
+);
+
+router.put(
+  "/users/:userId/role",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(authValidation.updateRoleRequest),
+  authController.updateUserRole
+);
+
+router.get("/profile", optionalAuth, authController.getCurrentUser);
 
 /**
  * @swagger
