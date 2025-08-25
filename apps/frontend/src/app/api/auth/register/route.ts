@@ -22,9 +22,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Call backend API
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-    const response = await fetch(`${backendUrl}/api/auth/register`, {
+    const apiBaseUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+    const response = await fetch(`${apiBaseUrl}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
