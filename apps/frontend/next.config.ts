@@ -24,13 +24,16 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backend =
-      process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL;
-    if (!backend) return [];
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    if (!apiBaseUrl) return [];
+
+    // Extract backend URL from API base URL (remove /api suffix)
+    const backend = apiBaseUrl.replace(/\/api$/, "");
+
     return [
       {
         source: "/api/:path*",
-        destination: `${backend.replace(/\/$/, "")}/api/:path*`,
+        destination: `${backend}/api/:path*`,
       },
     ];
   },
