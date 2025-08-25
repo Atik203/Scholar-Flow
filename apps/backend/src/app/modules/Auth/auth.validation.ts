@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { OAUTH_PROVIDERS, USER_ROLES } from "./auth.constant";
 
-// Email/Password Sign-in validation
-export const signInSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
 // OAuth Profile validation
 export const oauthProfileSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -36,17 +30,6 @@ export const oauthSigninSchema = z.object({
   account: oauthAccountSchema,
 });
 
-// Role update validation
-export const updateRoleSchema = z.object({
-  role: z.enum([
-    USER_ROLES.RESEARCHER,
-    USER_ROLES.PRO_RESEARCHER,
-    USER_ROLES.TEAM_LEAD,
-    USER_ROLES.ADMIN,
-  ]),
-  reason: z.string().optional(),
-});
-
 // Session validation
 export const sessionValidationSchema = z.object({
   token: z.string().min(1, "Token is required"),
@@ -54,13 +37,6 @@ export const sessionValidationSchema = z.object({
 
 export const sessionTokenSchema = z.object({
   sessionToken: z.string().min(1, "Session token is required"),
-});
-
-// Session creation validation
-export const createSessionSchema = z.object({
-  sessionToken: z.string().min(1, "Session token is required"),
-  userId: z.string().uuid("Invalid user ID"),
-  expires: z.string().datetime("Invalid expiration date"),
 });
 
 // Login validation
@@ -72,33 +48,18 @@ export const loginSchema = z.object({
 
 // Registration validation
 export const registerSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, "First name must be at least 2 characters")
-    .max(50),
-  lastName: z
-    .string()
-    .min(2, "Last name must be at least 2 characters")
-    .max(50),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email format"),
-  institution: z.string().max(100).optional(),
-  fieldOfStudy: z.string().max(100).optional(),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
-      /^(?=.*[a-z])(?=.*\d)/,
-      "Password must contain at least one lowercase letter and one number"
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
-  role: z
-    .enum([
-      USER_ROLES.RESEARCHER,
-      USER_ROLES.PRO_RESEARCHER,
-      USER_ROLES.TEAM_LEAD,
-      USER_ROLES.ADMIN,
-    ])
-    .optional()
-    .default(USER_ROLES.RESEARCHER),
+  institution: z.string().optional(),
+  fieldOfStudy: z.string().optional(),
 });
 
 // Password change validation
@@ -108,8 +69,8 @@ export const passwordChangeSchema = z.object({
     .string()
     .min(8, "New password must be at least 8 characters")
     .regex(
-      /^(?=.*[a-z])(?=.*\d)/,
-      "Password must contain at least one lowercase letter and one number"
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
 });
 
@@ -125,8 +86,8 @@ export const passwordResetSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
-      /^(?=.*[a-z])(?=.*\d)/,
-      "Password must contain at least one lowercase letter and one number"
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
 });
 
@@ -193,14 +154,9 @@ export const userFiltersSchema = z.object({
 
 // Export all validation schemas
 export const authValidation = {
-  signInRequest: signInSchema,
-  oAuthSignInRequest: oauthSigninSchema,
   oauthSignin: oauthSigninSchema,
-  sessionValidationRequest: sessionValidationSchema,
   sessionValidation: sessionValidationSchema,
   sessionToken: sessionTokenSchema,
-  createSessionRequest: createSessionSchema,
-  updateRoleRequest: updateRoleSchema,
   login: loginSchema,
   register: registerSchema,
   passwordChange: passwordChangeSchema,

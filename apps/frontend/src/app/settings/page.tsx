@@ -1,7 +1,5 @@
 "use client";
 
-import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { USER_ROLES, hasPermission } from "@/lib/auth/roles";
 import {
   Bell,
   Database,
@@ -29,7 +26,6 @@ import {
   Shield,
   Sun,
   Trash2,
-  Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
@@ -53,15 +49,6 @@ export default function SettingsPage() {
     collectionsPublic: false,
   });
 
-  // Admin/Team Lead settings
-  const [adminSettings, setAdminSettings] = useState({
-    systemMaintenance: false,
-    userRegistration: true,
-    dataRetention: "365",
-    maxFileSize: "100",
-    allowGuestAccess: false,
-  });
-
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -74,28 +61,12 @@ export default function SettingsPage() {
     redirect("/login");
   }
 
-  const { user } = session;
-  const userRole = user.role || USER_ROLES.RESEARCHER;
-
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast(
-      "Notification Settings",
-      "Your notification preferences have been updated"
-    );
   };
 
   const handlePrivacyChange = (key: string, value: boolean) => {
     setPrivacy((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast(
-      "Privacy Settings",
-      "Your privacy settings have been updated"
-    );
-  };
-
-  const handleAdminChange = (key: string, value: boolean | string) => {
-    setAdminSettings((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast("Admin Settings", "System settings have been updated");
   };
 
   return (
@@ -103,37 +74,22 @@ export default function SettingsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                <SettingsIcon className="h-8 w-8" />
-                Settings
-              </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">
-                Manage your account preferences and application settings
-              </p>
-            </div>
-            <RoleBadge role={userRole} size="lg" />
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+            <SettingsIcon className="h-8 w-8" />
+            Settings
+          </h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Manage your account preferences and application settings
+          </p>
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">
-          <TabsList
-            className={`grid w-full ${hasPermission(userRole, "MANAGE_USERS") ? "grid-cols-6" : "grid-cols-5"} dark:bg-gray-800`}
-          >
+          <TabsList className="grid w-full grid-cols-5 dark:bg-gray-800">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="privacy">Privacy</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
-            {hasPermission(userRole, "MANAGE_USERS") && (
-              <TabsTrigger
-                value="admin"
-                className="text-orange-600 dark:text-orange-400"
-              >
-                Admin
-              </TabsTrigger>
-            )}
           </TabsList>
 
           {/* General Settings */}
@@ -543,166 +499,6 @@ export default function SettingsPage() {
               </Card>
             </div>
           </TabsContent>
-
-          {/* Admin Settings Tab */}
-          {hasPermission(userRole, "MANAGE_USERS") && (
-            <TabsContent value="admin">
-              <div className="space-y-6">
-                <Card className="border-orange-200 dark:border-orange-800 dark:bg-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-orange-600 dark:text-orange-400 flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      System Administration
-                    </CardTitle>
-                    <CardDescription className="dark:text-gray-400">
-                      System-wide settings and configurations (Admin/Team Lead
-                      only)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-sm font-medium dark:text-white">
-                          System Maintenance Mode
-                        </Label>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Put the system in maintenance mode for updates
-                        </p>
-                      </div>
-                      <Switch
-                        checked={adminSettings.systemMaintenance}
-                        onCheckedChange={(checked) =>
-                          handleAdminChange("systemMaintenance", checked)
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-sm font-medium dark:text-white">
-                          Allow User Registration
-                        </Label>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Allow new users to register accounts
-                        </p>
-                      </div>
-                      <Switch
-                        checked={adminSettings.userRegistration}
-                        onCheckedChange={(checked) =>
-                          handleAdminChange("userRegistration", checked)
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="text-sm font-medium dark:text-white">
-                          Allow Guest Access
-                        </Label>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Allow guests to browse public papers without accounts
-                        </p>
-                      </div>
-                      <Switch
-                        checked={adminSettings.allowGuestAccess}
-                        onCheckedChange={(checked) =>
-                          handleAdminChange("allowGuestAccess", checked)
-                        }
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label
-                          htmlFor="dataRetention"
-                          className="dark:text-gray-300"
-                        >
-                          Data Retention (days)
-                        </Label>
-                        <Input
-                          id="dataRetention"
-                          type="number"
-                          value={adminSettings.dataRetention}
-                          onChange={(e) =>
-                            handleAdminChange("dataRetention", e.target.value)
-                          }
-                          className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                      </div>
-                      <div>
-                        <Label
-                          htmlFor="maxFileSize"
-                          className="dark:text-gray-300"
-                        >
-                          Max File Size (MB)
-                        </Label>
-                        <Input
-                          id="maxFileSize"
-                          type="number"
-                          value={adminSettings.maxFileSize}
-                          onChange={(e) =>
-                            handleAdminChange("maxFileSize", e.target.value)
-                          }
-                          className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-red-200 dark:border-red-800 dark:bg-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      User Management Actions
-                    </CardTitle>
-                    <CardDescription className="dark:text-gray-400">
-                      Bulk operations and system management
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          showSuccessToast(
-                            "Export Started",
-                            "User data export has been initiated"
-                          )
-                        }
-                        className="dark:border-gray-600"
-                      >
-                        Export All Users
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          showSuccessToast(
-                            "Cleanup Started",
-                            "System cleanup has been initiated"
-                          )
-                        }
-                        className="dark:border-gray-600"
-                      >
-                        Clean Inactive Data
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          showSuccessToast(
-                            "Broadcast Sent",
-                            "System notification sent to all users"
-                          )
-                        }
-                      >
-                        Send System Alert
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          )}
         </Tabs>
       </div>
     </div>

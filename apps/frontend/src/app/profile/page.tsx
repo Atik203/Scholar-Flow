@@ -1,8 +1,7 @@
 "use client";
 
-import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,36 +13,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { ROLE_DESCRIPTIONS, USER_ROLES } from "@/lib/auth/roles";
-import {
-  Calendar,
-  Camera,
-  Edit3,
-  Globe,
-  Mail,
-  MapPin,
-  Save,
-  Shield,
-  X,
-} from "lucide-react";
+import { Calendar, Camera, Edit3, Mail, Save, Shield, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 export default function ProfilePage() {
-  // Protected route guard
-  const { isLoading, user } = useProtectedRoute();
+  const { data: session, status } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
     institution: "",
     researchInterests: "",
-    location: "",
-    website: "",
-    orcid: "",
   });
 
-  if (isLoading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -51,25 +36,26 @@ export default function ProfilePage() {
     );
   }
 
-  const userRole = user?.role || USER_ROLES.RESEARCHER;
-  const initials = user?.name
+  if (!session) {
+    redirect("/login");
+  }
+
+  const { user } = session;
+  const initials = user.name
     ? user.name
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : user?.email?.[0]?.toUpperCase() || "U";
+    : user.email?.[0]?.toUpperCase() || "U";
 
   const handleEdit = () => {
     setFormData({
-      name: user?.name || "",
+      name: user.name || "",
       bio: "",
       institution: "",
       researchInterests: "",
-      location: "",
-      website: "",
-      orcid: "",
     });
     setIsEditing(true);
   };
@@ -77,24 +63,12 @@ export default function ProfilePage() {
   const handleSave = () => {
     // TODO: Implement save functionality with backend API
     console.log("Saving profile data:", formData);
-    showSuccessToast(
-      "Profile Updated",
-      "Your profile has been updated successfully"
-    );
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData({
-      name: "",
-      bio: "",
-      institution: "",
-      researchInterests: "",
-      location: "",
-      website: "",
-      orcid: "",
-    });
+    setFormData({ name: "", bio: "", institution: "", researchInterests: "" });
   };
 
   return (
@@ -110,16 +84,16 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Card */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="text-center">
                 <div className="relative mx-auto">
                   <Avatar className="h-24 w-24 ring-4 ring-primary/20">
                     <AvatarImage
-                      src={user?.image || ""}
-                      alt={user?.name || "User"}
+                      src={user.image || ""}
+                      alt={user.name || "User"}
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg dark:bg-primary/20">
@@ -136,28 +110,23 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {user?.name || "User"}
+                    {user.name || "User"}
                   </h2>
                   <p className="text-gray-500 dark:text-gray-400">
-                    {user?.email}
+                    {user.email}
                   </p>
-                  <div className="mt-3 flex flex-col gap-2">
-                    <RoleBadge role={userRole} size="lg" />
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {
-                        ROLE_DESCRIPTIONS[
-                          userRole as keyof typeof ROLE_DESCRIPTIONS
-                        ]
-                      }
-                    </p>
-                  </div>
+                  {user.role && (
+                    <Badge variant="outline" className="mt-2">
+                      {user.role}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="h-4 w-4 text-gray-400" />
                   <span className="text-gray-600 dark:text-gray-400">
-                    {user?.email}
+                    {user.email}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
@@ -177,7 +146,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile Information */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
@@ -264,50 +233,6 @@ export default function ProfilePage() {
                         rows={3}
                       />
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                          id="location"
-                          value={formData.location}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              location: e.target.value,
-                            })
-                          }
-                          placeholder="City, Country"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="website">Website</Label>
-                        <Input
-                          id="website"
-                          value={formData.website}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              website: e.target.value,
-                            })
-                          }
-                          placeholder="https://yourwebsite.com"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="orcid">ORCID iD</Label>
-                      <Input
-                        id="orcid"
-                        value={formData.orcid}
-                        onChange={(e) =>
-                          setFormData({ ...formData, orcid: e.target.value })
-                        }
-                        placeholder="0000-0000-0000-0000"
-                      />
-                    </div>
                   </>
                 ) : (
                   <>
@@ -316,7 +241,7 @@ export default function ProfilePage() {
                         Full Name
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {user?.name || "Not provided"}
+                        {user.name || "Not provided"}
                       </p>
                     </div>
 
@@ -344,37 +269,6 @@ export default function ProfilePage() {
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
                         No research interests listed yet.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <MapPin className="inline h-4 w-4 mr-1" />
-                          Location
-                        </Label>
-                        <p className="mt-1 text-gray-900 dark:text-white">
-                          Not provided
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <Globe className="inline h-4 w-4 mr-1" />
-                          Website
-                        </Label>
-                        <p className="mt-1 text-gray-900 dark:text-white">
-                          Not provided
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        ORCID iD
-                      </Label>
-                      <p className="mt-1 text-gray-900 dark:text-white">
-                        Not provided
                       </p>
                     </div>
                   </>
