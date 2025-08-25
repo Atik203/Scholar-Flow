@@ -29,7 +29,7 @@ jobs:
           echo "🔄 Starting atik → dev merge (one-way flow)"
           echo "📋 Branch flow: atik → dev → main"
           echo "🚫 Note: dev should NEVER merge back into atik"
-          
+
           git fetch --all --prune
           git checkout dev
           git pull origin dev
@@ -42,7 +42,7 @@ jobs:
           set -e
           echo "Merging origin/atik into dev (ONE-WAY FLOW)"
           echo "🚫 This workflow enforces: atik → dev (never dev → atik)"
-          
+
           if git merge --no-edit origin/atik; then
             echo "merge_result=success" >> $GITHUB_OUTPUT
             echo "✅ Successfully merged atik into dev"
@@ -67,7 +67,7 @@ jobs:
           echo "⚠️ Merge conflicts detected when merging atik → dev"
           echo "🚫 IMPORTANT: Do NOT merge dev back into atik to resolve conflicts"
           echo "✅ Instead: Resolve conflicts in the atik branch or manually in the PR"
-          
+
           git merge --abort || true
 
           # Check if PR already exists
