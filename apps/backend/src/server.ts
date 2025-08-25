@@ -5,7 +5,6 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import config from "./app/config";
-import { setupSwagger } from "./app/config/swagger";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
@@ -54,15 +53,11 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
     success: true,
     message: "Welcome to Scholar-Flow API",
     version: "1.0.0",
-    documentation: "/docs",
-    api: "/api",
+    documentation: "/api",
     health: "/health",
   });
 };
 app.get("/", rootHandler as unknown as RequestHandler);
-
-// Setup API Documentation
-setupSwagger(app);
 
 // Health check endpoint
 app.get("/health", healthCheck as unknown as RequestHandler);

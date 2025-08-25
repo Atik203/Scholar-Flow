@@ -4,21 +4,16 @@ globs:
   - "apps/backend/src/app/modules/Auth/**"
   - "apps/frontend/src/app/auth/**"
   - "apps/frontend/src/app/api/auth/**"
-  - "apps/frontend/src/app/login/**"
-  - "apps/frontend/src/app/register/**"
 alwaysApply: false
 ---
 
 # Authentication Rules
 
-## ✅ PRODUCTION-READY STATUS
-OAuth authentication system is COMPLETE and TESTED. Follow established patterns below.
-
 ## Backend Authentication (apps/backend)
 
 1. **OAuth Account Management**: ALWAYS use standard Prisma upsert for OAuth accounts.
    ```typescript
-   // CORRECT - Standard Prisma upsert (PROVEN PATTERN)
+   // CORRECT - Standard Prisma upsert
    const account = await prisma.account.upsert({
      where: {
        provider_providerAccountId: {
@@ -36,34 +31,22 @@ OAuth authentication system is COMPLETE and TESTED. Follow established patterns 
 3. **Error Handling**: All auth methods must use try/catch with ApiError for consistent error responses.
 
 4. **Testing Requirements**: All authentication flows require comprehensive integration tests:
-   - New user OAuth sign-in ✅
-   - Existing user OAuth sign-in (duplicate prevention) ✅
-   - Token refresh scenarios ✅
-   - Account creation and upsert functionality ✅
+   - New user OAuth sign-in
+   - Existing user OAuth sign-in (duplicate prevention)
+   - Token refresh scenarios
+   - Account creation and upsert functionality
 
 5. **Security Patterns**:
-   - Never trust client data - validate all inputs with Zod ✅
-   - Use JWT with proper expiry handling ✅
-   - Implement refresh token rotation ✅
-   - Secure cookie settings for production ✅
+   - Never trust client data - validate all inputs with Zod
+   - Use JWT with proper expiry handling
+   - Implement refresh token rotation
+   - Secure cookie settings for production
 
 ## Frontend Authentication (apps/frontend)
 
-1. **Auth.js Integration**: Use standard Auth.js patterns with custom backend integration. ✅
+1. **Auth.js Integration**: Use standard Auth.js patterns with custom backend integration.
 
-2. **State Management**: Use Redux Toolkit for authentication state management. ✅
-
-3. **UI Components**: Established auth pages with proper validation:
-   - Login page: Email/password + OAuth buttons ✅
-   - Register page: Full form with password strength + OAuth ✅
-   - Form validation with React Hook Form + Zod ✅
-   - Responsive design with proper error states ✅
-
-4. **Security & UX**:
-   - Password strength indicators ✅
-   - Form validation feedback ✅
-   - Loading states and error handling ✅
-   - Auth guards for protected routes ✅
+2. **State Management**: Use Redux Toolkit for authentication state management.
 
 3. **Route Protection**: Implement proper route guards for authenticated pages.
 

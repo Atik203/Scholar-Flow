@@ -1,19 +1,12 @@
 "use client";
 import { MarketingVideo } from "@/components/customUI/MarketingVideo";
 import { Button } from "@/components/ui/button";
-import { usePublicRoute } from "@/hooks/useAuthGuard";
-import { getGetStartedUrl } from "@/lib/auth/redirects";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import React from "react";
 
 export const Hero: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
-  const { isAuthenticated, isLoading } = usePublicRoute();
-  const pathname = usePathname();
-
-  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname);
   return (
     <section
       className="relative pt-32 pb-32 overflow-hidden"
@@ -61,15 +54,8 @@ export const Hero: React.FC = () => {
             size="lg"
             variant="gradient"
             className="btn-hover-glow btn-shine btn-inner-glow shadow-xl hover:shadow-2xl transition-all duration-300"
-            disabled={isLoading}
           >
-            <Link href={getStartedUrl}>
-              {isLoading
-                ? "Loading..."
-                : isAuthenticated
-                  ? "Go to Dashboard"
-                  : "Get Started"}
-            </Link>
+            <Link href="/login">Get Started</Link>
           </Button>
           <Button
             asChild
