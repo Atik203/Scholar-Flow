@@ -7,6 +7,7 @@
 **Architecture**: Monorepo with Next.js frontend and Express.js backend  
 **Phase**: Phase 1 Development (MVP)
 
+- use yarn dev:turbo to run frontend and backend
 - Package manager: Yarn (Berry). Do not use npm in this repo.
 - Check for any .env file changes
 - Document any new environment variables required for features
