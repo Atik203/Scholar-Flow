@@ -1,4 +1,4 @@
-import type { TUser } from "@scholar-flow/types";
+import type { TUser } from "../../types/user";
 import { apiSlice } from "../api/apiSlice";
 
 export interface OAuthSignInRequest {

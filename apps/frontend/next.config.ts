@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     // https://nextjs.org/docs/app/building-your-application/optimizing/packages
     // For Next 15, prefer the 'transpilePackages' option at the root level
   },
-  transpilePackages: ["@scholar-flow/types", "@scholar-flow/seo"],
+  // transpilePackages removed as we're no longer using workspace packages
   images: {
     remotePatterns: [
       {
