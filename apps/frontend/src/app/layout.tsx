@@ -3,9 +3,9 @@ import { Navbar } from "@/components/customUI/Navbar";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -32,28 +32,7 @@ export default function RootLayout({
                 <main className="flex-1 relative">{children}</main>
                 <Footer />
               </div>
-              <Toaster
-                theme="system"
-                position="top-right"
-                richColors
-                closeButton
-                toastOptions={{
-                  duration: 3000,
-                  classNames: {
-                    toast:
-                      "bg-card text-card-foreground border border-border shadow-sm",
-                    title: "font-medium",
-                    description: "text-muted-foreground",
-                    actionButton:
-                      "bg-primary text-primary-foreground hover:bg-primary/90",
-                    cancelButton: "bg-muted text-foreground hover:bg-muted/90",
-                    success: "border-l-4 border-l-green-500",
-                    error: "border-l-4 border-l-red-500",
-                    warning: "border-l-4 border-l-yellow-500",
-                    loading: "opacity-90",
-                  },
-                }}
-              />
+              <ToastProvider />
             </ThemeProvider>
           </ReduxProvider>
         </NextAuthProvider>

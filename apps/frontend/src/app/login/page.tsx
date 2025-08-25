@@ -1,5 +1,13 @@
 "use client";
+import {
+  dismissToast,
+  showAuthErrorToast,
+  showAuthSuccessToast,
+  showLoadingToast,
+} from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
+import { useAuthRoute } from "@/hooks/useAuthGuard";
+import { getCallbackUrl, handleAuthRedirect } from "@/lib/auth/redirects";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -8,29 +16,35 @@ import {
   Eye,
   EyeOff,
   Github,
+  Loader2,
   Mail,
   Shield,
   Sparkles,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Auth guard - redirects to dashboard if already authenticated
+  const { isLoading: authLoading } = useAuthRoute();
 
   const {
     register,
@@ -40,32 +54,90 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
+    setIsLoading("credentials");
+    const loadingToast = showLoadingToast("Signing in...");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const callbackUrl = getCallbackUrl(searchParams);
 
-      console.log("Login data:", data);
-      toast.success("Welcome back! Redirecting to dashboard...");
+      const result = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+        callbackUrl,
+      });
 
-      // Redirect to dashboard would happen here
-    } catch {
-      toast.error("Login failed. Please check your credentials.");
+      if (result?.error) {
+        dismissToast(loadingToast);
+        showAuthErrorToast("Invalid email or password");
+        return;
+      }
+
+      if (result?.ok) {
+        // Wait for session to be updated
+        const session = await getSession();
+        if (session) {
+          dismissToast(loadingToast);
+          showAuthSuccessToast("Email/Password");
+
+          // Use smart redirect
+          const redirectUrl = handleAuthRedirect(true, searchParams);
+          router.push(redirectUrl);
+        }
+      }
+    } catch (error) {
+      dismissToast(loadingToast);
+      console.error("Sign-in error:", error);
+      showAuthErrorToast("An unexpected error occurred while signing in");
     } finally {
-      setIsLoading(false);
+      setIsLoading(null);
     }
   };
 
   const handleSocialLogin = async (provider: "google" | "github") => {
-    setIsLoading(true);
+    setIsLoading(provider);
+    const loadingToast = showLoadingToast(`Signing in with ${provider}...`);
 
     try {
-      await signIn(provider, { callbackUrl: "/dashboard" });
-    } catch {
-      toast.error(`Failed to sign in with ${provider}`);
-      setIsLoading(false);
+      const callbackUrl = getCallbackUrl(searchParams);
+
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl,
+      });
+
+      if (result?.error) {
+        dismissToast(loadingToast);
+        showAuthErrorToast(`Failed to sign in with ${provider}`);
+        return;
+      }
+
+      if (result?.ok) {
+        dismissToast(loadingToast);
+        showAuthSuccessToast(
+          provider.charAt(0).toUpperCase() + provider.slice(1)
+        );
+
+        // Use smart redirect
+        const redirectUrl = handleAuthRedirect(true, searchParams);
+        router.push(redirectUrl);
+      }
+    } catch (error) {
+      dismissToast(loadingToast);
+      console.error(`${provider} sign-in error:`, error);
+      showAuthErrorToast(`An error occurred while signing in with ${provider}`);
+    } finally {
+      setIsLoading(null);
     }
   };
 
@@ -106,40 +178,48 @@ export default function LoginPage() {
             <div className="space-y-3 mb-6">
               <Button
                 onClick={() => handleSocialLogin("google")}
-                disabled={isLoading}
+                disabled={isLoading !== null}
                 variant="outline"
                 className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 size="lg"
               >
-                <svg className="h-5 w-5" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
+                {isLoading === "google" ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                )}
                 Continue with Google
               </Button>
 
               <Button
                 onClick={() => handleSocialLogin("github")}
-                disabled={isLoading}
+                disabled={isLoading !== null}
                 variant="outline"
                 className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 size="lg"
               >
-                <Github className="h-5 w-5 mr-3" />
+                {isLoading === "github" ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Github className="h-5 w-5 mr-3" />
+                )}
                 Continue with GitHub
               </Button>
             </div>
@@ -227,13 +307,13 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading !== null}
                 className="w-full px-4 py-3 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
                 size="lg"
               >
-                {isLoading ? (
+                {isLoading === "credentials" ? (
                   <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Signing in...
                   </>
                 ) : (
