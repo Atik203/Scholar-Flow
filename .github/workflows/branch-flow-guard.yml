@@ -21,29 +21,29 @@ jobs:
           echo "🔍 Checking branch flow for PR #${{ github.event.pull_request.number }}"
           echo "Source: ${{ github.event.pull_request.head.ref }}"
           echo "Target: ${{ github.event.pull_request.base.ref }}"
-          
+
           # Check for invalid flows
           invalid_flow=false
           error_message=""
-          
+
           # Prevent dev → atik (reverse flow)
           if [ "${{ github.event.pull_request.head.ref }}" = "dev" ] && [ "${{ github.event.pull_request.base.ref }}" = "atik" ]; then
             invalid_flow=true
             error_message="🚫 Invalid flow: dev → atik. Expected flow: atik → dev → main"
           fi
-          
+
           # Prevent main → dev (reverse flow)
           if [ "${{ github.event.pull_request.head.ref }}" = "main" ] && [ "${{ github.event.pull_request.base.ref }}" = "dev" ]; then
             invalid_flow=true
             error_message="🚫 Invalid flow: main → dev. Expected flow: atik → dev → main"
           fi
-          
+
           # Prevent main → atik (reverse flow)
           if [ "${{ github.event.pull_request.head.ref }}" = "main" ] && [ "${{ github.event.pull_request.base.ref }}" = "atik" ]; then
             invalid_flow=true
             error_message="🚫 Invalid flow: main → atik. Expected flow: atik → dev → main"
           fi
-          
+
           if [ "$invalid_flow" = true ]; then
             echo "$error_message"
             echo "invalid_flow=true" >> $GITHUB_OUTPUT
