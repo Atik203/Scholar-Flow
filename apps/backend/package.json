@@ -22,6 +22,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",
+    "@scholar-flow/types": "workspace:*",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "aws-sdk": "^2.1524.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
@@ -44,6 +47,8 @@
     "redis": "^4.6.11",
     "sslcommerz-lts": "^1.0.3",
     "stripe": "^14.10.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^5.0.4",
     "winston": "^3.11.0",
     "zod": "^3.22.4"
