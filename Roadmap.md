@@ -18,7 +18,6 @@ Week 1 – Project Setup & Foundations
 - [x] Environment & DevOps
   - [x] Setup .env variables and config for local and staging environments ✅
   - [x] Integrate Tailwind CSS + ShadCN UI + Redux Toolkit store ✅
-  - [ ] Connect to cloud storage for file uploads 🚧
 
 ---
 
@@ -29,22 +28,24 @@ Week 2 – User Auth & Profile ✅
 - [x] Comprehensive authentication testing suite ✅
 - [x] Production-ready error handling and unique constraint management ✅
 - [x] JWT-based authentication with secure token management ✅
-- [ ] Implement user profile page (basic: name, email, avatar) 🚧
-- [ ] Add password reset & email verification flow 🚧
-- [ ] Basic role-based access control for future admin support 🚧
+- [x] Implement user profile page (basic: name, email, avatar) ✅
+- [x] Basic role-based access control for future admin support ✅
 - [x] Write first Prisma migrations for User table + seeds ✅
 
-**✅ Major Achievement:** OAuth Authentication System completed with proper Prisma upsert patterns, resolving P2002 unique constraint violations.
+**✅ Major Achievement:** OAuth Authentication System completed with proper Prisma upsert patterns.
 
 ---
 
 Week 3 – Paper Upload & Storage
 
+- [ ] Add password reset & email verification flow & forgot password
+- [ ] Add API to update/edit user profile
+- [ ] Connect to cloud storage for file uploads
 - [ ] Build paper upload page (PDF, DOCX)
 - [ ] Store metadata (title, author, year) in DB
 - [ ] Extract text content from uploaded PDFs
-- [ ] Store original file in cloud storage (Supabase S3 / Cloudflare R2)
-- [ ] Basic UI for viewing uploaded papers
+- [ ] Store original file in cloud storage (AWS S3)
+- [ ] UI for viewing uploaded papers
 
 ---
 
