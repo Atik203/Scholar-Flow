@@ -1,0 +1,192 @@
+# Frontend Improvements & Design System
+
+## Overview
+
+This rule provides guidance for implementing frontend improvements outlined in the Scholar-Flow design system. All improvements should follow the phased approach and update tracking documents.
+
+## Key Documents
+
+- **Improvements.md**: Complete roadmap with 5 phases and checkboxes
+- **CHANGELOG.md**: Implementation progress tracking
+- **UI_DESIGN.md**: UI/UX design guidelines
+- **Roadmap.md**: Project roadmap
+
+## Implementation Workflow
+
+### 1. Before Starting Implementation
+
+- Check the current phase in `Improvements.md`
+- Review the specific feature requirements
+- Ensure you understand the existing design system (OKLCH colors, existing components)
+
+### 2. During Implementation
+
+- Follow DRY patterns outlined in the improvements document
+- Use existing component patterns (Button, Input, Card variants)
+- Maintain consistency with current theme and spacing
+- Implement TypeScript-first with proper typing
+
+### 3. After Implementation
+
+- ✅ Check off completed items in `Improvements.md`
+- 📝 Update `CHANGELOG.md` with implementation details
+- 🔄 Update progress percentages in tracking dashboard
+- 📚 Add implementation notes and code examples
+
+## Phase Priorities
+
+### Phase 1: Core Design System & Navigation (CRITICAL)
+
+- Start with navbar dropdown implementation
+- Add extended color palette to globals.css
+- Create typography scale utility
+- Build PageContainer component
+
+### Phase 2: Component Library (HIGH)
+
+- ScholarFlowForm system (Critical for consistency)
+- Enhanced button states
+- Card variants system
+
+### Phase 3: Performance & UX (HIGH)
+
+- Image optimization wrapper
+- Code splitting setup
+- Loading states implementation
+
+### Phase 4: Advanced Components (MEDIUM)
+
+- Data table component
+- Modal system
+- Command palette
+
+### Phase 5: Developer Experience (LOW)
+
+- Custom hooks library
+- Storybook documentation
+- Testing setup
+
+## Design System Guidelines
+
+### Colors
+
+- Use existing OKLCH color system
+- Add semantic colors (success, warning, info) as needed
+- Maintain dark mode compatibility
+
+### Typography
+
+- Follow established heading scales
+- Use consistent paragraph variants
+- Implement code block and quote styling
+
+### Spacing
+
+- Use `max-w-[1440px]` container width consistently
+- Apply responsive padding: `px-3 sm:px-5 lg:px-8`
+- Follow spacing scale: xs(8px), sm(16px), md(24px), lg(32px), xl(48px), 2xl(64px)
+
+### Components
+
+- Build upon existing shadcn/ui components
+- Use class-variance-authority for variants
+- Implement proper loading states and error handling
+- Ensure accessibility compliance
+
+## Code Quality Standards
+
+### TypeScript
+
+- 100% type coverage
+- No `any` types unless absolutely necessary
+- Proper interface definitions for all props
+
+### Performance
+
+- Implement lazy loading for heavy components
+- Use React.memo for expensive components
+- Optimize images with Next.js Image component
+- Implement virtual scrolling for large lists
+
+### Accessibility
+
+- WCAG 2.1 AA compliance
+- Proper ARIA labels and roles
+- Keyboard navigation support
+- Focus management for modals and dropdowns
+
+## File Organization
+
+```
+apps/frontend/src/
+├── components/
+│   ├── ui/                    # Base UI components
+│   ├── customUI/             # Scholar-Flow specific
+│   │   ├── form/            # Form system
+│   │   ├── cards/           # Card variants
+│   │   └── navigation/      # Nav components
+│   ├── layout/              # Layout components
+│   └── transitions/         # Animation components
+├── hooks/                   # Custom hooks
+├── lib/                     # Utilities
+│   ├── typography.ts       # Typography system
+│   ├── animations.ts       # Animation utilities
+│   └── validators.ts       # Zod schemas
+└── styles/                 # Additional styles
+```
+
+## Update Instructions
+
+### When Completing Features
+
+1. Update status in `Improvements.md` checkboxes
+2. Add implementation details to `CHANGELOG.md`
+3. Update progress dashboard percentages
+4. Add code examples and implementation notes
+5. Update file paths and dependencies
+
+### Example Changelog Update
+
+```markdown
+#### ✅ Button Loading States
+
+- **Status**: ✅ Completed
+- **Started**: [Date]
+- **Completed**: [Date]
+- **Files**: `apps/frontend/src/components/ui/button.tsx`
+- **Progress**: 100%
+
+**Implementation Notes:**
+
+- Added loading prop to ButtonProps interface
+- Integrated Loader2 icon from lucide-react
+- Added loading spinner with proper sizing
+```
+
+## Project Information
+
+**Project Start**: August 2025
+**Developer**: Md. Atikur Rahaman (GitHub: Atik203)
+**Current Status**: Phase 1 MVP Development
+
+## Resources
+
+- [Improvements.md](./Improvements.md) - Complete roadmap
+- [CHANGELOG.md](./CHANGELOG.md) - Progress tracking
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [Radix UI Primitives](https://www.radix-ui.com/primitives)
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod Validation](https://zod.dev/)
+
+## Success Metrics
+
+- **Performance**: Lighthouse Score 90+
+- **Accessibility**: WCAG 2.1 AA compliance
+- **TypeScript**: 100% type coverage
+- **Component Reusability**: 80%+ shared components
+- **Code Duplication**: < 5%
+  description:
+  globs:
+  alwaysApply: true
+
+---
