@@ -4,11 +4,11 @@ import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Badge } from "../badge";
 import { Button } from "../button";
-import { cardVariants, type CardVariantsProps } from "../card-variants";
+import { cardVariants, type CardVariants } from "../card-variants";
 
 export interface ProfileCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    CardVariantsProps {
+    CardVariants {
   user: {
     name: string;
     email?: string;
@@ -65,12 +65,6 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
     },
     ref
   ) => {
-    const sizeClasses = {
-      sm: "p-4",
-      md: "p-6",
-      lg: "p-8",
-    };
-
     const textSizes = {
       sm: {
         name: "text-lg",
@@ -90,27 +84,42 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
         bio: "text-lg",
         contact: "text-base",
       },
+      xl: {
+        name: "text-3xl",
+        role: "text-xl",
+        bio: "text-xl",
+        contact: "text-lg",
+      },
+      full: {
+        name: "text-xl",
+        role: "text-base",
+        bio: "text-base",
+        contact: "text-sm",
+      },
     };
 
     const avatarSizes = {
       sm: "h-16 w-16",
       md: "h-20 w-20",
       lg: "h-24 w-24",
+      xl: "h-28 w-28",
+      full: "h-20 w-20",
     };
+
+    const currentSize = size || "md";
 
     return (
       <div
         ref={ref}
         className={cn(
-          cardVariants({ variant, padding, hover }),
-          sizeClasses[size],
+          cardVariants({ variant, padding, hover, size }),
           className
         )}
         {...props}
       >
         {/* Header with Avatar and Basic Info */}
         <div className="flex items-start gap-4 mb-6">
-          <Avatar className={avatarSizes[size]}>
+          <Avatar className={avatarSizes[currentSize]}>
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback className="text-lg font-semibold">
               {user.name.charAt(0).toUpperCase()}
@@ -118,7 +127,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <h3 className={cn("font-bold mb-1", textSizes[size].name)}>
+            <h3 className={cn("font-bold mb-1", textSizes[currentSize].name)}>
               {user.name}
             </h3>
 
@@ -126,7 +135,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
               <p
                 className={cn(
                   "text-muted-foreground mb-1",
-                  textSizes[size].role
+                  textSizes[currentSize].role
                 )}
               >
                 {user.role}
@@ -135,7 +144,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
             )}
 
             {user.bio && (
-              <p className={cn("text-muted-foreground", textSizes[size].bio)}>
+              <p className={cn("text-muted-foreground", textSizes[currentSize].bio)}>
                 {user.bio}
               </p>
             )}
@@ -151,7 +160,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
                 <span
                   className={cn(
                     "text-muted-foreground",
-                    textSizes[size].contact
+                    textSizes[currentSize].contact
                   )}
                 >
                   {user.email}
@@ -165,7 +174,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
                 <span
                   className={cn(
                     "text-muted-foreground",
-                    textSizes[size].contact
+                    textSizes[currentSize].contact
                   )}
                 >
                   {user.location}
@@ -182,7 +191,7 @@ export const ProfileCard = React.forwardRef<HTMLDivElement, ProfileCardProps>(
                   rel="noopener noreferrer"
                   className={cn(
                     "text-muted-foreground hover:text-primary transition-colors",
-                    textSizes[size].contact
+                    textSizes[currentSize].contact
                   )}
                 >
                   {user.website}

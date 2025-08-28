@@ -3,7 +3,7 @@ import * as React from "react";
 import { FixedSizeList, FixedSizeListProps } from "react-window";
 
 export interface VirtualListProps<T = any>
-  extends Omit<FixedSizeListProps, "children"> {
+  extends Omit<FixedSizeListProps, "children" | "itemCount" | "itemSize"> {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   itemHeight: number;
@@ -25,6 +25,8 @@ export const VirtualList = React.forwardRef<FixedSizeList, VirtualListProps>(
       emptyState,
       loading = false,
       loadingState,
+      height = 400,
+      width = "100%",
       ...props
     },
     ref
@@ -80,10 +82,10 @@ export const VirtualList = React.forwardRef<FixedSizeList, VirtualListProps>(
       <div className={containerClassName}>
         <FixedSizeList
           ref={ref}
-          height={400}
+          height={height}
           itemCount={items.length}
           itemSize={itemHeight}
-          width="100%"
+          width={width}
           className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
           {...props}
         >
@@ -107,7 +109,7 @@ export const VirtualTable = React.forwardRef<
       render?: (value: any, item: any) => React.ReactNode;
     }[];
   }
->(({ items, columns, itemHeight = 48, className, ...props }, ref) => {
+>(({ items, columns, itemHeight = 48, className, height = 400, width, ...props }, ref) => {
   const totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
 
   const Row = ({
@@ -151,10 +153,10 @@ export const VirtualTable = React.forwardRef<
       <Header />
       <FixedSizeList
         ref={ref}
-        height={400}
+        height={height}
         itemCount={items.length}
         itemSize={itemHeight}
-        width={totalWidth}
+        width={width || totalWidth}
         className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
         {...props}
       >

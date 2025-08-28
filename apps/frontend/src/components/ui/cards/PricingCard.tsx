@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import * as React from "react";
 import { Button } from "../button";
-import { cardVariants, type CardVariantsProps } from "../card-variants";
+import { cardVariants, type CardVariants } from "../card-variants";
 
 export interface PricingCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    CardVariantsProps {
+    CardVariants {
   title: string;
   description: string;
   price: {
@@ -52,12 +52,6 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
     },
     ref
   ) => {
-    const sizeClasses = {
-      sm: "p-4",
-      md: "p-6",
-      lg: "p-8",
-    };
-
     const textSizes = {
       sm: {
         title: "text-lg",
@@ -77,14 +71,27 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
         price: "text-4xl",
         features: "text-base",
       },
+      xl: {
+        title: "text-3xl",
+        description: "text-xl",
+        price: "text-5xl",
+        features: "text-lg",
+      },
+      full: {
+        title: "text-xl",
+        description: "text-base",
+        price: "text-3xl",
+        features: "text-sm",
+      },
     };
+
+    const currentSize = size || "md";
 
     return (
       <div
         ref={ref}
         className={cn(
-          cardVariants({ variant, padding, hover }),
-          sizeClasses[size],
+          cardVariants({ variant, padding, hover, size }),
           popular && "ring-2 ring-primary/20 scale-105",
           className
         )}
@@ -101,11 +108,14 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
 
         {/* Header */}
         <div className="text-center mb-6">
-          <h3 className={cn("font-bold mb-2", textSizes[size].title)}>
+          <h3 className={cn("font-bold mb-2", textSizes[currentSize].title)}>
             {title}
           </h3>
           <p
-            className={cn("text-muted-foreground", textSizes[size].description)}
+            className={cn(
+              "text-muted-foreground",
+              textSizes[currentSize].description
+            )}
           >
             {description}
           </p>
@@ -113,7 +123,7 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
 
         {/* Pricing */}
         <div className="text-center mb-6">
-          <div className={cn("font-bold", textSizes[size].price)}>
+          <div className={cn("font-bold", textSizes[currentSize].price)}>
             {typeof price.amount === "number" ? (
               <>
                 {price.currency || "$"}
@@ -146,7 +156,7 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
                 <span
                   className={cn(
                     "text-muted-foreground",
-                    textSizes[size].features
+                    textSizes[currentSize].features
                   )}
                 >
                   {feature}
@@ -160,7 +170,7 @@ export const PricingCard = React.forwardRef<HTMLDivElement, PricingCardProps>(
                 <span
                   className={cn(
                     "text-muted-foreground",
-                    textSizes[size].features
+                    textSizes[currentSize].features
                   )}
                 >
                   {limitation}
