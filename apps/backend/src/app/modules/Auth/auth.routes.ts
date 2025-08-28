@@ -8,6 +8,11 @@ import {
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { authController } from "./auth.controller";
 import { authValidation } from "./auth.validation";
+import {
+  passwordResetLimiter,
+  emailVerificationLimiter,
+  sensitiveAuthLimiter,
+} from "../../middleware/rateLimiter";
 
 const router: express.Router = express.Router();
 
@@ -52,6 +57,35 @@ router.post(
   "/session/delete",
   validateRequestBody(authValidation.sessionValidationRequest),
   authController.deleteSession
+);
+
+// Password reset and email verification routes
+router.post(
+  "/forgot-password",
+  passwordResetLimiter,
+  validateRequestBody(authValidation.forgotPassword),
+  authController.forgotPassword
+);
+
+router.post(
+  "/reset-password",
+  passwordResetLimiter,
+  validateRequestBody(authValidation.passwordReset),
+  authController.resetPassword
+);
+
+router.post(
+  "/verify-email",
+  emailVerificationLimiter,
+  validateRequestBody(authValidation.emailVerification),
+  authController.verifyEmail
+);
+
+router.post(
+  "/send-verification",
+  sensitiveAuthLimiter,
+  validateRequestBody(authValidation.sessionValidationRequest),
+  authController.sendEmailVerification
 );
 
 // Protected routes for user management
