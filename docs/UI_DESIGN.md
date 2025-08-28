@@ -1,315 +1,705 @@
-# Scholar-Flow UI / UX Design Blueprint
+# 🎨 Scholar-Flow UI Design System
 
-Status: Phase 1 (MVP) in progress  
-Audience: Designers, Frontend engineers, Product  
-Source Inputs: Existing `README.md`, `.cursor/rules`, `.github/copilot-instructions.md`, project roadmap, and detailed page specs provided by product.
+> Comprehensive UI/UX design guidelines and component patterns for Scholar-Flow
 
-This document translates product & roadmap intent into an implementable UI / UX plan, sequenced by Phases (1–3) to keep scope controlled. It also embeds guard‑rails so Cursor / Copilot and contributors understand priorities, naming, and interaction patterns.
+## 📋 Overview
 
----
+This document defines the UI/UX design system for Scholar-Flow, providing guidelines for consistent, accessible, and beautiful user interfaces. All design decisions should align with the phased improvements outlined in `Improvements.md`.
 
-## 1. Core Design System & Foundations
+**Quick Links:**
 
-| Aspect        | Decision (MVP)                                                                        | Notes / Future Evolution                                          |
-| ------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Framework     | Next.js 15 App Router (RSC-first)                                                     | Keep client components minimal; server fetch for data-heavy pages |
-| Styling       | Tailwind CSS + ShadCN UI                                                              | Introduce design tokens layer (CSS vars) Phase 2 for theming      |
-| Icons         | Lucide (via ShadCN) + Custom domain icons                                             | Add semantic search, vector icon, citation graph icon             |
-| Typography    | System font stack (Phase 1)                                                           | Move to custom variable font Phase 2                              |
-| Color Tokens  | `--bg`, `--fg`, `--accent`, annotation highlight scales                               | Ensure WCAG AA; export palette doc                                |
-| Layout Grid   | 12-column desktop; 3-column composite (Sidebar / Main / Aux)                          | Collapses to single column mobile                                 |
-| Breakpoints   | sm (640), md (768), lg (1024), xl (1280), 2xl (1536)                                  | Keep ≤3 layout shifts                                             |
-| State Mgmt    | RTK Query per resource + lightweight slices (`auth`, `ui`, `search`, `notifications`) | Avoid over‑nesting; Phase 2 add entity adapters for lists         |
-| Motion        | Reduced by default; subtle opacity/scale for modals, annotation pulse                 | Phase 2 add presence transitions                                  |
-| Accessibility | Keyboard-first, focus rings visible, semantic landmarks                               | Audit each new page before merge                                  |
-| i18n          | Deferred; structure strings map early                                                 | Phase 2 integrate `next-intl`                                     |
-
-### Foundational Components (Phase 1 delivery)
-
-- Sidebar (collapsible): nav groups, active state, responsive collapse logic
-- Top Header: global search trigger, quick actions, notifications, user menu
-- Global Search Command Palette (`cmd/ctrl + k`)
-
-- Toast System (ShadCN `useToast` wrapper + slice integration for cross-page events)
-- Skeleton + Progress indicators (upload, AI summarization placeholder)
-
-- Modal / Drawer primitives (reuse ShadCN)
-- FAB (mobile only) with contextual actions (Upload / Annotate)
-
-### Naming Conventions
-
-`/src/app/(app)/...` for authenticated areas (optional segmentation)
-
-Component directories: `components/layout`, `components/navigation`, `components/papers`, `components/collections`, `components/graph`, `components/search`, `components/billing`, `components/admin`  
-State slices: `store/slices/uiSlice.ts`, `authSlice.ts` etc. (Consider collocating RTK Query APIs inside `store/api/` – already present.)
-
-## 2. Role / Permission Driven Visibility
-
-| Role | Phase 1 | Phase 2 | Phase 3 |
-| ---- | ------- | ------- | ------- |
-
-Sidebar & Command Palette dynamically filter restricted routes. Re-render on auth state change.
+- [📋 Improvements.md](../Improvements.md) - Complete improvement roadmap
+- [📝 CHANGELOG.md](../CHANGELOG.md) - Implementation progress tracking
+- [🗺️ Roadmap.md](../Roadmap.md) - Project roadmap
 
 ---
 
-## 3. Page Inventory Sequenced by Phases
+## 🎯 Design Principles
 
-### Phase 1 (MVP: Weeks 1–6)
+### 1. **Consistency First**
 
-Focus: Auth, Upload foundation, Basic Collections, Paper reading base, minimal dashboard.
+- Use established component patterns and variants
+- Maintain consistent spacing, typography, and color usage
+- Follow established interaction patterns
 
-| Priority | Page / Surface | Purpose | Core Components | API (initial) | Notes |
-| -------- | -------------- | ------- | --------------- | ------------- | ----- |
+### 2. **Accessibility by Default**
 
-| P0 | Landing (Marketing) | Conversion | Hero, FeatureCards, Pricing, Footer | Static | Can remain static until SEO iteration |
-| P0 | Auth (Signup/Login/Reset/OAuth) | Access | AuthForms, OAuthButtons | `/auth/*` (backend or Supabase) | Form validation (Zod) |
-| P0 | Onboarding Flow (Wizard) | First value | Stepper, UploadWidget, CollectionCreate | `/papers/upload`, `/collections` | Persist progress in `localStorage` |
-| P0 | Dashboard (Lite) | Recent + Quick actions | RecentPapersList, QuickTiles, UploadCTA | `/papers?sort=recent` | AI suggestions deferred |
-| P0 | Papers Library (List) | Browse & open | FiltersBar, PapersTable, EmptyState | `/papers` | Semantic toggle UI present but disabled flag |
-| P0 | Paper Detail / Reader (Basic) | Read + annotate stub | PDFViewer (embed), MetadataHeader | `/papers/:id` | Annotations panel placeholder component |
-| P1 | Collections List + Detail (Basic) | Grouping | CollectionsList, CollectionDetail | `/collections`, `/collections/:id` | Invitations deferred |
-| P1 | Upload / Import (Basic) | Add content | UploadArea, ImportByDOIForm | `/papers/upload` | External source import deferred |
-| P1 | Settings / Profile (Basic) | Edit profile | ProfileForm | `/me` | Integrations deferred |
-| P2 (defer) | Global Semantic Search Page | (Flagged) | SearchBar, ResultsList, SimilarPanel | `/search/semantic` | Hidden until embeddings ready |
+- WCAG 2.1 AA compliance for all components
+- Proper focus management and keyboard navigation
+- Semantic HTML structure with ARIA labels
 
-### Phase 2 (Advanced Collaboration & Intelligence)
+### 3. **Performance Conscious**
 
-Adds semantic search, shared collections, citation graph, expanded annotations.
+- Optimize for Core Web Vitals
+- Implement lazy loading and code splitting
+- Use efficient animations and transitions
 
-| New / Expanded | Page / Surface                   | Enhancements                                                           |
-| -------------- | -------------------------------- | ---------------------------------------------------------------------- |
-| Expanded       | Dashboard                        | AI recommendations, Timeline widget                                    |
-| Expanded       | Paper Detail                     | Full annotations, comment threads, AI summarize / citation suggestions |
-| New            | Semantic Search / Discovery      | Vector search UI, refinement chips, similarity scores                  |
-| New            | Citation Graph                   | Interactive graph canvas + node detail panel                           |
-| New            | Annotations History & Versioning | Version timeline, diff viewer                                          |
-| New            | Team / Workspace Management      | Workspace list, member roles, invites                                  |
-| Expanded       | Collections Detail               | Activity feed, invitations, permission badges                          |
+### 4. **Mobile-First Responsive**
 
-### Phase 3 (Monetization, Admin, Integrations)
-
-| Area         | Page / Surface         | Focus                                                |
-| ------------ | ---------------------- | ---------------------------------------------------- |
-| Billing      | Subscription & Billing | Plan upgrade, payment history, invoices              |
-| Admin        | Admin Dashboard        | User management, metrics, logs                       |
-| Integrations | External Imports       | arXiv / OpenAlex / CrossRef API forms & job statuses |
-| AI Assistant | Chat with Papers       | Multi-doc QA (scoped)                                |
-| Data         | Export & GDPR          | Account export, deletion workflow                    |
+- Design for mobile devices first
+- Progressive enhancement for larger screens
+- Touch-friendly interactions and sizing
 
 ---
 
-## 4. Component Architecture Mapping
+## 🎨 Color System
 
-| Category   | Components (Phase 1)                                                        | Later Additions                                            |
-| ---------- | --------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Navigation | `Sidebar`, `NavItem`, `TopHeader`, `CommandPalette`                         | `WorkspaceSwitcher` (Phase 2)                              |
-| Papers     | `PapersTable`, `PaperRow`, `PaperFilters`, `PaperDetailHeader`, `PDFViewer` | `AnnotationsPanel`, `AIActionBar`, `SemanticSnippet`       |
-| Forms      | `AuthForm`, `SignupForm`, `UploadForm`, `ProfileForm`                       | `InviteMemberForm`, `BillingPortalLink`                    |
-| Feedback   | `Toast`, `InlineError`, `LoadingSkeleton`, `ProgressBar`                    | `QuotaWarning`, `SemanticSearchBadge`                      |
-| Search     | (placeholder toggle in library)                                             | `SemanticSearchBar`, `SearchResultItem`, `SimilarityScore` |
-| Graph      | (deferred)                                                                  | `CitationGraphCanvas`, `GraphNodePanel`, `GraphControls`   |
-| Billing    | (deferred)                                                                  | `PlanCard`, `UpgradeModal`, `InvoiceTable`                 |
+### Primary Colors (OKLCH)
 
----
-
-## 5. State & Data Strategy
-
-RTK Query APIs (prefix suggestion):
-
-- `papersApi`: list, detail, upload mutation
-- `collectionsApi`: list, create, add paper
-- `authApi`: login, signup, profile fetch (hydrate `authSlice`)
-- `userApi`: (future) for profile / preferences if separated
-
-Slices:
-
-- `auth`: `{ user, status, error }`
-- `ui`: `{ sidebarCollapsed, theme, toasts[], commandPaletteOpen }`
-- `notifications`: list + read state (Phase 2)
-
-Persistence: Use `redux-persist` (or manual localStorage) only for lightweight keys: `theme`, `sidebarCollapsed`. Do NOT persist access tokens in localStorage if migrating to HTTP-only cookies (recommended).
-
----
-
-## 6. Accessibility & Inclusive Design Checklist (Phase 1 Targets)
-
-| Item                                                    | Status Goal           |
-| ------------------------------------------------------- | --------------------- |
-| Keyboard navigation across sidebar/header/forms         | 100%                  |
-| Focus visible for interactive elements                  | 100%                  |
-| Color contrast min 4.5:1 text, 3:1 UI icons             | Verified before merge |
-| ARIA labels: Buttons (Upload, Search, Collapse Sidebar) | Required              |
-| Motion reduced: `prefers-reduced-motion` respected      | Basic                 |
-
-```bash
-FEATURE_SEMANTIC_SEARCH=false
-FEATURE_ANNOTATIONS=false
-FEATURE_BILLING=false
+```css
+:root {
+  --primary: oklch(0.623 0.214 259.815);
+  --primary-foreground: oklch(0.97 0.014 254.604);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+}
 ```
 
-Wrap deferred UI with small utility: `if (!isFeatureEnabled('SEMANTIC_SEARCH')) return null;`
+### Semantic Colors
 
----
+```css
+:root {
+  /* Success */
+  --success: oklch(0.837 0.162 145.27);
+  --success-foreground: oklch(0.985 0 0);
 
-## 8. Routing Plan (App Router)
+  /* Warning */
+  --warning: oklch(0.816 0.158 86.047);
+  --warning-foreground: oklch(0.141 0.005 285.823);
 
-Suggested structure (Phase 1 realized subset):
+  /* Error */
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
 
-```bash
-app/
-  (marketing)/page.tsx                # Landing
-  auth/
-    login/page.tsx
-    signup/page.tsx
-    reset/page.tsx
-  dashboard/page.tsx
-  papers/
-    page.tsx                          # Library
-    [paperId]/page.tsx                # Reader
-  collections/
-    page.tsx
-    [collectionId]/page.tsx
-  upload/page.tsx
-  settings/profile/page.tsx
-  search/semantic/page.tsx            # (flagged)
-  graph/[paperId]/page.tsx            # (deferred)
-  billing/page.tsx                    # (Phase 3)
+  /* Info */
+  --info: oklch(0.598 0.178 238.7);
+  --info-foreground: oklch(0.985 0 0);
+}
+```
+
+### Neutral Grays (50-950 Scale)
+
+```css
+:root {
+  --gray-50: oklch(0.985 0 0);
+  --gray-100: oklch(0.967 0.001 286.375);
+  --gray-200: oklch(0.92 0.004 286.32);
+  --gray-300: oklch(0.869 0.006 286.286);
+  --gray-400: oklch(0.705 0.015 286.067);
+  --gray-500: oklch(0.552 0.016 285.938);
+  --gray-600: oklch(0.456 0.016 285.877);
+  --gray-700: oklch(0.372 0.014 285.823);
+  --gray-800: oklch(0.274 0.006 286.033);
+  --gray-900: oklch(0.21 0.006 285.885);
+  --gray-950: oklch(0.141 0.005 285.823);
+}
 ```
 
 ---
 
-## 9. UX Micro-Patterns
+## 📝 Typography System
 
-- Upload: show optimistic row (status: Processing) then replace when server completes.
-- Skeletons: Papers list (rows), Reader (page placeholders) while loading.
-- Command Palette: fuzzy search across (Papers, Collections, Actions) – Phase 2 expanded dataset.
-- Annotation Creation: highlight pulse animation (prefers-reduced-motion aware).
-- Error Surfaces: Inline + toast dual strategy for destructive failures.
+### Heading Scale
 
----
+```tsx
+export const typography = {
+  h1: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl",
+  h2: "scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0",
+  h3: "scroll-m-20 text-2xl font-semibold tracking-tight",
+  h4: "scroll-m-20 text-xl font-semibold tracking-tight",
+  h5: "scroll-m-20 text-lg font-semibold tracking-tight",
+  h6: "scroll-m-20 text-base font-semibold tracking-tight",
+};
+```
 
-## 10. Analytics & Telemetry (Instrumentation Points)
+### Body Text
 
-Phase 1 events: `auth_login_success`, `paper_upload_started`, `paper_upload_completed`, `collection_created`, `onboarding_completed`, `paper_opened`.
+```tsx
+export const typography = {
+  p: "leading-7 [&:not(:first-child)]:mt-6",
+  lead: "text-xl text-muted-foreground",
+  large: "text-lg font-semibold",
+  small: "text-sm font-medium leading-none",
+  muted: "text-sm text-muted-foreground",
+  code: "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
+};
+```
 
----
+### Font Weights
 
-## 11. Risk & Edge Case Mitigation
-
-| Area                    | Risk                 | Mitigation                                 |
-| ----------------------- | -------------------- | ------------------------------------------ |
-| Large PDF               | Memory / slow render | Paginate viewer, lazy page canvas load     |
-| Upload Failures         | User abandons        | Retry CTA + background job status poll     |
-| State Drift             | Unsynced flags       | Central `featureFlags` module + type       |
-| Annotation Scale        | Performance          | Virtualize list (Phase 2)                  |
-| Semantic Search Latency | UX freeze            | Show streaming skeleton / progressive list |
-
----
-
-## 12. Improvements vs Original Specification
-
-Enhancements introduced here:
-
-1. Formal feature flags to shield in-progress surfaces.
-2. Structured component taxonomy for predictable imports & tree-shaking.
-3. Accessibility checklist embedded from start (not an afterthought).
-4. Analytics phased event map (prevents ad-hoc naming).
-5. Routing layout plan ensures marketing vs app separation.
-6. Risk table to anticipate performance & UX pitfalls early.
-7. Naming standard for slices & APIs to align Copilot & Cursor generation.
+- **Light**: 300
+- **Normal**: 400
+- **Medium**: 500
+- **Semibold**: 600
+- **Bold**: 700
+- **Extrabold**: 800
 
 ---
 
-## 13. Alignment with `.cursor` & Copilot Instructions
+## 📏 Spacing & Layout
 
-- Roadmap Discipline: Pages mapped explicitly to Phase 1/2/3; discourage off-phase merges.
-- Typed SQL & Backend Limits: Semantic search & citation graph gated until embeddings infra stable.
-- PgVector Feature Flag: UI uses `FEATURE_SEMANTIC_SEARCH` to avoid premature coupling.
-- Quality Gates: Each shipped page requires lint + basic hydration test (smoke) before enabling link.
-- Observability: Track minimal core events early to validate adoption.
+### Container System
 
-Developers using Cursor / Copilot should reference this file before scaffolding new routes— auto-suggested filenames should follow the routing plan and component domains above.
+```tsx
+// Standard page container
+className = "mx-auto max-w-[1440px] px-3 sm:px-5 lg:px-8";
 
----
+// Section spacing
+className = "py-16 md:py-24 lg:py-32";
 
-## 14. Consistency & File Structure Review (Current Repo Notes)
+// Component spacing
+className = "space-y-4 md:space-y-6 lg:space-y-8";
+```
 
-Observed backend has both `src/app/routes` and `src/routes` – consider consolidating to a single routing entry to reduce confusion when mirroring frontend paths (recommended: keep `src/app/...` for modular feature pattern).  
-Frontend currently minimal; add `components/layout` & `components/navigation` directories before expanding.  
-Introduce `.env.example` entries for feature flags (see Section 7).  
-Ensure `README.md` cross-links to this document (Add "UI Design Blueprint" section).  
-Add a short badge or note in root README indicating current UI phase status.
+### Spacing Scale
 
----
+```tsx
+// Tailwind spacing values
+spacing: {
+  'xs': '0.5rem',    // 8px
+  'sm': '1rem',      // 16px
+  'md': '1.5rem',    // 24px
+  'lg': '2rem',      // 32px
+  'xl': '3rem',      // 48px
+  '2xl': '4rem',     // 64px
+  '18': '4.5rem',    // 72px
+  '88': '22rem',     // 352px
+  '128': '32rem',    // 512px
+  '144': '36rem',    // 576px
+}
+```
 
-## 15. Delivery Checklist (Phase 1 UI)
+### Breakpoints
 
-| Item                            | Status | Notes                            |
-| ------------------------------- | ------ | -------------------------------- |
-| Sidebar + Collapse Behaviour    | ☐      | Keyboard + ARIA support          |
-| Top Header + User Menu          | ☐      | Avatar fallback initials         |
-| Auth Pages (Login/Signup/Reset) | ☐      | Form validation messages         |
-| Onboarding Wizard (2–3 steps)   | ☐      | Persist partial progress         |
-| Upload Page (PDF only)          | ☐      | Drag-drop + size/type validation |
-| Papers List (Keyword search)    | ☐      | Semantic toggle disabled tooltip |
-| Paper Detail (Basic PDF embed)  | ☐      | Placeholder for annotations      |
-| Collections List & Detail       | ☐      | Create + add paper action        |
-| Profile Settings (Name/Avatar)  | ☐      | Avatar upload or placeholder     |
-| Feature Flags Plumbed           | ☐      | `.env` + utility module          |
-| Analytics Stub                  | ☐      | `track()` util + console log     |
-| Accessibility Pass (Core pages) | ☐      | Keyboard script test             |
-
----
-
-## 16. Next Steps After Phase 1 Freeze
-
-1. Instrument real semantic search once embeddings + pgvector stable.
-2. Expand annotation model & implement panel + real-time sync (WebSocket / Supabase Realtime).
-3. Add citation graph canvas with progressive node loading + clustering.
-4. Introduce billing flows; integrate Stripe portal link.
-5. Add admin-focused metrics & user moderation UI.
-6. Introduce design token extraction script (build-time) for theming.
-7. Integrate i18n scaffolding to isolate strings early Phase 2.
+```tsx
+// Mobile-first responsive design
+sm: '640px'   // Small devices
+md: '768px'   // Medium devices
+lg: '1024px'  // Large devices
+xl: '1280px'  // Extra large devices
+2xl: '1536px' // 2X large devices
+```
 
 ---
 
-## 17. Contributing Guidelines (UI Scope)
+## 🧩 Component Patterns
 
-- Adhere to phase boundaries; off-phase features require product signoff.
-- Every new component: include Story or at least a minimal usage doc (Phase 2 requirement; optional Phase 1 for core primitives).
-- Avoid premature abstraction; duplicate small patterns twice before generalizing.
-- Keep client components lean— server fetch where possible.
-- Ensure dark mode readiness by using semantic Tailwind classes (`bg-background`, `text-foreground`, etc.) if tokenized.
+### Button System
+
+```tsx
+// Button variants
+const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground shadow-lg hover:shadow-xl",
+        destructive: "bg-destructive text-destructive-foreground",
+        outline: "border border-border bg-background hover:bg-accent",
+        secondary: "bg-secondary text-secondary-foreground",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        gradient: "bg-gradient-to-r from-primary to-chart-1 text-white",
+      },
+      size: {
+        sm: "h-8 px-3 text-xs",
+        default: "h-9 px-4 py-2",
+        lg: "h-10 px-6",
+        xl: "h-12 px-8 text-base",
+        icon: "h-9 w-9",
+      },
+    },
+  }
+);
+```
+
+### Card System
+
+```tsx
+// Card variants
+const cardVariants = cva("rounded-xl border transition-all duration-300", {
+  variants: {
+    variant: {
+      default: "border-border bg-card",
+      ghost: "border-transparent hover:border-border",
+      elevated: "border-border shadow-lg hover:shadow-xl",
+      interactive:
+        "border-border/40 bg-background/60 backdrop-blur-sm hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10",
+    },
+    padding: {
+      none: "p-0",
+      sm: "p-4",
+      md: "p-6",
+      lg: "p-8",
+    },
+  },
+});
+```
+
+### Form System
+
+```tsx
+// Form field base
+const formFieldBase =
+  "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background";
+
+// Floating label input
+const floatingInput =
+  "peer w-full border-0 border-b-2 border-gray-300 bg-transparent px-0 py-3 placeholder-transparent focus:border-primary focus:outline-none";
+
+// Form validation states
+const formStates = {
+  default: "border-input focus-visible:ring-ring",
+  error: "border-destructive focus-visible:ring-destructive",
+  success: "border-success focus-visible:ring-success",
+};
+```
 
 ---
 
-## 18. Glossary
+## 🎭 Animation & Transitions
 
-| Term            | Definition                                                      |
-| --------------- | --------------------------------------------------------------- |
-| Semantic Search | Vector-based retrieval using embeddings (pgvector)              |
-| Collection      | User or team grouping of papers with metadata & permissions     |
-| Annotation      | Highlight + optional threaded comment anchored to paper content |
-| Citation Graph  | Network visualization of paper citation relationships           |
+### Transition Durations
+
+```tsx
+// Standard transition durations
+const transitions = {
+  fast: "duration-150",
+  normal: "duration-300",
+  slow: "duration-500",
+  slower: "duration-700",
+};
+```
+
+### Hover Effects
+
+```css
+/* Hover lift effect */
+.hover-lift {
+  @apply transition-transform duration-300 hover:-translate-y-1;
+}
+
+/* Hover glow effect */
+.hover-glow {
+  @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/20;
+}
+
+/* Hover scale effect */
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-105;
+}
+```
+
+### Page Transitions
+
+```tsx
+// Framer Motion page transitions
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: -20 }}
+  transition={{ duration: 0.3, ease: "easeOut" }}
+>
+  {children}
+</motion.div>
+```
+
+### Loading States
+
+```tsx
+// Skeleton loading
+const Skeleton = ({ className }: { className?: string }) => (
+  <div className={cn("animate-pulse rounded-md bg-muted", className)} />
+);
+
+// Loading spinner
+const LoadingSpinner = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => {
+  const sizeClasses = {
+    sm: "h-4 w-4",
+    md: "h-8 w-8",
+    lg: "h-12 w-12",
+  };
+
+  return (
+    <div className="flex items-center justify-center p-4">
+      <div
+        className={cn(
+          "animate-spin rounded-full border-4 border-primary border-t-transparent",
+          sizeClasses[size]
+        )}
+      />
+    </div>
+  );
+};
+```
 
 ---
 
-## 19. Change Log
+## 📱 Responsive Design Patterns
 
-| Date       | Change                                        | Author |
-| ---------- | --------------------------------------------- | ------ |
-| 2025-08-19 | Initial blueprint creation ✅                 | Atik   |
-| 2025-08-26 | Updated with completed authentication work ✅ | Atik   |
+### Mobile-First Approach
 
-### Recent Updates (2025-08-26)
+```tsx
+// Start with mobile styles, enhance for larger screens
+<div
+  className="
+  p-4                    // Mobile padding
+  md:p-6                 // Medium screen padding
+  lg:p-8                 // Large screen padding
+  xl:p-12                // Extra large screen padding
+"
+>
+  <h1
+    className="
+    text-2xl             // Mobile text size
+    md:text-3xl          // Medium screen text size
+    lg:text-4xl          // Large screen text size
+    xl:text-5xl          // Extra large screen text size
+  "
+  >
+    Responsive Heading
+  </h1>
+</div>
+```
 
-- ✅ **Authentication UI Complete**: Login/register pages with OAuth integration
-- ✅ **Form Validation**: React Hook Form + Zod validation patterns established
-- ✅ **Error Handling**: Comprehensive error states and loading indicators
-- ✅ **Responsive Design**: Mobile-first approach with proper breakpoints
-- ✅ **Feature Flags**: Enhanced environment variable strategy for gating features
-- ✅ **Component Architecture**: Established auth component patterns for future reference
+### Grid Layouts
+
+```tsx
+// Responsive grid columns
+<div
+  className="
+  grid
+  grid-cols-1            // Mobile: 1 column
+  sm:grid-cols-2         // Small: 2 columns
+  md:grid-cols-3         // Medium: 3 columns
+  lg:grid-cols-4         // Large: 4 columns
+  xl:grid-cols-5         // Extra large: 5 columns
+  gap-4                  // Consistent gap
+"
+>
+  {/* Grid items */}
+</div>
+```
+
+### Navigation Patterns
+
+```tsx
+// Mobile navigation
+<nav className="
+  lg:hidden              // Hide on large screens
+  fixed                  // Fixed positioning
+  inset-0                // Full screen
+  z-50                   // High z-index
+  bg-background/95       // Semi-transparent background
+  backdrop-blur          // Backdrop blur effect
+">
+  {/* Mobile menu content */}
+</nav>
+
+// Desktop navigation
+<nav className="
+  hidden                 // Hide on mobile
+  lg:flex                // Show on large screens
+  items-center
+  gap-6
+">
+  {/* Desktop menu content */}
+</nav>
+```
 
 ---
 
-Questions or proposals for deviation: open issue with label `ui-design` referencing section number.
+## ♿ Accessibility Guidelines
+
+### Focus Management
+
+```tsx
+// Focus trap for modals
+const useFocusTrap = (isActive: boolean) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    const element = ref.current;
+    if (!element) return;
+
+    const focusableElements = element.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+
+    // Focus trap logic
+  }, [isActive]);
+
+  return ref;
+};
+```
+
+### ARIA Labels
+
+```tsx
+// Proper ARIA usage
+<button
+  aria-label="Close modal"
+  aria-expanded={isOpen}
+  aria-controls="modal-content"
+  onClick={onClose}
+>
+  <X className="h-4 w-4" />
+</button>
+
+// Screen reader announcements
+<div
+  role="status"
+  aria-live="polite"
+  aria-atomic="false"
+>
+  {statusMessage}
+</div>
+```
+
+### Keyboard Navigation
+
+```tsx
+// Keyboard shortcuts
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
+    if (event.key === "Enter" && event.ctrlKey) {
+      onSubmit();
+    }
+  };
+
+  document.addEventListener("keydown", handleKeyDown);
+  return () => document.removeEventListener("keydown", handleKeyDown);
+}, [onClose, onSubmit]);
+```
+
+---
+
+## 🎨 Component Examples
+
+### Hero Section
+
+```tsx
+export const HeroSection = () => (
+  <section className="relative py-16 md:py-24 lg:py-32 overflow-hidden">
+    <div className="mx-auto max-w-[1440px] px-3 sm:px-5 lg:px-8">
+      <div className="text-center space-y-8">
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+        >
+          Research Made Simple
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-xl text-muted-foreground max-w-3xl mx-auto"
+        >
+          Collaborate on research papers, discover insights, and build knowledge
+          together.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <Button size="lg" className="btn-hover-glow">
+            Get Started
+          </Button>
+          <Button variant="outline" size="lg">
+            Learn More
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  </section>
+);
+```
+
+### Feature Card
+
+```tsx
+export const FeatureCard = ({
+  icon: Icon,
+  title,
+  description,
+}: FeatureCardProps) => (
+  <motion.div
+    whileHover={{ y: -4 }}
+    className="group relative overflow-hidden rounded-xl border border-border/40 bg-background/60 backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
+  >
+    <div className="p-6 space-y-4">
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+      </div>
+    </div>
+
+    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  </motion.div>
+);
+```
+
+---
+
+## 📊 Design Tokens
+
+### Shadows
+
+```css
+/* Shadow system */
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+.shadow-sm {
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.1),
+    0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+.shadow-md {
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+.shadow-lg {
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+.shadow-xl {
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+```
+
+### Border Radius
+
+```css
+/* Radius system */
+.rounded-sm {
+  border-radius: calc(var(--radius) - 4px);
+}
+.rounded-md {
+  border-radius: calc(var(--radius) - 2px);
+}
+.rounded-lg {
+  border-radius: var(--radius);
+}
+.rounded-xl {
+  border-radius: calc(var(--radius) + 4px);
+}
+```
+
+### Z-Index Scale
+
+```css
+/* Z-index system */
+.z-0 {
+  z-index: 0;
+}
+.z-10 {
+  z-index: 10;
+}
+.z-20 {
+  z-index: 20;
+}
+.z-30 {
+  z-index: 30;
+}
+.z-40 {
+  z-index: 40;
+}
+.z-50 {
+  z-index: 50;
+}
+.z-[60] {
+  z-index: 60;
+}
+.z-[70] {
+  z-index: 70;
+}
+.z-[80] {
+  z-index: 80;
+}
+.z-[90] {
+  z-index: 90;
+}
+.z-[100] {
+  z-index: 100;
+}
+```
+
+---
+
+## 🔄 Implementation Checklist
+
+### Before Starting Design
+
+- [ ] Check current phase in `Improvements.md`
+- [ ] Review existing component patterns
+- [ ] Understand design system constraints
+- [ ] Plan responsive behavior
+
+### During Design
+
+- [ ] Follow established color and typography systems
+- [ ] Use consistent spacing and layout patterns
+- [ ] Implement proper accessibility features
+- [ ] Test on multiple screen sizes
+
+### After Design
+
+- [ ] Update component documentation
+- [ ] Add to design system examples
+- [ ] Update progress tracking
+- [ ] Share with team for review
+
+---
+
+## 📚 Resources
+
+### Design Tools
+
+- [Figma](https://figma.com) - Design and prototyping
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Radix UI](https://radix-ui.com) - Unstyled, accessible components
+- [Framer Motion](https://framer.com/motion) - Animation library
+
+### Accessibility Tools
+
+- [axe-core](https://github.com/dequelabs/axe-core) - Accessibility testing
+- [WAVE](https://wave.webaim.org) - Web accessibility evaluation
+- [Contrast Checker](https://webaim.org/resources/contrastchecker/) - Color contrast testing
+
+### Performance Tools
+
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Performance auditing
+- [WebPageTest](https://www.webpagetest.org) - Performance testing
+- [Bundlephobia](https://bundlephobia.com) - Package size analysis
+
+---
+
+_Last Updated: August 28, 2025_
+_Maintained by: Md. Atikur Rahaman (GitHub: Atik203)_
+_Next Review: Weekly during implementation_
