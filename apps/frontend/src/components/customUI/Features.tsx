@@ -1,4 +1,6 @@
 "use client";
+import { PageContainer, Section } from "@/components/layout/PageContainer";
+import { Typography, TypographyComponents } from "@/lib/typography";
 import { motion } from "framer-motion";
 import {
   LucideBrain,
@@ -45,30 +47,30 @@ const features = [
 
 export const Features: React.FC = () => {
   return (
-    <section
+    <Section
       id="features"
-      className="py-32 relative overflow-hidden"
+      className="relative overflow-hidden"
       aria-labelledby="features-heading"
     >
       {/* Enhanced background patterns */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-primary/3 to-transparent" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_40%_60%,theme(colors.chart-1/6),transparent_50%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_60%_40%,theme(colors.primary/8),transparent_50%)]" />
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 relative">
+      <PageContainer className="relative">
         <div className="max-w-2xl">
-          <h2
+          <TypographyComponents.H2
             id="features-heading"
-            className="text-3xl md:text-4xl font-bold tracking-tight"
+            className="text-3xl md:text-4xl"
           >
             Powerful features for{" "}
             <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
               research velocity
             </span>
-          </h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
+          </TypographyComponents.H2>
+          <Typography variant="lead" className="mt-4">
             Built for teams who live in the literature: automate the grind &
             amplify insight.
-          </p>
+          </Typography>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => {
@@ -88,18 +90,21 @@ export const Features: React.FC = () => {
                   <div className="h-12 w-12 inline-flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-chart-1/10 text-primary border border-primary/20 group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-primary/20 group-hover:to-chart-1/15 transition-all duration-300 shadow-sm group-hover:shadow-md">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <h3 className="font-semibold text-base group-hover:text-primary/90 transition-colors">
+                  <TypographyComponents.H3 className="text-base group-hover:text-primary/90 transition-colors">
                     {f.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/90 transition-colors">
+                  </TypographyComponents.H3>
+                  <Typography
+                    variant="small"
+                    className="text-muted-foreground leading-relaxed group-hover:text-muted-foreground/90 transition-colors"
+                  >
                     {f.desc}
-                  </p>
+                  </Typography>
                 </div>
               </motion.div>
             );
           })}
         </div>
-      </div>
-    </section>
+      </PageContainer>
+    </Section>
   );
 };

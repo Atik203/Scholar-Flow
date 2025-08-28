@@ -125,6 +125,37 @@ const navigationItems = [
       },
     ],
   },
+  {
+    label: "Enterprise",
+    href: "#",
+    dropdown: true,
+    items: [
+      {
+        label: "Enterprise Solutions",
+        href: "/enterprise",
+        description: "Scalable solutions for organizations",
+        icon: Building2,
+      },
+      {
+        label: "Team Management",
+        href: "/enterprise/teams",
+        description: "Advanced team collaboration tools",
+        icon: Users,
+      },
+      {
+        label: "Custom Integrations",
+        href: "/enterprise/integrations",
+        description: "Integrate with your existing tools",
+        icon: BookOpen,
+      },
+      {
+        label: "Dedicated Support",
+        href: "/enterprise/support",
+        description: "24/7 priority support for enterprise",
+        icon: MessageSquare,
+      },
+    ],
+  },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" },
 ];
@@ -207,45 +238,50 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <PageContainer className="h-12 md:h-14 flex items-center justify-between gap-2 md:gap-4">
+      <PageContainer className="h-12 sm:h-13 md:h-14 flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
         <div className="flex items-center gap-3">
           <button
-            className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-primary/5 transition"
+            className="lg:hidden inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-primary/5 transition"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
           >
             {mobileOpen ? (
-              <X className="h-5 w-5" aria-hidden />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
             ) : (
-              <Menu className="h-5 w-5" aria-hidden />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden />
             )}
           </button>
           <Link
             href="/"
-            className="relative font-bold text-xl tracking-tight group transition-all duration-300"
+            className="relative font-bold tracking-tight group transition-all duration-300"
           >
-            <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text group-hover:scale-105 transition-transform duration-300 inline-block font-bold">
+            <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text group-hover:scale-105 transition-transform duration-300 inline-block font-bold text-lg sm:text-xl md:text-2xl lg:text-xl xl:text-2xl">
               ScholarFlow
             </span>
             <span className="absolute -inset-x-2 -bottom-1 top-1 rounded-md opacity-0 group-hover:opacity-20 bg-gradient-to-r from-primary/30 via-primary/20 to-transparent blur-sm transition-all duration-300" />
           </Link>
         </div>
-        <div className="flex items-center gap-2 md:gap-3">
-          <ul className="hidden lg:flex items-center gap-5 text-sm">
+
+        {/* Centered Navigation */}
+        <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2">
+          <ul className="flex items-center justify-center gap-5 text-sm">
             {navigationItems.map(renderNavItem)}
           </ul>
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-3">
           <Button
             onClick={toggleTheme}
             variant="outline"
             size="sm"
             aria-label="Toggle color theme"
-            className="w-9 h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
+            className="w-8 h-8 sm:w-9 sm:h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
           >
             {theme === "dark" ? (
-              <Sun className="h-4 w-4" aria-hidden />
+              <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
             ) : (
-              <Moon className="h-4 w-4" aria-hidden />
+              <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
             )}
             <span className="sr-only">Toggle theme</span>
           </Button>
@@ -256,7 +292,7 @@ export const Navbar: React.FC = () => {
               asChild
               size="sm"
               variant="gradient"
-              className="btn-hover-glow btn-shine shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="btn-hover-glow btn-shine shadow-xl hover:shadow-2xl transition-all duration-300 text-xs sm:text-sm px-3 sm:px-4"
             >
               <Link href="/login">Get Started</Link>
             </Button>
