@@ -1,6 +1,28 @@
 "use client";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  BookMarked,
+  BookOpen,
+  Building2,
+  ChevronDown,
+  FileText,
+  HelpCircle,
+  Lightbulb,
+  Menu,
+  MessageSquare,
+  Moon,
+  Phone,
+  Sun,
+  Users,
+  X,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -8,14 +30,103 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 import { UserMenu } from "./UserMenu";
 
-const navItems = [
-  { label: "Home", href: "/" },
-  { label: "Features", href: "/features" },
-  { label: "How it works", href: "/how-it-works" },
+// Navigation structure with dropdowns
+const navigationItems = [
+  {
+    label: "Products",
+    href: "#",
+    dropdown: true,
+    items: [
+      {
+        label: "Research Papers",
+        href: "/papers",
+        description: "Discover and organize academic papers",
+        icon: FileText,
+      },
+      {
+        label: "Collections",
+        href: "/collections",
+        description: "Create and share paper collections",
+        icon: BookOpen,
+      },
+      {
+        label: "Collaboration",
+        href: "/collaborate",
+        description: "Work together on research projects",
+        icon: Users,
+      },
+      {
+        label: "AI Insights",
+        href: "/ai-insights",
+        description: "AI-powered research analysis",
+        icon: Lightbulb,
+      },
+    ],
+  },
+  {
+    label: "Resources",
+    href: "#",
+    dropdown: true,
+    items: [
+      {
+        label: "Documentation",
+        href: "/docs",
+        description: "Complete API and usage guides",
+        icon: BookMarked,
+      },
+      {
+        label: "Tutorials",
+        href: "/tutorials",
+        description: "Step-by-step learning resources",
+        icon: HelpCircle,
+      },
+      {
+        label: "API Reference",
+        href: "/api",
+        description: "Developer API documentation",
+        icon: BookOpen,
+      },
+      {
+        label: "Community",
+        href: "/community",
+        description: "Connect with other researchers",
+        icon: Users,
+      },
+    ],
+  },
+  {
+    label: "Company",
+    href: "#",
+    dropdown: true,
+    items: [
+      {
+        label: "About Us",
+        href: "/about",
+        description: "Learn about our mission and team",
+        icon: Building2,
+      },
+      {
+        label: "Careers",
+        href: "/careers",
+        description: "Join our growing team",
+        icon: Users,
+      },
+      {
+        label: "Contact",
+        href: "/contact",
+        description: "Get in touch with our team",
+        icon: Phone,
+      },
+      {
+        label: "Support",
+        href: "/support",
+        description: "Get help and support",
+        icon: MessageSquare,
+      },
+    ],
+  },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" },
-  { label: "Contact", href: "/contact" },
-  { label: "About", href: "/about" },
 ];
 
 export const Navbar: React.FC = () => {
@@ -24,9 +135,79 @@ export const Navbar: React.FC = () => {
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const renderNavItem = (item: any) => {
+    if (item.dropdown) {
+      return (
+        <DropdownMenu key={item.label}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="relative px-2.5 py-1.5 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 group hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+            >
+              {item.label}
+              <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="w-80 p-2"
+            sideOffset={8}
+          >
+            <div className="grid gap-1">
+              {item.items.map((dropdownItem: any) => (
+                <DropdownMenuItem key={dropdownItem.href} asChild>
+                  <Link
+                    href={dropdownItem.href}
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                  >
+                    <dropdownItem.icon className="h-5 w-5 text-primary mt-0.5" />
+                    <div className="flex-1">
+                      <div className="font-medium text-foreground">
+                        {dropdownItem.label}
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-0.5">
+                        {dropdownItem.description}
+                      </div>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    }
+
+    return (
+      <li key={item.href}>
+        <Link
+          href={item.href}
+          className={
+            "relative px-2.5 py-1.5 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 group hover:bg-primary/5 " +
+            (pathname === item.href
+              ? "text-primary font-medium bg-primary/10"
+              : "text-muted-foreground hover:text-foreground")
+          }
+        >
+          <span className="relative z-10">{item.label}</span>
+          <span
+            className={
+              "pointer-events-none absolute inset-x-2 bottom-1 h-0.5 origin-left bg-gradient-to-r from-primary via-primary/80 to-primary/60 transition-all duration-300 " +
+              (pathname === item.href
+                ? "scale-x-100 opacity-100"
+                : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100")
+            }
+          />
+          <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </Link>
+      </li>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="relative mx-auto max-w-[1440px] px-3 sm:px-5 lg:px-8 h-12 md:h-14 flex items-center justify-between gap-2 md:gap-4">
+      <PageContainer className="h-12 md:h-14 flex items-center justify-between gap-2 md:gap-4">
         <div className="flex items-center gap-3">
           <button
             className="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-foreground hover:bg-primary/5 transition"
@@ -52,30 +233,7 @@ export const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center gap-2 md:gap-3">
           <ul className="hidden lg:flex items-center gap-5 text-sm">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={
-                    "relative px-2.5 py-1.5 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 group hover:bg-primary/5 " +
-                    (pathname === item.href
-                      ? "text-primary font-medium bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground")
-                  }
-                >
-                  <span className="relative z-10">{item.label}</span>
-                  <span
-                    className={
-                      "pointer-events-none absolute inset-x-2 bottom-1 h-0.5 origin-left bg-gradient-to-r from-primary via-primary/80 to-primary/60 transition-all duration-300 " +
-                      (pathname === item.href
-                        ? "scale-x-100 opacity-100"
-                        : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100")
-                    }
-                  />
-                  <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </Link>
-              </li>
-            ))}
+            {navigationItems.map(renderNavItem)}
           </ul>
           <Button
             onClick={toggleTheme}
@@ -104,29 +262,54 @@ export const Navbar: React.FC = () => {
             </Button>
           )}
         </div>
-      </div>
+      </PageContainer>
       {mobileOpen && (
         <div className="lg:hidden absolute inset-x-0 top-full z-50 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <nav className="mx-auto max-w-[1440px] px-3 py-2">
+          <PageContainer className="py-2">
             <ul className="grid gap-1">
-              {navItems.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={
-                      "flex items-center justify-between rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 " +
-                      (pathname === item.href
-                        ? "text-primary font-medium bg-primary/10"
-                        : "text-muted-foreground hover:text-foreground")
-                    }
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {navigationItems.map((item) => {
+                if (item.dropdown) {
+                  return (
+                    <li key={item.label}>
+                      <div className="px-3 py-2 text-sm font-medium text-foreground border-b border-border/20">
+                        {item.label}
+                      </div>
+                      <ul className="ml-4 mt-1 space-y-1">
+                        {item.items.map((dropdownItem: any) => (
+                          <li key={dropdownItem.href}>
+                            <Link
+                              href={dropdownItem.href}
+                              onClick={() => setMobileOpen(false)}
+                              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+                            >
+                              <dropdownItem.icon className="h-4 w-4" />
+                              {dropdownItem.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  );
+                }
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={
+                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 " +
+                        (pathname === item.href
+                          ? "text-primary font-medium bg-primary/10"
+                          : "text-muted-foreground hover:text-foreground")
+                      }
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
-          </nav>
+          </PageContainer>
         </div>
       )}
     </header>
