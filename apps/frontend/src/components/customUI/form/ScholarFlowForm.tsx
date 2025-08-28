@@ -1,145 +1,157 @@
 import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
 import {
-  Controller,
-  FieldPath,
-  FieldValues,
-  useFormContext,
+  FormProvider as ReactHookFormProvider,
+  useForm,
 } from "react-hook-form";
+import { z } from "zod";
 
-// Form Provider Wrapper
-export const FormProvider = React.forwardRef<
-  HTMLFormElement,
-  React.ComponentProps<"form">
->(({ className, ...props }, ref) => (
-  <form ref={ref} className={cn("space-y-6", className)} {...props} />
-));
-FormProvider.displayName = "FormProvider";
-
-// Form Field Component
-export interface FormFieldProps<
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> {
-  name: TName;
-  render: (props: {
-    field: {
-      value: any;
-      onChange: (...event: any[]) => void;
-      onBlur: () => void;
-      name: string;
-      ref: React.Ref<HTMLInputElement>;
-    };
-    fieldState: {
-      error?: any;
-      isTouched?: boolean;
-      isDirty?: boolean;
-    };
-    formState: {
-      isSubmitting?: boolean;
-      isLoading?: boolean;
-    };
-  }) => React.ReactElement;
+// Form Provider Component
+interface FormProviderProps {
+  children: React.ReactNode;
+  schema?: z.ZodType<any, any, any>;
+  defaultValues?: any;
+  onSubmit?: (data: any) => void;
+  className?: string;
 }
 
-export const FormField = <
-  TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({
-  name,
-  render,
-}: FormFieldProps<TFieldValues, TName>) => {
-  const { control, formState } = useFormContext<TFieldValues>();
+export const FormProvider: React.FC<FormProviderProps> = ({
+  children,
+  schema,
+  defaultValues = {},
+  onSubmit,
+  className,
+}) => {
+  const methods = useForm({
+    resolver: schema ? zodResolver(schema) : undefined,
+    defaultValues,
+  });
+
+  const handleSubmit = methods.handleSubmit((data) => {
+    onSubmit?.(data);
+  });
 
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={(props) => render({ ...props, formState })}
-    />
+    <ReactHookFormProvider {...methods}>
+      <form onSubmit={handleSubmit} className={cn("space-y-6", className)}>
+        {children}
+      </form>
+    </ReactHookFormProvider>
+  );
+};
+
+// Form Field Component
+interface FormFieldProps {
+  children: React.ReactNode;
+  name: string;
+  className?: string;
+}
+
+export const FormField: React.FC<FormFieldProps> = ({
+  children,
+  name,
+  className,
+}) => {
+  return <div className={cn("space-y-2", className)}>{children}</div>;
+};
+
+// Form Input Component
+interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  required?: boolean;
+}
+
+export const FormInput: React.FC<FormInputProps> = ({
+  label,
+  error,
+  helperText,
+  required,
+  className,
+  ...props
+}) => {
+  return (
+    <div className="space-y-2">
+      {label && (
+        <label className="text-sm font-medium text-foreground">
+          {label}
+          {required && <span className="text-destructive ml-1">*</span>}
+        </label>
+      )}
+      <input
+        className={cn(
+          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          error && "border-destructive focus-visible:ring-destructive",
+          className
+        )}
+        {...props}
+      />
+      {helperText && !error && (
+        <p className="text-sm text-muted-foreground">{helperText}</p>
+      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
   );
 };
 
 // Form Label Component
-export interface FormLabelProps extends React.ComponentProps<"label"> {
+interface FormLabelProps {
+  children: React.ReactNode;
+  htmlFor?: string;
   required?: boolean;
+  className?: string;
 }
 
-export const FormLabel = React.forwardRef<HTMLLabelElement, FormLabelProps>(
-  ({ className, required, children, ...props }, ref) => (
+export const FormLabel: React.FC<FormLabelProps> = ({
+  children,
+  htmlFor,
+  required,
+  className,
+}) => {
+  return (
     <label
-      ref={ref}
-      className={cn(
-        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-        className
-      )}
-      {...props}
+      htmlFor={htmlFor}
+      className={cn("text-sm font-medium text-foreground", className)}
     >
       {children}
       {required && <span className="text-destructive ml-1">*</span>}
     </label>
-  )
-);
-FormLabel.displayName = "FormLabel";
-
-// Form Input Component
-export interface FormInputProps extends React.ComponentProps<"input"> {
-  error?: boolean;
-}
-
-export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
-  ({ className, error, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={cn(
-        "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-        error && "border-destructive focus-visible:ring-destructive",
-        className
-      )}
-      {...props}
-    />
-  )
-);
-FormInput.displayName = "FormInput";
+  );
+};
 
 // Form Error Component
-export interface FormErrorProps extends React.ComponentProps<"p"> {
-  error?: string;
+interface FormErrorProps {
+  children: React.ReactNode;
+  className?: string;
 }
 
-export const FormError = React.forwardRef<HTMLParagraphElement, FormErrorProps>(
-  ({ className, error, ...props }, ref) => {
-    if (!error) return null;
-
-    return (
-      <p
-        ref={ref}
-        className={cn("text-sm text-destructive", className)}
-        {...props}
-      >
-        {error}
-      </p>
-    );
-  }
-);
-FormError.displayName = "FormError";
+export const FormError: React.FC<FormErrorProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <p className={cn("text-sm text-destructive", className)}>{children}</p>
+  );
+};
 
 // Form Description Component
-export interface FormDescriptionProps extends React.ComponentProps<"p"> {}
+interface FormDescriptionProps {
+  children: React.ReactNode;
+  className?: string;
+}
 
-export const FormDescription = React.forwardRef<
-  HTMLParagraphElement,
-  FormDescriptionProps
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-));
-FormDescription.displayName = "FormDescription";
+export const FormDescription: React.FC<FormDescriptionProps> = ({
+  children,
+  className,
+}) => {
+  return (
+    <p className={cn("text-sm text-muted-foreground", className)}>{children}</p>
+  );
+};
 
-// Main Form Export
+// Export all components as ScholarForm object
 export const ScholarForm = {
   Root: FormProvider,
   Field: FormField,

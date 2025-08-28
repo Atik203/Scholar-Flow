@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
 import * as React from "react";
-import { cardVariants, type CardVariantsProps } from "../card-variants";
+import { cardVariants, type CardVariants } from "../card-variants";
 
 export interface TestimonialCardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    CardVariantsProps {
+    CardVariants {
   author: {
     name: string;
     role?: string;
@@ -38,12 +38,6 @@ export const TestimonialCard = React.forwardRef<
     },
     ref
   ) => {
-    const sizeClasses = {
-      sm: "p-4",
-      md: "p-6",
-      lg: "p-8",
-    };
-
     const textSizes = {
       sm: {
         content: "text-sm",
@@ -60,7 +54,19 @@ export const TestimonialCard = React.forwardRef<
         author: "text-lg",
         role: "text-base",
       },
+      xl: {
+        content: "text-xl",
+        author: "text-xl",
+        role: "text-lg",
+      },
+      full: {
+        content: "text-base",
+        author: "text-base",
+        role: "text-sm",
+      },
     };
+
+    const currentSize = size || "md";
 
     const renderStars = (rating: number) => {
       return Array.from({ length: 5 }, (_, i) => (
@@ -80,8 +86,7 @@ export const TestimonialCard = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          cardVariants({ variant, padding, hover }),
-          sizeClasses[size],
+          cardVariants({ variant, padding, hover, size }),
           className
         )}
         {...props}
@@ -93,7 +98,7 @@ export const TestimonialCard = React.forwardRef<
         </div>
 
         {/* Content */}
-        <blockquote className={cn("mb-6", textSizes[size].content)}>
+        <blockquote className={cn("mb-6", textSizes[currentSize].content)}>
           "{content}"
         </blockquote>
 
@@ -118,7 +123,7 @@ export const TestimonialCard = React.forwardRef<
               <cite
                 className={cn(
                   "font-semibold not-italic",
-                  textSizes[size].author
+                  textSizes[currentSize].author
                 )}
               >
                 {author.name}
@@ -141,7 +146,7 @@ export const TestimonialCard = React.forwardRef<
             </div>
 
             {(author.role || author.company) && (
-              <p className={cn("text-muted-foreground", textSizes[size].role)}>
+              <p className={cn("text-muted-foreground", textSizes[currentSize].role)}>
                 {author.role}
                 {author.role && author.company && " at "}
                 {author.company}
@@ -149,7 +154,7 @@ export const TestimonialCard = React.forwardRef<
             )}
 
             {date && (
-              <p className={cn("text-muted-foreground", textSizes[size].role)}>
+              <p className={cn("text-muted-foreground", textSizes[currentSize].role)}>
                 {date}
               </p>
             )}

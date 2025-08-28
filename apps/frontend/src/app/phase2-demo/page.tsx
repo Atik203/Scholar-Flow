@@ -149,11 +149,8 @@ export default function Phase2DemoPage() {
                     id="email"
                     type="email"
                     placeholder="Enter your email"
-                    error={!!form.formState.errors.email}
-                    {...form.register("email")}
-                  />
-                  <ScholarForm.Error
                     error={form.formState.errors.email?.message}
+                    {...form.register("email")}
                   />
                 </div>
 
@@ -165,11 +162,8 @@ export default function Phase2DemoPage() {
                     id="name"
                     type="text"
                     placeholder="Enter your full name"
-                    error={!!form.formState.errors.name}
-                    {...form.register("name")}
-                  />
-                  <ScholarForm.Error
                     error={form.formState.errors.name?.message}
+                    {...form.register("name")}
                   />
                 </div>
 
@@ -185,9 +179,11 @@ export default function Phase2DemoPage() {
                     searchable
                     error={!!form.formState.errors.category}
                   />
-                  <ScholarForm.Error
-                    error={form.formState.errors.category?.message}
-                  />
+                  {form.formState.errors.category?.message && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.category.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -200,9 +196,11 @@ export default function Phase2DemoPage() {
                     placeholder="Enter description"
                     {...form.register("description")}
                   />
-                  <ScholarForm.Error
-                    error={form.formState.errors.description?.message}
-                  />
+                  {form.formState.errors.description?.message && (
+                    <ScholarForm.Error>
+                      {form.formState.errors.description.message}
+                    </ScholarForm.Error>
+                  )}
                 </div>
 
                 <Button

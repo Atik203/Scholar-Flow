@@ -21,17 +21,18 @@ export function useKeyboardShortcut(
   } = options;
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+    (e: Event) => {
+      const keyboardEvent = e as KeyboardEvent;
       const pressedKeys = [
-        e.ctrlKey && "Ctrl",
-        e.altKey && "Alt",
-        e.shiftKey && "Shift",
-        e.metaKey && "Meta",
-        e.key !== "Control" &&
-          e.key !== "Alt" &&
-          e.key !== "Shift" &&
-          e.key !== "Meta" &&
-          e.key,
+        keyboardEvent.ctrlKey && "Ctrl",
+        keyboardEvent.altKey && "Alt",
+        keyboardEvent.shiftKey && "Shift",
+        keyboardEvent.metaKey && "Meta",
+        keyboardEvent.key !== "Control" &&
+          keyboardEvent.key !== "Alt" &&
+          keyboardEvent.key !== "Shift" &&
+          keyboardEvent.key !== "Meta" &&
+          keyboardEvent.key,
       ].filter(Boolean) as string[];
 
       const isMatch =
@@ -40,12 +41,12 @@ export function useKeyboardShortcut(
 
       if (isMatch) {
         if (preventDefault) {
-          e.preventDefault();
+          keyboardEvent.preventDefault();
         }
         if (stopPropagation) {
-          e.stopPropagation();
+          keyboardEvent.stopPropagation();
         }
-        handler(e);
+        handler(keyboardEvent);
       }
     },
     [keys, handler, preventDefault, stopPropagation]
