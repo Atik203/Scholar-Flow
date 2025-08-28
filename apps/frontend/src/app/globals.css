@@ -495,3 +495,28 @@ h3 {
 .landing-page #nd-subnav button[data-search] + button {
   @apply hidden;
 }
+
+/* Phase 3: Animation Enhancements */
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Hover effects library */
+.hover-lift {
+  @apply transition-transform duration-300 hover:-translate-y-1;
+}
+
+.hover-glow {
+  @apply transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/20;
+}
+
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-105;
+}

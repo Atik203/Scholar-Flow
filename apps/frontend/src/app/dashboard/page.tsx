@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { StatCard } from "@/components/ui/cards/StatCard";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { USER_ROLES } from "@/lib/auth/roles";
 import {
@@ -192,24 +193,17 @@ export default function DashboardPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {recentStats.map((stat, index) => (
-            <Card key={index} className="dark:bg-gray-800 dark:border-gray-700">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">
-                      {stat.change}
-                    </p>
-                  </div>
-                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              key={index}
+              title={stat.title}
+              value={stat.value}
+              change={0}
+              trend="neutral"
+              icon={stat.icon}
+              description={stat.change}
+              variant="default"
+              hover="lift"
+            />
           ))}
         </div>
 

@@ -4,7 +4,7 @@ import React from "react";
 interface PageContainerProps {
   children: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({
@@ -12,12 +12,13 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   className = "",
   as: Component = "div",
 }) => {
+  const ComponentElement = Component as React.ElementType;
   return (
-    <Component
+    <ComponentElement
       className={cn("mx-auto max-w-[1440px] px-3 sm:px-5 lg:px-8", className)}
     >
       {children}
-    </Component>
+    </ComponentElement>
   );
 };
 
@@ -25,12 +26,13 @@ export const PageContainer: React.FC<PageContainerProps> = ({
 export const Section: React.FC<{
   children: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: keyof React.JSX.IntrinsicElements;
 }> = ({ children, className = "", as: Component = "section" }) => {
+  const ComponentElement = Component as React.ElementType;
   return (
-    <Component className={cn("py-16 md:py-24 lg:py-32", className)}>
+    <ComponentElement className={cn("py-16 md:py-24 lg:py-32", className)}>
       {children}
-    </Component>
+    </ComponentElement>
   );
 };
 

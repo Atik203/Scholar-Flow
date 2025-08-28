@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchInput } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,34 +53,47 @@ export default function PapersSearchPage() {
           <CardHeader>
             <CardTitle className="dark:text-white">Paper Search</CardTitle>
             <CardDescription className="dark:text-gray-400">
-              This feature is coming soon in Phase 1 of ScholarFlow
+              Search through your research papers using our Phase 2 enhanced
+              search
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <FileSearch className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Advanced Search Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                We're building powerful search capabilities to help you find
-                exactly what you're looking for in your research library.
-              </p>
-              <div className="space-y-4">
-                <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-orange-900 dark:text-orange-100 mb-2">
-                    Planned Features:
-                  </h4>
-                  <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
-                    <li>• Full-text search across all papers</li>
-                    <li>• Filter by author, date, keywords</li>
-                    <li>• Semantic search using AI</li>
-                    <li>• Advanced query builders</li>
-                  </ul>
+            <div className="space-y-6">
+              {/* Phase 2 Search Input */}
+              <div className="max-w-2xl mx-auto">
+                <SearchInput
+                  placeholder="Search papers by title, author, keywords, or content..."
+                  onSearch={(query) => console.log("Search query:", query)}
+                  showClearButton
+                  className="w-full"
+                />
+              </div>
+
+              <div className="text-center py-8">
+                <FileSearch className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Enhanced Search with Phase 2 Components
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                  Experience our new Phase 2 search capabilities with enhanced
+                  UI components.
+                </p>
+                <div className="space-y-4">
+                  <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                    <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
+                      Phase 2 Features Now Available:
+                    </h4>
+                    <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+                      <li>• Enhanced search input with clear button</li>
+                      <li>• Improved UI components and animations</li>
+                      <li>• Better accessibility and user experience</li>
+                      <li>• Consistent design system integration</li>
+                    </ul>
+                  </div>
+                  <Button asChild>
+                    <Link href="/dashboard">Return to Dashboard</Link>
+                  </Button>
                 </div>
-                <Button asChild>
-                  <Link href="/dashboard">Return to Dashboard</Link>
-                </Button>
               </div>
             </div>
           </CardContent>
