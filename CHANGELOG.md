@@ -4,11 +4,10 @@
 
 ## 🎯 Overview
 
-This changelog tracks the implementation progress of all frontend improvements outlined in `Improvements.md`. Each feature implementation should update both this changelog and the corresponding checkboxes in the improvements document.
+This changelog tracks the implementation progress of all frontend improvements and serves as the complete roadmap. Each feature implementation should update this changelog with implementation details.
 
 **Quick Links:**
 
-- [📋 Improvements.md](./Improvements.md) - Complete improvement roadmap
 - [🎨 UI_DESIGN.md](./docs/UI_DESIGN.md) - UI/UX design guidelines
 - [🗺️ Roadmap.md](./Roadmap.md) - Project roadmap
 
@@ -980,7 +979,7 @@ export const cardVariants = cva(
 ### When Implementing Features
 
 1. **Update this changelog** with implementation details
-2. **Check off items** in `Improvements.md`
+2. **Update progress** in `CHANGELOG.md`
 3. **Update progress** in the dashboard above
 4. **Add implementation notes** and code examples
 5. **Update status** (⏸️ Pending → 🔄 In Progress → ✅ Completed)
