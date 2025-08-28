@@ -118,6 +118,11 @@ export const passwordResetRequestSchema = z.object({
   email: z.string().email("Invalid email format"),
 });
 
+// Forgot password validation (initiate password reset)
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
 // Password reset validation
 export const passwordResetSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
@@ -128,6 +133,11 @@ export const passwordResetSchema = z.object({
       /^(?=.*[a-z])(?=.*\d)/,
       "Password must contain at least one lowercase letter and one number"
     ),
+});
+
+// Email verification validation
+export const emailVerificationSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
 });
 
 // User creation validation
@@ -204,8 +214,9 @@ export const authValidation = {
   login: loginSchema,
   register: registerSchema,
   passwordChange: passwordChangeSchema,
-  passwordResetRequest: passwordResetRequestSchema,
+  forgotPassword: forgotPasswordSchema,
   passwordReset: passwordResetSchema,
+  emailVerification: emailVerificationSchema,
   createUser: createUserSchema,
   updateUser: updateUserSchema,
   jwtPayload: jwtPayloadSchema,
