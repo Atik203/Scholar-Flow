@@ -11,15 +11,18 @@ export {
   CardTitle,
 } from "./card";
 export {
-  CardWithVariants,
   cardPresets,
   cardVariants,
+  CardWithVariants,
   type CardVariants,
 } from "./card-variants";
 
 // Specialized Cards
 export { FeatureCard } from "./cards/FeatureCard";
+export { PricingCard } from "./cards/PricingCard";
+export { ProfileCard } from "./cards/ProfileCard";
 export { StatCard } from "./cards/StatCard";
+export { TestimonialCard } from "./cards/TestimonialCard";
 
 // Form Components
 export { FloatingInput } from "../customUI/form/FloatingInput";
@@ -38,6 +41,7 @@ export { SelectField } from "../customUI/form/SelectField";
 // Other UI Components
 export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 export { Badge, badgeVariants } from "./badge";
+export { Checkbox } from "./checkbox";
 export {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,3 +80,39 @@ export {
   TooltipProvider,
   TooltipTrigger,
 } from "./tooltip";
+
+// Phase 3: Performance & UX Components
+export {
+  HoverCard,
+  LoadingSpinner,
+  PageTransition,
+  StaggerContainer,
+} from "../transitions/PageTransition";
+export {
+  ContentLoader,
+  LoadingSkeleton,
+  ProgressBar,
+  Shimmer,
+  Spinner,
+} from "./loading-states";
+export { OptimizedImage } from "./optimized-image";
+export { VirtualList, VirtualTable } from "./virtual-list";
+
+// Phase 4: Advanced UI Components
+export { DataTable } from "./data-table/DataTable";
+export {
+  Modal,
+  ModalBody,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "./modal/Modal";
+
+// Navigation Components
+export {
+  Breadcrumbs,
+  BreadcrumbsWithBack,
+  CompactBreadcrumbs,
+} from "../navigation/Breadcrumbs";
+export { CommandPalette } from "../navigation/CommandPalette";
