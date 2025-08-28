@@ -3,6 +3,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { usePublicRoute } from "@/hooks/useAuthGuard";
 import { getGetStartedUrl } from "@/lib/auth/redirects";
+import { Typography, TypographyComponents } from "@/lib/typography";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -69,29 +70,31 @@ export const Hero: React.FC = () => {
       <PageContainer>
         {/* Main Hero Content */}
         <div className="text-center mb-20">
-          <motion.h1
+          <motion.div
             id="hero-heading"
             initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight"
           >
-            Collaborate Smarter on{" "}
-            <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent relative">
-              Research
-              <span className="absolute -inset-x-2 -inset-y-1 bg-gradient-to-r from-primary/10 via-chart-1/10 to-transparent blur-2xl -z-10" />
-            </span>
-          </motion.h1>
-          <motion.p
+            <TypographyComponents.H1 className="text-4xl sm:text-5xl md:text-6xl">
+              Collaborate Smarter on{" "}
+              <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent relative">
+                Research
+                <span className="absolute -inset-x-2 -inset-y-1 bg-gradient-to-r from-primary/10 via-chart-1/10 to-transparent blur-2xl -z-10" />
+              </span>
+            </TypographyComponents.H1>
+          </motion.div>
+          <motion.div
             initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.7, ease: "easeOut" }}
-            className="mt-6 mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed"
           >
-            ScholarFlow centralizes your papers, semantic search, AI summaries,
-            annotations, and collection sharing so your literature review
-            accelerates.
-          </motion.p>
+            <Typography variant="lead" className="mt-6 mx-auto max-w-2xl">
+              ScholarFlow centralizes your papers, semantic search, AI
+              summaries, annotations, and collection sharing so your literature
+              review accelerates.
+            </Typography>
+          </motion.div>
           <motion.div
             initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.95 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
@@ -131,7 +134,7 @@ export const Hero: React.FC = () => {
           whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
           transition={{ delay: 0.4, duration: 0.7 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-18"
         >
           {features.map((feature, index) => (
             <motion.div
@@ -140,18 +143,21 @@ export const Hero: React.FC = () => {
               whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.5 }}
               transition={{ delay: 0.1 * index, duration: 0.5 }}
-              className="group relative p-6 rounded-2xl border border-primary/20 bg-gradient-to-b from-muted/50 via-background/80 to-background hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
+              className="group relative p-6 rounded-2xl border border-primary/20 bg-gradient-to-b from-muted/50 via-background/80 to-background hover:border-success/40 transition-all duration-300 hover:shadow-lg hover:shadow-success/10"
             >
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mb-4 group-hover:bg-primary/20 transition-colors duration-300">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-success/10 text-success mb-4 group-hover:bg-success/20 transition-colors duration-300">
                 <feature.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
+              <TypographyComponents.H3 className="text-lg mb-2">
                 {feature.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              </TypographyComponents.H3>
+              <Typography
+                variant="small"
+                className="text-muted-foreground leading-relaxed"
+              >
                 {feature.description}
-              </p>
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </Typography>
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-success/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
           ))}
         </motion.div>
@@ -165,12 +171,12 @@ export const Hero: React.FC = () => {
           className="relative mx-auto max-w-4xl rounded-2xl border border-primary/20 bg-gradient-to-b from-muted/50 via-background/80 to-background p-8 md:p-12 shadow-2xl hover:shadow-3xl transition-all duration-500"
         >
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+            <TypographyComponents.H2 className="text-2xl md:text-3xl mb-2">
               Trusted by Researchers Worldwide
-            </h2>
-            <p className="text-muted-foreground">
+            </TypographyComponents.H2>
+            <Typography variant="muted">
               Join thousands of researchers who have transformed their workflow
-            </p>
+            </Typography>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -187,30 +193,47 @@ export const Hero: React.FC = () => {
                 transition={{ delay: 0.1 * index, duration: 0.5 }}
                 className="text-center"
               >
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-1">
+                <Typography
+                  variant="h4"
+                  className={`text-3xl md:text-4xl mb-1 ${
+                    index === 0
+                      ? "text-info"
+                      : index === 1
+                        ? "text-success"
+                        : index === 2
+                          ? "text-warning"
+                          : "text-primary"
+                  }`}
+                >
                   {stat.number}
-                </div>
-                <div className="text-sm text-muted-foreground">
+                </Typography>
+                <Typography variant="small" className="text-muted-foreground">
                   {stat.label}
-                </div>
+                </Typography>
               </motion.div>
             ))}
           </div>
 
           {/* Trust indicators */}
           <div className="mt-8 pt-8 border-t border-border/20">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-6">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>99.9% Uptime</span>
+                <CheckCircle2 className="h-4 w-4 text-success" />
+                <Typography variant="small" className="text-muted-foreground">
+                  99.9% Uptime
+                </Typography>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>Enterprise Security</span>
+                <CheckCircle2 className="h-4 w-4 text-info" />
+                <Typography variant="small" className="text-muted-foreground">
+                  Enterprise Security
+                </Typography>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span>24/7 Support</span>
+                <CheckCircle2 className="h-4 w-4 text-warning" />
+                <Typography variant="small" className="text-muted-foreground">
+                  24/7 Support
+                </Typography>
               </div>
             </div>
           </div>
