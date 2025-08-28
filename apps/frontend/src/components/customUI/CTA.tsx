@@ -67,14 +67,11 @@ export const CTA: React.FC = () => {
               asChild
               size="lg"
               className="shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90"
-              disabled={isLoading}
+              loading={isLoading}
+              loadingText="Loading..."
             >
               <Link href={getStartedUrl}>
-                {isLoading
-                  ? "Loading..."
-                  : isAuthenticated
-                    ? "Go to Dashboard →"
-                    : "Get Started →"}
+                {isAuthenticated ? "Go to Dashboard →" : "Get Started →"}
               </Link>
             </Button>
             <Button
