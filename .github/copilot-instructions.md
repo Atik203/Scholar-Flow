@@ -6,6 +6,8 @@
 **Type**: AI-Powered Research Paper Collaboration Hub  
 **Architecture**: Monorepo with Next.js frontend and Express.js backend  
 **Phase**: Phase 1 Development (MVP) - Authentication Complete ✅
+**Project Start**: August 2025
+**Developer**: Md. Atikur Rahaman (GitHub: Atik203)
 
 - use yarn dev:turbo to run frontend and backend
 - Package manager: Yarn (Berry). Do not use npm in this repo.
@@ -27,6 +29,29 @@
 - **State Management**: Redux Toolkit Query (RTK Query)
 - **Authentication**: NextAuth.js (Auth.js) with JWT strategy
 - **Forms**: React Hook Form + Zod validation
+
+### Frontend Improvements & Design System
+
+**IMPORTANT**: All frontend improvements must follow the phased approach outlined in `Improvements.md` and update tracking documents.
+
+**Key Documents:**
+
+- **Improvements.md**: Complete roadmap with 5 phases and checkboxes
+- **CHANGELOG.md**: Implementation progress tracking
+- **UI_DESIGN.md**: UI/UX design guidelines
+- **Roadmap.md**: Project roadmap
+
+**Implementation Workflow:**
+
+1. Check current phase in `Improvements.md`
+2. Follow DRY patterns and existing design system
+3. After completion: ✅ Update checkboxes, 📝 Update CHANGELOG.md, 🔄 Update progress
+4. Maintain OKLCH color system and `max-w-[1440px]` container width
+
+**Current Phase**: Phase 1 (Core Design System & Navigation) - CRITICAL
+**Next Priority**: Modern SaaS Navbar with Dropdowns
+**Project Start**: August 2025
+**Developer**: Md. Atikur Rahaman (GitHub: Atik203)
 
 ### Backend (apps/backend)
 
@@ -493,3 +518,62 @@ When making significant changes to authentication, UI/UX, or core patterns:
 4. Update `Roadmap.md` to reflect completion status
 5. Add feature flags to both backend and frontend `.env.example` files
 6. Update main `README.md` only for major milestones or architecture changes
+
+## Frontend Improvements Tracking Protocol
+
+**CRITICAL**: All frontend improvements must update tracking documents to maintain progress visibility.
+
+### When Implementing Frontend Features:
+
+1. **Before Starting:**
+   - Check current phase in `Improvements.md`
+   - Review specific feature requirements and dependencies
+   - Understand existing design system (OKLCH colors, component patterns)
+
+2. **During Implementation:**
+   - Follow DRY patterns from `Improvements.md`
+   - Use existing component variants and styling
+   - Maintain consistency with current theme and spacing
+   - Implement TypeScript-first with proper typing
+
+3. **After Completion:**
+   - ✅ Check off completed items in `Improvements.md` checkboxes
+   - 📝 Update `CHANGELOG.md` with implementation details
+   - 🔄 Update progress percentages in tracking dashboard
+   - 📚 Add implementation notes and code examples
+   - 🎯 Update status (Pending → In Progress → Completed)
+
+### Required Updates for Each Feature:
+
+````markdown
+#### ✅ [Feature Name]
+
+- **Status**: ✅ Completed
+- **Started**: [Date]
+- **Completed**: [Date]
+- **Files**: [File paths]
+- **Progress**: 100%
+
+**Implementation Notes:**
+
+- [Key implementation details]
+- [Dependencies added]
+- [Testing performed]
+
+**Code Example:**
+
+```tsx
+// Relevant code snippet
+```
+````
+
+```
+
+### Current Implementation Status:
+- **Phase 1**: 8% complete (1/12 items in progress)
+- **Overall Progress**: 2% complete (1/54 total items)
+- **Next Priority**: Modern SaaS Navbar with Dropdowns
+- **Target**: Complete Phase 1 by August 2025
+- **Project Start**: August 2025
+- **Developer**: Md. Atikur Rahaman (GitHub: Atik203)
+```
