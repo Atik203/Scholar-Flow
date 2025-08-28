@@ -1,5 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2 } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -38,24 +39,57 @@ const buttonVariants = cva(
   }
 );
 
+export interface ButtonProps
+  extends React.ComponentProps<"button">,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  loading?: boolean;
+  loadingText?: string;
+}
+
 function Button({
   className,
   variant,
   size,
   asChild = false,
+  loading = false,
+  loadingText,
+  children,
+  disabled,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+
+  // When using asChild, we need to handle loading differently to avoid multiple children
+  if (asChild) {
+    // For asChild, we'll clone the child and add our props to it
+    return (
+      <Slot
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...(props as any)}
+        disabled={isDisabled}
+      >
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {loadingText || children}
+          </span>
+        ) : (
+          children
+        )}
+      </Slot>
+    );
+  }
 
   return (
-    <Comp
-      data-slot="button"
+    <button
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isDisabled}
       {...props}
-    />
+    >
+      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      {loading && loadingText ? loadingText : children}
+    </button>
   );
 }
 
