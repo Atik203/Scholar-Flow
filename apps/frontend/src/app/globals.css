@@ -45,6 +45,51 @@
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
+  --success-50: oklch(0.98 0.03 145);
+  --success-100: oklch(0.95 0.05 145);
+  --success-200: oklch(0.88 0.08 145);
+  --success-300: oklch(0.78 0.12 145);
+  --success-400: oklch(0.68 0.16 145);
+  --success-500: oklch(0.58 0.19 145);
+  --success-600: oklch(0.48 0.18 145);
+  --success-700: oklch(0.38 0.15 145);
+  --success-800: oklch(0.28 0.12 145);
+  --success-900: oklch(0.18 0.09 145);
+
+  --warning-50: oklch(0.98 0.03 80);
+  --warning-100: oklch(0.95 0.06 80);
+  --warning-200: oklch(0.9 0.1 80);
+  --warning-300: oklch(0.82 0.14 80);
+  --warning-400: oklch(0.72 0.18 80);
+  --warning-500: oklch(0.62 0.22 80);
+  --warning-600: oklch(0.52 0.2 80);
+  --warning-700: oklch(0.42 0.16 80);
+  --warning-800: oklch(0.32 0.12 80);
+  --warning-900: oklch(0.22 0.1 80);
+
+  --info-50: oklch(0.98 0.03 230);
+  --info-100: oklch(0.95 0.06 230);
+  --info-200: oklch(0.9 0.1 230);
+  --info-300: oklch(0.82 0.14 230);
+  --info-400: oklch(0.72 0.18 230);
+  --info-500: oklch(0.62 0.22 230);
+  --info-600: oklch(0.52 0.2 230);
+  --info-700: oklch(0.42 0.16 230);
+  --info-800: oklch(0.32 0.12 230);
+  --info-900: oklch(0.22 0.1 230);
+
+  --gray-50: oklch(0.98 0 0);
+  --gray-100: oklch(0.95 0 0);
+  --gray-200: oklch(0.9 0 0);
+  --gray-300: oklch(0.82 0 0);
+  --gray-400: oklch(0.72 0 0);
+  --gray-500: oklch(0.62 0 0);
+  --gray-600: oklch(0.52 0 0);
+  --gray-700: oklch(0.42 0 0);
+  --gray-800: oklch(0.32 0 0);
+  --gray-900: oklch(0.22 0 0);
+  --gray-950: oklch(0.12 0 0);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
@@ -80,6 +125,14 @@
 .dark {
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
+  --success-50: oklch(0.18 0.09 145);
+  --success-900: oklch(0.98 0.03 145);
+  --warning-50: oklch(0.22 0.1 80);
+  --warning-900: oklch(0.98 0.03 80);
+  --info-50: oklch(0.22 0.1 230);
+  --info-900: oklch(0.98 0.03 230);
+  --gray-50: oklch(0.12 0 0);
+  --gray-950: oklch(0.98 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
