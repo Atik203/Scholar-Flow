@@ -106,14 +106,11 @@ export const Hero: React.FC = () => {
               size="lg"
               variant="gradient"
               className="btn-hover-glow btn-shine btn-inner-glow shadow-xl hover:shadow-2xl transition-all duration-300"
-              disabled={isLoading}
+              loading={isLoading}
+              loadingText="Loading..."
             >
               <Link href={getStartedUrl}>
-                {isLoading
-                  ? "Loading..."
-                  : isAuthenticated
-                    ? "Go to Dashboard"
-                    : "Get Started"}
+                {isAuthenticated ? "Go to Dashboard" : "Get Started"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
