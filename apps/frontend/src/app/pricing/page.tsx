@@ -1,4 +1,5 @@
 "use client";
+import { CardWithVariants } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -99,7 +100,7 @@ const faqs = [
       "Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences.",
   },
   {
-            question: "What&apos;s included in the free trial?",
+    question: "What&apos;s included in the free trial?",
     answer:
       "All paid plans include a 14-day free trial with full access to features. No credit card required to start.",
   },
@@ -146,8 +147,8 @@ export default function PricingPage() {
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
               Choose the perfect plan for your research needs. Start free,
-              upgrade when you&apos;re ready. All plans include our core AI-powered
-              features.
+              upgrade when you&apos;re ready. All plans include our core
+              AI-powered features.
             </p>
 
             {/* Billing Toggle */}
@@ -193,98 +194,107 @@ export default function PricingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: index * 0.1, duration: 0.6 }}
-                className={`relative rounded-2xl border p-8 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${
-                  plan.popular
-                    ? "border-primary/50 bg-gradient-to-b from-primary/5 to-chart-1/5 shadow-xl scale-105"
-                    : "border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30"
-                }`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="bg-gradient-to-r from-primary to-chart-1 text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </div>
-                  </div>
-                )}
-
-                <div className="text-center mb-8">
-                  <div className="h-12 w-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-primary/20 to-chart-1/20 border border-primary/30 flex items-center justify-center">
-                    <plan.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div className="text-center mb-8">
-                  <div className="text-4xl font-bold">
-                    {typeof plan.price[billingPeriod] === "number" ? (
-                      <>
-                        ${plan.price[billingPeriod]}
-                        <span className="text-lg font-normal text-muted-foreground">
-                          /{billingPeriod === "monthly" ? "mo" : "year"}
-                        </span>
-                      </>
-                    ) : (
-                      plan.price[billingPeriod]
-                    )}
-                  </div>
-                  {billingPeriod === "annual" &&
-                    typeof plan.price.monthly === "number" &&
-                    typeof plan.price.annual === "number" &&
-                    plan.price.monthly > 0 && (
-                      <div className="text-sm text-muted-foreground mt-1">
-                        ${Math.round(plan.price.annual / 12)}/month billed
-                        annually
-                      </div>
-                    )}
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                  {plan.limitations.map((limitation, idx) => (
-                    <li key={idx} className="flex items-start gap-3 opacity-60">
-                      <div className="h-5 w-5 mt-0.5 flex-shrink-0 flex items-center justify-center">
-                        <div className="h-1 w-3 bg-muted-foreground rounded" />
-                      </div>
-                      <span className="text-sm">{limitation}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Button
-                  asChild={plan.name !== "Enterprise"}
-                  variant={
-                    plan.name === "Enterprise"
-                      ? "outline"
-                      : plan.popular
-                        ? "default"
-                        : "outline"
-                  }
-                  className={`w-full py-3 px-4 font-semibold transition-all duration-300 ${
-                    plan.name === "Enterprise"
-                      ? "border border-border bg-background hover:bg-primary/5"
-                      : plan.popular
-                        ? "bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5"
-                        : "border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
+                <CardWithVariants
+                  variant={plan.popular ? "gradient" : "default"}
+                  hover={plan.popular ? "scale" : "lift"}
+                  padding="lg"
+                  className={`relative ${
+                    plan.popular
+                      ? "border-primary/50 bg-gradient-to-b from-primary/5 to-chart-1/5 shadow-xl scale-105"
+                      : "border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30"
                   }`}
                 >
-                  {plan.name === "Enterprise" ? (
-                    "Contact Sales"
-                  ) : (
-                    <Link href="/login">
-                      {plan.name === "Free"
-                        ? "Get Started"
-                        : `Start ${plan.name} Trial`}
-                    </Link>
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                      <div className="bg-gradient-to-r from-primary to-chart-1 text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
+                        Most Popular
+                      </div>
+                    </div>
                   )}
-                </Button>
+
+                  <div className="text-center mb-8">
+                    <div className="h-12 w-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-primary/20 to-chart-1/20 border border-primary/30 flex items-center justify-center">
+                      <plan.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <div className="text-center mb-8">
+                    <div className="text-4xl font-bold">
+                      {typeof plan.price[billingPeriod] === "number" ? (
+                        <>
+                          ${plan.price[billingPeriod]}
+                          <span className="text-lg font-normal text-muted-foreground">
+                            /{billingPeriod === "monthly" ? "mo" : "year"}
+                          </span>
+                        </>
+                      ) : (
+                        plan.price[billingPeriod]
+                      )}
+                    </div>
+                    {billingPeriod === "annual" &&
+                      typeof plan.price.monthly === "number" &&
+                      typeof plan.price.annual === "number" &&
+                      plan.price.monthly > 0 && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          ${Math.round(plan.price.annual / 12)}/month billed
+                          annually
+                        </div>
+                      )}
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                    {plan.limitations.map((limitation, idx) => (
+                      <li
+                        key={idx}
+                        className="flex items-start gap-3 opacity-60"
+                      >
+                        <div className="h-5 w-5 mt-0.5 flex-shrink-0 flex items-center justify-center">
+                          <div className="h-1 w-3 bg-muted-foreground rounded" />
+                        </div>
+                        <span className="text-sm">{limitation}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    asChild={plan.name !== "Enterprise"}
+                    variant={
+                      plan.name === "Enterprise"
+                        ? "outline"
+                        : plan.popular
+                          ? "default"
+                          : "outline"
+                    }
+                    className={`w-full py-3 px-4 font-semibold transition-all duration-300 ${
+                      plan.name === "Enterprise"
+                        ? "border border-border bg-background hover:bg-primary/5"
+                        : plan.popular
+                          ? "bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5"
+                          : "border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
+                    }`}
+                  >
+                    {plan.name === "Enterprise" ? (
+                      "Contact Sales"
+                    ) : (
+                      <Link href="/login">
+                        {plan.name === "Free"
+                          ? "Get Started"
+                          : `Start ${plan.name} Trial`}
+                      </Link>
+                    )}
+                  </Button>
+                </CardWithVariants>
               </motion.div>
             ))}
           </div>

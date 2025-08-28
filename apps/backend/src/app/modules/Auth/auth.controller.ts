@@ -313,6 +313,70 @@ class AuthController {
       });
     }
   });
+
+  /**
+   * Initiate forgot password process
+   * POST /api/auth/forgot-password
+   */
+  forgotPassword = catchAsync(async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    const result = await authService.initiateForgotPassword(email);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: result.message,
+    });
+  });
+
+  /**
+   * Reset password using token
+   * POST /api/auth/reset-password
+   */
+  resetPassword = catchAsync(async (req: Request, res: Response) => {
+    const { token, newPassword } = req.body;
+
+    const result = await authService.resetPassword(token, newPassword);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: result.message,
+    });
+  });
+
+  /**
+   * Verify email using token
+   * POST /api/auth/verify-email
+   */
+  verifyEmail = catchAsync(async (req: Request, res: Response) => {
+    const { token } = req.body;
+
+    const result = await authService.verifyEmail(token);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: result.message,
+    });
+  });
+
+  /**
+   * Send email verification email
+   * POST /api/auth/send-verification
+   */
+  sendEmailVerification = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.body;
+
+    const result = await authService.sendEmailVerification(userId);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: result.message,
+    });
+  });
 }
 
 export const authController = new AuthController();

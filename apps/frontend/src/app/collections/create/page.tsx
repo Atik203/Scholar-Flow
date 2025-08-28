@@ -1,5 +1,6 @@
 "use client";
 
+import { FloatingInput, ScholarForm, SelectField } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowLeft, BookOpen, Plus } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -50,38 +51,70 @@ export default function CollectionsCreatePage() {
 
         <Card className="dark:bg-gray-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="dark:text-white">Collections</CardTitle>
+            <CardTitle className="dark:text-white">
+              Create New Collection
+            </CardTitle>
             <CardDescription className="dark:text-gray-400">
-              This feature is coming soon in Phase 1 of ScholarFlow
+              Use our Phase 2 enhanced form components to create your collection
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12">
-              <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Collections Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                We're building the collection system to help you organize your
-                research papers by topics, projects, or any custom
-                categorization.
-              </p>
-              <div className="space-y-4">
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
-                    Planned Features:
-                  </h4>
-                  <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
-                    <li>• Create custom collections</li>
-                    <li>• Organize papers by topic or project</li>
-                    <li>• Share collections with collaborators</li>
-                    <li>• Set permissions and access controls</li>
-                  </ul>
+            <div className="max-w-2xl mx-auto">
+              <ScholarForm.Root
+                onSubmit={(data) => console.log("Collection data:", data)}
+              >
+                <div className="space-y-6">
+                  <div>
+                    <ScholarForm.Label htmlFor="name" required>
+                      Collection Name
+                    </ScholarForm.Label>
+                    <FloatingInput
+                      id="name"
+                      label="Collection Name"
+                      placeholder="Enter collection name"
+                      required
+                      helperText="Choose a descriptive name for your collection"
+                    />
+                  </div>
+
+                  <div>
+                    <ScholarForm.Label htmlFor="description">
+                      Description
+                    </ScholarForm.Label>
+                    <FloatingInput
+                      id="description"
+                      label="Description"
+                      placeholder="Describe what this collection is about"
+                      helperText="Optional: Add a description to help organize your research"
+                    />
+                  </div>
+
+                  <div>
+                    <ScholarForm.Label htmlFor="category">
+                      Category
+                    </ScholarForm.Label>
+                    <SelectField
+                      options={[
+                        { value: "research", label: "Research Papers" },
+                        { value: "review", label: "Literature Review" },
+                        { value: "project", label: "Project Related" },
+                        { value: "personal", label: "Personal Interest" },
+                        { value: "other", label: "Other" },
+                      ]}
+                      placeholder="Select a category"
+                      searchable
+                      helperText="Choose a category that best describes your collection"
+                    />
+                  </div>
+
+                  <div className="pt-4">
+                    <Button type="submit" className="w-full" size="lg">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Collection
+                    </Button>
+                  </div>
                 </div>
-                <Button asChild>
-                  <Link href="/dashboard">Return to Dashboard</Link>
-                </Button>
-              </div>
+              </ScholarForm.Root>
             </div>
           </CardContent>
         </Card>
