@@ -74,7 +74,7 @@ class AuthService {
   /**
    * Sign in with email and password
    */
-  async signInWithPassword(email: string, password: string) {
+  async signInWithPassword(email: string, _password: string) {
     try {
       // Find user by email
       const user = await prisma.user.findUnique({
@@ -102,13 +102,14 @@ class AuthService {
       }
 
       // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(_password, user.password);
       if (!isPasswordValid) {
         throw new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
       }
 
       // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {
       if (error instanceof ApiError) {

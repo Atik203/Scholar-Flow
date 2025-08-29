@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import config from '../config';
+// import config from '../config';
 import prisma from './prisma';
 
 export interface TokenPayload {

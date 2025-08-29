@@ -36,6 +36,27 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  
+  // Debug logging
+  console.log("UpdateProfile - User object:", user);
+  console.log("UpdateProfile - Request body:", req.body);
+  
+  if (!user || !user.id) {
+    throw new Error("User authentication failed: user object is missing or invalid");
+  }
+  
+  const result = await userService.updateProfile(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile updated successfully!",
+    data: result,
+  });
+});
+
 const changePassword = catchAsync(async (req: Request, res: Response) => {
   const user = (req as any).user as IAuthUser;
   await userService.changePassword(user, req.body);
@@ -51,5 +72,6 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
 export const userController = {
   getAllFromDB,
   getMyProfile,
+  updateProfile,
   changePassword,
 };

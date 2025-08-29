@@ -1,5 +1,8 @@
 import express from "express";
 import { userController } from "./user.controller";
+import { validateRequestBody } from "../../middleware/validateRequest";
+import { updateProfileSchema, changePasswordSchema } from "./user.validation";
+import { authMiddleware } from "../../middleware/auth";
 
 const router: import("express").Router = express.Router();
 
@@ -104,7 +107,7 @@ const router: import("express").Router = express.Router();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/", userController.getAllFromDB);
+router.get("/", authMiddleware, userController.getAllFromDB);
 
 /**
  * @swagger
@@ -170,7 +173,76 @@ router.get("/", userController.getAllFromDB);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/me", userController.getMyProfile);
+router.get("/me", authMiddleware, userController.getMyProfile);
+
+/**
+ * @swagger
+ * /api/user/update-profile:
+ *   put:
+ *     summary: Update User Profile
+ *     description: Update the current user's profile information including name, institution, field of study, and image.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Full name of the user
+ *                 example: "Dr. John Smith"
+ *               firstName:
+ *                 type: string
+ *                 description: First name of the user
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 description: Last name of the user
+ *                 example: "Smith"
+ *               institution:
+ *                 type: string
+ *                 description: User's institution or organization
+ *                 example: "Stanford University"
+ *               fieldOfStudy:
+ *                 type: string
+ *                 description: User's field of study or research area
+ *                 example: "Computer Science"
+ *               image:
+ *                 type: string
+ *                 description: URL to user's profile image
+ *                 example: "https://example.com/avatar.jpg"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.put("/update-profile", authMiddleware, validateRequestBody(updateProfileSchema), userController.updateProfile);
 
 /**
  * @swagger
@@ -223,6 +295,6 @@ router.get("/me", userController.getMyProfile);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/change-password", userController.changePassword);
+router.post("/change-password", authMiddleware, validateRequestBody(changePasswordSchema), userController.changePassword);
 
 export const userRoutes = router;
