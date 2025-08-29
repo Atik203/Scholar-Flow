@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { AuthRequest } from "../../middleware/auth";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
+import AppError from "../../errors/AppError";
 import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "./auth.constant";
 import {
   IOAuthSignInRequest,
@@ -116,7 +117,10 @@ class AuthController {
   updateUserRole = catchAsync(async (req: AuthRequest, res: Response) => {
     const { userId } = req.params;
     const roleData = req.body as IRoleUpdateData;
-    const adminUserId = req.user?.id!;
+    const adminUserId = req.user?.id;
+    if (!adminUserId) {
+      throw new AppError(401, "User not authenticated");
+    }
 
     const updatedUser = await authService.updateUserRole(
       adminUserId,
@@ -140,7 +144,10 @@ class AuthController {
    */
   getAllUsers = catchAsync(async (req: AuthRequest, res: Response) => {
     const filters = req.query as IUserFilters;
-    const requestingUserId = req.user?.id!;
+    const requestingUserId = req.user?.id;
+    if (!requestingUserId) {
+      throw new AppError(401, "User not authenticated");
+    }
 
     const users = await authService.getAllUsers(requestingUserId, filters);
 
