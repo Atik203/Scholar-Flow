@@ -43,6 +43,29 @@ export interface SessionResponse {
   };
 }
 
+// Password Reset Interfaces
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+export interface EmailVerificationRequest {
+  token: string;
+}
+
+export interface SendVerificationRequest {
+  userId: string;
+}
+
+export interface AuthMessageResponse {
+  success: boolean;
+  message: string;
+}
+
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // OAuth sign-in
@@ -113,6 +136,45 @@ export const authApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    // Forgot password
+    forgotPassword: builder.mutation<AuthMessageResponse, ForgotPasswordRequest>({
+      query: (data) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Reset password
+    resetPassword: builder.mutation<AuthMessageResponse, ResetPasswordRequest>({
+      query: (data) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Verify email
+    verifyEmail: builder.mutation<AuthMessageResponse, EmailVerificationRequest>({
+      query: (data) => ({
+        url: "/auth/verify-email",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
+    // Send email verification
+    sendEmailVerification: builder.mutation<
+      AuthMessageResponse,
+      SendVerificationRequest
+    >({
+      query: (data) => ({
+        url: "/auth/send-verification",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -123,4 +185,8 @@ export const {
   useCreateSessionMutation,
   useDeleteSessionMutation,
   useGetSessionMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+  useVerifyEmailMutation,
+  useSendEmailVerificationMutation,
 } = authApi;
