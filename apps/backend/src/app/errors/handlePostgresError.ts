@@ -7,7 +7,7 @@ const handlePostgresError = (err: any): TGenericErrorResponse => {
 
   // Handle different PostgreSQL error codes
   switch (err.code) {
-    case "23505":
+    case "23505": {
       // Unique violation
       statusCode = 409;
       message = "Duplicate entry";
@@ -19,6 +19,7 @@ const handlePostgresError = (err: any): TGenericErrorResponse => {
         },
       ];
       break;
+    }
 
     case "23503":
       // Foreign key violation
@@ -32,11 +33,11 @@ const handlePostgresError = (err: any): TGenericErrorResponse => {
       ];
       break;
 
-    case "23502":
+    case "23502": {
       // Not null violation
       statusCode = 400;
       message = "Required field missing";
-      const column = err.column || "unknown";
+      const column = err.column || "column";
       errorSources = [
         {
           path: column,
@@ -44,6 +45,7 @@ const handlePostgresError = (err: any): TGenericErrorResponse => {
         },
       ];
       break;
+    }
 
     case "23514":
       // Check violation
