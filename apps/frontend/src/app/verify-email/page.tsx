@@ -1,16 +1,19 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useVerifyEmailMutation } from "@/redux/auth/authApi";
-import { motion } from "framer-motion";
 import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle,
-  Mail,
-  Shield,
-  Sparkles,
-  XCircle,
-} from "lucide-react";
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  useGetCurrentUserQuery,
+  useSendEmailVerificationMutation,
+  useVerifyEmailMutation,
+} from "@/redux/auth/authApi";
+import { motion } from "framer-motion";
+import { ArrowRight, CheckCircle, Mail, Send, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,50 +21,198 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function VerifyEmailPage() {
-  const [isVerifying, setIsVerifying] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [manualToken, setManualToken] = useState("");
   const [verifyEmail] = useVerifyEmailMutation();
+  const [sendVerification, { isLoading: isSending }] =
+    useSendEmailVerificationMutation();
+  const { data: currentUser } = useGetCurrentUserQuery();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
 
   useEffect(() => {
-    if (!token) {
+    if (token) {
+      const verifyTokenFromURL = async () => {
+        try {
+          setIsVerifying(true);
+          setIsError(false);
+          setErrorMessage("");
+
+          const result = await verifyEmail({ token }).unwrap();
+
+          if (result.success) {
+            setIsSuccess(true);
+            toast.success("Email verified successfully!", {
+              description: "Your account is now fully activated",
+            });
+            // Redirect to profile after 2 seconds
+            setTimeout(() => {
+              router.push("/profile");
+            }, 2000);
+          }
+        } catch (error: any) {
+          console.error("Email verification error:", error);
+          console.error("Error details:", JSON.stringify(error, null, 2));
+          setIsError(true);
+
+          // Handle RTK Query error structure
+          let errorMessage = "Failed to verify email. Please try again.";
+          if (error?.data?.message) {
+            errorMessage = error.data.message;
+          } else if (error?.message) {
+            errorMessage = error.message;
+          } else if (typeof error === "string") {
+            errorMessage = error;
+          }
+
+          setErrorMessage(errorMessage);
+          toast.error("Email verification failed", {
+            description: errorMessage,
+          });
+        } finally {
+          setIsVerifying(false);
+        }
+      };
+
+      verifyTokenFromURL();
+    }
+  }, [token, verifyEmail, router]);
+
+  const verifyToken = async (tokenToVerify: string) => {
+    try {
+      setIsVerifying(true);
+      const result = await verifyEmail({ token: tokenToVerify }).unwrap();
+
+      if (result.success) {
+        setIsSuccess(true);
+        toast.success("Email verified successfully!", {
+          description: "Your account is now fully activated",
+        });
+        // Redirect to profile after 2 seconds
+        setTimeout(() => {
+          router.push("/profile");
+        }, 2000);
+      }
+    } catch (error: any) {
       setIsError(true);
-      setErrorMessage("No verification token provided");
+
+      // Handle RTK Query error structure
+      let errorMessage = "Failed to verify email. Please try again.";
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      setErrorMessage(errorMessage);
+      toast.error("Email verification failed", {
+        description: errorMessage,
+      });
+    } finally {
       setIsVerifying(false);
+    }
+  };
+
+  const handleManualVerify = () => {
+    if (!manualToken.trim()) {
+      toast.error("Please enter a verification token");
+      return;
+    }
+    verifyToken(manualToken.trim());
+  };
+
+  const handleSendVerification = async () => {
+    if (!currentUser?.data?.user?.id) {
+      toast.error("Please log in to send verification email");
       return;
     }
 
-    const verifyToken = async () => {
-      try {
-        const result = await verifyEmail({ token }).unwrap();
-        
-        if (result.success) {
-          setIsSuccess(true);
-          toast.success("Email verified successfully!", {
-            description: "Your account is now fully activated",
-          });
-        }
-      } catch (error: any) {
-        console.error("Email verification error:", error);
-        setIsError(true);
-        setErrorMessage(
-          error?.data?.message || "Failed to verify email. Please try again."
-        );
-        toast.error("Email verification failed", {
-          description: error?.data?.message || "Please try again later",
-        });
-      } finally {
-        setIsVerifying(false);
-      }
-    };
+    try {
+      await sendVerification({ userId: currentUser.data.user.id }).unwrap();
+      toast.success("Verification email sent!", {
+        description: "Check your email for the verification link",
+      });
+    } catch (error: any) {
+      console.error("Send verification error:", error);
 
-    verifyToken();
-  }, [token, verifyEmail]);
+      // Handle RTK Query error structure
+      let errorMessage = "Please try again later";
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      toast.error("Failed to send verification email", {
+        description: errorMessage,
+      });
+    }
+  };
+
+  // Default state - no token provided
+  if (!token && !isVerifying && !isSuccess && !isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card>
+              <CardHeader className="text-center">
+                <div className="h-16 w-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30 flex items-center justify-center">
+                  <Mail className="h-8 w-8 text-blue-500" />
+                </div>
+                <CardTitle className="text-2xl">Email Verification</CardTitle>
+                <CardDescription>
+                  Click the verification link in your email to verify your
+                  account.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={handleSendVerification}
+                  variant="outline"
+                  className="w-full"
+                  disabled={isSending}
+                >
+                  {isSending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4 mr-2" />
+                      Send New Verification Email
+                    </>
+                  )}
+                </Button>
+                <div className="text-center pt-4">
+                  <Link
+                    href="/profile"
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    ← Back to Profile
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   // Loading state
   if (isVerifying) {
@@ -107,9 +258,7 @@ export default function VerifyEmailPage() {
                 <h1 className="text-3xl font-bold tracking-tight text-red-600">
                   Verification Failed
                 </h1>
-                <p className="text-muted-foreground mt-2">
-                  {errorMessage}
-                </p>
+                <p className="text-muted-foreground mt-2">{errorMessage}</p>
               </div>
 
               {/* Common Issues */}
@@ -141,7 +290,7 @@ export default function VerifyEmailPage() {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
-                
+
                 <Link href="/contact">
                   <Button variant="outline" className="w-full" size="lg">
                     Contact Support
@@ -266,17 +415,17 @@ export default function VerifyEmailPage() {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <Link href="/dashboard">
+                <Link href="/profile">
                   <Button className="w-full" size="lg">
-                    Go to Dashboard
+                    Go to Profile
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
-                
-                <Link href="/">
+
+                <Link href="/dashboard">
                   <Button variant="outline" className="w-full" size="lg">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Home
+                    Go to Dashboard
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
               </div>
@@ -323,7 +472,8 @@ export default function VerifyEmailPage() {
               </h2>
               <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
                 Your account is now fully verified and ready to use. Start
-                exploring our powerful research tools and collaboration features.
+                exploring our powerful research tools and collaboration
+                features.
               </p>
 
               <div className="space-y-4">

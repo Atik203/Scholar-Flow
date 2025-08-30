@@ -1,5 +1,5 @@
+import { User, UserApiResponse } from "@/types/user";
 import { apiSlice } from "./apiSlice";
-import { User } from "@/types/user";
 
 // Profile update request interface
 export interface UpdateProfileRequest {
@@ -34,13 +34,16 @@ export interface ChangePasswordResponse {
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get user profile
-    getProfile: builder.query<User, void>({
+    getProfile: builder.query<UserApiResponse, void>({
       query: () => "/user/me",
       providesTags: ["User"],
     }),
 
     // Update user profile
-    updateProfile: builder.mutation<UpdateProfileResponse, UpdateProfileRequest>({
+    updateProfile: builder.mutation<
+      UpdateProfileResponse,
+      UpdateProfileRequest
+    >({
       query: (data) => ({
         url: "/user/update-profile",
         method: "PUT",
@@ -50,7 +53,10 @@ export const userApi = apiSlice.injectEndpoints({
     }),
 
     // Change password
-    changePassword: builder.mutation<ChangePasswordResponse, ChangePasswordRequest>({
+    changePassword: builder.mutation<
+      ChangePasswordResponse,
+      ChangePasswordRequest
+    >({
       query: (data) => ({
         url: "/user/change-password",
         method: "POST",

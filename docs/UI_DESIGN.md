@@ -701,5 +701,6 @@ export const FeatureCard = ({
 ---
 
 _Last Updated: August 28, 2025_
-_Maintained by: Md. Atikur Rahaman (GitHub: Atik203)_
+_Maintained by: Md. Atikur Rahaman (GitHub: Atik203), Salman_
+_Function Author (Email Verification, Password Reset, Forgot Password): Atik+Salman_
 _Next Review: Weekly during implementation_

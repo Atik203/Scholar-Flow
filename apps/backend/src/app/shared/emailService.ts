@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer';
-import config from '../config';
+import nodemailer from "nodemailer";
+import config from "../config";
 
 interface EmailOptions {
   to: string;
@@ -12,7 +12,7 @@ interface TokenEmailData {
   email: string;
   name: string;
   token: string;
-  type: 'password-reset' | 'email-verification';
+  type: "password-reset" | "email-verification";
 }
 
 class EmailService {
@@ -21,7 +21,7 @@ class EmailService {
   constructor() {
     // Create transporter using Gmail SMTP
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      service: "gmail",
       auth: {
         user: config.emailSender.email,
         pass: config.emailSender.app_pass, // App-specific password
@@ -43,10 +43,10 @@ class EmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent successfully:', info.messageId);
+      console.log("Email sent successfully:", info.messageId);
     } catch (error) {
-      console.error('Error sending email:', error);
-      throw new Error('Failed to send email');
+      console.error("Error sending email:", error);
+      throw new Error("Failed to send email");
     }
   }
 
@@ -55,7 +55,7 @@ class EmailService {
    */
   async sendPasswordResetEmail(data: TokenEmailData): Promise<void> {
     const resetUrl = `${config.reset_pass_link}?token=${data.token}&type=password-reset`;
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -80,7 +80,7 @@ class EmailService {
               <p>Hello ${data.name},</p>
               <p>We received a request to reset your password for your ScholarFlow account.</p>
               <p>Click the button below to reset your password:</p>
-              <a href="${resetUrl}" class="button">Reset Password</a>
+              <a href="${resetUrl}" class="button" role="button" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;margin:20px 0;font-weight:600;">Reset Password</a>
               <p>This link will expire in 15 minutes for security reasons.</p>
               <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
               <p>Best regards,<br>The ScholarFlow Team</p>
@@ -95,7 +95,7 @@ class EmailService {
 
     await this.sendEmail({
       to: data.email,
-      subject: 'Password Reset Request - ScholarFlow',
+      subject: "Password Reset Request - ScholarFlow",
       html,
     });
   }
@@ -104,8 +104,8 @@ class EmailService {
    * Send email verification email
    */
   async sendEmailVerificationEmail(data: TokenEmailData): Promise<void> {
-    const verifyUrl = `${config.reset_pass_link}?token=${data.token}&type=email-verification`;
-    
+    const verifyUrl = `${config.verify_email_link}?token=${data.token}&type=email-verification`;
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -130,7 +130,7 @@ class EmailService {
               <p>Hello ${data.name},</p>
               <p>Welcome to ScholarFlow! Please verify your email address to complete your registration.</p>
               <p>Click the button below to verify your email:</p>
-              <a href="${verifyUrl}" class="button">Verify Email</a>
+              <a href="${verifyUrl}" class="button" role="button" style="display:inline-block;padding:12px 24px;background:#059669;color:#ffffff;text-decoration:none;border-radius:6px;margin:20px 0;font-weight:600;">Verify Email</a>
               <p>This link will expire in 15 minutes for security reasons.</p>
               <p>If you didn't create a ScholarFlow account, please ignore this email.</p>
               <p>Best regards,<br>The ScholarFlow Team</p>
@@ -145,7 +145,7 @@ class EmailService {
 
     await this.sendEmail({
       to: data.email,
-      subject: 'Verify Your Email - ScholarFlow',
+      subject: "Verify Your Email - ScholarFlow",
       html,
     });
   }
@@ -155,11 +155,11 @@ class EmailService {
    */
   private htmlToText(html: string): string {
     return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"')
       .trim();
   }
@@ -172,7 +172,7 @@ class EmailService {
       await this.transporter.verify();
       return true;
     } catch (error) {
-      console.error('Email service connection failed:', error);
+      console.error("Email service connection failed:", error);
       return false;
     }
   }

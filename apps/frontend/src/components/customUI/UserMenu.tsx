@@ -60,7 +60,7 @@ export function UserMenu({ className }: UserMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 mt-2 dark:bg-gray-800 dark:border-gray-700"
+        className="w-72 min-w-[18rem] mt-2 dark:bg-gray-800 dark:border-gray-700"
         align="end"
         forceMount
       >

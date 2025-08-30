@@ -12,7 +12,9 @@
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import ApiError from "../../errors/ApiError";
+import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
+import tokenService from "../../shared/tokenService";
 import {
   AUTH_ERROR_MESSAGES,
   Permission,
@@ -512,18 +514,18 @@ class AuthService {
 
       if (!user) {
         // Don't reveal if user exists or not for security
-        return { message: "If an account with that email exists, a password reset link has been sent." };
+        return {
+          message:
+            "If an account with that email exists, a password reset link has been sent.",
+        };
       }
 
-      // Import token service here to avoid circular dependencies
-      const { tokenService } = await import("../../shared/tokenService");
-      
       // Generate and store password reset token
-      const resetToken = await tokenService.createAndStoreToken(user.id, "password-reset");
+      const resetToken = await tokenService.createAndStoreToken(
+        user.id,
+        "password-reset"
+      );
 
-      // Import email service here to avoid circular dependencies
-      const { emailService } = await import("../../shared/emailService");
-      
       // Send password reset email
       await emailService.sendPasswordResetEmail({
         email: user.email,
@@ -532,7 +534,10 @@ class AuthService {
         type: "password-reset",
       });
 
-      return { message: "If an account with that email exists, a password reset link has been sent." };
+      return {
+        message:
+          "If an account with that email exists, a password reset link has been sent.",
+      };
     } catch (error) {
       console.error("Error initiating forgot password:", error);
       throw new ApiError(500, "Failed to process password reset request");
@@ -544,11 +549,11 @@ class AuthService {
    */
   async resetPassword(token: string, newPassword: string) {
     try {
-      // Import token service here to avoid circular dependencies
-      const { tokenService } = await import("../../shared/tokenService");
-      
       // Validate the token
-      const tokenValidation = await tokenService.validateToken(token, "password-reset");
+      const tokenValidation = await tokenService.validateToken(
+        token,
+        "password-reset"
+      );
 
       if (!tokenValidation.valid || !tokenValidation.userId) {
         throw new ApiError(400, "Invalid or expired reset token");
@@ -579,11 +584,11 @@ class AuthService {
    */
   async verifyEmail(token: string) {
     try {
-      // Import token service here to avoid circular dependencies
-      const { tokenService } = await import("../../shared/tokenService");
-      
       // Validate the token
-      const tokenValidation = await tokenService.validateToken(token, "email-verification");
+      const tokenValidation = await tokenService.validateToken(
+        token,
+        "email-verification"
+      );
 
       if (!tokenValidation.valid || !tokenValidation.userId) {
         throw new ApiError(400, "Invalid or expired verification token");
@@ -592,7 +597,7 @@ class AuthService {
       // Update user's email verification status
       await prisma.user.update({
         where: { id: tokenValidation.userId },
-        data: { 
+        data: {
           emailVerified: new Date(),
           emailVerificationToken: null,
         },
@@ -628,15 +633,12 @@ class AuthService {
         throw new ApiError(404, "User not found");
       }
 
-      // Import token service here to avoid circular dependencies
-      const { tokenService } = await import("../../shared/tokenService");
-      
       // Generate and store email verification token
-      const verificationToken = await tokenService.createAndStoreToken(user.id, "email-verification");
+      const verificationToken = await tokenService.createAndStoreToken(
+        user.id,
+        "email-verification"
+      );
 
-      // Import email service here to avoid circular dependencies
-      const { emailService } = await import("../../shared/emailService");
-      
       // Send email verification email
       await emailService.sendEmailVerificationEmail({
         email: user.email,
