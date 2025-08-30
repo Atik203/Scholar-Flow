@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../errors/ApiError";
 import { AUTH_ERROR_MESSAGES, USER_ROLES } from "../modules/Auth/auth.constant";
-import { IAuthUser } from "../modules/Auth/auth.interface";
+import { IAuthUser } from "../interfaces/common";
 import prisma from "../shared/prisma";
 
 export interface AuthRequest extends Request {
@@ -19,6 +19,10 @@ export const authMiddleware = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
+    
+    // Debug logging
+    console.log("Auth Middleware - Request headers:", req.headers);
+    console.log("Auth Middleware - Authorization header:", authHeader);
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
@@ -33,10 +37,22 @@ export const authMiddleware = async (
 
     // Verify JWT token
     const decoded = jwt.verify(token, jwtSecret) as any;
+    
+    // Debug logging
+    console.log("Auth Middleware - Decoded token:", decoded);
+    console.log("Auth Middleware - Token sub:", decoded.sub);
+    console.log("Auth Middleware - Token email:", decoded.email);
 
-    // Get user from database
+    // Get user from database - try both sub and email
+    const userId = decoded.sub || decoded.id;
+    const userEmail = decoded.email;
+    
+    if (!userId && !userEmail) {
+      throw new ApiError(401, "Invalid token: missing user identifier");
+    }
+    
     const user = await prisma.user.findUnique({
-      where: { id: decoded.sub },
+      where: userId ? { id: userId } : { email: userEmail },
       select: {
         id: true,
         email: true,

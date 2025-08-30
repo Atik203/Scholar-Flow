@@ -1,7 +1,14 @@
+// Generic API response type for User or {data: User}
+export type UserApiResponse = { data: User };
 export interface User {
   id: string;
   email: string;
+  emailVerified?: Date | string | null;
   name: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  institution: string | null;
+  fieldOfStudy: string | null;
   image: string | null;
   role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
   createdAt?: Date | string;

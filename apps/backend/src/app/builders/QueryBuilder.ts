@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
  * PostgreSQL QueryBuilder for Prisma
  * Adapts the pattern from University Management Backend for PostgreSQL + Prisma
  */
-class QueryBuilder<T> {
+class QueryBuilder {
   public query: Record<string, unknown>;
   public prismaQuery: any;
   public modelName: string;
@@ -329,8 +329,8 @@ class QueryBuilder<T> {
   /**
    * Static method to create a new QueryBuilder
    */
-  static create<T>(modelName: string, query: Record<string, unknown>) {
-    return new QueryBuilder<T>(modelName, query);
+  static create(modelName: string, query: Record<string, unknown>) {
+    return new QueryBuilder(modelName, query);
   }
 }
 
