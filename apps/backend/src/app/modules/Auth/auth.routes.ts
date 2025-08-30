@@ -5,14 +5,14 @@ import {
   requireAdmin,
   requireTeamLead,
 } from "../../middleware/auth";
+import {
+  emailVerificationLimiter,
+  passwordResetLimiter,
+  sensitiveAuthLimiter,
+} from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { authController } from "./auth.controller";
 import { authValidation } from "./auth.validation";
-import {
-  passwordResetLimiter,
-  emailVerificationLimiter,
-  sensitiveAuthLimiter,
-} from "../../middleware/rateLimiter";
 
 const router: express.Router = express.Router();
 
@@ -84,7 +84,7 @@ router.post(
 router.post(
   "/send-verification",
   sensitiveAuthLimiter,
-  validateRequestBody(authValidation.sessionValidationRequest),
+  validateRequestBody(authValidation.sendEmailVerification),
   authController.sendEmailVerification
 );
 

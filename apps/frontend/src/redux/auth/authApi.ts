@@ -138,7 +138,10 @@ export const authApi = apiSlice.injectEndpoints({
     }),
 
     // Forgot password
-    forgotPassword: builder.mutation<AuthMessageResponse, ForgotPasswordRequest>({
+    forgotPassword: builder.mutation<
+      AuthMessageResponse,
+      ForgotPasswordRequest
+    >({
       query: (data) => ({
         url: "/auth/forgot-password",
         method: "POST",
@@ -156,12 +159,16 @@ export const authApi = apiSlice.injectEndpoints({
     }),
 
     // Verify email
-    verifyEmail: builder.mutation<AuthMessageResponse, EmailVerificationRequest>({
+    verifyEmail: builder.mutation<
+      AuthMessageResponse,
+      EmailVerificationRequest
+    >({
       query: (data) => ({
         url: "/auth/verify-email",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
 
     // Send email verification
@@ -174,6 +181,7 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["User"],
     }),
   }),
 });

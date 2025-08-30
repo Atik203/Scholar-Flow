@@ -7,7 +7,7 @@ Goal: Get a working core platform with minimal but functional features.
 
 ---
 
-Week 1 – Project Setup & Foundations
+Week 1 – Project Setup & Foundations (Author: Atik) ✅
 
 - [x] Setup & Configuration
   - [x] Initialize monorepo / Next.js 15 + Node.js backend ✅
@@ -21,7 +21,7 @@ Week 1 – Project Setup & Foundations
 
 ---
 
-Week 2 – User Auth & Profile ✅
+Week 2 – User Auth & Profile (Author: Atik) ✅
 
 - [x] Implement sign up / login / logout ✅
 - [x] OAuth authentication (Google OAuth with upsert handling) ✅
@@ -38,8 +38,8 @@ Week 2 – User Auth & Profile ✅
 
 Week 3 – Paper Upload & Storage
 
-- [x] Add password reset & email verification flow & forgot password
-- [x] Add API to update/edit user profile
+- [x] Add password reset & email verification flow & forgot password ✅ (Author: Atik+Salman)
+- [ ] Add API to update/edit user profile
 - [ ] Connect to cloud storage for file uploads
 - [ ] Build paper upload page (PDF, DOCX)
 - [ ] Store metadata (title, author, year) in DB

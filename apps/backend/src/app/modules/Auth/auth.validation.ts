@@ -140,6 +140,11 @@ export const emailVerificationSchema = z.object({
   token: z.string().min(1, "Verification token is required"),
 });
 
+// Send email verification validation
+export const sendEmailVerificationSchema = z.object({
+  userId: z.string().uuid("Invalid user ID"),
+});
+
 // User creation validation
 export const createUserSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -217,6 +222,7 @@ export const authValidation = {
   forgotPassword: forgotPasswordSchema,
   passwordReset: passwordResetSchema,
   emailVerification: emailVerificationSchema,
+  sendEmailVerification: sendEmailVerificationSchema,
   createUser: createUserSchema,
   updateUser: updateUserSchema,
   jwtPayload: jwtPayloadSchema,

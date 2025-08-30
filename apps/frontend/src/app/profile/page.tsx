@@ -1,7 +1,10 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,32 +16,72 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { ROLE_DESCRIPTIONS, USER_ROLES } from "@/lib/auth/roles";
-import { useGetProfileQuery, useUpdateProfileMutation } from "@/redux/api/userApi";
 import {
-  Calendar,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/api/userApi";
+import {
+  AlertTriangle,
   Camera,
+  CheckCircle,
   Edit3,
-  Globe,
-  Mail,
-  MapPin,
+  ExternalLink,
+  Loader2,
   Save,
   Shield,
   X,
-  Loader2,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+function VerifyButton() {
+  return (
+    <Link href="/verify-email">
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
+      >
+        <ExternalLink className="h-4 w-4 mr-2" />
+        Verify Now
+      </Button>
+    </Link>
+  );
+}
 
 export default function ProfilePage() {
   // Protected route guard
   const { isLoading: isAuthLoading, user: authUser } = useProtectedRoute();
-  
+
   // API hooks
-  const { data: profileData, isLoading: isProfileLoading, refetch } = useGetProfileQuery();
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useGetProfileQuery();
+
+  // // Debug logs for profile data (after declaration)
+  // useEffect(() => {
+  //   console.log("[Profile Debug] profileData:", profileData);
+  //   console.log("[Profile Debug] authUser:", authUser);
+  // }, [profileData, authUser]);
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
-  
+
+  // Refetch profile if redirected from verification
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname === "/profile"
+    ) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("verified")) {
+        refetch();
+      }
+    }
+  }, [refetch]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -53,12 +96,12 @@ export default function ProfilePage() {
   useEffect(() => {
     if (profileData) {
       setFormData({
-        name: profileData.name || "",
-        firstName: profileData.firstName || "",
-        lastName: profileData.lastName || "",
-        institution: profileData.institution || "",
-        fieldOfStudy: profileData.fieldOfStudy || "",
-        image: profileData.image || "",
+        name: profileData.data.name || "",
+        firstName: profileData.data.firstName || "",
+        lastName: profileData.data.lastName || "",
+        institution: profileData.data.institution || "",
+        fieldOfStudy: profileData.data.fieldOfStudy || "",
+        image: profileData.data.image || "",
       });
     }
   }, [profileData]);
@@ -75,17 +118,17 @@ export default function ProfilePage() {
   }
 
   // Use profile data from API if available, fallback to auth user
-  const user = profileData || authUser;
+  const user = profileData?.data || authUser;
   const userRole = user?.role || USER_ROLES.RESEARCHER;
-  
-  const initials = profileData?.name
-    ? profileData.name
+
+  const initials = profileData?.data.name
+    ? profileData.data.name
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : profileData?.email?.[0]?.toUpperCase() || "U";
+    : profileData?.data.email?.[0]?.toUpperCase() || "U";
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -95,16 +138,18 @@ export default function ProfilePage() {
     try {
       // Filter out empty strings and undefined values
       const updateData = Object.fromEntries(
-        Object.entries(formData).filter(([_, value]) => value !== "" && value !== undefined)
+        Object.entries(formData).filter(
+          ([_, value]) => value !== "" && value !== undefined
+        )
       );
 
       await updateProfile(updateData).unwrap();
-      
+
       showSuccessToast(
         "Profile Updated",
         "Your profile has been updated successfully"
       );
-      
+
       setIsEditing(false);
       refetch(); // Refresh profile data
     } catch (error) {
@@ -120,12 +165,12 @@ export default function ProfilePage() {
     // Reset form data to current profile data
     if (profileData) {
       setFormData({
-        name: profileData.name || "",
-        firstName: profileData.firstName || "",
-        lastName: profileData.lastName || "",
-        institution: profileData.institution || "",
-        fieldOfStudy: profileData.fieldOfStudy || "",
-        image: profileData.image || "",
+        name: profileData.data.name || "",
+        firstName: profileData.data.firstName || "",
+        lastName: profileData.data.lastName || "",
+        institution: profileData.data.institution || "",
+        fieldOfStudy: profileData.data.fieldOfStudy || "",
+        image: profileData.data.image || "",
       });
     }
     setIsEditing(false);
@@ -189,22 +234,54 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                                      <span className="text-gray-600 dark:text-gray-400">
-                      {profileData?.email}
-                    </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Joined {profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Shield className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Account verified
-                  </span>
+                  <Shield className="h-4 w-4 text-gray-400 mt-0.5" />
+                  {(() => {
+                    const emailVerified = (user as import("@/types/user").TUser)
+                      ?.emailVerified;
+                    console.log(
+                      "[Profile Debug] emailVerified value:",
+                      emailVerified
+                    );
+                    return emailVerified && emailVerified !== "null";
+                  })() ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-green-600 dark:text-green-400 font-medium">
+                        Verified on{" "}
+                        {(() => {
+                          const dateVal = (user as import("@/types/user").TUser)
+                            .emailVerified;
+                          if (!dateVal || dateVal === "null") return "";
+                          const dateObj =
+                            typeof dateVal === "string"
+                              ? new Date(dateVal)
+                              : dateVal;
+                          return dateObj instanceof Date &&
+                            !isNaN(dateObj.getTime())
+                            ? dateObj.toLocaleDateString()
+                            : "";
+                        })()}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">
+                          Email not verified
+                        </span>
+                      </div>
+                      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+                          Please verify your email address to access all
+                          features and receive important notifications.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <VerifyButton />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -229,9 +306,9 @@ export default function ProfilePage() {
                   </Button>
                 ) : (
                   <div className="flex gap-2">
-                    <Button 
-                      onClick={handleSave} 
-                      size="sm" 
+                    <Button
+                      onClick={handleSave}
+                      size="sm"
                       disabled={isUpdating}
                     >
                       {isUpdating ? (
@@ -258,7 +335,10 @@ export default function ProfilePage() {
                           id="firstName"
                           value={formData.firstName}
                           onChange={(e) =>
-                            setFormData({ ...formData, firstName: e.target.value })
+                            setFormData({
+                              ...formData,
+                              firstName: e.target.value,
+                            })
                           }
                           placeholder="Enter your first name"
                         />
@@ -270,7 +350,10 @@ export default function ProfilePage() {
                           id="lastName"
                           value={formData.lastName}
                           onChange={(e) =>
-                            setFormData({ ...formData, lastName: e.target.value })
+                            setFormData({
+                              ...formData,
+                              lastName: e.target.value,
+                            })
                           }
                           placeholder="Enter your last name"
                         />
@@ -339,7 +422,7 @@ export default function ProfilePage() {
                           First Name
                         </Label>
                         <p className="mt-1 text-gray-900 dark:text-white">
-                          {profileData?.firstName || "Not provided"}
+                          {profileData?.data.firstName || "Not provided"}
                         </p>
                       </div>
 
@@ -348,7 +431,7 @@ export default function ProfilePage() {
                           Last Name
                         </Label>
                         <p className="mt-1 text-gray-900 dark:text-white">
-                          {profileData?.lastName || "Not provided"}
+                          {profileData?.data.lastName || "Not provided"}
                         </p>
                       </div>
                     </div>
@@ -358,7 +441,7 @@ export default function ProfilePage() {
                         Full Name
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {profileData?.name || "Not provided"}
+                        {profileData?.data.name || "Not provided"}
                       </p>
                     </div>
 
@@ -367,7 +450,7 @@ export default function ProfilePage() {
                         Institution
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {profileData?.institution || "Not provided"}
+                        {profileData?.data.institution || "Not provided"}
                       </p>
                     </div>
 
@@ -376,7 +459,7 @@ export default function ProfilePage() {
                         Field of Study
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {profileData?.fieldOfStudy || "Not provided"}
+                        {profileData?.data.fieldOfStudy || "Not provided"}
                       </p>
                     </div>
 
@@ -385,10 +468,10 @@ export default function ProfilePage() {
                         Profile Image
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {profileData?.image ? (
-                          <a 
-                            href={profileData.image} 
-                            target="_blank" 
+                        {profileData?.data.image ? (
+                          <a
+                            href={profileData.data.image}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
