@@ -1,7 +1,10 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,88 +16,164 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { ROLE_DESCRIPTIONS, USER_ROLES } from "@/lib/auth/roles";
 import {
-  Calendar,
+  useGetProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/api/userApi";
+import {
+  AlertTriangle,
   Camera,
+  CheckCircle,
   Edit3,
-  Globe,
-  Mail,
-  MapPin,
+  ExternalLink,
+  Loader2,
   Save,
   Shield,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+function VerifyButton() {
+  return (
+    <Link href="/verify-email">
+      <Button
+        size="sm"
+        variant="outline"
+        className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950"
+      >
+        <ExternalLink className="h-4 w-4 mr-2" />
+        Verify Now
+      </Button>
+    </Link>
+  );
+}
 
 export default function ProfilePage() {
   // Protected route guard
-  const { isLoading, user } = useProtectedRoute();
+  const { isLoading: isAuthLoading, user: authUser } = useProtectedRoute();
+
+  // API hooks
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useGetProfileQuery();
+
+  // // Debug logs for profile data (after declaration)
+  // useEffect(() => {
+  //   console.log("[Profile Debug] profileData:", profileData);
+  //   console.log("[Profile Debug] authUser:", authUser);
+  // }, [profileData, authUser]);
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+
+  // Refetch profile if redirected from verification
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname === "/profile"
+    ) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("verified")) {
+        refetch();
+      }
+    }
+  }, [refetch]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    bio: "",
+    firstName: "",
+    lastName: "",
     institution: "",
-    researchInterests: "",
-    location: "",
-    website: "",
-    orcid: "",
+    fieldOfStudy: "",
+    image: "",
   });
 
-  if (isLoading) {
+  // Update form data when profile data changes
+  useEffect(() => {
+    if (profileData) {
+      setFormData({
+        name: profileData.data.name || "",
+        firstName: profileData.data.firstName || "",
+        lastName: profileData.data.lastName || "",
+        institution: profileData.data.institution || "",
+        fieldOfStudy: profileData.data.fieldOfStudy || "",
+        image: profileData.data.image || "",
+      });
+    }
+  }, [profileData]);
+
+  if (isAuthLoading || isProfileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading profile...</span>
+        </div>
       </div>
     );
   }
 
+  // Use profile data from API if available, fallback to auth user
+  const user = profileData?.data || authUser;
   const userRole = user?.role || USER_ROLES.RESEARCHER;
-  const initials = user?.name
-    ? user.name
+
+  const initials = profileData?.data.name
+    ? profileData.data.name
         .split(" ")
         .map((n) => n[0])
         .join("")
         .toUpperCase()
         .slice(0, 2)
-    : user?.email?.[0]?.toUpperCase() || "U";
+    : profileData?.data.email?.[0]?.toUpperCase() || "U";
 
   const handleEdit = () => {
-    setFormData({
-      name: user?.name || "",
-      bio: "",
-      institution: "",
-      researchInterests: "",
-      location: "",
-      website: "",
-      orcid: "",
-    });
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    // TODO: Implement save functionality with backend API
-    console.log("Saving profile data:", formData);
-    showSuccessToast(
-      "Profile Updated",
-      "Your profile has been updated successfully"
-    );
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      // Filter out empty strings and undefined values
+      const updateData = Object.fromEntries(
+        Object.entries(formData).filter(
+          ([_, value]) => value !== "" && value !== undefined
+        )
+      );
+
+      await updateProfile(updateData).unwrap();
+
+      showSuccessToast(
+        "Profile Updated",
+        "Your profile has been updated successfully"
+      );
+
+      setIsEditing(false);
+      refetch(); // Refresh profile data
+    } catch (error) {
+      console.error("Profile update error:", error);
+      showErrorToast(
+        "Update Failed",
+        "Failed to update profile. Please try again."
+      );
+    }
   };
 
   const handleCancel = () => {
+    // Reset form data to current profile data
+    if (profileData) {
+      setFormData({
+        name: profileData.data.name || "",
+        firstName: profileData.data.firstName || "",
+        lastName: profileData.data.lastName || "",
+        institution: profileData.data.institution || "",
+        fieldOfStudy: profileData.data.fieldOfStudy || "",
+        image: profileData.data.image || "",
+      });
+    }
     setIsEditing(false);
-    setFormData({
-      name: "",
-      bio: "",
-      institution: "",
-      researchInterests: "",
-      location: "",
-      website: "",
-      orcid: "",
-    });
   };
 
   return (
@@ -155,22 +234,54 @@ export default function ProfilePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3 text-sm">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {user?.email}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Calendar className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Joined August 2025
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <Shield className="h-4 w-4 text-gray-400" />
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Account verified
-                  </span>
+                  <Shield className="h-4 w-4 text-gray-400 mt-0.5" />
+                  {(() => {
+                    const emailVerified = (user as import("@/types/user").TUser)
+                      ?.emailVerified;
+                    console.log(
+                      "[Profile Debug] emailVerified value:",
+                      emailVerified
+                    );
+                    return emailVerified && emailVerified !== "null";
+                  })() ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-green-600 dark:text-green-400 font-medium">
+                        Verified on{" "}
+                        {(() => {
+                          const dateVal = (user as import("@/types/user").TUser)
+                            .emailVerified;
+                          if (!dateVal || dateVal === "null") return "";
+                          const dateObj =
+                            typeof dateVal === "string"
+                              ? new Date(dateVal)
+                              : dateVal;
+                          return dateObj instanceof Date &&
+                            !isNaN(dateObj.getTime())
+                            ? dateObj.toLocaleDateString()
+                            : "";
+                        })()}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">
+                          Email not verified
+                        </span>
+                      </div>
+                      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p className="text-sm text-amber-800 dark:text-amber-200 mb-3">
+                          Please verify your email address to access all
+                          features and receive important notifications.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <VerifyButton />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -195,9 +306,17 @@ export default function ProfilePage() {
                   </Button>
                 ) : (
                   <div className="flex gap-2">
-                    <Button onClick={handleSave} size="sm">
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
+                    <Button
+                      onClick={handleSave}
+                      size="sm"
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      {isUpdating ? "Saving..." : "Save"}
                     </Button>
                     <Button onClick={handleCancel} variant="outline" size="sm">
                       <X className="h-4 w-4 mr-2" />
@@ -209,6 +328,38 @@ export default function ProfilePage() {
               <CardContent className="space-y-6">
                 {isEditing ? (
                   <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={formData.firstName}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              firstName: e.target.value,
+                            })
+                          }
+                          placeholder="Enter your first name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={formData.lastName}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              lastName: e.target.value,
+                            })
+                          }
+                          placeholder="Enter your last name"
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <Input
@@ -217,7 +368,7 @@ export default function ProfilePage() {
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        placeholder="Enter your full name"
+                        placeholder="Enter your full name (optional if using first/last name)"
                       />
                     </div>
 
@@ -237,86 +388,60 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <Textarea
-                        id="bio"
-                        value={formData.bio}
-                        onChange={(e) =>
-                          setFormData({ ...formData, bio: e.target.value })
-                        }
-                        placeholder="Tell us about yourself and your research"
-                        rows={4}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="interests">Research Interests</Label>
-                      <Textarea
-                        id="interests"
-                        value={formData.researchInterests}
+                      <Label htmlFor="fieldOfStudy">Field of Study</Label>
+                      <Input
+                        id="fieldOfStudy"
+                        value={formData.fieldOfStudy}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
-                            researchInterests: e.target.value,
+                            fieldOfStudy: e.target.value,
                           })
                         }
-                        placeholder="List your research areas and interests"
-                        rows={3}
+                        placeholder="Your research area or field of study"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <Input
-                          id="location"
-                          value={formData.location}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              location: e.target.value,
-                            })
-                          }
-                          placeholder="City, Country"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="website">Website</Label>
-                        <Input
-                          id="website"
-                          value={formData.website}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              website: e.target.value,
-                            })
-                          }
-                          placeholder="https://yourwebsite.com"
-                        />
-                      </div>
-                    </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="orcid">ORCID iD</Label>
+                      <Label htmlFor="image">Profile Image URL</Label>
                       <Input
-                        id="orcid"
-                        value={formData.orcid}
+                        id="image"
+                        value={formData.image}
                         onChange={(e) =>
-                          setFormData({ ...formData, orcid: e.target.value })
+                          setFormData({ ...formData, image: e.target.value })
                         }
-                        placeholder="0000-0000-0000-0000"
+                        placeholder="https://example.com/avatar.jpg"
                       />
                     </div>
                   </>
                 ) : (
                   <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          First Name
+                        </Label>
+                        <p className="mt-1 text-gray-900 dark:text-white">
+                          {profileData?.data.firstName || "Not provided"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Last Name
+                        </Label>
+                        <p className="mt-1 text-gray-900 dark:text-white">
+                          {profileData?.data.lastName || "Not provided"}
+                        </p>
+                      </div>
+                    </div>
+
                     <div>
                       <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
                         Full Name
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        {user?.name || "Not provided"}
+                        {profileData?.data.name || "Not provided"}
                       </p>
                     </div>
 
@@ -325,56 +450,36 @@ export default function ProfilePage() {
                         Institution
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        Not provided
+                        {profileData?.data.institution || "Not provided"}
                       </p>
                     </div>
 
                     <div>
                       <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Bio
+                        Field of Study
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        No bio available yet. Click edit to add your bio.
+                        {profileData?.data.fieldOfStudy || "Not provided"}
                       </p>
                     </div>
 
                     <div>
                       <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        Research Interests
+                        Profile Image
                       </Label>
                       <p className="mt-1 text-gray-900 dark:text-white">
-                        No research interests listed yet.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <MapPin className="inline h-4 w-4 mr-1" />
-                          Location
-                        </Label>
-                        <p className="mt-1 text-gray-900 dark:text-white">
-                          Not provided
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                          <Globe className="inline h-4 w-4 mr-1" />
-                          Website
-                        </Label>
-                        <p className="mt-1 text-gray-900 dark:text-white">
-                          Not provided
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        ORCID iD
-                      </Label>
-                      <p className="mt-1 text-gray-900 dark:text-white">
-                        Not provided
+                        {profileData?.data.image ? (
+                          <a
+                            href={profileData.data.image}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            View Image
+                          </a>
+                        ) : (
+                          "Not provided"
+                        )}
                       </p>
                     </div>
                   </>
