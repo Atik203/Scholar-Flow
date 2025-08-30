@@ -60,6 +60,8 @@ model User {
   image        String?
   password     String? // Optional password for demo/test users
   role         Role    @default(RESEARCHER)
+  emailVerified DateTime? // When email was verified
+  emailVerificationToken String? // For email verification
 
   // Auth.js relations
   accounts Account[]
@@ -77,6 +79,9 @@ model User {
   notifications   Notification[]
   usageEvents     UsageEvent[]
   activities      ActivityLog[]
+
+  // Token relations
+  tokens UserToken[]
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -527,4 +532,26 @@ model VerificationToken {
   isDeleted Boolean  @default(false)
 
   @@unique([identifier, token])
+}
+
+model UserToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique // Hashed token
+  type      TokenType
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([type])
+  @@index([expiresAt])
+}
+
+enum TokenType {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
 }
