@@ -56,6 +56,7 @@ export const extractPaginationOptions = (req: Request) => {
  * Extract filters from request query (removes pagination params)
  */
 export const extractFilters = (req: Request) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { page, limit, sortBy, sortOrder, ...filters } = req.query;
   return filters;
 };
