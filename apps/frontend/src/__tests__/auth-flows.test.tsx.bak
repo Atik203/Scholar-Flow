@@ -1,0 +1,91 @@
+import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import { apiSlice } from '../redux/api/apiSlice';
+import ForgotPasswordPage from '../app/forgot-password/page';
+import ResetPasswordPage from '../app/reset-password/page';
+import VerifyEmailPage from '../app/verify-email/page';
+
+// Create a mock store
+const createMockStore = () => {
+  return configureStore({
+    reducer: {
+      [apiSlice.reducerPath]: apiSlice.reducer,
+    },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(apiSlice.middleware),
+  });
+};
+
+// Wrapper component for Redux Provider
+const ReduxWrapper = ({ children }: { children: React.ReactNode }) => {
+  const store = createMockStore();
+  return <Provider store={store}>{children}</Provider>;
+};
+
+describe('Auth Flow Components', () => {
+  describe('ForgotPasswordPage', () => {
+    it('renders forgot password form', () => {
+      render(
+        <ReduxWrapper>
+          <ForgotPasswordPage />
+        </ReduxWrapper>
+      );
+
+      expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('name@example.com')).toBeInTheDocument();
+      expect(screen.getByText('Send reset link')).toBeInTheDocument();
+      expect(screen.getByText('Back to login')).toBeInTheDocument();
+    });
+
+    it('shows email input field', () => {
+      render(
+        <ReduxWrapper>
+          <ForgotPasswordPage />
+        </ReduxWrapper>
+      );
+
+      const emailInput = screen.getByPlaceholderText('name@example.com');
+      expect(emailInput).toBeInTheDocument();
+      expect(emailInput).toHaveAttribute('type', 'email');
+    });
+  });
+
+  describe('ResetPasswordPage', () => {
+    it('renders password reset form', () => {
+      render(
+        <ReduxWrapper>
+          <ResetPasswordPage />
+        </ReduxWrapper>
+      );
+
+      expect(screen.getByText('Create New Password')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Enter your new password')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Confirm your new password')).toBeInTheDocument();
+      expect(screen.getByText('Update Password')).toBeInTheDocument();
+    });
+
+    it('shows password requirements', () => {
+      render(
+        <ReduxWrapper>
+          <ResetPasswordPage />
+        </ReduxWrapper>
+      );
+
+      expect(screen.getByText(/Must be at least 8 characters/)).toBeInTheDocument();
+    });
+  });
+
+  describe('VerifyEmailPage', () => {
+    it('renders email verification page', () => {
+      render(
+        <ReduxWrapper>
+          <VerifyEmailPage />
+        </ReduxWrapper>
+      );
+
+      expect(screen.getByText('Verifying Your Email')).toBeInTheDocument();
+      expect(screen.getByText('Please wait while we verify your email address...')).toBeInTheDocument();
+    });
+  });
+});

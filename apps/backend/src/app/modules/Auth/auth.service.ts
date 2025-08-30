@@ -12,7 +12,9 @@
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import ApiError from "../../errors/ApiError";
+import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
+import tokenService from "../../shared/tokenService";
 import {
   AUTH_ERROR_MESSAGES,
   Permission,
@@ -74,7 +76,7 @@ class AuthService {
   /**
    * Sign in with email and password
    */
-  async signInWithPassword(email: string, password: string) {
+  async signInWithPassword(email: string, _password: string) {
     try {
       // Find user by email
       const user = await prisma.user.findUnique({
@@ -102,13 +104,14 @@ class AuthService {
       }
 
       // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(_password, user.password);
       if (!isPasswordValid) {
         throw new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
       }
 
       // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -491,6 +494,163 @@ class AuthService {
       if (error instanceof ApiError) throw error;
       console.error("Error validating JWT token:", error);
       throw new ApiError(500, "Failed to validate token");
+    }
+  }
+
+  /**
+   * Initiate forgot password process
+   */
+  async initiateForgotPassword(email: string) {
+    try {
+      // Find user by email
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      });
+
+      if (!user) {
+        // Don't reveal if user exists or not for security
+        return {
+          message:
+            "If an account with that email exists, a password reset link has been sent.",
+        };
+      }
+
+      // Generate and store password reset token
+      const resetToken = await tokenService.createAndStoreToken(
+        user.id,
+        "password-reset"
+      );
+
+      // Send password reset email
+      await emailService.sendPasswordResetEmail({
+        email: user.email,
+        name: user.name || "User",
+        token: resetToken,
+        type: "password-reset",
+      });
+
+      return {
+        message:
+          "If an account with that email exists, a password reset link has been sent.",
+      };
+    } catch (error) {
+      console.error("Error initiating forgot password:", error);
+      throw new ApiError(500, "Failed to process password reset request");
+    }
+  }
+
+  /**
+   * Reset password using token
+   */
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      // Validate the token
+      const tokenValidation = await tokenService.validateToken(
+        token,
+        "password-reset"
+      );
+
+      if (!tokenValidation.valid || !tokenValidation.userId) {
+        throw new ApiError(400, "Invalid or expired reset token");
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+      // Update user's password
+      await prisma.user.update({
+        where: { id: tokenValidation.userId },
+        data: { password: hashedPassword },
+      });
+
+      // Mark token as used
+      await tokenService.markTokenAsUsed(token, "password-reset");
+
+      return { message: "Password has been reset successfully" };
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      console.error("Error resetting password:", error);
+      throw new ApiError(500, "Failed to reset password");
+    }
+  }
+
+  /**
+   * Verify email using token
+   */
+  async verifyEmail(token: string) {
+    try {
+      // Validate the token
+      const tokenValidation = await tokenService.validateToken(
+        token,
+        "email-verification"
+      );
+
+      if (!tokenValidation.valid || !tokenValidation.userId) {
+        throw new ApiError(400, "Invalid or expired verification token");
+      }
+
+      // Update user's email verification status
+      await prisma.user.update({
+        where: { id: tokenValidation.userId },
+        data: {
+          emailVerified: new Date(),
+          emailVerificationToken: null,
+        },
+      });
+
+      // Mark token as used
+      await tokenService.markTokenAsUsed(token, "email-verification");
+
+      return { message: "Email verified successfully" };
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      console.error("Error verifying email:", error);
+      throw new ApiError(500, "Failed to verify email");
+    }
+  }
+
+  /**
+   * Send email verification email
+   */
+  async sendEmailVerification(userId: string) {
+    try {
+      // Get user details
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+        },
+      });
+
+      if (!user) {
+        throw new ApiError(404, "User not found");
+      }
+
+      // Generate and store email verification token
+      const verificationToken = await tokenService.createAndStoreToken(
+        user.id,
+        "email-verification"
+      );
+
+      // Send email verification email
+      await emailService.sendEmailVerificationEmail({
+        email: user.email,
+        name: user.name || "User",
+        token: verificationToken,
+        type: "email-verification",
+      });
+
+      return { message: "Verification email sent successfully" };
+    } catch (error) {
+      console.error("Error sending email verification:", error);
+      throw new ApiError(500, "Failed to send verification email");
     }
   }
 }
