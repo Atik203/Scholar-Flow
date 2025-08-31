@@ -74,11 +74,11 @@ This will start:
 
 ### 🚧 In Progress (Phase 1)
 
-- [ ] Complete User authentication module
-- [ ] Frontend Auth.js setup
+- [x] Complete User authentication module
+- [x] Frontend Auth.js setup
 - [ ] Paper upload and management
-- [ ] Database migrations
-- [ ] Frontend-backend integration
+- [x] Database migrations
+- [x] Frontend-backend integration
 
 ### ⏳ Planned (Phase 1)
 
