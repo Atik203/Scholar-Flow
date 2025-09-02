@@ -24,6 +24,10 @@ const publicRoutes = [
   "/collaborate",
   "/ai-insights",
   "/products",
+  // Company pages are public
+  "/about",
+  "/contact",
+  "/company",
 ];
 
 export default withAuth(

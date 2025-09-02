@@ -3573,7 +3573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-select@npm:2.2.6":
+"@radix-ui/react-select@npm:2.2.6, @radix-ui/react-select@npm:^2.2.6":
   version: 2.2.6
   resolution: "@radix-ui/react-select@npm:2.2.6"
   dependencies:
@@ -4181,6 +4181,7 @@ __metadata:
     "@radix-ui/react-dialog": "npm:^1.1.15"
     "@radix-ui/react-dropdown-menu": "npm:^2.1.16"
     "@radix-ui/react-label": "npm:^2.1.7"
+    "@radix-ui/react-select": "npm:^2.2.6"
     "@radix-ui/react-separator": "npm:^1.1.7"
     "@radix-ui/react-slot": "npm:^1.2.3"
     "@radix-ui/react-switch": "npm:^1.2.6"
