@@ -27,7 +27,7 @@ import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { UserMenu } from "./UserMenu";
 
 // Navigation structure with dropdowns
@@ -166,15 +166,41 @@ export const Navbar: React.FC = () => {
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleDropdownMouseEnter = (label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setHoveredDropdown(label);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setHoveredDropdown(null);
+    }, 150); // Small delay to prevent flickering
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const renderNavItem = (item: any) => {
     if (item.dropdown) {
       return (
-        <DropdownMenu key={item.label}>
+        <DropdownMenu key={item.label} open={hoveredDropdown === item.label}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               className="relative px-2.5 py-1.5 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 group hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+              onMouseEnter={() => handleDropdownMouseEnter(item.label)}
+              onMouseLeave={handleDropdownMouseLeave}
             >
               {item.label}
               <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
@@ -184,20 +210,22 @@ export const Navbar: React.FC = () => {
             align="start"
             className="w-80 p-2"
             sideOffset={8}
+            onMouseEnter={() => handleDropdownMouseEnter(item.label)}
+            onMouseLeave={handleDropdownMouseLeave}
           >
             <div className="grid gap-1">
               {item.items.map((dropdownItem: any) => (
                 <DropdownMenuItem key={dropdownItem.href} asChild>
                   <Link
                     href={dropdownItem.href}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
                   >
-                    <dropdownItem.icon className="h-5 w-5 text-primary mt-0.5" />
+                    <dropdownItem.icon className="h-5 w-5 text-primary mt-0.5 group-hover:scale-110 transition-transform duration-200" />
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">
+                      <div className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
                         {dropdownItem.label}
                       </div>
-                      <div className="text-sm text-muted-foreground mt-0.5">
+                      <div className="text-sm text-muted-foreground mt-0.5 group-hover:text-foreground/80 transition-colors duration-200">
                         {dropdownItem.description}
                       </div>
                     </div>
@@ -316,9 +344,9 @@ export const Navbar: React.FC = () => {
                             <Link
                               href={dropdownItem.href}
                               onClick={() => setMobileOpen(false)}
-                              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+                              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-primary/5 hover:scale-[1.02] text-muted-foreground hover:text-foreground cursor-pointer group"
                             >
-                              <dropdownItem.icon className="h-4 w-4" />
+                              <dropdownItem.icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                               {dropdownItem.label}
                             </Link>
                           </li>
@@ -333,7 +361,7 @@ export const Navbar: React.FC = () => {
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
                       className={
-                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 " +
+                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-primary/5 hover:scale-[1.02] cursor-pointer " +
                         (pathname === item.href
                           ? "text-primary font-medium bg-primary/10"
                           : "text-muted-foreground hover:text-foreground")
