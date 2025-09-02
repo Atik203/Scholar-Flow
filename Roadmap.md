@@ -49,7 +49,7 @@ Week 3 – Paper Upload & Storage
 
 ---
 
-Week 3.5 – Modern UI/UX Redesign (Author: Atik) ✅
+Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅
 
 - [x] Complete dashboard redesign with modern SaaS-style interface ✅
 - [x] Implement shadcn/ui sidebar component with collapsible navigation ✅
