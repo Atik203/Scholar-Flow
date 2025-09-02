@@ -1,5 +1,4 @@
-import { Footer } from "@/components/customUI/Footer";
-import { Navbar } from "@/components/customUI/Navbar";
+import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -27,11 +26,7 @@ export default function RootLayout({
         <NextAuthProvider>
           <ReduxProvider>
             <ThemeProvider>
-              <div className="relative overflow-x-hidden min-h-screen pt-6 flex flex-col">
-                <Navbar />
-                <main className="flex-1 relative">{children}</main>
-                <Footer />
-              </div>
+              <ConditionalLayout>{children}</ConditionalLayout>
               <ToastProvider />
             </ThemeProvider>
           </ReduxProvider>
