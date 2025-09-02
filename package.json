@@ -1,6 +1,6 @@
 {
   "name": "scholar-flow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-Powered Research Paper Collaboration Hub",
   "private": true,
   "workspaces": [
