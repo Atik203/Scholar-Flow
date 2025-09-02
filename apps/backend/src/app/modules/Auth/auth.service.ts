@@ -63,6 +63,39 @@ class AuthService {
   }
 
   /**
+   * Create or update user with email verified for OAuth users
+   */
+  async createOrUpdateUserWithOAuth(userData: IUserData) {
+    try {
+      const userId = userData.id || uuidv4();
+      const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
+
+      const user = await prisma.user.upsert({
+        where: { email: userData.email },
+        update: {
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+          emailVerified: new Date(), // Mark as verified for OAuth users
+        },
+        create: {
+          id: userId,
+          email: userData.email,
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+          emailVerified: new Date(), // Mark as verified for OAuth users
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error("Error creating/updating OAuth user:", error);
+      throw new ApiError(500, AUTH_ERROR_MESSAGES.OAUTH_ERROR);
+    }
+  }
+
+  /**
    * Validate if role is valid
    */
   private validateRole(role: string): string {
@@ -459,8 +492,8 @@ class AuthService {
         role: USER_ROLES.RESEARCHER,
       };
 
-      // Create or update user
-      const user = await this.createOrUpdateUser(userData);
+      // Create or update user with email verified for OAuth users
+      const user = await this.createOrUpdateUserWithOAuth(userData);
 
       // Create account linking
       await this.createAccount(user.id, account);
