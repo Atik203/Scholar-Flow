@@ -192,17 +192,19 @@ export function AppSidebar() {
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
       {/* Header */}
       <div className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Brain className="size-4" />
+        <Link href="/">
+          <div className="flex items-center gap-3">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Brain className="size-4" />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-semibold">ScholarFlow</span>
+              <span className="truncate text-xs text-sidebar-foreground/70">
+                Research Hub
+              </span>
+            </div>
           </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">ScholarFlow</span>
-            <span className="truncate text-xs text-sidebar-foreground/70">
-              Research Hub
-            </span>
-          </div>
-        </div>
+        </Link>
       </div>
 
       {/* Content */}
