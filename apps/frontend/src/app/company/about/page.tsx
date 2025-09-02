@@ -12,6 +12,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -145,7 +146,10 @@ const stats = [
   { value: "40+", label: "Countries" },
 ];
 
-export default function AboutPage() {
+export default function CompanyAboutPage() {
+  const { data: session } = useSession();
+  const isAuthenticated = !!session;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -166,11 +170,11 @@ export default function AboutPage() {
                 ScholarFlow
               </span>
             </h1>
-                          <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
-                We&apos;re on a mission to accelerate human knowledge by building
-                AI-powered tools that help researchers discover, understand, and
-                build upon existing knowledge faster than ever before.
-              </p>
+            <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
+              We&apos;re on a mission to accelerate human knowledge by building
+              AI-powered tools that help researchers discover, understand, and
+              build upon existing knowledge faster than ever before.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -472,7 +476,9 @@ export default function AboutPage() {
                 size="lg"
                 className="px-8 py-4 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                <Link href="/login">Start Your Journey</Link>
+                <Link href={isAuthenticated ? "/dashboard" : "/login"}>
+                  {isAuthenticated ? "Go to Dashboard" : "Start Your Journey"}
+                </Link>
               </Button>
               <Button
                 asChild
@@ -480,7 +486,7 @@ export default function AboutPage() {
                 variant="outline"
                 className="px-8 py-4 border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300"
               >
-                <Link href="/contact">Meet the Team</Link>
+                <Link href="/company/contact">Meet the Team</Link>
               </Button>
             </div>
           </motion.div>
