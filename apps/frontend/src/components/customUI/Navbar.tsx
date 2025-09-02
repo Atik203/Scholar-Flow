@@ -39,25 +39,25 @@ const navigationItems = [
     items: [
       {
         label: "Research Papers",
-        href: "/papers",
+        href: "/products/papers",
         description: "Discover and organize academic papers",
         icon: FileText,
       },
       {
         label: "Collections",
-        href: "/collections",
+        href: "/products/collections",
         description: "Create and share paper collections",
         icon: BookOpen,
       },
       {
         label: "Collaboration",
-        href: "/collaborate",
+        href: "/products/collaborate",
         description: "Work together on research projects",
         icon: Users,
       },
       {
         label: "AI Insights",
-        href: "/ai-insights",
+        href: "/products/ai-insights",
         description: "AI-powered research analysis",
         icon: Lightbulb,
       },

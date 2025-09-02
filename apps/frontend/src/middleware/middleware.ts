@@ -2,15 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 // Define protected routes that require authentication
-const protectedRoutes = [
-  "/dashboard",
-  "/profile",
-  "/papers",
-  "/collections",
-  "/collaborate",
-  "/settings",
-  "/admin",
-];
+const protectedRoutes = ["/dashboard", "/profile", "/settings", "/admin"];
 
 // Define auth routes that should redirect to dashboard if user is already logged in
 const authRoutes = ["/login", "/register", "/auth/signin"];
@@ -26,6 +18,12 @@ const publicRoutes = [
   "/faq",
   "/terms",
   "/privacy",
+  // Products are public-facing marketing pages
+  "/papers",
+  "/collections",
+  "/collaborate",
+  "/ai-insights",
+  "/products",
 ];
 
 export default withAuth(
