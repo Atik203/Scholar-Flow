@@ -9,7 +9,7 @@ export function ToastProvider() {
   return (
     <Toaster
       theme={theme as any}
-      position="top-right"
+      position="bottom-right"
       expand={true}
       richColors
       closeButton
