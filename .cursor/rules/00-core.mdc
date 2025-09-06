@@ -1,20 +1,35 @@
 ---
-description: Core repository standards (package manager, typing, security, ports)
 alwaysApply: true
+description: Core project standards and architecture
 ---
 
-# Core Repository Rules
+# Core Project Rules
 
-1. Package Manager: Use Yarn Berry (v4). Never introduce npm or package-lock.json.
-2. TypeScript: Strict typing; avoid `any`. Run `yarn type-check` before committing major changes.
-3. Linting/Formatting: Use existing ESLint/Prettier configs. Don't reformat unrelated code in a patch.
-4. Monorepo: Keep concerns separated (frontend vs backend). Shared logic belongs in `packages/*`.
-5. Env Files: Do not commit secrets. When adding a variable, update docs and example envs.
-6. Roadmap Alignment: Only build features in the current phase (see `Roadmap.md`). Defer out-of-scope items to "Next steps" section in PR.
-7. Commits/PRs: Small, focused, conventional messages. Reference related issue when possible.
-8. Error Handling: Backend must use `ApiError`, `catchAsync`, and central `globalErrorHandler`.
-9. Security: No plaintext secrets in code. Validate and sanitize all external input.
-10. Ports: Frontend 3000, Backend 5000.
-11. UI/UX Changes: Consult `docs/UI_DESIGN.md` first; keep README high-level and only document deltas in PR descriptions.
-12. Testing: Comprehensive tests for critical features (auth, payments, data integrity). Test coverage required for authentication flows.
-13. Authentication: Use standard Prisma upsert for OAuth; never revert to problematic raw queries without clear documentation.
+## Repository Standards
+
+1. **Package Manager**: Use Yarn Berry (v4). Never introduce npm or package-lock.json.
+2. **TypeScript**: Strict typing; avoid `any`. Run `yarn type-check` before committing major changes.
+3. **Linting/Formatting**: Use existing ESLint/Prettier configs. Don't reformat unrelated code in a patch.
+4. **Monorepo**: Keep concerns separated (frontend vs backend). Shared logic belongs in `packages/*`.
+5. **Ports**: Frontend 3000, Backend 5000.
+
+## Environment & Security
+
+1. **Env Files**: Do not commit secrets. When adding a variable, update docs and example envs.
+2. **Locations**: Backend `apps/backend/.env`; Frontend `apps/frontend/.env.local`.
+3. **Security**: No plaintext secrets in code. Validate and sanitize all external input.
+4. **Database**: `DATABASE_URL` required; `DIRECT_DATABASE_URL` for extension management.
+
+## Project Status
+
+- **Current Phase**: Phase 1 MVP in progress with **OAuth authentication system completed** ✅
+- **Technology Stack**: Next.js 15 + Express.js + PostgreSQL + Prisma ORM + TypeScript
+- **Roadmap**: Only build features in current phase (see `Roadmap.md`)
+
+## Quality Gates
+
+1. **Build**: `yarn build` must succeed before merging.
+2. **Types**: `yarn type-check` must be clean (no errors).
+3. **Lint**: `yarn lint` with zero errors.
+4. **Tests**: Add/adjust tests for new logic; critical features require comprehensive test coverage.
+5. **Commits/PRs**: Small, focused, conventional messages. Reference related issue when possible.

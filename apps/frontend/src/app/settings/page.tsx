@@ -1,7 +1,21 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,11 +30,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { USER_ROLES, hasPermission } from "@/lib/auth/roles";
+import { useDeleteAccountMutation } from "@/redux/api/userApi";
 import {
   Bell,
   Database,
   Eye,
   Globe,
+  Loader2,
   Lock,
   Monitor,
   Moon,
@@ -31,14 +47,16 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SettingsPage() {
   const { data: session, status } = useSession();
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -96,6 +114,25 @@ export default function SettingsPage() {
   const handleAdminChange = (key: string, value: boolean | string) => {
     setAdminSettings((prev) => ({ ...prev, [key]: value }));
     showSuccessToast("Admin Settings", "System settings have been updated");
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount({ confirmDelete: true }).unwrap();
+
+      showSuccessToast(
+        "Account Deleted",
+        "Your account has been successfully deleted. You will be logged out."
+      );
+
+      // Sign out and redirect to home page
+      await signOut({ callbackUrl: "/" });
+    } catch (error: any) {
+      console.error("Delete account error:", error);
+      const errorMessage =
+        error?.data?.message || "Failed to delete account. Please try again.";
+      showErrorToast("Delete Failed", errorMessage);
+    }
   };
 
   return (
@@ -532,12 +569,78 @@ export default function SettingsPage() {
                         Delete Account
                       </Label>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Permanently delete your account and all associated data
+                        Permanently delete your account and all associated data.
+                        This action cannot be undone.
                       </p>
                     </div>
-                    <Button variant="destructive" size="sm">
-                      Delete Account
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            <>
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Account
+                            </>
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="text-red-600 dark:text-red-400">
+                            Delete Account
+                          </AlertDialogTitle>
+                          <AlertDialogDescription asChild>
+                            <div className="space-y-2">
+                              <div>
+                                Are you absolutely sure you want to delete your
+                                account? This action cannot be undone.
+                              </div>
+                              <div className="font-medium text-red-600 dark:text-red-400">
+                                This will permanently delete:
+                              </div>
+                              <ul className="list-disc list-inside space-y-1 text-sm">
+                                <li>Your profile and personal information</li>
+                                <li>
+                                  All your research papers and collections
+                                </li>
+                                <li>Your collaboration history</li>
+                                <li>All associated data and settings</li>
+                              </ul>
+                              <div className="font-medium">
+                                You will be logged out immediately after
+                                deletion.
+                              </div>
+                            </div>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Yes, Delete My Account"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>
