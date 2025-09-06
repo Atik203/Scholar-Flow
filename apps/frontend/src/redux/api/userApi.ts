@@ -31,6 +31,22 @@ export interface ChangePasswordResponse {
   data: null;
 }
 
+// Delete account request interface
+export interface DeleteAccountRequest {
+  confirmDelete: boolean;
+}
+
+// Delete account response interface
+export interface DeleteAccountResponse {
+  success: boolean;
+  message: string;
+  data: {
+    success: boolean;
+    message: string;
+    deletedAt: string;
+  };
+}
+
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get user profile
@@ -63,6 +79,18 @@ export const userApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    // Delete account
+    deleteAccount: builder.mutation<
+      DeleteAccountResponse,
+      DeleteAccountRequest
+    >({
+      query: (data) => ({
+        url: "/user/delete-account",
+        method: "DELETE",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -70,4 +98,5 @@ export const {
   useGetProfileQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
+  useDeleteAccountMutation,
 } = userApi;

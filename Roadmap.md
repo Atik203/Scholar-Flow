@@ -39,7 +39,12 @@ Week 2 – User Auth & Profile (Author: Atik) ✅
 Week 3 – Paper Upload & Storage
 
 - [x] Add password reset & email verification flow & forgot password ✅ (Author: Atik+Salman)
-- [ ] Add API to update/edit user profile
+- [x] Add API to update/edit user profile ✅ (Author: Atik)
+- [x] Implement Personal Information Update feature with enhanced validation ✅ (Author: Atik)
+- [x] Implement Delete Account feature with confirmation dialog ✅ (Author: Atik)
+
+**✅ Final Update (September 6, 2025):** All user profile management features completed and documented by Atik.
+
 - [ ] Connect to cloud storage for file uploads
 - [ ] Build paper upload page (PDF, DOCX)
 - [ ] Store metadata (title, author, year) in DB
