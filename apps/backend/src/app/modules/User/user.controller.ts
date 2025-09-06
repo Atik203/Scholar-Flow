@@ -72,14 +72,35 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteAccount = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new Error(
+      "User authentication failed: user object is missing or invalid"
+    );
+  }
+
+  const result = await userService.deleteAccount(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Account deleted successfully!",
+    data: result,
+  });
+});
+
 export const userController: {
   getAllFromDB: AsyncRequestHandler;
   getMyProfile: AsyncRequestHandler;
   updateProfile: AsyncRequestHandler;
   changePassword: AsyncRequestHandler;
+  deleteAccount: AsyncRequestHandler;
 } = {
   getAllFromDB,
   getMyProfile,
   updateProfile,
   changePassword,
+  deleteAccount,
 };
