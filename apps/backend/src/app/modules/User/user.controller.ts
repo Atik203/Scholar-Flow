@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { IAuthUser } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
+import { AsyncRequestHandler } from "../../types/express";
 import { userService } from "./user.service";
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
@@ -71,7 +72,12 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const userController = {
+export const userController: {
+  getAllFromDB: AsyncRequestHandler;
+  getMyProfile: AsyncRequestHandler;
+  updateProfile: AsyncRequestHandler;
+  changePassword: AsyncRequestHandler;
+} = {
   getAllFromDB,
   getMyProfile,
   updateProfile,

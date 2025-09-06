@@ -1,30 +1,87 @@
 ---
-description: Backend architecture, patterns, and constraints
+description: Backend architecture, database operations, and authentication
 globs:
   - "apps/backend/**"
 alwaysApply: false
 ---
 
-# Backend Rules (apps/backend)
+# Backend Rules
 
-See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standards.
+## Architecture & Structure
 
-1. Structure: Feature modules under `src/app/modules` (controller, service, routes, validation schemas).
-2. Routes: Register in `src/app/routes` only. No ad-hoc route registration elsewhere.
-3. Controllers: Thin. Business logic belongs in services.
-4. Services: Use Prisma client from shared singleton. Handle transactions explicitly when needed.
-5. Validation: Zod for request bodies, params, queries. Reject early on failure.
-6. Auth: JWT access + refresh. Use `auth` middleware for protected endpoints.
-7. CORS: Use `FRONTEND_URL` env; default `http://localhost:3000` in dev.
-8. Prisma: After modifying schema run migrations then `yarn db:generate` (includes TypedSQL). Keep raw SQL in `prisma/sql` (one statement per file).
-9. TypedSQL: Import from `@prisma/client/sql`; execute with `$queryRawTyped`. Add a comment referencing the originating `.sql` file.
-10. pgvector: Only run similarity queries if `USE_PGVECTOR=true`. Ensure extension exists before deploying usage.
-11. Pagination: Use provided pagination helper; never return unbounded lists.
-12. Errors: Throw `ApiError(status, message)`; avoid returning partial successes silently.
-13. Logging: Avoid console noise. Use structured logs for important events.
-14. Testing: Add unit tests for non-trivial service logic; integration tests for new routes. Critical features require comprehensive test coverage.
-15. Dependencies: Prefer standard libs and already-installed packages. Justify new deps in PR.
-16. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
-17. Do not use npm; use Yarn v4 workspaces.
-18. **OAuth Authentication**: Use standard Prisma upsert for account management. Document any deviation with clear warnings about constraint errors.
-19. **Database Operations**: Prefer Prisma Client over raw SQL. Use TypedSQL only for complex queries not expressible in Prisma Client.
+1. **Structure**: Feature modules under `src/app/modules` (controller, service, routes, validation schemas).
+2. **Routes**: Register in `src/app/routes` only. No ad-hoc route registration elsewhere.
+3. **Controllers**: Thin. Business logic belongs in services.
+4. **Services**: Use Prisma client from shared singleton. Handle transactions explicitly when needed.
+5. **Validation**: Zod for request bodies, params, queries. Reject early on failure.
+
+## Database Operations - $queryRaw Optimization
+
+**CRITICAL RULE**: All database operations MUST use `$queryRaw` or `$executeRaw` instead of Prisma Client methods for optimal performance.
+
+### ✅ REQUIRED: Use $queryRaw for:
+
+- All SELECT queries (findMany, findUnique, findFirst)
+- All INSERT operations (create)
+- All UPDATE operations (update, upsert)
+- All DELETE operations (delete)
+- All aggregation queries (count, groupBy)
+- All complex joins and relationships
+
+### 🔒 EXCEPTIONS: Keep Prisma Client ONLY for:
+
+- **OAuth operations** that require complex constraint handling:
+  - `createAccount()` - Provider constraint management
+  - `createOrUpdateUser()` - Email constraint management
+  - `createOrUpdateUserWithOAuth()` - Email verification handling
+
+### Implementation Standards
+
+```typescript
+// ✅ CORRECT: Use $queryRaw with proper typing
+const users = await prisma.$queryRaw<any[]>`
+  SELECT id, email, name, "createdAt"
+  FROM "User"
+  WHERE "isDeleted" = false
+  ORDER BY "createdAt" DESC
+  LIMIT ${limit} OFFSET ${skip}
+`;
+
+// ❌ WRONG: Using Prisma Client
+const users = await prisma.user.findMany({
+  where: { isDeleted: false },
+  orderBy: { createdAt: "desc" },
+  skip,
+  take: limit,
+});
+```
+
+### Security & Performance
+
+- **SQL Injection Prevention**: Use template literals: `WHERE email = ${email}`
+- **Type Safety**: Use `prisma.$queryRaw<Type[]>` for proper typing
+- **Field Selection**: Select only required fields, avoid `SELECT *`
+- **Pagination**: Use `LIMIT ${limit} OFFSET ${skip}` for efficient pagination
+
+## Authentication & Security
+
+1. **OAuth Account Management**: ALWAYS use standard Prisma upsert for OAuth accounts.
+2. **Raw Query Warning**: Do NOT change OAuth account creation to raw queries - causes unique constraint errors (P2002).
+3. **Error Handling**: All auth methods must use try/catch with ApiError for consistent error responses.
+4. **JWT**: Use JWT access + refresh. Use `auth` middleware for protected endpoints.
+5. **CORS**: Use `FRONTEND_URL` env; default `http://localhost:3000` in dev.
+
+## Testing & Quality
+
+1. **Testing**: Add unit tests for non-trivial service logic; integration tests for new routes.
+2. **Critical Features**: Authentication flows require comprehensive test coverage.
+3. **Errors**: Throw `ApiError(status, message)`; avoid returning partial successes silently.
+4. **Logging**: Avoid console noise. Use structured logs for important events.
+
+## Prisma & Database
+
+1. **Prisma**: After modifying schema run migrations then `yarn db:generate` (includes TypedSQL).
+2. **Raw SQL**: Keep raw SQL in `prisma/sql` (one statement per file).
+3. **TypedSQL**: Import from `@prisma/client/sql`; execute with `$queryRawTyped` or `$queryRaw`.
+4. **pgvector**: Only run similarity queries if `USE_PGVECTOR=true`. Ensure extension exists before deploying usage.
+5. **Pagination**: Use provided pagination helper; never return unbounded lists.
