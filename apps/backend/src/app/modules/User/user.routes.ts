@@ -1,8 +1,8 @@
 import express from "express";
-import { userController } from "./user.controller";
-import { validateRequestBody } from "../../middleware/validateRequest";
-import { updateProfileSchema, changePasswordSchema } from "./user.validation";
 import { authMiddleware } from "../../middleware/auth";
+import { validateRequestBody } from "../../middleware/validateRequest";
+import { userController } from "./user.controller";
+import { changePasswordSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
 
@@ -242,7 +242,12 @@ router.get("/me", authMiddleware, userController.getMyProfile);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.put("/update-profile", authMiddleware, validateRequestBody(updateProfileSchema), userController.updateProfile);
+router.put(
+  "/update-profile",
+  authMiddleware,
+  validateRequestBody(updateProfileSchema),
+  userController.updateProfile
+);
 
 /**
  * @swagger
@@ -295,6 +300,60 @@ router.put("/update-profile", authMiddleware, validateRequestBody(updateProfileS
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/change-password", authMiddleware, validateRequestBody(changePasswordSchema), userController.changePassword);
+router.post(
+  "/change-password",
+  authMiddleware,
+  validateRequestBody(changePasswordSchema),
+  userController.changePassword
+);
+
+/**
+ * @swagger
+ * /api/user/delete-account:
+ *   delete:
+ *     summary: Delete User Account
+ *     description: Permanently delete the current user's account. This action is irreversible and will log out the user immediately.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Account deleted successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     success:
+ *                       type: boolean
+ *                       example: true
+ *                     message:
+ *                       type: string
+ *                       example: "Account deleted successfully"
+ *                     deletedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-01-15T10:30:00.000Z"
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: User not found or already deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.delete("/delete-account", authMiddleware, userController.deleteAccount);
 
 export const userRoutes = router;
