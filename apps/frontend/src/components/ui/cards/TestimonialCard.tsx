@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Star } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { cardVariants, type CardVariants } from "../card-variants";
 
@@ -105,9 +106,11 @@ export const TestimonialCard = React.forwardRef<
         {/* Author Info */}
         <div className="flex items-center gap-3">
           {author.avatar ? (
-            <img
+            <Image
               src={author.avatar}
               alt={author.name}
+              width={40}
+              height={40}
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
@@ -146,7 +149,12 @@ export const TestimonialCard = React.forwardRef<
             </div>
 
             {(author.role || author.company) && (
-              <p className={cn("text-muted-foreground", textSizes[currentSize].role)}>
+              <p
+                className={cn(
+                  "text-muted-foreground",
+                  textSizes[currentSize].role
+                )}
+              >
                 {author.role}
                 {author.role && author.company && " at "}
                 {author.company}
@@ -154,7 +162,12 @@ export const TestimonialCard = React.forwardRef<
             )}
 
             {date && (
-              <p className={cn("text-muted-foreground", textSizes[currentSize].role)}>
+              <p
+                className={cn(
+                  "text-muted-foreground",
+                  textSizes[currentSize].role
+                )}
+              >
                 {date}
               </p>
             )}
