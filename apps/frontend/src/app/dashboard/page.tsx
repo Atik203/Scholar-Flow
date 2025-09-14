@@ -1,7 +1,9 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,19 +12,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { StatCard } from "@/components/ui/cards/StatCard";
+import { Progress } from "@/components/ui/progress";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { USER_ROLES } from "@/lib/auth/roles";
 import {
+  ArrowUpRight,
   BookOpen,
+  Brain,
   Clock,
   FileText,
+  Lightbulb,
   Plus,
   Search,
   Settings,
   Shield,
-  Star,
+  TrendingUp,
+  Upload,
   Users,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -110,31 +117,100 @@ const roleSpecificActions = {
 const recentStats = [
   {
     title: "Papers Uploaded",
-    value: "0",
-    change: "+0 this week",
+    value: "24",
+    change: "+3 this week",
+    trend: "up" as const,
     icon: FileText,
     color: "text-blue-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+    iconColor: "text-blue-600 dark:text-blue-400",
   },
   {
     title: "Collections",
-    value: "0",
-    change: "+0 this week",
+    value: "8",
+    change: "+2 this week",
+    trend: "up" as const,
+    icon: BookOpen,
+    color: "text-green-600",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+    iconColor: "text-green-600 dark:text-green-400",
+  },
+  {
+    title: "Collaborations",
+    value: "5",
+    change: "+1 this week",
+    trend: "up" as const,
+    icon: Users,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+    iconColor: "text-purple-600 dark:text-purple-400",
+  },
+  {
+    title: "Reading Time",
+    value: "42h",
+    change: "+8h this week",
+    trend: "up" as const,
+    icon: Clock,
+    color: "text-orange-600",
+    bgColor: "bg-orange-50 dark:bg-orange-950/20",
+    iconColor: "text-orange-600 dark:text-orange-400",
+  },
+];
+
+// Recent activity data
+const recentActivity = [
+  {
+    title: "Uploaded 'Neural Networks in Climate Science'",
+    time: "2 hours ago",
+    type: "upload",
+    icon: Upload,
+    color: "text-blue-600",
+  },
+  {
+    title: "Created 'Machine Learning Papers' collection",
+    time: "1 day ago",
+    type: "collection",
     icon: BookOpen,
     color: "text-green-600",
   },
   {
-    title: "Collaborations",
-    value: "0",
-    change: "+0 this week",
+    title: "Shared collection with Dr. Sarah Wilson",
+    time: "2 days ago",
+    type: "collaboration",
     icon: Users,
     color: "text-purple-600",
   },
   {
-    title: "Reading Time",
-    value: "0h",
-    change: "+0h this week",
-    icon: Clock,
-    color: "text-orange-600",
+    title: "AI analysis completed for 3 papers",
+    time: "3 days ago",
+    type: "ai",
+    icon: Brain,
+    color: "text-pink-600",
+  },
+];
+
+// Quick insights data
+const quickInsights = [
+  {
+    title: "Research Productivity",
+    description: "Your research activity has increased 40% this month",
+    progress: 75,
+    icon: TrendingUp,
+    color: "text-green-600",
+  },
+  {
+    title: "AI Recommendations",
+    description: "3 new papers match your research interests",
+    count: 3,
+    icon: Lightbulb,
+    color: "text-yellow-600",
+  },
+  {
+    title: "Team Collaboration",
+    description: "2 team members are actively contributing",
+    count: 2,
+    icon: Users,
+    color: "text-blue-600",
   },
 ];
 
@@ -171,188 +247,333 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header with Role Badge */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user?.name?.split(" ")[0] || "Researcher"}!
-              </h1>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">
-                Here's what's happening with your research today.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <RoleBadge role={userRole} size="lg" />
-            </div>
-          </div>
+    <DashboardLayout>
+      {/* Welcome Header */}
+      <div className="flex flex-col space-y-3 sm:space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+            Welcome back, {user?.name?.split(" ")[0] || "Researcher"}!
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Here's what's happening with your research today.
+          </p>
         </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {recentStats.map((stat, index) => (
-            <StatCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              change={0}
-              trend="neutral"
-              icon={stat.icon}
-              description={stat.change}
-              variant="default"
-              hover="lift"
-            />
-          ))}
+        <div className="flex items-center gap-2">
+          <RoleBadge role={userRole} size="sm" />
         </div>
+      </div>
 
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {recentStats.map((stat, index) => (
+          <Card key={index} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+                    {stat.title}
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.change}</p>
+                </div>
+                <div
+                  className={`rounded-full p-2 sm:p-3 ${stat.bgColor} flex-shrink-0`}
+                >
+                  <stat.icon
+                    className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.iconColor}`}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Dashboard Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Quick Actions */}
-        <Card className="mb-8 dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="dark:text-white">Quick Actions</CardTitle>
-            <CardDescription className="dark:text-gray-400">
-              Get started with common tasks
+        <div className="xl:col-span-2">
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
+                Quick Actions
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Get started with common research tasks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {availableActions.slice(0, 4).map((action, index) => (
+                  <Button
+                    key={index}
+                    asChild
+                    variant="outline"
+                    className="h-auto p-3 sm:p-4 justify-start hover:shadow-md transition-all duration-300"
+                    onClick={() => handleActionClick(action.title)}
+                  >
+                    <Link
+                      href={action.href}
+                      className="flex items-center gap-3 w-full"
+                    >
+                      <div
+                        className={`p-2 rounded-lg ${action.color} text-white flex-shrink-0`}
+                      >
+                        <action.icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                      </div>
+                      <div className="text-left min-w-0 flex-1">
+                        <p className="font-medium text-sm sm:text-base truncate">
+                          {action.title}
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+                          {action.description}
+                        </p>
+                      </div>
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Insights */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5" />
+              Insights
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Your research at a glance
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {availableActions.map((action, index) => (
-                <Button
-                  key={index}
-                  asChild
-                  variant="outline"
-                  className="h-auto p-6 flex-col items-start space-y-3 hover:shadow-lg transition-all duration-300 dark:border-gray-600 dark:hover:bg-gray-700"
-                  onClick={() => handleActionClick(action.title)}
-                >
-                  <Link href={action.href}>
-                    <div
-                      className={`p-3 rounded-lg ${action.color} text-white`}
-                    >
-                      <action.icon className="h-6 w-6" />
-                    </div>
-                    <div className="text-left">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
-                        {action.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {action.description}
-                      </p>
-                    </div>
-                  </Link>
-                </Button>
-              ))}
-            </div>
+          <CardContent className="space-y-3 sm:space-y-4">
+            {quickInsights.map((insight, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <div className="rounded-full p-2 bg-muted flex-shrink-0">
+                  <insight.icon
+                    className={`h-3 w-3 sm:h-4 sm:w-4 ${insight.color}`}
+                  />
+                </div>
+                <div className="flex-1 space-y-1 min-w-0">
+                  <p className="font-medium text-sm truncate">
+                    {insight.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {insight.description}
+                  </p>
+                  {"progress" in insight && (
+                    <Progress
+                      value={insight.progress}
+                      className="h-1.5 sm:h-2"
+                    />
+                  )}
+                  {"count" in insight && (
+                    <Badge variant="secondary" className="text-xs">
+                      {insight.count} items
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity & Research Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Your latest research actions
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 sm:space-y-4">
+            {recentActivity.map((activity, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <div className="rounded-full p-2 bg-muted flex-shrink-0">
+                  <activity.icon
+                    className={`h-3 w-3 sm:h-4 sm:w-4 ${activity.color}`}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm line-clamp-2">
+                    {activity.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {activity.time}
+                  </p>
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        {/* Recent Activity & Collections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Papers */}
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-white">
-                <FileText className="h-5 w-5" />
-                Recent Papers
-              </CardTitle>
-              <CardDescription className="dark:text-gray-400">
-                Your recently uploaded or viewed papers
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  No papers uploaded yet
-                </p>
-                <Button asChild>
-                  <Link href="/papers/upload">Upload Your First Paper</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recent Collections */}
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-white">
-                <BookOpen className="h-5 w-5" />
-                Collections
-              </CardTitle>
-              <CardDescription className="dark:text-gray-400">
-                Your organized paper collections
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400 mb-4">
-                  No collections created yet
-                </p>
-                <Button asChild variant="outline">
-                  <Link href="/collections/create">
-                    Create Your First Collection
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Getting Started Guide */}
-        <Card className="mt-8 border-primary/20 bg-gradient-to-r from-primary/5 to-blue-50 dark:from-primary/10 dark:to-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary dark:text-primary">
-              <Star className="h-5 w-5" />
-              Getting Started with ScholarFlow
+        {/* Research Overview */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+              Research Overview
             </CardTitle>
-            <CardDescription className="dark:text-gray-400">
-              New to ScholarFlow? Here's how to get the most out of your
-              research workflow
+            <CardDescription className="text-sm">
+              Your research library status
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg mb-3 inline-block">
-                  <FileText className="h-8 w-8 text-primary" />
+          <CardContent className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <p className="text-sm font-medium">Papers Analyzed</p>
+                  <p className="text-xs text-muted-foreground">
+                    AI insights generated
+                  </p>
                 </div>
-                <h3 className="font-semibold mb-2 dark:text-white">
-                  1. Upload Papers
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Start by uploading your research papers to build your digital
-                  library
-                </p>
+                <Badge variant="secondary" className="text-xs">
+                  18/24
+                </Badge>
               </div>
-              <div className="text-center">
-                <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg mb-3 inline-block">
-                  <BookOpen className="h-8 w-8 text-primary" />
+              <Progress value={75} className="h-1.5 sm:h-2" />
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1 min-w-0 flex-1">
+                  <p className="text-sm font-medium">Collection Progress</p>
+                  <p className="text-xs text-muted-foreground">
+                    Organized papers
+                  </p>
                 </div>
-                <h3 className="font-semibold mb-2 dark:text-white">
-                  2. Organize
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Create collections to organize papers by topic, project, or
-                  research area
-                </p>
+                <Badge variant="secondary" className="text-xs">
+                  21/24
+                </Badge>
               </div>
-              <div className="text-center">
-                <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-lg mb-3 inline-block">
-                  <Users className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold mb-2 dark:text-white">
-                  3. Collaborate
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Share collections and collaborate with colleagues on research
-                  projects
-                </p>
-              </div>
+              <Progress value={87} className="h-1.5 sm:h-2" />
+            </div>
+
+            <div className="flex gap-2 pt-2 sm:pt-4">
+              <Button asChild size="sm" className="flex-1 text-xs sm:text-sm">
+                <Link href="/papers/upload">
+                  <Upload className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  Upload
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="flex-1 text-xs sm:text-sm"
+              >
+                <Link href="/collections/create">
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  Organize
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+
+      {/* AI Recommendations */}
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
+            AI Recommendations
+          </CardTitle>
+          <CardDescription className="text-sm">
+            Personalized research suggestions powered by AI
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="h-3 w-3 sm:h-4 sm:w-4 text-pink-600" />
+                <Badge variant="secondary" className="text-xs">
+                  AI Insight
+                </Badge>
+              </div>
+              <h4 className="font-medium mb-1 text-sm sm:text-base">
+                Similar Research Found
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                3 papers on neural networks that align with your interests
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                asChild
+                className="w-full text-xs sm:text-sm"
+              >
+                <Link href="/ai-insights">
+                  View Details
+                  <ArrowUpRight className="h-3 w-3 ml-1" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                <Badge variant="secondary" className="text-xs">
+                  Collaboration
+                </Badge>
+              </div>
+              <h4 className="font-medium mb-1 text-sm sm:text-base">
+                Potential Collaborators
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                2 researchers with similar interests want to connect
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                asChild
+                className="w-full text-xs sm:text-sm"
+              >
+                <Link href="/collaborate">
+                  Connect
+                  <ArrowUpRight className="h-3 w-3 ml-1" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                <Badge variant="secondary" className="text-xs">
+                  Trending
+                </Badge>
+              </div>
+              <h4 className="font-medium mb-1 text-sm sm:text-base">
+                Trending Topics
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                "Sustainable AI" is gaining momentum in your field
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                asChild
+                className="w-full text-xs sm:text-sm"
+              >
+                <Link href="/trends">
+                  Explore
+                  <ArrowUpRight className="h-3 w-3 ml-1" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </DashboardLayout>
   );
 }

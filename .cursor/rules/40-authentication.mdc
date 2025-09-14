@@ -12,11 +12,13 @@ alwaysApply: false
 # Authentication Rules
 
 ## ✅ PRODUCTION-READY STATUS
+
 OAuth authentication system is COMPLETE and TESTED. Follow established patterns below.
 
-## Backend Authentication (apps/backend)
+## Backend Authentication
 
 1. **OAuth Account Management**: ALWAYS use standard Prisma upsert for OAuth accounts.
+
    ```typescript
    // CORRECT - Standard Prisma upsert (PROVEN PATTERN)
    const account = await prisma.account.upsert({
@@ -26,8 +28,12 @@ OAuth authentication system is COMPLETE and TESTED. Follow established patterns 
          providerAccountId: accountData.providerAccountId,
        },
      },
-     update: { /* token updates */ },
-     create: { /* full account data */ },
+     update: {
+       /* token updates */
+     },
+     create: {
+       /* full account data */
+     },
    });
    ```
 
@@ -47,7 +53,7 @@ OAuth authentication system is COMPLETE and TESTED. Follow established patterns 
    - Implement refresh token rotation ✅
    - Secure cookie settings for production ✅
 
-## Frontend Authentication (apps/frontend)
+## Frontend Authentication
 
 1. **Auth.js Integration**: Use standard Auth.js patterns with custom backend integration. ✅
 
@@ -65,26 +71,17 @@ OAuth authentication system is COMPLETE and TESTED. Follow established patterns 
    - Loading states and error handling ✅
    - Auth guards for protected routes ✅
 
-3. **Route Protection**: Implement proper route guards for authenticated pages.
-
-4. **Error Handling**: Display user-friendly error messages for auth failures.
-
 ## Testing Standards
 
 1. **Integration Tests**: Required for all authentication endpoints and flows.
-
 2. **Mock Data**: Use consistent mock data patterns for OAuth profiles and account data.
-
 3. **Test Coverage**: Minimum 90% coverage for authentication-related code.
-
 4. **Database State**: Tests must handle database state properly (cleanup, isolation).
 
 ## Documentation Requirements
 
 1. **Code Comments**: All auth-related functions must have JSDoc comments explaining their purpose.
-
 2. **Warning Comments**: Any deviation from standard Prisma patterns must include clear warnings.
-
 3. **Environment Variables**: Document all required auth-related environment variables.
 
 ## Security Checklist
