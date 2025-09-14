@@ -22,6 +22,7 @@ import {
   useGetProfileQuery,
   useUpdateProfileMutation,
 } from "@/redux/api/userApi";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertTriangle,
   Camera,
@@ -35,6 +36,32 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+// Profile update validation schema
+const profileUpdateSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name too long")
+    .optional(),
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name too long")
+    .optional(),
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .max(50, "Last name too long")
+    .optional(),
+  institution: z.string().max(200, "Institution name too long").optional(),
+  fieldOfStudy: z.string().max(200, "Field of study too long").optional(),
+  image: z.string().url("Invalid image URL").optional().or(z.literal("")),
+});
+
+type ProfileUpdateForm = z.infer<typeof profileUpdateSchema>;
 
 function VerifyButton() {
   return (
@@ -62,12 +89,26 @@ export default function ProfilePage() {
     refetch,
   } = useGetProfileQuery();
 
-  // // Debug logs for profile data (after declaration)
-  // useEffect(() => {
-  //   console.log("[Profile Debug] profileData:", profileData);
-  //   console.log("[Profile Debug] authUser:", authUser);
-  // }, [profileData, authUser]);
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+
+  // Form handling with react-hook-form
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty },
+    reset,
+    watch,
+  } = useForm<ProfileUpdateForm>({
+    resolver: zodResolver(profileUpdateSchema),
+    defaultValues: {
+      name: "",
+      firstName: "",
+      lastName: "",
+      institution: "",
+      fieldOfStudy: "",
+      image: "",
+    },
+  });
 
   // Refetch profile if redirected from verification
   useEffect(() => {
@@ -83,19 +124,11 @@ export default function ProfilePage() {
   }, [refetch]);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    firstName: "",
-    lastName: "",
-    institution: "",
-    fieldOfStudy: "",
-    image: "",
-  });
 
   // Update form data when profile data changes
   useEffect(() => {
     if (profileData) {
-      setFormData({
+      reset({
         name: profileData.data.name || "",
         firstName: profileData.data.firstName || "",
         lastName: profileData.data.lastName || "",
@@ -104,7 +137,7 @@ export default function ProfilePage() {
         image: profileData.data.image || "",
       });
     }
-  }, [profileData]);
+  }, [profileData, reset]);
 
   if (isAuthLoading || isProfileLoading) {
     return (
@@ -134,11 +167,11 @@ export default function ProfilePage() {
     setIsEditing(true);
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (data: ProfileUpdateForm) => {
     try {
       // Filter out empty strings and undefined values
       const updateData = Object.fromEntries(
-        Object.entries(formData).filter(
+        Object.entries(data).filter(
           ([_, value]) => value !== "" && value !== undefined
         )
       );
@@ -152,27 +185,17 @@ export default function ProfilePage() {
 
       setIsEditing(false);
       refetch(); // Refresh profile data
-    } catch (error) {
+    } catch (error: any) {
       console.error("Profile update error:", error);
-      showErrorToast(
-        "Update Failed",
-        "Failed to update profile. Please try again."
-      );
+      const errorMessage =
+        error?.data?.message || "Failed to update profile. Please try again.";
+      showErrorToast("Update Failed", errorMessage);
     }
   };
 
   const handleCancel = () => {
-    // Reset form data to current profile data
-    if (profileData) {
-      setFormData({
-        name: profileData.data.name || "",
-        firstName: profileData.data.firstName || "",
-        lastName: profileData.data.lastName || "",
-        institution: profileData.data.institution || "",
-        fieldOfStudy: profileData.data.fieldOfStudy || "",
-        image: profileData.data.image || "",
-      });
-    }
+    // Reset form to original values
+    reset();
     setIsEditing(false);
   };
 
@@ -189,9 +212,9 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Profile Card */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="text-center">
                 <div className="relative mx-auto">
@@ -290,8 +313,8 @@ export default function ProfilePage() {
           {/* Profile Information */}
           <div className="lg:col-span-3">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="min-w-0 flex-1">
                   <CardTitle className="dark:text-white">
                     Personal Information
                   </CardTitle>
@@ -299,120 +322,138 @@ export default function ProfilePage() {
                     Update your personal details and research information
                   </CardDescription>
                 </div>
-                {!isEditing ? (
-                  <Button onClick={handleEdit} variant="outline" size="sm">
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
+                <div className="flex-shrink-0">
+                  {!isEditing ? (
                     <Button
-                      onClick={handleSave}
+                      onClick={handleEdit}
+                      variant="outline"
                       size="sm"
-                      disabled={isUpdating}
+                      className="w-full sm:w-auto"
                     >
-                      {isUpdating ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      {isUpdating ? "Saving..." : "Save"}
+                      <Edit3 className="h-4 w-4 mr-2" />
+                      Edit
                     </Button>
-                    <Button onClick={handleCancel} variant="outline" size="sm">
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
+                  ) : (
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        onClick={handleSubmit(onSubmit)}
+                        size="sm"
+                        disabled={isUpdating || !isDirty}
+                        className="flex-1 sm:flex-none"
+                      >
+                        {isUpdating ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Save className="h-4 w-4 mr-2" />
+                        )}
+                        {isUpdating ? "Saving..." : "Save"}
+                      </Button>
+                      <Button
+                        onClick={handleCancel}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 sm:flex-none"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {isEditing ? (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                          id="firstName"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              firstName: e.target.value,
-                            })
-                          }
-                          placeholder="Enter your first name"
-                        />
+                    <form
+                      onSubmit={handleSubmit(onSubmit)}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="firstName">First Name</Label>
+                          <Input
+                            id="firstName"
+                            {...register("firstName")}
+                            placeholder="Enter your first name"
+                          />
+                          {errors.firstName && (
+                            <p className="text-sm text-red-500">
+                              {errors.firstName.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input
+                            id="lastName"
+                            {...register("lastName")}
+                            placeholder="Enter your last name"
+                          />
+                          {errors.lastName && (
+                            <p className="text-sm text-red-500">
+                              {errors.lastName.message}
+                            </p>
+                          )}
+                        </div>
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="name">Full Name</Label>
                         <Input
-                          id="lastName"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              lastName: e.target.value,
-                            })
-                          }
-                          placeholder="Enter your last name"
+                          id="name"
+                          {...register("name")}
+                          placeholder="Enter your full name (optional if using first/last name)"
                         />
+                        {errors.name && (
+                          <p className="text-sm text-red-500">
+                            {errors.name.message}
+                          </p>
+                        )}
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        placeholder="Enter your full name (optional if using first/last name)"
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="institution">Institution</Label>
+                        <Input
+                          id="institution"
+                          {...register("institution")}
+                          placeholder="University or organization"
+                        />
+                        {errors.institution && (
+                          <p className="text-sm text-red-500">
+                            {errors.institution.message}
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="institution">Institution</Label>
-                      <Input
-                        id="institution"
-                        value={formData.institution}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            institution: e.target.value,
-                          })
-                        }
-                        placeholder="University or organization"
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fieldOfStudy">Field of Study</Label>
+                        <Input
+                          id="fieldOfStudy"
+                          {...register("fieldOfStudy")}
+                          placeholder="Your research area or field of study"
+                        />
+                        {errors.fieldOfStudy && (
+                          <p className="text-sm text-red-500">
+                            {errors.fieldOfStudy.message}
+                          </p>
+                        )}
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="fieldOfStudy">Field of Study</Label>
-                      <Input
-                        id="fieldOfStudy"
-                        value={formData.fieldOfStudy}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            fieldOfStudy: e.target.value,
-                          })
-                        }
-                        placeholder="Your research area or field of study"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="image">Profile Image URL</Label>
-                      <Input
-                        id="image"
-                        value={formData.image}
-                        onChange={(e) =>
-                          setFormData({ ...formData, image: e.target.value })
-                        }
-                        placeholder="https://example.com/avatar.jpg"
-                      />
-                    </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="image">Profile Image URL</Label>
+                        <Input
+                          id="image"
+                          {...register("image")}
+                          placeholder="https://example.com/avatar.jpg"
+                        />
+                        {errors.image && (
+                          <p className="text-sm text-red-500">
+                            {errors.image.message}
+                          </p>
+                        )}
+                      </div>
+                    </form>
                   </>
                 ) : (
                   <>

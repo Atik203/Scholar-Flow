@@ -42,27 +42,30 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     return new Date();
   });
 
-  const formatDate = (date: Date): string => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+  const formatDate = React.useCallback(
+    (date: Date): string => {
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
 
-    return format
-      .replace("MMM", months[date.getMonth()])
-      .replace("dd", date.getDate().toString().padStart(2, "0"))
-      .replace("yyyy", date.getFullYear().toString());
-  };
+      return format
+        .replace("MMM", months[date.getMonth()])
+        .replace("dd", date.getDate().toString().padStart(2, "0"))
+        .replace("yyyy", date.getFullYear().toString());
+    },
+    [format]
+  );
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();

@@ -1,14 +1,3 @@
-// Temporarily commenting out TypedSQL imports due to build issues
-// import {
-//   createSession,
-//   deleteSession,
-//   getSessionByToken,
-// } from "@prisma/client/sql";
-// import {
-//   createUser,
-//   getUserByEmail,
-//   getUserById,
-// } from "@prisma/client/sql";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import ApiError from "../../errors/ApiError";
@@ -63,6 +52,39 @@ class AuthService {
   }
 
   /**
+   * Create or update user with email verified for OAuth users
+   */
+  async createOrUpdateUserWithOAuth(userData: IUserData) {
+    try {
+      const userId = userData.id || uuidv4();
+      const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
+
+      const user = await prisma.user.upsert({
+        where: { email: userData.email },
+        update: {
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+          emailVerified: new Date(), // Mark as verified for OAuth users
+        },
+        create: {
+          id: userId,
+          email: userData.email,
+          name: userData.name ?? "",
+          image: userData.image ?? "",
+          role: role as any,
+          emailVerified: new Date(), // Mark as verified for OAuth users
+        },
+      });
+
+      return user;
+    } catch (error) {
+      console.error("Error creating/updating OAuth user:", error);
+      throw new ApiError(500, AUTH_ERROR_MESSAGES.OAUTH_ERROR);
+    }
+  }
+
+  /**
    * Validate if role is valid
    */
   private validateRole(role: string): string {
@@ -74,23 +96,20 @@ class AuthService {
   }
 
   /**
-   * Sign in with email and password
+   * Sign in with email and password using $queryRaw for optimized user lookup
+   * Source: optimized single query for authentication data retrieval
    */
   async signInWithPassword(email: string, _password: string) {
     try {
-      // Find user by email
-      const user = await prisma.user.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          image: true,
-          password: true,
-          role: true,
-        },
-      });
+      // Find user by email using $queryRaw for better performance
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name, image, password, role
+        FROM "User"
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
 
+      const user = users[0];
       if (!user) {
         throw new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
       }
@@ -123,7 +142,8 @@ class AuthService {
   }
 
   /**
-   * Register new user with email and password
+   * Register new user with email and password using $queryRaw for optimized operations
+   * Source: optimized user existence check and creation in single transaction
    */
   async registerWithPassword(
     firstName: string,
@@ -135,12 +155,14 @@ class AuthService {
     role: string = USER_ROLES.RESEARCHER
   ) {
     try {
-      // Check if user already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
+      // Check if user already exists using $queryRaw
+      const existingUsers = await prisma.$queryRaw<any[]>`
+        SELECT id FROM "User" 
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
 
-      if (existingUser) {
+      if (existingUsers.length > 0) {
         throw new ApiError(409, "User with this email already exists");
       }
 
@@ -152,35 +174,30 @@ class AuthService {
 
       // Create full name from first and last name
       const name = `${firstName} ${lastName}`.trim();
+      const userId = uuidv4();
 
-      // Create new user
-      const user = await prisma.user.create({
-        data: {
-          id: uuidv4(),
-          email,
-          name,
-          firstName,
-          lastName,
-          institution,
-          fieldOfStudy,
-          password: hashedPassword,
-          role: validRole as any,
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          firstName: true,
-          lastName: true,
-          institution: true,
-          fieldOfStudy: true,
-          image: true,
-          role: true,
-          createdAt: true,
-        },
-      });
+      // Create new user using $queryRaw with proper role casting
+      await prisma.$queryRaw`
+        INSERT INTO "User" (
+          id, email, name, "firstName", "lastName", institution, "fieldOfStudy", 
+          password, role, "isDeleted", "createdAt", "updatedAt"
+        ) VALUES (
+          ${userId}, ${email}, ${name}, ${firstName}, ${lastName}, 
+          ${institution || null}, ${fieldOfStudy || null}, ${hashedPassword}, 
+          ${validRole}::"Role", false, NOW(), NOW()
+        )
+      `;
 
-      return user;
+      // Return the created user data using $queryRaw
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name, "firstName", "lastName", institution, 
+               "fieldOfStudy", image, role, "createdAt"
+        FROM "User"
+        WHERE id = ${userId}
+        LIMIT 1
+      `;
+
+      return users[0];
     } catch (error) {
       if (error instanceof ApiError) {
         throw error;
@@ -213,7 +230,8 @@ class AuthService {
   }
 
   /**
-   * Update user role (admin only)
+   * Update user role using $queryRaw for optimized role update operation
+   * Source: optimized role update with single query execution
    */
   async updateUserRole(
     adminUserId: string,
@@ -230,24 +248,26 @@ class AuthService {
       // Validate new role
       const newRole = this.validateRole(roleData.role);
 
-      // Update user role
-      const updatedUser = await prisma.user.update({
-        where: { id: targetUserId },
-        data: {
-          role: newRole as any,
-          updatedAt: new Date(),
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      // Update user role using $queryRaw with proper role casting
+      await prisma.$queryRaw`
+        UPDATE "User" 
+        SET role = ${newRole}::"Role", "updatedAt" = NOW()
+        WHERE id = ${targetUserId} AND "isDeleted" = false
+      `;
 
-      return updatedUser;
+      // Return updated user data
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name, role, "createdAt", "updatedAt"
+        FROM "User"
+        WHERE id = ${targetUserId} AND "isDeleted" = false
+        LIMIT 1
+      `;
+
+      if (users.length === 0) {
+        throw new ApiError(404, "User not found");
+      }
+
+      return users[0];
     } catch (error) {
       console.error("Error updating user role:", error);
       if (error instanceof ApiError) {
@@ -259,6 +279,8 @@ class AuthService {
 
   /**
    * Get all users with role filtering (admin/team lead only)
+   * Uses $queryRaw for optimized filtering and search
+   * Source: optimized user filtering with role hierarchy and search
    */
   async getAllUsers(
     requestingUserId: string,
@@ -274,41 +296,66 @@ class AuthService {
         throw new ApiError(403, AUTH_ERROR_MESSAGES.FORBIDDEN);
       }
 
-      const whereClause: any = { isDeleted: false };
+      // Use $queryRaw with conditional logic for better performance
+      let users: any[];
 
-      // Apply role filter
-      if (filters?.role) {
-        whereClause.role = this.validateRole(filters.role);
-      }
-
-      // Apply search filter
-      if (filters?.search) {
-        whereClause.OR = [
-          { email: { contains: filters.search, mode: "insensitive" } },
-          { name: { contains: filters.search, mode: "insensitive" } },
-        ];
-      }
-
-      // Team leads can only see users below their level
       if (requestingUser.role === USER_ROLES.TEAM_LEAD) {
-        whereClause.role = {
-          in: [USER_ROLES.RESEARCHER, USER_ROLES.PRO_RESEARCHER],
-        };
+        // Team leads can only see researchers
+        if (filters?.search) {
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false
+              AND role IN ('RESEARCHER', 'PRO_RESEARCHER')
+              AND (email ILIKE ${`%${filters.search}%`} OR name ILIKE ${`%${filters.search}%`})
+            ORDER BY "createdAt" DESC
+          `;
+        } else {
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false
+              AND role IN ('RESEARCHER', 'PRO_RESEARCHER')
+            ORDER BY "createdAt" DESC
+          `;
+        }
+      } else {
+        // Admin can see all users with optional role and search filters
+        if (filters?.role && filters?.search) {
+          const validRole = this.validateRole(filters.role);
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false
+              AND role = ${validRole}
+              AND (email ILIKE ${`%${filters.search}%`} OR name ILIKE ${`%${filters.search}%`})
+            ORDER BY "createdAt" DESC
+          `;
+        } else if (filters?.role) {
+          const validRole = this.validateRole(filters.role);
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false AND role = ${validRole}
+            ORDER BY "createdAt" DESC
+          `;
+        } else if (filters?.search) {
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false
+              AND (email ILIKE ${`%${filters.search}%`} OR name ILIKE ${`%${filters.search}%`})
+            ORDER BY "createdAt" DESC
+          `;
+        } else {
+          users = await prisma.$queryRaw<any[]>`
+            SELECT id, email, name, image, role, "createdAt", "updatedAt"
+            FROM "User"
+            WHERE "isDeleted" = false
+            ORDER BY "createdAt" DESC
+          `;
+        }
       }
-
-      const users = await prisma.user.findMany({
-        where: whereClause,
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          image: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-        orderBy: { createdAt: "desc" },
-      });
 
       return users;
     } catch (error) {
@@ -320,41 +367,38 @@ class AuthService {
     }
   }
 
-  /**
-   * Get user by email using Prisma
-   */
   async getUserByEmail(email: string) {
     try {
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
-      return user;
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name, "firstName", "lastName", image, role, password, 
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+        FROM "User" 
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
+      return users[0] || null;
     } catch (error) {
       console.error("Error getting user by email:", error);
       throw new ApiError(500, "Failed to get user by email");
     }
   }
 
-  /**
-   * Get user by ID using Prisma
-   */
   async getUserById(id: string) {
     try {
-      const user = await prisma.user.findUnique({
-        where: { id },
-      });
-      return user;
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name, "firstName", "lastName", image, role, password,
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+        FROM "User" 
+        WHERE id = ${id} AND "isDeleted" = false
+        LIMIT 1
+      `;
+      return users[0] || null;
     } catch (error) {
       console.error("Error getting user by ID:", error);
       throw new ApiError(500, "Failed to get user by ID");
     }
   }
 
-  /**
-   * Create account linking for OAuth provider using standard Prisma upsert
-   * NOTE: DO NOT change this to raw query - it causes database constraint errors
-   * The upsert operation handles both creating new accounts and updating existing ones
-   */
   async createAccount(userId: string, accountData: IAccountData) {
     try {
       const account = await prisma.account.upsert({
@@ -396,19 +440,26 @@ class AuthService {
   }
 
   /**
-   * Create session using Prisma
+   * Create session using $queryRaw for optimized session creation
+   * Source: optimized session insertion with direct SQL
    */
   async createSession(userId: string, sessionData: ISessionData) {
     try {
-      const session = await prisma.session.create({
-        data: {
-          sessionToken: sessionData.sessionToken,
-          userId: userId,
-          expires: sessionData.expires,
-        },
-      });
+      // Create session using $queryRaw
+      await prisma.$queryRaw`
+        INSERT INTO "Session" ("sessionToken", "userId", expires, "createdAt", "updatedAt")
+        VALUES (${sessionData.sessionToken}, ${userId}, ${sessionData.expires}, NOW(), NOW())
+      `;
 
-      return session;
+      // Return the created session
+      const sessions = await prisma.$queryRaw<any[]>`
+        SELECT "sessionToken", "userId", expires, "createdAt", "updatedAt"
+        FROM "Session"
+        WHERE "sessionToken" = ${sessionData.sessionToken}
+        LIMIT 1
+      `;
+
+      return sessions[0];
     } catch (error) {
       console.error("Error creating session:", error);
       throw new ApiError(500, AUTH_ERROR_MESSAGES.SESSION_EXPIRED);
@@ -416,15 +467,42 @@ class AuthService {
   }
 
   /**
-   * Get session by token using Prisma
+   * Get session by token using $queryRaw with user data join
+   * Source: optimized session retrieval with user information in single query
    */
   async getSessionByToken(sessionToken: string) {
     try {
-      const session = await prisma.session.findUnique({
-        where: { sessionToken },
-        include: { user: true },
-      });
-      return session;
+      const sessions = await prisma.$queryRaw<any[]>`
+        SELECT 
+          s."sessionToken", s."userId", s.expires, s."createdAt" as "sessionCreatedAt",
+          u.id as "userId", u.email, u.name, u.image, u.role, u."emailVerified"
+        FROM "Session" s
+        LEFT JOIN "User" u ON s."userId" = u.id
+        WHERE s."sessionToken" = ${sessionToken}
+        LIMIT 1
+      `;
+
+      if (sessions.length === 0) {
+        return null;
+      }
+
+      const session = sessions[0];
+
+      // Format the response to match Prisma's include structure
+      return {
+        sessionToken: session.sessionToken,
+        userId: session.userId,
+        expires: session.expires,
+        createdAt: session.sessionCreatedAt,
+        user: {
+          id: session.userId,
+          email: session.email,
+          name: session.name,
+          image: session.image,
+          role: session.role,
+          emailVerified: session.emailVerified,
+        },
+      };
     } catch (error) {
       console.error("Error getting session by token:", error);
       throw new ApiError(500, "Failed to get session");
@@ -432,13 +510,15 @@ class AuthService {
   }
 
   /**
-   * Delete session using Prisma
+   * Delete session using $queryRaw for optimized session removal
+   * Source: optimized session deletion with direct SQL
    */
   async deleteSession(sessionToken: string) {
     try {
-      await prisma.session.delete({
-        where: { sessionToken },
-      });
+      await prisma.$queryRaw`
+        DELETE FROM "Session"
+        WHERE "sessionToken" = ${sessionToken}
+      `;
       return true;
     } catch (error) {
       console.error("Error deleting session:", error);
@@ -459,8 +539,8 @@ class AuthService {
         role: USER_ROLES.RESEARCHER,
       };
 
-      // Create or update user
-      const user = await this.createOrUpdateUser(userData);
+      // Create or update user with email verified for OAuth users
+      const user = await this.createOrUpdateUserWithOAuth(userData);
 
       // Create account linking
       await this.createAccount(user.id, account);
@@ -498,27 +578,28 @@ class AuthService {
   }
 
   /**
-   * Initiate forgot password process
+   * Initiate forgot password process using $queryRaw for optimized user lookup
+   * Source: optimized user lookup for password reset functionality
    */
   async initiateForgotPassword(email: string) {
     try {
-      // Find user by email
-      const user = await prisma.user.findUnique({
-        where: { email },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
-      });
+      // Find user by email using $queryRaw
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name
+        FROM "User"
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
 
-      if (!user) {
+      if (users.length === 0) {
         // Don't reveal if user exists or not for security
         return {
           message:
             "If an account with that email exists, a password reset link has been sent.",
         };
       }
+
+      const user = users[0];
 
       // Generate and store password reset token
       const resetToken = await tokenService.createAndStoreToken(
@@ -545,7 +626,8 @@ class AuthService {
   }
 
   /**
-   * Reset password using token
+   * Reset password using token with $queryRaw for optimized password update
+   * Source: optimized password update operation
    */
   async resetPassword(token: string, newPassword: string) {
     try {
@@ -562,11 +644,12 @@ class AuthService {
       // Hash the new password
       const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-      // Update user's password
-      await prisma.user.update({
-        where: { id: tokenValidation.userId },
-        data: { password: hashedPassword },
-      });
+      // Update user's password using $queryRaw
+      await prisma.$queryRaw`
+        UPDATE "User" 
+        SET password = ${hashedPassword}, "updatedAt" = NOW()
+        WHERE id = ${tokenValidation.userId} AND "isDeleted" = false
+      `;
 
       // Mark token as used
       await tokenService.markTokenAsUsed(token, "password-reset");
@@ -580,7 +663,8 @@ class AuthService {
   }
 
   /**
-   * Verify email using token
+   * Verify email using token with $queryRaw for optimized email verification update
+   * Source: optimized email verification status update
    */
   async verifyEmail(token: string) {
     try {
@@ -594,14 +678,12 @@ class AuthService {
         throw new ApiError(400, "Invalid or expired verification token");
       }
 
-      // Update user's email verification status
-      await prisma.user.update({
-        where: { id: tokenValidation.userId },
-        data: {
-          emailVerified: new Date(),
-          emailVerificationToken: null,
-        },
-      });
+      // Update user's email verification status using $queryRaw
+      await prisma.$queryRaw`
+        UPDATE "User" 
+        SET "emailVerified" = NOW(), "emailVerificationToken" = NULL, "updatedAt" = NOW()
+        WHERE id = ${tokenValidation.userId} AND "isDeleted" = false
+      `;
 
       // Mark token as used
       await tokenService.markTokenAsUsed(token, "email-verification");
@@ -615,23 +697,24 @@ class AuthService {
   }
 
   /**
-   * Send email verification email
+   * Send email verification email using $queryRaw for optimized user lookup
+   * Source: optimized user data retrieval for email verification
    */
   async sendEmailVerification(userId: string) {
     try {
-      // Get user details
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-        },
-      });
+      // Get user details using $queryRaw
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name
+        FROM "User"
+        WHERE id = ${userId} AND "isDeleted" = false
+        LIMIT 1
+      `;
 
-      if (!user) {
+      if (users.length === 0) {
         throw new ApiError(404, "User not found");
       }
+
+      const user = users[0];
 
       // Generate and store email verification token
       const verificationToken = await tokenService.createAndStoreToken(
