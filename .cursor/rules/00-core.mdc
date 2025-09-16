@@ -22,8 +22,10 @@ description: Core project standards and architecture
 
 ## Project Status
 
-- **Current Phase**: Phase 1 MVP in progress with **OAuth authentication system completed** ✅
-- **Technology Stack**: Next.js 15 + Express.js + PostgreSQL + Prisma ORM + TypeScript
+- **Current Phase**: Phase 1 MVP - **Paper Management System completed** ✅ + **Production-Ready Improvements** ✅ (September 17, 2025)
+- **Technology Stack**: Next.js 15 + Express.js + PostgreSQL + Prisma ORM + TypeScript + Sonner (Toast)
+- **Major Completions**: OAuth authentication ✅, Paper upload & storage ✅, Modern UI/UX ✅, Production security & performance ✅
+- **Recent Improvements**: Security hardening, performance monitoring, comprehensive error handling, health checks ✅
 - **Roadmap**: Only build features in current phase (see `Roadmap.md`)
 
 ## Quality Gates
@@ -33,3 +35,25 @@ description: Core project standards and architecture
 3. **Lint**: `yarn lint` with zero errors.
 4. **Tests**: Add/adjust tests for new logic; critical features require comprehensive test coverage.
 5. **Commits/PRs**: Small, focused, conventional messages. Reference related issue when possible.
+
+## 🚀 Production-Ready Standards (September 17, 2025)
+
+### Security & Performance
+- **Debug Logging**: Only log debug info in development (`NODE_ENV !== "production"`)
+- **Type Safety**: No `any` types; use proper interfaces (`AuthenticatedRequest`, etc.)
+- **Rate Limiting**: Apply to all mutation endpoints, especially uploads
+- **Performance Monitoring**: Track response times with `performanceMonitor` middleware
+- **Database Optimization**: Add composite indexes for hot query paths
+
+### Error Handling & Monitoring  
+- **Standardized Errors**: Use feature-specific error classes extending `ApiError`
+- **Health Checks**: Comprehensive monitoring endpoints (`/api/health/*`)
+- **Toast Integration**: Use Sonner via `ToastProvider` - never import `toast` directly
+- **Smart Retry**: Auto-retry network/server errors, manual retry for client errors
+- **Error Classification**: Network, client (4xx), server (5xx) with appropriate handling
+
+### Development Standards
+- **Environment Checks**: Always check `NODE_ENV` before debug operations
+- **BigInt Handling**: Cast to integer in SQL for JSON serialization
+- **Performance Headers**: Add `X-Response-Time` headers for monitoring
+- **Memory Monitoring**: Track heap usage and memory thresholds in health checks
