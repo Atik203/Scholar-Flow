@@ -18,6 +18,7 @@ alwaysApply: false
 7. **Advanced Search**: Real-time search with filters and fuzzy matching ✅
 8. **PDF Handling**: Fallback viewer with robust error handling ✅
 9. **Navigation**: Enhanced sidebar with proper routing and mobile responsiveness ✅
+10. **Advanced Error Handling**: Sonner integration, retry logic, and smart error classification ✅
 
 ## Core Development Standards
 
@@ -48,6 +49,76 @@ alwaysApply: false
 - **Typography**: Use Typography component with established heading scales
 - **Spacing**: Use max-w-[1440px] container width and consistent padding scales
 - **Animations**: Use existing hover effects (lift, scale, glow) and transitions
+
+## 🚀 Advanced Error Handling Patterns (September 17, 2025)
+
+### RTK Query Enhancement with Retry Logic
+
+1. **Enhanced API Slice**: Use retry configuration and error transformation
+   ```typescript
+   // ✅ CORRECT: Enhanced base query with retry
+   import { retry } from "@reduxjs/toolkit/query/react";
+   const baseQueryWithRetry = retry(baseQuery, { maxRetries: 3 });
+   ```
+
+2. **Error Classification**: Network, client, and server error handling
+   ```typescript
+   // ✅ CORRECT: Smart retry logic
+   // Auto-retry on 5xx/network errors, skip retry on 4xx client errors
+   ```
+
+### Sonner Toast Integration
+
+1. **Use ToastProvider Functions**: Never import `toast` directly
+   ```typescript
+   // ✅ CORRECT: Use existing ToastProvider functions
+   import { showErrorToast, showSuccessToast } from '@/components/providers/ToastProvider';
+   
+   // ❌ WRONG: Direct toast import
+   import { toast } from 'sonner';
+   ```
+
+2. **Error Toast Best Practices**: Use `showApiErrorToast()` from error utilities
+   ```typescript
+   // ✅ CORRECT: Smart error toast with retry respect
+   import { showApiErrorToast } from '@/lib/errorHandling';
+   showApiErrorToast(error); // Respects network error retry logic
+   ```
+
+### Custom Error Handling Hooks
+
+1. **Generic Error Handler**: Use `useErrorHandler` for any error
+   ```typescript
+   // ✅ CORRECT: Generic error handling
+   const { errorMessage, retry, isRetryable } = useErrorHandler(error, {
+     showToast: true,
+     logError: true,
+     onError: (error) => console.log('Custom handling')
+   });
+   ```
+
+2. **Query Error Handler**: Use `useQueryErrorHandler` for RTK Query queries
+   ```typescript
+   // ✅ CORRECT: Query-specific error handling with refetch
+   const { errorMessage, retry } = useQueryErrorHandler({
+     error, isLoading, isError, refetch
+   });
+   ```
+
+3. **Mutation Error Handler**: Use `useMutationErrorHandler` for mutations
+   ```typescript
+   // ✅ CORRECT: Mutation error handling with retry capability
+   const { retry, isRetryable } = useMutationErrorHandler({
+     error, isLoading, isError, reset
+   }, retryFunction);
+   ```
+
+### Error Handling Standards
+
+- **Smart Retry**: Auto-retry on network/server errors, manual retry for client errors
+- **Error Classification**: Network (retry), Client 4xx (fix required), Server 5xx (retry)
+- **Toast Integration**: Consistent error messaging with theme support
+- **Development Logging**: Detailed error logs only in development environment
 
 ## Code Quality
 
