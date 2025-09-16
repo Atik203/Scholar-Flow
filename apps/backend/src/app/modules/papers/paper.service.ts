@@ -18,7 +18,7 @@ export const paperService = {
   async createUploadedPaper(args: CreateUploadArgs) {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
     console.log("Creating uploaded paper with authors:", input.authors);
-    return prisma.paper.create({
+    const created = await prisma.paper.create({
       data: {
         workspaceId,
         uploaderId,
@@ -41,8 +41,92 @@ export const paperService = {
       },
       include: { file: true },
     });
+
+    // Dev verification: confirm relation back to user reflects the new paper
+    try {
+      const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*)::bigint as count FROM "Paper" WHERE "uploaderId" = ${uploaderId} AND "isDeleted" = false
+      `;
+      console.log(
+        "[PaperUpload] User",
+        uploaderId,
+        "now has uploadedPapers count:",
+        Number(count)
+      );
+    } catch (e) {
+      console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
+    }
+
+    return created;
   },
 
+  async countByUser(userId: string) {
+    const result = await prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*)::bigint as count
+      FROM "Paper"
+      WHERE "uploaderId" = ${userId} AND "isDeleted" = false
+    `;
+    return Number(result[0]?.count || 0);
+  },
+
+  async listByUser(userId: string, page = 1, limit = 10) {
+    const skip = (page - 1) * limit;
+
+    // Use $queryRaw for performance per backend instructions
+    const [items, totalResult] = await Promise.all([
+      prisma.$queryRaw<any[]>`
+        SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
+               p.source, p.doi, p."processingStatus", p."createdAt", p."updatedAt",
+               pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
+               pf."sizeBytes", pf."originalFilename", pf."extractedAt"
+        FROM "Paper" p
+        LEFT JOIN "PaperFile" pf ON p.id = pf."paperId"
+        WHERE p."uploaderId" = ${userId} AND p."isDeleted" = false
+        ORDER BY p."createdAt" DESC
+        LIMIT ${limit} OFFSET ${skip}
+      `,
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*) as count
+        FROM "Paper"
+        WHERE "uploaderId" = ${userId} AND "isDeleted" = false
+      `,
+    ]);
+
+    const total = Number(totalResult[0]?.count || 0);
+
+    // Transform flat result to nested structure
+    const transformedItems = items.map((item) => ({
+      id: item.id,
+      workspaceId: item.workspaceId,
+      uploaderId: item.uploaderId,
+      title: item.title,
+      abstract: item.abstract,
+      metadata: item.metadata,
+      source: item.source,
+      doi: item.doi,
+      processingStatus: item.processingStatus,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      file: item.file_id
+        ? {
+            id: item.file_id,
+            storageProvider: item.storageProvider,
+            objectKey: item.objectKey,
+            contentType: item.contentType,
+            sizeBytes: item.sizeBytes,
+            originalFilename: item.originalFilename,
+            extractedAt: item.extractedAt,
+          }
+        : null,
+    }));
+
+    return {
+      items: transformedItems,
+      meta: { page, limit, total, totalPage: Math.ceil(total / limit) },
+    };
+  },
+
+  // Keep the workspace method for backward compatibility and future workspace sharing
   async listByWorkspace(workspaceId: string, page = 1, limit = 10) {
     const skip = (page - 1) * limit;
 

@@ -15,10 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { USER_ROLES } from "@/lib/auth/roles";
-import {
-  useGetDevWorkspaceQuery,
-  useListPapersQuery,
-} from "@/redux/api/paperApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import {
   ArrowUpRight,
   BookOpen,
@@ -141,25 +138,15 @@ export default function DashboardPage() {
   // Protected route guard
   const { isLoading, user, session } = useProtectedRoute();
 
-  // Get workspace and papers data
-  const { data: workspaceData, isLoading: workspaceLoading } =
-    useGetDevWorkspaceQuery();
-  const workspaceId = workspaceData?.data?.workspace?.id;
-
+  // Get papers data for authenticated user
   const {
     data: papersData,
     isLoading: papersLoading,
     isError,
-  } = useListPapersQuery(
-    {
-      workspaceId: workspaceId || "",
-      page: 1,
-      limit: 5, // Get recent papers for dashboard
-    },
-    {
-      skip: !workspaceId,
-    }
-  );
+  } = useListPapersQuery({
+    page: 1,
+    limit: 5, // Get recent papers for dashboard
+  });
 
   // Compute dynamic stats
   const recentStats = useMemo(() => {
@@ -267,7 +254,7 @@ export default function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {papersLoading || workspaceLoading
+        {papersLoading
           ? // Loading skeletons
             Array.from({ length: 4 }).map((_, index) => (
               <Card key={index}>
