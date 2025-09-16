@@ -28,6 +28,41 @@
 
 - Paper Management System (Sep 17, 2025): S3 integration, PDF processing, metadata extraction, advanced search, modern UI/UX.
 - OAuth Authentication System: Google/GitHub OAuth, JWT management, production-grade error handling, 5/5 integration tests passing.
+- **Senior-Level Improvements (Sep 17, 2025)**: Production-grade security, performance monitoring, comprehensive error handling, health checks, and frontend retry logic with Sonner integration.
+
+## 🚀 Production-Ready Improvements (Sep 17, 2025)
+
+### Security & Performance Standards
+
+- **Debug Logging Control**: Auth middleware conditionally logs only in development (`NODE_ENV !== "production"`)
+- **Type Safety**: Replace all `any` types with proper interfaces (use `AuthenticatedRequest` for authenticated routes)
+- **Rate Limiting**: Apply paper-specific rate limiters (`paperUploadLimiter`, `paperListLimiter`, `paperOperationLimiter`) to all paper endpoints
+- **Database Performance**: Add composite indexes for hot query paths (e.g., `Paper` queries by `uploaderId + workspaceId`)
+- **Performance Monitoring**: Use `performanceMonitor` middleware to track response times and add `X-Response-Time` headers
+
+### Error Handling Standards
+
+- **Backend Error Classes**: Create feature-specific error classes (e.g., `PaperError`) extending `ApiError` for consistent error responses
+- **Standardized Error Format**: All errors follow `{ success: false, message: string, statusCode: number, errorCode?: string, details?: object }`
+- **Frontend Error Handling**: Use `useErrorHandler`, `useMutationErrorHandler`, and `useQueryErrorHandler` hooks with automatic retry logic
+- **Toast Integration**: Use Sonner via existing `ToastProvider` functions (`showErrorToast`, `showSuccessToast`) - never import `toast` directly
+
+### Health Check & Monitoring
+
+- **Comprehensive Health Endpoints**:
+  - `/api/health` - Basic health status
+  - `/api/health/detailed` - Full system health (database, memory, environment)
+  - `/api/health/live` - Kubernetes liveness probe
+  - `/api/health/ready` - Kubernetes readiness probe
+- **Health Check Components**: Database connectivity, memory usage thresholds, required environment variables
+- **Performance Headers**: All requests include response time tracking for monitoring
+
+### Frontend Error Handling Patterns
+
+- **Smart Retry Logic**: Auto-retry on 5xx/network errors, skip retry on 4xx client errors
+- **Error Classification**: Network errors, client errors (400-499), server errors (500+) with appropriate user messaging
+- **Toast Best Practices**: Use `showApiErrorToast()` from error handling utilities, respects network error retry logic
+- **RTK Query Integration**: Enhanced `apiSlice` with retry configuration and error transformation
 
 ## Golden Rules (must-follow)
 
@@ -141,13 +176,21 @@ When changing authentication, UI/UX, or core patterns:
 - Writing raw SQL with string concatenation or using `$queryRawUnsafe`.
 - Using Prisma Client model methods where `$queryRaw/$executeRaw` is the standard (outside of the documented exceptions).
 - Skipping Zod validation or bypassing `validateRequest`.
-- Throwing generic `Error` in controllers instead of `ApiError`.
+- Throwing generic `Error` in controllers instead of `ApiError` or feature-specific error classes.
 - Unbounded queries without pagination or missing indexes on hot paths.
 - Adding environment variables without updating `.env.example` and docs.
 - Mixing Phase 1 and later-phase features in a single PR.
+- **Production Issues to Avoid**:
+  - Logging debug info in production (check `NODE_ENV` first)
+  - Using `any` types (use proper interfaces like `AuthenticatedRequest`)
+  - Missing rate limiting on endpoints (especially upload/mutation endpoints)
+  - Missing performance monitoring on critical paths
+  - Importing `toast` directly (use `ToastProvider` functions instead)
+  - Not handling BigInt serialization in JSON responses (cast to integer in SQL)
+  - Missing error retry logic for network/server errors in frontend
 
 ---
 
-Last updated: Phase 1 MVP Development — Paper Management System Completed ✅ (Sep 17, 2025)
+Last updated: Phase 1 MVP Development — Paper Management System Completed ✅ + Senior-Level Production Improvements ✅ (Sep 17, 2025)
 
 Next milestone: Complete Phase 1 collections features (create/assign papers to collections) before Phase 2.

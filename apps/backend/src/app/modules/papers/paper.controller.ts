@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
+import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
 import { StorageService } from "./StorageService";
+import { createPaperError } from "./paper.errors";
 import { ensureDevUserAndWorkspace, paperService } from "./paper.service";
 import {
   deletePaperParamsSchema,
@@ -23,20 +25,27 @@ function featureEnabled() {
 
 export const paperController = {
   upload: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
     if (!featureEnabled()) {
-      throw new ApiError(403, "Uploads feature disabled");
+      throw createPaperError.uploadDisabled();
     }
-    if (!req.file) {
-      throw new ApiError(400, "Missing file");
+    if (!authReq.file) {
+      throw createPaperError.missingFile();
+    }
+    if (authReq.file.mimetype !== "application/pdf") {
+      throw createPaperError.invalidFileType(["PDF"]);
     }
 
-    const parsed = uploadPaperSchema.safeParse(req.body);
+    const parsed = uploadPaperSchema.safeParse(authReq.body);
     if (!parsed.success) {
-      throw new ApiError(400, "Validation failed");
+      const errorDetails = parsed.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      throw createPaperError.validationFailed(errorDetails);
     }
 
     // Resolve uploader & workspace fallback for dev/testing
-    let userId = (req as any).user?.id as string | undefined;
+    let userId = authReq.user?.id as string | undefined;
     let workspaceId = parsed.data.workspaceId as string | undefined;
     if (!userId || !workspaceId) {
       const { user, workspace } = await ensureDevUserAndWorkspace();
@@ -44,17 +53,17 @@ export const paperController = {
       if (!workspaceId) workspaceId = workspace.id;
     }
 
-    const objectKey = `papers/${workspaceId}/${Date.now()}-${req.file.originalname}`;
+    const objectKey = `papers/${workspaceId}/${Date.now()}-${authReq.file.originalname}`;
     console.log("[PaperUpload] putObject", { objectKey });
     await storage.putObject({
       key: objectKey,
-      body: req.file.buffer,
-      contentType: req.file.mimetype,
+      body: authReq.file.buffer,
+      contentType: authReq.file.mimetype,
     });
 
     const paper = await paperService.createUploadedPaper({
       input: parsed.data,
-      file: req.file,
+      file: authReq.file,
       uploaderId: userId!,
       workspaceId: workspaceId!,
       objectKey,
@@ -66,11 +75,13 @@ export const paperController = {
   list: catchAsync(async (req: Request, res: Response) => {
     const parsed = listPapersQuerySchema.safeParse(req.query);
     if (!parsed.success) {
-      throw new ApiError(400, "Invalid query parameters");
+      const errorDetails = parsed.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      throw createPaperError.validationFailed(errorDetails);
     }
 
     const { workspaceId, page, limit } = parsed.data;
-    const authReq = req as any;
 
     // If workspaceId is explicitly provided and not empty, use workspace-scoped listing (for future workspace features)
     if (workspaceId && workspaceId.trim() !== "") {
@@ -88,8 +99,9 @@ export const paperController = {
     }
 
     // Default: list papers by authenticated user
+    const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) {
-      throw new ApiError(401, "Authentication required");
+      throw createPaperError.authenticationRequired();
     }
 
     const results = await paperService.listByUser(
@@ -109,12 +121,12 @@ export const paperController = {
   getOne: catchAsync(async (req: Request, res: Response) => {
     const parsed = getPaperParamsSchema.safeParse(req.params);
     if (!parsed.success) {
-      throw new ApiError(400, "Invalid paper ID");
+      throw createPaperError.validationFailed("Invalid paper ID format");
     }
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
-      throw new ApiError(404, "Paper not found");
+      throw createPaperError.paperNotFound(parsed.data.id);
     }
 
     sendSuccessResponse(res, paper, "Paper retrieved successfully");
@@ -123,7 +135,7 @@ export const paperController = {
   delete: catchAsync(async (req: Request, res: Response) => {
     const parsed = deletePaperParamsSchema.safeParse(req.params);
     if (!parsed.success) {
-      throw new ApiError(400, "Invalid paper ID");
+      throw createPaperError.validationFailed("Invalid paper ID format");
     }
 
     await paperService.softDelete(parsed.data.id);
@@ -190,7 +202,7 @@ export const paperController = {
 
   // Authenticated helper endpoint: returns count of papers uploaded by current user
   myUploadsSummary: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as any;
+    const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) {
       throw new ApiError(401, "Authentication required");
     }
