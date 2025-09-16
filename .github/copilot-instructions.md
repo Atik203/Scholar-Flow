@@ -33,14 +33,15 @@
 ### Code Style & Patterns
 
 1. **TypeScript First**: All code must be properly typed, no implicit `any`
-2. **Error Handling**: Use catchAsync wrapper and ApiError class consistently
-3. **Validation**: Use Zod for all input validation, never trust client data
-4. **Testing**: Comprehensive tests for critical features (auth, payments, data integrity)
-5. **Authentication**: Use standard Prisma upsert for OAuth account management
-6. **Database**: Prefer Prisma Client over raw SQL; document any raw queries with warnings
-7. **Security**: Hide secrets; strict CORS; secure cookies; input sanitization
-8. **Performance**: Paginate, index DB queries, cache hot reads
-9. **Git hygiene**: Conventional commits, small PRs, descriptive titles, linked issues
+2. **File Naming Convention**: Use dot notation for module files: `module.type.ts` (e.g., `auth.controller.ts`, `user.service.ts`, `paper.validation.ts`, `paper.routes.ts`)
+3. **Error Handling**: Use catchAsync wrapper and ApiError class consistently
+4. **Validation**: Use Zod for all input validation, never trust client data
+5. **Testing**: Comprehensive tests for critical features (auth, payments, data integrity)
+6. **Authentication**: Use standard Prisma upsert for OAuth account management
+7. **Database**: Prefer Prisma Client over raw SQL; document any raw queries with warnings
+8. **Security**: Hide secrets; strict CORS; secure cookies; input sanitization
+9. **Performance**: Paginate, index DB queries, cache hot reads
+10. **Git hygiene**: Conventional commits, small PRs, descriptive titles, linked issues
 
 ### Phase 1 MVP Features (Current Priority)
 
