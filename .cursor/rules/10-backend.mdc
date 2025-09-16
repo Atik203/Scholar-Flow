@@ -7,6 +7,13 @@ alwaysApply: false
 
 # Backend Rules
 
+## ✅ ESTABLISHED SYSTEMS (Phase 1 Complete - September 17, 2025)
+
+1. **Authentication**: OAuth (Google/GitHub) + JWT system with upsert handling ✅
+2. **Paper Management**: Complete upload, S3 storage, metadata extraction ✅  
+3. **User Profiles**: CRUD operations with validation and security ✅
+4. **File Processing**: PDF upload with metadata extraction ✅
+
 ## Architecture & Structure
 
 1. **Structure**: Feature modules under `src/app/modules` (controller, service, routes, validation schemas).

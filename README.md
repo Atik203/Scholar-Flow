@@ -119,6 +119,7 @@ Feature flags gate unfinished surfaces (see example env files).
   - GET /papers – list/filter; supports semantic=true for vector search
   - GET /papers/:id – detail with metadata
   - DELETE /papers/:id – soft delete
+  - GET /papers/:id/file-url – short-lived signed URL for PDF preview (frontend uses react-pdf)
 - Annotations
   - GET /papers/:id/annotations
   - POST /papers/:id/annotations
