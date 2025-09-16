@@ -17,14 +17,14 @@ interface CreateUploadArgs {
 export const paperService = {
   async createUploadedPaper(args: CreateUploadArgs) {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
-
+    console.log("Creating uploaded paper with authors:", input.authors);
     return prisma.paper.create({
       data: {
         workspaceId,
         uploaderId,
         title: input.title || file.originalname,
         metadata: {
-          authors: input.authors,
+          authors: input.authors || [],
           year: input.year,
           source: input.source || "upload",
         },
@@ -163,8 +163,9 @@ export const paperService = {
     const existingMeta = existing[0].metadata || {};
     const mergedMeta = {
       ...existingMeta,
-      authors: data.authors,
-      year: data.year,
+      authors:
+        data.authors !== undefined ? data.authors : existingMeta.authors || [],
+      year: data.year !== undefined ? data.year : existingMeta.year,
     };
 
     // Update with merged metadata
