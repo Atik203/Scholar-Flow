@@ -70,8 +70,30 @@ export const paperController = {
     }
 
     const { workspaceId, page, limit } = parsed.data;
-    const results = await paperService.listByWorkspace(
-      workspaceId,
+    const authReq = req as any;
+
+    // If workspaceId is explicitly provided and not empty, use workspace-scoped listing (for future workspace features)
+    if (workspaceId && workspaceId.trim() !== "") {
+      const results = await paperService.listByWorkspace(
+        workspaceId,
+        page || 1,
+        limit || 10
+      );
+      return sendPaginatedResponse(
+        res,
+        results.items,
+        results.meta,
+        "Papers retrieved successfully"
+      );
+    }
+
+    // Default: list papers by authenticated user
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
+    const results = await paperService.listByUser(
+      authReq.user.id,
       page || 1,
       limit || 10
     );
@@ -164,5 +186,17 @@ export const paperController = {
       { workspace, user: { id: user.id, email: user.email } },
       "Dev workspace retrieved"
     );
+  }),
+
+  // Authenticated helper endpoint: returns count of papers uploaded by current user
+  myUploadsSummary: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const userId: string = authReq.user.id;
+    const count = await paperService.countByUser(userId);
+
+    sendSuccessResponse(res, { count }, "My uploads summary");
   }),
 };
