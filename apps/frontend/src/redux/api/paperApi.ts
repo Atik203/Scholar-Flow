@@ -83,12 +83,19 @@ export const paperApi = apiSlice.injectEndpoints({
 
     listPapers: builder.query<
       PaginatedPapersResponse,
-      { workspaceId: string; page?: number; limit?: number }
+      { page?: number; limit?: number; workspaceId?: string }
     >({
-      query: ({ workspaceId, page = 1, limit = 10 }) => ({
-        url: "/papers",
-        params: { workspaceId, page, limit },
-      }),
+      query: ({ page = 1, limit = 10, workspaceId }) => {
+        const params: any = { page, limit };
+        // Only include workspaceId for dev/fallback mode
+        if (workspaceId) {
+          params.workspaceId = workspaceId;
+        }
+        return {
+          url: "/papers",
+          params,
+        };
+      },
       transformResponse: (response: {
         data: Paper[];
         meta: any;

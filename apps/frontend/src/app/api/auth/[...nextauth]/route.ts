@@ -281,6 +281,17 @@ const handler = NextAuth({
           return true;
         }
 
+        // Handle specific error responses
+        if (response.status === 403) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error(
+            "OAuth sign-in blocked:",
+            errorData.message || "Account deactivated"
+          );
+          // NextAuth will handle this as a failed signin
+          return false;
+        }
+
         return false;
       } catch (error) {
         console.error("Sign-in error:", error);
@@ -292,13 +303,21 @@ const handler = NextAuth({
       if (user) {
         token.role = (user as any).role || "RESEARCHER";
         token.id = user.id;
+        // Ensure NextAuth subject aligns with backend user id
+        token.sub = user.id;
+      }
+
+      // For subsequent callbacks, ensure sub is aligned if token.id exists
+      if (token.id && token.sub !== token.id) {
+        token.sub = token.id as string;
       }
 
       // Mint a backend JWT for API calls
       const secret = process.env.NEXTAUTH_SECRET ?? "";
-      if (secret && token?.sub) {
+      const subject = (token.sub as string) || (token.id as string);
+      if (secret && subject) {
         const payload = {
-          sub: token.sub,
+          sub: subject,
           email: token.email,
           role: (token.role as string) || "RESEARCHER",
         };

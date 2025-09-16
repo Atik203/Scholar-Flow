@@ -111,9 +111,26 @@ export default function UploadPaperPage() {
 
       showSuccessToast("Paper uploaded successfully!");
       router.push(`/dashboard/papers/${result.data.paper.id}`);
-    } catch (error) {
-      showErrorToast("Failed to upload paper");
+    } catch (error: any) {
       console.error("Upload error:", error);
+
+      // Extract meaningful error message
+      let errorMessage = "Failed to upload paper";
+
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.status === 401) {
+        errorMessage = "Authentication required. Please sign in again.";
+      } else if (error?.status === 403) {
+        errorMessage =
+          "Upload feature is disabled or you don't have permission.";
+      } else if (error?.status === 413) {
+        errorMessage = "File is too large. Maximum size is 25MB.";
+      }
+
+      showErrorToast(errorMessage);
     }
   };
 
