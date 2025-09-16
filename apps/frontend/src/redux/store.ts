@@ -1,3 +1,4 @@
+import { safeStorage } from "@/lib/storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
   FLUSH,
@@ -8,7 +9,6 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import { apiSlice } from "./api/apiSlice";
 import authReducer from "./auth/authSlice";
 
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: safeStorage,
   whitelist: ["auth"],
 };
 

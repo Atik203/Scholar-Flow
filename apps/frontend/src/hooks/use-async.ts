@@ -108,7 +108,8 @@ export function useAsyncEffect<T>(
     execute().catch(() => {
       // Error handling is done in the hook
     });
-  }, deps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [execute, ...deps]);
 
   return state;
 }
