@@ -46,11 +46,13 @@ import {
   useUpdatePaperMetadataMutation,
 } from "@/redux/api/paperApi";
 import {
+  AlertCircle,
   ArrowLeft,
   Calendar,
   Edit,
   Eye,
   FileText,
+  Loader2,
   Plus,
   Save,
   Trash2,
@@ -87,6 +89,12 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
     error,
   } = useGetPaperQuery(resolvedParams.id);
 
+  // Debug logging to check raw paper data
+  console.log("Raw paper data:", paper);
+  console.log("Paper metadata:", paper?.metadata);
+  console.log("Paper metadata type:", typeof paper?.metadata);
+  console.log("Paper metadata authors:", paper?.metadata?.authors);
+
   const [updateMetadata, { isLoading: isUpdating }] =
     useUpdatePaperMetadataMutation();
   const [deletePaper, { isLoading: isDeleting }] = useDeletePaperMutation();
@@ -101,11 +109,17 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
   const startEditing = () => {
     if (paper) {
+      console.log("Starting edit - paper metadata:", paper.metadata);
+      console.log("Current authors:", paper.metadata?.authors);
       setEditTitle(paper.title);
       setEditAbstract(paper.abstract || "");
-      setEditAuthors(paper.metadata.authors || []);
-      setEditYear(paper.metadata.year || "");
+      setEditAuthors(paper.metadata?.authors || []);
+      setEditYear(paper.metadata?.year || "");
       setIsEditing(true);
+      console.log(
+        "Edit state initialized - editAuthors:",
+        paper.metadata?.authors || []
+      );
     }
   };
 
@@ -128,14 +142,19 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const handleSave = async () => {
     if (!paper) return;
 
+    const updateData = {
+      id: paper.id,
+      title: editTitle.trim() || undefined,
+      abstract: editAbstract.trim() || undefined,
+      authors: editAuthors.length > 0 ? editAuthors : [],
+      year: editYear || undefined,
+    };
+
+    console.log("Updating paper with data:", updateData);
+
     try {
-      await updateMetadata({
-        id: paper.id,
-        title: editTitle.trim() || undefined,
-        abstract: editAbstract.trim() || undefined,
-        authors: editAuthors.length > 0 ? editAuthors : undefined,
-        year: editYear || undefined,
-      }).unwrap();
+      const result = await updateMetadata(updateData).unwrap();
+      console.log("Update result:", result);
 
       setIsEditing(false);
       showSuccessToast("Paper metadata updated successfully");
@@ -259,15 +278,26 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" asChild>
-            <Link href="/dashboard/papers">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Papers
-            </Link>
-          </Button>
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" asChild className="hover:bg-white/80">
+              <Link href="/dashboard/papers">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Papers
+              </Link>
+            </Button>
+            <div className="h-6 border-l border-border" />
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">
+                Paper Details
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                View and manage your research paper
+              </p>
+            </div>
+          </div>
           <div className="flex space-x-2">
             {!isEditing ? (
               <>
@@ -314,105 +344,147 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
           </div>
         </div>
 
-        {/* Paper Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+        {/* Enhanced Paper Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content - Enhanced */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
+            {/* Paper Information Card */}
+            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <CardHeader className="pb-4 bg-gradient-to-r from-background to-muted/20">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     {isEditing ? (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div>
-                          <Label htmlFor="title">Title</Label>
+                          <Label
+                            htmlFor="title"
+                            className="text-sm font-medium text-foreground"
+                          >
+                            Title *
+                          </Label>
                           <Input
                             id="title"
                             value={editTitle}
                             onChange={(e) => setEditTitle(e.target.value)}
+                            className="mt-2 text-lg"
+                            placeholder="Enter paper title..."
                           />
                         </div>
                         <div>
-                          <Label htmlFor="abstract">Abstract</Label>
+                          <Label
+                            htmlFor="abstract"
+                            className="text-sm font-medium text-foreground"
+                          >
+                            Abstract
+                          </Label>
                           <Textarea
                             id="abstract"
                             value={editAbstract}
                             onChange={(e) => setEditAbstract(e.target.value)}
                             rows={4}
-                            placeholder="Enter paper abstract..."
+                            className="mt-2"
+                            placeholder="Enter paper abstract or summary..."
                           />
                         </div>
                       </div>
                     ) : (
                       <div>
-                        <CardTitle className="text-2xl leading-tight">
-                          {paper.title}
-                        </CardTitle>
+                        <div className="flex items-center gap-3 mb-4">
+                          <CardTitle className="text-2xl font-bold leading-tight text-foreground break-words">
+                            {paper.title}
+                          </CardTitle>
+                          <Badge
+                            variant={statusBadge.variant}
+                            className="shrink-0 ml-auto"
+                          >
+                            {statusBadge.label}
+                          </Badge>
+                        </div>
                         {paper.abstract && (
-                          <CardDescription className="mt-4 text-base leading-relaxed">
+                          <CardDescription className="text-base leading-relaxed text-muted-foreground bg-muted/30 p-4 rounded-lg border-l-4 border-primary/20">
                             {paper.abstract}
                           </CardDescription>
                         )}
                       </div>
                     )}
                   </div>
-                  <Badge variant={statusBadge.variant} className="ml-4">
-                    {statusBadge.label}
-                  </Badge>
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                {/* Authors */}
-                <div>
-                  <Label className="text-sm font-medium">Authors</Label>
+              <CardContent className="space-y-6 pt-6">
+                {/* Enhanced Authors Section */}
+                <div className="bg-muted/20 p-4 rounded-lg border">
+                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Authors
+                  </Label>
                   {isEditing ? (
-                    <div className="space-y-2 mt-2">
+                    <div className="space-y-3 mt-3">
                       <div className="flex space-x-2">
                         <Input
                           value={newAuthor}
                           onChange={(e) => setNewAuthor(e.target.value)}
                           placeholder="Add author name..."
+                          className="flex-1"
                           onKeyPress={(e) =>
                             e.key === "Enter" &&
                             (e.preventDefault(), addAuthor())
                           }
                         />
-                        <Button type="button" onClick={addAuthor} size="sm">
-                          <Plus className="h-4 w-4" />
+                        <Button
+                          type="button"
+                          onClick={addAuthor}
+                          size="sm"
+                          variant="secondary"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
                         </Button>
                       </div>
-                      {editAuthors.length > 0 && (
+                      {editAuthors.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {editAuthors.map((author, index) => (
-                            <Badge key={index} variant="secondary">
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-sm py-1 px-3"
+                            >
+                              <User className="mr-1 h-3 w-3" />
                               {author}
                               <button
                                 type="button"
                                 onClick={() => removeAuthor(index)}
-                                className="ml-2 hover:text-destructive"
+                                className="ml-2 hover:text-destructive transition-colors"
                               >
                                 <X className="h-3 w-3" />
                               </button>
                             </Badge>
                           ))}
                         </div>
+                      ) : (
+                        <p className="text-muted-foreground text-sm italic">
+                          No authors added yet
+                        </p>
                       )}
                     </div>
                   ) : (
-                    <div className="mt-2">
-                      {paper.metadata.authors &&
+                    <div className="mt-3">
+                      {paper.metadata?.authors &&
                       paper.metadata.authors.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {paper.metadata.authors.map((author, index) => (
-                            <Badge key={index} variant="outline">
+                            <Badge
+                              key={index}
+                              variant="outline"
+                              className="text-sm py-1 px-3 bg-background"
+                            >
                               <User className="mr-1 h-3 w-3" />
                               {author}
                             </Badge>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground text-sm italic">
                           No authors specified
                         </p>
                       )}
@@ -420,9 +492,10 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                   )}
                 </div>
 
-                {/* Year */}
-                <div>
-                  <Label className="text-sm font-medium">
+                {/* Enhanced Publication Year Section */}
+                <div className="bg-muted/20 p-4 rounded-lg border">
+                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
                     Publication Year
                   </Label>
                   {isEditing ? (
@@ -436,33 +509,40 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                           e.target.value ? parseInt(e.target.value) : ""
                         )
                       }
-                      className="mt-2"
+                      className="mt-3"
+                      placeholder="e.g. 2024"
                     />
                   ) : (
-                    <p className="mt-2">
-                      {paper.metadata.year ? (
-                        <Badge variant="outline">
+                    <div className="mt-3">
+                      {paper.metadata?.year ? (
+                        <Badge
+                          variant="outline"
+                          className="text-sm py-1 px-3 bg-background"
+                        >
                           <Calendar className="mr-1 h-3 w-3" />
                           {paper.metadata.year}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground text-sm italic">
                           Not specified
                         </span>
                       )}
-                    </p>
+                    </div>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
+          {/* Enhanced Sidebar */}
           <div className="space-y-6">
-            {/* File Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">File Information</CardTitle>
+            {/* Enhanced File Info */}
+            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3 bg-gradient-to-r from-background to-muted/20">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  File Information
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {paper.file ? (
@@ -493,32 +573,49 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                         </span>
                       </div>
                     </div>
-                    <div className="pt-2">
+                    <div className="pt-3 space-y-2">
                       <Dialog open={showPreview} onOpenChange={setShowPreview}>
                         <DialogTrigger asChild>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full mt-2"
+                            className="w-full justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
                             disabled={isFetchingFileUrl}
                           >
-                            <Eye className="h-4 w-4 mr-2" />
+                            <Eye className="h-4 w-4" />
                             {isFetchingFileUrl ? "Loading..." : "Preview PDF"}
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-3xl">
-                          <DialogHeader>
-                            <DialogTitle>{paper.title}</DialogTitle>
+                        <DialogContent className="max-w-5xl w-full h-[90vh]">
+                          <DialogHeader className="pb-4">
+                            <DialogTitle className="text-xl flex items-center gap-2 truncate">
+                              <FileText className="h-5 w-5 shrink-0" />
+                              {paper.file?.originalFilename || paper.title}
+                            </DialogTitle>
                           </DialogHeader>
-                          <div className="max-h-[80vh] overflow-auto">
-                            {fileUrlData?.data?.url ? (
+                          <div className="flex-1 overflow-auto bg-muted/10 rounded-lg p-4">
+                            {isFetchingFileUrl ? (
+                              <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
+                                <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                                <p>Preparing PDF preview...</p>
+                              </div>
+                            ) : fileUrlData?.data?.url ? (
                               <PdfPreview
                                 fileUrl={fileUrlData.data.url}
                                 className="mx-auto"
                               />
                             ) : (
-                              <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
-                                Generating preview...
+                              <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
+                                <AlertCircle className="h-8 w-8 mb-4" />
+                                <p>Unable to load PDF preview</p>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setShowPreview(true)}
+                                  className="mt-2"
+                                >
+                                  Retry
+                                </Button>
                               </div>
                             )}
                           </div>
@@ -535,10 +632,13 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Paper Metadata */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Metadata</CardTitle>
+            {/* Enhanced Paper Metadata */}
+            <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3 bg-gradient-to-r from-background to-muted/20">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Metadata
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
                 <div className="flex justify-between">

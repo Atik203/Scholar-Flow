@@ -46,13 +46,18 @@ import {
   useGetDevWorkspaceQuery,
   useGetPaperFileUrlQuery,
   useListPapersQuery,
+  type Paper,
 } from "@/redux/api/paperApi";
 import { Calendar, Eye, FileText, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 // Using native date formatting to avoid external dependency
 
-export function PapersList() {
+interface PapersListProps {
+  searchTerm?: string;
+}
+
+export function PapersList({ searchTerm = "" }: PapersListProps) {
   const [page, setPage] = useState(1);
   const limit = 10;
 
@@ -83,6 +88,23 @@ export function PapersList() {
   const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
   const { data: previewUrlData, isFetching: previewLoading } =
     useGetPaperFileUrlQuery(previewPaperId || "", { skip: !previewPaperId });
+
+  // Filter papers based on search term
+  const filteredPapers: Paper[] = useMemo(() => {
+    if (!papersData?.items || !searchTerm.trim()) {
+      return papersData?.items || [];
+    }
+
+    const searchTermLower = searchTerm.toLowerCase();
+    return papersData.items.filter(
+      (paper) =>
+        paper.title.toLowerCase().includes(searchTermLower) ||
+        paper.abstract?.toLowerCase().includes(searchTermLower) ||
+        paper.metadata?.authors?.some((author) =>
+          author.toLowerCase().includes(searchTermLower)
+        )
+    );
+  }, [papersData?.items, searchTerm]);
 
   const handleDeletePaper = async (paperId: string, paperTitle: string) => {
     try {
@@ -166,7 +188,7 @@ export function PapersList() {
     );
   }
 
-  const papers = papersData?.items || [];
+  const papers = filteredPapers;
   const meta = papersData?.meta;
 
   if (papers.length === 0) {
@@ -196,7 +218,9 @@ export function PapersList() {
       <CardHeader>
         <CardTitle>Your Papers</CardTitle>
         <CardDescription>
-          {meta?.total} paper{meta?.total !== 1 ? "s" : ""} found
+          {searchTerm.trim()
+            ? `${papers.length} paper${papers.length !== 1 ? "s" : ""} found matching "${searchTerm}"`
+            : `${meta?.total} paper${meta?.total !== 1 ? "s" : ""} found`}
         </CardDescription>
       </CardHeader>
       <CardContent>
