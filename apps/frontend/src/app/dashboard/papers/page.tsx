@@ -8,10 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import {
-  useGetDevWorkspaceQuery,
-  useListPapersQuery,
-} from "@/redux/api/paperApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import {
   ArrowUpRight,
   BookOpen,
@@ -28,20 +25,11 @@ export default function PapersPage() {
   const isProtected = useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Get workspace data for stats
-  const { data: workspaceData } = useGetDevWorkspaceQuery();
-  const workspaceId = workspaceData?.data?.workspace?.id;
-
-  const { data: papersData, isLoading: papersLoading } = useListPapersQuery(
-    {
-      workspaceId: workspaceId || "",
-      page: 1,
-      limit: 100, // Get more papers for stats
-    },
-    {
-      skip: !workspaceId,
-    }
-  );
+  // Get papers for stats
+  const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
+    page: 1,
+    limit: 100, // Get more papers for stats
+  });
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
