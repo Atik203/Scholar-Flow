@@ -54,7 +54,7 @@ const navigationItems = [
       },
       {
         title: "Search Papers",
-        url: "/papers/search",
+        url: "/dashboard/papers/search",
         icon: Search,
       },
     ],
