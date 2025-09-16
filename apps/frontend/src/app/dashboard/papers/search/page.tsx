@@ -24,10 +24,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import {
-  useGetDevWorkspaceQuery,
-  useListPapersQuery,
-} from "@/redux/api/paperApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import {
   ArrowLeft,
   Brain,
@@ -56,20 +53,10 @@ export default function SearchPapersPage() {
   const [advancedSearch, setAdvancedSearch] = useState(false);
   const [semanticSearch, setSemanticSearch] = useState(false);
 
-  // Get workspace data
-  const { data: workspaceData } = useGetDevWorkspaceQuery();
-  const workspaceId = workspaceData?.data?.workspace?.id;
-
-  const { data: papersData, isLoading: papersLoading } = useListPapersQuery(
-    {
-      workspaceId: workspaceId || "",
-      page: 1,
-      limit: 50,
-    },
-    {
-      skip: !workspaceId,
-    }
-  );
+  const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
+    page: 1,
+    limit: 50,
+  });
 
   // Filter and search papers
   const filteredPapers = useMemo(() => {

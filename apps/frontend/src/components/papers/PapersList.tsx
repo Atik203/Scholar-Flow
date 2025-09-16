@@ -43,7 +43,6 @@ import {
 } from "@/components/ui/table";
 import {
   useDeletePaperMutation,
-  useGetDevWorkspaceQuery,
   useGetPaperFileUrlQuery,
   useListPapersQuery,
   type Paper,
@@ -61,28 +60,17 @@ export function PapersList({ searchTerm = "" }: PapersListProps) {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Get the dev workspace dynamically
-  const { data: workspaceData, isLoading: workspaceLoading } =
-    useGetDevWorkspaceQuery();
-
-  const workspaceId = workspaceData?.data?.workspace?.id;
-
+  // Get papers for the authenticated user
   const {
     data: papersData,
     isLoading,
     isError,
     error,
     refetch,
-  } = useListPapersQuery(
-    {
-      workspaceId: workspaceId || "",
-      page,
-      limit,
-    },
-    {
-      skip: !workspaceId, // Don't fetch papers until we have workspace ID
-    }
-  );
+  } = useListPapersQuery({
+    page,
+    limit,
+  });
 
   const [deletePaper, { isLoading: isDeleting }] = useDeletePaperMutation();
   const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
@@ -140,7 +128,7 @@ export function PapersList({ searchTerm = "" }: PapersListProps) {
     return mb < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mb.toFixed(1)} MB`;
   };
 
-  if (workspaceLoading || isLoading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
