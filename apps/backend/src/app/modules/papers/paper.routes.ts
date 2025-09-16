@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { optionalAuth } from "../../middleware/auth";
+import { authMiddleware, optionalAuth } from "../../middleware/auth";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { paperController } from "./paper.controller";
 import { updatePaperMetadataSchema } from "./paper.validation";
@@ -13,13 +13,13 @@ export const paperRoutes: express.Router = express.Router();
 // Upload PDF (protected - requires auth for production, fallback for dev)
 paperRoutes.post(
   "/",
-  optionalAuth as any,
+  authMiddleware as any,
   upload.single("file") as any,
   paperController.upload as any
 );
 
-// List papers by workspace (protected, but allow dev fallback)
-paperRoutes.get("/", optionalAuth as any, paperController.list as any);
+// List papers by user (protected, but allow dev fallback with workspaceId)
+paperRoutes.get("/", authMiddleware as any, paperController.list as any);
 
 // Get single paper (protected, but allow dev fallback)
 paperRoutes.get("/:id", optionalAuth as any, paperController.getOne as any);
@@ -44,3 +44,10 @@ paperRoutes.delete("/:id", optionalAuth as any, paperController.delete as any);
 
 // Debug endpoint to get dev workspace
 paperRoutes.get("/dev/workspace", paperController.getDevWorkspace as any);
+
+// Authenticated helper to verify uploadedPapers relation
+paperRoutes.get(
+  "/me/summary",
+  authMiddleware as any,
+  paperController.myUploadsSummary as any
+);
