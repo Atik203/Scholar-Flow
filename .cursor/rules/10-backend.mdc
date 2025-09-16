@@ -7,6 +7,14 @@ alwaysApply: false
 
 # Backend Rules
 
+## ✅ ESTABLISHED SYSTEMS (Phase 1 Complete - September 17, 2025)
+
+1. **Authentication**: OAuth (Google/GitHub) + JWT system with upsert handling ✅
+2. **Paper Management**: Complete upload, S3 storage, metadata extraction ✅  
+3. **User Profiles**: CRUD operations with validation and security ✅
+4. **File Processing**: PDF upload with metadata extraction ✅
+5. **Production Improvements**: Security, performance, monitoring, error handling ✅
+
 ## Architecture & Structure
 
 1. **Structure**: Feature modules under `src/app/modules` (controller, service, routes, validation schemas).
@@ -70,6 +78,96 @@ const users = await prisma.user.findMany({
 3. **Error Handling**: All auth methods must use try/catch with ApiError for consistent error responses.
 4. **JWT**: Use JWT access + refresh. Use `auth` middleware for protected endpoints.
 5. **CORS**: Use `FRONTEND_URL` env; default `http://localhost:3000` in dev.
+
+## 🚀 Production-Ready Patterns (September 17, 2025)
+
+### Security & Performance Standards
+
+1. **Debug Logging Control**: Auth middleware conditionally logs only in development
+   ```typescript
+   // ✅ CORRECT: Conditional debug logging
+   if (process.env.NODE_ENV !== "production") {
+     console.log("Auth debug info:", { userId, role });
+   }
+   ```
+
+2. **Type Safety**: Replace all `any` types with proper interfaces
+   ```typescript
+   // ✅ CORRECT: Use AuthenticatedRequest interface
+   export interface AuthenticatedRequest extends Request {
+     user: { id: string; email: string; role: string };
+   }
+   ```
+
+3. **Rate Limiting**: Apply feature-specific rate limiters to endpoints
+   ```typescript
+   // ✅ CORRECT: Feature-specific rate limiters
+   import { paperUploadLimiter, paperListLimiter } from '../middleware/rateLimiter';
+   router.post('/upload', paperUploadLimiter, uploadPaper);
+   router.get('/', paperListLimiter, listPapers);
+   ```
+
+4. **Database Performance**: Add composite indexes for hot query paths
+   ```prisma
+   // ✅ CORRECT: Composite indexes for performance
+   model Paper {
+     @@index([uploaderId, workspaceId], name: "paper_uploader_workspace_idx")
+     @@index([processingStatus, createdAt], name: "paper_status_created_idx")
+   }
+   ```
+
+### Error Handling Standards
+
+1. **Feature-Specific Error Classes**: Create error classes extending `ApiError`
+   ```typescript
+   // ✅ CORRECT: Feature-specific error handling
+   export class PaperError extends ApiError {
+     constructor(message: string, statusCode: number = 400, errorCode?: string) {
+       super(statusCode, message);
+       this.errorCode = errorCode;
+     }
+   }
+   ```
+
+2. **Standardized Error Format**: All errors follow consistent structure
+   ```typescript
+   // ✅ CORRECT: Standardized error response
+   {
+     success: false,
+     message: string,
+     statusCode: number,
+     errorCode?: string,
+     details?: object,
+     timestamp: string
+   }
+   ```
+
+### Performance Monitoring
+
+1. **Performance Monitoring Middleware**: Track response times and add headers
+   ```typescript
+   // ✅ CORRECT: Performance monitoring
+   import { performanceMonitor } from '../middleware/performanceMonitor';
+   app.use(performanceMonitor);
+   ```
+
+2. **Health Check Endpoints**: Comprehensive health monitoring
+   ```typescript
+   // ✅ CORRECT: Health check endpoints
+   // /api/health - Basic health status
+   // /api/health/detailed - Full system health (database, memory, environment)
+   // /api/health/live - Kubernetes liveness probe  
+   // /api/health/ready - Kubernetes readiness probe
+   ```
+
+### Common Production Pitfalls to Avoid
+
+- ❌ Logging debug info in production (always check `NODE_ENV`)
+- ❌ Using `any` types (use proper interfaces like `AuthenticatedRequest`)
+- ❌ Missing rate limiting on upload/mutation endpoints
+- ❌ Missing performance monitoring on critical paths
+- ❌ Not handling BigInt serialization in JSON (cast to integer in SQL)
+- ❌ Missing composite indexes on frequently queried columns
 
 ## Testing & Quality
 
