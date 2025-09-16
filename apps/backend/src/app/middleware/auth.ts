@@ -17,12 +17,15 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  // Conditional debug logging (only in development)
+  const DEBUG_AUTH = process.env.NODE_ENV === "development";
+
   try {
     const authHeader = req.headers.authorization;
 
-    // Debug logging
-    console.log("Auth Middleware - Request headers:", req.headers);
-    console.log("Auth Middleware - Authorization header:", authHeader);
+    if (DEBUG_AUTH) {
+      console.log("Auth Middleware - Authorization header:", authHeader);
+    }
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
@@ -38,10 +41,11 @@ export const authMiddleware = async (
     // Verify JWT token
     const decoded = jwt.verify(token, jwtSecret) as any;
 
-    // Debug logging
-    console.log("Auth Middleware - Decoded token:", decoded);
-    console.log("Auth Middleware - Token sub:", decoded.sub);
-    console.log("Auth Middleware - Token email:", decoded.email);
+    // Conditional debug logging (only in development)
+    if (DEBUG_AUTH) {
+      console.log("Auth Middleware - Token sub:", decoded.sub);
+      console.log("Auth Middleware - Token email:", decoded.email);
+    }
 
     // Get user from database using $queryRaw for optimized lookup
     // Source: optimized authentication middleware user lookup
@@ -54,17 +58,6 @@ export const authMiddleware = async (
 
     let users: any[] = [];
 
-    // Debug: Check what users exist with similar email
-    if (userEmail) {
-      const debugUsers = await prisma.$queryRaw<any[]>`
-        SELECT id, email, role, "isDeleted", "createdAt"
-        FROM "User"
-        WHERE email ILIKE ${`%${userEmail}%`}
-        LIMIT 3
-      `;
-      console.log("Auth Middleware - DEBUG: Similar users found:", debugUsers);
-    }
-
     if (userId) {
       users = await prisma.$queryRaw<any[]>`
         SELECT id, email, role, "isDeleted"
@@ -72,27 +65,38 @@ export const authMiddleware = async (
         WHERE id = ${userId} AND "isDeleted" = false
         LIMIT 1
       `;
-      console.log(
-        "Auth Middleware - Lookup by id result count:",
-        users?.length || 0
-      );
+      if (DEBUG_AUTH) {
+        console.log(
+          "Auth Middleware - Lookup by id result count:",
+          users?.length || 0
+        );
+      }
+
       // Fallback to email if id lookup failed but email is present in token
       if ((!users || users.length === 0) && userEmail) {
-        console.log("Auth Middleware - Fallback to email lookup:", userEmail);
+        if (DEBUG_AUTH) {
+          console.log("Auth Middleware - Fallback to email lookup:", userEmail);
+        }
         users = await prisma.$queryRaw<any[]>`
           SELECT id, email, role, "isDeleted"
           FROM "User"
           WHERE email = ${userEmail} AND "isDeleted" = false
           LIMIT 1
         `;
-        console.log(
-          "Auth Middleware - Lookup by email result count:",
-          users?.length || 0
-        );
+        if (DEBUG_AUTH) {
+          console.log(
+            "Auth Middleware - Lookup by email result count:",
+            users?.length || 0
+          );
+        }
 
         // If still no match, try case-insensitive email lookup
         if (!users || users.length === 0) {
-          console.log("Auth Middleware - Trying case-insensitive email lookup");
+          if (DEBUG_AUTH) {
+            console.log(
+              "Auth Middleware - Trying case-insensitive email lookup"
+            );
+          }
           users = await prisma.$queryRaw<any[]>`
             SELECT id, email, role, "isDeleted"
             FROM "User"

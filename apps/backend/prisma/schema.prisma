@@ -168,6 +168,10 @@ model Paper {
 
   @@index([workspaceId, createdAt])
   @@index([uploaderId])
+  // Optimized indexes for user-scoped and workspace-scoped queries
+  @@index([uploaderId, isDeleted, createdAt])
+  @@index([workspaceId, isDeleted, createdAt])
+  @@index([processingStatus, createdAt])
 }
 
 model PaperFile {
