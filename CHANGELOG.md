@@ -31,7 +31,15 @@ Goal: Get a working core platform with minimal but functional features.
 
 - Add password reset, email verification, forgot password ✅ (Author: Atik+Salman)
 - Add API to update/edit user profile
-- Connect to cloud storage for file uploads
+- **Connect to cloud storage for file uploads ✅ (Author: Salman)**
+  - Implemented comprehensive AWS S3 cloud storage service with presigned URLs
+  - Added secure file upload API endpoints with validation and error handling
+  - Created modern drag-and-drop file upload component with progress tracking
+  - Built file management interface with download/delete functionality
+  - Added file metadata management and integrity checks
+  - Implemented workspace-based access control for file operations
+  - Added support for multiple file types (PDF, DOCX, DOC, TXT, RTF)
+  - Configured environment variables for cloud storage settings
 - Build paper upload page (PDF, DOCX)
 - Store metadata (title, author, year) in DB
 - Extract text content from uploaded PDFs
