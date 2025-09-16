@@ -305,13 +305,18 @@ export const Navbar: React.FC = () => {
             variant="outline"
             size="sm"
             aria-label="Toggle color theme"
-            className="w-8 h-8 sm:w-9 sm:h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
+            className="relative w-8 h-8 sm:w-9 sm:h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
           >
-            {theme === "dark" ? (
-              <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
-            ) : (
-              <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
-            )}
+            {/* Render both icons to keep SSR/CSR markup identical and avoid hydration mismatches.
+                We animate visibility purely with CSS (dark: classes) instead of conditional JSX. */}
+            <Sun
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+              aria-hidden
+            />
+            <Moon
+              className="absolute h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+              aria-hidden
+            />
             <span className="sr-only">Toggle theme</span>
           </Button>
           {session ? (
