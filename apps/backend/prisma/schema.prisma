@@ -49,18 +49,26 @@ enum PlanTier {
   INSTITUTIONAL
 }
 
+// Processing lifecycle for uploaded papers (Week 3 feature)
+enum PaperProcessingStatus {
+  UPLOADED // File record created, extraction not started yet
+  PROCESSING // Extraction & chunking in progress
+  PROCESSED // All chunks stored successfully
+  FAILED // Processing failed; see processingError
+}
+
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  name         String?
-  firstName    String?
-  lastName     String?
-  institution  String?
-  fieldOfStudy String?
-  image        String?
-  password     String? // Optional password for demo/test users
-  role         Role    @default(RESEARCHER)
-  emailVerified DateTime? // When email was verified
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  name                   String?
+  firstName              String?
+  lastName               String?
+  institution            String?
+  fieldOfStudy           String?
+  image                  String?
+  password               String? // Optional password for demo/test users
+  role                   Role      @default(RESEARCHER)
+  emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
 
   // Auth.js relations
@@ -138,6 +146,11 @@ model Paper {
   source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar'
   doi         String? @unique
 
+  // Processing lifecycle fields
+  processingStatus PaperProcessingStatus @default(UPLOADED)
+  processingError  String?
+  processedAt      DateTime?
+
   uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
   workspace       Workspace         @relation(fields: [workspaceId], references: [id])
   file            PaperFile?
@@ -158,14 +171,16 @@ model Paper {
 }
 
 model PaperFile {
-  id              String  @id @default(uuid())
-  paperId         String  @unique
-  storageProvider String // s3 | gcs | local
-  objectKey       String
-  contentType     String?
-  sizeBytes       Int?
-  pageCount       Int?
-  checksum        String?
+  id               String    @id @default(uuid())
+  paperId          String    @unique
+  storageProvider  String // s3 | gcs | local
+  objectKey        String
+  contentType      String?
+  sizeBytes        Int?
+  pageCount        Int?
+  checksum         String?
+  originalFilename String? // Original uploaded filename
+  extractedAt      DateTime? // When text extraction completed
 
   paper Paper @relation(fields: [paperId], references: [id])
 
@@ -535,13 +550,13 @@ model VerificationToken {
 }
 
 model UserToken {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  token     String   @unique // Hashed token
+  token     String    @unique // Hashed token
   type      TokenType
   expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

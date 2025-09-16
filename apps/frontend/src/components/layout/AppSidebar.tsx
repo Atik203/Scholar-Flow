@@ -44,12 +44,12 @@ const navigationItems = [
     items: [
       {
         title: "All Papers",
-        url: "/papers",
+        url: "/dashboard/papers",
         icon: FileText,
       },
       {
         title: "Upload Paper",
-        url: "/papers/upload",
+        url: "/dashboard/papers/upload",
         icon: Upload,
       },
       {
