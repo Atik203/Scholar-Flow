@@ -48,6 +48,10 @@ if (config.env !== "production") {
   app.use(morgan("dev") as unknown as RequestHandler);
 }
 
+// Performance monitoring
+import { performanceMonitor } from "./app/middleware/performanceMonitor";
+app.use(performanceMonitor as unknown as RequestHandler);
+
 // Root endpoint
 const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
