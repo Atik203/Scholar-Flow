@@ -12,8 +12,8 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 🚀 Live Demo
 
-- **Frontend**: [ScholarFlow App](https://scholar-flow.vercel.app)
-- **API**: [Backend API](https://scholar-flow-backend.vercel.app)
+- **Frontend**: [ScholarFlow App](https://scholar-flow-ai.vercel.app)
+- **API**: [Backend API](https://scholar-flow-api.vercel.app/api/health)
 
 ## ✨ Features
 
