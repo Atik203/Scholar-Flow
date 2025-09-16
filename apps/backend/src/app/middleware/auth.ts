@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../errors/ApiError";
-import { AUTH_ERROR_MESSAGES, USER_ROLES } from "../modules/Auth/auth.constant";
 import { IAuthUser } from "../interfaces/common";
+import { AUTH_ERROR_MESSAGES, USER_ROLES } from "../modules/Auth/auth.constant";
 import prisma from "../shared/prisma";
 
 export interface AuthRequest extends Request {
@@ -19,7 +19,7 @@ export const authMiddleware = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     // Debug logging
     console.log("Auth Middleware - Request headers:", req.headers);
     console.log("Auth Middleware - Authorization header:", authHeader);
@@ -37,29 +37,39 @@ export const authMiddleware = async (
 
     // Verify JWT token
     const decoded = jwt.verify(token, jwtSecret) as any;
-    
+
     // Debug logging
     console.log("Auth Middleware - Decoded token:", decoded);
     console.log("Auth Middleware - Token sub:", decoded.sub);
     console.log("Auth Middleware - Token email:", decoded.email);
 
-    // Get user from database - try both sub and email
+    // Get user from database using $queryRaw for optimized lookup
+    // Source: optimized authentication middleware user lookup
     const userId = decoded.sub || decoded.id;
     const userEmail = decoded.email;
-    
+
     if (!userId && !userEmail) {
       throw new ApiError(401, "Invalid token: missing user identifier");
     }
-    
-    const user = await prisma.user.findUnique({
-      where: userId ? { id: userId } : { email: userEmail },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        isDeleted: true,
-      },
-    });
+
+    let users: any[];
+    if (userId) {
+      users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, role, "isDeleted"
+        FROM "User"
+        WHERE id = ${userId} AND "isDeleted" = false
+        LIMIT 1
+      `;
+    } else {
+      users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, role, "isDeleted"
+        FROM "User"
+        WHERE email = ${userEmail} AND "isDeleted" = false
+        LIMIT 1
+      `;
+    }
+
+    const user = users[0];
 
     if (!user || user.isDeleted) {
       throw new ApiError(401, AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
@@ -150,16 +160,16 @@ export const optionalAuth = async (
     // Verify JWT token
     const decoded = jwt.verify(token, jwtSecret) as any;
 
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.sub },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        isDeleted: true,
-      },
-    });
+    // Get user from database using $queryRaw for optimized lookup
+    // Source: optimized optional authentication user lookup
+    const users = await prisma.$queryRaw<any[]>`
+      SELECT id, email, role, "isDeleted"
+      FROM "User"
+      WHERE id = ${decoded.sub} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    const user = users[0];
 
     if (user && !user.isDeleted) {
       req.user = {

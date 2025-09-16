@@ -1,0 +1,79 @@
+---
+description: Development workflow, roadmap discipline, and troubleshooting
+alwaysApply: true
+---
+
+# Development Workflow Rules
+
+## Roadmap Discipline
+
+1. **Phases**: Implement features strictly in current phase (see `Roadmap.md`).
+2. **Out-of-Scope Requests**: Document and defer unless they unblock current milestone.
+3. **Minimal Viable**: Prefer shipping a thin vertical slice over broad incomplete scaffolding.
+4. **Tech Debt**: Track as TODO comments + issues; don't silently accumulate.
+5. **Metrics**: For performance or DB related changes, note baseline and expected improvement in PR.
+6. **Feature Flags**: Gate experimental features; remove flags once stable.
+7. **Cleanup**: Remove unused code/feature toggles at phase transitions.
+
+## Documentation Management
+
+**CRITICAL RULE**: Do NOT create README.md files for every update or optimization. Focus on code quality and inline documentation instead.
+
+### ✅ REQUIRED: Inline Documentation Only
+
+```typescript
+/**
+ * Get user by email using $queryRaw for optimized lookup
+ * Source: optimized single-table query for authentication
+ */
+async getUserByEmail(email: string) {
+  // Implementation with clear comments
+}
+```
+
+### ❌ AVOID: Unnecessary Documentation Files
+
+- `README.md` files for minor updates
+- `OPTIMIZATION.md` files for every change
+- `CHANGELOG.md` entries for small improvements
+- `PERFORMANCE.md` files unless major architectural changes
+
+### Only create documentation files for:
+
+- **Major architectural changes** (new service patterns)
+- **Breaking changes** (API modifications)
+- **Security updates** (authentication changes)
+- **Deployment instructions** (environment setup)
+
+## Troubleshooting Reference
+
+| Issue                 | Check                            | Action                                          |
+| --------------------- | -------------------------------- | ----------------------------------------------- |
+| Cannot connect DB     | `DATABASE_URL` / service running | Start Postgres, verify credentials              |
+| Prisma generate fails | Schema errors / migration drift  | Run `yarn db:migrate`, fix schema               |
+| Port in use           | 3000 / 5000 listening            | Kill process or change port env                 |
+| Vector query error    | pgvector extension present?      | Run extension creation with DIRECT_DATABASE_URL |
+| Auth failures         | Token expiry & secrets           | Sync `NEXTAUTH_SECRET` / refresh token secrets  |
+| Missing types         | Generated client outdated        | `yarn db:generate`                              |
+| Slow search           | Missing indexes / large scans    | Add appropriate index & document in migration   |
+
+## Quality Gates
+
+1. **Build**: `yarn build` must succeed before merging.
+2. **Types**: `yarn type-check` must be clean (no errors).
+3. **Lint**: `yarn lint` with zero errors (warnings acceptable if justified).
+4. **Tests**: Add/adjust tests for new logic; no unrelated test breakage. Critical features require comprehensive test coverage.
+5. **Security**: No secrets committed; env keys documented.
+6. **Performance**: No obvious N+1 or unbounded queries introduced.
+7. **Accessibility (frontend)**: New UI components must have labels/roles as appropriate.
+8. **Backwards Compatibility**: Migrations are additive; note any breaking changes explicitly.
+9. **Docs**: Update README / SCHEMA.md / ENVIRONMENT docs for changed public behavior.
+10. **Review**: Keep PR scope tight; include summary + checklist mapping to these gates.
+
+## Maintenance Philosophy
+
+- **Code is documentation** - Write clear, readable code
+- **Comments explain why** - Not what the code does
+- **Types are contracts** - Use TypeScript effectively
+- **Tests are examples** - Show expected behavior
+- **Errors are guides** - Provide helpful error messages
