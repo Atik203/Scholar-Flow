@@ -39,8 +39,8 @@ Week 2 – User Auth & Profile (Author: Atik) ✅
 Week 3 – Paper Upload & Storage
 
 - [x] Add password reset & email verification flow & forgot password ✅ (Author: Atik+Salman)
-- [ ] Add API to update/edit user profile
-- [ ] Connect to cloud storage for file uploads
+- [x] Add API to update/edit user profile
+- [x] Connect to cloud storage for file uploads ✅ (Author: Salman)
 - [ ] Build paper upload page (PDF, DOCX)
 - [ ] Store metadata (title, author, year) in DB
 - [ ] Extract text content from uploaded PDFs
