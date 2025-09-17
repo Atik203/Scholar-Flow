@@ -1,4 +1,7 @@
-# ScholarFlow ERD Reference
+# ScholarFlow ERD and Relational Schema Reference
+
+- For Better View: [ERD](https://lucid.app/lucidchart/76e3f9ec-0891-48af-aeed-1a6f9dbd641c/view)
+- For Better View: [Schema](https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b/view)
 
 ## Phase 1 Tables (MVP - Core Features)
 
