@@ -253,13 +253,11 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE.md](./L
 
 - **Issues**: [GitHub Issues](https://github.com/Atik203/Scholar-Flow/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Atik203/Scholar-Flow/discussions)
-- **Email**: [atikurrahaman203@gmail.com](mailto:atikurrahaman0305@gmail.com)
+- **Email**: [atikurrahaman0305@gmail.com](mailto:atikurrahaman0305@gmail.com)
 
 ---
 
 <div align="center">
-
-**Built with ❤️ by [Md. Atikur Rahaman](https://github.com/Atik203)**
 
 [⭐Star this repository](https://github.com/Atik203/Scholar-Flow) if you find it helpful!
 
