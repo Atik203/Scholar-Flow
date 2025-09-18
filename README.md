@@ -14,18 +14,18 @@ Smart ingestion, semantic search, structured collaboration, and citation intelli
 
 ## ✨ Key Capabilities (Phased Delivery)
 
-| Area            | Phase 1 (MVP) ✅             | Phase 2                         | Phase 3                                    |
-| --------------- | ---------------------------- | ------------------------------- | ------------------------------------------ |
-| Auth & Profiles | ✅ Email/OAuth, JWT, Profile | Password reset, roles expansion | Org SSO (future)                           |
-| Papers          | Upload, metadata store       | OCR & full AI summaries         | Versioning & multi-format ingest           |
-| Collections     | Create & list                | Sharing, activity feed          | Advanced permissions & workspace analytics |
-| Semantic Search | Flagged (pgvector infra)     | Vector search & recommendations | Multi-doc chat assistant                   |
-| Annotations     | Placeholder                  | Full highlights + realtime      | History diff & export                      |
-| Citation Graph  | Deferred                     | Interactive graph               | Advanced metrics & clustering              |
-| Billing         | Deferred                     | Plans integration (Stripe/SSL)  | Usage-based quotas                         |
-| Admin           | Deferred                     | Basic user mgmt                 | Platform analytics & moderation            |
+| Area            | Phase 1 (MVP) ✅                                                   | Phase 2                         | Phase 3                                    |
+| --------------- | ------------------------------------------------------------------ | ------------------------------- | ------------------------------------------ |
+| Auth & Profiles | ✅ Email/OAuth, JWT, Profile, Personal Info Update, Delete Account | Password reset, roles expansion | Org SSO (future)                           |
+| Papers          | Upload, metadata store                                             | OCR & full AI summaries         | Versioning & multi-format ingest           |
+| Collections     | Create & list                                                      | Sharing, activity feed          | Advanced permissions & workspace analytics |
+| Semantic Search | Flagged (pgvector infra)                                           | Vector search & recommendations | Multi-doc chat assistant                   |
+| Annotations     | Placeholder                                                        | Full highlights + realtime      | History diff & export                      |
+| Citation Graph  | Deferred                                                           | Interactive graph               | Advanced metrics & clustering              |
+| Billing         | Deferred                                                           | Plans integration (Stripe/SSL)  | Usage-based quotas                         |
+| Admin           | Deferred                                                           | Basic user mgmt                 | Platform analytics & moderation            |
 
-**✅ Recent Major Completion:** OAuth Authentication System with Google/GitHub, JWT management, and comprehensive testing.
+**✅ Recent Major Completion:** OAuth Authentication System with Google/GitHub, JWT management, comprehensive testing, and User Profile Management System with Personal Information Update and Delete Account features.
 
 Detailed per‑page UX & component plan lives in: **`docs/UI_DESIGN.md`** (kept out of this README to stay concise).
 
@@ -109,6 +109,10 @@ Feature flags gate unfinished surfaces (see example env files).
 
 - Auth
   - POST /auth/session/validate (optional ping) – verifies JWT valid/claims
+- User Profile Management
+  - GET /user/me – get current user profile
+  - PUT /user/update-profile – update personal information with validation
+  - DELETE /user/delete-account – soft delete account with confirmation
 - Papers
   - POST /papers/upload-url – get pre-signed upload URL
   - POST /papers/import – import by DOI/API providers
@@ -200,7 +204,7 @@ The full Prisma data model has been moved to `SCHEMA.md` for clarity.
 
 ## ⏭️ Immediate Next Steps (Phase 1)
 
-1. Finalize Auth + profile endpoints integration
+1. ✅ ~~Finalize Auth + profile endpoints integration~~ **COMPLETED** (Author: Atik)
 2. Implement upload → ingest pipeline (with placeholder worker path)
 3. Add pgvector migration & embeddings service stub (feature-flagged)
 4. Collections basic CRUD + association

@@ -1,44 +1,52 @@
 ---
-description: Frontend (Next.js) usage standards and constraints
+description: Frontend development standards and UI guidelines
 globs:
   - "apps/frontend/**"
 alwaysApply: false
 ---
 
-# Frontend Rules (apps/frontend)
-
-See [01-cursor-overview.mdc](mdc:01-cursor-overview.mdc) for project-wide standards.
+# Frontend Rules
 
 ## ✅ ESTABLISHED PATTERNS (Phase 1 Complete)
 
 1. **Authentication UI**: Login/register pages with OAuth integration ✅
-2. **Form Validation**: React Hook Form + Zod validation ✅  
+2. **Form Validation**: React Hook Form + Zod validation ✅
 3. **Error Handling**: Comprehensive error states and loading indicators ✅
 4. **Responsive Design**: Mobile-first with proper breakpoints ✅
 
-## Core Development Rules
+## Core Development Standards
 
-1. Next.js App Router: Prefer Server Components; add `"use client"` only for interactivity/state.
-2. State/Data: RTK Query for server data. Derive UI state locally when possible.
-3. Forms: React Hook Form + Zod for validation both client + server.
-4. Auth: NextAuth (JWT). Keep sensitive logic server-side. No direct Prisma usage in client components.
-5. Styling: Tailwind + ShadCN. Put reusable primitives in `components/ui`.
-6. Performance: Use `next/image`, `next/font`; stream large UI with Suspense; avoid unnecessary client bundles.
-7. SEO: Use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
-8. Error States: Provide loading / empty / error UI for each data fetch.
-9. Ports: App runs on 3000. Update backend CORS if changed.
-10. Accessibility: Maintain focus states, labels, keyboard navigation.
-11. No Secrets: Never expose private keys or tokens in client code.
-12. Lint/typecheck: Run `yarn lint` and `yarn type-check` on every change.
-13. Do not use npm; use Yarn v4 workspaces.
+1. **Next.js App Router**: Prefer Server Components; add `"use client"` only for interactivity/state.
+2. **State/Data**: RTK Query for server data. Derive UI state locally when possible.
+3. **Forms**: React Hook Form + Zod for validation both client + server.
+4. **Auth**: NextAuth (JWT). Keep sensitive logic server-side. No direct Prisma usage in client components.
+5. **Styling**: Tailwind + ShadCN. Put reusable primitives in `components/ui`.
+6. **Performance**: Use `next/image`, `next/font`; stream large UI with Suspense; avoid unnecessary client bundles.
+7. **SEO**: Use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
+8. **Error States**: Provide loading / empty / error UI for each data fetch.
+9. **Accessibility**: Maintain focus states, labels, keyboard navigation.
 
 ## UI Component Guidelines
 
 1. **Consult `docs/UI_DESIGN.md` FIRST** before creating new pages or components
-2. Follow established component taxonomy:
+2. **Component Taxonomy**:
    - `components/auth/` - Authentication related
-   - `components/layout/` - Navigation, headers, sidebars  
+   - `components/layout/` - Navigation, headers, sidebars
    - `components/ui/` - ShadCN primitives
    - `components/customUI/` - Custom components
-3. Use feature flags for incomplete features as documented in UI_DESIGN.md
-4. Maintain accessibility standards: focus states, ARIA labels, keyboard navigation
+3. **Design System**: Use existing OKLCH color system, maintain `max-w-[1440px]` container width
+4. **Feature Flags**: Use established feature flag patterns for incomplete features
+
+## Design System Standards
+
+- **Colors**: Use OKLCH color system with existing success, warning, info variants
+- **Typography**: Use Typography component with established heading scales
+- **Spacing**: Use max-w-[1440px] container width and consistent padding scales
+- **Animations**: Use existing hover effects (lift, scale, glow) and transitions
+
+## Code Quality
+
+- **TypeScript**: 100% type coverage, no `any` types unless absolutely necessary
+- **Performance**: Implement lazy loading, React.memo for expensive components
+- **Accessibility**: WCAG 2.1 AA compliance, proper ARIA labels and roles
+- **No Secrets**: Never expose private keys or tokens in client code

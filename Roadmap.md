@@ -36,16 +36,38 @@ Week 2 – User Auth & Profile (Author: Atik) ✅
 
 ---
 
+Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅
+
+- [x] Complete dashboard redesign with modern SaaS-style interface ✅
+- [x] Implement shadcn/ui sidebar component with collapsible navigation ✅
+- [x] Add responsive mobile hamburger menu with sheet overlay ✅
+- [x] Fix sidebar positioning using CSS Grid system (2-3 columns) ✅
+- [x] Desktop: Fixed sidebar positioning, only content area scrolls ✅
+- [x] Mobile/Tablet: Hidden sidebar with hamburger menu (< 1024px) ✅
+- [x] Comprehensive responsive design for all device breakpoints ✅
+- [x] Custom theme integration with seamless light/dark mode ✅
+- [x] Role-based navigation filtering and user permission system ✅
+- [x] Professional backdrop blur effects and smooth animations ✅
+- [x] Modern z-index layering and layout conflict resolution ✅
+
+**✅ Major UI/UX Redesign:** Completed modern SaaS-style dashboard with responsive design and role-based navigation.
+
 Week 3 – Paper Upload & Storage
 
 - [x] Add password reset & email verification flow & forgot password ✅ (Author: Atik+Salman)
-- [x] Add API to update/edit user profile
+- [x] Add API to update/edit user profile ✅ (Author: Atik)
+- [x] Implement Personal Information Update feature with enhanced validation ✅ (Author: Atik)
+- [x] Implement Delete Account feature with confirmation dialog ✅ (Author: Atik)
 - [x] Connect to cloud storage for file uploads ✅ (Author: Salman)
+
+**✅ Final Update (September 6, 2025):** All user profile management features completed and documented by Atik.
 - [ ] Build paper upload page (PDF, DOCX)
 - [ ] Store metadata (title, author, year) in DB
 - [ ] Extract text content from uploaded PDFs
 - [ ] Store original file in cloud storage (AWS S3)
 - [ ] UI for viewing uploaded papers
+
+---
 
 ---
 
