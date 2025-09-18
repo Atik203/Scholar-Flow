@@ -80,10 +80,16 @@ export default function SharedCollectionsPage() {
         </div>
 
         <Tabs defaultValue="shared">
-          <TabsList>
-            <TabsTrigger value="shared">Accepted</TabsTrigger>
-            <TabsTrigger value="received">Received Invites</TabsTrigger>
-            <TabsTrigger value="sent">Sent Invites</TabsTrigger>
+          <TabsList className="grid w-fit grid-cols-3 gap-4">
+            <TabsTrigger value="shared" className="px-6">
+              Accepted
+            </TabsTrigger>
+            <TabsTrigger value="received" className="px-6">
+              Received Invites
+            </TabsTrigger>
+            <TabsTrigger value="sent" className="px-6">
+              Sent Invites
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="shared">

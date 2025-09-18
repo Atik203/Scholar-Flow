@@ -14,6 +14,8 @@ import {
 import {
   BookOpen,
   Calendar,
+  Edit,
+  Eye,
   FileText,
   Globe,
   Loader2,
@@ -230,59 +232,62 @@ export default function CollectionsPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-3">
                     {filteredCollections.map((collection: any) => (
-                      <Card
+                      <div
                         key={collection.id}
-                        className="hover:shadow-md transition-shadow"
+                        className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                       >
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-2">
-                              <BookOpen className="h-4 w-4 text-muted-foreground" />
-                              <CardTitle className="text-base">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <BookOpen className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                              <h3 className="font-medium text-lg">
                                 {collection.name}
-                              </CardTitle>
-                            </div>
-                            <Badge
-                              variant={
-                                collection.isPublic ? "default" : "secondary"
-                              }
-                            >
-                              {collection.isPublic ? (
-                                <>
-                                  <Globe className="h-3 w-3 mr-1" /> Public
-                                </>
-                              ) : (
-                                <>
-                                  <Lock className="h-3 w-3 mr-1" /> Private
-                                </>
-                              )}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                            {collection.description ||
-                              "No description provided"}
-                          </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                            <div className="flex items-center gap-1">
-                              <FileText className="h-3 w-3" />
-                              {collection._count?.papers || 0} papers
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(
-                                collection.createdAt
-                              ).toLocaleDateString()}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {collection.description ||
+                                  "No description provided"}
+                              </p>
+                              <div className="flex items-center gap-6 mt-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <FileText className="h-3 w-3" />
+                                  {collection._count?.papers || 0} papers
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  Created{" "}
+                                  {new Date(
+                                    collection.createdAt
+                                  ).toLocaleDateString()}
+                                </div>
+                                <Badge
+                                  variant={
+                                    collection.isPublic
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {collection.isPublic ? (
+                                    <>
+                                      <Globe className="h-3 w-3 mr-1" /> Public
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lock className="h-3 w-3 mr-1" /> Private
+                                    </>
+                                  )}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button asChild size="sm" className="flex-1">
+                            <Button asChild size="sm">
                               <Link
                                 href={`/dashboard/collections/${collection.id}`}
                               >
+                                <Eye className="h-4 w-4 mr-1" />
                                 View
                               </Link>
                             </Button>
@@ -290,12 +295,13 @@ export default function CollectionsPage() {
                               <Link
                                 href={`/dashboard/collections/${collection.id}/edit`}
                               >
+                                <Edit className="h-4 w-4 mr-1" />
                                 Edit
                               </Link>
                             </Button>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
