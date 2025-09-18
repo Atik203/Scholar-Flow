@@ -48,6 +48,10 @@ export const inviteMemberSchema = z.object({
     .enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"]) // mirrors Role enum
     .optional()
     .default("RESEARCHER"),
+  permission: z
+    .enum(["VIEW", "EDIT"]) // mirrors CollectionPermission enum
+    .optional()
+    .default("EDIT"),
 });
 
 // Accept or decline an invite
