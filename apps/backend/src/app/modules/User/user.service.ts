@@ -86,10 +86,6 @@ const getMyProfile = async (user: IAuthUser) => {
 };
 
 const updateProfile = async (_user: IAuthUser, payload: UpdateProfileInput) => {
-  // Debug logging
-  console.log("UpdateProfile Service - User:", _user);
-  console.log("UpdateProfile Service - Payload:", payload);
-
   if (!_user || !_user.id) {
     throw new ApiError(401, "User authentication failed");
   }

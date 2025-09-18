@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
@@ -25,7 +25,7 @@ class AuthService {
    */
   async createOrUpdateUser(userData: IUserData) {
     try {
-      const userId = userData.id || uuidv4();
+      const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
       const user = await prisma.user.upsert({
@@ -56,7 +56,7 @@ class AuthService {
    */
   async createOrUpdateUserWithOAuth(userData: IUserData) {
     try {
-      const userId = userData.id || uuidv4();
+      const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
       // First check if user exists and is deleted
@@ -190,7 +190,7 @@ class AuthService {
 
       // Create full name from first and last name
       const name = `${firstName} ${lastName}`.trim();
-      const userId = uuidv4();
+      const userId = randomUUID();
 
       // Create new user using $queryRaw with proper role casting
       await prisma.$queryRaw`

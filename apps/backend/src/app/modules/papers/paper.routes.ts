@@ -74,3 +74,19 @@ paperRoutes.get(
   authMiddleware as any,
   paperController.myUploadsSummary as any
 );
+
+// Trigger PDF processing for a specific paper
+paperRoutes.post(
+  "/:id/process",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.processPDF as any
+);
+
+// Get processing status and chunks for a paper
+paperRoutes.get(
+  "/:id/processing-status",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getProcessingStatus as any
+);
