@@ -52,15 +52,23 @@ Goal: Get a working core platform with minimal but functional features.
 
 **Week 3 – Paper Upload & Storage**
 
-- [x] Add password reset, email verification, forgot password (Author: Atik+Salman)
-- [x] Add API to update/edit user profile (Author: Atik)
-- [x] Implement Personal Information Update feature with enhanced validation (Author: Atik)
-- [x] Implement Delete Account feature with confirmation dialog (Author: Atik)
-- [x] Connect to cloud storage for file uploads (Author: Atik)
-- [x] Build paper upload page (PDF, DOCX) (Author: Atik)
-- [x] Store metadata (title, author, year) in DB (Author: Atik)
-- [x] Store original file in cloud storage (AWS S3) (Author: Atik)
-- [x] UI for viewing uploaded papers (Author: Atik)
+- [x] Add password reset, email verification, forgot password ✅ (Author: Atik+Salman)
+- [x] Add API to update/edit user profile ✅ (Author: Atik)
+- [x] Implement Personal Information Update feature with enhanced validation ✅ (Author: Atik)
+- [x] Implement Delete Account feature with confirmation dialog ✅ (Author: Atik)
+- [x] Connect to cloud storage for file uploads ✅ (Author: Atik+Salman)
+  - Implemented comprehensive AWS S3 cloud storage service with presigned URLs
+  - Added secure file upload API endpoints with validation and error handling
+  - Created modern drag-and-drop file upload component with progress tracking
+  - Built file management interface with download/delete functionality
+  - Added file metadata management and integrity checks
+  - Implemented workspace-based access control for file operations
+  - Added support for multiple file types (PDF, DOCX, DOC, TXT, RTF)
+  - Configured environment variables for cloud storage settings
+- [x] Build paper upload page (PDF, DOCX) ✅ (Author: Atik)
+- [x] Store metadata (title, author, year) in DB ✅ (Author: Atik)
+- [x] Store original file in cloud storage (AWS S3) ✅ (Author: Atik)
+- [x] UI for viewing uploaded papers ✅ (Author: Atik)
 
 **✅ Paper Upload & Storage Complete (September 17, 2025):** Paper management system implemented by Atik including S3 storage integration, basic PDF processing, metadata extraction, comprehensive upload UI, and modern paper viewing interface with fallback support.
 
@@ -78,14 +86,17 @@ Goal: Get a working core platform with minimal but functional features.
 
 **Week 4 – Basic Collections**
 
-- [ ] Extract text content from uploaded PDFs
-- [ ] Create Collection flow
-- [ ] Add papers to collections
-- [x] Collection listing page (papers management interface)
-- [x] Search & filter (title, author, fuzzy search)
-- [x] Backend CRUD for collections & papers
+- [x] Create Collection flow ✅ (Author: Atik+Salman)
+- [x] Add papers to collections ✅ (Author: Atik)
+- [x] Collection listing page (papers management interface) ✅ (Author: Atik)
+- [x] Search & filter (title, author, fuzzy search) ✅ (Author: Atik)
+- [x] Backend CRUD for collections & papers ✅ (Author: Atik+Salman)
+- [x] Permission-based sharing system (VIEW/EDIT) ✅ (Author: Atik)
+- [x] Collection invitation system with email notifications ✅ (Author: Atik)
+- [x] Real-time cache invalidation and updates ✅ (Author: Atik)
+- [ ] Extract text content from uploaded PDFs (pending)
 
-**✅ Partial Completion (September 17, 2025):** Basic paper management, advanced search/filter functionality, and backend CRUD operations completed by Atik. PDF text extraction and collection creation features pending.
+**✅ Collections Management Complete (September 19, 2025):** Comprehensive collection management system with permission-based sharing implemented by Atik+Salman. Features include CRUD operations, role-based access control (OWNER/EDIT/VIEW), invitation system, real-time updates, and modern UI components. PDF text extraction remains pending for Week 4.5.
 
 **Week 5 – AI Summarization & Semantic Search**
 
