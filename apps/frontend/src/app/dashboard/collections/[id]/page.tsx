@@ -201,7 +201,7 @@ export default function CollectionDetailPage({
       const promises = Array.from(selectedPapers).map((paperId) =>
         addPaperToCollection({
           collectionId: resolvedParams.id,
-          paperId,
+          data: { paperId },
         }).unwrap()
       );
 
