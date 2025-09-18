@@ -6,6 +6,7 @@ import {
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { paperRoutes } from "../modules/papers/paper.routes";
+import { collectionRoutes } from "../modules/Collection/collection.routes";
 import healthRoutes from "./health.routes";
 
 // Legacy route handlers (to be migrated into feature modules under app/modules/*)
@@ -23,6 +24,7 @@ router.use("/health", healthRoutes);
 router.use("/user", userRoutes);
 router.use("/auth", authRoutes);
 router.use("/papers", paperRoutes);
+router.use("/collections", collectionRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);

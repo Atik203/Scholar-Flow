@@ -1,5 +1,6 @@
 import prisma from "../../shared/prisma";
 import { UpdatePaperMetadataInput, UploadPaperInput } from "./paper.validation";
+import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
 
 interface CreateUploadArgs {
   input: UploadPaperInput;
@@ -55,6 +56,15 @@ export const paperService = {
       );
     } catch (e) {
       console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
+    }
+
+    // Queue PDF extraction for background processing
+    try {
+      await queuePDFExtraction(created.id);
+      console.log(`[PaperUpload] Queued PDF extraction for paper: ${created.id}`);
+    } catch (error) {
+      console.error(`[PaperUpload] Failed to queue PDF extraction for paper: ${created.id}`, error);
+      // Don't fail the upload if PDF extraction queuing fails
     }
 
     return created;

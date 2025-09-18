@@ -202,17 +202,14 @@ export default function PapersPage() {
                   </div>
                   Collections
                 </CardTitle>
-                <Badge variant="secondary" className="text-xs">
-                  Soon
-                </Badge>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-sm text-muted-foreground mb-3">
                 Organize papers into collections for better management
               </p>
-              <Button variant="outline" disabled className="w-full">
-                Coming Soon
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/collections">Manage Collections</Link>
               </Button>
             </CardContent>
           </Card>

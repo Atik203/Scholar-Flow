@@ -85,14 +85,14 @@ Goal: Get a working core platform with minimal but functional features.
 **✅ Major UI/UX Enhancement (September 17, 2025):** Complete interface overhaul with advanced search capabilities, modern paper management system, enhanced dashboard experience, and improved navigation architecture implemented by Atik.
 **Week 4 – Basic Collections**
 
-- [ ] Extract text content from uploaded PDFs
-- [ ] Create Collection flow
-- [ ] Add papers to collections
+- [x] Extract text content from uploaded PDFs ✅ (Author: salman)
+- [x] Create Collection flow ✅ (Author: salman)
+- [x] Add papers to collections ✅ (Author: salman)
 - [x] Collection listing page (papers management interface)
 - [x] Search & filter (title, author, fuzzy search)
 - [x] Backend CRUD for collections & papers
 
-**✅ Partial Completion (September 17, 2025):** Basic paper management, advanced search/filter functionality, and backend CRUD operations completed by Atik. PDF text extraction and collection creation features pending.
+**✅ Complete Implementation (January 2025):** PDF text extraction, collection management system, and paper-collection relationships fully implemented by Senior Engineer. Features include automated PDF processing with background jobs, comprehensive collection CRUD operations, role-based access control, and modern UI components.
 
 **Week 5 – AI Summarization & Semantic Search**
 
