@@ -8,8 +8,6 @@ This project template provides a complete foundation for the Scholar-Flow AI-pow
 ├── apps/
 │   ├── frontend/          # Next.js frontend application
 │   └── backend/           # Node.js/Express backend API
-├── packages/
-│   └── shared/            # Shared utilities and types
 ├── docs/                  # Documentation
 └── scripts/               # Build and deployment scripts
 ```
@@ -18,7 +16,7 @@ This project template provides a complete foundation for the Scholar-Flow AI-pow
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - PostgreSQL 15+ with pgvector extension
 - Redis (for background jobs)
 
@@ -76,11 +74,11 @@ This will start:
 
 ### 🚧 In Progress (Phase 1)
 
-- [ ] Complete User authentication module
-- [ ] Frontend Auth.js setup
+- [x] Complete User authentication module
+- [x] Frontend Auth.js setup
 - [ ] Paper upload and management
-- [ ] Database migrations
-- [ ] Frontend-backend integration
+- [x] Database migrations
+- [x] Frontend-backend integration
 
 ### ⏳ Planned (Phase 1)
 
