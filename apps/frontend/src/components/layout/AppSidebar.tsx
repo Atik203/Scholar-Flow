@@ -14,12 +14,18 @@ import {
   Building2,
   ChevronRight,
   FileText,
+  Highlighter,
   Home,
+  Layers,
+  MessageSquare,
+  Microscope,
   Plus,
+  Quote,
   Search,
   Settings,
   Shield,
   Star,
+  TextCursor,
   TrendingUp,
   Upload,
   Users,
@@ -38,7 +44,7 @@ const navigationItems = [
     minRole: USER_ROLES.RESEARCHER,
   },
   {
-    title: "Research",
+    title: "Papers",
     icon: FileText,
     minRole: USER_ROLES.RESEARCHER,
     items: [
@@ -82,33 +88,92 @@ const navigationItems = [
     ],
   },
   {
-    title: "AI Insights",
-    url: "/ai-insights",
-    icon: Brain,
-    badge: "New",
+    title: "Workspaces",
+    icon: Layers,
     minRole: USER_ROLES.RESEARCHER,
+    items: [
+      {
+        title: "My Workspaces",
+        url: "/dashboard/workspaces",
+        icon: Layers,
+      },
+      {
+        title: "Create Workspace",
+        url: "/dashboard/workspaces/create",
+        icon: Plus,
+      },
+      {
+        title: "Shared Workspaces",
+        url: "/dashboard/workspaces/shared",
+        icon: Users,
+      },
+    ],
   },
   {
-    title: "Collaboration",
+    title: "Research",
+    icon: Microscope,
+    minRole: USER_ROLES.RESEARCHER,
+    items: [
+      {
+        title: "PDF Text Extraction",
+        url: "/dashboard/research/pdf-extraction",
+        icon: TextCursor,
+      },
+      {
+        title: "Text Editor",
+        url: "/dashboard/research/editor",
+        icon: FileText,
+      },
+      {
+        title: "Citations",
+        url: "/dashboard/research/citations",
+        icon: Quote,
+      },
+      {
+        title: "Annotations",
+        url: "/dashboard/research/annotations",
+        icon: Highlighter,
+      },
+      {
+        title: "Research Notes",
+        url: "/dashboard/research/notes",
+        icon: MessageSquare,
+      },
+    ],
+  },
+  {
+    title: "Collaborations",
     icon: Users,
     minRole: USER_ROLES.RESEARCHER,
     items: [
       {
         title: "My Teams",
-        url: "/teams",
+        url: "/dashboard/collaborations/teams",
         icon: Users,
       },
       {
+        title: "Active Projects",
+        url: "/dashboard/collaborations/projects",
+        icon: Building2,
+      },
+      {
         title: "Shared Projects",
-        url: "/projects/shared",
+        url: "/dashboard/collaborations/projects/shared",
         icon: Building2,
       },
       {
         title: "Invitations",
-        url: "/invitations",
+        url: "/dashboard/collaborations/invitations",
         icon: Star,
       },
     ],
+  },
+  {
+    title: "AI Insights",
+    url: "/dashboard/ai-insights",
+    icon: Brain,
+    badge: "New",
+    minRole: USER_ROLES.RESEARCHER,
   },
 ];
 
@@ -116,20 +181,20 @@ const navigationItems = [
 const proFeatures = [
   {
     title: "Analytics",
-    url: "/analytics",
+    url: "/dashboard/analytics",
     icon: BarChart3,
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
   {
     title: "Advanced Search",
-    url: "/search/advanced",
+    url: "/dashboard/search/advanced",
     icon: Zap,
     badge: "Pro",
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
   {
     title: "Research Trends",
-    url: "/trends",
+    url: "/dashboard/trends",
     icon: TrendingUp,
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
@@ -139,19 +204,19 @@ const proFeatures = [
 const adminFeatures = [
   {
     title: "Admin Panel",
-    url: "/admin",
+    url: "/dashboard/admin",
     icon: Shield,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "User Management",
-    url: "/admin/users",
+    url: "/dashboard/admin/users",
     icon: Users,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "System Settings",
-    url: "/admin/settings",
+    url: "/dashboard/admin/settings",
     icon: Settings,
     minRole: USER_ROLES.ADMIN,
   },
