@@ -66,17 +66,17 @@ const navigationItems = [
     items: [
       {
         title: "My Collections",
-        url: "/collections",
+        url: "/dashboard/collections",
         icon: BookOpen,
       },
       {
         title: "Create Collection",
-        url: "/collections/create",
+        url: "/dashboard/collections/create",
         icon: Plus,
       },
       {
         title: "Shared Collections",
-        url: "/collections/shared",
+        url: "/dashboard/collections/shared",
         icon: Users,
       },
     ],

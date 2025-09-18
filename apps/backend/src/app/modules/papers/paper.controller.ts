@@ -16,6 +16,8 @@ import {
   updatePaperMetadataSchema,
   uploadPaperSchema,
 } from "./paper.validation";
+import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
+import prisma from "../../shared/prisma";
 
 const storage = new StorageService();
 
@@ -210,5 +212,62 @@ export const paperController = {
     const count = await paperService.countByUser(userId);
 
     sendSuccessResponse(res, { count }, "My uploads summary");
+  }),
+
+  // Trigger PDF processing for a specific paper
+  processPDF: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    if (!paper.file) {
+      throw new ApiError(400, "Paper file not found");
+    }
+
+    // Queue PDF processing
+    await queuePDFExtraction(parsed.data.id);
+
+    sendSuccessResponse(res, { message: "PDF processing queued" }, "PDF processing started");
+  }),
+
+  // Get processing status and chunks for a paper
+  getProcessingStatus: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    // Get chunks if available
+    const chunks = await prisma.paperChunk.findMany({
+      where: { paperId: parsed.data.id, isDeleted: false },
+      orderBy: { idx: 'asc' },
+      select: {
+        id: true,
+        idx: true,
+        page: true,
+        content: true,
+        tokenCount: true,
+        createdAt: true,
+      },
+    });
+
+    sendSuccessResponse(res, {
+      processingStatus: paper.processingStatus,
+      processingError: (paper as any).processingError,
+      processedAt: (paper as any).processedAt,
+      chunksCount: chunks.length,
+      chunks: chunks.slice(0, 5), // Return first 5 chunks as preview
+    }, "Processing status retrieved");
   }),
 };

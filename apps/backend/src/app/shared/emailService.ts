@@ -151,6 +151,72 @@ class EmailService {
   }
 
   /**
+   * Send collection invitation email
+   */
+  async sendCollectionInvitationEmail(data: {
+    email: string;
+    name: string;
+    collectionName: string;
+    inviterName: string;
+    collectionId: string;
+  }): Promise<void> {
+    const inviteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/collections/shared`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Collection Invitation - ScholarFlow</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #7c3aed; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9fafb; }
+            .collection-info { background: #e0e7ff; padding: 16px; border-radius: 8px; margin: 20px 0; }
+            .button { display: inline-block; padding: 12px 24px; background: #7c3aed; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Collection Invitation</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${data.name},</p>
+              <p><strong>${data.inviterName}</strong> has invited you to collaborate on a collection in ScholarFlow.</p>
+              
+              <div class="collection-info">
+                <h3>📚 ${data.collectionName}</h3>
+                <p>You've been invited to join this research paper collection where you can organize, annotate, and collaborate on academic papers.</p>
+              </div>
+              
+              <p>Click the button below to view and manage your invitation:</p>
+              <a href="${inviteUrl}" class="button" role="button" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#ffffff;text-decoration:none;border-radius:6px;margin:20px 0;font-weight:600;">View Invitation</a>
+              
+              <p>You can accept or decline this invitation from your ScholarFlow dashboard.</p>
+              <p>If you don't have a ScholarFlow account yet, you'll be prompted to create one.</p>
+              
+              <p>Best regards,<br>The ScholarFlow Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+              <p>If you didn't expect this invitation, please contact the sender.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: data.email,
+      subject: `You've been invited to "${data.collectionName}" - ScholarFlow`,
+      html,
+    });
+  }
+
+  /**
    * Convert HTML to plain text for email clients that don't support HTML
    */
   private htmlToText(html: string): string {
