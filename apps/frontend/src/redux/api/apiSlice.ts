@@ -76,9 +76,23 @@ const baseQuery = fetchBaseQuery({
 });
 
 // Enhanced base query with retry logic and error handling
-const baseQueryWithRetry = retry(baseQuery, {
-  maxRetries: 1, // Reduce retries to minimize AbortController conflicts
-});
+const baseQueryWithRetry = retry(
+  async (args, api, extraOptions) => {
+    // Ensure proper AbortController handling
+    if (api.signal?.aborted) {
+      return {
+        error: {
+          status: "FETCH_ERROR" as const,
+          error: "Request aborted",
+        },
+      };
+    }
+    return baseQuery(args, api, extraOptions);
+  },
+  {
+    maxRetries: 0, // Disable retries to prevent AbortController conflicts
+  }
+);
 
 export const apiSlice = createApi({
   reducerPath: "api",
@@ -87,9 +101,12 @@ export const apiSlice = createApi({
     "Paper",
     "Collection",
     "CollectionPaper",
+    "CollectionMember",
     "Workspace",
     "User",
     "Annotation",
   ],
+  keepUnusedDataFor: 30, // Keep data for 30 seconds by default
+  refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
   endpoints: () => ({}),
 });
