@@ -1,87 +1,56 @@
-# v1.0.5
+# v1.0.6
 
-Release date: 2025-09-17  
-Author: @Atik203
+Release date: 2025-09-19  
+Authors: @Atik203
 
 ## Highlights
 
-- Production-ready paper management (upload, S3 storage, metadata: title/authors/year)
-- Reliable PDF preview via iframe (removed worker errors from react-pdf)
-- Modern papers library with working search (title/abstract/authors)
-- Advanced Search page with filters and fuzzy search
-- Dashboard quick actions and links fixed; improved navigation
-- Paper detail page: edit/delete working; authors update fixed
+- **Week 4 Collections Management Complete**: Comprehensive permission-based sharing system
+- **Real-Time Updates**: Live cache management with RTK Query optimization
+- **Permission System**: OWNER/EDIT/VIEW roles with full backend/frontend enforcement
+- **Collection Invitations**: Email-based sharing with role assignment
+- **Bug Fixes**: Resolved AbortController errors and stale UI data issues
 
-## What’s New
+## What's New
 
-- Papers
-  - Upload flow with S3 storage and metadata persistence
-  - Paper detail page UI enhancements and robust actions
-  - Library list: real-time search and better cards
-  - Advanced Search page (filters + fuzzy search)
-- Dashboard
-  - Quick search and quick actions
-  - Correct links to Papers and Advanced Search
-- Navigation
-  - Sidebar links corrected (/dashboard/papers, /dashboard/papers/search)
+### Permission-Based Collection Sharing
+
+- Role-Based Access Control with OWNER, EDIT, and VIEW permission levels
+- Invitation System for sharing collections via email
+- Backend Security with full permission enforcement at all API levels
+- Frontend Guards with dynamic UI adaptation based on user permissions
+
+### Real-Time Updates
+
+- Live Cache Management using RTK Query with granular cache invalidation
+- Polling Support for optional background refresh of collection details
+- Manual Refresh capability without page reload
+- Optimistic Updates for instant UI feedback
+
+### Technical Improvements
+
+- Enhanced Database Schema with CollectionMember table and optimized indexes
+- Improved Backend Architecture with feature-specific error classes and rate limiting
+- Advanced Frontend Architecture with better RTK Query error handling and abort management
+- Performance Enhancements including composite indexes and optimized SQL queries
 
 ## Fixes
 
-- PDF Preview: removed react-pdf worker usage; iframe-only viewer to prevent “fake worker” error
-- Authors metadata: default empty array on create; safe merge on update; frontend null-safety
-- Papers page search: connected input to list with fuzzy filtering
-- Duplicate dashboard implementation removed; lint/format cleanup
-- Broken/duplicate actions and icons in dashboard fixed
+- **AbortController Runtime Error**: Resolved RTK Query abort controller issues
+- **Stale Collection UI**: Collections now update in real-time without page reload
+- **Permission Edge Cases**: Proper handling of dynamic user permission changes
+- **Cache Consistency**: Fixed issues with outdated collection data display
 
-## Breaking/Notable Changes
+## Week 4 Status
 
-- PdfPreview is now iframe-based only (no pdf.js worker configuration)
-- Any prior workerSrc setup can be removed from client code
+**✅ Completed**: Create Collection flow, Add papers to collections, Collection listing page, Search & filter, Backend CRUD, Permission-based sharing, Invitation system, Real-time cache invalidation
+
+**⏳ Pending for Week 4.5**: Extract text content from uploaded PDFs
 
 ## Upgrade Notes
 
-- After pulling:
-  ```bash
-  yarn install
-  yarn lint && yarn type-check
-  # Optional: clear Next cache if UI assets seem stale
-  rmdir /s /q "apps\frontend\.next" 2> NUL & mkdir "apps\frontend\.next"
-  yarn dev:turbo
-  ```
-- No env changes required for this release
-
-## Known Issues / Next
-
-- Extract text content from uploaded PDFs: pending (planned Week 4)
-- Collections: create/assign flows pending (search/filter and CRUD are in)
-
-## Checklist
-
-- [x] Paper upload + S3 storage
-- [x] Metadata (title/authors/year) saved/displayed
-- [x] PDF preview stable (iframe)
-- [x] Papers list search fixed
-- [x] Advanced Search page
-- [x] Dashboard links and actions updated
-- [x] Authors update working
-- [x] Docs updated (.github, .cursor, Roadmap, Changelog)
-
----
-
-Project: Scholar-Flow • Monorepo (Next.js + Express) • Yarn Berry v4
-
-- AI-powered features (summarization, recommendations) planned for Phase 2.0.0
-
-## Checklist
-
-- [x] Paper upload with S3 integration
-- [x] PDF processing and metadata extraction
-- [x] Advanced search with filters and full-text
-- [x] Production-grade security measures
-- [x] Performance monitoring and health checks
-- [x] Comprehensive error handling system
-- [x] Modern responsive UI/UX
-- [x] Type safety improvements
-- [x] Documentation updates
+- Backward compatible with v1.0.5
+- New database migrations will run automatically
+- RTK Query cache improvements require no client changes
 
 ---
