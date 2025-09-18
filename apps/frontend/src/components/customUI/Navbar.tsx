@@ -71,25 +71,25 @@ const navigationItems = [
     items: [
       {
         label: "Documentation",
-        href: "/docs",
+        href: "/resources/docs",
         description: "Complete API and usage guides",
         icon: BookMarked,
       },
       {
         label: "Tutorials",
-        href: "/tutorials",
+        href: "/resources/tutorials",
         description: "Step-by-step learning resources",
         icon: HelpCircle,
       },
       {
         label: "API Reference",
-        href: "/api",
+        href: "/resources/api",
         description: "Developer API documentation",
         icon: BookOpen,
       },
       {
         label: "Community",
-        href: "/community",
+        href: "/resources/community",
         description: "Connect with other researchers",
         icon: Users,
       },

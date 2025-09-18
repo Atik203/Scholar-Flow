@@ -39,6 +39,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import {
   useAddPaperToCollectionMutation,
@@ -86,6 +93,9 @@ export default function CollectionDetailPage({
   const { data: session } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePermission, setInvitePermission] = useState<"VIEW" | "EDIT">(
+    "EDIT"
+  );
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
   const [isAddPapersDialogOpen, setIsAddPapersDialogOpen] = useState(false);
@@ -97,17 +107,30 @@ export default function CollectionDetailPage({
     data: collection,
     isLoading: collectionLoading,
     error: collectionError,
-  } = useGetCollectionQuery(resolvedParams.id);
+    refetch: refetchCollection,
+  } = useGetCollectionQuery(resolvedParams.id, {
+    pollingInterval: 30000, // Poll every 30 seconds for real-time updates
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   const {
     data: papersData,
     isLoading: papersLoading,
     error: papersError,
-  } = useGetCollectionPapersQuery({
-    collectionId: resolvedParams.id,
-    page: 1,
-    limit: 100,
-  });
+    refetch: refetchPapers,
+  } = useGetCollectionPapersQuery(
+    {
+      collectionId: resolvedParams.id,
+      page: 1,
+      limit: 100,
+    },
+    {
+      pollingInterval: 30000, // Poll every 30 seconds for real-time updates
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
+    }
+  );
 
   const [deleteCollection, { isLoading: isDeleting }] =
     useDeleteCollectionMutation();
@@ -158,9 +181,15 @@ export default function CollectionDetailPage({
         id: resolvedParams.id,
         email: inviteEmail.trim(),
         role: "RESEARCHER",
+        permission: invitePermission,
       }).unwrap();
+
+      // Manual refetch for immediate updates
+      refetchCollection();
+
       showSuccessToast("Invitation sent successfully");
       setInviteEmail("");
+      setInvitePermission("EDIT");
       setIsInviteDialogOpen(false);
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to send invitation");
@@ -173,6 +202,11 @@ export default function CollectionDetailPage({
         collectionId: resolvedParams.id,
         paperId,
       }).unwrap();
+
+      // Manual refetch for immediate updates
+      refetchCollection();
+      refetchPapers();
+
       showSuccessToast(`Removed "${paperTitle}" from collection`);
     } catch (error: any) {
       showErrorToast(
@@ -206,6 +240,11 @@ export default function CollectionDetailPage({
       );
 
       await Promise.all(promises);
+
+      // Manual refetch for immediate updates
+      refetchCollection();
+      refetchPapers();
+
       showSuccessToast(`Added ${selectedPapers.size} paper(s) to collection`);
       setSelectedPapers(new Set());
       setIsAddPapersDialogOpen(false);
@@ -264,6 +303,11 @@ export default function CollectionDetailPage({
     );
   }
 
+  // Permission checking
+  const userPermission = collection?.userPermission;
+  const canEdit = userPermission === "OWNER" || userPermission === "EDIT";
+  const isOwner = userPermission === "OWNER";
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -293,10 +337,27 @@ export default function CollectionDetailPage({
                   </>
                 )}
               </Badge>
+              {userPermission && userPermission !== "OWNER" && (
+                <Badge
+                  variant={userPermission === "EDIT" ? "default" : "outline"}
+                >
+                  <User className="h-3 w-3 mr-1" />
+                  {userPermission === "EDIT" ? "Editor" : "View Only"}
+                </Badge>
+              )}
             </div>
             <p className="text-muted-foreground">
               {collection.description || "No description provided"}
             </p>
+            {userPermission === "VIEW" && (
+              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center text-sm text-blue-800 dark:text-blue-200">
+                  <Eye className="h-4 w-4 mr-2" />
+                  You have view-only access to this collection. You can browse
+                  papers but cannot make changes.
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             <Dialog>
@@ -344,36 +405,48 @@ export default function CollectionDetailPage({
               </DialogContent>
             </Dialog>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() =>
-                    router.push(`/dashboard/collections/${collection.id}/edit`)
-                  }
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Collection
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsInviteDialogOpen(true)}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Invite Members
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Collection
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {canEdit && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/collections/${collection.id}/edit`
+                        )
+                      }
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Collection
+                    </DropdownMenuItem>
+                  )}
+                  {isOwner && (
+                    <DropdownMenuItem
+                      onClick={() => setIsInviteDialogOpen(true)}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Invite Members
+                    </DropdownMenuItem>
+                  )}
+                  {(canEdit || isOwner) && <DropdownMenuSeparator />}
+                  {isOwner && (
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Collection
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
 
@@ -501,8 +574,8 @@ export default function CollectionDetailPage({
                     ? "No papers match your search criteria"
                     : "This collection doesn't have any papers yet"}
                 </p>
-                {!searchTerm && (
-                  <Button>
+                {!searchTerm && canEdit && (
+                  <Button onClick={() => setIsAddPapersDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Papers
                   </Button>
@@ -600,39 +673,43 @@ export default function CollectionDetailPage({
                                 </DialogContent>
                               </Dialog>
                             )}
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  disabled={isRemovingPaper}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Remove Paper
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to remove "
-                                    {paper.title}" from this collection? The
-                                    paper itself will not be deleted.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() =>
-                                      handleRemovePaper(paper.id, paper.title)
-                                    }
+                            {canEdit && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={isRemovingPaper}
                                   >
-                                    Remove
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Remove Paper
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove "
+                                      {paper.title}" from this collection? The
+                                      paper itself will not be deleted.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() =>
+                                        handleRemovePaper(paper.id, paper.title)
+                                      }
+                                    >
+                                      Remove
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -775,6 +852,81 @@ export default function CollectionDetailPage({
               )}
               Add {selectedPapers.size > 0 ? `${selectedPapers.size} ` : ""}
               Papers
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Member Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Member to Collection</DialogTitle>
+            <DialogDescription>
+              Send an invitation to collaborate on this collection. Choose the
+              appropriate permission level.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email Address</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="Enter email address"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-permission">Permission Level</Label>
+              <Select
+                value={invitePermission}
+                onValueChange={(value: "VIEW" | "EDIT") =>
+                  setInvitePermission(value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="VIEW">
+                    <div className="flex flex-col">
+                      <span>View Only</span>
+                      <span className="text-sm text-muted-foreground">
+                        Can view collection and papers but cannot edit
+                      </span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="EDIT">
+                    <div className="flex flex-col">
+                      <span>Edit Access</span>
+                      <span className="text-sm text-muted-foreground">
+                        Can view, add, and remove papers from collection
+                      </span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsInviteDialogOpen(false);
+                setInviteEmail("");
+                setInvitePermission("EDIT");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleInvite}
+              disabled={isInviting || !inviteEmail.trim()}
+            >
+              {isInviting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Send Invitation
             </Button>
           </DialogFooter>
         </DialogContent>
