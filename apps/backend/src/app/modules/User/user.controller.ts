@@ -40,10 +40,6 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const user = (req as any).user as IAuthUser;
 
-  // Debug logging
-  console.log("UpdateProfile - User object:", user);
-  console.log("UpdateProfile - Request body:", req.body);
-
   if (!user || !user.id) {
     throw new Error(
       "User authentication failed: user object is missing or invalid"
