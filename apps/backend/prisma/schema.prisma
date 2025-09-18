@@ -18,6 +18,11 @@ enum Role {
   ADMIN
 }
 
+enum CollectionPermission {
+  VIEW // Read-only access - can view collection and papers
+  EDIT // Full access - can edit, add/remove papers, delete collection
+}
+
 enum AnnotationType {
   HIGHLIGHT
   COMMENT
@@ -317,13 +322,14 @@ model CollectionPaper {
 }
 
 model CollectionMember {
-  id           String           @id @default(uuid())
+  id           String               @id @default(uuid())
   collectionId String
   userId       String
-  role         Role             @default(RESEARCHER)
-  invitedAt    DateTime         @default(now())
+  role         Role                 @default(RESEARCHER)
+  permission   CollectionPermission @default(EDIT) // Collection-specific permission
+  invitedAt    DateTime             @default(now())
   // Invitation workflow fields
-  status       MembershipStatus @default(PENDING)
+  status       MembershipStatus     @default(PENDING)
   invitedById  String?
   acceptedAt   DateTime?
   declinedAt   DateTime?
