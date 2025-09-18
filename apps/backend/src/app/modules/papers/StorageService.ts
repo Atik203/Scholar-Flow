@@ -41,6 +41,17 @@ export class StorageService {
     return { key: params.key };
   }
 
+  async getObject(key: string): Promise<Buffer> {
+    const result = await this.s3
+      .getObject({
+        Bucket: this.bucket,
+        Key: key,
+      })
+      .promise();
+    
+    return result.Body as Buffer;
+  }
+
   getSignedUrl(key: string, expiresSeconds = 300) {
     return this.s3.getSignedUrl("getObject", {
       Bucket: this.bucket,
