@@ -55,13 +55,21 @@ const transformErrorResponse = (
 };
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
   timeout: 30000, // 30 second timeout
   prepareHeaders: async (headers) => {
-    const session = await getSession();
-    const token = (session as { accessToken?: string } | null)?.accessToken;
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+    try {
+      const session = await getSession();
+      const token = (session as { accessToken?: string } | null)?.accessToken;
+
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+    } catch (error) {
+      // Silently handle auth errors in production
+      if (process.env.NODE_ENV === "development") {
+        console.error("Auth error:", error);
+      }
     }
     return headers;
   },
@@ -69,12 +77,19 @@ const baseQuery = fetchBaseQuery({
 
 // Enhanced base query with retry logic and error handling
 const baseQueryWithRetry = retry(baseQuery, {
-  maxRetries: 3,
+  maxRetries: 1, // Reduce retries to minimize AbortController conflicts
 });
 
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Paper", "Collection", "Workspace", "User", "Annotation"],
+  tagTypes: [
+    "Paper",
+    "Collection",
+    "CollectionPaper",
+    "Workspace",
+    "User",
+    "Annotation",
+  ],
   endpoints: () => ({}),
 });
