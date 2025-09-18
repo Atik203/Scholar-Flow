@@ -5,15 +5,15 @@
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
 [![Version](https://img.shields.io/badge/version-1.0.5-blue)](./Release.md)
-[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
 
 ## 🚀 Live Demo
 
-- **Frontend**: [ScholarFlow App](https://scholar-flow.vercel.app)
-- **API**: [Backend API](https://scholar-flow-backend.vercel.app)
+- **Frontend**: [ScholarFlow App](https://scholar-flow-ai.vercel.app)
+- **API**: [Backend API](https://scholar-flow-api.vercel.app/api/health)
 
 ## ✨ Features
 
@@ -240,7 +240,7 @@ yarn test:backend
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.md) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE.md](./LICENSE.md) file for details.
 
 ## 🙏 Acknowledgments
 
@@ -253,14 +253,12 @@ This project is licensed under the MIT License - see the [LICENSE.md](./LICENSE.
 
 - **Issues**: [GitHub Issues](https://github.com/Atik203/Scholar-Flow/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Atik203/Scholar-Flow/discussions)
-- **Email**: [atikurrahaman203@gmail.com](mailto:atikurrahaman203@gmail.com)
+- **Email**: [atikurrahaman0305@gmail.com](mailto:atikurrahaman0305@gmail.com)
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by [Md. Atikur Rahaman](https://github.com/Atik203)**
-
-[⭐ Star this repository](https://github.com/Atik203/Scholar-Flow) if you find it helpful!
+[⭐Star this repository](https://github.com/Atik203/Scholar-Flow) if you find it helpful!
 
 </div>
