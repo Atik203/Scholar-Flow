@@ -42,28 +42,24 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Enhanced dashboard with improved navigation & quick actions
 - [x] Component architecture cleanup & duplicate code removal
 
-### Week 4 – Basic Collections ✅
-
-**✅ Complete Implementation (January 2025):** PDF text extraction, collection management system, and paper-collection relationships fully implemented by salman.
+### Week 4 – Basic Collections (Author: Atik+Salman) ✅
 
 **Key Features Delivered:**
-- [x] Extract text content from uploaded PDFs with automated background processing
-- [x] Create Collection flow with comprehensive CRUD operations
-- [x] Add papers to collections with role-based access control
-- [x] Collection listing page with modern UI components
-- [x] Advanced search & filter functionality
-- [x] Backend CRUD operations for collections & papers
-- [x] PDF text chunking and processing pipeline
-- [x] Collection privacy controls (public/private)
-- [x] Paper-collection relationship management
 
-**Technical Implementation:**
-- PDF text extraction using pdf-parse library
-- Background job processing with Bull queue system
-- Comprehensive collection service with optimized database queries
-- Modern React components with TypeScript
-- Role-based access control and permissions
-- Real-time processing status tracking
+- [x] Create Collection flow with comprehensive CRUD operations (Author: Atik+Salman) ✅
+- [x] Add papers to collections with permission-based access control (Author: Atik) ✅
+- [x] Collection listing page with modern UI components (Author: Atik) ✅
+- [x] Advanced search & filter functionality (Author: Atik) ✅
+- [x] Backend CRUD operations for collections & papers (Author: Atik+Salman) ✅
+- [x] Collection privacy controls (public/private) (Author: Atik) ✅
+- [x] Paper-collection relationship management (Author: Atik) ✅
+- [x] Permission-based sharing system (VIEW/EDIT permissions) (Author: Atik) ✅
+- [x] Real-time cache invalidation and updates (Author: Atik) ✅
+- [x] Collection invitation system with email notifications (Author: Atik) ✅
+
+**Remaining:**
+
+- [ ] Extract text content from uploaded PDFs (planned for Week 4.5)
 
 ### Week 5 – AI Summarization & Semantic Search
 
@@ -128,5 +124,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 4 Complete – PDF text extraction and collection management system fully implemented ✅
-Last Updated: January 2025
+Current Status: Week 4 Complete – Collection management system with permission-based sharing implemented ✅ (Text extraction pending)
+Last Updated: September 2025
