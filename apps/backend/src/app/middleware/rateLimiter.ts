@@ -1,5 +1,17 @@
 import rateLimit from "express-rate-limit";
 
+// General rate limiter for API endpoints
+export const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per 15 minutes
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Rate limiting for sensitive auth endpoints
 export const sensitiveAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

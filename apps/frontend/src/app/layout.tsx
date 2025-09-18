@@ -3,7 +3,7 @@ import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
