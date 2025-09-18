@@ -59,6 +59,19 @@ class AuthService {
       const userId = userData.id || uuidv4();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
+      // First check if user exists and is deleted
+      const existingUser = await prisma.user.findUnique({
+        where: { email: userData.email },
+        select: { id: true, isDeleted: true },
+      });
+
+      if (existingUser && existingUser.isDeleted) {
+        throw new ApiError(
+          403,
+          "Your account has been deactivated. Please contact support."
+        );
+      }
+
       const user = await prisma.user.upsert({
         where: { email: userData.email },
         update: {
@@ -79,6 +92,9 @@ class AuthService {
 
       return user;
     } catch (error) {
+      if (error instanceof ApiError) {
+        throw error; // Re-throw our custom errors
+      }
       console.error("Error creating/updating OAuth user:", error);
       throw new ApiError(500, AUTH_ERROR_MESSAGES.OAUTH_ERROR);
     }

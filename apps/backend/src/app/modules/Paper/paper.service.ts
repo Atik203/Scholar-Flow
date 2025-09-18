@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
 
@@ -372,7 +373,7 @@ export class PaperService {
    * Source: optimized paper insertion with uploader data retrieval
    */
   static async create(data: any, uploaderId: string) {
-    const paperId = data.id || require("uuid").v4();
+    const paperId = data.id || uuidv4();
 
     // Insert paper using $queryRaw
     await prisma.$queryRaw`
