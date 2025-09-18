@@ -20,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -40,13 +41,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import {
+  useAddPaperToCollectionMutation,
   useDeleteCollectionMutation,
   useGetCollectionPapersQuery,
   useGetCollectionQuery,
   useInviteMemberMutation,
   useRemovePaperFromCollectionMutation,
 } from "@/redux/api/collectionApi";
-import { useGetPaperFileUrlQuery } from "@/redux/api/paperApi";
+import {
+  useGetPaperFileUrlQuery,
+  useListPapersQuery,
+} from "@/redux/api/paperApi";
 import {
   ArrowLeft,
   BookOpen,
@@ -83,6 +88,8 @@ export default function CollectionDetailPage({
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
+  const [isAddPapersDialogOpen, setIsAddPapersDialogOpen] = useState(false);
+  const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
 
   const resolvedParams = use(params);
 
@@ -107,6 +114,15 @@ export default function CollectionDetailPage({
   const [inviteMember, { isLoading: isInviting }] = useInviteMemberMutation();
   const [removePaperFromCollection, { isLoading: isRemovingPaper }] =
     useRemovePaperFromCollectionMutation();
+  const [addPaperToCollection, { isLoading: isAddingPaper }] =
+    useAddPaperToCollectionMutation();
+
+  // Query for available papers to add
+  const { data: availablePapersData, isLoading: availablePapersLoading } =
+    useListPapersQuery(
+      { page: 1, limit: 100 },
+      { skip: !isAddPapersDialogOpen }
+    );
 
   // Query for paper preview
   const {
@@ -173,6 +189,41 @@ export default function CollectionDetailPage({
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to delete collection");
     }
+  };
+
+  const handleAddPapers = async () => {
+    if (selectedPapers.size === 0) {
+      showErrorToast("Please select at least one paper to add");
+      return;
+    }
+
+    try {
+      const promises = Array.from(selectedPapers).map((paperId) =>
+        addPaperToCollection({
+          collectionId: resolvedParams.id,
+          paperId,
+        }).unwrap()
+      );
+
+      await Promise.all(promises);
+      showSuccessToast(`Added ${selectedPapers.size} paper(s) to collection`);
+      setSelectedPapers(new Set());
+      setIsAddPapersDialogOpen(false);
+    } catch (error: any) {
+      showErrorToast(
+        error?.data?.message || "Failed to add papers to collection"
+      );
+    }
+  };
+
+  const togglePaperSelection = (paperId: string) => {
+    const newSelection = new Set(selectedPapers);
+    if (newSelection.has(paperId)) {
+      newSelection.delete(paperId);
+    } else {
+      newSelection.add(paperId);
+    }
+    setSelectedPapers(newSelection);
   };
 
   if (!isProtected) {
@@ -407,7 +458,10 @@ export default function CollectionDetailPage({
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Papers in Collection</CardTitle>
               <div className="flex items-center gap-2">
-                <Button size="sm">
+                <Button
+                  size="sm"
+                  onClick={() => setIsAddPapersDialogOpen(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Papers
                 </Button>
@@ -625,6 +679,102 @@ export default function CollectionDetailPage({
             >
               {isInviting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Papers Dialog */}
+      <Dialog
+        open={isAddPapersDialogOpen}
+        onOpenChange={setIsAddPapersDialogOpen}
+      >
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Add Papers to Collection</DialogTitle>
+            <DialogDescription>
+              Select papers from your library to add to this collection
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {availablePapersLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="ml-2">Loading papers...</span>
+              </div>
+            ) : availablePapersData?.items?.length ? (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {availablePapersData.items
+                  .filter(
+                    (paper) =>
+                      !papers.some((cp: any) => cp.paper.id === paper.id)
+                  )
+                  .map((paper: any) => (
+                    <div
+                      key={paper.id}
+                      className={`border rounded p-3 cursor-pointer transition-colors ${
+                        selectedPapers.has(paper.id)
+                          ? "bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
+                      onClick={() => togglePaperSelection(paper.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{paper.title}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {paper.abstract || "No abstract available"}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+                            <span>
+                              Authors:{" "}
+                              {(paper.metadata?.authors || []).join(", ") ||
+                                "Unknown"}
+                            </span>
+                            <span>
+                              Year: {paper.metadata?.year || "Unknown"}
+                            </span>
+                            <span>Status: {paper.processingStatus}</span>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <Checkbox
+                            checked={selectedPapers.has(paper.id)}
+                            onChange={() => togglePaperSelection(paper.id)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">
+                  No papers available to add
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddPapersDialogOpen(false);
+                setSelectedPapers(new Set());
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddPapers}
+              disabled={isAddingPaper || selectedPapers.size === 0}
+            >
+              {isAddingPaper && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
+              Add {selectedPapers.size > 0 ? `${selectedPapers.size} ` : ""}
+              Papers
             </Button>
           </DialogFooter>
         </DialogContent>

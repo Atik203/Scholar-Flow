@@ -189,12 +189,19 @@ export const collectionApi = apiSlice.injectEndpoints({
       query: ({ page = 1, limit = 10 } = {}) => ({
         url: "/collections/invites/sent",
         params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
       }),
       transformResponse: (response: { data: any[]; meta: any }) => ({
         result: response.data,
         meta: response.meta,
       }),
       providesTags: ["Collection"],
+      keepUnusedDataFor: 0,
+      forceRefetch({ currentArg, previousArg }) {
+        return true; // Always refetch
+      },
     }),
 
     // Invites received by the authenticated user
@@ -205,12 +212,19 @@ export const collectionApi = apiSlice.injectEndpoints({
       query: ({ page = 1, limit = 10 } = {}) => ({
         url: "/collections/invites/received",
         params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
       }),
       transformResponse: (response: { data: any[]; meta: any }) => ({
         result: response.data,
         meta: response.meta,
       }),
       providesTags: ["Collection"],
+      keepUnusedDataFor: 0,
+      forceRefetch({ currentArg, previousArg }) {
+        return true; // Always refetch
+      },
     }),
 
     // Get papers in collection
@@ -305,7 +319,10 @@ export const collectionApi = apiSlice.injectEndpoints({
         url: `/collections/${id}/accept`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "Collection", id }],
+      invalidatesTags: (result, error, id) => [
+        { type: "Collection", id },
+        "Collection",
+      ],
     }),
 
     // Decline an invite
@@ -314,7 +331,10 @@ export const collectionApi = apiSlice.injectEndpoints({
         url: `/collections/${id}/decline`,
         method: "POST",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "Collection", id }],
+      invalidatesTags: (result, error, id) => [
+        { type: "Collection", id },
+        "Collection",
+      ],
     }),
   }),
 });
