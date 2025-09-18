@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
+import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
@@ -129,12 +130,17 @@ export const collectionController = {
     const skip = (page - 1) * limit;
 
     // Use raw queries for performance and to include member status
+    // Only show collections where user is NOT the owner and has ACCEPTED membership
     const userId = authReq.user.id;
     const collections = await prisma.$queryRaw<any[]>`
-      SELECT c.*, cm.status as "memberStatus"
+      SELECT c.*, cm.status as "memberStatus", owner.name as "ownerName", owner.email as "ownerEmail"
       FROM "Collection" c
       JOIN "CollectionMember" cm ON cm."collectionId" = c.id AND cm."isDeleted" = false
-      WHERE cm."userId" = ${userId} AND c."isDeleted" = false
+      JOIN "User" owner ON owner.id = c."ownerId"
+      WHERE cm."userId" = ${userId} 
+        AND c."isDeleted" = false 
+        AND c."ownerId" != ${userId}
+        AND cm.status = 'ACCEPTED'
       ORDER BY c."createdAt" DESC
       LIMIT ${limit} OFFSET ${skip}
     `;
@@ -142,7 +148,11 @@ export const collectionController = {
       SELECT COUNT(*)::int as count
       FROM "CollectionMember" cm
       JOIN "Collection" c ON c.id = cm."collectionId"
-      WHERE cm."userId" = ${userId} AND cm."isDeleted" = false AND c."isDeleted" = false
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND c."isDeleted" = false
+        AND c."ownerId" != ${userId}
+        AND cm.status = 'ACCEPTED'
     `;
 
     sendPaginatedResponse(
@@ -210,14 +220,22 @@ export const collectionController = {
       FROM "CollectionMember" cm
       JOIN "Collection" c ON c.id = cm."collectionId"
       LEFT JOIN "User" inv ON inv.id = cm."invitedById"
-      WHERE cm."userId" = ${userId} AND cm."isDeleted" = false
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND cm.status = 'PENDING'
+        AND cm."invitedById" IS NOT NULL
+        AND cm."invitedById" != ${userId}
       ORDER BY cm."invitedAt" DESC
       LIMIT ${limit} OFFSET ${skip}
     `;
     const totalRes = await prisma.$queryRaw<any[]>`
       SELECT COUNT(*)::int as count
       FROM "CollectionMember" cm
-      WHERE cm."userId" = ${userId} AND cm."isDeleted" = false
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND cm.status = 'PENDING'
+        AND cm."invitedById" IS NOT NULL
+        AND cm."invitedById" != ${userId}
     `;
     sendPaginatedResponse(
       res,
@@ -345,6 +363,25 @@ export const collectionController = {
           status: "PENDING" as any,
         },
       });
+    }
+
+    // Send invitation email
+    try {
+      const inviter = await prisma.user.findUnique({
+        where: { id: inviterId },
+        select: { name: true, email: true },
+      });
+
+      await emailService.sendCollectionInvitationEmail({
+        email: user.email,
+        name: user.name || user.email,
+        collectionName: collection.name,
+        inviterName: inviter?.name || inviter?.email || "A ScholarFlow user",
+        collectionId: collection.id,
+      });
+    } catch (emailError) {
+      // Log email error but don't fail the invitation
+      console.error("Failed to send invitation email:", emailError);
     }
 
     sendSuccessResponse(
