@@ -77,7 +77,7 @@ const baseQuery = fetchBaseQuery({
 
 // Enhanced base query with retry logic and error handling
 const baseQueryWithRetry = retry(baseQuery, {
-  maxRetries: 3,
+  maxRetries: 1, // Reduce retries to minimize AbortController conflicts
 });
 
 export const apiSlice = createApi({

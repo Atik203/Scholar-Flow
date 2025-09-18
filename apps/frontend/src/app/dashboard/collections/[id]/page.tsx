@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { PdfPreview } from "@/components/papers/PdfPreview";
 import {
   showErrorToast,
   showSuccessToast,
@@ -43,13 +44,16 @@ import {
   useGetCollectionPapersQuery,
   useGetCollectionQuery,
   useInviteMemberMutation,
+  useRemovePaperFromCollectionMutation,
 } from "@/redux/api/collectionApi";
+import { useGetPaperFileUrlQuery } from "@/redux/api/paperApi";
 import {
   ArrowLeft,
   BookOpen,
   Calendar,
   Copy,
   Edit,
+  Eye,
   FileText,
   Globe,
   Loader2,
@@ -78,6 +82,7 @@ export default function CollectionDetailPage({
   const [searchTerm, setSearchTerm] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
 
   const resolvedParams = use(params);
 
@@ -100,6 +105,15 @@ export default function CollectionDetailPage({
   const [deleteCollection, { isLoading: isDeleting }] =
     useDeleteCollectionMutation();
   const [inviteMember, { isLoading: isInviting }] = useInviteMemberMutation();
+  const [removePaperFromCollection, { isLoading: isRemovingPaper }] =
+    useRemovePaperFromCollectionMutation();
+
+  // Query for paper preview
+  const {
+    data: previewUrlData,
+    isLoading: previewLoading,
+    error: previewError,
+  } = useGetPaperFileUrlQuery(previewPaperId || "", { skip: !previewPaperId });
 
   // Process papers data and apply search filter
   const papers = papersData?.result || [];
@@ -116,6 +130,41 @@ export default function CollectionDetailPage({
     );
   });
 
+  // Handler functions
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) {
+      showErrorToast("Please enter a valid email");
+      return;
+    }
+
+    try {
+      await inviteMember({
+        id: resolvedParams.id,
+        email: inviteEmail.trim(),
+        role: "RESEARCHER",
+      }).unwrap();
+      showSuccessToast("Invitation sent successfully");
+      setInviteEmail("");
+      setIsInviteDialogOpen(false);
+    } catch (error: any) {
+      showErrorToast(error?.data?.message || "Failed to send invitation");
+    }
+  };
+
+  const handleRemovePaper = async (paperId: string, paperTitle: string) => {
+    try {
+      await removePaperFromCollection({
+        collectionId: resolvedParams.id,
+        paperId,
+      }).unwrap();
+      showSuccessToast(`Removed "${paperTitle}" from collection`);
+    } catch (error: any) {
+      showErrorToast(
+        error?.data?.message || "Failed to remove paper from collection"
+      );
+    }
+  };
+
   const handleDelete = async () => {
     try {
       await deleteCollection(resolvedParams.id).unwrap();
@@ -123,22 +172,6 @@ export default function CollectionDetailPage({
       router.push("/dashboard/collections");
     } catch (error: any) {
       showErrorToast(error?.data?.message || "Failed to delete collection");
-    }
-  };
-
-  const handleInvite = async () => {
-    if (!inviteEmail) return;
-
-    try {
-      await inviteMember({
-        id: resolvedParams.id,
-        email: inviteEmail,
-      }).unwrap();
-      showSuccessToast("Invitation sent successfully");
-      setInviteEmail("");
-      setIsInviteDialogOpen(false);
-    } catch (error: any) {
-      showErrorToast(error?.data?.message || "Failed to send invitation");
     }
   };
 
@@ -469,12 +502,83 @@ export default function CollectionDetailPage({
                             <Badge variant="outline">
                               {paper.processingStatus}
                             </Badge>
-                            <Button variant="outline" size="sm">
-                              View
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/dashboard/papers/${paper.id}`}>
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Link>
                             </Button>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {paper.file && (
+                              <Dialog
+                                open={previewPaperId === paper.id}
+                                onOpenChange={(open) =>
+                                  setPreviewPaperId(open ? paper.id : null)
+                                }
+                              >
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    Preview
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-3xl">
+                                  <DialogHeader>
+                                    <DialogTitle>{paper.title}</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="max-h-[80vh] overflow-auto">
+                                    {previewLoading && (
+                                      <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
+                                        Loading preview...
+                                      </div>
+                                    )}
+                                    {previewUrlData?.data?.url && (
+                                      <PdfPreview
+                                        fileUrl={previewUrlData.data.url}
+                                        className="mx-auto"
+                                      />
+                                    )}
+                                    {!previewLoading &&
+                                      !previewUrlData?.data?.url && (
+                                        <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
+                                          Preview unavailable
+                                        </div>
+                                      )}
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={isRemovingPaper}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Remove Paper
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to remove "
+                                    {paper.title}" from this collection? The
+                                    paper itself will not be deleted.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() =>
+                                      handleRemovePaper(paper.id, paper.title)
+                                    }
+                                  >
+                                    Remove
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </div>
                       </CardContent>
