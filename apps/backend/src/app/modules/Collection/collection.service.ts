@@ -301,6 +301,67 @@ export class CollectionService {
       throw error;
     }
   }
+
+  /**
+   * Check if a user has edit permission for a collection
+   * Returns true if user is the owner or has EDIT permission as a member
+   * Source: permission checking for collection operations
+   */
+  static async hasEditPermission(
+    collectionId: string,
+    userId: string
+  ): Promise<boolean> {
+    try {
+      const result = await prisma.$queryRaw<any[]>`
+        SELECT 
+          CASE 
+            WHEN c."ownerId" = ${userId} THEN true
+            WHEN cm."permission" = 'EDIT' AND cm.status = 'ACCEPTED' THEN true
+            ELSE false
+          END as "hasEditPermission"
+        FROM "Collection" c
+        LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."userId" = ${userId}
+        WHERE c.id = ${collectionId} AND c."isDeleted" = false
+        LIMIT 1
+      `;
+
+      return result[0]?.hasEditPermission === true;
+    } catch (error) {
+      console.error("Error checking edit permission:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user's permission level for a collection
+   * Returns 'OWNER', 'EDIT', 'VIEW', or null if no access
+   * Source: get specific permission level for UI rendering
+   */
+  static async getUserPermission(
+    collectionId: string,
+    userId: string
+  ): Promise<"OWNER" | "EDIT" | "VIEW" | null> {
+    try {
+      const result = await prisma.$queryRaw<any[]>`
+        SELECT 
+          CASE 
+            WHEN c."ownerId" = ${userId} THEN 'OWNER'
+            WHEN cm."permission" = 'EDIT' AND cm.status = 'ACCEPTED' THEN 'EDIT'
+            WHEN cm."permission" = 'VIEW' AND cm.status = 'ACCEPTED' THEN 'VIEW'
+            ELSE NULL
+          END as "permission"
+        FROM "Collection" c
+        LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."userId" = ${userId}
+        WHERE c.id = ${collectionId} AND c."isDeleted" = false
+        LIMIT 1
+      `;
+
+      return result[0]?.permission || null;
+    } catch (error) {
+      console.error("Error getting user permission:", error);
+      throw error;
+    }
+  }
 }
 
 export const collectionService = {
@@ -308,4 +369,6 @@ export const collectionService = {
   getCollectionsWithCounts: CollectionService.getCollectionsWithCounts,
   getUserCollections: CollectionService.getUserCollections,
   searchCollections: CollectionService.searchCollections,
+  hasEditPermission: CollectionService.hasEditPermission,
+  getUserPermission: CollectionService.getUserPermission,
 };

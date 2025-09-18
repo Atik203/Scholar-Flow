@@ -1,5 +1,8 @@
 import { apiSlice } from "./apiSlice";
 
+export type CollectionPermission = "VIEW" | "EDIT";
+export type UserPermission = "OWNER" | "EDIT" | "VIEW";
+
 export interface Collection {
   id: string;
   name: string;
@@ -17,6 +20,31 @@ export interface Collection {
   _count?: {
     papers: number;
     members: number;
+  };
+  userPermission?: UserPermission; // User's permission level for this collection
+}
+
+export interface CollectionMember {
+  id: string;
+  collectionId: string;
+  userId: string;
+  role: string;
+  permission: CollectionPermission;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  invitedAt: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+  invitedById?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+  };
+  invitedBy?: {
+    id: string;
+    name: string;
+    email: string;
   };
 }
 
@@ -62,6 +90,13 @@ export interface AddPaperToCollectionRequest {
   paperId: string;
 }
 
+export interface InviteMemberRequest {
+  id: string;
+  email: string;
+  role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+  permission?: CollectionPermission;
+}
+
 export const collectionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get user's collections
@@ -72,19 +107,21 @@ export const collectionApi = apiSlice.injectEndpoints({
       query: ({ page = 1, limit = 10 } = {}) => ({
         url: "/collections/my",
         params: { page, limit },
-        headers: {
-          "Cache-Control": "no-cache",
-        },
       }),
       transformResponse: (response: { data: Collection[]; meta: any }) => ({
         result: response.data,
         meta: response.meta,
       }),
-      providesTags: ["Collection"],
-      keepUnusedDataFor: 0, // Don't cache this query
-      forceRefetch({ currentArg, previousArg }) {
-        return true; // Always refetch
-      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Collection" as const,
+                id,
+              })),
+              { type: "Collection", id: "LIST" },
+            ]
+          : [{ type: "Collection", id: "LIST" }],
     }),
 
     // Get public collections
@@ -107,19 +144,21 @@ export const collectionApi = apiSlice.injectEndpoints({
       query: ({ page = 1, limit = 10 } = {}) => ({
         url: "/collections/shared",
         params: { page, limit },
-        headers: {
-          "Cache-Control": "no-cache",
-        },
       }),
       transformResponse: (response: { data: Collection[]; meta: any }) => ({
         result: response.data,
         meta: response.meta,
       }),
-      providesTags: ["Collection"],
-      keepUnusedDataFor: 0,
-      forceRefetch({ currentArg, previousArg }) {
-        return true; // Always refetch
-      },
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Collection" as const,
+                id,
+              })),
+              { type: "Collection", id: "SHARED" },
+            ]
+          : [{ type: "Collection", id: "SHARED" }],
     }),
 
     // Get specific collection
@@ -137,7 +176,11 @@ export const collectionApi = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: { data: Collection }) => response.data,
-      invalidatesTags: ["Collection"],
+      invalidatesTags: [
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "Collection",
+      ],
     }),
 
     // Update collection
@@ -151,7 +194,11 @@ export const collectionApi = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: { data: Collection }) => response.data,
-      invalidatesTags: (result, error, { id }) => [{ type: "Collection", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+      ],
     }),
 
     // Delete collection
@@ -160,7 +207,12 @@ export const collectionApi = apiSlice.injectEndpoints({
         url: `/collections/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Collection"],
+      invalidatesTags: (result, error, id) => [
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "Collection",
+      ],
     }),
 
     // Search collections
@@ -268,6 +320,7 @@ export const collectionApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { collectionId }) => [
         { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
         "CollectionPaper",
       ],
     }),
@@ -283,34 +336,37 @@ export const collectionApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { collectionId }) => [
         { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
         "CollectionPaper",
       ],
     }),
 
     // List members of a collection
-    getCollectionMembers: builder.query<any[], string>({
+    getCollectionMembers: builder.query<CollectionMember[], string>({
       query: (id) => `/collections/${id}/members`,
-      transformResponse: (response: { data: any[] }) => response.data,
-      providesTags: (result, error, id) => [{ type: "Collection", id }],
+      transformResponse: (response: { data: CollectionMember[] }) =>
+        response.data,
+      providesTags: (result, error, id) => [
+        { type: "CollectionMember", id },
+        { type: "Collection", id },
+      ],
     }),
 
     // Invite a member by email
-    inviteMember: builder.mutation<
-      { memberId: string },
-      {
-        id: string;
-        email: string;
-        role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
-      }
-    >({
-      query: ({ id, email, role = "RESEARCHER" }) => ({
+    inviteMember: builder.mutation<{ memberId: string }, InviteMemberRequest>({
+      query: ({ id, email, role = "RESEARCHER", permission = "EDIT" }) => ({
         url: `/collections/${id}/invite`,
         method: "POST",
-        body: { email, role },
+        body: { email, role, permission },
       }),
       transformResponse: (response: { data: { memberId: string } }) =>
         response.data,
-      invalidatesTags: (result, error, { id }) => [{ type: "Collection", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CollectionMember", id },
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+      ],
     }),
 
     // Accept an invite
@@ -320,8 +376,10 @@ export const collectionApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, id) => [
+        { type: "CollectionMember", id },
         { type: "Collection", id },
-        "Collection",
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
       ],
     }),
 
@@ -332,8 +390,10 @@ export const collectionApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, id) => [
+        { type: "CollectionMember", id },
         { type: "Collection", id },
-        "Collection",
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
       ],
     }),
   }),
