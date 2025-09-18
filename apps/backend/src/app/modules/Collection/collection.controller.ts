@@ -133,7 +133,7 @@ export const collectionController = {
     // Only show collections where user is NOT the owner and has ACCEPTED membership
     const userId = authReq.user.id;
     const collections = await prisma.$queryRaw<any[]>`
-      SELECT c.*, cm.status as "memberStatus", owner.name as "ownerName", owner.email as "ownerEmail"
+      SELECT c.*, cm.status as "memberStatus", cm.permission as "userPermission", owner.name as "ownerName", owner.email as "ownerEmail"
       FROM "Collection" c
       JOIN "CollectionMember" cm ON cm."collectionId" = c.id AND cm."isDeleted" = false
       JOIN "User" owner ON owner.id = c."ownerId"
@@ -179,7 +179,7 @@ export const collectionController = {
     const skip = (page - 1) * limit;
     const inviterId = authReq.user.id;
     const items = await prisma.$queryRaw<any[]>`
-      SELECT cm.id, cm."collectionId", cm."userId", cm.status, cm."invitedAt", c.name as "collectionName", u.email as "inviteeEmail", u.name as "inviteeName"
+      SELECT cm.id, cm."collectionId", cm."userId", cm.status, cm.permission, cm."invitedAt", c.name as "collectionName", u.email as "inviteeEmail", u.name as "inviteeName"
       FROM "CollectionMember" cm
       JOIN "Collection" c ON c.id = cm."collectionId"
       JOIN "User" u ON u.id = cm."userId"
@@ -216,7 +216,7 @@ export const collectionController = {
     const skip = (page - 1) * limit;
     const userId = authReq.user.id;
     const items = await prisma.$queryRaw<any[]>`
-      SELECT cm.id, cm."collectionId", cm.status, cm."invitedAt", cm."invitedById", c.name as "collectionName", inv."email" as "inviterEmail", inv.name as "inviterName"
+      SELECT cm.id, cm."collectionId", cm.status, cm.permission, cm."invitedAt", cm."invitedById", c.name as "collectionName", inv."email" as "inviterEmail", inv.name as "inviterName"
       FROM "CollectionMember" cm
       JOIN "Collection" c ON c.id = cm."collectionId"
       LEFT JOIN "User" inv ON inv.id = cm."invitedById"
@@ -311,7 +311,7 @@ export const collectionController = {
       throw new ApiError(400, `Validation failed: ${errorDetails}`);
     }
 
-    const { email, role } = parsed.data;
+    const { email, role, permission } = parsed.data;
     const inviterId = authReq.user.id;
 
     // Ensure inviter is the owner of the collection
@@ -346,6 +346,7 @@ export const collectionController = {
         where: { id: existing.id },
         data: {
           role: role as any,
+          permission: permission as any,
           status: "PENDING" as any,
           invitedById: inviterId,
           invitedAt: new Date(),
@@ -359,6 +360,7 @@ export const collectionController = {
           collectionId: id,
           userId: user.id,
           role: role as any,
+          permission: permission as any,
           invitedById: inviterId,
           status: "PENDING" as any,
         },
@@ -503,25 +505,24 @@ export const collectionController = {
       throw new ApiError(404, "Collection not found");
     }
 
-    // Check access permissions
+    // Check access permissions and get user permission
     const isOwner = authReq.user?.id === collection.ownerId;
     const isPublic = collection.isPublic;
-    const isMember = authReq.user?.id
-      ? await prisma.collectionMember.findFirst({
-          where: {
-            collectionId: id,
-            userId: authReq.user.id,
-            status: "ACCEPTED" as any,
-            isDeleted: false,
-          },
-        })
+    const userPermission = authReq.user?.id
+      ? await CollectionService.getUserPermission(id, authReq.user.id)
       : null;
 
-    if (!isOwner && !isPublic && !isMember) {
+    if (!isOwner && !isPublic && !userPermission) {
       throw new ApiError(403, "Access denied");
     }
 
-    sendSuccessResponse(res, collection, "Collection retrieved successfully");
+    // Add user permission to response
+    const responseData = {
+      ...collection,
+      userPermission: isOwner ? "OWNER" : userPermission,
+    };
+
+    sendSuccessResponse(res, responseData, "Collection retrieved successfully");
   }),
 
   // Update a collection
@@ -540,17 +541,28 @@ export const collectionController = {
       throw new ApiError(400, `Validation failed: ${errorDetails}`);
     }
 
-    // Check ownership
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id,
-        ownerId: authReq.user.id,
         isDeleted: false,
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      id,
+      authReq.user.id
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     const updated = await prisma.collection.update({
@@ -584,17 +596,28 @@ export const collectionController = {
 
     const { id } = req.params;
 
-    // Check ownership
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id,
-        ownerId: authReq.user.id,
         isDeleted: false,
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      id,
+      authReq.user.id
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Soft delete the collection
@@ -662,31 +685,28 @@ export const collectionController = {
     const { paperId } = parsed.data;
     const userId = authReq.user.id;
 
-    // Check if collection exists and user has access
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id: collectionId,
         isDeleted: false,
-        OR: [
-          { ownerId: userId },
-          {
-            members: {
-              some: {
-                userId: userId,
-                isDeleted: false,
-                status: "ACCEPTED" as any,
-                role: {
-                  in: ["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"],
-                },
-              },
-            },
-          },
-        ],
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      collectionId,
+      userId
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Check if paper exists and user has access
@@ -749,31 +769,28 @@ export const collectionController = {
     const { collectionId, paperId } = req.params;
     const userId = authReq.user.id;
 
-    // Check if collection exists and user has access
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id: collectionId,
         isDeleted: false,
-        OR: [
-          { ownerId: userId },
-          {
-            members: {
-              some: {
-                userId: userId,
-                isDeleted: false,
-                status: "ACCEPTED" as any,
-                role: {
-                  in: ["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"],
-                },
-              },
-            },
-          },
-        ],
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      collectionId,
+      userId
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Check if paper is in collection
