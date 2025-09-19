@@ -19,14 +19,30 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // Create transporter using Gmail SMTP
-    this.transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: config.emailSender.email,
-        pass: config.emailSender.app_pass, // App-specific password
-      },
-    });
+    // Prefer explicit SMTP config if provided; fallback to Gmail app password
+    if (
+      config.smtp.host &&
+      config.smtp.user &&
+      (config.smtp.password || config.emailSender.app_pass)
+    ) {
+      this.transporter = nodemailer.createTransport({
+        host: config.smtp.host,
+        port: config.smtp.port || 587,
+        secure: !!config.smtp.secure,
+        auth: {
+          user: config.smtp.user || config.emailSender.email,
+          pass: config.smtp.password || config.emailSender.app_pass,
+        },
+      });
+    } else {
+      this.transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: config.emailSender.email,
+          pass: config.emailSender.app_pass, // App-specific password
+        },
+      });
+    }
   }
 
   /**
@@ -43,10 +59,12 @@ class EmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log("Email sent successfully:", info.messageId);
+      if (config.env !== "production") {
+        console.log("Email sent successfully:", info.messageId);
+      }
     } catch (error) {
-      console.error("Error sending email:", error);
-      throw new Error("Failed to send email");
+      // Log but do not throw to avoid breaking main flows
+      console.error("Error sending email:", (error as any)?.message || error);
     }
   }
 
@@ -212,6 +230,75 @@ class EmailService {
     await this.sendEmail({
       to: data.email,
       subject: `You've been invited to "${data.collectionName}" - ScholarFlow`,
+      html,
+    });
+  }
+
+  /**
+   * Send workspace invitation email
+   */
+  async sendWorkspaceInvitationEmail(data: {
+    email: string;
+    name: string;
+    workspaceName: string;
+    inviterName: string;
+    workspaceId: string;
+  }): Promise<void> {
+    const inviteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/workspaces/shared`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Workspace Invitation - ScholarFlow</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #7c3aed; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9fafb; }
+            .footer { padding: 15px; text-align: center; color: #666; font-size: 14px; }
+            .button { display: inline-block; padding: 12px 24px; background: #7c3aed; color: #ffffff; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>ScholarFlow</h1>
+              <h2>Workspace Invitation</h2>
+            </div>
+            <div class="content">
+              <p>Hi ${data.name},</p>
+              
+              <p><strong>${data.inviterName}</strong> has invited you to join the workspace <strong>"${data.workspaceName}"</strong> on ScholarFlow.</p>
+              
+              <p>As a workspace member, you'll be able to:</p>
+              <ul>
+                <li>Collaborate on research papers</li>
+                <li>Create and manage collections</li>
+                <li>Share insights and annotations</li>
+                <li>Access advanced AI-powered research tools</li>
+              </ul>
+              
+              <a href="${inviteUrl}" class="button" role="button" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#ffffff;text-decoration:none;border-radius:6px;margin:20px 0;font-weight:600;">View Invitation</a>
+              
+              <p>You can accept or decline this invitation from your ScholarFlow dashboard.</p>
+              <p>If you don't have a ScholarFlow account yet, you'll be prompted to create one.</p>
+              
+              <p>Best regards,<br>The ScholarFlow Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+              <p>If you didn't expect this invitation, please contact the sender.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: data.email,
+      subject: `You've been invited to "${data.workspaceName}" workspace - ScholarFlow`,
       html,
     });
   }
