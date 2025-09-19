@@ -25,9 +25,11 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   ArrowLeft,
   Brain,
+  Building2,
   Calendar,
   FileText,
   Filter,
@@ -39,10 +41,13 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function SearchPapersPage() {
   const isProtected = useProtectedRoute();
+
+  // Workspace state
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,10 +58,26 @@ export default function SearchPapersPage() {
   const [advancedSearch, setAdvancedSearch] = useState(false);
   const [semanticSearch, setSemanticSearch] = useState(false);
 
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
+
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     page: 1,
     limit: 50,
+    workspaceId: selectedWorkspaceId || undefined,
   });
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (workspaces.length === 1 && !selectedWorkspaceId) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
 
   // Filter and search papers
   const filteredPapers = useMemo(() => {
@@ -168,6 +189,37 @@ export default function SearchPapersPage() {
               Find research papers using advanced filters and AI-powered search
             </p>
           </div>
+        </div>
+
+        {/* Workspace Selection */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            <label htmlFor="workspace-select" className="text-sm font-medium">
+              Workspace:
+            </label>
+          </div>
+          <Select
+            value={selectedWorkspaceId}
+            onValueChange={setSelectedWorkspaceId}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a workspace to search papers" />
+            </SelectTrigger>
+            <SelectContent>
+              {(workspacesData?.data || []).map((workspace: any) => (
+                <SelectItem key={workspace.id} value={workspace.id}>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>{workspace.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {workspace.role}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

@@ -9,11 +9,16 @@
  *   yarn ts-node scripts/s3SmokeTest.ts
  * Or add an npm script alias if desired.
  *
- * This script intentionally uses the existing aws-sdk v2 dependency already present
- * in the project to avoid adding new dependencies. Migration to AWS SDK v3 modular
- * clients can be performed later for tree-shaking benefits.
+ * This script uses AWS SDK v3 modular clients for better performance and tree-shaking.
  */
-import AWS from "aws-sdk";
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import "dotenv/config";
 
@@ -34,14 +39,13 @@ if (missing.length) {
 const bucket = process.env.AWS_BUCKET_NAME as string;
 const region = process.env.AWS_REGION as string;
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+const s3 = new S3Client({
   region,
-  signatureVersion: "v4",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string,
+  },
 });
-
-const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
 
 // -------- Test PDF Payload (Tiny Minimal PDF) --------
 // A very small valid PDF header/footer to avoid large binary inclusion.
@@ -60,41 +64,46 @@ const run = async () => {
   try {
     // 1. PUT Object
     console.log("➡️  Uploading test PDF...");
-    await s3
-      .putObject({
-        Bucket: bucket,
-        Key: key,
-        Body: minimalPdf,
-        ContentType: "application/pdf",
-        ACL: "private",
-      })
-      .promise();
+    const putCommand = new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: minimalPdf,
+      ContentType: "application/pdf",
+      ACL: "private",
+    });
+    await s3.send(putCommand);
     console.log("✅ Upload successful.");
 
     // 2. HEAD Object
     console.log("➡️  Verifying object with HEAD...");
-    const head = await s3
-      .headObject({
-        Bucket: bucket,
-        Key: key,
-      })
-      .promise();
+    const headCommand = new HeadObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    const head = await s3.send(headCommand);
     console.log("✅ HEAD successful. Size =", head.ContentLength, "bytes");
 
     // 3. GET Object
     console.log("➡️  Downloading object...");
-    const getRes = await s3
-      .getObject({
-        Bucket: bucket,
-        Key: key,
-      })
-      .promise();
+    const getCommand = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    const getRes = await s3.send(getCommand);
     if (!getRes.Body) {
       throw new Error("Downloaded object Body is empty");
     }
-    const downloaded = Buffer.isBuffer(getRes.Body)
-      ? getRes.Body
-      : Buffer.from(getRes.Body as any);
+
+    // Convert stream to buffer for AWS SDK v3
+    const chunks: Buffer[] = [];
+    const stream = getRes.Body as NodeJS.ReadableStream;
+
+    const downloaded = await new Promise<Buffer>((resolve, reject) => {
+      stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
+
     if (downloaded.length !== minimalPdf.length) {
       console.warn(
         `⚠️  Downloaded size (${downloaded.length}) differs from uploaded (${minimalPdf.length}).`
@@ -105,21 +114,22 @@ const run = async () => {
 
     // 4. Generate Signed URL (optional demonstration)
     console.log("➡️  Generating a signed URL (60s)...");
-    const signedUrl = s3.getSignedUrl("getObject", {
+    const signedGetCommand = new GetObjectCommand({
       Bucket: bucket,
       Key: key,
-      Expires: 60,
+    });
+    const signedUrl = await getSignedUrl(s3, signedGetCommand, {
+      expiresIn: 60,
     });
     console.log("🔗 Signed URL:", signedUrl);
 
     // 5. DELETE Object
     console.log("➡️  Deleting test object...");
-    await s3
-      .deleteObject({
-        Bucket: bucket,
-        Key: key,
-      })
-      .promise();
+    const deleteCommand = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    await s3.send(deleteCommand);
     console.log("✅ Deletion successful.");
 
     console.log("\n🎉 S3 Smoke Test PASSED. Basic operations functioning.");
