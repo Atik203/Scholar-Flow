@@ -81,19 +81,21 @@ model User {
   sessions Session[]
 
   // App relations
-  memberships           WorkspaceMember[]
-  workspacesOwned       Workspace[]        @relation("WorkspaceOwner")
-  uploadedPapers        Paper[]            @relation("PaperUploader")
-  annotations           Annotation[]
-  collections           Collection[]       @relation("CollectionOwner")
-  subscriptions         Subscription[]
-  payments              Payment[]
-  searchHistory         SearchHistory[]
-  notifications         Notification[]
-  usageEvents           UsageEvent[]
-  activities            ActivityLog[]
+  memberships              WorkspaceMember[]
+  workspacesOwned          Workspace[]           @relation("WorkspaceOwner")
+  uploadedPapers           Paper[]               @relation("PaperUploader")
+  annotations              Annotation[]
+  collections              Collection[]          @relation("CollectionOwner")
+  subscriptions            Subscription[]
+  payments                 Payment[]
+  searchHistory            SearchHistory[]
+  notifications            Notification[]
+  usageEvents              UsageEvent[]
+  activities               ActivityLog[]
   // Sharing relations
-  collectionInvitesSent CollectionMember[] @relation("CollectionMemberInvitedBy")
+  collectionInvitesSent    CollectionMember[]    @relation("CollectionMemberInvitedBy")
+  workspaceInvitesReceived WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
+  workspaceInvitesSent     WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
 
   // Token relations
   tokens UserToken[]
@@ -107,11 +109,13 @@ model User {
 }
 
 model Workspace {
-  id          String            @id @default(uuid())
+  id          String                @id @default(uuid())
   name        String
+  description String?
   ownerId     String
-  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  owner       User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id])
   members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
   collections Collection[]
   papers      Paper[]
   activities  ActivityLog[]
@@ -142,6 +146,31 @@ model WorkspaceMember {
   @@unique([workspaceId, userId])
   @@index([userId])
   @@index([workspaceId])
+}
+
+model WorkspaceInvitation {
+  id          String           @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        Role             @default(RESEARCHER)
+  invitedAt   DateTime         @default(now())
+  // Invitation workflow fields
+  status      MembershipStatus @default(PENDING)
+  invitedById String?
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  user      User      @relation("WorkspaceInvitationUser", fields: [userId], references: [id])
+  invitedBy User?     @relation("WorkspaceInvitationInvitedBy", fields: [invitedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
 }
 
 model Paper {

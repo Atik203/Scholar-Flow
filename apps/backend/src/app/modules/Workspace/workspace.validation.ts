@@ -10,6 +10,7 @@ export const workspaceParamsSchema = z.object({
 
 export const updateWorkspaceSchema = z.object({
   name: z.string().min(2).max(120).optional(),
+  description: z.string().max(500).optional(),
 });
 
 export const listQuerySchema = z.object({
@@ -39,4 +40,13 @@ export const updateMemberRoleSchema = z.object({
 export const memberParamsSchema = z.object({
   id: z.string().uuid(),
   memberId: z.string().uuid(),
+});
+
+// Invite a member to a workspace by email
+export const inviteMemberSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  role: z
+    .enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"])
+    .optional()
+    .default("RESEARCHER"),
 });
