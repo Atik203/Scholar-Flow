@@ -21,6 +21,9 @@ const publicRoutes = [
   // Products are public-facing marketing pages
   "/papers",
   "/collections",
+  "/workspaces",
+  "/research",
+  "/collaborations",
   "/collaborate",
   "/ai-insights",
   "/products",

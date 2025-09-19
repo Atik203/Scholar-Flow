@@ -2,13 +2,19 @@ import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
+import emailService from "../../shared/emailService";
+import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
-import prisma from "../../shared/prisma";
 import { CollectionService } from "./collection.service";
-import { createCollectionSchema, updateCollectionSchema, addPaperToCollectionSchema, removePaperFromCollectionSchema, paperCollectionParamsSchema } from "./collection.validation";
+import {
+  addPaperToCollectionSchema,
+  createCollectionSchema,
+  inviteMemberSchema,
+  updateCollectionSchema,
+} from "./collection.validation";
 
 export const collectionController = {
   // Create a new collection
@@ -88,11 +94,160 @@ export const collectionController = {
         },
       });
 
-      sendSuccessResponse(res, collection, "Collection created successfully", 201);
+      // Automatically add the creator as an ACCEPTED member
+      await prisma.collectionMember.create({
+        data: {
+          collectionId: collection.id,
+          userId: userId,
+          role: "RESEARCHER",
+          status: "ACCEPTED",
+          acceptedAt: new Date(),
+          invitedAt: new Date(),
+        },
+      });
+
+      sendSuccessResponse(
+        res,
+        collection,
+        "Collection created successfully",
+        201
+      );
     } catch (collectionError) {
       console.error("Error creating collection:", collectionError);
       throw new ApiError(500, "Failed to create collection");
     }
+  }),
+
+  // Get collections shared with the authenticated user (accepted or pending)
+  getSharedCollections: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Use raw queries for performance and to include member status
+    // Only show collections where user is NOT the owner and has ACCEPTED membership
+    const userId = authReq.user.id;
+    const collections = await prisma.$queryRaw<any[]>`
+      SELECT c.*, cm.status as "memberStatus", cm.permission as "userPermission", owner.name as "ownerName", owner.email as "ownerEmail"
+      FROM "Collection" c
+      JOIN "CollectionMember" cm ON cm."collectionId" = c.id AND cm."isDeleted" = false
+      JOIN "User" owner ON owner.id = c."ownerId"
+      WHERE cm."userId" = ${userId} 
+        AND c."isDeleted" = false 
+        AND c."ownerId" != ${userId}
+        AND cm.status = 'ACCEPTED'
+      ORDER BY c."createdAt" DESC
+      LIMIT ${limit} OFFSET ${skip}
+    `;
+    const totalRes = await prisma.$queryRaw<any[]>`
+      SELECT COUNT(*)::int as count
+      FROM "CollectionMember" cm
+      JOIN "Collection" c ON c.id = cm."collectionId"
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND c."isDeleted" = false
+        AND c."ownerId" != ${userId}
+        AND cm.status = 'ACCEPTED'
+    `;
+
+    sendPaginatedResponse(
+      res,
+      collections,
+      {
+        page,
+        limit,
+        total: totalRes[0]?.count || 0,
+        totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+      },
+      "Shared collections retrieved successfully"
+    );
+  }),
+
+  // Invites sent by me
+  getInvitesSent: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const inviterId = authReq.user.id;
+    const items = await prisma.$queryRaw<any[]>`
+      SELECT cm.id, cm."collectionId", cm."userId", cm.status, cm.permission, cm."invitedAt", c.name as "collectionName", u.email as "inviteeEmail", u.name as "inviteeName"
+      FROM "CollectionMember" cm
+      JOIN "Collection" c ON c.id = cm."collectionId"
+      JOIN "User" u ON u.id = cm."userId"
+      WHERE cm."invitedById" = ${inviterId} AND cm."isDeleted" = false
+      ORDER BY cm."invitedAt" DESC
+      LIMIT ${limit} OFFSET ${skip}
+    `;
+    const totalRes = await prisma.$queryRaw<any[]>`
+      SELECT COUNT(*)::int as count
+      FROM "CollectionMember" cm
+      WHERE cm."invitedById" = ${inviterId} AND cm."isDeleted" = false
+    `;
+    sendPaginatedResponse(
+      res,
+      items,
+      {
+        page,
+        limit,
+        total: totalRes[0]?.count || 0,
+        totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+      },
+      "Invites sent retrieved successfully"
+    );
+  }),
+
+  // Invites received by me
+  getInvitesReceived: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const userId = authReq.user.id;
+    const items = await prisma.$queryRaw<any[]>`
+      SELECT cm.id, cm."collectionId", cm.status, cm.permission, cm."invitedAt", cm."invitedById", c.name as "collectionName", inv."email" as "inviterEmail", inv.name as "inviterName"
+      FROM "CollectionMember" cm
+      JOIN "Collection" c ON c.id = cm."collectionId"
+      LEFT JOIN "User" inv ON inv.id = cm."invitedById"
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND cm.status = 'PENDING'
+        AND cm."invitedById" IS NOT NULL
+        AND cm."invitedById" != ${userId}
+      ORDER BY cm."invitedAt" DESC
+      LIMIT ${limit} OFFSET ${skip}
+    `;
+    const totalRes = await prisma.$queryRaw<any[]>`
+      SELECT COUNT(*)::int as count
+      FROM "CollectionMember" cm
+      WHERE cm."userId" = ${userId} 
+        AND cm."isDeleted" = false 
+        AND cm.status = 'PENDING'
+        AND cm."invitedById" IS NOT NULL
+        AND cm."invitedById" != ${userId}
+    `;
+    sendPaginatedResponse(
+      res,
+      items,
+      {
+        page,
+        limit,
+        total: totalRes[0]?.count || 0,
+        totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+      },
+      "Invites received retrieved successfully"
+    );
   }),
 
   // Get user's collections
@@ -140,6 +295,176 @@ export const collectionController = {
     );
   }),
 
+  // Invite a member to a collection by email
+  inviteMember: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
+    const { id } = req.params; // collection id
+    const parsed = inviteMemberSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const errorDetails = parsed.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      throw new ApiError(400, `Validation failed: ${errorDetails}`);
+    }
+
+    const { email, role, permission } = parsed.data;
+    const inviterId = authReq.user.id;
+
+    // Ensure inviter is the owner of the collection
+    const collection = await prisma.collection.findFirst({
+      where: { id, ownerId: inviterId, isDeleted: false },
+    });
+    if (!collection) {
+      throw new ApiError(403, "Only the owner can invite members");
+    }
+
+    // Find the user by email
+    const user = await prisma.user.findFirst({
+      where: { email, isDeleted: false },
+    });
+    if (!user) {
+      throw new ApiError(404, "User with this email does not exist");
+    }
+
+    // Prevent inviting self
+    if (user.id === inviterId) {
+      throw new ApiError(400, "You cannot invite yourself");
+    }
+
+    // Upsert membership to PENDING if not exists, otherwise update status back to PENDING
+    const existing = await prisma.collectionMember.findFirst({
+      where: { collectionId: id, userId: user.id, isDeleted: false },
+    });
+
+    let member;
+    if (existing) {
+      member = await prisma.collectionMember.update({
+        where: { id: existing.id },
+        data: {
+          role: role as any,
+          permission: permission as any,
+          status: "PENDING" as any,
+          invitedById: inviterId,
+          invitedAt: new Date(),
+          declinedAt: null,
+          acceptedAt: null,
+        },
+      });
+    } else {
+      member = await prisma.collectionMember.create({
+        data: {
+          collectionId: id,
+          userId: user.id,
+          role: role as any,
+          permission: permission as any,
+          invitedById: inviterId,
+          status: "PENDING" as any,
+        },
+      });
+    }
+
+    // Send invitation email
+    try {
+      const inviter = await prisma.user.findUnique({
+        where: { id: inviterId },
+        select: { name: true, email: true },
+      });
+
+      await emailService.sendCollectionInvitationEmail({
+        email: user.email,
+        name: user.name || user.email,
+        collectionName: collection.name,
+        inviterName: inviter?.name || inviter?.email || "A ScholarFlow user",
+        collectionId: collection.id,
+      });
+    } catch (emailError) {
+      // Log email error but don't fail the invitation
+      console.error("Failed to send invitation email:", emailError);
+    }
+
+    sendSuccessResponse(
+      res,
+      { memberId: member.id },
+      "Invitation sent successfully",
+      201
+    );
+  }),
+
+  // Accept an invite
+  acceptInvite: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const { id } = req.params;
+
+    const member = await prisma.collectionMember.findFirst({
+      where: { collectionId: id, userId: authReq.user.id, isDeleted: false },
+    });
+    if (!member) throw new ApiError(404, "Invitation not found");
+
+    const updated = await prisma.collectionMember.update({
+      where: { id: member.id },
+      data: {
+        status: "ACCEPTED" as any,
+        acceptedAt: new Date(),
+        declinedAt: null,
+      },
+    });
+
+    sendSuccessResponse(res, updated, "Invitation accepted");
+  }),
+
+  // Decline an invite
+  declineInvite: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const { id } = req.params;
+
+    const member = await prisma.collectionMember.findFirst({
+      where: { collectionId: id, userId: authReq.user.id, isDeleted: false },
+    });
+    if (!member) throw new ApiError(404, "Invitation not found");
+
+    const updated = await prisma.collectionMember.update({
+      where: { id: member.id },
+      data: { status: "DECLINED" as any, declinedAt: new Date() },
+    });
+
+    sendSuccessResponse(res, updated, "Invitation declined");
+  }),
+
+  // List collection members (owner only)
+  getMembers: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const { id } = req.params;
+
+    const collection = await prisma.collection.findFirst({
+      where: { id, ownerId: authReq.user.id, isDeleted: false },
+    });
+    if (!collection) throw new ApiError(403, "Only the owner can view members");
+
+    const members = await prisma.collectionMember.findMany({
+      where: { collectionId: id, isDeleted: false },
+      include: {
+        user: { select: { id: true, name: true, email: true, image: true } },
+        invitedBy: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { invitedAt: "desc" },
+    });
+
+    sendSuccessResponse(res, members, "Members retrieved successfully");
+  }),
+
   // Get a specific collection
   getOne: catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -164,7 +489,7 @@ export const collectionController = {
             },
           },
           orderBy: {
-            addedAt: 'desc',
+            addedAt: "desc",
           },
         },
         _count: {
@@ -180,22 +505,24 @@ export const collectionController = {
       throw new ApiError(404, "Collection not found");
     }
 
-    // Check access permissions
+    // Check access permissions and get user permission
     const isOwner = authReq.user?.id === collection.ownerId;
     const isPublic = collection.isPublic;
-    const isMember = authReq.user?.id ? await prisma.collectionMember.findFirst({
-      where: {
-        collectionId: id,
-        userId: authReq.user.id,
-        isDeleted: false,
-      },
-    }) : null;
+    const userPermission = authReq.user?.id
+      ? await CollectionService.getUserPermission(id, authReq.user.id)
+      : null;
 
-    if (!isOwner && !isPublic && !isMember) {
+    if (!isOwner && !isPublic && !userPermission) {
       throw new ApiError(403, "Access denied");
     }
 
-    sendSuccessResponse(res, collection, "Collection retrieved successfully");
+    // Add user permission to response
+    const responseData = {
+      ...collection,
+      userPermission: isOwner ? "OWNER" : userPermission,
+    };
+
+    sendSuccessResponse(res, responseData, "Collection retrieved successfully");
   }),
 
   // Update a collection
@@ -214,17 +541,28 @@ export const collectionController = {
       throw new ApiError(400, `Validation failed: ${errorDetails}`);
     }
 
-    // Check ownership
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id,
-        ownerId: authReq.user.id,
         isDeleted: false,
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      id,
+      authReq.user.id
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     const updated = await prisma.collection.update({
@@ -258,17 +596,28 @@ export const collectionController = {
 
     const { id } = req.params;
 
-    // Check ownership
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id,
-        ownerId: authReq.user.id,
         isDeleted: false,
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      id,
+      authReq.user.id
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Soft delete the collection
@@ -283,7 +632,7 @@ export const collectionController = {
   // Search collections
   search: catchAsync(async (req: Request, res: Response) => {
     const { q } = req.query;
-    if (!q || typeof q !== 'string') {
+    if (!q || typeof q !== "string") {
       throw new ApiError(400, "Search query is required");
     }
 
@@ -296,7 +645,13 @@ export const collectionController = {
     sendPaginatedResponse(
       res,
       result.result,
-      { page: 1, limit: 50, total: result.result.length, totalPage: 1, ...result.meta },
+      {
+        page: 1,
+        limit: 50,
+        total: result.result.length,
+        totalPage: 1,
+        ...result.meta,
+      },
       "Search results retrieved successfully"
     );
   }),
@@ -304,7 +659,11 @@ export const collectionController = {
   // Get collection statistics
   getStats: catchAsync(async (req: Request, res: Response) => {
     const stats = await CollectionService.getCollectionStats();
-    sendSuccessResponse(res, stats, "Collection statistics retrieved successfully");
+    sendSuccessResponse(
+      res,
+      stats,
+      "Collection statistics retrieved successfully"
+    );
   }),
 
   // Add paper to collection
@@ -326,28 +685,28 @@ export const collectionController = {
     const { paperId } = parsed.data;
     const userId = authReq.user.id;
 
-    // Check if collection exists and user has access
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id: collectionId,
         isDeleted: false,
-        OR: [
-          { ownerId: userId },
-          { 
-            members: {
-              some: {
-                userId: userId,
-                isDeleted: false,
-                role: { in: ['RESEARCHER', 'PRO_RESEARCHER', 'TEAM_LEAD', 'ADMIN'] }
-              }
-            }
-          }
-        ]
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      collectionId,
+      userId
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Check if paper exists and user has access
@@ -355,10 +714,7 @@ export const collectionController = {
       where: {
         id: paperId,
         isDeleted: false,
-        OR: [
-          { uploaderId: userId },
-          { workspaceId: collection.workspaceId }
-        ]
+        OR: [{ uploaderId: userId }, { workspaceId: collection.workspaceId }],
       },
     });
 
@@ -395,7 +751,12 @@ export const collectionController = {
       },
     });
 
-    sendSuccessResponse(res, collectionPaper, "Paper added to collection successfully", 201);
+    sendSuccessResponse(
+      res,
+      collectionPaper,
+      "Paper added to collection successfully",
+      201
+    );
   }),
 
   // Remove paper from collection
@@ -408,28 +769,28 @@ export const collectionController = {
     const { collectionId, paperId } = req.params;
     const userId = authReq.user.id;
 
-    // Check if collection exists and user has access
+    // Check if collection exists
     const collection = await prisma.collection.findFirst({
       where: {
         id: collectionId,
         isDeleted: false,
-        OR: [
-          { ownerId: userId },
-          { 
-            members: {
-              some: {
-                userId: userId,
-                isDeleted: false,
-                role: { in: ['RESEARCHER', 'PRO_RESEARCHER', 'TEAM_LEAD', 'ADMIN'] }
-              }
-            }
-          }
-        ]
       },
     });
 
     if (!collection) {
-      throw new ApiError(404, "Collection not found or access denied");
+      throw new ApiError(404, "Collection not found");
+    }
+
+    // Check edit permission
+    const hasEditPermission = await CollectionService.hasEditPermission(
+      collectionId,
+      userId
+    );
+    if (!hasEditPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
     }
 
     // Check if paper is in collection
@@ -451,7 +812,11 @@ export const collectionController = {
       data: { isDeleted: true },
     });
 
-    sendSuccessResponse(res, null, "Paper removed from collection successfully");
+    sendSuccessResponse(
+      res,
+      null,
+      "Paper removed from collection successfully"
+    );
   }),
 
   // Get papers in a collection
@@ -470,15 +835,16 @@ export const collectionController = {
         OR: [
           { isPublic: true },
           { ownerId: authReq.user?.id },
-          { 
+          {
             members: {
               some: {
                 userId: authReq.user?.id,
                 isDeleted: false,
-              }
-            }
-          }
-        ]
+                status: "ACCEPTED" as any,
+              },
+            },
+          },
+        ],
       },
     });
 
@@ -508,7 +874,7 @@ export const collectionController = {
           },
         },
         orderBy: {
-          addedAt: 'desc',
+          addedAt: "desc",
         },
         skip,
         take: limit,
