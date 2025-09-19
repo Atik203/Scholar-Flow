@@ -10,6 +10,7 @@ import WorkspaceService from "./workspace.service";
 import {
   addMemberSchema,
   createWorkspaceSchema,
+  inviteMemberSchema,
   listQuerySchema,
   memberParamsSchema,
   updateMemberRoleSchema,
@@ -142,6 +143,86 @@ export const workspaceController = {
       params.memberId
     );
     sendSuccessResponse(res, result, "Member removed");
+  }),
+
+  // Invite a member by email
+  inviteMember: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const body = inviteMemberSchema.parse(req.body);
+    const result = await WorkspaceService.inviteMember(
+      authReq.user.id,
+      params.id,
+      body
+    );
+    sendSuccessResponse(res, result, "Invitation sent successfully", 201);
+  }),
+
+  // Accept invitation
+  acceptInvitation: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const result = await WorkspaceService.acceptInvitation(
+      authReq.user.id,
+      params.id
+    );
+    sendSuccessResponse(res, result, "Invitation accepted");
+  }),
+
+  // Decline invitation
+  declineInvitation: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const result = await WorkspaceService.declineInvitation(
+      authReq.user.id,
+      params.id
+    );
+    sendSuccessResponse(res, result, "Invitation declined");
+  }),
+
+  // Get invitations sent by the user
+  getInvitationsSent: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const q = listQuerySchema.parse(req.query);
+    const page = parseInt((q.page as string) || "1", 10);
+    const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
+    const skip = (page - 1) * limit;
+    const result = await WorkspaceService.getInvitationsSent(
+      authReq.user.id,
+      limit,
+      skip
+    );
+    sendPaginatedResponse(
+      res,
+      result.result,
+      { ...result.meta, page, limit },
+      "Invitations sent retrieved successfully"
+    );
+  }),
+
+  // Get invitations received by the user
+  getInvitationsReceived: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const q = listQuerySchema.parse(req.query);
+    const page = parseInt((q.page as string) || "1", 10);
+    const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
+    const skip = (page - 1) * limit;
+    const result = await WorkspaceService.getInvitationsReceived(
+      authReq.user.id,
+      limit,
+      skip
+    );
+    sendPaginatedResponse(
+      res,
+      result.result,
+      { ...result.meta, page, limit },
+      "Invitations received retrieved successfully"
+    );
   }),
 };
 

@@ -9,6 +9,7 @@ import {
 import workspaceController from "./workspace.controller";
 import {
   createWorkspaceSchema,
+  inviteMemberSchema,
   memberParamsSchema,
   updateMemberRoleSchema,
   updateWorkspaceSchema,
@@ -98,6 +99,50 @@ workspaceRoutes.delete(
   authMiddleware as any,
   validateRequestParams(memberParamsSchema) as any,
   workspaceController.removeMember as any
+);
+
+// Invitation routes
+workspaceRoutes.post(
+  "/:id/invite",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  validateRequestBody(inviteMemberSchema) as any,
+  workspaceController.inviteMember as any
+);
+
+// Accept invitation
+workspaceRoutes.post(
+  "/:id/accept",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.acceptInvitation as any
+);
+
+// Decline invitation
+workspaceRoutes.post(
+  "/:id/decline",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.declineInvitation as any
+);
+
+// Get invitations sent by user
+workspaceRoutes.get(
+  "/invites/sent",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsSent as any
+);
+
+// Get invitations received by user
+workspaceRoutes.get(
+  "/invites/received",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsReceived as any
 );
 
 export default workspaceRoutes;
