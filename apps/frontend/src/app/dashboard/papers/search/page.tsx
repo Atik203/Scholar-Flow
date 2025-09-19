@@ -24,8 +24,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   ArrowLeft,
+  Building2,
   FileText,
   Filter,
   Search,
@@ -35,23 +37,39 @@ import {
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function PapersSearchPage() {
   const isProtected = useProtectedRoute();
+
+  // Workspace state
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
+
+  // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPaperId, setSelectedPaperId] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  // Get all papers for search
-  const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
     page: 1,
-    limit: 100, // Get more papers for search
+    limit: 50,
+    scope: "all",
   });
 
-  if (!isProtected) {
-    return null; // Loading state handled by useProtectedRoute
-  }
+  const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
+    page: 1,
+    limit: 50,
+    workspaceId: selectedWorkspaceId || undefined,
+  });
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (workspaces.length === 1 && !selectedWorkspaceId) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
 
   // Filter papers based on status
   const filteredPapers = useMemo(() => {
@@ -65,6 +83,10 @@ export default function PapersSearchPage() {
     
     return filtered;
   }, [papersData?.items, statusFilter]);
+
+  if (!isProtected) {
+    return null; // Loading state handled by useProtectedRoute
+  }
 
   // Calculate stats
   const totalPapers = papersData?.items?.length || 0;
@@ -96,6 +118,37 @@ export default function PapersSearchPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Workspace Selection */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            <label htmlFor="workspace-select" className="text-sm font-medium">
+              Workspace:
+            </label>
+          </div>
+          <Select
+            value={selectedWorkspaceId}
+            onValueChange={setSelectedWorkspaceId}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a workspace to search papers" />
+            </SelectTrigger>
+            <SelectContent>
+              {(workspacesData?.data || []).map((workspace: any) => (
+                <SelectItem key={workspace.id} value={workspace.id}>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>{workspace.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {workspace.role}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats Overview */}

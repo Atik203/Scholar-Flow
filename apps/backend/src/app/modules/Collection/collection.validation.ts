@@ -7,7 +7,7 @@ export const createCollectionSchema = z.object({
     .max(100, "Name too long"),
   description: z.string().max(500, "Description too long").optional(),
   isPublic: z.boolean().optional().default(false),
-  workspaceId: z.string().min(1, "Workspace ID is required"),
+  workspaceId: z.string().uuid("Invalid workspace ID format. Expected UUID."),
 });
 
 export const updateCollectionSchema = z.object({
@@ -59,6 +59,16 @@ export const inviteActionSchema = z.object({
   action: z.enum(["accept", "decline"]),
 });
 
+// Query parameters for listing collections
+export const listQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  workspaceId: z
+    .string()
+    .uuid("Invalid workspace ID format. Expected UUID.")
+    .optional(),
+});
+
 export type CreateCollectionInput = z.infer<typeof createCollectionSchema>;
 export type UpdateCollectionInput = z.infer<typeof updateCollectionSchema>;
 export type AddPaperToCollectionInput = z.infer<
@@ -72,3 +82,4 @@ export type CollectionIdParams = z.infer<typeof collectionIdParamsSchema>;
 export type PaperCollectionParams = z.infer<typeof paperCollectionParamsSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 export type InviteActionInput = z.infer<typeof inviteActionSchema>;
+export type ListQueryParams = z.infer<typeof listQuerySchema>;
