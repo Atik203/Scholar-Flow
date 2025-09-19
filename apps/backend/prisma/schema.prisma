@@ -141,6 +141,7 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+  @@index([workspaceId])
 }
 
 model Paper {
@@ -343,6 +344,7 @@ model CollectionMember {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, userId])
+  @@index([collectionId])
 }
 
 model SearchHistory {

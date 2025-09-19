@@ -2,7 +2,6 @@ import {
   createApi,
   fetchBaseQuery,
   FetchBaseQueryError,
-  retry,
 } from "@reduxjs/toolkit/query/react";
 import { getSession } from "next-auth/react";
 
@@ -56,7 +55,6 @@ const transformErrorResponse = (
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
-  timeout: 30000, // 30 second timeout
   prepareHeaders: async (headers) => {
     try {
       const session = await getSession();
@@ -75,28 +73,9 @@ const baseQuery = fetchBaseQuery({
   },
 });
 
-// Enhanced base query with retry logic and error handling
-const baseQueryWithRetry = retry(
-  async (args, api, extraOptions) => {
-    // Ensure proper AbortController handling
-    if (api.signal?.aborted) {
-      return {
-        error: {
-          status: "FETCH_ERROR" as const,
-          error: "Request aborted",
-        },
-      };
-    }
-    return baseQuery(args, api, extraOptions);
-  },
-  {
-    maxRetries: 0, // Disable retries to prevent AbortController conflicts
-  }
-);
-
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: baseQueryWithRetry,
+  baseQuery,
   tagTypes: [
     "Paper",
     "Collection",

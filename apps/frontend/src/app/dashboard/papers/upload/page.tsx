@@ -14,15 +14,48 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import {
+  useAddPaperToCollectionMutation,
+  useCreateCollectionMutation,
+  useGetMyCollectionsQuery,
+} from "@/redux/api/collectionApi";
 import { useUploadPaperMutation } from "@/redux/api/paperApi";
-import { ArrowLeft, FileText, Plus, Search, Upload, X } from "lucide-react";
+import {
+  useCreateWorkspaceMutation,
+  useListWorkspacesQuery,
+} from "@/redux/api/workspaceApi";
+import {
+  ArrowLeft,
+  BookOpen,
+  Building2,
+  FileText,
+  Plus,
+  Search,
+  Upload,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UploadPaperPage() {
   const router = useRouter();
@@ -35,6 +68,43 @@ export default function UploadPaperPage() {
   const [newAuthor, setNewAuthor] = useState("");
   const [year, setYear] = useState<number | "">("");
   const [dragActive, setDragActive] = useState(false);
+
+  // Workspace and Collection selection
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>(
+    []
+  );
+  const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
+  const [showCreateCollection, setShowCreateCollection] = useState(false);
+  const [newWorkspaceName, setNewWorkspaceName] = useState("");
+  const [newCollectionName, setNewCollectionName] = useState("");
+  const [newCollectionDescription, setNewCollectionDescription] = useState("");
+
+  // API hooks
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
+  const { data: collectionsData } = useGetMyCollectionsQuery(
+    selectedWorkspaceId
+      ? { workspaceId: selectedWorkspaceId, page: 1, limit: 50 }
+      : { page: 1, limit: 50 },
+    { skip: !selectedWorkspaceId }
+  );
+  const [createWorkspace, { isLoading: creatingWorkspace }] =
+    useCreateWorkspaceMutation();
+  const [createCollection, { isLoading: creatingCollection }] =
+    useCreateCollectionMutation();
+  const [addPaperToCollection] = useAddPaperToCollectionMutation();
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (workspaces.length === 1 && !selectedWorkspaceId) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
@@ -93,6 +163,51 @@ export default function UploadPaperPage() {
     setAuthors(authors.filter((_, i) => i !== index));
   };
 
+  const handleCreateWorkspace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWorkspaceName.trim()) return;
+
+    try {
+      const result = await createWorkspace({
+        name: newWorkspaceName.trim(),
+      }).unwrap();
+      setSelectedWorkspaceId(result.id);
+      setNewWorkspaceName("");
+      setShowCreateWorkspace(false);
+      showSuccessToast("Workspace created successfully");
+    } catch (error: any) {
+      showErrorToast(error?.data?.message || "Failed to create workspace");
+    }
+  };
+
+  const handleCreateCollection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCollectionName.trim() || !selectedWorkspaceId) return;
+
+    try {
+      const result = await createCollection({
+        name: newCollectionName.trim(),
+        description: newCollectionDescription.trim() || undefined,
+        workspaceId: selectedWorkspaceId,
+      }).unwrap();
+      setSelectedCollectionIds([...selectedCollectionIds, result.id]);
+      setNewCollectionName("");
+      setNewCollectionDescription("");
+      setShowCreateCollection(false);
+      showSuccessToast("Collection created successfully");
+    } catch (error: any) {
+      showErrorToast(error?.data?.message || "Failed to create collection");
+    }
+  };
+
+  const toggleCollectionSelection = (collectionId: string) => {
+    setSelectedCollectionIds((prev) =>
+      prev.includes(collectionId)
+        ? prev.filter((id) => id !== collectionId)
+        : [...prev, collectionId]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -101,15 +216,47 @@ export default function UploadPaperPage() {
       return;
     }
 
+    if (!selectedWorkspaceId) {
+      showErrorToast("Please select a workspace");
+      return;
+    }
+
     try {
       const result = await uploadPaper({
         file,
+        workspaceId: selectedWorkspaceId,
         title: title.trim() || undefined,
         authors: authors.length > 0 ? authors : undefined,
         year: year || undefined,
       }).unwrap();
 
       showSuccessToast("Paper uploaded successfully!");
+
+      // Add paper to selected collections
+      if (selectedCollectionIds.length > 0) {
+        try {
+          await Promise.all(
+            selectedCollectionIds.map((collectionId) =>
+              addPaperToCollection({
+                collectionId,
+                data: { paperId: result.data.paper.id },
+              }).unwrap()
+            )
+          );
+          showSuccessToast(
+            `Paper added to ${selectedCollectionIds.length} collection${selectedCollectionIds.length !== 1 ? "s" : ""}`
+          );
+        } catch (collectionError) {
+          console.warn(
+            "Failed to add paper to some collections:",
+            collectionError
+          );
+          showErrorToast(
+            "Paper uploaded but failed to add to some collections"
+          );
+        }
+      }
+
       router.push(`/dashboard/papers/${result.data.paper.id}`);
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -235,6 +382,223 @@ export default function UploadPaperPage() {
               </CardContent>
             </Card>
 
+            {/* Workspace and Collection Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Workspace & Collections
+                </CardTitle>
+                <CardDescription>
+                  Choose where to upload your paper and optionally add it to
+                  collections
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Workspace Selection */}
+                <div>
+                  <Label htmlFor="workspace">Workspace *</Label>
+                  <div className="flex gap-2">
+                    <Select
+                      value={selectedWorkspaceId}
+                      onValueChange={setSelectedWorkspaceId}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select workspace" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {workspacesData?.data?.length ? (
+                          workspacesData.data.map((workspace) => (
+                            <SelectItem key={workspace.id} value={workspace.id}>
+                              {workspace.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-3 text-sm text-muted-foreground">
+                            {workspacesData
+                              ? "No workspaces available"
+                              : "Loading workspaces..."}
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Dialog
+                      open={showCreateWorkspace}
+                      onOpenChange={setShowCreateWorkspace}
+                    >
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Create New Workspace</DialogTitle>
+                        </DialogHeader>
+                        <form
+                          onSubmit={handleCreateWorkspace}
+                          className="space-y-4"
+                        >
+                          <div>
+                            <Label htmlFor="workspaceName">
+                              Workspace Name
+                            </Label>
+                            <Input
+                              id="workspaceName"
+                              value={newWorkspaceName}
+                              onChange={(e) =>
+                                setNewWorkspaceName(e.target.value)
+                              }
+                              placeholder="Enter workspace name"
+                              required
+                            />
+                          </div>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setShowCreateWorkspace(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              type="submit"
+                              disabled={
+                                creatingWorkspace || !newWorkspaceName.trim()
+                              }
+                            >
+                              {creatingWorkspace ? "Creating..." : "Create"}
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+
+                {/* Collection Selection */}
+                {selectedWorkspaceId && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        Collections (Optional)
+                      </Label>
+                      <Dialog
+                        open={showCreateCollection}
+                        onOpenChange={setShowCreateCollection}
+                      >
+                        <DialogTrigger asChild>
+                          <Button type="button" variant="outline" size="sm">
+                            <Plus className="h-3 w-3 mr-1" />
+                            New Collection
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Create New Collection</DialogTitle>
+                          </DialogHeader>
+                          <form
+                            onSubmit={handleCreateCollection}
+                            className="space-y-4"
+                          >
+                            <div>
+                              <Label htmlFor="collectionName">
+                                Collection Name
+                              </Label>
+                              <Input
+                                id="collectionName"
+                                value={newCollectionName}
+                                onChange={(e) =>
+                                  setNewCollectionName(e.target.value)
+                                }
+                                placeholder="Enter collection name"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="collectionDescription">
+                                Description (Optional)
+                              </Label>
+                              <Input
+                                id="collectionDescription"
+                                value={newCollectionDescription}
+                                onChange={(e) =>
+                                  setNewCollectionDescription(e.target.value)
+                                }
+                                placeholder="Enter collection description"
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowCreateCollection(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                disabled={
+                                  creatingCollection ||
+                                  !newCollectionName.trim()
+                                }
+                              >
+                                {creatingCollection ? "Creating..." : "Create"}
+                              </Button>
+                            </div>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                    <div className="border rounded-lg p-3 max-h-32 overflow-y-auto">
+                      {collectionsData?.result?.length ? (
+                        <div className="space-y-2">
+                          {collectionsData.result.map((collection) => (
+                            <div
+                              key={collection.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                id={collection.id}
+                                checked={selectedCollectionIds.includes(
+                                  collection.id
+                                )}
+                                onCheckedChange={() =>
+                                  toggleCollectionSelection(collection.id)
+                                }
+                              />
+                              <Label
+                                htmlFor={collection.id}
+                                className="flex-1 text-sm cursor-pointer"
+                              >
+                                {collection.name}
+                                {collection.description && (
+                                  <span className="text-muted-foreground ml-1">
+                                    - {collection.description}
+                                  </span>
+                                )}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-2">
+                          No collections in this workspace yet
+                        </p>
+                      )}
+                    </div>
+                    {selectedCollectionIds.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Selected {selectedCollectionIds.length} collection
+                        {selectedCollectionIds.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Paper Metadata */}
             <Card>
               <CardHeader>
@@ -329,7 +693,10 @@ export default function UploadPaperPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!file || isLoading}>
+              <Button
+                type="submit"
+                disabled={!file || !selectedWorkspaceId || isLoading}
+              >
                 {isLoading ? "Uploading..." : "Upload Paper"}
               </Button>
             </div>

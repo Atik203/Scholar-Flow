@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../../shared/prisma";
 
 /**
@@ -150,9 +151,14 @@ export class CollectionService {
   static async getUserCollections(
     userId: string,
     limit: number = 10,
-    skip: number = 0
+    skip: number = 0,
+    workspaceId?: string
   ) {
     try {
+      // Normalize workspaceId: treat empty string or whitespace as no filter
+      const ws: string | null =
+        workspaceId && workspaceId.trim() !== "" ? workspaceId : null;
+
       const collections = await prisma.$queryRaw<any[]>`
         SELECT DISTINCT
           c.id,
@@ -172,6 +178,7 @@ export class CollectionService {
             c."ownerId" = ${userId} 
             OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
           )
+          ${ws ? Prisma.sql`AND c."workspaceId" = ${ws}` : Prisma.empty}
         GROUP BY c.id, c."ownerId", c."workspaceId"
         ORDER BY c."createdAt" DESC
         LIMIT ${limit} OFFSET ${skip}
@@ -192,6 +199,7 @@ export class CollectionService {
             c."ownerId" = ${userId} 
             OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
           )
+          ${ws ? Prisma.sql`AND c."workspaceId" = ${ws}` : Prisma.empty}
       `;
 
       const total = totalResult[0]?.count || 0;

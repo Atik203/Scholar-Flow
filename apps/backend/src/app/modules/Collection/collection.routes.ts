@@ -4,6 +4,7 @@ import { rateLimiter } from "../../middleware/rateLimiter";
 import {
   validateRequestBody,
   validateRequestParams,
+  validateRequestQuery,
 } from "../../middleware/validateRequest";
 import { collectionController } from "./collection.controller";
 import {
@@ -12,6 +13,7 @@ import {
   collectionParamsSchema,
   createCollectionSchema,
   inviteMemberSchema,
+  listQuerySchema,
   paperCollectionParamsSchema,
   updateCollectionSchema,
 } from "./collection.validation";
@@ -32,6 +34,7 @@ collectionRoutes.get(
   "/my",
   rateLimiter,
   authMiddleware as any,
+  validateRequestQuery(listQuerySchema) as any,
   collectionController.getMyCollections as any
 );
 

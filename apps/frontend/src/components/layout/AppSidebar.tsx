@@ -6,6 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 import { USER_ROLES } from "@/lib/auth/roles";
 import {
   BarChart3,
@@ -274,6 +275,11 @@ export function AppSidebar() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-2 sidebar-scroll">
+        {/* Workspace Switcher */}
+        <div className="mb-6">
+          <WorkspaceSwitcher />
+        </div>
+
         {/* Main Navigation */}
         <div className="mb-6">
           <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
