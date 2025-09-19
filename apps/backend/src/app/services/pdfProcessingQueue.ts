@@ -1,5 +1,4 @@
 import Bull from 'bull';
-import { pdfExtractionService } from '../services/pdfExtractionService';
 import prisma from '../shared/prisma';
 
 // Create a queue for PDF processing
@@ -18,6 +17,8 @@ pdfProcessingQueue.process('extract-pdf', async (job) => {
   try {
     console.log(`Processing PDF extraction for paper: ${paperId}`);
     
+    // Import the service dynamically to avoid circular dependency
+    const { pdfExtractionService } = await import('./pdfExtractionService');
     const result = await pdfExtractionService.extractTextFromPDF(paperId);
     
     if (result.success) {
@@ -65,6 +66,8 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
 // Process all unprocessed papers (for batch processing)
 export async function processAllUnprocessedPapers(): Promise<void> {
   try {
+    // Import the service dynamically to avoid circular dependency
+    const { pdfExtractionService } = await import('./pdfExtractionService');
     await pdfExtractionService.processUnprocessedPapers();
   } catch (error) {
     console.error('Error processing unprocessed papers:', error);

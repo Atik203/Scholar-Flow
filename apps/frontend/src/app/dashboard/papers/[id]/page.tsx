@@ -2,6 +2,8 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PdfPreview } from "@/components/papers/PdfPreview";
+import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
+import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
 import {
   showErrorToast,
   showSuccessToast,
@@ -532,6 +534,16 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* PDF Processing Status */}
+            <PdfProcessingStatus
+              paperId={paper.id}
+              currentStatus={paper.processingStatus}
+              showTriggerButton={true}
+            />
+
+            {/* Extracted Text Display */}
+            <ExtractedTextDisplay paperId={paper.id} />
           </div>
 
           {/* Enhanced Sidebar */}
