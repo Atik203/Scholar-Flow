@@ -83,16 +83,20 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Modern SaaS-style interface with professional styling and animations
 
 **✅ Major UI/UX Enhancement (September 17, 2025):** Complete interface overhaul with advanced search capabilities, modern paper management system, enhanced dashboard experience, and improved navigation architecture implemented by Atik.
+
 **Week 4 – Basic Collections**
 
-- [x] Extract text content from uploaded PDFs ✅ (Author: salman)
-- [x] Create Collection flow ✅ (Author: salman)
-- [x] Add papers to collections ✅ (Author: salman)
-- [x] Collection listing page (papers management interface)
-- [x] Search & filter (title, author, fuzzy search)
-- [x] Backend CRUD for collections & papers
+- [x] Create Collection flow ✅ (Author: Atik+Salman)
+- [x] Add papers to collections ✅ (Author: Atik)
+- [x] Collection listing page (papers management interface) ✅ (Author: Atik)
+- [x] Search & filter (title, author, fuzzy search) ✅ (Author: Atik)
+- [x] Backend CRUD for collections & papers ✅ (Author: Atik+Salman)
+- [x] Permission-based sharing system (VIEW/EDIT) ✅ (Author: Atik)
+- [x] Collection invitation system with email notifications ✅ (Author: Atik)
+- [x] Real-time cache invalidation and updates ✅ (Author: Atik)
+- [ ] Extract text content from uploaded PDFs (pending)
 
-**✅ Complete Implementation (January 2025):** PDF text extraction, collection management system, and paper-collection relationships fully implemented by Senior Engineer. Features include automated PDF processing with background jobs, comprehensive collection CRUD operations, role-based access control, and modern UI components.
+**✅ Collections Management Complete (September 19, 2025):** Comprehensive collection management system with permission-based sharing implemented by Atik+Salman. Features include CRUD operations, role-based access control (OWNER/EDIT/VIEW), invitation system, real-time updates, and modern UI components. PDF text extraction remains pending for Week 4.5.
 
 **Week 5 – AI Summarization & Semantic Search**
 

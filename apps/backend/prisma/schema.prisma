@@ -18,6 +18,11 @@ enum Role {
   ADMIN
 }
 
+enum CollectionPermission {
+  VIEW // Read-only access - can view collection and papers
+  EDIT // Full access - can edit, add/remove papers, delete collection
+}
+
 enum AnnotationType {
   HIGHLIGHT
   COMMENT
@@ -76,17 +81,19 @@ model User {
   sessions Session[]
 
   // App relations
-  memberships     WorkspaceMember[]
-  workspacesOwned Workspace[]       @relation("WorkspaceOwner")
-  uploadedPapers  Paper[]           @relation("PaperUploader")
-  annotations     Annotation[]
-  collections     Collection[]      @relation("CollectionOwner")
-  subscriptions   Subscription[]
-  payments        Payment[]
-  searchHistory   SearchHistory[]
-  notifications   Notification[]
-  usageEvents     UsageEvent[]
-  activities      ActivityLog[]
+  memberships           WorkspaceMember[]
+  workspacesOwned       Workspace[]        @relation("WorkspaceOwner")
+  uploadedPapers        Paper[]            @relation("PaperUploader")
+  annotations           Annotation[]
+  collections           Collection[]       @relation("CollectionOwner")
+  subscriptions         Subscription[]
+  payments              Payment[]
+  searchHistory         SearchHistory[]
+  notifications         Notification[]
+  usageEvents           UsageEvent[]
+  activities            ActivityLog[]
+  // Sharing relations
+  collectionInvitesSent CollectionMember[] @relation("CollectionMemberInvitedBy")
 
   // Token relations
   tokens UserToken[]
@@ -315,14 +322,21 @@ model CollectionPaper {
 }
 
 model CollectionMember {
-  id           String   @id @default(uuid())
+  id           String               @id @default(uuid())
   collectionId String
   userId       String
-  role         Role     @default(RESEARCHER)
-  invitedAt    DateTime @default(now())
+  role         Role                 @default(RESEARCHER)
+  permission   CollectionPermission @default(EDIT) // Collection-specific permission
+  invitedAt    DateTime             @default(now())
+  // Invitation workflow fields
+  status       MembershipStatus     @default(PENDING)
+  invitedById  String?
+  acceptedAt   DateTime?
+  declinedAt   DateTime?
 
   collection Collection @relation(fields: [collectionId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
+  invitedBy  User?      @relation("CollectionMemberInvitedBy", fields: [invitedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -573,4 +587,11 @@ model UserToken {
 enum TokenType {
   PASSWORD_RESET
   EMAIL_VERIFICATION
+}
+
+// Invitation/member status for collection sharing
+enum MembershipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }

@@ -2,7 +2,6 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PapersList } from "@/components/papers/PapersList";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -209,7 +208,7 @@ export default function PapersPage() {
                 Organize papers into collections for better management
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/collections">Manage Collections</Link>
+                <Link href="/dashboard/collections">Manage Collections</Link>
               </Button>
             </CardContent>
           </Card>

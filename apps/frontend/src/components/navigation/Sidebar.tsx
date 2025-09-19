@@ -4,8 +4,12 @@ import React from "react";
 // Phase 1 minimal nav; expand per docs/UI_DESIGN.md
 const navItems: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/papers", label: "Papers" },
-  { href: "/collections", label: "Collections" },
+  { href: "/dashboard/papers", label: "Papers" },
+  { href: "/dashboard/collections", label: "Collections" },
+  { href: "/dashboard/workspaces", label: "Workspaces" },
+  { href: "/dashboard/research", label: "Research" },
+  { href: "/dashboard/collaborations", label: "Collaborations" },
+  { href: "/dashboard/ai-insights", label: "AI Insights" },
 ];
 
 const Sidebar: React.FC = () => {
