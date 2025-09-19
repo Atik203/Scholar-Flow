@@ -23,7 +23,7 @@
     "db:migrate": "yarn workspace @scholar-flow/backend prisma migrate dev",
     "db:generate": "yarn workspace @scholar-flow/backend prisma generate --sql",
     "db:studio": "yarn workspace @scholar-flow/backend prisma studio",
-    "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.ts",
+    "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.js",
     "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force"
   },
   "devDependencies": {

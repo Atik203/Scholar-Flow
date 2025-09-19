@@ -5,14 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import {
   useGetCollectionStatsQuery,
   useGetMyCollectionsQuery,
 } from "@/redux/api/collectionApi";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   BookOpen,
+  Building2,
   Calendar,
   Edit,
   Eye,
@@ -25,20 +34,44 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function CollectionsPage() {
   const isProtected = useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("all");
+
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
 
   const {
     data: collectionsData,
     isLoading: collectionsLoading,
     error: collectionsError,
-  } = useGetMyCollectionsQuery({ page: 1, limit: 50 });
+  } = useGetMyCollectionsQuery({
+    page: 1,
+    limit: 50,
+    workspaceId:
+      selectedWorkspaceId === "all" ? undefined : selectedWorkspaceId,
+  });
 
   const { data: statsData, isLoading: statsLoading } =
     useGetCollectionStatsQuery();
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (
+      workspaces.length === 1 &&
+      (selectedWorkspaceId === "all" || !selectedWorkspaceId)
+    ) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
 
   if (!isProtected) return null;
 
@@ -65,12 +98,54 @@ export default function CollectionsPage() {
           </div>
           <div className="flex gap-3">
             <Button asChild>
-              <Link href="/dashboard/collections/create">
+              <Link
+                href={
+                  selectedWorkspaceId
+                    ? `/dashboard/collections/create?workspaceId=${selectedWorkspaceId}`
+                    : "/dashboard/collections/create"
+                }
+              >
                 <Plus className="mr-2 h-4 w-4" />
                 Create Collection
               </Link>
             </Button>
           </div>
+        </div>
+
+        {/* Workspace Selection */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            <label htmlFor="workspace-select" className="text-sm font-medium">
+              Workspace:
+            </label>
+          </div>
+          <Select
+            value={selectedWorkspaceId}
+            onValueChange={setSelectedWorkspaceId}
+          >
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Select workspace" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All workspaces</SelectItem>
+              {workspacesData?.data?.length ? (
+                workspacesData.data.map((workspace) => (
+                  <SelectItem key={workspace.id} value={workspace.id}>
+                    {workspace.name}
+                  </SelectItem>
+                ))
+              ) : workspacesData ? (
+                <div className="px-2 py-3 text-sm text-muted-foreground">
+                  No workspaces available
+                </div>
+              ) : (
+                <div className="px-2 py-3 text-sm text-muted-foreground">
+                  Loading workspaces...
+                </div>
+              )}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

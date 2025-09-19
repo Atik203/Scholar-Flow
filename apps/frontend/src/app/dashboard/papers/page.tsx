@@ -2,15 +2,25 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PapersList } from "@/components/papers/PapersList";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   ArrowUpRight,
   BookOpen,
+  Building2,
   FileText,
   Filter,
   Plus,
@@ -18,17 +28,34 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function PapersPage() {
   const isProtected = useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
 
-  // Get papers for stats
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
+
+  // Get papers for stats (workspace-filtered)
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     page: 1,
     limit: 100, // Get more papers for stats
+    workspaceId: selectedWorkspaceId || undefined,
   });
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (workspaces.length === 1 && !selectedWorkspaceId) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
@@ -69,12 +96,49 @@ export default function PapersPage() {
               </Link>
             </Button>
             <Button asChild>
-              <Link href="/dashboard/papers/upload">
+              <Link
+                href={
+                  selectedWorkspaceId
+                    ? `/dashboard/papers/upload?workspaceId=${selectedWorkspaceId}`
+                    : "/dashboard/papers/upload"
+                }
+              >
                 <Upload className="mr-2 h-4 w-4" />
                 Upload Paper
               </Link>
             </Button>
           </div>
+        </div>
+
+        {/* Workspace Selection */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            <label htmlFor="workspace-select" className="text-sm font-medium">
+              Workspace:
+            </label>
+          </div>
+          <Select
+            value={selectedWorkspaceId}
+            onValueChange={setSelectedWorkspaceId}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a workspace to view papers" />
+            </SelectTrigger>
+            <SelectContent>
+              {(workspacesData?.data || []).map((workspace: any) => (
+                <SelectItem key={workspace.id} value={workspace.id}>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>{workspace.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {workspace.role}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats Overview */}
@@ -208,7 +272,15 @@ export default function PapersPage() {
                 Organize papers into collections for better management
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/dashboard/collections">Manage Collections</Link>
+                <Link
+                  href={
+                    selectedWorkspaceId
+                      ? `/dashboard/collections?workspaceId=${selectedWorkspaceId}`
+                      : "/dashboard/collections"
+                  }
+                >
+                  Manage Collections
+                </Link>
               </Button>
             </CardContent>
           </Card>
@@ -241,7 +313,10 @@ export default function PapersPage() {
             </div>
             <Separator className="mb-6" />
             <div id="papers-list">
-              <PapersList searchTerm={searchTerm} />
+              <PapersList
+                searchTerm={searchTerm}
+                workspaceId={selectedWorkspaceId}
+              />
             </div>
           </CardContent>
         </Card>
