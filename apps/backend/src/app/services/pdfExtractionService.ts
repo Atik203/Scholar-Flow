@@ -27,6 +27,8 @@ export class PDFExtractionService {
    */
   async extractTextFromPDF(paperId: string): Promise<PDFExtractionResult> {
     try {
+      console.log(`[PDFExtraction] Starting extraction for paper: ${paperId}`);
+      
       // Get paper and file info
       const paper = await prisma.paper.findUnique({
         where: { id: paperId },
@@ -34,11 +36,14 @@ export class PDFExtractionService {
       });
 
       if (!paper || !paper.file) {
+        console.error(`[PDFExtraction] Paper or file not found for ID: ${paperId}`);
         return {
           success: false,
           error: 'Paper or file not found',
         };
       }
+
+      console.log(`[PDFExtraction] Found paper: ${paper.title}, file: ${paper.file.objectKey}`);
 
       // Update processing status
       await prisma.paper.update({
@@ -46,10 +51,15 @@ export class PDFExtractionService {
         data: { processingStatus: 'PROCESSING' },
       });
 
+      console.log(`[PDFExtraction] Updated status to PROCESSING for paper: ${paperId}`);
+
       // Download PDF from S3
+      console.log(`[PDFExtraction] Downloading PDF from S3: ${paper.file.objectKey}`);
       const pdfBuffer = await this.storage.getObject(paper.file.objectKey);
+      console.log(`[PDFExtraction] Downloaded PDF buffer size: ${pdfBuffer.length} bytes`);
       
       // Extract text using pdf-parse
+      console.log(`[PDFExtraction] Starting text extraction with pdf-parse`);
       const pdfData = await pdf(pdfBuffer, {
         // Options for better text extraction
         max: 0, // Parse all pages
@@ -59,7 +69,10 @@ export class PDFExtractionService {
       const extractedText = pdfData.text;
       const pageCount = pdfData.numpages;
 
+      console.log(`[PDFExtraction] Extracted text length: ${extractedText.length}, pages: ${pageCount}`);
+
       if (!extractedText || extractedText.trim().length === 0) {
+        console.error(`[PDFExtraction] No text content found in PDF for paper: ${paperId}`);
         await prisma.paper.update({
           where: { id: paperId },
           data: {
@@ -75,19 +88,23 @@ export class PDFExtractionService {
       }
 
       // Chunk the text for better processing
+      console.log(`[PDFExtraction] Creating chunks for paper: ${paperId}`);
       const chunks = this.chunkText(extractedText, pageCount);
+      console.log(`[PDFExtraction] Created ${chunks.length} chunks`);
 
       // Store chunks in database
+      console.log(`[PDFExtraction] Storing chunks in database for paper: ${paperId}`);
       await this.storeChunks(paperId, chunks);
 
       // Update paper processing status and file info
+      console.log(`[PDFExtraction] Updating paper status to PROCESSED for paper: ${paperId}`);
       await Promise.all([
         prisma.paper.update({
           where: { id: paperId },
           data: {
             processingStatus: 'PROCESSED',
             processedAt: new Date(),
-            abstract: this.extractAbstract(extractedText),
+            abstract: this.sanitizeText(this.extractAbstract(extractedText)),
           },
         }),
         prisma.paperFile.update({
@@ -99,6 +116,8 @@ export class PDFExtractionService {
         }),
       ]);
 
+      console.log(`[PDFExtraction] Successfully completed extraction for paper: ${paperId}`);
+
       return {
         success: true,
         text: extractedText,
@@ -106,16 +125,20 @@ export class PDFExtractionService {
         chunks,
       };
     } catch (error) {
-      console.error('PDF extraction error:', error);
+      console.error(`[PDFExtraction] Error processing PDF for paper ${paperId}:`, error);
       
       // Update processing status to failed
-      await prisma.paper.update({
-        where: { id: paperId },
-        data: {
-          processingStatus: 'FAILED',
-          processingError: error instanceof Error ? error.message : 'Unknown error',
-        },
-      });
+      try {
+        await prisma.paper.update({
+          where: { id: paperId },
+          data: {
+            processingStatus: 'FAILED',
+            processingError: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      } catch (updateError) {
+        console.error(`[PDFExtraction] Failed to update error status for paper ${paperId}:`, updateError);
+      }
 
       return {
         success: false,
@@ -161,7 +184,7 @@ export class PDFExtractionService {
         chunks.push({
           idx: chunkIndex++,
           page: pageIndex + 1,
-          content: chunkText.trim(),
+          content: this.sanitizeText(chunkText),
           tokenCount: this.estimateTokenCount(chunkText),
         });
       });
@@ -235,6 +258,19 @@ export class PDFExtractionService {
   }
 
   /**
+   * Sanitize text content to remove null bytes and other problematic characters
+   */
+  private sanitizeText(text: string): string {
+    if (!text) return '';
+    
+    // Remove null bytes (0x00) and other control characters that can cause PostgreSQL issues
+    return text
+      .replace(/\0/g, '') // Remove null bytes
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '') // Remove other control characters
+      .trim();
+  }
+
+  /**
    * Store chunks in database
    */
   private async storeChunks(
@@ -251,13 +287,13 @@ export class PDFExtractionService {
       where: { paperId },
     });
 
-    // Insert new chunks
+    // Insert new chunks with sanitized content
     await prisma.paperChunk.createMany({
       data: chunks.map((chunk) => ({
         paperId,
         idx: chunk.idx,
         page: chunk.page,
-        content: chunk.content,
+        content: this.sanitizeText(chunk.content),
         tokenCount: chunk.tokenCount,
       })),
     });

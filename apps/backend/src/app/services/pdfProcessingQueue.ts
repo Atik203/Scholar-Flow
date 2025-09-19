@@ -80,6 +80,10 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
       `[PDFQueue] Attempting to queue PDF extraction for paper: ${paperId}`
     );
 
+    // Test Redis connection first
+    await pdfProcessingQueue.isReady();
+    console.log(`[PDFQueue] Redis connection verified for paper: ${paperId}`);
+
     await pdfProcessingQueue.add(
       "extract-pdf",
       { paperId },
@@ -105,13 +109,17 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
       `[PDFQueue] Failed to queue PDF extraction for paper: ${paperId} after ${queueTime}ms:`,
       error
     );
+    
     // Check if it's a Redis connection issue
     const errorCode = (error as any)?.code;
-    if (errorCode === "ECONNREFUSED" || errorCode === "ETIMEDOUT") {
+    const errorMessage = (error as any)?.message || '';
+    
+    if (errorCode === "ECONNREFUSED" || errorCode === "ETIMEDOUT" || 
+        errorMessage.includes('Redis') || errorMessage.includes('connection')) {
       console.warn(
-        `[PDFQueue] Redis connection issue detected. PDF processing will be skipped for paper: ${paperId}`
+        `[PDFQueue] Redis connection issue detected for paper: ${paperId}. Throwing error to trigger fallback.`
       );
-      return; // Don't throw - allow upload to continue
+      throw error; // Throw to trigger fallback in controller
     }
     throw error;
   }

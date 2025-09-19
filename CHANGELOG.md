@@ -94,7 +94,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Permission-based sharing system (VIEW/EDIT) ✅ (Author: Atik)
 - [x] Collection invitation system with email notifications ✅ (Author: Atik)
 - [x] Real-time cache invalidation and updates ✅ (Author: Atik)
-- [ ] Extract text content from uploaded PDFs (pending)
+- [x] Extract text content from uploaded PDFs ()
 
 **✅ Collections Management Complete (September 19, 2025):** Comprehensive collection management system with permission-based sharing implemented by Atik+Salman. Features include CRUD operations, role-based access control (OWNER/EDIT/VIEW), invitation system, real-time updates, and modern UI components. PDF text extraction remains pending for Week 4.5.
 

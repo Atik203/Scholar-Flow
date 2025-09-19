@@ -12,12 +12,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useGetProcessingStatusQuery } from "@/redux/api/paperApi";
+import { useGetProcessingStatusQuery, useGetAllChunksQuery } from "@/redux/api/paperApi";
 import {
   ChevronDown,
   ChevronUp,
   FileText,
   Filter,
+  RefreshCw,
   Search,
   SortAsc,
   SortDesc,
@@ -44,12 +45,31 @@ export function ExtractedTextDisplay({
 
   const {
     data: processingData,
-    isLoading,
-    error,
-  } = useGetProcessingStatusQuery(paperId);
+    isLoading: isStatusLoading,
+    error: statusError,
+    refetch: refetchStatus,
+  } = useGetProcessingStatusQuery(paperId, {
+    refetchOnMountOrArgChange: true, // Always refetch when component mounts
+  });
 
-  const chunks = processingData?.data?.chunks || [];
+  const {
+    data: chunksData,
+    isLoading: isChunksLoading,
+    error: chunksError,
+    refetch: refetchChunks,
+  } = useGetAllChunksQuery(paperId, {
+    skip: processingData?.data?.processingStatus !== "PROCESSED", // Only fetch chunks when processing is complete
+  });
+
   const processingStatus = processingData?.data?.processingStatus;
+  const chunksCount = processingData?.data?.chunksCount || 0;
+  const chunks = chunksData?.data?.chunks || [];
+
+  // Debug logging
+  console.log("ExtractedTextDisplay - Paper ID:", paperId);
+  console.log("ExtractedTextDisplay - Processing Status:", processingStatus);
+  console.log("ExtractedTextDisplay - Chunks Count:", chunksCount);
+  console.log("ExtractedTextDisplay - Chunks:", chunks);
 
   // Filter and sort chunks
   const filteredAndSortedChunks = useMemo(() => {
@@ -68,8 +88,8 @@ export function ExtractedTextDisplay({
       filtered = filtered.filter((chunk) => chunk.page === filterByPage);
     }
 
-    // Sort chunks
-    filtered.sort((a, b) => {
+    // Sort chunks (create a copy to avoid mutating read-only array)
+    filtered = [...filtered].sort((a, b) => {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
@@ -153,7 +173,7 @@ export function ExtractedTextDisplay({
     );
   }
 
-  if (isLoading) {
+  if (processingStatus === "PROCESSED" && isChunksLoading) {
     return (
       <Card className={className}>
         <CardHeader>
@@ -167,6 +187,7 @@ export function ExtractedTextDisplay({
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
               <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
+              <p className="text-sm text-muted-foreground">Loading extracted text...</p>
             </div>
           </div>
         </CardContent>
@@ -174,7 +195,7 @@ export function ExtractedTextDisplay({
     );
   }
 
-  if (error || chunks.length === 0) {
+  if (statusError || chunksError || chunks.length === 0) {
     return (
       <Card className={className}>
         <CardHeader>
@@ -186,7 +207,33 @@ export function ExtractedTextDisplay({
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No extracted text available</p>
+            {statusError || chunksError ? (
+              <div className="space-y-2">
+                <p>Failed to load extracted text</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    refetchStatus();
+                    refetchChunks();
+                  }}
+                >
+                  Retry
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p>No extracted text available</p>
+                <p className="text-xs">
+                  Status: {processingStatus || "Unknown"}
+                </p>
+                {processingStatus === "PROCESSED" && chunksCount === 0 && (
+                  <p className="text-xs text-orange-600">
+                    Processing completed but no chunks were found
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -206,9 +253,22 @@ export function ExtractedTextDisplay({
               {chunks.length} text chunks extracted from PDF
             </CardDescription>
           </div>
-          <Badge variant="outline" className="text-sm">
-            {filteredAndSortedChunks.length} of {chunks.length} chunks
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-sm">
+              {filteredAndSortedChunks.length} of {chunks.length} chunks
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                refetchStatus();
+                refetchChunks();
+              }}
+              disabled={isChunksLoading || isStatusLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${isChunksLoading || isStatusLoading ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
         </div>
       </CardHeader>
 
