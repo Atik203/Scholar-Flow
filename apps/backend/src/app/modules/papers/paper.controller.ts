@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
+import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
 import catchAsync from "../../shared/catchAsync";
+import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
   sendSuccessResponse,
@@ -16,8 +18,6 @@ import {
   updatePaperMetadataSchema,
   uploadPaperSchema,
 } from "./paper.validation";
-import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
-import prisma from "../../shared/prisma";
 
 const storage = new StorageService();
 
@@ -27,7 +27,9 @@ function featureEnabled() {
 
 export const paperController = {
   upload: catchAsync(async (req: Request, res: Response) => {
+    const startTime = Date.now();
     const authReq = req as AuthenticatedRequest;
+
     if (!featureEnabled()) {
       throw createPaperError.uploadDisabled();
     }
@@ -38,6 +40,7 @@ export const paperController = {
       throw createPaperError.invalidFileType(["PDF"]);
     }
 
+    const validationStart = Date.now();
     const parsed = uploadPaperSchema.safeParse(authReq.body);
     if (!parsed.success) {
       const errorDetails = parsed.error.issues
@@ -45,8 +48,10 @@ export const paperController = {
         .join(", ");
       throw createPaperError.validationFailed(errorDetails);
     }
+    console.log(`[PaperUpload] Validation: ${Date.now() - validationStart}ms`);
 
     // Resolve uploader & workspace fallback for dev/testing
+    const resolveStart = Date.now();
     let userId = authReq.user?.id as string | undefined;
     let workspaceId = parsed.data.workspaceId as string | undefined;
     if (!userId || !workspaceId) {
@@ -54,15 +59,28 @@ export const paperController = {
       if (!userId) userId = user.id;
       if (!workspaceId) workspaceId = workspace.id;
     }
+    console.log(
+      `[PaperUpload] User/workspace resolve: ${Date.now() - resolveStart}ms`
+    );
 
     const objectKey = `papers/${workspaceId}/${Date.now()}-${authReq.file.originalname}`;
-    console.log("[PaperUpload] putObject", { objectKey });
+    const s3Start = Date.now();
+    console.log("[PaperUpload] Starting S3 upload", {
+      objectKey,
+      fileSize: `${(authReq.file.size / 1024 / 1024).toFixed(2)}MB`,
+      contentType: authReq.file.mimetype,
+    });
+
     await storage.putObject({
       key: objectKey,
       body: authReq.file.buffer,
       contentType: authReq.file.mimetype,
     });
+    const s3Time = Date.now() - s3Start;
+    console.log(`[PaperUpload] S3 upload completed: ${s3Time}ms`);
 
+    const dbStart = Date.now();
+    console.log("[PaperUpload] Starting database operations");
     const paper = await paperService.createUploadedPaper({
       input: parsed.data,
       file: authReq.file,
@@ -70,6 +88,13 @@ export const paperController = {
       workspaceId: workspaceId!,
       objectKey,
     });
+    const dbTime = Date.now() - dbStart;
+    console.log(`[PaperUpload] Database operations completed: ${dbTime}ms`);
+
+    const totalTime = Date.now() - startTime;
+    console.log(
+      `[PaperUpload] TOTAL TIME: ${totalTime}ms (S3: ${s3Time}ms, DB: ${dbTime}ms, Other: ${totalTime - s3Time - dbTime}ms)`
+    );
 
     sendSuccessResponse(res, { paper }, "Paper uploaded successfully", 201);
   }),
@@ -233,7 +258,11 @@ export const paperController = {
     // Queue PDF processing
     await queuePDFExtraction(parsed.data.id);
 
-    sendSuccessResponse(res, { message: "PDF processing queued" }, "PDF processing started");
+    sendSuccessResponse(
+      res,
+      { message: "PDF processing queued" },
+      "PDF processing started"
+    );
   }),
 
   // Get processing status and chunks for a paper
@@ -251,7 +280,7 @@ export const paperController = {
     // Get chunks if available
     const chunks = await prisma.paperChunk.findMany({
       where: { paperId: parsed.data.id, isDeleted: false },
-      orderBy: { idx: 'asc' },
+      orderBy: { idx: "asc" },
       select: {
         id: true,
         idx: true,
@@ -262,12 +291,16 @@ export const paperController = {
       },
     });
 
-    sendSuccessResponse(res, {
-      processingStatus: paper.processingStatus,
-      processingError: (paper as any).processingError,
-      processedAt: (paper as any).processedAt,
-      chunksCount: chunks.length,
-      chunks: chunks.slice(0, 5), // Return first 5 chunks as preview
-    }, "Processing status retrieved");
+    sendSuccessResponse(
+      res,
+      {
+        processingStatus: paper.processingStatus,
+        processingError: (paper as any).processingError,
+        processedAt: (paper as any).processedAt,
+        chunksCount: chunks.length,
+        chunks: chunks.slice(0, 5), // Return first 5 chunks as preview
+      },
+      "Processing status retrieved"
+    );
   }),
 };

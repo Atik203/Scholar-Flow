@@ -1,6 +1,6 @@
+import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
 import prisma from "../../shared/prisma";
 import { UpdatePaperMetadataInput, UploadPaperInput } from "./paper.validation";
-import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
 
 interface CreateUploadArgs {
   input: UploadPaperInput;
@@ -19,6 +19,8 @@ export const paperService = {
   async createUploadedPaper(args: CreateUploadArgs) {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
     console.log("Creating uploaded paper with authors:", input.authors);
+
+    const createStart = Date.now();
     const created = await prisma.paper.create({
       data: {
         workspaceId,
@@ -42,8 +44,10 @@ export const paperService = {
       },
       include: { file: true },
     });
+    console.log(`[PaperService] Prisma create: ${Date.now() - createStart}ms`);
 
     // Dev verification: confirm relation back to user reflects the new paper
+    const verifyStart = Date.now();
     try {
       const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*)::bigint as count FROM "Paper" WHERE "uploaderId" = ${uploaderId} AND "isDeleted" = false
@@ -57,15 +61,28 @@ export const paperService = {
     } catch (e) {
       console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
     }
+    console.log(
+      `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
+    );
 
-    // Queue PDF extraction for background processing
-    try {
-      await queuePDFExtraction(created.id);
-      console.log(`[PaperUpload] Queued PDF extraction for paper: ${created.id}`);
-    } catch (error) {
-      console.error(`[PaperUpload] Failed to queue PDF extraction for paper: ${created.id}`, error);
-      // Don't fail the upload if PDF extraction queuing fails
-    }
+    // Queue PDF extraction for background processing (non-blocking)
+    const queueStart = Date.now();
+    // Fire and forget - don't wait for Redis queue operations
+    queuePDFExtraction(created.id)
+      .then(() => {
+        console.log(
+          `[PaperUpload] Queued PDF extraction for paper: ${created.id} (async)`
+        );
+      })
+      .catch((error) => {
+        console.error(
+          `[PaperUpload] Failed to queue PDF extraction for paper: ${created.id}`,
+          error
+        );
+      });
+    console.log(
+      `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
+    );
 
     return created;
   },
