@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { useGetProcessingStatusQuery, useProcessPDFMutation } from "@/redux/api/paperApi";
+import { useGetProcessingStatusQuery, useProcessPDFMutation, useProcessPDFDirectMutation } from "@/redux/api/paperApi";
 import {
   AlertCircle,
   CheckCircle,
@@ -40,6 +40,7 @@ export function PdfProcessingStatus({
   compact = false,
 }: PdfProcessingStatusProps) {
   const [isPolling, setIsPolling] = useState(false);
+  const [pollingTimeout, setPollingTimeout] = useState<NodeJS.Timeout | null>(null);
   
   const {
     data: processingData,
@@ -49,9 +50,11 @@ export function PdfProcessingStatus({
   } = useGetProcessingStatusQuery(paperId, {
     pollingInterval: isPolling ? 2000 : 0, // Poll every 2 seconds when processing
     skip: false,
+    refetchOnMountOrArgChange: true, // Always refetch when component mounts
   });
 
   const [processPDF, { isLoading: isProcessing }] = useProcessPDFMutation();
+  const [processPDFDirect, { isLoading: isProcessingDirect }] = useProcessPDFDirectMutation();
 
   const status = processingData?.data?.processingStatus || currentStatus || "UPLOADED";
   const processingError = processingData?.data?.processingError;
@@ -62,11 +65,34 @@ export function PdfProcessingStatus({
   // Start polling when status is PROCESSING
   useEffect(() => {
     if (status === "PROCESSING") {
+      console.log("Starting polling for paper:", paperId);
       setIsPolling(true);
+      
+      // Set a timeout to stop polling after 5 minutes
+      const timeout = setTimeout(() => {
+        console.warn(`Polling timeout reached for paper: ${paperId}`);
+        setIsPolling(false);
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      setPollingTimeout(timeout);
     } else {
+      console.log("Stopping polling for paper:", paperId, "Status:", status);
       setIsPolling(false);
+      
+      // Clear timeout if status changes
+      if (pollingTimeout) {
+        clearTimeout(pollingTimeout);
+        setPollingTimeout(null);
+      }
     }
-  }, [status]);
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (pollingTimeout) {
+        clearTimeout(pollingTimeout);
+      }
+    };
+  }, [status, paperId, pollingTimeout]);
 
   // Notify parent component of status changes
   useEffect(() => {
@@ -75,10 +101,42 @@ export function PdfProcessingStatus({
 
   const handleProcessPDF = async () => {
     try {
-      await processPDF(paperId).unwrap();
+      console.log(`[PdfProcessingStatus] Starting PDF processing for paper: ${paperId}`);
+      const result = await processPDF(paperId).unwrap();
+      console.log("PDF processing started:", result);
+      // Start polling immediately after successful request
       setIsPolling(true);
+      // Refetch to get updated status
+      refetch();
     } catch (error) {
       console.error("Failed to start PDF processing:", error);
+      setIsPolling(false);
+      
+      // Show user-friendly error message
+      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+        console.error("API Error:", (error.data as any).message);
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        console.error("Network Error:", (error as any).message);
+      }
+    }
+  };
+
+  const handleProcessPDFDirect = async () => {
+    try {
+      console.log(`[PdfProcessingStatus] Starting direct PDF processing for paper: ${paperId}`);
+      const result = await processPDFDirect(paperId).unwrap();
+      console.log("Direct PDF processing completed:", result);
+      // Refetch to get updated status
+      refetch();
+    } catch (error) {
+      console.error("Failed to process PDF directly:", error);
+      
+      // Show user-friendly error message
+      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+        console.error("API Error:", (error.data as any).message);
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        console.error("Network Error:", (error as any).message);
+      }
     }
   };
 
@@ -174,12 +232,19 @@ export function PdfProcessingStatus({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Processing PDF...</span>
-              <span className="text-muted-foreground">Please wait</span>
+              <span className="text-muted-foreground">
+                {isPolling ? "Updating..." : "Please wait"}
+              </span>
             </div>
             <Progress value={45} className="h-2" />
             <p className="text-xs text-muted-foreground">
               This may take a few moments depending on the PDF size
             </p>
+            {chunksCount > 0 && (
+              <p className="text-xs text-green-600">
+                Found {chunksCount} text chunks so far...
+              </p>
+            )}
           </div>
         )}
 
@@ -263,46 +328,76 @@ export function PdfProcessingStatus({
         {/* Action Buttons */}
         <div className="flex items-center gap-2 pt-2">
           {showTriggerButton && status === "UPLOADED" && (
-            <Button
-              onClick={handleProcessPDF}
-              disabled={isProcessing}
-              size="sm"
-              className="flex-1"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Starting...
-                </>
-              ) : (
-                <>
-                  <Play className="mr-2 h-4 w-4" />
-                  Extract Text
-                </>
-              )}
-            </Button>
+            <>
+              <Button
+                onClick={handleProcessPDF}
+                disabled={isProcessing || isProcessingDirect}
+                size="sm"
+                className="flex-1"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-4 w-4" />
+                    Extract Text
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleProcessPDFDirect}
+                disabled={isProcessing || isProcessingDirect}
+                size="sm"
+                variant="outline"
+                title="Process PDF directly (bypasses queue)"
+              >
+                {isProcessingDirect ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+            </>
           )}
 
           {status === "FAILED" && (
-            <Button
-              onClick={handleProcessPDF}
-              disabled={isProcessing}
-              size="sm"
-              variant="outline"
-              className="flex-1"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Retrying...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Retry Processing
-                </>
-              )}
-            </Button>
+            <>
+              <Button
+                onClick={handleProcessPDF}
+                disabled={isProcessing || isProcessingDirect}
+                size="sm"
+                variant="outline"
+                className="flex-1"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Retry Processing
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleProcessPDFDirect}
+                disabled={isProcessing || isProcessingDirect}
+                size="sm"
+                variant="outline"
+                title="Process PDF directly (bypasses queue)"
+              >
+                {isProcessingDirect ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+            </>
           )}
 
           <Button

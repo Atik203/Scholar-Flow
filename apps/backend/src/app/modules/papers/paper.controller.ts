@@ -255,14 +255,44 @@ export const paperController = {
       throw new ApiError(400, "Paper file not found");
     }
 
-    // Queue PDF processing
-    await queuePDFExtraction(parsed.data.id);
+    console.log(`[PaperController] Starting PDF processing for paper: ${parsed.data.id}`);
 
-    sendSuccessResponse(
-      res,
-      { message: "PDF processing queued" },
-      "PDF processing started"
-    );
+    try {
+      // Try to queue PDF processing first
+      await queuePDFExtraction(parsed.data.id);
+      
+      console.log(`[PaperController] Successfully queued PDF processing for paper: ${parsed.data.id}`);
+      sendSuccessResponse(
+        res,
+        { message: "PDF processing queued" },
+        "PDF processing started"
+      );
+    } catch (queueError) {
+      console.warn(`[PaperController] Queue failed for paper ${parsed.data.id}, attempting direct processing:`, queueError);
+      
+      // Fallback: Process directly if queue fails
+      try {
+        const { pdfExtractionService } = await import('../../services/pdfExtractionService');
+        console.log(`[PaperController] Starting direct PDF processing for paper: ${parsed.data.id}`);
+        
+        const result = await pdfExtractionService.extractTextFromPDF(parsed.data.id);
+        
+        if (result.success) {
+          console.log(`[PaperController] Direct PDF processing completed successfully for paper: ${parsed.data.id}`);
+          sendSuccessResponse(
+            res,
+            { message: "PDF processing completed directly" },
+            "PDF processing completed"
+          );
+        } else {
+          console.error(`[PaperController] Direct PDF processing failed for paper ${parsed.data.id}:`, result.error);
+          throw new ApiError(500, `PDF processing failed: ${result.error}`);
+        }
+      } catch (directError) {
+        console.error(`[PaperController] Direct processing also failed for paper ${parsed.data.id}:`, directError);
+        throw new ApiError(500, `PDF processing failed: ${directError instanceof Error ? directError.message : String(directError)}`);
+      }
+    }
   }),
 
   // Get processing status and chunks for a paper
@@ -302,5 +332,87 @@ export const paperController = {
       },
       "Processing status retrieved"
     );
+  }),
+
+  // Get all chunks for a paper
+  getAllChunks: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    // Get all chunks
+    const chunks = await prisma.paperChunk.findMany({
+      where: { paperId: parsed.data.id, isDeleted: false },
+      orderBy: { idx: "asc" },
+      select: {
+        id: true,
+        idx: true,
+        page: true,
+        content: true,
+        tokenCount: true,
+        createdAt: true,
+      },
+    });
+
+    sendSuccessResponse(
+      res,
+      {
+        chunksCount: chunks.length,
+        chunks: chunks,
+      },
+      "All chunks retrieved"
+    );
+  }),
+
+  // Force direct PDF processing (bypasses Redis queue)
+  processPDFDirect: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    if (!paper.file) {
+      throw new ApiError(400, "Paper file not found");
+    }
+
+    console.log(`[PaperController] Starting direct PDF processing for paper: ${parsed.data.id}`);
+
+    try {
+      const { pdfExtractionService } = await import('../../services/pdfExtractionService');
+      const result = await pdfExtractionService.extractTextFromPDF(parsed.data.id);
+      
+      if (result.success) {
+        console.log(`[PaperController] Direct PDF processing completed successfully for paper: ${parsed.data.id}`);
+        sendSuccessResponse(
+          res,
+          { 
+            message: "PDF processing completed directly",
+            result: {
+              pageCount: result.pageCount,
+              chunksCount: result.chunks?.length || 0,
+              textLength: result.text?.length || 0
+            }
+          },
+          "PDF processing completed"
+        );
+      } else {
+        console.error(`[PaperController] Direct PDF processing failed for paper ${parsed.data.id}:`, result.error);
+        throw new ApiError(500, `PDF processing failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error(`[PaperController] Direct processing failed for paper ${parsed.data.id}:`, error);
+      throw new ApiError(500, `PDF processing failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }),
 };

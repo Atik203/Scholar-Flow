@@ -185,6 +185,31 @@ export const paperApi = apiSlice.injectEndpoints({
         { type: "ProcessingStatus", id: paperId },
       ],
     }),
+
+    getAllChunks: builder.query<
+      { data: { chunksCount: number; chunks: ProcessingStatusResponse['chunks'] } },
+      string
+    >({
+      query: (paperId) => `/papers/${paperId}/chunks`,
+      transformResponse: (response: { data: { chunksCount: number; chunks: ProcessingStatusResponse['chunks'] } }) => response,
+      providesTags: (result, error, paperId) => [
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
+
+    processPDFDirect: builder.mutation<
+      { data: { message: string; result?: { pageCount: number; chunksCount: number; textLength: number } } },
+      string
+    >({
+      query: (paperId) => ({
+        url: `/papers/${paperId}/process-direct`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, paperId) => [
+        { type: "Paper", id: paperId },
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -198,4 +223,6 @@ export const {
   useGetDevWorkspaceQuery,
   useProcessPDFMutation,
   useGetProcessingStatusQuery,
+  useGetAllChunksQuery,
+  useProcessPDFDirectMutation,
 } = paperApi;
