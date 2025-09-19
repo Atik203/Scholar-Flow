@@ -1,13 +1,38 @@
 import Bull from "bull";
 import prisma from "../shared/prisma";
 
-// Create a queue for PDF processing
+// Create a queue for PDF processing with Redis Cloud connection
+const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const redisConfig = {
+  host: process.env.REDIS_HOST || "localhost",
+  port: parseInt(process.env.REDIS_PORT || "6379"),
+  db: parseInt(process.env.REDIS_DB || "0"),
+  password: process.env.REDIS_PASSWORD || undefined,
+  connectTimeout: 10000, // 10 second connection timeout for cloud Redis
+  commandTimeout: 5000, // 5 second command timeout
+  lazyConnect: true, // Don't connect immediately
+  maxRetriesPerRequest: 3, // Allow more retries for cloud connections
+};
+
+console.log(
+  `[PDFQueue] Connecting to Redis: ${redisConfig.host}:${redisConfig.port}, DB: ${redisConfig.db}`
+);
+
 const pdfProcessingQueue = new Bull("pdf-processing", {
-  redis: {
-    host: process.env.REDIS_HOST || "localhost",
-    port: parseInt(process.env.REDIS_PORT || "6379"),
-    password: process.env.REDIS_PASSWORD,
+  redis: redisConfig,
+  settings: {
+    stalledInterval: 30000,
+    maxStalledCount: 1,
   },
+});
+
+// Add Redis connection event listeners
+pdfProcessingQueue.on("ready", () => {
+  console.log("[PDFQueue] Redis connection established successfully");
+});
+
+pdfProcessingQueue.on("error", (error) => {
+  console.error("[PDFQueue] Redis connection error:", error.message);
 });
 
 // Process PDF extraction jobs
@@ -49,7 +74,12 @@ pdfProcessingQueue.on("failed", (job, err) => {
 
 // Add a job to process a specific paper
 export async function queuePDFExtraction(paperId: string): Promise<void> {
+  const queueStart = Date.now();
   try {
+    console.log(
+      `[PDFQueue] Attempting to queue PDF extraction for paper: ${paperId}`
+    );
+
     await pdfProcessingQueue.add(
       "extract-pdf",
       { paperId },
@@ -61,14 +91,28 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
         },
         removeOnComplete: 10,
         removeOnFail: 5,
+        timeout: 5000, // 5 second timeout for queue operations
       }
     );
-    console.log(`Queued PDF extraction for paper: ${paperId}`);
+
+    const queueTime = Date.now() - queueStart;
+    console.log(
+      `[PDFQueue] Successfully queued PDF extraction for paper: ${paperId} in ${queueTime}ms`
+    );
   } catch (error) {
+    const queueTime = Date.now() - queueStart;
     console.error(
-      `Failed to queue PDF extraction for paper: ${paperId}`,
+      `[PDFQueue] Failed to queue PDF extraction for paper: ${paperId} after ${queueTime}ms:`,
       error
     );
+    // Check if it's a Redis connection issue
+    const errorCode = (error as any)?.code;
+    if (errorCode === "ECONNREFUSED" || errorCode === "ETIMEDOUT") {
+      console.warn(
+        `[PDFQueue] Redis connection issue detected. PDF processing will be skipped for paper: ${paperId}`
+      );
+      return; // Don't throw - allow upload to continue
+    }
     throw error;
   }
 }

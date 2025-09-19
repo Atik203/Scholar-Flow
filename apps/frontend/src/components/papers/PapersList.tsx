@@ -55,13 +55,14 @@ import { useMemo, useState } from "react";
 
 interface PapersListProps {
   searchTerm?: string;
+  workspaceId?: string;
 }
 
-export function PapersList({ searchTerm = "" }: PapersListProps) {
+export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Get papers for the authenticated user
+  // Get papers (workspace-scoped if workspaceId provided)
   const {
     data: papersData,
     isLoading,
@@ -71,6 +72,7 @@ export function PapersList({ searchTerm = "" }: PapersListProps) {
   } = useListPapersQuery({
     page,
     limit,
+    workspaceId,
   });
 
   const [deletePaper, { isLoading: isDeleting }] = useDeletePaperMutation();
@@ -192,21 +194,40 @@ export function PapersList({ searchTerm = "" }: PapersListProps) {
   const meta = papersData?.meta;
 
   if (papers.length === 0) {
+    const isSearching = searchTerm.trim().length > 0;
+    const hasWorkspace = workspaceId && workspaceId.trim().length > 0;
+
     return (
       <Card>
         <CardHeader>
           <CardTitle>Papers</CardTitle>
-          <CardDescription>No papers found in your workspace</CardDescription>
+          <CardDescription>
+            {isSearching
+              ? "No papers match your search criteria"
+              : hasWorkspace
+                ? "No papers found in this workspace"
+                : "Select a workspace to view papers"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-4">
-              Upload your first paper to get started with ScholarFlow.
+              {isSearching
+                ? "Try adjusting your search terms or filters."
+                : hasWorkspace
+                  ? "Upload your first paper to get started with ScholarFlow."
+                  : "Choose a workspace from the dropdown above to see papers."}
             </p>
-            <Button asChild>
-              <Link href="/dashboard/papers/upload">Upload Paper</Link>
-            </Button>
+            {hasWorkspace && !isSearching && (
+              <Button asChild>
+                <Link
+                  href={`/dashboard/papers/upload${workspaceId ? `?workspaceId=${workspaceId}` : ""}`}
+                >
+                  Upload Paper
+                </Link>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

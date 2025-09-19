@@ -1,7 +1,14 @@
-// Plain JS S3 Smoke Test (fallback when TS node types not configured)
+// Plain JS S3 Smoke Test using AWS SDK v3
 require('dotenv/config');
 const crypto = require('crypto');
-const AWS = require('aws-sdk');
+const { 
+  S3Client, 
+  PutObjectCommand, 
+  HeadObjectCommand, 
+  GetObjectCommand, 
+  DeleteObjectCommand 
+} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const requiredEnv = [
   'AWS_ACCESS_KEY_ID',
@@ -17,13 +24,14 @@ if (missing.length) {
 
 const bucket = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_REGION;
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+
+const s3 = new S3Client({
   region,
-  signatureVersion: 'v4',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
-const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
 
 const minimalPdf = Buffer.from('%PDF-1.1\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n', 'utf-8');
 
@@ -33,20 +41,37 @@ async function run() {
   console.log(`Starting S3 smoke test bucket='${bucket}' region='${region}' key='${key}'`);
   try {
     console.log('Uploading...');
-    await s3.putObject({ Bucket: bucket, Key: key, Body: minimalPdf, ContentType: 'application/pdf', ACL: 'private' }).promise();
+    const putCommand = new PutObjectCommand({ 
+      Bucket: bucket, 
+      Key: key, 
+      Body: minimalPdf, 
+      ContentType: 'application/pdf', 
+      ACL: 'private' 
+    });
+    await s3.send(putCommand);
     console.log('Upload OK');
 
-    const head = await s3.headObject({ Bucket: bucket, Key: key }).promise();
+    const headCommand = new HeadObjectCommand({ Bucket: bucket, Key: key });
+    const head = await s3.send(headCommand);
     console.log('HEAD OK size=', head.ContentLength);
 
-    const getRes = await s3.getObject({ Bucket: bucket, Key: key }).promise();
-    const body = Buffer.isBuffer(getRes.Body) ? getRes.Body : Buffer.from(getRes.Body);
+    const getCommand = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const getRes = await s3.send(getCommand);
+    
+    // Convert stream to buffer
+    const chunks = [];
+    for await (const chunk of getRes.Body) {
+      chunks.push(chunk);
+    }
+    const body = Buffer.concat(chunks);
     console.log('GET OK size=', body.length);
 
-    const signed = s3.getSignedUrl('getObject', { Bucket: bucket, Key: key, Expires: 60 });
+    const signedGetCommand = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const signed = await getSignedUrl(s3, signedGetCommand, { expiresIn: 60 });
     console.log('Signed URL (60s):', signed);
 
-    await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
+    const deleteCommand = new DeleteObjectCommand({ Bucket: bucket, Key: key });
+    await s3.send(deleteCommand);
     console.log('Delete OK');
 
     console.log('S3 Smoke Test PASSED');
