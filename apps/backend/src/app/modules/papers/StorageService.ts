@@ -1,4 +1,11 @@
-import AWS from "aws-sdk";
+import {
+  GetObjectCommand,
+  GetObjectCommandInput,
+  PutObjectCommand,
+  PutObjectCommandInput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export interface PutObjectParams {
   key: string;
@@ -7,7 +14,7 @@ export interface PutObjectParams {
 }
 
 export class StorageService {
-  private s3: AWS.S3;
+  private s3: S3Client;
   private bucket: string;
 
   constructor() {
@@ -18,30 +25,21 @@ export class StorageService {
       );
     const region = process.env.AWS_REGION || "us-east-1";
 
-    // Configure AWS with performance optimizations
-    AWS.config.update({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY,
-      secretAccessKey:
-        process.env.AWS_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY,
+    // Configure AWS SDK v3 client with performance optimizations
+    this.s3 = new S3Client({
       region,
-      signatureVersion: "v4",
-      httpOptions: {
-        timeout: 30000, // 30 second timeout
-        connectTimeout: 5000, // 5 second connection timeout
+      credentials: {
+        accessKeyId:
+          process.env.AWS_ACCESS_KEY_ID || process.env.S3_ACCESS_KEY || "",
+        secretAccessKey:
+          process.env.AWS_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY || "",
       },
-      maxRetries: 2, // Reduce retry attempts for faster failure
-      retryDelayOptions: {
-        customBackoff: (retryCount: number) => Math.pow(2, retryCount) * 100, // Faster backoff
+      requestHandler: {
+        requestTimeout: 30000, // 30 second timeout
+        connectionTimeout: 5000, // 5 second connection timeout
       },
-    });
-
-    this.s3 = new AWS.S3({
-      apiVersion: "2006-03-01",
-      // Additional S3-specific optimizations
-      params: { Bucket: bucket }, // Set default bucket
-      httpOptions: {
-        timeout: 30000,
-      },
+      maxAttempts: 3, // Reduce retry attempts for faster failure
+      retryMode: "adaptive", // Use adaptive retry mode for better performance
     });
     this.bucket = bucket;
 
@@ -57,15 +55,16 @@ export class StorageService {
     );
 
     try {
-      await this.s3
-        .putObject({
-          Bucket: this.bucket,
-          Key: params.key,
-          Body: params.body,
-          ContentType: params.contentType,
-          ACL: "private",
-        })
-        .promise();
+      const putObjectInput: PutObjectCommandInput = {
+        Bucket: this.bucket,
+        Key: params.key,
+        Body: params.body,
+        ContentType: params.contentType,
+        ACL: "private",
+      };
+
+      const command = new PutObjectCommand(putObjectInput);
+      await this.s3.send(command);
 
       const uploadTime = Date.now() - uploadStart;
       const sizeMB = (params.body.length / 1024 / 1024).toFixed(2);
@@ -85,21 +84,34 @@ export class StorageService {
   }
 
   async getObject(key: string): Promise<Buffer> {
-    const result = await this.s3
-      .getObject({
-        Bucket: this.bucket,
-        Key: key,
-      })
-      .promise();
-
-    return result.Body as Buffer;
-  }
-
-  getSignedUrl(key: string, expiresSeconds = 300) {
-    return this.s3.getSignedUrl("getObject", {
+    const getObjectInput: GetObjectCommandInput = {
       Bucket: this.bucket,
       Key: key,
-      Expires: expiresSeconds,
+    };
+
+    const command = new GetObjectCommand(getObjectInput);
+    const result = await this.s3.send(command);
+
+    // Convert the readable stream to a buffer
+    const chunks: Buffer[] = [];
+    const stream = result.Body as NodeJS.ReadableStream;
+
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
+  }
+
+  async getSignedUrl(key: string, expiresSeconds = 300): Promise<string> {
+    const getObjectInput: GetObjectCommandInput = {
+      Bucket: this.bucket,
+      Key: key,
+    };
+
+    const command = new GetObjectCommand(getObjectInput);
+    return await getSignedUrl(this.s3, command, {
+      expiresIn: expiresSeconds,
     });
   }
 }
