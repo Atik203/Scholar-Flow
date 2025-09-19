@@ -12,14 +12,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { USER_ROLES } from "@/lib/auth/roles";
+import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   ArrowUpRight,
   BookOpen,
   Brain,
+  Building2,
   Clock,
   FileText,
   Lightbulb,
@@ -33,15 +43,17 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-// Base quick actions available to all roles
-const baseQuickActions = [
+// Base quick actions available to all roles (now defined as a function to use workspace context)
+const getBaseQuickActions = (workspaceId?: string) => [
   {
     title: "Upload Paper",
     description: "Add a new research paper to your collection",
     icon: Plus,
-    href: "/dashboard/papers/upload",
+    href: workspaceId
+      ? `/dashboard/papers/upload?workspaceId=${workspaceId}`
+      : "/dashboard/papers/upload",
     color: "bg-blue-500 hover:bg-blue-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -65,7 +77,9 @@ const baseQuickActions = [
     title: "View Collections",
     description: "View and manage your paper collections",
     icon: BookOpen,
-    href: "/dashboard/collections",
+    href: workspaceId
+      ? `/dashboard/collections?workspaceId=${workspaceId}`
+      : "/dashboard/collections",
     color: "bg-orange-500 hover:bg-orange-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -138,22 +152,49 @@ export default function DashboardPage() {
   // Protected route guard
   const { isLoading, user, session } = useProtectedRoute();
 
-  // Get papers data for authenticated user
+  // Workspace state
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
+
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
+
+  // Get workspace-aware data
   const {
     data: papersData,
     isLoading: papersLoading,
     isError,
   } = useListPapersQuery({
     page: 1,
-    limit: 5, // Get recent papers for dashboard
+    limit: 10, // Get more recent papers for dashboard
+    workspaceId: selectedWorkspaceId || undefined,
   });
 
-  // Compute dynamic stats
-  const recentStats = useMemo(() => {
+  const { data: collectionsData, isLoading: collectionsLoading } =
+    useGetMyCollectionsQuery({
+      page: 1,
+      limit: 50,
+      workspaceId: selectedWorkspaceId || undefined,
+    });
+
+  // Auto-select first workspace if only one available
+  useEffect(() => {
+    const workspaces = workspacesData?.data || [];
+    if (workspaces.length === 1 && !selectedWorkspaceId) {
+      setSelectedWorkspaceId(workspaces[0].id);
+    }
+  }, [workspacesData, selectedWorkspaceId]);
+
+  // Compute workspace-aware stats
+  const workspaceStats = useMemo(() => {
     const totalPapers = papersData?.meta?.total || 0;
     const recentPapers = papersData?.items || [];
+    const totalCollections = collectionsData?.result?.length || 0;
 
-    // Calculate papers uploaded this week (simplified - using last few papers)
+    // Calculate papers uploaded this week
     const thisWeekPapers = recentPapers.filter((paper) => {
       const paperDate = new Date(paper.createdAt);
       const weekAgo = new Date();
@@ -161,9 +202,21 @@ export default function DashboardPage() {
       return paperDate > weekAgo;
     }).length;
 
+    // Calculate processed papers
+    const processedPapers = recentPapers.filter(
+      (p) => p.processingStatus === "PROCESSED"
+    ).length;
+
+    // Calculate total storage
+    const totalBytes = recentPapers.reduce(
+      (acc, paper) => acc + (paper.file?.sizeBytes || 0),
+      0
+    );
+    const totalMB = Math.round(totalBytes / (1024 * 1024));
+
     return [
       {
-        title: "Papers Uploaded",
+        title: selectedWorkspaceId ? "Papers in Workspace" : "All Papers",
         value: totalPapers.toString(),
         change: `+${thisWeekPapers} this week`,
         trend: "up" as const,
@@ -173,9 +226,11 @@ export default function DashboardPage() {
         iconColor: "text-blue-600 dark:text-blue-400",
       },
       {
-        title: "Collections",
-        value: "0", // TODO: Implement collections API
-        change: "Coming soon",
+        title: selectedWorkspaceId
+          ? "Collections in Workspace"
+          : "All Collections",
+        value: totalCollections.toString(),
+        change: collectionsLoading ? "Loading..." : "Organized papers",
         trend: "neutral" as const,
         icon: BookOpen,
         color: "text-green-600",
@@ -183,11 +238,9 @@ export default function DashboardPage() {
         iconColor: "text-green-600 dark:text-green-400",
       },
       {
-        title: "Processing Status",
-        value: recentPapers
-          .filter((p) => p.processingStatus === "PROCESSED")
-          .length.toString(),
-        change: "Processed papers",
+        title: "Processed Papers",
+        value: processedPapers.toString(),
+        change: `${Math.round((processedPapers / Math.max(totalPapers, 1)) * 100)}% complete`,
         trend: "up" as const,
         icon: Brain,
         color: "text-purple-600",
@@ -196,8 +249,8 @@ export default function DashboardPage() {
       },
       {
         title: "Storage Used",
-        value: `${Math.round(recentPapers.reduce((acc, paper) => acc + (paper.file?.sizeBytes || 0), 0) / (1024 * 1024))}MB`,
-        change: "Total file size",
+        value: totalMB > 0 ? `${totalMB}MB` : "0MB",
+        change: selectedWorkspaceId ? "Workspace files" : "Total file size",
         trend: "neutral" as const,
         icon: Clock,
         color: "text-orange-600",
@@ -205,7 +258,7 @@ export default function DashboardPage() {
         iconColor: "text-orange-600 dark:text-orange-400",
       },
     ];
-  }, [papersData]);
+  }, [papersData, collectionsData, collectionsLoading, selectedWorkspaceId]);
 
   if (isLoading) {
     return (
@@ -219,7 +272,7 @@ export default function DashboardPage() {
 
   // Get actions available to the user based on their role
   const getAvailableActions = () => {
-    const actions = [...baseQuickActions];
+    const actions = [...getBaseQuickActions(selectedWorkspaceId)];
     const userRoleActions =
       roleSpecificActions[userRole as keyof typeof roleSpecificActions] || [];
     return [...actions, ...userRoleActions];
@@ -238,23 +291,58 @@ export default function DashboardPage() {
   return (
     <DashboardLayout>
       {/* Welcome Header */}
-      <div className="flex flex-col space-y-3 sm:space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
-            Welcome back, {user?.name?.split(" ")[0] || "Researcher"}!
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
-            Here's what's happening with your research today.
-          </p>
+      <div className="flex flex-col space-y-3 sm:space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:space-y-0 gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+              Welcome back, {user?.name?.split(" ")[0] || "Researcher"}!
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              {selectedWorkspaceId
+                ? "Here's what's happening in your current workspace."
+                : "Select a workspace to view your research dashboard."}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <RoleBadge role={userRole} size="sm" />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <RoleBadge role={userRole} size="sm" />
+
+        {/* Workspace Selection */}
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            <label htmlFor="workspace-select" className="text-sm font-medium">
+              Current Workspace:
+            </label>
+          </div>
+          <Select
+            value={selectedWorkspaceId}
+            onValueChange={setSelectedWorkspaceId}
+          >
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a workspace to view dashboard" />
+            </SelectTrigger>
+            <SelectContent>
+              {(workspacesData?.data || []).map((workspace: any) => (
+                <SelectItem key={workspace.id} value={workspace.id}>
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>{workspace.name}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {workspace.role}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {papersLoading
+        {papersLoading || collectionsLoading
           ? // Loading skeletons
             Array.from({ length: 4 }).map((_, index) => (
               <Card key={index}>
@@ -270,7 +358,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             ))
-          : recentStats.map((stat, index) => (
+          : workspaceStats.map((stat, index) => (
               <Card key={index} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
@@ -386,9 +474,16 @@ export default function DashboardPage() {
           <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             Recent Papers
+            {selectedWorkspaceId && (
+              <Badge variant="outline" className="text-xs">
+                Workspace
+              </Badge>
+            )}
           </CardTitle>
           <CardDescription className="text-sm">
-            Your latest uploads and research
+            {selectedWorkspaceId
+              ? "Latest papers from your current workspace"
+              : "Select a workspace to view recent papers"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -453,113 +548,132 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
-          ) : (
+          ) : selectedWorkspaceId ? (
             <div className="text-center py-6">
               <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No papers yet</p>
+              <p className="text-sm text-muted-foreground">
+                No papers in this workspace yet
+              </p>
               <Button asChild variant="link" className="text-xs">
-                <Link href="/dashboard/papers/upload">
+                <Link
+                  href={`/dashboard/papers/upload?workspaceId=${selectedWorkspaceId}`}
+                >
                   Upload your first paper
                 </Link>
               </Button>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">
+                Select a workspace to view papers
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Choose a workspace from the dropdown above
+              </p>
             </div>
           )}
         </CardContent>
       </Card>
 
       {/* AI Recommendations */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-            <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
-            AI Recommendations
-          </CardTitle>
-          <CardDescription className="text-sm">
-            Personalized research suggestions powered by AI
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="h-3 w-3 sm:h-4 sm:w-4 text-pink-600" />
-                <Badge variant="secondary" className="text-xs">
-                  AI Insight
-                </Badge>
+      {selectedWorkspaceId && (
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
+              AI Recommendations
+              <Badge variant="outline" className="text-xs">
+                Beta
+              </Badge>
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Personalized research suggestions based on your workspace activity
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="h-3 w-3 sm:h-4 sm:w-4 text-pink-600" />
+                  <Badge variant="secondary" className="text-xs">
+                    AI Insight
+                  </Badge>
+                </div>
+                <h4 className="font-medium mb-1 text-sm sm:text-base">
+                  Similar Research Found
+                </h4>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                  3 papers on neural networks that align with your interests
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full text-xs sm:text-sm"
+                >
+                  <Link href="/dashboard/papers/search">
+                    Explore Papers
+                    <ArrowUpRight className="h-3 w-3 ml-1" />
+                  </Link>
+                </Button>
               </div>
-              <h4 className="font-medium mb-1 text-sm sm:text-base">
-                Similar Research Found
-              </h4>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
-                3 papers on neural networks that align with your interests
-              </p>
-              <Button
-                size="sm"
-                variant="outline"
-                asChild
-                className="w-full text-xs sm:text-sm"
-              >
-                <Link href="/dashboard/papers/search">
-                  Explore Papers
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Link>
-              </Button>
-            </div>
 
-            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                <Badge variant="secondary" className="text-xs">
-                  Collaboration
-                </Badge>
+              <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                  <Badge variant="secondary" className="text-xs">
+                    Collaboration
+                  </Badge>
+                </div>
+                <h4 className="font-medium mb-1 text-sm sm:text-base">
+                  Potential Collaborators
+                </h4>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                  2 researchers working on similar topics
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full text-xs sm:text-sm"
+                >
+                  <Link href="/collaborate">
+                    Connect
+                    <ArrowUpRight className="h-3 w-3 ml-1" />
+                  </Link>
+                </Button>
               </div>
-              <h4 className="font-medium mb-1 text-sm sm:text-base">
-                Potential Collaborators
-              </h4>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
-                2 researchers working on similar topics
-              </p>
-              <Button
-                size="sm"
-                variant="outline"
-                asChild
-                className="w-full text-xs sm:text-sm"
-              >
-                <Link href="/collaborate">
-                  Connect
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Link>
-              </Button>
-            </div>
 
-            <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                <Badge variant="secondary" className="text-xs">
-                  Trending
-                </Badge>
+              <div className="rounded-lg border p-3 sm:p-4 hover:shadow-md transition-shadow sm:col-span-2 lg:col-span-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                  <Badge variant="secondary" className="text-xs">
+                    Trending
+                  </Badge>
+                </div>
+                <h4 className="font-medium mb-1 text-sm sm:text-base">
+                  Trending Topics
+                </h4>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
+                  "Sustainable AI" is gaining momentum in your field
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="w-full text-xs sm:text-sm"
+                >
+                  <Link href="/dashboard/papers/search">
+                    Explore
+                    <ArrowUpRight className="h-3 w-3 ml-1" />
+                  </Link>
+                </Button>
               </div>
-              <h4 className="font-medium mb-1 text-sm sm:text-base">
-                Trending Topics
-              </h4>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">
-                "Sustainable AI" is gaining momentum in your field
-              </p>
-              <Button
-                size="sm"
-                variant="outline"
-                asChild
-                className="w-full text-xs sm:text-sm"
-              >
-                <Link href="/dashboard/papers/search">
-                  Explore
-                  <ArrowUpRight className="h-3 w-3 ml-1" />
-                </Link>
-              </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </DashboardLayout>
   );
 }
