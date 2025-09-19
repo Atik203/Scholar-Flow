@@ -10,6 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
@@ -18,15 +25,17 @@ import {
   useCreateCollectionMutation,
 } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
-import { ArrowLeft, BookOpen, Globe, Lock } from "lucide-react";
+import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
+import { ArrowLeft, BookOpen, Building2, Globe, Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function CreateCollectionPage() {
   const isProtected = useProtectedRoute();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
 
   const [createCollection, { isLoading: isSubmitting }] =
@@ -41,16 +50,32 @@ export default function CreateCollectionPage() {
     workspaceId: "",
   });
 
-  // Papers list for selection
-  const { data: papersList } = useListPapersQuery({ page: 1, limit: 100 });
+  // Fetch workspaces for selection
+  const { data: workspacesData } = useListWorkspacesQuery({
+    page: 1,
+    limit: 50,
+    scope: "all",
+  });
+
+  // Papers list for selection (filtered by workspace)
+  const { data: papersList } = useListPapersQuery({
+    page: 1,
+    limit: 100,
+    workspaceId: formData.workspaceId || undefined,
+  });
   const papers = papersList?.items || [];
 
   useEffect(() => {
-    if (session?.user?.id) {
-      const workspaceId = `workspace-${session.user.id}`;
-      setFormData((prev) => ({ ...prev, workspaceId }));
+    // Get workspaceId from query params or use first available workspace
+    const queryWorkspaceId = searchParams.get("workspaceId");
+    const workspaces = workspacesData?.data || [];
+
+    if (queryWorkspaceId) {
+      setFormData((prev) => ({ ...prev, workspaceId: queryWorkspaceId }));
+    } else if (workspaces.length === 1 && !formData.workspaceId) {
+      setFormData((prev) => ({ ...prev, workspaceId: workspaces[0].id }));
     }
-  }, [session]);
+  }, [searchParams, session, workspacesData, formData.workspaceId]);
 
   if (!isProtected) return null;
 
@@ -147,6 +172,37 @@ export default function CreateCollectionPage() {
                   }
                   rows={4}
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="workspace" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Workspace *
+                </Label>
+                <Select
+                  value={formData.workspaceId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, workspaceId: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select workspace" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {workspacesData?.data?.length ? (
+                      workspacesData.data.map((workspace) => (
+                        <SelectItem key={workspace.id} value={workspace.id}>
+                          {workspace.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <div className="px-2 py-3 text-sm text-muted-foreground">
+                        {workspacesData
+                          ? "No workspaces available"
+                          : "Loading workspaces..."}
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-4">
                 <Label className="text-base font-medium">

@@ -102,12 +102,18 @@ export const collectionApi = apiSlice.injectEndpoints({
     // Get user's collections
     getMyCollections: builder.query<
       { result: Collection[]; meta: any },
-      { page?: number; limit?: number }
+      { page?: number; limit?: number; workspaceId?: string }
     >({
-      query: ({ page = 1, limit = 10 } = {}) => ({
-        url: "/collections/my",
-        params: { page, limit },
-      }),
+      query: ({ page = 1, limit = 10, workspaceId } = {}) => {
+        const params: any = { page, limit };
+        if (workspaceId) {
+          params.workspaceId = workspaceId;
+        }
+        return {
+          url: "/collections/my",
+          params,
+        };
+      },
       transformResponse: (response: { data: Collection[]; meta: any }) => ({
         result: response.data,
         meta: response.meta,
