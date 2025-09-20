@@ -1,4 +1,4 @@
-import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
+import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
 import prisma from "../../shared/prisma";
 import { UpdatePaperMetadataInput, UploadPaperInput } from "./paper.validation";
 
@@ -65,18 +65,18 @@ export const paperService = {
       `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
     );
 
-    // Queue PDF extraction for background processing (non-blocking)
+    // Queue document extraction for background processing (non-blocking)
     const queueStart = Date.now();
     // Fire and forget - don't wait for Redis queue operations
-    queuePDFExtraction(created.id)
+    queueDocumentExtraction(created.id)
       .then(() => {
         console.log(
-          `[PaperUpload] Queued PDF extraction for paper: ${created.id} (async)`
+          `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
         );
       })
       .catch((error) => {
         console.error(
-          `[PaperUpload] Failed to queue PDF extraction for paper: ${created.id}`,
+          `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
           error
         );
       });

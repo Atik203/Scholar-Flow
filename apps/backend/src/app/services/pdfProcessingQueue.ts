@@ -1,8 +1,6 @@
 import Bull from "bull";
-import { pdfExtractionService } from "../services/pdfExtractionService";
 
-// Create a queue for PDF processing with Redis Cloud connection
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+// Create a queue for document processing with Redis Cloud connection
 const redisConfig = {
   host: process.env.REDIS_HOST || "localhost",
   port: parseInt(process.env.REDIS_PORT || "6379"),
@@ -18,7 +16,7 @@ console.log(
   `[PDFQueue] Connecting to Redis: ${redisConfig.host}:${redisConfig.port}, DB: ${redisConfig.db}`
 );
 
-const pdfProcessingQueue = new Bull("pdf-processing", {
+const pdfProcessingQueue = new Bull("document-processing", {
   redis: redisConfig,
   settings: {
     stalledInterval: 30000,
@@ -35,14 +33,53 @@ pdfProcessingQueue.on("error", (error) => {
   console.error("[PDFQueue] Redis connection error:", error.message);
 });
 
-// Process PDF extraction jobs
+// Process document extraction jobs (PDF, DOCX, etc.)
+pdfProcessingQueue.process("extract-document", async (job) => {
+  const { paperId } = job.data;
+
+  try {
+    console.log(`Processing document extraction for paper: ${paperId}`);
+
+    // Import the service dynamically to avoid circular dependency
+    const { documentExtractionService } = await import(
+      "./documentExtractionService"
+    );
+    const result = await documentExtractionService.extractFromDocument(
+      paperId,
+      {
+        preserveFormatting: true,
+        includeHtml: true,
+      }
+    );
+
+    if (result.success) {
+      console.log(`Successfully processed document for paper: ${paperId}`);
+      return { success: true, result };
+    } else {
+      console.error(
+        `Failed to process document for paper: ${paperId}`,
+        result.error
+      );
+      throw new Error(result.error);
+    }
+  } catch (error) {
+    console.error(`Error processing document for paper: ${paperId}`, error);
+    throw error;
+  }
+});
+
+// Keep the old PDF extraction job for backward compatibility
 pdfProcessingQueue.process("extract-pdf", async (job) => {
   const { paperId } = job.data;
 
   try {
-    console.log(`Processing PDF extraction for paper: ${paperId}`);
+    console.log(`Processing PDF extraction for paper: ${paperId} (legacy)`);
 
-    const result = await pdfExtractionService.extractTextFromPDF(paperId);
+    // Import the new service
+    const { documentExtractionService } = await import(
+      "./documentExtractionService"
+    );
+    const result = await documentExtractionService.extractFromDocument(paperId);
 
     if (result.success) {
       console.log(`Successfully processed PDF for paper: ${paperId}`);
@@ -61,25 +98,57 @@ pdfProcessingQueue.process("extract-pdf", async (job) => {
 });
 
 // Handle job completion
-pdfProcessingQueue.on("completed", (job, _result) => {
-  console.log(`PDF processing job ${job.id} completed successfully`);
+pdfProcessingQueue.on("completed", (job, result) => {
+  console.log(
+    `[DocumentQueue] Job ${job.id} completed successfully for paper: ${job.data.paperId}`
+  );
+  console.log(
+    `[DocumentQueue] Result:`,
+    result?.success ? "SUCCESS" : "FAILED"
+  );
 });
 
 // Handle job failure
 pdfProcessingQueue.on("failed", (job, err) => {
-  console.error(`PDF processing job ${job.id} failed:`, err.message);
+  console.error(
+    `[DocumentQueue] Job ${job.id} failed for paper: ${job.data.paperId}:`,
+    err.message
+  );
 });
 
-// Add a job to process a specific paper
-export async function queuePDFExtraction(paperId: string): Promise<void> {
+// Handle job progress and other events
+pdfProcessingQueue.on("active", (job) => {
+  console.log(
+    `[DocumentQueue] Job ${job.id} started processing for paper: ${job.data.paperId}`
+  );
+});
+
+pdfProcessingQueue.on("stalled", (job) => {
+  console.warn(
+    `[DocumentQueue] Job ${job.id} stalled for paper: ${job.data.paperId}`
+  );
+});
+
+pdfProcessingQueue.on("waiting", (jobId) => {
+  console.log(`[DocumentQueue] Job ${jobId} is waiting to be processed`);
+});
+
+// Add a job to process a specific document (PDF, DOCX, etc.)
+export async function queueDocumentExtraction(paperId: string): Promise<void> {
   const queueStart = Date.now();
   try {
     console.log(
-      `[PDFQueue] Attempting to queue PDF extraction for paper: ${paperId}`
+      `[DocumentQueue] Attempting to queue document extraction for paper: ${paperId}`
+    );
+
+    // Test Redis connection first
+    await pdfProcessingQueue.isReady();
+    console.log(
+      `[DocumentQueue] Redis connection verified for paper: ${paperId}`
     );
 
     await pdfProcessingQueue.add(
-      "extract-pdf",
+      "extract-document",
       { paperId },
       {
         attempts: 3,
@@ -89,36 +158,54 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
         },
         removeOnComplete: 10,
         removeOnFail: 5,
-        timeout: 5000, // 5 second timeout for queue operations
+        // Allow enough time for document extraction (5 minutes for large documents)
+        timeout: 300000,
       }
     );
 
     const queueTime = Date.now() - queueStart;
     console.log(
-      `[PDFQueue] Successfully queued PDF extraction for paper: ${paperId} in ${queueTime}ms`
+      `[DocumentQueue] Successfully queued document extraction for paper: ${paperId} in ${queueTime}ms`
     );
   } catch (error) {
     const queueTime = Date.now() - queueStart;
     console.error(
-      `[PDFQueue] Failed to queue PDF extraction for paper: ${paperId} after ${queueTime}ms:`,
+      `[DocumentQueue] Failed to queue document extraction for paper: ${paperId} after ${queueTime}ms:`,
       error
     );
+
     // Check if it's a Redis connection issue
     const errorCode = (error as any)?.code;
-    if (errorCode === "ECONNREFUSED" || errorCode === "ETIMEDOUT") {
+    const errorMessage = (error as any)?.message || "";
+
+    if (
+      errorCode === "ECONNREFUSED" ||
+      errorCode === "ETIMEDOUT" ||
+      errorMessage.includes("Redis") ||
+      errorMessage.includes("connection")
+    ) {
       console.warn(
-        `[PDFQueue] Redis connection issue detected. PDF processing will be skipped for paper: ${paperId}`
+        `[DocumentQueue] Redis connection issue detected for paper: ${paperId}. Throwing error to trigger fallback.`
       );
-      return; // Don't throw - allow upload to continue
+      throw error; // Throw to trigger fallback in controller
     }
     throw error;
   }
 }
 
+// Legacy function for backward compatibility
+export async function queuePDFExtraction(paperId: string): Promise<void> {
+  return queueDocumentExtraction(paperId);
+}
+
 // Process all unprocessed papers (for batch processing)
 export async function processAllUnprocessedPapers(): Promise<void> {
   try {
-    await pdfExtractionService.processUnprocessedPapers();
+    // Import the new service dynamically to avoid circular dependency
+    const { documentExtractionService } = await import(
+      "./documentExtractionService"
+    );
+    await documentExtractionService.processUnprocessedPapers();
   } catch (error) {
     console.error("Error processing unprocessed papers:", error);
     throw error;

@@ -1,6 +1,6 @@
-import pdf from 'pdf-parse';
-import { StorageService } from '../modules/papers/StorageService';
-import prisma from '../shared/prisma';
+import pdf from "pdf-parse";
+import { StorageService } from "../modules/papers/StorageService";
+import prisma from "../shared/prisma";
 
 export interface PDFExtractionResult {
   success: boolean;
@@ -27,6 +27,8 @@ export class PDFExtractionService {
    */
   async extractTextFromPDF(paperId: string): Promise<PDFExtractionResult> {
     try {
+      console.log(`[PDFExtraction] Starting extraction for paper: ${paperId}`);
+
       // Get paper and file info
       const paper = await prisma.paper.findUnique({
         where: { id: paperId },
@@ -34,60 +36,97 @@ export class PDFExtractionService {
       });
 
       if (!paper || !paper.file) {
+        console.error(
+          `[PDFExtraction] Paper or file not found for ID: ${paperId}`
+        );
         return {
           success: false,
-          error: 'Paper or file not found',
+          error: "Paper or file not found",
         };
       }
+
+      console.log(
+        `[PDFExtraction] Found paper: ${paper.title}, file: ${paper.file.objectKey}`
+      );
 
       // Update processing status
       await prisma.paper.update({
         where: { id: paperId },
-        data: { processingStatus: 'PROCESSING' },
+        data: { processingStatus: "PROCESSING" },
       });
 
+      console.log(
+        `[PDFExtraction] Updated status to PROCESSING for paper: ${paperId}`
+      );
+
       // Download PDF from S3
+      console.log(
+        `[PDFExtraction] Downloading PDF from S3: ${paper.file.objectKey}`
+      );
       const pdfBuffer = await this.storage.getObject(paper.file.objectKey);
-      
+      console.log(
+        `[PDFExtraction] Downloaded PDF buffer size: ${pdfBuffer.length} bytes`
+      );
+
       // Extract text using pdf-parse
+      console.log(`[PDFExtraction] Starting text extraction with pdf-parse`);
       const pdfData = await pdf(pdfBuffer, {
         // Options for better text extraction
         max: 0, // Parse all pages
-        version: 'v1.10.100', // Use specific version for consistency
+        version: "v1.10.100", // Use specific version for consistency
       });
 
+      // Extracted raw text from parser
       const extractedText = pdfData.text;
       const pageCount = pdfData.numpages;
 
+      console.log(
+        `[PDFExtraction] Extracted text length: ${extractedText.length}, pages: ${pageCount}`
+      );
+
       if (!extractedText || extractedText.trim().length === 0) {
+        console.error(
+          `[PDFExtraction] No text content found in PDF for paper: ${paperId}`
+        );
         await prisma.paper.update({
           where: { id: paperId },
           data: {
-            processingStatus: 'FAILED',
-            processingError: 'No text content found in PDF',
+            processingStatus: "FAILED",
+            processingError: "No text content found in PDF",
           },
         });
 
         return {
           success: false,
-          error: 'No text content found in PDF',
+          error: "No text content found in PDF",
         };
       }
 
+      // Sanitize full text upfront to ensure no invalid bytes reach the DB layer
+      const sanitizedFullText = this.sanitizeText(extractedText);
+
       // Chunk the text for better processing
-      const chunks = this.chunkText(extractedText, pageCount);
+      console.log(`[PDFExtraction] Creating chunks for paper: ${paperId}`);
+      const chunks = this.chunkText(sanitizedFullText, pageCount);
+      console.log(`[PDFExtraction] Created ${chunks.length} chunks`);
 
       // Store chunks in database
+      console.log(
+        `[PDFExtraction] Storing chunks in database for paper: ${paperId}`
+      );
       await this.storeChunks(paperId, chunks);
 
       // Update paper processing status and file info
+      console.log(
+        `[PDFExtraction] Updating paper status to PROCESSED for paper: ${paperId}`
+      );
       await Promise.all([
         prisma.paper.update({
           where: { id: paperId },
           data: {
-            processingStatus: 'PROCESSED',
+            processingStatus: "PROCESSED",
             processedAt: new Date(),
-            abstract: this.extractAbstract(extractedText),
+            // Intentionally not auto-updating abstract from extracted text.
           },
         }),
         prisma.paperFile.update({
@@ -99,6 +138,10 @@ export class PDFExtractionService {
         }),
       ]);
 
+      console.log(
+        `[PDFExtraction] Successfully completed extraction for paper: ${paperId}`
+      );
+
       return {
         success: true,
         text: extractedText,
@@ -106,20 +149,31 @@ export class PDFExtractionService {
         chunks,
       };
     } catch (error) {
-      console.error('PDF extraction error:', error);
-      
+      console.error(
+        `[PDFExtraction] Error processing PDF for paper ${paperId}:`,
+        error
+      );
+
       // Update processing status to failed
-      await prisma.paper.update({
-        where: { id: paperId },
-        data: {
-          processingStatus: 'FAILED',
-          processingError: error instanceof Error ? error.message : 'Unknown error',
-        },
-      });
+      try {
+        await prisma.paper.update({
+          where: { id: paperId },
+          data: {
+            processingStatus: "FAILED",
+            processingError:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+        });
+      } catch (updateError) {
+        console.error(
+          `[PDFExtraction] Failed to update error status for paper ${paperId}:`,
+          updateError
+        );
+      }
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -127,7 +181,10 @@ export class PDFExtractionService {
   /**
    * Chunk text into manageable pieces for processing
    */
-  private chunkText(text: string, pageCount: number): Array<{
+  private chunkText(
+    text: string,
+    pageCount: number
+  ): Array<{
     idx: number;
     page?: number;
     content: string;
@@ -140,11 +197,17 @@ export class PDFExtractionService {
       tokenCount?: number;
     }> = [];
 
+    // Guard against invalid inputs
+    if (!text) {
+      return [];
+    }
+
     // Split text into pages first (approximate)
-    const textPerPage = Math.ceil(text.length / pageCount);
+    const safePages = Math.max(1, Number.isFinite(pageCount) ? pageCount : 1);
+    const textPerPage = Math.ceil(text.length / safePages);
     const pages = [];
-    
-    for (let i = 0; i < pageCount; i++) {
+
+    for (let i = 0; i < safePages; i++) {
       const start = i * textPerPage;
       const end = Math.min(start + textPerPage, text.length);
       pages.push(text.slice(start, end));
@@ -156,14 +219,17 @@ export class PDFExtractionService {
       // Split page into smaller chunks (max 2000 characters)
       const maxChunkSize = 2000;
       const pageChunks = this.splitIntoChunks(pageText, maxChunkSize);
-      
+
       pageChunks.forEach((chunkText) => {
-        chunks.push({
-          idx: chunkIndex++,
-          page: pageIndex + 1,
-          content: chunkText.trim(),
-          tokenCount: this.estimateTokenCount(chunkText),
-        });
+        const sanitized = this.sanitizeText(chunkText);
+        if (sanitized.length > 0) {
+          chunks.push({
+            idx: chunkIndex++,
+            page: pageIndex + 1,
+            content: sanitized,
+            tokenCount: this.estimateTokenCount(sanitized),
+          });
+        }
       });
     });
 
@@ -175,23 +241,26 @@ export class PDFExtractionService {
    */
   private splitIntoChunks(text: string, maxSize: number): string[] {
     const chunks: string[] = [];
-    let currentChunk = '';
-    
+    let currentChunk = "";
+
     const sentences = text.split(/[.!?]+/);
-    
+
     for (const sentence of sentences) {
-      if (currentChunk.length + sentence.length > maxSize && currentChunk.length > 0) {
+      if (
+        currentChunk.length + sentence.length > maxSize &&
+        currentChunk.length > 0
+      ) {
         chunks.push(currentChunk.trim());
         currentChunk = sentence;
       } else {
-        currentChunk += sentence + '.';
+        currentChunk += sentence + ".";
       }
     }
-    
+
     if (currentChunk.trim().length > 0) {
       chunks.push(currentChunk.trim());
     }
-    
+
     return chunks;
   }
 
@@ -219,19 +288,48 @@ export class PDFExtractionService {
       if (match && match[1]) {
         const abstract = match[1].trim();
         // Limit abstract length
-        return abstract.length > 500 ? abstract.substring(0, 500) + '...' : abstract;
+        return abstract.length > 500
+          ? abstract.substring(0, 500) + "..."
+          : abstract;
       }
     }
 
     // Fallback: take first paragraph
-    const firstParagraph = text.split('\n\n')[0];
+    const firstParagraph = text.split("\n\n")[0];
     if (firstParagraph && firstParagraph.length > 50) {
-      return firstParagraph.length > 500 
-        ? firstParagraph.substring(0, 500) + '...' 
+      return firstParagraph.length > 500
+        ? firstParagraph.substring(0, 500) + "..."
         : firstParagraph;
     }
 
-    return '';
+    return "";
+  }
+
+  /**
+   * Sanitize text content to remove null bytes and other problematic characters
+   */
+  private sanitizeText(text: string): string {
+    if (!text) return "";
+
+    // Fast path: replace explicit null bytes first
+    let cleaned = text.replace(/\0/g, "");
+
+    // Filter out remaining problematic code points while preserving common whitespace
+    const builder: string[] = [];
+    for (const ch of cleaned) {
+      const code = ch.codePointAt(0)!;
+      // Remove C0 controls except tab (9), LF (10), CR (13)
+      if (code < 32 && code !== 9 && code !== 10 && code !== 13) continue;
+      // Delete DEL
+      if (code === 127) continue;
+      // Remove surrogate halves (invalid in UTF-8/UTF-32 strings)
+      if (code >= 0xd800 && code <= 0xdfff) continue;
+      // Remove non-characters U+FFFE, U+FFFF
+      if (code === 0xfffe || code === 0xffff) continue;
+      builder.push(ch);
+    }
+    cleaned = builder.join("");
+    return cleaned.trim();
   }
 
   /**
@@ -251,16 +349,20 @@ export class PDFExtractionService {
       where: { paperId },
     });
 
-    // Insert new chunks
-    await prisma.paperChunk.createMany({
-      data: chunks.map((chunk) => ({
+    // Insert new chunks with sanitized content
+    const prepared = chunks
+      .map((chunk) => ({
         paperId,
         idx: chunk.idx,
         page: chunk.page,
-        content: chunk.content,
+        content: this.sanitizeText(chunk.content),
         tokenCount: chunk.tokenCount,
-      })),
-    });
+      }))
+      .filter((c) => c.content && c.content.length > 0);
+
+    if (prepared.length > 0) {
+      await prisma.paperChunk.createMany({ data: prepared });
+    }
   }
 
   /**
@@ -269,7 +371,7 @@ export class PDFExtractionService {
   async processUnprocessedPapers(): Promise<void> {
     const unprocessedPapers = await prisma.paper.findMany({
       where: {
-        processingStatus: 'UPLOADED',
+        processingStatus: "UPLOADED",
         isDeleted: false,
       },
       include: { file: true },
