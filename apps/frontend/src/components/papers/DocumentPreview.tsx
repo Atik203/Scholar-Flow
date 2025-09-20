@@ -8,7 +8,7 @@ import {
   FileText,
   Loader2,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PdfViewerFallback } from "./PdfViewerFallback";
 
 interface DocumentPreviewProps {
@@ -29,6 +29,8 @@ export function DocumentPreview({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [docxHtml, setDocxHtml] = useState<string | null>(null);
+  const [renderedByDocxPreview, setRenderedByDocxPreview] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Helpers: infer extension and type from available hints
   const extractExtensionFromName = (name?: string) => {
@@ -161,18 +163,87 @@ export function DocumentPreview({
     }
   }, [fileUrl]);
 
+  // High-fidelity DOCX rendering using docx-preview; falls back to mammoth on failure
+  const renderDocxHighFidelity = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (!fileUrl || typeof fileUrl !== "string" || fileUrl.trim() === "") {
+        throw new Error("Invalid file URL provided");
+      }
+
+      const response = await fetch(fileUrl, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("Access denied - file URL may have expired");
+        } else if (response.status === 404) {
+          throw new Error("Document not found");
+        } else {
+          throw new Error(`Failed to fetch document (${response.status})`);
+        }
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+
+      // Dynamic import to avoid SSR issues
+      const docx = await import("docx-preview").catch(() => null as any);
+      if (!docx || typeof (docx as any).renderAsync !== "function") {
+        throw new Error("High-fidelity DOCX renderer not available");
+      }
+
+      // Clear previous content before rendering
+      if (containerRef.current) {
+        containerRef.current.innerHTML = "";
+      }
+
+      await (docx as any).renderAsync(
+        arrayBuffer,
+        containerRef.current,
+        undefined,
+        {
+          className: "docx",
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: false,
+          breakPages: false,
+          experimental: true,
+          useMathMLPolyfill: true,
+        }
+      );
+
+      setRenderedByDocxPreview(true);
+      setDocxHtml(null); // ensure mammoth content isn't shown
+    } catch (err) {
+      console.warn(
+        "docx-preview rendering failed, falling back to mammoth:",
+        err
+      );
+      setRenderedByDocxPreview(false);
+      // Fallback to mammoth conversion
+      await convertDocxToHtml();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fileUrl, convertDocxToHtml]);
+
   useEffect(() => {
     if (
-      fileExtension === "docx" &&
-      !docxHtml &&
+      effectiveType === "docx" &&
       !error &&
       fileUrl &&
       typeof fileUrl === "string" &&
       fileUrl.trim() !== ""
     ) {
-      convertDocxToHtml();
+      // Try high-fidelity renderer first; it will fallback to mammoth on failure
+      renderDocxHighFidelity();
     }
-  }, [fileExtension, fileUrl, docxHtml, error, convertDocxToHtml]);
+  }, [effectiveType, fileUrl, error, renderDocxHighFidelity]);
 
   // Validate fileUrl after hooks but before rendering
   if (!fileUrl || typeof fileUrl !== "string" || fileUrl.trim() === "") {
@@ -211,7 +282,7 @@ export function DocumentPreview({
         >
           <Loader2 className="h-8 w-8 mb-2 text-muted-foreground animate-spin" />
           <p className="text-sm text-muted-foreground">
-            Converting document for preview...
+            Preparing document preview...
           </p>
         </div>
       );
@@ -233,11 +304,58 @@ export function DocumentPreview({
               <Download className="h-4 w-4 mr-2" />
               Download
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const officeUrl =
+                  "https://view.officeapps.live.com/op/view.aspx?src=" +
+                  encodeURIComponent(fileUrl);
+                window.open(officeUrl, "_blank");
+              }}
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Office Viewer
+            </Button>
           </div>
         </div>
       );
     }
 
+    // Rendered by docx-preview
+    if (renderedByDocxPreview) {
+      return (
+        <div className={className}>
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-muted/50 border-b p-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span className="text-sm font-medium">Document Preview</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenInNewTab}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleDownload}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+            </div>
+            <div className="p-0 max-h-96 overflow-auto">
+              <div ref={containerRef} className="docx-wrapper" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Fallback: mammoth-rendered HTML
     if (docxHtml) {
       return (
         <div className={className}>
