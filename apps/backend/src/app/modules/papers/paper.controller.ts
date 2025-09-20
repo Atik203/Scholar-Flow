@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
-import { queuePDFExtraction } from "../../services/pdfProcessingQueue";
+import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
 import catchAsync from "../../shared/catchAsync";
 import prisma from "../../shared/prisma";
 import {
@@ -36,8 +36,14 @@ export const paperController = {
     if (!authReq.file) {
       throw createPaperError.missingFile();
     }
-    if (authReq.file.mimetype !== "application/pdf") {
-      throw createPaperError.invalidFileType(["PDF"]);
+    const allowedMimeTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+      "application/msword", // DOC (legacy support)
+    ];
+
+    if (!allowedMimeTypes.includes(authReq.file.mimetype)) {
+      throw createPaperError.invalidFileType(["PDF", "DOCX", "DOC"]);
     }
 
     const validationStart = Date.now();
@@ -186,7 +192,10 @@ export const paperController = {
 
     // Use shorter expiry for security; front-end can re-request as needed
     const EXPIRES_SECONDS = 120; // 2 minutes
-    const url = storage.getSignedUrl(paper.file.objectKey, EXPIRES_SECONDS);
+    const url = await storage.getSignedUrl(
+      paper.file.objectKey,
+      EXPIRES_SECONDS
+    );
 
     sendSuccessResponse(
       res,
@@ -255,14 +264,92 @@ export const paperController = {
       throw new ApiError(400, "Paper file not found");
     }
 
-    // Queue PDF processing
-    await queuePDFExtraction(parsed.data.id);
-
-    sendSuccessResponse(
-      res,
-      { message: "PDF processing queued" },
-      "PDF processing started"
+    console.log(
+      `[PaperController] Starting document processing for paper: ${parsed.data.id}`
     );
+
+    // Reset processing status if it was failed or stuck
+    if (
+      paper.processingStatus === "FAILED" ||
+      paper.processingStatus === "PROCESSING"
+    ) {
+      console.log(
+        `[PaperController] Resetting processing status from ${paper.processingStatus} to UPLOADED for paper: ${parsed.data.id}`
+      );
+      await prisma.paper.update({
+        where: { id: parsed.data.id },
+        data: {
+          processingStatus: "UPLOADED",
+          processingError: null,
+        },
+      });
+    }
+
+    try {
+      // Try to queue document processing first (supports PDF, DOCX, etc.)
+      await queueDocumentExtraction(parsed.data.id);
+
+      console.log(
+        `[PaperController] Successfully queued document processing for paper: ${parsed.data.id}`
+      );
+      sendSuccessResponse(
+        res,
+        { message: "Document processing queued" },
+        "Document processing started"
+      );
+    } catch (queueError) {
+      console.warn(
+        `[PaperController] Queue failed for paper ${parsed.data.id}, attempting direct processing:`,
+        queueError
+      );
+
+      // Fallback: Process directly if queue fails
+      try {
+        const { documentExtractionService } = await import(
+          "../../services/documentExtractionService"
+        );
+        console.log(
+          `[PaperController] Starting direct document processing for paper: ${parsed.data.id}`
+        );
+
+        const result = await documentExtractionService.extractFromDocument(
+          parsed.data.id,
+          {
+            preserveFormatting: true,
+            includeHtml: true,
+          }
+        );
+
+        if (result.success) {
+          console.log(
+            `[PaperController] Direct document processing completed successfully for paper: ${parsed.data.id}`
+          );
+          sendSuccessResponse(
+            res,
+            { message: "Document processing completed directly" },
+            "Document processing completed"
+          );
+        } else {
+          console.error(
+            `[PaperController] Direct document processing failed for paper ${parsed.data.id}:`,
+            result.error
+          );
+          throw new ApiError(
+            500,
+            `Document processing failed: ${result.error}`
+          );
+        }
+      } catch (directError) {
+        console.error(
+          `[PaperController] Direct processing also failed for paper ${parsed.data.id}:`,
+          directError
+        );
+        throw new ApiError(
+          500,
+          `Document processing failed: ${directError instanceof Error ? directError.message : String(directError)}`
+        );
+      }
+    }
   }),
 
   // Get processing status and chunks for a paper
@@ -302,5 +389,109 @@ export const paperController = {
       },
       "Processing status retrieved"
     );
+  }),
+
+  // Get all chunks for a paper
+  getAllChunks: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    // Get all chunks
+    const chunks = await prisma.paperChunk.findMany({
+      where: { paperId: parsed.data.id, isDeleted: false },
+      orderBy: { idx: "asc" },
+      select: {
+        id: true,
+        idx: true,
+        page: true,
+        content: true,
+        tokenCount: true,
+        createdAt: true,
+      },
+    });
+
+    sendSuccessResponse(
+      res,
+      {
+        chunksCount: chunks.length,
+        chunks: chunks,
+      },
+      "All chunks retrieved"
+    );
+  }),
+
+  // Force direct PDF processing (bypasses Redis queue)
+  processPDFDirect: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    if (!paper.file) {
+      throw new ApiError(400, "Paper file not found");
+    }
+
+    console.log(
+      `[PaperController] Starting direct document processing for paper: ${parsed.data.id}`
+    );
+
+    try {
+      const { documentExtractionService } = await import(
+        "../../services/documentExtractionService"
+      );
+      const result = await documentExtractionService.extractFromDocument(
+        parsed.data.id,
+        {
+          preserveFormatting: true,
+          includeHtml: true,
+        }
+      );
+
+      if (result.success) {
+        console.log(
+          `[PaperController] Direct document processing completed successfully for paper: ${parsed.data.id}`
+        );
+        sendSuccessResponse(
+          res,
+          {
+            message: "Document processing completed directly",
+            result: {
+              pageCount: result.pageCount,
+              chunksCount: result.chunks?.length || 0,
+              textLength: result.text?.length || 0,
+              hasHtmlContent: !!result.htmlContent,
+            },
+          },
+          "Document processing completed"
+        );
+      } else {
+        console.error(
+          `[PaperController] Direct document processing failed for paper ${parsed.data.id}:`,
+          result.error
+        );
+        throw new ApiError(500, `Document processing failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error(
+        `[PaperController] Direct processing failed for paper ${parsed.data.id}:`,
+        error
+      );
+      throw new ApiError(
+        500,
+        `Document processing failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }),
 };
