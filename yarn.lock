@@ -4957,6 +4957,7 @@ __metadata:
     axios: "npm:^1.6.2"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.0.0"
+    docx-preview: "npm:^0.3.6"
     embla-carousel-react: "npm:^8.6.0"
     eslint: "npm:^9"
     eslint-config-next: "npm:15.4.6"
@@ -8789,6 +8790,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"docx-preview@npm:^0.3.6":
+  version: 0.3.6
+  resolution: "docx-preview@npm:0.3.6"
+  dependencies:
+    jszip: "npm:>=3.0.0"
+  checksum: 10c0/4df4e109dff8177aa2ae58780285c071f5203eab87c62ecbd2c3cfd414874d5be70c8dfa6248d62f1126f80e10558989fb9c1f518c5c1a4a4659c513b63689e6
+  languageName: node
+  linkType: hard
+
 "dom-accessibility-api@npm:^0.5.9":
   version: 0.5.16
   resolution: "dom-accessibility-api@npm:0.5.16"
@@ -12385,7 +12395,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jszip@npm:^3.7.1":
+"jszip@npm:>=3.0.0, jszip@npm:^3.7.1":
   version: 3.10.1
   resolution: "jszip@npm:3.10.1"
   dependencies:

@@ -12,10 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useGetProcessingStatusQuery, useGetAllChunksQuery } from "@/redux/api/paperApi";
+import {
+  useGetAllChunksQuery,
+  useGetProcessingStatusQuery,
+} from "@/redux/api/paperApi";
 import {
   ChevronDown,
   ChevronUp,
+  Copy,
   FileText,
   Filter,
   RefreshCw,
@@ -23,7 +27,7 @@ import {
   SortAsc,
   SortDesc,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 interface ExtractedTextDisplayProps {
   paperId: string;
@@ -42,6 +46,9 @@ export function ExtractedTextDisplay({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set());
   const [filterByPage, setFilterByPage] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"continuous" | "chunks">(
+    "continuous"
+  );
 
   const {
     data: processingData,
@@ -63,7 +70,8 @@ export function ExtractedTextDisplay({
 
   const processingStatus = processingData?.data?.processingStatus;
   const chunksCount = processingData?.data?.chunksCount || 0;
-  const chunks = chunksData?.data?.chunks || [];
+  // Memoize chunks to keep reference stable across renders for dependent hooks
+  const chunks = useMemo(() => chunksData?.data?.chunks ?? [], [chunksData]);
 
   // Debug logging
   console.log("ExtractedTextDisplay - Paper ID:", paperId);
@@ -117,6 +125,23 @@ export function ExtractedTextDisplay({
     return [...new Set(pages)];
   }, [chunks]);
 
+  // For continuous view, enforce natural reading order: page asc, idx asc
+  const orderedForContinuous = useMemo(() => {
+    const arr = [...filteredAndSortedChunks];
+    return arr.sort((a, b) => {
+      const pa = a.page ?? Number.MAX_SAFE_INTEGER;
+      const pb = b.page ?? Number.MAX_SAFE_INTEGER;
+      if (pa !== pb) return pa - pb;
+      return (a.idx ?? 0) - (b.idx ?? 0);
+    });
+  }, [filteredAndSortedChunks]);
+
+  const combinedText = useMemo(() => {
+    return orderedForContinuous
+      .map((c) => c.content?.trim?.() ?? "")
+      .join("\n\n");
+  }, [orderedForContinuous]);
+
   const toggleChunkExpansion = (chunkId: string) => {
     const newExpanded = new Set(expandedChunks);
     if (newExpanded.has(chunkId)) {
@@ -164,8 +189,8 @@ export function ExtractedTextDisplay({
               {processingStatus === "PROCESSING"
                 ? "Processing PDF..."
                 : processingStatus === "FAILED"
-                ? "Processing failed"
-                : "PDF not processed yet"}
+                  ? "Processing failed"
+                  : "PDF not processed yet"}
             </p>
           </div>
         </CardContent>
@@ -187,7 +212,9 @@ export function ExtractedTextDisplay({
             <div className="animate-pulse space-y-4">
               <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
               <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-              <p className="text-sm text-muted-foreground">Loading extracted text...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading extracted text...
+              </p>
             </div>
           </div>
         </CardContent>
@@ -266,14 +293,16 @@ export function ExtractedTextDisplay({
               }}
               disabled={isChunksLoading || isStatusLoading}
             >
-              <RefreshCw className={`h-4 w-4 ${isChunksLoading || isStatusLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isChunksLoading || isStatusLoading ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Search and Filter Controls */}
+        {/* Search, Filter, and View Controls */}
         <div className="space-y-3">
           <div className="flex gap-2">
             <div className="relative flex-1">
@@ -297,13 +326,17 @@ export function ExtractedTextDisplay({
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Filter by page:</span>
+              <span className="text-sm text-muted-foreground">
+                Filter by page:
+              </span>
               <select
                 value={filterByPage || ""}
                 onChange={(e) =>
-                  setFilterByPage(e.target.value ? parseInt(e.target.value) : null)
+                  setFilterByPage(
+                    e.target.value ? parseInt(e.target.value) : null
+                  )
                 }
-                className="px-2 py-1 text-sm border rounded"
+                className="px-2 py-1 text-sm rounded-md border border-input bg-background text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 hover:bg-muted/50"
               >
                 <option value="">All pages</option>
                 {uniquePages.map((page) => (
@@ -341,92 +374,146 @@ export function ExtractedTextDisplay({
                 Tokens {getSortIcon("tokenCount")}
               </Button>
             </div>
+
+            {/* View mode toggle */}
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">View:</span>
+              <div className="inline-flex rounded-md border border-input bg-muted/40 p-1">
+                <Button
+                  variant={viewMode === "continuous" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setViewMode("continuous")}
+                >
+                  Continuous
+                </Button>
+                <Button
+                  variant={viewMode === "chunks" ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setViewMode("chunks")}
+                >
+                  Chunks
+                </Button>
+              </div>
+              {viewMode === "continuous" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => navigator.clipboard.writeText(combinedText)}
+                  title="Copy all text"
+                >
+                  <Copy className="h-4 w-4 mr-2" /> Copy
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
         <Separator />
 
-        {/* Chunks Display */}
+        {/* Display */}
         <ScrollArea className="h-[600px] w-full">
-          <div className="space-y-3 pr-4">
-            {filteredAndSortedChunks.map((chunk) => {
-              const isExpanded = expandedChunks.has(chunk.id);
-              const shouldTruncate = !isExpanded && chunk.content.length > 300;
-
-              return (
-                <Card key={chunk.id} className="border-l-4 border-l-primary/20">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          Chunk {chunk.idx}
-                        </Badge>
-                        {chunk.page && (
-                          <Badge variant="outline" className="text-xs">
-                            Page {chunk.page}
-                          </Badge>
-                        )}
-                        {chunk.tokenCount && (
-                          <Badge variant="outline" className="text-xs">
-                            {chunk.tokenCount} tokens
-                          </Badge>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleChunkExpansion(chunk.id)}
-                        className="h-6 w-6 p-0"
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {shouldTruncate
-                          ? `${chunk.content.substring(0, 300)}...`
-                          : chunk.content}
-                      </p>
-                    </div>
-                    {shouldTruncate && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => toggleChunkExpansion(chunk.id)}
-                        className="p-0 h-auto text-xs mt-2"
-                      >
-                        Show more
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            {filteredAndSortedChunks.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No chunks match your search criteria</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setFilterByPage(null);
+          {viewMode === "continuous" ? (
+            <div className="pr-4">
+              <div className="prose prose-sm md:prose-base lg:prose-lg max-w-none">
+                <div
+                  className="leading-relaxed whitespace-pre-wrap"
+                  style={{
+                    textAlign: "justify",
+                    textJustify: "inter-word" as any,
                   }}
-                  className="mt-2"
                 >
-                  Clear filters
-                </Button>
+                  {combinedText}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-3 pr-4">
+              {filteredAndSortedChunks.map((chunk) => {
+                const isExpanded = expandedChunks.has(chunk.id);
+                const shouldTruncate =
+                  !isExpanded && chunk.content.length > 300;
+
+                return (
+                  <Card
+                    key={chunk.id}
+                    className="border-l-4 border-l-primary/20"
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-xs">
+                            Chunk {chunk.idx}
+                          </Badge>
+                          {chunk.page && (
+                            <Badge variant="outline" className="text-xs">
+                              Page {chunk.page}
+                            </Badge>
+                          )}
+                          {chunk.tokenCount && (
+                            <Badge variant="outline" className="text-xs">
+                              {chunk.tokenCount} tokens
+                            </Badge>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleChunkExpansion(chunk.id)}
+                          className="h-6 w-6 p-0"
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="prose prose-sm max-w-none">
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {shouldTruncate
+                            ? `${chunk.content.substring(0, 300)}...`
+                            : chunk.content}
+                        </p>
+                      </div>
+                      {shouldTruncate && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          onClick={() => toggleChunkExpansion(chunk.id)}
+                          className="p-0 h-auto text-xs mt-2"
+                        >
+                          Show more
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {filteredAndSortedChunks.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No chunks match your search criteria</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilterByPage(null);
+                    }}
+                    className="mt-2"
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </ScrollArea>
       </CardContent>
     </Card>
