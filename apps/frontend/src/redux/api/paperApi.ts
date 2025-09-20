@@ -54,6 +54,21 @@ export interface UpdatePaperMetadataRequest {
   year?: number;
 }
 
+export interface ProcessingStatusResponse {
+  processingStatus: "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
+  processingError?: string;
+  processedAt?: string;
+  chunksCount: number;
+  chunks: Array<{
+    id: string;
+    idx: number;
+    page?: number;
+    content: string;
+    tokenCount?: number;
+    createdAt: string;
+  }>;
+}
+
 export const paperApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     uploadPaper: builder.mutation<
@@ -113,7 +128,11 @@ export const paperApi = apiSlice.injectEndpoints({
     }),
 
     getPaperFileUrl: builder.query<
-      { data: { url: string; expiresIn: number } },
+      {
+        success: boolean;
+        data: { url: string; expiresIn: number };
+        message: string;
+      },
       string
     >({
       query: (id) => `/papers/${id}/file-url`,
@@ -144,6 +163,74 @@ export const paperApi = apiSlice.injectEndpoints({
     >({
       query: () => "/papers/dev/workspace",
     }),
+
+    // PDF Processing endpoints
+    processPDF: builder.mutation<{ data: { message: string } }, string>({
+      query: (paperId) => ({
+        url: `/papers/${paperId}/process`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, paperId) => [
+        { type: "Paper", id: paperId },
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
+
+    getProcessingStatus: builder.query<
+      { data: ProcessingStatusResponse },
+      string
+    >({
+      query: (paperId) => `/papers/${paperId}/processing-status`,
+      transformResponse: (response: { data: ProcessingStatusResponse }) =>
+        response,
+      providesTags: (result, error, paperId) => [
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
+
+    getAllChunks: builder.query<
+      {
+        data: {
+          chunksCount: number;
+          chunks: ProcessingStatusResponse["chunks"];
+        };
+      },
+      string
+    >({
+      query: (paperId) => `/papers/${paperId}/chunks`,
+      transformResponse: (response: {
+        data: {
+          chunksCount: number;
+          chunks: ProcessingStatusResponse["chunks"];
+        };
+      }) => response,
+      providesTags: (result, error, paperId) => [
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
+
+    processPDFDirect: builder.mutation<
+      {
+        data: {
+          message: string;
+          result?: {
+            pageCount: number;
+            chunksCount: number;
+            textLength: number;
+          };
+        };
+      },
+      string
+    >({
+      query: (paperId) => ({
+        url: `/papers/${paperId}/process-direct`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, paperId) => [
+        { type: "Paper", id: paperId },
+        { type: "ProcessingStatus", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -155,4 +242,8 @@ export const {
   useUpdatePaperMetadataMutation,
   useDeletePaperMutation,
   useGetDevWorkspaceQuery,
+  useProcessPDFMutation,
+  useGetProcessingStatusQuery,
+  useGetAllChunksQuery,
+  useProcessPDFDirectMutation,
 } = paperApi;

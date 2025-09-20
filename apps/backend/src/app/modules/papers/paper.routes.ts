@@ -90,3 +90,19 @@ paperRoutes.get(
   authMiddleware as any,
   paperController.getProcessingStatus as any
 );
+
+// Get all chunks for a paper
+paperRoutes.get(
+  "/:id/chunks",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getAllChunks as any
+);
+
+// Force direct PDF processing (bypasses Redis queue)
+paperRoutes.post(
+  "/:id/process-direct",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.processPDFDirect as any
+);
