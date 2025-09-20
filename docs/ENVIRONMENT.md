@@ -164,6 +164,68 @@ If using Stripe CLI, forward events locally:
 stripe listen --forward-to http://localhost:5000/webhooks/stripe
 ```
 
+## Gotenberg on GCP (Cloud Run)
+
+Use Cloud Run to host the Gotenberg container for DOCX→PDF conversion. This keeps conversions off Vercel serverless and gives you longer timeouts and more memory.
+
+Prerequisites
+
+- Google Cloud project with billing enabled
+- gcloud CLI installed and authenticated
+- Cloud Run and Artifact Registry APIs enabled
+
+Quick deploy (official image)
+
+```bash
+# Pick a region (e.g., us-central1)
+gcloud run deploy scholarflow-gotenberg \
+  --image=gotenberg/gotenberg:8 \
+  --port=3000 \
+  --region=us-central1 \
+  --memory=1Gi --cpu=1 \
+  --allow-unauthenticated
+```
+
+After deploy, copy the service URL (e.g., <https://scholarflow-gotenberg-xxxx-uc.a.run.app>).
+
+Optional: custom image with fonts
+
+```dockerfile
+FROM gotenberg/gotenberg:8
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends fonts-dejavu fonts-liberation fonts-noto-core && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+USER 1001
+```
+
+Build and push to Artifact Registry, then deploy that image to Cloud Run.
+
+Backend env wiring
+
+- In `apps/backend/.env` (and `.env.example`):
+  - `DOCX_TO_PDF_ENGINE=gotenberg`
+  - `GOTENBERG_URL=<your-cloud-run-url>`
+
+Example:
+
+```env
+DOCX_TO_PDF_ENGINE=gotenberg
+GOTENBERG_URL=https://scholarflow-gotenberg-xxxx-uc.a.run.app
+```
+
+Verification
+
+- From your dev machine:
+  - Open the URL to ensure it responds. For full testing, run a DOCX→PDF conversion from the backend worker and confirm a PDF is produced.
+  - Watch logs: `gcloud run services logs tail scholarflow-gotenberg --region=us-central1`
+
+Security & limits
+
+- Leave the service public during early dev; later, restrict with an auth proxy or Cloud Run “authenticated” and sign requests from your backend.
+- Choose `--memory=1Gi` (or more) for complex files; increase if you see OOM.
+- Keep conversions async in your queue with a 2–5 minute timeout and retry with backoff.
+
 ## End-to-End Dev Checklist
 
 1. Copy example envs into place
