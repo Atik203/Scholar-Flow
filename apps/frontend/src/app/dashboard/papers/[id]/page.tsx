@@ -1,7 +1,9 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PdfPreview } from "@/components/papers/PdfPreview";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
+import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
+import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import {
   showErrorToast,
   showSuccessToast,
@@ -532,6 +534,16 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* PDF Processing Status */}
+            <PdfProcessingStatus
+              paperId={paper.id}
+              currentStatus={paper.processingStatus}
+              showTriggerButton={true}
+            />
+
+            {/* Extracted Text Display */}
+            <ExtractedTextDisplay paperId={paper.id} />
           </div>
 
           {/* Enhanced Sidebar */}
@@ -597,17 +609,20 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                             {isFetchingFileUrl ? (
                               <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
                                 <Loader2 className="h-8 w-8 animate-spin mb-4" />
-                                <p>Preparing PDF preview...</p>
+                                <p>Preparing document preview...</p>
                               </div>
                             ) : fileUrlData?.data?.url ? (
-                              <PdfPreview
+                              <DocumentPreview
                                 fileUrl={fileUrlData.data.url}
+                                fileName={paper?.file?.originalFilename}
+                                mimeType={paper?.file?.contentType}
+                                originalFilename={paper?.file?.originalFilename}
                                 className="mx-auto"
                               />
                             ) : (
                               <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
                                 <AlertCircle className="h-8 w-8 mb-4" />
-                                <p>Unable to load PDF preview</p>
+                                <p>Unable to load document preview</p>
                                 <Button
                                   variant="outline"
                                   size="sm"

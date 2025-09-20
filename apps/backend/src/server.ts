@@ -10,6 +10,9 @@ import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
 
+// Initialize queue processing
+import "./app/services/pdfProcessingQueue";
+
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
