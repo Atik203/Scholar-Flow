@@ -1,5 +1,4 @@
 import Bull from "bull";
-import prisma from "../shared/prisma";
 
 // Create a queue for PDF processing with Redis Cloud connection
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -41,9 +40,9 @@ pdfProcessingQueue.process("extract-pdf", async (job) => {
 
   try {
     console.log(`Processing PDF extraction for paper: ${paperId}`);
-    
+
     // Import the service dynamically to avoid circular dependency
-    const { pdfExtractionService } = await import('./pdfExtractionService');
+    const { pdfExtractionService } = await import("./pdfExtractionService");
     const result = await pdfExtractionService.extractTextFromPDF(paperId);
 
     if (result.success) {
@@ -95,7 +94,8 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
         },
         removeOnComplete: 10,
         removeOnFail: 5,
-        timeout: 5000, // 5 second timeout for queue operations
+        // Allow enough time for text extraction on typical PDFs (3 minutes)
+        timeout: 180000,
       }
     );
 
@@ -109,13 +109,17 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
       `[PDFQueue] Failed to queue PDF extraction for paper: ${paperId} after ${queueTime}ms:`,
       error
     );
-    
+
     // Check if it's a Redis connection issue
     const errorCode = (error as any)?.code;
-    const errorMessage = (error as any)?.message || '';
-    
-    if (errorCode === "ECONNREFUSED" || errorCode === "ETIMEDOUT" || 
-        errorMessage.includes('Redis') || errorMessage.includes('connection')) {
+    const errorMessage = (error as any)?.message || "";
+
+    if (
+      errorCode === "ECONNREFUSED" ||
+      errorCode === "ETIMEDOUT" ||
+      errorMessage.includes("Redis") ||
+      errorMessage.includes("connection")
+    ) {
       console.warn(
         `[PDFQueue] Redis connection issue detected for paper: ${paperId}. Throwing error to trigger fallback.`
       );
@@ -129,7 +133,7 @@ export async function queuePDFExtraction(paperId: string): Promise<void> {
 export async function processAllUnprocessedPapers(): Promise<void> {
   try {
     // Import the service dynamically to avoid circular dependency
-    const { pdfExtractionService } = await import('./pdfExtractionService');
+    const { pdfExtractionService } = await import("./pdfExtractionService");
     await pdfExtractionService.processUnprocessedPapers();
   } catch (error) {
     console.error("Error processing unprocessed papers:", error);
