@@ -1,6 +1,6 @@
 "use client";
 
-import { PdfPreview } from "@/components/papers/PdfPreview";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import {
   showErrorToast,
   showSuccessToast,
@@ -45,9 +45,10 @@ import {
   useDeletePaperMutation,
   useGetPaperFileUrlQuery,
   useListPapersQuery,
+  useProcessPDFMutation,
   type Paper,
 } from "@/redux/api/paperApi";
-import { Calendar, Eye, FileText, Trash2 } from "lucide-react";
+import { Calendar, Eye, FileText, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 // Using native date formatting to avoid external dependency
@@ -75,6 +76,7 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   });
 
   const [deletePaper, { isLoading: isDeleting }] = useDeletePaperMutation();
+  const [processPDF, { isLoading: isProcessing }] = useProcessPDFMutation();
   const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
   const { data: previewUrlData, isFetching: previewLoading } =
     useGetPaperFileUrlQuery(previewPaperId || "", { skip: !previewPaperId });
@@ -103,6 +105,16 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
     } catch (error) {
       showErrorToast("Failed to delete paper");
       console.error("Delete error:", error);
+    }
+  };
+
+  const handleProcessPDF = async (paperId: string, paperTitle: string) => {
+    try {
+      await processPDF(paperId).unwrap();
+      showSuccessToast(`PDF processing started for "${paperTitle}"`);
+    } catch (error) {
+      showErrorToast("Failed to start PDF processing");
+      console.error("Processing error:", error);
     }
   };
 
@@ -291,6 +303,19 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
+                      {paper.processingStatus === "UPLOADED" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleProcessPDF(paper.id, paper.title)
+                          }
+                          disabled={isProcessing}
+                          title="Start PDF processing"
+                        >
+                          <Play className="h-4 w-4" />
+                        </Button>
+                      )}
                       {paper.file && (
                         <Dialog
                           open={previewPaperId === paper.id}
@@ -314,8 +339,13 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
                                 </div>
                               )}
                               {previewUrlData?.data?.url && (
-                                <PdfPreview
+                                <DocumentPreview
                                   fileUrl={previewUrlData.data.url}
+                                  fileName={paper.file?.originalFilename}
+                                  mimeType={paper.file?.contentType}
+                                  originalFilename={
+                                    paper.file?.originalFilename
+                                  }
                                   className="mx-auto"
                                 />
                               )}

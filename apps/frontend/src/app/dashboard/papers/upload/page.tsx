@@ -127,13 +127,20 @@ export default function UploadPaperPage() {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile.type === "application/pdf") {
+      const allowedTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+        "application/msword", // DOC
+      ];
+
+      if (allowedTypes.includes(droppedFile.type)) {
         setFile(droppedFile);
         if (!title) {
-          setTitle(droppedFile.name.replace(/\.pdf$/i, ""));
+          // Extract title from filename, removing common extensions
+          setTitle(droppedFile.name.replace(/\.(pdf|docx|doc)$/i, ""));
         }
       } else {
-        showErrorToast("Please select a PDF file");
+        showErrorToast("Please select a PDF, DOCX, or DOC file");
       }
     }
   };
@@ -141,13 +148,20 @@ export default function UploadPaperPage() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.type === "application/pdf") {
+      const allowedTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+        "application/msword", // DOC
+      ];
+
+      if (allowedTypes.includes(selectedFile.type)) {
         setFile(selectedFile);
         if (!title) {
-          setTitle(selectedFile.name.replace(/\.pdf$/i, ""));
+          // Extract title from filename, removing common extensions
+          setTitle(selectedFile.name.replace(/\.(pdf|docx|doc)$/i, ""));
         }
       } else {
-        showErrorToast("Please select a PDF file");
+        showErrorToast("Please select a PDF, DOCX, or DOC file");
       }
     }
   };
@@ -322,7 +336,7 @@ export default function UploadPaperPage() {
             {/* File Upload */}
             <Card>
               <CardHeader>
-                <CardTitle>Select PDF File</CardTitle>
+                <CardTitle>Select Document File</CardTitle>
                 <CardDescription>
                   Upload a PDF research paper (max 10MB)
                 </CardDescription>
@@ -345,15 +359,15 @@ export default function UploadPaperPage() {
                   >
                     <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                     <p className="text-lg font-medium mb-2">
-                      Drop your PDF here, or click to browse
+                      Drop your document here, or click to browse
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Only PDF files are supported
+                      Supports PDF, DOCX, and DOC files
                     </p>
                     <input
                       id="file-input"
                       type="file"
-                      accept=".pdf"
+                      accept=".pdf,.docx,.doc"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
