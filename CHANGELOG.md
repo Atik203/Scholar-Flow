@@ -1,12 +1,31 @@
 # Scholar-Flow Changelog
 
-## Roadmap Progress (Last Updated: September 6, 2025)
+## v1.0.9 (2025-09-21) – Document Extraction & Preview
+
+Authors: @Atik203, @Salman
+
+### Highlights
+
+- PDF & DOCX extraction unified with improved formatting retention
+- High‑fidelity DOCX preview using docx-preview with mammoth fallback
+- Robust PDF preview with iframe fallback and error handling
+- Signed URL response fix (await) and strict frontend typing
+- Continuous Extracted Text view (justified, scrollable) with dark‑mode‑friendly filters
+
+### Details
+
+- Backend - Fixed `getFileUrl` to await `storage.getSignedUrl` returning a string - Standardized responses via `sendSuccessResponse`
+- Frontend - `DocumentPreview`: MIME/extension detection; DOCX rendered via `docx-preview`, fallback to `mammoth`; Office Viewer button - `PdfViewerFallback`: improved loading and retry UX - All `DocumentPreview` callers now pass `file.contentType` - `ExtractedTextDisplay`: new Continuous view merges chunks into formatted, justified text; dark‑theme select styling; copy‑all action
+
+---
+
+## Roadmap Progress (Last Updated: September 21, 2025)
 
 ### Phase 1 – MVP (Weeks 1–6)
 
 Goal: Get a working core platform with minimal but functional features.
 
-**Week 1 – Project Setup & Foundations (Author: Atik) ✅**
+### Week 1 – Project Setup & Foundations (Author: Atik) ✅
 
 - [x] Setup & Configuration (monorepo, Next.js 15, Node.js backend)
 - [x] TypeScript, ESLint, Prettier, Husky hooks
@@ -15,7 +34,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] .env setup for local/staging
 - [x] Tailwind CSS + ShadCN UI + Redux Toolkit
 
-**Week 2 – User Auth & Profile (Author: Atik) ✅**
+### Week 2 – User Auth & Profile (Author: Atik) ✅
 
 - [x] Sign up / login / logout
 - [x] Google OAuth (upsert handling)
@@ -27,7 +46,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Prisma migrations for User table + seeds
       **Major Achievement:** OAuth Authentication System completed (Prisma upsert patterns)
 
-**Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅**
+### Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅
 
 - [x] Complete dashboard redesign with modern SaaS-style interface
 - [x] Implemented shadcn/ui sidebar with collapsible navigation
@@ -50,7 +69,7 @@ Goal: Get a working core platform with minimal but functional features.
 - Modern UX Patterns: Fixed sidebar, backdrop blur headers, custom scrollbars
 - Performance: Minimal layout shifts, smooth CSS transitions, optimized z-index stacking
 
-**Week 3 – Paper Upload & Storage**
+### Week 3 – Paper Upload & Storage
 
 - [x] Add password reset, email verification, forgot password ✅ (Author: Atik+Salman)
 - [x] Add API to update/edit user profile ✅ (Author: Atik)
@@ -72,7 +91,7 @@ Goal: Get a working core platform with minimal but functional features.
 
 **✅ Paper Upload & Storage Complete (September 17, 2025):** Paper management system implemented by Atik including S3 storage integration, basic PDF processing, metadata extraction, comprehensive upload UI, and modern paper viewing interface with fallback support.
 
-**Week 3.5 – Enhanced UI/UX & Modern Paper Management (Author: Atik) ✅**
+### Week 3.5 – Enhanced UI/UX & Modern Paper Management (Author: Atik) ✅
 
 - [x] Advanced search page with comprehensive filters and fuzzy search functionality
 - [x] Modern papers list with real-time search and responsive design
@@ -84,7 +103,7 @@ Goal: Get a working core platform with minimal but functional features.
 
 **✅ Major UI/UX Enhancement (September 17, 2025):** Complete interface overhaul with advanced search capabilities, modern paper management system, enhanced dashboard experience, and improved navigation architecture implemented by Atik.
 
-**Week 4 – Basic Collections**
+### Week 4 – Basic Collections
 
 - [x] Create Collection flow ✅ (Author: Atik+Salman)
 - [x] Add papers to collections ✅ (Author: Atik)
@@ -98,7 +117,7 @@ Goal: Get a working core platform with minimal but functional features.
 
 **✅ Collections Management Complete (September 19, 2025):** Comprehensive collection management system with permission-based sharing implemented by Atik+Salman. Features include CRUD operations, role-based access control (OWNER/EDIT/VIEW), invitation system, real-time updates, and modern UI components. PDF text extraction remains pending for Week 4.5.
 
-**Week 4.5 – Advanced Workspace Management (Author: Atik) ✅**
+### Week 4.5 – Advanced Workspace Management (Author: Atik) ✅
 
 - [x] Workspace settings and management interface with modern UI ✅ (Author: Atik)
 - [x] Comprehensive workspace invitation system with email notifications ✅ (Author: Atik)
@@ -115,14 +134,14 @@ Goal: Get a working core platform with minimal but functional features.
 
 **✅ Advanced Workspace Management Complete (September 19, 2025):** Comprehensive workspace management system implemented by Atik including full CRUD operations, sophisticated role-based permission system, invitation workflow with email notifications, member management, activity logging, and AWS SDK v3 migration for enhanced performance. Features production-grade security controls, real-time updates, and modern UI components.
 
-**Week 5 – AI Summarization & Semantic Search**
+### Week 5 – AI Summarization & Semantic Search
 
 - [ ] Integrate OpenAI/LLM API for summarization
 - [ ] Summary generation & DB storage
 - [ ] Vector search with embeddings
 - [ ] Semantic paper search
 
-**Week 6 – Annotation & Comments**
+### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
 - [ ] Comment threads under papers
@@ -135,47 +154,47 @@ Goal: Get a working core platform with minimal but functional features.
 
 Goal: Collaboration tools, advanced research utilities, improved UI.
 
-**Week 7 – Citation Graph**
+### Week 7 – Citation Graph
 
 - [ ] Parse references from uploaded papers
 - [ ] Store citation relationships in DB
 - [ ] Citation graph visualization (D3.js/Cytoscape.js)
 
-**Week 8 – Citation Formatting**
+### Week 8 – Citation Formatting
 
 - [ ] Generate citations (APA, MLA, IEEE)
 - [ ] Copy Citation button
 - [ ] Export citations (.bib/Word)
 
-**Week 9 – Shared Collections (Team Collaboration)**
+### Week 9 – Shared Collections (Team Collaboration)
 
 - [ ] CollectionMember table (roles: Owner, Editor, Viewer)
 - [ ] Invite users via email
 - [ ] Role-based permissions
 
-**Week 10 – Team Workspace**
+### Week 10 – Team Workspace
 
 - [ ] Team dashboard
 - [ ] Team-level collections
 - [ ] Activity feed for collaborators
 
-**Week 11 – Enhanced UI**
+### Week 11 – Enhanced UI
 
 - [ ] Dashboard analytics (papers, cited authors)
 - [ ] Dark/light theme toggle
 - [ ] Mobile responsiveness
 
-**Week 12 – Versioning**
+### Week 12 – Versioning
 
 - [ ] Track paper versions
 - [ ] Change history for annotations/summaries
 
-**Week 13 – AI Research Assistant**
+### Week 13 – AI Research Assistant
 
 - [ ] Chat with uploaded papers
 - [ ] Multi-document Q&A
 
-**Week 14 – Polishing & Bug Fixes**
+### Week 14 – Polishing & Bug Fixes
 
 - [ ] Final pass on Phase 2 features
 - [ ] UI fixes
@@ -187,37 +206,37 @@ Goal: Collaboration tools, advanced research utilities, improved UI.
 
 Goal: Monetization, admin tools, external integrations.
 
-**Week 15 – Payment System**
+### Week 15 – Payment System
 
 - [ ] Stripe integration (international)
 - [ ] SSLCommerz integration (local)
 - [ ] Subscription plans (Plan, Subscription tables)
 - [ ] Payment webhooks
 
-**Week 16 – Subscription Features**
+### Week 16 – Subscription Features
 
 - [ ] Premium feature restrictions
 - [ ] Upgrade/Downgrade flow
 - [ ] Invoice & billing history
 
-**Week 17 – Admin Panel**
+### Week 17 – Admin Panel
 
 - [ ] Admin dashboard (users, papers, collections)
 - [ ] Admin tools (ban, content removal)
 - [ ] Platform analytics
 
-**Week 18 – External API Integrations**
+### Week 18 – External API Integrations
 
 - [ ] CrossRef API (metadata lookup)
 - [ ] Semantic Scholar/arXiv API (paper search/import)
 
-**Week 19 – Final QA**
+### Week 19 – Final QA
 
 - [ ] Security audit
 - [ ] Code review & cleanup
 - [ ] Core feature tests
 
-**Week 20 – Launch**
+### Week 20 – Launch
 
 - [ ] Production deployment
 - [ ] Marketing page
