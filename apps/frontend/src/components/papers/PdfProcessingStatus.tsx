@@ -10,8 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { useGetProcessingStatusQuery, useProcessPDFMutation, useProcessPDFDirectMutation } from "@/redux/api/paperApi";
+import {
+  useGetProcessingStatusQuery,
+  useProcessPDFDirectMutation,
+  useProcessPDFMutation,
+} from "@/redux/api/paperApi";
 import {
   AlertCircle,
   CheckCircle,
@@ -22,7 +25,7 @@ import {
   RefreshCw,
   XCircle,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface PdfProcessingStatusProps {
   paperId: string;
@@ -40,8 +43,7 @@ export function PdfProcessingStatus({
   compact = false,
 }: PdfProcessingStatusProps) {
   const [isPolling, setIsPolling] = useState(false);
-  const [pollingTimeout, setPollingTimeout] = useState<NodeJS.Timeout | null>(null);
-  
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const {
     data: processingData,
     isLoading,
@@ -54,9 +56,11 @@ export function PdfProcessingStatus({
   });
 
   const [processPDF, { isLoading: isProcessing }] = useProcessPDFMutation();
-  const [processPDFDirect, { isLoading: isProcessingDirect }] = useProcessPDFDirectMutation();
+  const [processPDFDirect, { isLoading: isProcessingDirect }] =
+    useProcessPDFDirectMutation();
 
-  const status = processingData?.data?.processingStatus || currentStatus || "UPLOADED";
+  const status =
+    processingData?.data?.processingStatus || currentStatus || "UPLOADED";
   const processingError = processingData?.data?.processingError;
   const processedAt = processingData?.data?.processedAt;
   const chunksCount = processingData?.data?.chunksCount || 0;
@@ -64,35 +68,43 @@ export function PdfProcessingStatus({
 
   // Start polling when status is PROCESSING
   useEffect(() => {
-    if (status === "PROCESSING") {
+    const shouldPoll = status === "PROCESSING";
+
+    // Only toggle when value changed to avoid unnecessary renders
+    setIsPolling((prev) => (prev !== shouldPoll ? shouldPoll : prev));
+
+    if (shouldPoll) {
       console.log("Starting polling for paper:", paperId);
-      setIsPolling(true);
-      
-      // Set a timeout to stop polling after 5 minutes
-      const timeout = setTimeout(() => {
-        console.warn(`Polling timeout reached for paper: ${paperId}`);
-        setIsPolling(false);
-      }, 5 * 60 * 1000); // 5 minutes
-      
-      setPollingTimeout(timeout);
+      // create a single timeout to stop polling after 5 minutes
+      if (!pollingTimeoutRef.current) {
+        pollingTimeoutRef.current = setTimeout(
+          () => {
+            console.warn(`Polling timeout reached for paper: ${paperId}`);
+            setIsPolling(false);
+            if (pollingTimeoutRef.current) {
+              clearTimeout(pollingTimeoutRef.current);
+              pollingTimeoutRef.current = null;
+            }
+          },
+          5 * 60 * 1000
+        );
+      }
     } else {
       console.log("Stopping polling for paper:", paperId, "Status:", status);
-      setIsPolling(false);
-      
-      // Clear timeout if status changes
-      if (pollingTimeout) {
-        clearTimeout(pollingTimeout);
-        setPollingTimeout(null);
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+        pollingTimeoutRef.current = null;
       }
     }
-    
-    // Cleanup timeout on unmount
+
+    // Cleanup when unmounting or when status changes away from PROCESSING
     return () => {
-      if (pollingTimeout) {
-        clearTimeout(pollingTimeout);
+      if (!shouldPoll && pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+        pollingTimeoutRef.current = null;
       }
     };
-  }, [status, paperId, pollingTimeout]);
+  }, [status, paperId]);
 
   // Notify parent component of status changes
   useEffect(() => {
@@ -101,7 +113,9 @@ export function PdfProcessingStatus({
 
   const handleProcessPDF = async () => {
     try {
-      console.log(`[PdfProcessingStatus] Starting PDF processing for paper: ${paperId}`);
+      console.log(
+        `[PdfProcessingStatus] Starting PDF processing for paper: ${paperId}`
+      );
       const result = await processPDF(paperId).unwrap();
       console.log("PDF processing started:", result);
       // Start polling immediately after successful request
@@ -111,11 +125,18 @@ export function PdfProcessingStatus({
     } catch (error) {
       console.error("Failed to start PDF processing:", error);
       setIsPolling(false);
-      
+
       // Show user-friendly error message
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         console.error("API Error:", (error.data as any).message);
-      } else if (error && typeof error === 'object' && 'message' in error) {
+      } else if (error && typeof error === "object" && "message" in error) {
         console.error("Network Error:", (error as any).message);
       }
     }
@@ -123,18 +144,27 @@ export function PdfProcessingStatus({
 
   const handleProcessPDFDirect = async () => {
     try {
-      console.log(`[PdfProcessingStatus] Starting direct PDF processing for paper: ${paperId}`);
+      console.log(
+        `[PdfProcessingStatus] Starting direct PDF processing for paper: ${paperId}`
+      );
       const result = await processPDFDirect(paperId).unwrap();
       console.log("Direct PDF processing completed:", result);
       // Refetch to get updated status
       refetch();
     } catch (error) {
       console.error("Failed to process PDF directly:", error);
-      
+
       // Show user-friendly error message
-      if (error && typeof error === 'object' && 'data' in error && error.data && typeof error.data === 'object' && 'message' in error.data) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "data" in error &&
+        error.data &&
+        typeof error.data === "object" &&
+        "message" in error.data
+      ) {
         console.error("API Error:", (error.data as any).message);
-      } else if (error && typeof error === 'object' && 'message' in error) {
+      } else if (error && typeof error === "object" && "message" in error) {
         console.error("Network Error:", (error as any).message);
       }
     }
@@ -213,9 +243,7 @@ export function PdfProcessingStatus({
           </div>
           <div className="flex items-center gap-2">
             {getStatusIcon(status)}
-            <Badge variant={statusBadge.variant}>
-              {statusBadge.label}
-            </Badge>
+            <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
           </div>
         </div>
         <CardDescription>
@@ -272,7 +300,9 @@ export function PdfProcessingStatus({
             {/* Preview of extracted chunks */}
             {chunks.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-sm font-medium">Extracted Content Preview:</h4>
+                <h4 className="text-sm font-medium">
+                  Extracted Content Preview:
+                </h4>
                 <div className="max-h-32 overflow-y-auto space-y-1">
                   {chunks.slice(0, 3).map((chunk, index) => (
                     <div
@@ -319,7 +349,9 @@ export function PdfProcessingStatus({
             {processingError && (
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm font-medium mb-1">Error details:</p>
-                <p className="text-xs text-muted-foreground">{processingError}</p>
+                <p className="text-xs text-muted-foreground">
+                  {processingError}
+                </p>
               </div>
             )}
           </div>
@@ -400,13 +432,17 @@ export function PdfProcessingStatus({
             </>
           )}
 
+          {/* Keep a single refresh button for manual updates */}
           <Button
             onClick={() => refetch()}
             disabled={isLoading}
             size="sm"
             variant="ghost"
+            title="Refresh status"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
           </Button>
         </div>
 

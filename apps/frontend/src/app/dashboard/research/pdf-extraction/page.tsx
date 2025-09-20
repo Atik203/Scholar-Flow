@@ -1,8 +1,8 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
+import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,91 +21,101 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
+  AlertCircle,
   ArrowLeft,
   Building2,
-  FileText,
-  Filter,
-  Search,
-  BookOpen,
-  Clock,
   CheckCircle,
-  XCircle,
-  Upload,
-  TextCursor,
+  Clock,
+  FileSearch,
+  FileText,
   Microscope,
   RefreshCw,
-  Download,
-  Eye,
-  AlertCircle,
-  Info,
+  Search,
+  TextCursor,
+  Upload,
+  XCircle,
   Zap,
-  FileSearch,
-  Layers,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export default function PdfExtractionPage() {
-  const isProtected = useProtectedRoute();
+  const { isLoading } = useProtectedRoute();
   const [selectedPaper, setSelectedPaper] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterByPage, setFilterByPage] = useState<number | null>(null);
-  const [sortField, setSortField] = useState<"idx" | "page" | "createdAt">("idx");
+  const [sortField, setSortField] = useState<"idx" | "page" | "createdAt">(
+    "idx"
+  );
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"extract" | "search" | "bulk">("extract");
+  const [activeTab, setActiveTab] = useState<"extract" | "search" | "bulk">(
+    "extract"
+  );
 
   // Get workspaces for filtering
-  const { data: workspacesData, isLoading: workspacesLoading } = useListWorkspacesQuery({});
+  const { data: workspacesData, isLoading: workspacesLoading } =
+    useListWorkspacesQuery({});
   const workspaces = workspacesData?.data || [];
 
   // Get papers with processing status
-  const { 
-    data: papersData, 
-    isLoading: papersLoading, 
+  const {
+    data: papersData,
+    isLoading: papersLoading,
     error: papersError,
-    refetch: refetchPapers 
+    refetch: refetchPapers,
   } = useListPapersQuery({
     workspaceId: selectedWorkspaceId || undefined,
     page: 1,
     limit: 100,
   });
 
-  const papers = papersData?.items || [];
+  const papers = useMemo(() => papersData?.items || [], [papersData?.items]);
 
   // Process papers by status for better organization
-  const processedPapers = useMemo(() => 
-    papers.filter(p => p.processingStatus === "PROCESSED"), [papers]);
-  
-  const processingPapers = useMemo(() => 
-    papers.filter(p => p.processingStatus === "PROCESSING"), [papers]);
-  
-  const failedPapers = useMemo(() => 
-    papers.filter(p => p.processingStatus === "FAILED"), [papers]);
-  
-  const uploadedPapers = useMemo(() => 
-    papers.filter(p => p.processingStatus === "UPLOADED"), [papers]);
+  const processedPapers = useMemo(
+    () => papers.filter((p) => p.processingStatus === "PROCESSED"),
+    [papers]
+  );
+
+  const processingPapers = useMemo(
+    () => papers.filter((p) => p.processingStatus === "PROCESSING"),
+    [papers]
+  );
+
+  const failedPapers = useMemo(
+    () => papers.filter((p) => p.processingStatus === "FAILED"),
+    [papers]
+  );
+
+  const uploadedPapers = useMemo(
+    () => papers.filter((p) => p.processingStatus === "UPLOADED"),
+    [papers]
+  );
 
   // Get unique pages for filtering - we'll get this from the chunks API when needed
   const uniquePages: number[] = [];
 
   // Statistics
-  const stats = useMemo(() => ({
-    total: papers.length,
-    processed: processedPapers.length,
-    processing: processingPapers.length,
-    failed: failedPapers.length,
-    uploaded: uploadedPapers.length,
-  }), [papers, processedPapers, processingPapers, failedPapers, uploadedPapers]);
+  const stats = useMemo(
+    () => ({
+      total: papers.length,
+      processed: processedPapers.length,
+      processing: processingPapers.length,
+      failed: failedPapers.length,
+      uploaded: uploadedPapers.length,
+    }),
+    [papers, processedPapers, processingPapers, failedPapers, uploadedPapers]
+  );
 
-  if (isProtected) {
+  // Show loading state while auth guard is resolving
+  if (isLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
@@ -136,7 +146,8 @@ export default function PdfExtractionPage() {
                 PDF Text Extraction
               </h1>
               <p className="text-muted-foreground">
-                Extract and search through text content from your research papers
+                Extract and search through text content from your research
+                papers
               </p>
             </div>
           </div>
@@ -201,7 +212,7 @@ export default function PdfExtractionPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p4">
+            <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Upload className="h-4 w-4 text-gray-500" />
                 <div>
@@ -214,7 +225,10 @@ export default function PdfExtractionPage() {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as any)}
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="extract" className="flex items-center gap-2">
               <TextCursor className="h-4 w-4" />
@@ -251,16 +265,26 @@ export default function PdfExtractionPage() {
                       <div className="space-y-2">
                         <Label htmlFor="workspace">Workspace</Label>
                         <Select
-                          value={selectedWorkspaceId}
-                          onValueChange={setSelectedWorkspaceId}
+                          value={
+                            selectedWorkspaceId &&
+                            selectedWorkspaceId.length > 0
+                              ? selectedWorkspaceId
+                              : "all"
+                          }
+                          onValueChange={(val) =>
+                            setSelectedWorkspaceId(val === "all" ? "" : val)
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="All workspaces" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All workspaces</SelectItem>
+                            <SelectItem value="all">All workspaces</SelectItem>
                             {workspaces.map((workspace) => (
-                              <SelectItem key={workspace.id} value={workspace.id}>
+                              <SelectItem
+                                key={workspace.id}
+                                value={workspace.id}
+                              >
                                 <div className="flex items-center gap-2">
                                   <Building2 className="h-4 w-4" />
                                   {workspace.name}
@@ -286,9 +310,9 @@ export default function PdfExtractionPage() {
                           <div className="text-center py-4 text-red-500">
                             <AlertCircle className="h-8 w-8 mx-auto mb-2" />
                             <p>Error loading papers</p>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => refetchPapers()}
                               className="mt-2"
                             >
@@ -300,7 +324,11 @@ export default function PdfExtractionPage() {
                             <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                             <p>No papers found</p>
                             <Link href="/dashboard/papers/upload">
-                              <Button variant="outline" size="sm" className="mt-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                              >
                                 Upload your first paper
                               </Button>
                             </Link>
@@ -323,35 +351,44 @@ export default function PdfExtractionPage() {
                                       {paper.title}
                                     </h4>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                      {paper.metadata?.authors?.join(", ") || "Unknown authors"}
+                                      {paper.metadata?.authors?.join(", ") ||
+                                        "Unknown authors"}
                                     </p>
                                     <div className="flex items-center gap-2 mt-2">
                                       <Badge
                                         variant={
                                           paper.processingStatus === "PROCESSED"
                                             ? "default"
-                                            : paper.processingStatus === "PROCESSING"
-                                            ? "secondary"
-                                            : paper.processingStatus === "FAILED"
-                                            ? "destructive"
-                                            : "outline"
+                                            : paper.processingStatus ===
+                                                "PROCESSING"
+                                              ? "secondary"
+                                              : paper.processingStatus ===
+                                                  "FAILED"
+                                                ? "destructive"
+                                                : "outline"
                                         }
                                         className="text-xs"
                                       >
-                                        {paper.processingStatus === "PROCESSED" && (
+                                        {paper.processingStatus ===
+                                          "PROCESSED" && (
                                           <CheckCircle className="h-3 w-3 mr-1" />
                                         )}
-                                        {paper.processingStatus === "PROCESSING" && (
+                                        {paper.processingStatus ===
+                                          "PROCESSING" && (
                                           <Clock className="h-3 w-3 mr-1" />
                                         )}
-                                        {paper.processingStatus === "FAILED" && (
+                                        {paper.processingStatus ===
+                                          "FAILED" && (
                                           <XCircle className="h-3 w-3 mr-1" />
                                         )}
                                         {paper.processingStatus}
                                       </Badge>
                                       {paper.file?.sizeBytes && (
                                         <span className="text-xs text-muted-foreground">
-                                          {Math.round(paper.file.sizeBytes / 1024)} KB
+                                          {Math.round(
+                                            paper.file.sizeBytes / 1024
+                                          )}{" "}
+                                          KB
                                         </span>
                                       )}
                                     </div>
@@ -389,7 +426,8 @@ export default function PdfExtractionPage() {
                           Extract & Search Text
                         </CardTitle>
                         <CardDescription>
-                          Search through the extracted text content of "{selectedPaper.title}"
+                          Search through the extracted text content of "
+                          {selectedPaper.title}"
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -417,18 +455,27 @@ export default function PdfExtractionPage() {
                           <div className="flex-1">
                             <Label htmlFor="page-filter">Filter by Page</Label>
                             <Select
-                              value={filterByPage?.toString() || ""}
+                              value={
+                                filterByPage !== null
+                                  ? String(filterByPage)
+                                  : "all"
+                              }
                               onValueChange={(value) =>
-                                setFilterByPage(value ? parseInt(value) : null)
+                                setFilterByPage(
+                                  value === "all" ? null : parseInt(value)
+                                )
                               }
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="All pages" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">All pages</SelectItem>
+                                <SelectItem value="all">All pages</SelectItem>
                                 {uniquePages.map((page: number) => (
-                                  <SelectItem key={page} value={page.toString()}>
+                                  <SelectItem
+                                    key={page}
+                                    value={page.toString()}
+                                  >
                                     Page {page}
                                   </SelectItem>
                                 ))}
@@ -439,17 +486,21 @@ export default function PdfExtractionPage() {
                             <Label htmlFor="sort-field">Sort by</Label>
                             <Select
                               value={sortField}
-                              onValueChange={(value: "idx" | "page" | "createdAt") =>
-                                setSortField(value)
-                              }
+                              onValueChange={(
+                                value: "idx" | "page" | "createdAt"
+                              ) => setSortField(value)}
                             >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="idx">Chunk Order</SelectItem>
-                                <SelectItem value="page">Page Number</SelectItem>
-                                <SelectItem value="createdAt">Created Date</SelectItem>
+                                <SelectItem value="page">
+                                  Page Number
+                                </SelectItem>
+                                <SelectItem value="createdAt">
+                                  Created Date
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -485,7 +536,8 @@ export default function PdfExtractionPage() {
                         Select a Paper to Extract Text
                       </h3>
                       <p className="text-muted-foreground text-center mb-4">
-                        Choose a paper from the list to view and search through its extracted text content.
+                        Choose a paper from the list to view and search through
+                        its extracted text content.
                       </p>
                       <Link href="/dashboard/papers/upload">
                         <Button>
@@ -509,13 +561,16 @@ export default function PdfExtractionPage() {
                   Advanced Search Across All Papers
                 </CardTitle>
                 <CardDescription>
-                  Search through text content across multiple papers simultaneously
+                  Search through text content across multiple papers
+                  simultaneously
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
                   <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">Advanced Search</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Advanced Search
+                  </h3>
                   <p>This feature will be available in the next update.</p>
                 </div>
               </CardContent>
@@ -538,7 +593,9 @@ export default function PdfExtractionPage() {
                 <div className="space-y-4">
                   {/* Processing Queue */}
                   <div className="space-y-2">
-                    <Label>Papers Ready for Processing ({uploadedPapers.length})</Label>
+                    <Label>
+                      Papers Ready for Processing ({uploadedPapers.length})
+                    </Label>
                     <div className="max-h-60 overflow-y-auto space-y-2">
                       {uploadedPapers.map((paper) => (
                         <Card key={paper.id} className="p-3">
@@ -548,7 +605,9 @@ export default function PdfExtractionPage() {
                                 {paper.title}
                               </h4>
                               <p className="text-xs text-muted-foreground">
-                                {paper.file?.sizeBytes ? `${Math.round(paper.file.sizeBytes / 1024)} KB` : "Unknown size"}
+                                {paper.file?.sizeBytes
+                                  ? `${Math.round(paper.file.sizeBytes / 1024)} KB`
+                                  : "Unknown size"}
                               </p>
                             </div>
                             <PdfProcessingStatus
@@ -566,7 +625,9 @@ export default function PdfExtractionPage() {
                   {/* Failed Papers */}
                   {failedPapers.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-red-600">Failed Papers ({failedPapers.length})</Label>
+                      <Label className="text-red-600">
+                        Failed Papers ({failedPapers.length})
+                      </Label>
                       <div className="max-h-60 overflow-y-auto space-y-2">
                         {failedPapers.map((paper) => (
                           <Card key={paper.id} className="p-3 border-red-200">
