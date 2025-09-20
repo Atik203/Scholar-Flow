@@ -1,92 +1,48 @@
-# ScholarFlow Release Notes
+## v1.0.9
 
-## v1.0.8
-
-Release date: 2025-09-19  
-Authors: @Atik203
+Release date: 2025-09-21  
+Authors: @Atik203, @Salman
 
 ### Overview
 
-- **Advanced Workspace Management**: Comprehensive workspace settings, invitation system, and role-based permissions
-- **AWS SDK v3 Migration**: Complete migration from AWS SDK v2 to v3 for improved performance and modern tooling
-- **Enhanced Security**: Production-grade permission controls and invitation validation
-- **Performance Optimization**: Optimized database queries, efficient cache invalidation, and improved S3 operations
-- **Real-time Features**: Advanced workspace updates with live cache management
+- PDF & DOCX text extraction completed with unified pipeline
+- High‑fidelity DOCX preview via docx-preview (with mammoth fallback)
+- Improved PDF preview robustness and error handling
+- Enhanced Extracted Text UI: continuous, justified reading mode + dark‑theme filters
 
-### Feature Details
+### Feature Details – v1.0.9
 
-#### Workspace Management System
+#### Document Extraction & Preview – v1.0.9
 
-- **Settings Interface**: Modern workspace settings page with edit functionality for name and description
-- **Invitation System**: Comprehensive invitation workflow with email notifications and status tracking
-- **Role Management**: Advanced role-based permissions (OWNER/ADMIN/TEAM_LEAD/PRO_RESEARCHER/RESEARCHER)
-- **Member Management**: Complete CRUD operations for workspace members with permission validation
-- **Invitation Tracking**: Sent/received invitation management with accept/decline workflow
-- **Activity Logging**: Comprehensive audit trail for workspace actions and member changes
+- Unified extraction service for PDF and DOCX with better format preservation
+- DOCX preview renders in-app using `docx-preview`; falls back to `mammoth`
+- PDF preview uses iframe fallback with improved loading/retry UX
+- Extracted Text section now supports continuous, justified layout and copy-all
 
-#### AWS SDK v3 Migration
+#### Backend Fixes – v1.0.9
 
-- **StorageService Enhancement**: Migrated S3 operations to AWS SDK v3 for better performance
-- **Modern API Structure**: Updated to use command pattern with optimized error handling
-- **Performance Improvements**: Reduced bundle size and improved tree-shaking capabilities
-- **Future-Proof Architecture**: Modern SDK structure with enhanced TypeScript support
+- Awaited `storage.getSignedUrl` in `paper.controller.getFileUrl` to return string URLs
+- Standardized API responses with `sendSuccessResponse`
 
-#### Security & Permissions
+#### Frontend Improvements – v1.0.9
 
-- **Multi-layer Security**: Advanced permission checks for all workspace operations
-- **Invitation Validation**: Secure invitation system with status management and conflict prevention
-- **Role-based Access**: Sophisticated permission system with hierarchical access controls
-- **Input Validation**: Production-grade error handling and comprehensive input validation
+- `DocumentPreview` type detection via MIME + filename/URL heuristics
+- Passed `file.contentType` to all preview usages for accurate rendering
+- Dark-theme-friendly styling for page filters and controls
 
-#### Real-time Updates
+### Status – v1.0.9
 
-- **Cache Management**: Efficient RTK Query cache invalidation with real-time updates
-- **Live Synchronization**: Instant workspace updates across all connected clients
-- **Optimistic Updates**: Enhanced user experience with immediate UI feedback
-- **Background Sync**: Automatic synchronization of workspace changes
+#### Completed Milestones – v1.0.9
 
-### Technical Improvements
+- PDF/DOCX text extraction and in-app preview experience
+- Continuous extracted text reading mode with justified layout
 
-#### Backend Enhancements
+#### In Progress – v1.0.9
 
-- Complete workspace service layer with CRUD operations and permission-based access control
-- Sophisticated invitation system with email integration and status management
-- Advanced database queries with optimized performance and comprehensive error handling
-- Production-ready security controls with multi-layer validation
+- AI summarization & semantic search (Phase 1 Week 5)
 
-#### Frontend Improvements
+### Deployment Notes – v1.0.9
 
-- RTK Query integration with intelligent cache management and real-time updates
-- Modern UI components with responsive design and accessibility features
-- Enhanced error handling with retry logic and user-friendly feedback
-- Optimized state management with efficient data synchronization
-
-#### Infrastructure Updates
-
-- AWS SDK v3 migration with improved performance and reduced bundle size
-- Database query optimization for better response times and resource efficiency
-- Enhanced email service integration with branded templates and reliable delivery
-- Comprehensive logging and monitoring for production environments
-
-### Status
-
-#### Completed Milestones
-
-- Advanced workspace management system with comprehensive features
-- AWS SDK v3 migration for all S3 operations
-- Production-grade security and permission system
-- Real-time workspace updates and cache management
-- Enhanced invitation workflow with email notifications
-
-#### In Progress
-
-- Extract text content from uploaded PDFs (continuing development)
-
-### Deployment Notes
-
-- Backward compatible with v1.0.7
-- AWS SDK v2 dependency removed - ensure environment variables are correctly configured
-- Enhanced database queries may require connection pool optimization in high-traffic environments
-- Email service configuration may need updates for invitation notifications
-
----
+- Backward compatible with v1.0.8
+- Ensure S3 CORS allows GET from frontend origin for preview fetches
+- Signed URLs are short-lived; UI will re-request as needed

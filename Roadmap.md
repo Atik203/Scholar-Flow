@@ -73,10 +73,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Advanced permission checks and security controls (Author: Atik) ✅
 - [x] Production-grade error handling and input validation (Author: Atik) ✅
 - [x] AWS SDK v3 migration for improved performance and modern tooling (Author: Atik) ✅
-
-**Remaining:**
-
-- [ ] Extract text content from uploaded PDFs (planned for Week 4.5)
+- [x] Extract text content from uploaded PDFs & DOCX (Author: Atik+Salman) ✅
 
 ### Week 5 – AI Summarization & Semantic Search
 
@@ -141,5 +138,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 4 Complete – Collection management system with permission-based sharing implemented ✅ (Text extraction pending)
-Last Updated: September 2025
+Current Status: Week 4.5 Complete – Advanced Workspace + PDF/DOCX text extraction and high‑fidelity preview implemented ✅ (Authors: Atik+Salman)
+Last Updated: September 21, 2025
