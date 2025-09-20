@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PdfPreview } from "@/components/papers/PdfPreview";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import {
   showErrorToast,
   showSuccessToast,
@@ -658,8 +658,13 @@ export default function CollectionDetailPage({
                                       </div>
                                     )}
                                     {previewUrlData?.data?.url && (
-                                      <PdfPreview
+                                      <DocumentPreview
                                         fileUrl={previewUrlData.data.url}
+                                        fileName={paper.file?.originalFilename}
+                                        mimeType={paper.file?.contentType}
+                                        originalFilename={
+                                          paper.file?.originalFilename
+                                        }
                                         className="mx-auto"
                                       />
                                     )}

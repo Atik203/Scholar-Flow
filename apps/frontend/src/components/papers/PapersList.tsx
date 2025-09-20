@@ -1,6 +1,6 @@
 "use client";
 
-import { PdfPreview } from "@/components/papers/PdfPreview";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import {
   showErrorToast,
   showSuccessToast,
@@ -307,7 +307,9 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleProcessPDF(paper.id, paper.title)}
+                          onClick={() =>
+                            handleProcessPDF(paper.id, paper.title)
+                          }
                           disabled={isProcessing}
                           title="Start PDF processing"
                         >
@@ -337,8 +339,13 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
                                 </div>
                               )}
                               {previewUrlData?.data?.url && (
-                                <PdfPreview
+                                <DocumentPreview
                                   fileUrl={previewUrlData.data.url}
+                                  fileName={paper.file?.originalFilename}
+                                  mimeType={paper.file?.contentType}
+                                  originalFilename={
+                                    paper.file?.originalFilename
+                                  }
                                   className="mx-auto"
                                 />
                               )}

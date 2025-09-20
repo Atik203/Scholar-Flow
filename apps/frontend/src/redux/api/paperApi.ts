@@ -128,7 +128,11 @@ export const paperApi = apiSlice.injectEndpoints({
     }),
 
     getPaperFileUrl: builder.query<
-      { data: { url: string; expiresIn: number } },
+      {
+        success: boolean;
+        data: { url: string; expiresIn: number };
+        message: string;
+      },
       string
     >({
       query: (id) => `/papers/${id}/file-url`,
@@ -161,10 +165,7 @@ export const paperApi = apiSlice.injectEndpoints({
     }),
 
     // PDF Processing endpoints
-    processPDF: builder.mutation<
-      { data: { message: string } },
-      string
-    >({
+    processPDF: builder.mutation<{ data: { message: string } }, string>({
       query: (paperId) => ({
         url: `/papers/${paperId}/process`,
         method: "POST",
@@ -180,25 +181,45 @@ export const paperApi = apiSlice.injectEndpoints({
       string
     >({
       query: (paperId) => `/papers/${paperId}/processing-status`,
-      transformResponse: (response: { data: ProcessingStatusResponse }) => response,
+      transformResponse: (response: { data: ProcessingStatusResponse }) =>
+        response,
       providesTags: (result, error, paperId) => [
         { type: "ProcessingStatus", id: paperId },
       ],
     }),
 
     getAllChunks: builder.query<
-      { data: { chunksCount: number; chunks: ProcessingStatusResponse['chunks'] } },
+      {
+        data: {
+          chunksCount: number;
+          chunks: ProcessingStatusResponse["chunks"];
+        };
+      },
       string
     >({
       query: (paperId) => `/papers/${paperId}/chunks`,
-      transformResponse: (response: { data: { chunksCount: number; chunks: ProcessingStatusResponse['chunks'] } }) => response,
+      transformResponse: (response: {
+        data: {
+          chunksCount: number;
+          chunks: ProcessingStatusResponse["chunks"];
+        };
+      }) => response,
       providesTags: (result, error, paperId) => [
         { type: "ProcessingStatus", id: paperId },
       ],
     }),
 
     processPDFDirect: builder.mutation<
-      { data: { message: string; result?: { pageCount: number; chunksCount: number; textLength: number } } },
+      {
+        data: {
+          message: string;
+          result?: {
+            pageCount: number;
+            chunksCount: number;
+            textLength: number;
+          };
+        };
+      },
       string
     >({
       query: (paperId) => ({
