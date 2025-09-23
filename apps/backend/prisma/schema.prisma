@@ -188,6 +188,13 @@ model Paper {
   processingError  String?
   processedAt      DateTime?
 
+  // Document preview support - for enhanced text extraction view
+  previewFileKey    String? // S3 key for preview PDF (converted from DOCX)
+  previewMimeType   String? // MIME type of preview file (usually application/pdf)
+  originalMimeType  String? // Original uploaded MIME type (preserves DOCX, DOC, PDF)
+  contentHtml       String? // Sanitized HTML content for rich text editor
+  extractionVersion Int     @default(1) // Version for extraction algorithm
+
   uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
   workspace       Workspace         @relation(fields: [workspaceId], references: [id])
   file            PaperFile?

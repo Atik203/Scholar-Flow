@@ -1,5 +1,23 @@
 # Scholar-Flow Changelog
 
+## v1.1.0 (2025-09-24) – Preview-first Extraction & Gotenberg
+
+Authors: @Atik203
+
+### Highlights – v1.1.0
+
+- Preview-first Extraction Text: shows high-fidelity view/preview for DOCX/PDF (no rich-text editor yet)
+- DOCX→PDF preview pipeline using Gotenberg (Docker), suitable for EC2 deployment
+- Keeps raw text extraction for search/embeddings while prioritizing accurate visual preview
+
+### Details – v1.1.0
+
+- Backend – Added DOCX→PDF conversion via Gotenberg service; signed preview URL API improvements
+- Frontend – Updated extraction view to prefer preview/inline viewers (PDF iframe, DOCX preview), with fallbacks
+- Infra – docker-compose snippet for running Gotenberg locally; guidance for EC2 deployment
+
+---
+
 ## v1.0.9 (2025-09-21) – Document Extraction & Preview
 
 Authors: @Atik203, @Salman
@@ -19,7 +37,7 @@ Authors: @Atik203, @Salman
 
 ---
 
-## Roadmap Progress (Last Updated: September 21, 2025)
+## Roadmap Progress (Last Updated: September 24, 2025)
 
 ### Phase 1 – MVP (Weeks 1–6)
 
