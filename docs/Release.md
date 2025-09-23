@@ -1,48 +1,40 @@
-## v1.0.9
+## v1.1.0
 
-Release date: 2025-09-21  
-Authors: @Atik203, @Salman
+Release date: 2025-09-24  
+Author: @Atik203
 
-### Overview
+### Overview – v1.0.9
 
-- PDF & DOCX text extraction completed with unified pipeline
-- High‑fidelity DOCX preview via docx-preview (with mammoth fallback)
-- Improved PDF preview robustness and error handling
-- Enhanced Extracted Text UI: continuous, justified reading mode + dark‑theme filters
+- Introduced preview-first Extraction Text experience: users see high-fidelity view/preview for DOCX/PDF
+- Added Gotenberg-based DOCX→PDF conversion pipeline (Docker-friendly; EC2-ready)
+- Editor is not included in this release; focus is view/preview + robust extraction for search
 
-### Feature Details – v1.0.9
+### Feature Details – v1.1.0
 
-#### Document Extraction & Preview – v1.0.9
+#### Preview & Conversion – v1.1.0
 
-- Unified extraction service for PDF and DOCX with better format preservation
-- DOCX preview renders in-app using `docx-preview`; falls back to `mammoth`
-- PDF preview uses iframe fallback with improved loading/retry UX
-- Extracted Text section now supports continuous, justified layout and copy-all
+- Server-side DOCX→PDF conversion using Gotenberg for pixel-perfect previews
+- Signed preview URL API prefers preview derivative when available; falls back to original
+- Frontend renders PDF via iframe/pdf.js and DOCX via preview-first logic with fallbacks
 
-#### Backend Fixes – v1.0.9
+#### Infra Notes – v1.1.0
 
-- Awaited `storage.getSignedUrl` in `paper.controller.getFileUrl` to return string URLs
-- Standardized API responses with `sendSuccessResponse`
+- Provided docker-compose snippet for local Gotenberg (`gotenberg/gotenberg:8` on port 3008)
+- EC2 deployment guidance: run Gotenberg container alongside backend; set `GOTENBERG_URL`
 
-#### Frontend Improvements – v1.0.9
+### Status – v1.1.0
 
-- `DocumentPreview` type detection via MIME + filename/URL heuristics
-- Passed `file.contentType` to all preview usages for accurate rendering
-- Dark-theme-friendly styling for page filters and controls
+#### Completed
 
-### Status – v1.0.9
+- Preview-first view/preview for DOCX/PDF in Extraction Text
+- Backend conversion pipeline via Gotenberg; signed preview URLs
 
-#### Completed Milestones – v1.0.9
+#### Deferred
 
-- PDF/DOCX text extraction and in-app preview experience
-- Continuous extracted text reading mode with justified layout
+- Rich text editor (TipTap) and content editing API – planned next
 
-#### In Progress – v1.0.9
+### Deployment Notes – v1.1.0
 
-- AI summarization & semantic search (Phase 1 Week 5)
-
-### Deployment Notes – v1.0.9
-
-- Backward compatible with v1.0.8
-- Ensure S3 CORS allows GET from frontend origin for preview fetches
-- Signed URLs are short-lived; UI will re-request as needed
+- Set env vars: `DOCX_TO_PDF_ENGINE=gotenberg`, `GOTENBERG_URL=http://<host>:3008`
+- Ensure S3 CORS permits GET from frontend origin; signed URLs short-lived
+- Backward-compatible with v1.0.9

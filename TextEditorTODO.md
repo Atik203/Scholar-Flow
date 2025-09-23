@@ -4,8 +4,8 @@ Below is a focused, senior-level implementation guide and TODO list to preserve 
 
 # ScholarFlow — Document Preview & Rich Text Editor Plan
 
-Date: 2025-09-21
-Status: Planned (start after Phase 1 collections core is stable)
+Date: 2025-09-24
+Status: Partially Delivered – Preview/View implemented (no editor yet)
 
 ## Objectives
 
@@ -119,6 +119,12 @@ services:
   - Backend: `DOCX_TO_PDF_ENGINE`, `GOTENBERG_URL`
   - Frontend: no new vars; reuse base API URL
 
+- EC2 (prod) quick notes:
+  - Run Gotenberg alongside backend: `docker run -d --name gotenberg -p 3008:3000 --restart unless-stopped gotenberg/gotenberg:8`
+  - Set `GOTENBERG_URL=http://<EC2_PRIVATE_IP>:3008` for backend container/service
+  - Open security group for port `3008` if accessed across hosts (prefer VPC-internal access only)
+  - Ensure backend uses signed S3 URLs and short TTL; no public buckets
+
 ## Testing & QA
 
 - Backend unit tests: conversion service (mock HTTP/exec), preview-url controller, content API validation.
@@ -160,13 +166,13 @@ services:
 
 ## Immediate Next Steps Checklist
 
-- [ ] Migration: add preview/content columns to `Paper`.
-- [ ] Service: `convertDocxToPdf` (Gotenberg + soffice fallback).
-- [ ] Worker: generate/upload preview PDF for DOCX; set preview fields.
-- [ ] API: `GET /papers/:id/preview-url` (signed URL + mime).
-- [ ] API: ensure `/papers/:id/processing-status` has `Cache-Control: no-store`.
-- [ ] Frontend: `ExtractionViewer` to render preview-first and handle fallbacks.
-- [ ] Frontend: Advanced toggle for raw chunks (default hidden).
-- [ ] Frontend: RTK endpoint/hook for preview-url with retry/403 refresh.
-- [ ] Infra: docker-compose for Gotenberg + env docs updates.
-- [ ] QA: sample complex files; validate acceptance criteria.
+- [x] Service: `convertDocxToPdf` (Gotenberg) – initial pipeline and infra docs
+- [x] Frontend: Preview-first Extraction view for DOCX/PDF – implemented (no editor)
+- [ ] Migration: add preview/content columns to `Paper` (if not already present)
+- [ ] Worker: generate/upload preview PDF for DOCX; set preview fields
+- [ ] API: `GET /papers/:id/preview-url` (signed URL + mime)
+- [ ] API: ensure `/papers/:id/processing-status` has `Cache-Control: no-store`
+- [ ] Frontend: Advanced toggle for raw chunks (default hidden)
+- [ ] Frontend: RTK endpoint/hook for preview-url with retry/403 refresh
+- [ ] Infra: docker-compose for Gotenberg + env docs updates
+- [ ] QA: sample complex files; validate acceptance criteria
