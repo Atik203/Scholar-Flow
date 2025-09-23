@@ -227,9 +227,16 @@ export const paperController = {
     if (paper.previewFileKey && paper.previewMimeType) {
       objectKey = paper.previewFileKey;
       mimeType = paper.previewMimeType;
-      console.log(`[PaperController] Using preview file: ${objectKey}`);
+      console.log(
+        `[PaperController] Using preview file: ${objectKey}, mimeType: ${mimeType}`
+      );
     } else {
-      console.log(`[PaperController] Using original file: ${objectKey}`);
+      console.log(
+        `[PaperController] Using original file: ${objectKey}, mimeType: ${mimeType}`
+      );
+      console.log(
+        `[PaperController] Debug - file.contentType: ${paper.file.contentType}, originalMimeType: ${paper.originalMimeType}`
+      );
     }
 
     // Use shorter expiry for security; front-end can re-request as needed
@@ -239,17 +246,17 @@ export const paperController = {
     // Add Cache-Control header to prevent caching of signed URLs
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
 
-    sendSuccessResponse(
-      res,
-      {
-        url,
-        mime: mimeType,
-        expiresIn: EXPIRES_SECONDS,
-        isPreview: !!paper.previewFileKey,
-        originalMimeType: paper.originalMimeType,
-      },
-      "Signed preview URL generated"
-    );
+    const responseData = {
+      url,
+      mime: mimeType,
+      expiresIn: EXPIRES_SECONDS,
+      isPreview: !!paper.previewFileKey,
+      originalMimeType: paper.originalMimeType,
+    };
+
+    console.log(`[PaperController] Preview URL response:`, responseData);
+
+    sendSuccessResponse(res, responseData, "Signed preview URL generated");
   }),
 
   updateMetadata: catchAsync(async (req: Request, res: Response) => {
