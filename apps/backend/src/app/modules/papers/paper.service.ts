@@ -215,6 +215,7 @@ export const paperService = {
     const result = await prisma.$queryRaw<any[]>`
       SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
              p.source, p.doi, p."processingStatus", p."createdAt", p."updatedAt",
+             p."previewFileKey", p."previewMimeType", p."originalMimeType",
              pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
              pf."sizeBytes", pf."originalFilename", pf."extractedAt"
       FROM "Paper" p
@@ -238,6 +239,9 @@ export const paperService = {
       processingStatus: item.processingStatus,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      previewFileKey: item.previewFileKey,
+      previewMimeType: item.previewMimeType,
+      originalMimeType: item.originalMimeType,
       file: item.file_id
         ? {
             id: item.file_id,
