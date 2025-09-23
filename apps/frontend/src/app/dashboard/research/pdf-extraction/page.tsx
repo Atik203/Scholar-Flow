@@ -1,7 +1,8 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
+import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,7 +32,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { useListPapersQuery } from "@/redux/api/paperApi";
+import {
+  useGetPaperFileUrlQuery,
+  useListPapersQuery,
+} from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   AlertCircle,
@@ -32,8 +43,10 @@ import {
   Building2,
   CheckCircle,
   Clock,
+  Eye,
   FileSearch,
   FileText,
+  Loader2,
   Microscope,
   RefreshCw,
   Search,
@@ -58,6 +71,8 @@ export default function PdfExtractionPage() {
   const [activeTab, setActiveTab] = useState<"extract" | "search" | "bulk">(
     "extract"
   );
+  const [showPreview, setShowPreview] = useState(false);
+  const [viewMode, setViewMode] = useState<"preview" | "extraction">("preview");
 
   // Get workspaces for filtering
   const { data: workspacesData, isLoading: workspacesLoading } =
@@ -75,6 +90,12 @@ export default function PdfExtractionPage() {
     page: 1,
     limit: 100,
   });
+
+  // Hook for signed file URL (only fetch when preview is needed)
+  const { data: fileUrlData, isFetching: isFetchingFileUrl } =
+    useGetPaperFileUrlQuery(selectedPaper?.id || "", {
+      skip: !selectedPaper || !showPreview,
+    });
 
   const papers = useMemo(() => papersData?.items || [], [papersData?.items]);
 
@@ -414,130 +435,308 @@ export default function PdfExtractionPage() {
                 )}
               </div>
 
-              {/* Search and Results */}
+              {/* Preview and Extraction */}
               <div className="lg:col-span-2 space-y-4">
                 {selectedPaper ? (
                   <>
-                    {/* Search Controls */}
+                    {/* View Mode Tabs */}
                     <Card>
                       <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <TextCursor className="h-5 w-5" />
-                          Extract & Search Text
-                        </CardTitle>
-                        <CardDescription>
-                          Search through the extracted text content of "
-                          {selectedPaper.title}"
-                        </CardDescription>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle className="flex items-center gap-2">
+                              <FileText className="h-5 w-5" />
+                              Document Viewer
+                            </CardTitle>
+                            <CardDescription>
+                              View and analyze "{selectedPaper.title}"
+                            </CardDescription>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant={
+                                viewMode === "preview" ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => setViewMode("preview")}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              Preview
+                            </Button>
+                            <Button
+                              variant={
+                                viewMode === "extraction"
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => setViewMode("extraction")}
+                            >
+                              <TextCursor className="h-4 w-4 mr-2" />
+                              Text Extraction
+                            </Button>
+                          </div>
+                        </div>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        {/* Search Input */}
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              placeholder="Search in extracted text..."
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
-                              className="pl-10"
-                            />
-                          </div>
-                          <Button
-                            variant="outline"
-                            onClick={() => setSearchQuery("")}
-                          >
-                            Clear
-                          </Button>
-                        </div>
-
-                        {/* Filters */}
-                        <div className="flex gap-4">
-                          <div className="flex-1">
-                            <Label htmlFor="page-filter">Filter by Page</Label>
-                            <Select
-                              value={
-                                filterByPage !== null
-                                  ? String(filterByPage)
-                                  : "all"
-                              }
-                              onValueChange={(value) =>
-                                setFilterByPage(
-                                  value === "all" ? null : parseInt(value)
-                                )
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="All pages" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all">All pages</SelectItem>
-                                {uniquePages.map((page: number) => (
-                                  <SelectItem
-                                    key={page}
-                                    value={page.toString()}
-                                  >
-                                    Page {page}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex-1">
-                            <Label htmlFor="sort-field">Sort by</Label>
-                            <Select
-                              value={sortField}
-                              onValueChange={(
-                                value: "idx" | "page" | "createdAt"
-                              ) => setSortField(value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="idx">Chunk Order</SelectItem>
-                                <SelectItem value="page">
-                                  Page Number
-                                </SelectItem>
-                                <SelectItem value="createdAt">
-                                  Created Date
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="flex-1">
-                            <Label htmlFor="sort-direction">Direction</Label>
-                            <Select
-                              value={sortDirection}
-                              onValueChange={(value: "asc" | "desc") =>
-                                setSortDirection(value)
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="asc">Ascending</SelectItem>
-                                <SelectItem value="desc">Descending</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </CardContent>
                     </Card>
 
-                    {/* Extracted Text Display */}
-                    <ExtractedTextDisplay paperId={selectedPaper.id} />
+                    {/* Preview Mode */}
+                    {viewMode === "preview" && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Eye className="h-5 w-5" />
+                            Document Preview
+                          </CardTitle>
+                          <CardDescription>
+                            View the original document content
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex gap-2">
+                              <Dialog
+                                open={showPreview}
+                                onOpenChange={setShowPreview}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="flex items-center gap-2"
+                                    disabled={isFetchingFileUrl}
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    {isFetchingFileUrl
+                                      ? "Loading..."
+                                      : "Open Preview"}
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-5xl w-full h-[90vh]">
+                                  <DialogHeader className="pb-4">
+                                    <DialogTitle className="text-xl flex items-center gap-2 truncate">
+                                      <FileText className="h-5 w-5 shrink-0" />
+                                      {selectedPaper.file?.originalFilename ||
+                                        selectedPaper.title}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="flex-1 overflow-auto bg-muted/10 rounded-lg p-4">
+                                    {isFetchingFileUrl ? (
+                                      <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
+                                        <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                                        <p>Preparing document preview...</p>
+                                      </div>
+                                    ) : fileUrlData?.data?.url ? (
+                                      <DocumentPreview
+                                        fileUrl={fileUrlData.data.url}
+                                        fileName={
+                                          selectedPaper?.file?.originalFilename
+                                        }
+                                        mimeType={
+                                          selectedPaper?.file?.contentType
+                                        }
+                                        originalFilename={
+                                          selectedPaper?.file?.originalFilename
+                                        }
+                                        className="mx-auto"
+                                      />
+                                    ) : (
+                                      <div className="h-96 flex flex-col items-center justify-center text-muted-foreground">
+                                        <AlertCircle className="h-8 w-8 mb-4" />
+                                        <p>Unable to load document preview</p>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => setShowPreview(true)}
+                                          className="mt-2"
+                                        >
+                                          Retry
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+
+                              <Button
+                                variant="outline"
+                                onClick={() => setViewMode("extraction")}
+                              >
+                                <TextCursor className="h-4 w-4 mr-2" />
+                                Switch to Text Extraction
+                              </Button>
+                            </div>
+
+                            {/* Inline preview area - smaller version */}
+                            <div className="border rounded-lg h-96 overflow-auto bg-muted/10 p-4">
+                              {isFetchingFileUrl ? (
+                                <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                                  <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                                  <p>Loading preview...</p>
+                                </div>
+                              ) : fileUrlData?.data?.url ? (
+                                <DocumentPreview
+                                  fileUrl={fileUrlData.data.url}
+                                  fileName={
+                                    selectedPaper?.file?.originalFilename
+                                  }
+                                  mimeType={selectedPaper?.file?.contentType}
+                                  originalFilename={
+                                    selectedPaper?.file?.originalFilename
+                                  }
+                                  className="w-full h-full"
+                                />
+                              ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                                  <FileText className="h-8 w-8 mb-4 opacity-50" />
+                                  <p>
+                                    Click "Open Preview" to view the document
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Text Extraction Mode */}
+                    {viewMode === "extraction" && (
+                      <>
+                        {/* Search Controls */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <TextCursor className="h-5 w-5" />
+                              Extract & Search Text
+                            </CardTitle>
+                            <CardDescription>
+                              Search through the extracted text content
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            {/* Search Input */}
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="Search in extracted text..."
+                                  value={searchQuery}
+                                  onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                  }
+                                  className="pl-10"
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                onClick={() => setSearchQuery("")}
+                              >
+                                Clear
+                              </Button>
+                            </div>
+
+                            {/* Filters */}
+                            <div className="flex gap-4">
+                              <div className="flex-1">
+                                <Label htmlFor="page-filter">
+                                  Filter by Page
+                                </Label>
+                                <Select
+                                  value={
+                                    filterByPage !== null
+                                      ? String(filterByPage)
+                                      : "all"
+                                  }
+                                  onValueChange={(value) =>
+                                    setFilterByPage(
+                                      value === "all" ? null : parseInt(value)
+                                    )
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="All pages" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="all">
+                                      All pages
+                                    </SelectItem>
+                                    {uniquePages.map((page: number) => (
+                                      <SelectItem
+                                        key={page}
+                                        value={page.toString()}
+                                      >
+                                        Page {page}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex-1">
+                                <Label htmlFor="sort-field">Sort by</Label>
+                                <Select
+                                  value={sortField}
+                                  onValueChange={(
+                                    value: "idx" | "page" | "createdAt"
+                                  ) => setSortField(value)}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="idx">
+                                      Chunk Order
+                                    </SelectItem>
+                                    <SelectItem value="page">
+                                      Page Number
+                                    </SelectItem>
+                                    <SelectItem value="createdAt">
+                                      Created Date
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex-1">
+                                <Label htmlFor="sort-direction">
+                                  Direction
+                                </Label>
+                                <Select
+                                  value={sortDirection}
+                                  onValueChange={(value: "asc" | "desc") =>
+                                    setSortDirection(value)
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="asc">
+                                      Ascending
+                                    </SelectItem>
+                                    <SelectItem value="desc">
+                                      Descending
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Enhanced Extraction Display using ExtractionViewer */}
+                        <ExtractionViewer paperId={selectedPaper.id} />
+                      </>
+                    )}
                   </>
                 ) : (
                   <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                       <TextCursor className="h-12 w-12 text-muted-foreground mb-4" />
                       <h3 className="text-lg font-semibold mb-2">
-                        Select a Paper to Extract Text
+                        Select a Paper to View and Extract
                       </h3>
                       <p className="text-muted-foreground text-center mb-4">
-                        Choose a paper from the list to view and search through
-                        its extracted text content.
+                        Choose a paper from the list to view its preview and
+                        extract text content.
                       </p>
                       <Link href="/dashboard/papers/upload">
                         <Button>

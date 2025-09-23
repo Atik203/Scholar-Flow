@@ -26,6 +26,7 @@ import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
+  AlertCircle,
   ArrowUpRight,
   BookOpen,
   Brain,
@@ -37,6 +38,7 @@ import {
   Search,
   Settings,
   Shield,
+  TextCursor,
   TrendingUp,
   Upload,
   Users,
@@ -163,11 +165,7 @@ export default function DashboardPage() {
   });
 
   // Get workspace-aware data
-  const {
-    data: papersData,
-    isLoading: papersLoading,
-    isError,
-  } = useListPapersQuery({
+  const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     page: 1,
     limit: 10, // Get more recent papers for dashboard
     workspaceId: selectedWorkspaceId || undefined,
@@ -188,11 +186,79 @@ export default function DashboardPage() {
     }
   }, [workspacesData, selectedWorkspaceId]);
 
-  // Compute workspace-aware stats
+  // Helper: format relative time (e.g., "2h ago")
+  const formatTimeAgo = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    const sec = Math.floor(diffMs / 1000);
+    if (sec < 60) return `${sec}s ago`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const hrs = Math.floor(min / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString();
+  };
+
+  // Derived processing stats for overview widgets
+  const processingStats = useMemo(() => {
+    const items = papersData?.items || [];
+    const total = papersData?.meta?.total || items.length || 0;
+    const processed = items.filter(
+      (p: any) => p.processingStatus === "PROCESSED"
+    ).length;
+    const processing = items.filter(
+      (p: any) => p.processingStatus === "PROCESSING"
+    ).length;
+    const failed = items.filter(
+      (p: any) => p.processingStatus === "FAILED"
+    ).length;
+    const extracted = items.filter(
+      (p: any) => p.extractedText && p.extractedText.length > 100
+    ).length;
+    return { total, processed, processing, failed, extracted };
+  }, [papersData]);
+
+  // Dynamic recent activity derived from papers list
+  const dynamicActivity = useMemo(() => {
+    const items = papersData?.items || [];
+    const acts: Array<{
+      title: string;
+      time: string;
+      icon: any;
+      color: string;
+    }> = [];
+    // Most recent uploads
+    items.slice(0, 5).forEach((p: any) =>
+      acts.push({
+        title: `Paper added: ${p.title}`,
+        time: formatTimeAgo(p.createdAt),
+        icon: Upload,
+        color: "text-blue-600",
+      })
+    );
+    // Highlight processed papers (top 3)
+    items
+      .filter((p: any) => p.processingStatus === "PROCESSED")
+      .slice(0, 3)
+      .forEach((p: any) =>
+        acts.push({
+          title: `Text extracted: ${p.title}`,
+          time: formatTimeAgo(p.updatedAt || p.createdAt),
+          icon: TextCursor,
+          color: "text-emerald-600",
+        })
+      );
+    return acts.slice(0, 6);
+  }, [papersData]);
+
+  // Compute comprehensive workspace-aware stats
   const workspaceStats = useMemo(() => {
     const totalPapers = papersData?.meta?.total || 0;
     const recentPapers = papersData?.items || [];
     const totalCollections = collectionsData?.result?.length || 0;
+    const availableWorkspaces = workspacesData?.data || [];
 
     // Calculate papers uploaded this week
     const thisWeekPapers = recentPapers.filter((paper) => {
@@ -202,10 +268,18 @@ export default function DashboardPage() {
       return paperDate > weekAgo;
     }).length;
 
-    // Calculate processed papers
+    // Calculate processed papers and extraction stats
     const processedPapers = recentPapers.filter(
       (p) => p.processingStatus === "PROCESSED"
     ).length;
+    const processingPapers = recentPapers.filter(
+      (p) => p.processingStatus === "PROCESSING"
+    ).length;
+    const failedPapers = recentPapers.filter(
+      (p) => p.processingStatus === "FAILED"
+    ).length;
+    // Approximate extracted as processed (frontend does not include extractedText in Paper type)
+    const extractedPapers = processedPapers;
 
     // Calculate total storage
     const totalBytes = recentPapers.reduce(
@@ -213,52 +287,87 @@ export default function DashboardPage() {
       0
     );
     const totalMB = Math.round(totalBytes / (1024 * 1024));
+    const totalGB = totalMB > 1024 ? (totalMB / 1024).toFixed(1) : null;
+
+    // Get current workspace info
+    const currentWorkspace = availableWorkspaces.find(
+      (w) => w.id === selectedWorkspaceId
+    );
+    const totalWorkspaces = availableWorkspaces.length;
 
     return [
       {
         title: selectedWorkspaceId ? "Papers in Workspace" : "All Papers",
         value: totalPapers.toString(),
         change: `+${thisWeekPapers} this week`,
-        trend: "up" as const,
+        trend: thisWeekPapers > 0 ? ("up" as const) : ("neutral" as const),
         icon: FileText,
         color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-950/20",
         iconColor: "text-blue-600 dark:text-blue-400",
+        details: `${processingPapers} processing${failedPapers > 0 ? `, ${failedPapers} failed` : ""}`,
+      },
+      {
+        title: "Text Extracted",
+        value: extractedPapers.toString(),
+        change: `${Math.round((extractedPapers / Math.max(totalPapers, 1)) * 100)}% of papers`,
+        trend:
+          extractedPapers > processedPapers * 0.8
+            ? ("up" as const)
+            : ("neutral" as const),
+        icon: TextCursor,
+        color: "text-emerald-600",
+        bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+        iconColor: "text-emerald-600 dark:text-emerald-400",
+        details: `${processedPapers} fully processed`,
       },
       {
         title: selectedWorkspaceId
-          ? "Collections in Workspace"
-          : "All Collections",
+          ? "Collections Here"
+          : `Collections (${totalWorkspaces} workspaces)`,
         value: totalCollections.toString(),
-        change: collectionsLoading ? "Loading..." : "Organized papers",
+        change: collectionsLoading
+          ? "Loading..."
+          : selectedWorkspaceId
+            ? `in ${currentWorkspace?.name || "workspace"}`
+            : "across all workspaces",
         trend: "neutral" as const,
         icon: BookOpen,
-        color: "text-green-600",
-        bgColor: "bg-green-50 dark:bg-green-950/20",
-        iconColor: "text-green-600 dark:text-green-400",
-      },
-      {
-        title: "Processed Papers",
-        value: processedPapers.toString(),
-        change: `${Math.round((processedPapers / Math.max(totalPapers, 1)) * 100)}% complete`,
-        trend: "up" as const,
-        icon: Brain,
-        color: "text-purple-600",
-        bgColor: "bg-purple-50 dark:bg-purple-950/20",
-        iconColor: "text-purple-600 dark:text-purple-400",
-      },
-      {
-        title: "Storage Used",
-        value: totalMB > 0 ? `${totalMB}MB` : "0MB",
-        change: selectedWorkspaceId ? "Workspace files" : "Total file size",
-        trend: "neutral" as const,
-        icon: Clock,
         color: "text-orange-600",
         bgColor: "bg-orange-50 dark:bg-orange-950/20",
         iconColor: "text-orange-600 dark:text-orange-400",
+        details: selectedWorkspaceId
+          ? `Role: ${currentWorkspace?.userRole || "Member"}`
+          : `${totalWorkspaces} workspaces available`,
+      },
+      {
+        title: "Storage Used",
+        value: totalGB ? `${totalGB}GB` : totalMB > 0 ? `${totalMB}MB` : "0MB",
+        change: selectedWorkspaceId
+          ? "Workspace files"
+          : "Total across all papers",
+        trend: totalMB > 500 ? ("up" as const) : ("neutral" as const),
+        icon: Clock,
+        color: "text-purple-600",
+        bgColor: "bg-purple-50 dark:bg-purple-950/20",
+        iconColor: "text-purple-600 dark:text-purple-400",
+        details: `${totalPapers} papers${totalMB > 100 ? ", optimize storage" : ""}`,
       },
     ];
-  }, [papersData, collectionsData, collectionsLoading, selectedWorkspaceId]);
+  }, [
+    papersData,
+    collectionsData,
+    collectionsLoading,
+    selectedWorkspaceId,
+    workspacesData,
+  ]);
+
+  // Current workspace memo for snapshot
+  const currentWorkspace = useMemo(() => {
+    return (workspacesData?.data || []).find(
+      (w) => w.id === selectedWorkspaceId
+    );
+  }, [workspacesData, selectedWorkspaceId]);
 
   if (isLoading) {
     return (
@@ -330,7 +439,7 @@ export default function DashboardPage() {
                     <Building2 className="h-4 w-4" />
                     <span>{workspace.name}</span>
                     <Badge variant="outline" className="text-xs">
-                      {workspace.role}
+                      {workspace.userRole || "Member"}
                     </Badge>
                   </div>
                 </SelectItem>
@@ -447,23 +556,221 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <div className="rounded-full p-2 bg-muted flex-shrink-0">
-                  <activity.icon
-                    className={`h-3 w-3 sm:h-4 sm:w-4 ${activity.color}`}
-                  />
+            {(dynamicActivity.length ? dynamicActivity : recentActivity).map(
+              (activity, index) => (
+                <div key={index} className="flex items-start gap-3">
+                  <div className="rounded-full p-2 bg-muted flex-shrink-0">
+                    <activity.icon
+                      className={`h-3 w-3 sm:h-4 sm:w-4 ${activity.color}`}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm line-clamp-2">
+                      {activity.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.time}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm line-clamp-2">
-                    {activity.title}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {activity.time}
-                  </p>
+              )
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Processing Overview, Research Tools, Workspace Snapshot */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Processing Overview */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5" /> Processing Overview
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Snapshot of document processing and extraction
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Total</span>
+                  <FileText className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <p className="text-lg font-semibold">{processingStats.total}</p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    Processed
+                  </span>
+                  <Brain className="h-3.5 w-3.5 text-emerald-600" />
+                </div>
+                <p className="text-lg font-semibold">
+                  {processingStats.processed}
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">
+                    Processing
+                  </span>
+                  <Zap className="h-3.5 w-3.5 text-amber-600" />
+                </div>
+                <p className="text-lg font-semibold">
+                  {processingStats.processing}
+                </p>
+              </div>
+              <div className="rounded-lg border p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Failed</span>
+                  <AlertCircle className="h-3.5 w-3.5 text-red-600" />
+                </div>
+                <p className="text-lg font-semibold">
+                  {processingStats.failed}
+                </p>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {processingStats.processed > 0
+                ? `${Math.round((processingStats.processed / Math.max(processingStats.total, 1)) * 100)}% processed`
+                : "No processed papers yet"}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Research Tools */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Search className="h-4 w-4 sm:h-5 sm:w-5" /> Research Tools
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Jump into key workflows
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button
+                asChild
+                variant="outline"
+                className="justify-start h-auto p-3"
+              >
+                <Link
+                  href="/dashboard/research/pdf-extraction"
+                  className="flex items-center gap-3 w-full"
+                >
+                  <div className="p-2 rounded-lg bg-emerald-500 text-white">
+                    <TextCursor className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">PDF Text Extraction</div>
+                    <div className="text-xs text-muted-foreground">
+                      Preview & extract text
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="justify-start h-auto p-3"
+              >
+                <Link
+                  href="/dashboard/papers/search"
+                  className="flex items-center gap-3 w-full"
+                >
+                  <div className="p-2 rounded-lg bg-blue-500 text-white">
+                    <Search className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">Advanced Search</div>
+                    <div className="text-xs text-muted-foreground">
+                      Filter, query, discover
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="justify-start h-auto p-3 sm:col-span-2"
+              >
+                <Link
+                  href="/dashboard/analytics"
+                  className="flex items-center gap-3 w-full"
+                >
+                  <div className="p-2 rounded-lg bg-purple-500 text-white">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium">Analytics</div>
+                    <div className="text-xs text-muted-foreground">
+                      Insights & trends
+                    </div>
+                  </div>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Workspace Snapshot */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Building2 className="h-4 w-4 sm:h-5 sm:w-5" /> Workspace Snapshot
+            </CardTitle>
+            <CardDescription className="text-sm">
+              Key details of your current workspace
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {selectedWorkspaceId && currentWorkspace ? (
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Name</span>
+                  <span className="font-medium">{currentWorkspace.name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Your Role</span>
+                  <Badge variant="outline">
+                    {currentWorkspace.userRole || "Member"}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="rounded-lg border p-2 text-center">
+                    <div className="text-[10px] text-muted-foreground">
+                      Members
+                    </div>
+                    <div className="text-base font-semibold">
+                      {currentWorkspace.memberCount ?? "-"}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-2 text-center">
+                    <div className="text-[10px] text-muted-foreground">
+                      Papers
+                    </div>
+                    <div className="text-base font-semibold">
+                      {currentWorkspace.paperCount ?? "-"}
+                    </div>
+                  </div>
+                  <div className="rounded-lg border p-2 text-center">
+                    <div className="text-[10px] text-muted-foreground">
+                      Collections
+                    </div>
+                    <div className="text-base font-semibold">
+                      {currentWorkspace.collectionCount ?? "-"}
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                Select a workspace above to see details.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
