@@ -1,5 +1,8 @@
 # Scholar-Flow Development Roadmap
 
+Author: Atik
+Last Updated: September 24, 2025
+
 > Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
 
 ## Phase 1 – MVP (Weeks 1–6)
@@ -74,6 +77,9 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Production-grade error handling and input validation (Author: Atik) ✅
 - [x] AWS SDK v3 migration for improved performance and modern tooling (Author: Atik) ✅
 - [x] Extract text content from uploaded PDFs & DOCX (Author: Atik+Salman) ✅
+      Preview & Extraction improvements:
+- [x] Gotenberg-based DOCX→PDF preview pipeline (Docker on EC2) for pixel‑perfect viewing (Author: Atik) ✅
+- [x] Preview‑first Extraction Text: view/preview for DOCX/PDF (no rich text editor yet) (Author: Atik) ✅
 
 ### Week 5 – AI Summarization & Semantic Search
 
@@ -139,4 +145,4 @@ Goal: Monetization, admin tools, external integrations.
 
 Total Duration: 20 weeks (~5 months)
 Current Status: Week 4.5 Complete – Advanced Workspace + PDF/DOCX text extraction and high‑fidelity preview implemented ✅ (Authors: Atik+Salman)
-Last Updated: September 21, 2025
+Last Updated: September 24, 2025

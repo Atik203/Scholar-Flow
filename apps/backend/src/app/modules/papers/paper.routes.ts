@@ -48,6 +48,14 @@ paperRoutes.get(
   paperController.getFileUrl as any
 );
 
+// Get signed preview URL (prefers preview PDF for DOCX, falls back to original)
+paperRoutes.get(
+  "/:id/preview-url",
+  paperOperationLimiter,
+  optionalAuth as any,
+  paperController.getPreviewUrl as any
+);
+
 // Update metadata (protected, but allow dev fallback)
 paperRoutes.patch(
   "/:id",

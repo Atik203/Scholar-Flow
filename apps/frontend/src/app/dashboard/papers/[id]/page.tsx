@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
-import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
+import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import {
   showErrorToast,
@@ -542,8 +542,8 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
               showTriggerButton={true}
             />
 
-            {/* Extracted Text Display */}
-            <ExtractedTextDisplay paperId={paper.id} />
+            {/* Document Extraction Viewer */}
+            <ExtractionViewer paperId={paper.id} />
           </div>
 
           {/* Enhanced Sidebar */}
