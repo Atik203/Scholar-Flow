@@ -139,6 +139,24 @@ export const paperApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "Paper", id }],
     }),
 
+    getPaperPreviewUrl: builder.query<
+      {
+        success: boolean;
+        data: {
+          url: string;
+          mime: string;
+          expiresIn: number;
+          isPreview: boolean;
+          originalMimeType?: string;
+        };
+        message: string;
+      },
+      string
+    >({
+      query: (id) => `/papers/${id}/preview-url`,
+      providesTags: (result, error, id) => [{ type: "Paper", id }],
+    }),
+
     updatePaperMetadata: builder.mutation<Paper, UpdatePaperMetadataRequest>({
       query: ({ id, ...data }) => ({
         url: `/papers/${id}`,
@@ -239,6 +257,7 @@ export const {
   useListPapersQuery,
   useGetPaperQuery,
   useGetPaperFileUrlQuery,
+  useGetPaperPreviewUrlQuery,
   useUpdatePaperMetadataMutation,
   useDeletePaperMutation,
   useGetDevWorkspaceQuery,
