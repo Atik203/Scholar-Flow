@@ -44,6 +44,15 @@ export default {
     secret_key: process.env.STRIPE_SECRET_KEY,
     webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   },
+  // Document conversion / preview configuration
+  docxToPdf: {
+    engine: process.env.DOCX_TO_PDF_ENGINE || "soffice",
+    gotenbergUrl: process.env.GOTENBERG_URL,
+    // Optional timeout in ms for external requests
+    requestTimeoutMs: process.env.GOTENBERG_TIMEOUT_MS
+      ? Number(process.env.GOTENBERG_TIMEOUT_MS)
+      : 10000,
+  },
   ssl: {
     storeId: process.env.STORE_ID,
     storePass: process.env.STORE_PASS,

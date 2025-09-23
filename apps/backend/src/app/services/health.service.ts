@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import config from "../config";
 import ApiError from "../errors/ApiError";
 import catchAsync from "../shared/catchAsync";
 import prisma from "../shared/prisma";
@@ -124,6 +125,83 @@ const checkEnvironment = (): HealthCheckResult => {
   };
 };
 
+// Optional: Gotenberg connectivity health check (DOCX -> PDF engine)
+const checkGotenberg = async (): Promise<HealthCheckResult> => {
+  const start = Date.now();
+  const engine = config.docxToPdf?.engine;
+  const url = config.docxToPdf?.gotenbergUrl;
+
+  if (engine !== "gotenberg") {
+    return {
+      service: "docxToPdf",
+      status: "healthy",
+      details: {
+        engine,
+        message: "Gotenberg check skipped (engine not set to 'gotenberg')",
+      },
+    };
+  }
+
+  if (!url) {
+    return {
+      service: "docxToPdf",
+      status: "degraded",
+      error: "GOTENBERG_URL is not configured",
+      details: {
+        engine,
+      },
+    };
+  }
+
+  try {
+    // Gotenberg returns 405 on root; use /health for a lightweight check where available
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      config.docxToPdf?.requestTimeoutMs || 8000
+    );
+
+    const target = url.replace(/\/$/, "") + "/health";
+    const res = await fetch(target, {
+      method: "GET",
+      signal: controller.signal,
+    }).catch(async (err) => {
+      // Some deployments may not expose /health. Try root as fallback.
+      const fallback = url;
+      return fetch(fallback, { method: "GET", signal: controller.signal });
+    });
+
+    clearTimeout(timeout);
+
+    const responseTime = Date.now() - start;
+    const ok =
+      !!res && (res.status === 200 || res.status === 204 || res.status === 405);
+
+    return {
+      service: "docxToPdf",
+      status: ok ? "healthy" : "degraded",
+      responseTime,
+      details: {
+        engine,
+        url,
+        statusCode: res ? res.status : "no-response",
+      },
+    };
+  } catch (error) {
+    const responseTime = Date.now() - start;
+    return {
+      service: "docxToPdf",
+      status: "unhealthy",
+      responseTime,
+      error: error instanceof Error ? error.message : "Unknown Gotenberg error",
+      details: {
+        engine,
+        url,
+      },
+    };
+  }
+};
+
 // Basic health check (lightweight)
 export const basicHealthCheck = catchAsync(
   async (req: Request, res: Response) => {
@@ -146,11 +224,12 @@ export const detailedHealthCheck = catchAsync(
     const startTime = Date.now();
 
     // Run all health checks in parallel
-    const [databaseResult, memoryResult, environmentResult] =
+    const [databaseResult, memoryResult, environmentResult, gotenbergResult] =
       await Promise.allSettled([
         checkDatabase(),
         Promise.resolve(checkMemory()),
         Promise.resolve(checkEnvironment()),
+        checkGotenberg(),
       ]);
 
     const services: HealthCheckResult[] = [];
@@ -174,6 +253,11 @@ export const detailedHealthCheck = catchAsync(
     // Process environment check result
     if (environmentResult.status === "fulfilled") {
       services.push(environmentResult.value);
+    }
+
+    // Process gotenberg check result
+    if (gotenbergResult.status === "fulfilled") {
+      services.push(gotenbergResult.value);
     }
 
     // Calculate overall status
