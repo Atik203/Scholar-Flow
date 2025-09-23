@@ -17,6 +17,7 @@ interface DocumentPreviewProps {
   className?: string;
   originalFilename?: string;
   mimeType?: string;
+  onError?: (error: string) => void;
 }
 
 export function DocumentPreview({
@@ -25,6 +26,7 @@ export function DocumentPreview({
   className,
   originalFilename = "document",
   mimeType,
+  onError,
 }: DocumentPreviewProps) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -157,11 +159,13 @@ export function DocumentPreview({
       console.error("File URL:", fileUrl);
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
-      setError(`Failed to preview document: ${errorMessage}`);
+      const errorMsg = `Failed to preview document: ${errorMessage}`;
+      setError(errorMsg);
+      onError?.(errorMsg);
     } finally {
       setIsLoading(false);
     }
-  }, [fileUrl]);
+  }, [fileUrl, onError]);
 
   // High-fidelity DOCX rendering using docx-preview; falls back to mammoth on failure
   const renderDocxHighFidelity = useCallback(async () => {

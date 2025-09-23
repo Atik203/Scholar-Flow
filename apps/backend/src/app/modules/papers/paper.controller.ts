@@ -204,6 +204,54 @@ export const paperController = {
     );
   }),
 
+  // Return a signed URL for the paper's preview file (PDF converted from DOCX) or original file
+  getPreviewUrl: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await paperService.getById(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found");
+    }
+    if (!paper.file || !paper.file.objectKey) {
+      throw new ApiError(404, "Paper file not found");
+    }
+
+    // Prefer preview file if available (for DOCX → PDF conversion)
+    let objectKey = paper.file.objectKey;
+    let mimeType =
+      paper.file.contentType || paper.originalMimeType || "application/pdf";
+
+    if (paper.previewFileKey && paper.previewMimeType) {
+      objectKey = paper.previewFileKey;
+      mimeType = paper.previewMimeType;
+      console.log(`[PaperController] Using preview file: ${objectKey}`);
+    } else {
+      console.log(`[PaperController] Using original file: ${objectKey}`);
+    }
+
+    // Use shorter expiry for security; front-end can re-request as needed
+    const EXPIRES_SECONDS = 300; // 5 minutes for preview (longer than file download)
+    const url = await storage.getSignedUrl(objectKey, EXPIRES_SECONDS);
+
+    // Add Cache-Control header to prevent caching of signed URLs
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+
+    sendSuccessResponse(
+      res,
+      {
+        url,
+        mime: mimeType,
+        expiresIn: EXPIRES_SECONDS,
+        isPreview: !!paper.previewFileKey,
+        originalMimeType: paper.originalMimeType,
+      },
+      "Signed preview URL generated"
+    );
+  }),
+
   updateMetadata: catchAsync(async (req: Request, res: Response) => {
     const params = getPaperParamsSchema.safeParse(req.params);
     if (!params.success) {
