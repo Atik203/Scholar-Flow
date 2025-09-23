@@ -34,6 +34,71 @@ export function DocumentPreview({
   const [renderedByDocxPreview, setRenderedByDocxPreview] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // Enhanced DOCX styling
+  useEffect(() => {
+    // Add enhanced CSS for docx-preview when component mounts
+    const styleId = "docx-preview-styles";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        .docx-preview {
+          font-family: "Times New Roman", "Liberation Serif", serif !important;
+          font-size: 12pt !important;
+          line-height: 1.15 !important;
+          color: #000000 !important;
+          background-color: #ffffff !important;
+        }
+        .docx-preview .docx-wrapper {
+          max-width: 8.5in !important;
+          margin: 0 auto !important;
+          background: white !important;
+          padding: 1in !important;
+          box-shadow: 0 0 5px rgba(0,0,0,0.1) !important;
+        }
+        .docx-preview p {
+          margin: 0 0 6pt 0 !important;
+          text-align: justify !important;
+        }
+        .docx-preview h1, .docx-preview h2, .docx-preview h3, .docx-preview h4, .docx-preview h5, .docx-preview h6 {
+          font-family: "Times New Roman", serif !important;
+          font-weight: bold !important;
+          margin-top: 12pt !important;
+          margin-bottom: 6pt !important;
+        }
+        .docx-preview table {
+          border-collapse: collapse !important;
+          width: 100% !important;
+          margin: 6pt 0 !important;
+        }
+        .docx-preview table td, .docx-preview table th {
+          border: 1px solid #000000 !important;
+          padding: 4pt !important;
+          vertical-align: top !important;
+        }
+        .docx-preview .docx-num-decimal {
+          list-style-type: decimal !important;
+        }
+        .docx-preview .docx-num-bullet {
+          list-style-type: disc !important;
+        }
+        .docx-preview img {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    return () => {
+      // Clean up style when component unmounts
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
   // Helpers: infer extension and type from available hints
   const extractExtensionFromName = (name?: string) => {
     if (!name) return "";
@@ -98,6 +163,16 @@ export function DocumentPreview({
   };
 
   const effectiveType = getEffectiveType();
+
+  // Debug logging to understand MIME type detection
+  console.log("[DocumentPreview] Debug info:", {
+    mimeType,
+    fileExtension,
+    effectiveType,
+    fileUrl: fileUrl?.substring(0, 100) + "...",
+    fileName,
+    originalFilename,
+  });
 
   const handleDownload = () => {
     const link = document.createElement("a");
@@ -211,13 +286,22 @@ export function DocumentPreview({
         containerRef.current,
         undefined,
         {
-          className: "docx",
+          className: "docx-preview",
           inWrapper: true,
           ignoreWidth: false,
           ignoreHeight: false,
+          ignoreLastRenderedPageBreak: true,
           breakPages: false,
           experimental: true,
           useMathMLPolyfill: true,
+          useBase64URL: false,
+          renderChanges: false,
+          renderComments: false,
+          renderEndnotes: true,
+          renderFootnotes: true,
+          renderHeaders: true,
+          renderFooters: true,
+          trimXmlDeclaration: true,
         }
       );
 
@@ -237,8 +321,15 @@ export function DocumentPreview({
   }, [fileUrl, convertDocxToHtml]);
 
   useEffect(() => {
+    // Safety check: ensure we're not trying to process a PDF as DOCX
+    const isProbablyPdf =
+      mimeType?.toLowerCase().includes("pdf") ||
+      fileUrl?.toLowerCase().includes(".pdf") ||
+      fileExtension === "pdf";
+
     if (
       effectiveType === "docx" &&
+      !isProbablyPdf && // Additional safety check
       !error &&
       fileUrl &&
       typeof fileUrl === "string" &&
@@ -247,7 +338,14 @@ export function DocumentPreview({
       // Try high-fidelity renderer first; it will fallback to mammoth on failure
       renderDocxHighFidelity();
     }
-  }, [effectiveType, fileUrl, error, renderDocxHighFidelity]);
+  }, [
+    effectiveType,
+    fileUrl,
+    error,
+    renderDocxHighFidelity,
+    mimeType,
+    fileExtension,
+  ]);
 
   // Validate fileUrl after hooks but before rendering
   if (!fileUrl || typeof fileUrl !== "string" || fileUrl.trim() === "") {
@@ -279,6 +377,25 @@ export function DocumentPreview({
 
   // Handle DOCX files
   if (effectiveType === "docx") {
+    // Safety check: ensure we're not trying to process a PDF as DOCX
+    const isProbablyPdf =
+      mimeType?.toLowerCase().includes("pdf") ||
+      fileUrl?.toLowerCase().includes(".pdf") ||
+      fileExtension === "pdf";
+
+    if (isProbablyPdf) {
+      console.warn(
+        "[DocumentPreview] Detected PDF file but effectiveType is docx, redirecting to PDF viewer"
+      );
+      return (
+        <PdfViewerFallback
+          fileUrl={fileUrl}
+          className={className}
+          originalFilename={originalFilename}
+        />
+      );
+    }
+
     if (isLoading) {
       return (
         <div
@@ -340,10 +457,15 @@ export function DocumentPreview({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleOpenInNewTab}
+                  onClick={() => {
+                    const officeUrl =
+                      "https://view.officeapps.live.com/op/view.aspx?src=" +
+                      encodeURIComponent(fileUrl);
+                    window.open(officeUrl, "_blank");
+                  }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Open
+                  Open in Office
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleDownload}>
                   <Download className="h-4 w-4 mr-2" />
@@ -352,7 +474,16 @@ export function DocumentPreview({
               </div>
             </div>
             <div className="p-0 max-h-96 overflow-auto">
-              <div ref={containerRef} className="docx-wrapper" />
+              <div
+                ref={containerRef}
+                className="docx-wrapper p-6"
+                style={{
+                  backgroundColor: "#ffffff",
+                  fontFamily: "Times New Roman, serif",
+                  lineHeight: "1.6",
+                  color: "#000000",
+                }}
+              />
             </div>
           </div>
         </div>
@@ -373,10 +504,15 @@ export function DocumentPreview({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleOpenInNewTab}
+                  onClick={() => {
+                    const officeUrl =
+                      "https://view.officeapps.live.com/op/view.aspx?src=" +
+                      encodeURIComponent(fileUrl);
+                    window.open(officeUrl, "_blank");
+                  }}
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
-                  Open
+                  Open in Office
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleDownload}>
                   <Download className="h-4 w-4 mr-2" />
@@ -385,7 +521,14 @@ export function DocumentPreview({
               </div>
             </div>
             <div
-              className="p-6 max-h-96 overflow-y-auto prose prose-sm max-w-none"
+              className="p-6 max-h-96 overflow-y-auto prose prose-sm max-w-none prose-headings:font-serif prose-p:text-justify prose-p:leading-relaxed prose-table:border-collapse prose-td:border prose-td:border-gray-300 prose-td:p-2"
+              style={{
+                backgroundColor: "#ffffff",
+                fontFamily: "Times New Roman, serif",
+                fontSize: "12pt",
+                lineHeight: "1.15",
+                color: "#000000",
+              }}
               dangerouslySetInnerHTML={{ __html: docxHtml }}
             />
           </div>
