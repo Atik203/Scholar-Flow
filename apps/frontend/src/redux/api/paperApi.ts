@@ -407,7 +407,7 @@ export const paperApi = apiSlice.injectEndpoints({
       ShareViaEmailRequest
     >({
       query: (data) => ({
-        url: "/share-email",
+        url: "/papers/share-email",
         method: "POST",
         body: data,
       }),

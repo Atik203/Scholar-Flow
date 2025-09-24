@@ -36,12 +36,20 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Get position from node attributes, fallback to (0,0)
+  const dataPosX = props.node.attrs["data-position-x"] as
+    | number
+    | string
+    | undefined;
+  const dataPosY = props.node.attrs["data-position-y"] as
+    | number
+    | string
+    | undefined;
   const position = useMemo(
     () => ({
-      x: props.node.attrs.positionX || 0,
-      y: props.node.attrs.positionY || 0,
+      x: Number(dataPosX ?? 0) || 0,
+      y: Number(dataPosY ?? 0) || 0,
     }),
-    [props.node.attrs.positionX, props.node.attrs.positionY]
+    [dataPosX, dataPosY]
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +82,7 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
 
   const updatePosition = useCallback(
     (newPosition: { x: number; y: number }) => {
-      // Update node attributes to persist position
+      // Update node attributes to persist position (use data-* keys)
       requestAnimationFrame(() => {
         const { getPos } = props;
         if (typeof getPos === "function") {
@@ -86,8 +94,8 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
               .command(({ tr }) => {
                 tr.setNodeMarkup(pos, undefined, {
                   ...props.node.attrs,
-                  positionX: newPosition.x,
-                  positionY: newPosition.y,
+                  "data-position-x": newPosition.x,
+                  "data-position-y": newPosition.y,
                 });
                 return true;
               })
@@ -284,23 +292,23 @@ export const ResizableImageWithPopover = ResizableImage.extend({
     // Inherit attributes from parent ResizableImage and add position attributes
     return {
       ...this.parent?.(),
-      positionX: {
+      "data-position-x": {
         default: 0,
         parseHTML: (element) =>
           parseFloat(element.getAttribute("data-position-x") || "0"),
         renderHTML: (attributes) => {
           return {
-            "data-position-x": attributes.positionX,
+            "data-position-x": attributes["data-position-x"],
           };
         },
       },
-      positionY: {
+      "data-position-y": {
         default: 0,
         parseHTML: (element) =>
           parseFloat(element.getAttribute("data-position-y") || "0"),
         renderHTML: (attributes) => {
           return {
-            "data-position-y": attributes.positionY,
+            "data-position-y": attributes["data-position-y"],
           };
         },
       },
