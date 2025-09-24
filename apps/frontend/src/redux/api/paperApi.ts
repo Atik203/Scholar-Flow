@@ -80,6 +80,13 @@ export interface PublishDraftRequest {
   abstract?: string;
 }
 
+export interface ShareViaEmailRequest {
+  paperId: string;
+  recipientEmail: string;
+  permission: "view" | "edit";
+  message?: string;
+}
+
 export interface EditorPaper {
   id: string;
   title: string;
@@ -380,6 +387,30 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      transformResponse: (response: {
+        success: boolean;
+        data: { url: string; fileName: string };
+        message: string;
+      }) => {
+        console.log("Upload image response received:", response);
+        return response.data;
+      },
+    }),
+
+    shareViaEmail: builder.mutation<
+      {
+        message: string;
+        recipientEmail: string;
+        paperTitle: string;
+        permission: string;
+      },
+      ShareViaEmailRequest
+    >({
+      query: (data) => ({
+        url: "/share-email",
+        method: "POST",
+        body: data,
+      }),
     }),
   }),
 });
@@ -406,4 +437,5 @@ export const {
   useExportPaperPdfMutation,
   useExportPaperDocxMutation,
   useUploadImageForEditorMutation,
+  useShareViaEmailMutation,
 } = paperApi;

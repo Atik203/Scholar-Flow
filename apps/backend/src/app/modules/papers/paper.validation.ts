@@ -85,8 +85,16 @@ export const publishDraftSchema = z.object({
   abstract: z.string().max(5000).optional(),
 });
 
+export const shareViaEmailSchema = z.object({
+  paperId: z.string().uuid(),
+  recipientEmail: z.string().email(),
+  permission: z.enum(["view", "edit"]),
+  message: z.string().optional(),
+});
+
 export type CreateEditorPaperInput = z.infer<typeof createEditorPaperSchema>;
 export type UpdateEditorContentInput = z.infer<
   typeof updateEditorContentSchema
 >;
 export type PublishDraftInput = z.infer<typeof publishDraftSchema>;
+export type ShareViaEmailInput = z.infer<typeof shareViaEmailSchema>;

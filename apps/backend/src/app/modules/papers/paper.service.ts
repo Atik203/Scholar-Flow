@@ -697,7 +697,7 @@ export const exportService = {
         },
       });
 
-      return pdfBuffer;
+      return Buffer.from(pdfBuffer);
     } finally {
       await browser.close();
     }
