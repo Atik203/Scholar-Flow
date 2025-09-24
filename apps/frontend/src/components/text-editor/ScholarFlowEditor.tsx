@@ -42,9 +42,10 @@ import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 
 // TipTap Node Extensions
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
-import { ResizableImage } from "tiptap-extension-resizable-image";
+import { ResizableImageWithPopover } from "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover";
 
 // Import ResizableImage styles
+import "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover.scss";
 import "tiptap-extension-resizable-image/styles.css";
 
 // Hooks
@@ -125,7 +126,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      ResizableImage.configure({
+      ResizableImageWithPopover.configure({
         defaultWidth: 400,
         defaultHeight: 300,
         async onUpload(file: File) {
