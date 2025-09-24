@@ -71,6 +71,7 @@ export const createEditorPaperSchema = z.object({
   title: z.string().min(1).max(300),
   content: z.string().optional(), // HTML content
   isDraft: z.boolean().optional().default(true),
+  authors: z.array(z.string().min(1).max(120)).max(25).optional(),
 });
 
 export const updateEditorContentSchema = z.object({
