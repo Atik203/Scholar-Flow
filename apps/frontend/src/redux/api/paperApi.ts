@@ -357,6 +357,8 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "GET",
         responseHandler: (response) => response.blob(),
       }),
+      // Don't serialize blob responses in Redux
+      transformResponse: (response: Blob) => response,
     }),
 
     exportPaperDocx: builder.mutation<Blob, string>({
@@ -364,6 +366,19 @@ export const paperApi = apiSlice.injectEndpoints({
         url: `/editor/${id}/export/docx`,
         method: "GET",
         responseHandler: (response) => response.blob(),
+      }),
+      // Don't serialize blob responses in Redux
+      transformResponse: (response: Blob) => response,
+    }),
+
+    uploadImageForEditor: builder.mutation<
+      { url: string; fileName: string },
+      FormData
+    >({
+      query: (formData) => ({
+        url: "/editor/upload-image",
+        method: "POST",
+        body: formData,
       }),
     }),
   }),
@@ -390,4 +405,5 @@ export const {
   usePublishDraftMutation,
   useExportPaperPdfMutation,
   useExportPaperDocxMutation,
+  useUploadImageForEditorMutation,
 } = paperApi;

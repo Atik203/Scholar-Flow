@@ -182,6 +182,15 @@ editorPaperRoutes.delete(
   editorPaperController.deleteEditorPaper as any
 );
 
+// Upload image for editor
+editorPaperRoutes.post(
+  "/upload-image",
+  paperUploadLimiter,
+  authMiddleware as any,
+  upload.single("image") as any,
+  editorPaperController.uploadImage as any
+);
+
 // Export paper as PDF
 editorPaperRoutes.get(
   "/:id/export/pdf",

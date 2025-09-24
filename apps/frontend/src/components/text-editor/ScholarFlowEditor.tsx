@@ -89,9 +89,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   } = useGetEditorPaperQuery(paperId);
   const [updateContent, { isLoading: isSaving }] =
     useUpdateEditorContentMutation();
-  const [exportToPdf, { isLoading: isExportingPdf }] =
+  const [exportPaperPdf, { isLoading: isExportingPdf }] =
     useExportPaperPdfMutation();
-  const [exportToDocx, { isLoading: isExportingDocx }] =
+  const [exportPaperDocx, { isLoading: isExportingDocx }] =
     useExportPaperDocxMutation();
   const [publishDraft, { isLoading: isPublishing }] = usePublishDraftMutation();
 
@@ -215,37 +215,53 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   // Export functions
   const handleExportPdf = async () => {
     try {
-      const blob = await exportToPdf(paperId).unwrap();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${title || "paper"}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      showSuccessToast("PDF exported successfully!");
+      const response = await exportPaperPdf(paperId);
+      if ("data" in response) {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title || "paper"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showSuccessToast("PDF exported successfully!");
+      } else {
+        throw response.error;
+      }
     } catch (error: any) {
       console.error("PDF export failed:", error);
-      showErrorToast("Failed to export PDF", error?.data?.message);
+      showErrorToast(
+        "Failed to export PDF",
+        error?.data?.message || "Unknown error"
+      );
     }
   };
 
   const handleExportDocx = async () => {
     try {
-      const blob = await exportToDocx(paperId).unwrap();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${title || "paper"}.docx`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      showSuccessToast("DOCX exported successfully!");
+      const response = await exportPaperDocx(paperId);
+      if ("data" in response) {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title || "paper"}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showSuccessToast("DOCX exported successfully!");
+      } else {
+        throw response.error;
+      }
     } catch (error: any) {
       console.error("DOCX export failed:", error);
-      showErrorToast("Failed to export DOCX", error?.data?.message);
+      showErrorToast(
+        "Failed to export DOCX",
+        error?.data?.message || "Unknown error"
+      );
     }
   };
 

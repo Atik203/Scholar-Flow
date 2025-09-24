@@ -747,8 +747,12 @@ export const exportService = {
       </html>
     `;
 
-    const docx = htmlDocx.asBlob(htmlContent);
-    return Buffer.from(docx);
+    // Generate DOCX and convert Blob to Buffer
+    const docxBlob = htmlDocx.asBlob(htmlContent);
+
+    // Convert Blob to Buffer properly
+    const arrayBuffer = await docxBlob.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   },
 };
 
