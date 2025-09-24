@@ -132,28 +132,31 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         maxSize: MAX_FILE_SIZE,
         limit: 5,
         upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
+        onError: (error) => {
+          console.error("Upload failed:", error);
+          showErrorToast("Image upload failed", error.message);
+        },
       }),
     ],
     content: "",
     onUpdate: () => {
       setHasUnsavedChanges(true);
+      // Trigger debounced auto-save
+      if (debouncedAutoSaveTimeoutId) {
+        clearTimeout(debouncedAutoSaveTimeoutId);
+      }
+      const timeoutId = setTimeout(() => {
+        // Auto-save logic will be called here
+        if (hasUnsavedChanges && !isSaving && editor) {
+          handleAutoSave();
+        }
+      }, 2000);
+      setDebouncedAutoSaveTimeoutId(timeoutId);
     },
   });
 
-  // Initialize editor content when paper data is loaded
-  useEffect(() => {
-    if (paper && editor) {
-      setTitle(paper.title);
-      if (paper.contentHtml) {
-        editor.commands.setContent(paper.contentHtml);
-      }
-      setHasUnsavedChanges(false);
-    }
-  }, [paper, editor]);
-
-  // Auto-save functionality
-  const autoSave = useCallback(async () => {
+  // Auto-save function
+  const handleAutoSave = useCallback(async () => {
     if (!editor || !hasUnsavedChanges || isSaving) return;
 
     try {
@@ -172,6 +175,21 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       showErrorToast("Auto-save failed", error?.data?.message);
     }
   }, [editor, paperId, hasUnsavedChanges, isSaving, updateContent, title]);
+
+  // Debounced auto-save - wait for user to stop typing
+  const [debouncedAutoSaveTimeoutId, setDebouncedAutoSaveTimeoutId] =
+    useState<NodeJS.Timeout | null>(null);
+
+  // Initialize editor content when paper data is loaded
+  useEffect(() => {
+    if (paper && editor) {
+      setTitle(paper.title);
+      if (paper.contentHtml) {
+        editor.commands.setContent(paper.contentHtml);
+      }
+      setHasUnsavedChanges(false);
+    }
+  }, [paper, editor]);
 
   // Manual save
   const handleSave = async () => {
@@ -216,7 +234,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const handleExportPdf = async () => {
     try {
       const response = await exportPaperPdf(paperId);
-      if ("data" in response) {
+      if ("data" in response && response.data) {
         const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -242,7 +260,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const handleExportDocx = async () => {
     try {
       const response = await exportPaperDocx(paperId);
-      if ("data" in response) {
+      if ("data" in response && response.data) {
         const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -265,11 +283,14 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     }
   };
 
-  // Auto-save interval
+  // Cleanup timeout on unmount
   useEffect(() => {
-    const interval = setInterval(autoSave, 30000); // Auto-save every 30 seconds
-    return () => clearInterval(interval);
-  }, [autoSave]);
+    return () => {
+      if (debouncedAutoSaveTimeoutId) {
+        clearTimeout(debouncedAutoSaveTimeoutId);
+      }
+    };
+  }, [debouncedAutoSaveTimeoutId]);
 
   if (isLoading) {
     return (
