@@ -35,17 +35,42 @@ export class StorageService {
           process.env.AWS_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY || "",
       },
       requestHandler: {
-        requestTimeout: 10000, // 10 second timeout (reduced)
-        connectionTimeout: 3000, // 3 second connection timeout (reduced)
+        requestTimeout: 60000, // 60 second timeout for large uploads
+        connectionTimeout: 15000, // 15 second connection timeout
       },
-      maxAttempts: 2, // Reduce retry attempts for faster failure
-      retryMode: "standard", // Use standard retry mode for better predictability
+      maxAttempts: 3, // Allow more retries for reliability
+      retryMode: "adaptive", // Use adaptive retry mode for better handling
     });
     this.bucket = bucket;
 
     console.log(
       `[StorageService] Initialized with bucket: ${bucket}, region: ${region}`
     );
+
+    // Test connectivity on initialization (optional, for debugging)
+    this.testConnection().catch((error) => {
+      console.warn(
+        `[StorageService] Initial connection test failed:`,
+        error.message
+      );
+    });
+  }
+
+  /**
+   * Test S3 connectivity and permissions
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log(`[StorageService] Testing S3 connection...`);
+      const { HeadBucketCommand } = await import("@aws-sdk/client-s3");
+      const command = new HeadBucketCommand({ Bucket: this.bucket });
+      await this.s3.send(command);
+      console.log(`[StorageService] S3 connection test successful`);
+      return true;
+    } catch (error) {
+      console.error(`[StorageService] S3 connection test failed:`, error);
+      return false;
+    }
   }
 
   async putObject(params: PutObjectParams) {
@@ -59,8 +84,8 @@ export class StorageService {
         Bucket: this.bucket,
         Key: params.key,
         Body: params.body,
-        ContentType: params.contentType,
-        ACL: "private",
+        ContentType: params.contentType || "application/octet-stream",
+        // Remove ACL as it might not be supported by all S3 configurations
       };
 
       const command = new PutObjectCommand(putObjectInput);
@@ -79,6 +104,22 @@ export class StorageService {
         `[StorageService] S3 putObject failed after ${uploadTime}ms:`,
         error
       );
+
+      // Add more specific error information for debugging
+      if (error instanceof Error) {
+        console.error(`[StorageService] Error name: ${error.name}`);
+        console.error(`[StorageService] Error message: ${error.message}`);
+        if ("code" in error) {
+          console.error(`[StorageService] Error code: ${(error as any).code}`);
+        }
+        if ("$metadata" in error) {
+          console.error(
+            `[StorageService] Error metadata:`,
+            (error as any).$metadata
+          );
+        }
+      }
+
       throw error;
     }
   }

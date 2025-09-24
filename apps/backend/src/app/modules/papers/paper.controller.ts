@@ -841,6 +841,12 @@ export const editorPaperController = {
         ? `${paper.title.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`
         : `paper_${parsed.data.id}.pdf`;
 
+      // Set CORS headers explicitly for file download
+      res.setHeader(
+        "Access-Control-Allow-Origin",
+        process.env.FRONTEND_URL || "http://localhost:3000"
+      );
+      res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
@@ -880,6 +886,12 @@ export const editorPaperController = {
         ? `${paper.title.replace(/[^a-zA-Z0-9]/g, "_")}.docx`
         : `paper_${parsed.data.id}.docx`;
 
+      // Set CORS headers explicitly for file download
+      res.setHeader(
+        "Access-Control-Allow-Origin",
+        process.env.FRONTEND_URL || "http://localhost:3000"
+      );
+      res.setHeader("Access-Control-Allow-Credentials", "true");
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
