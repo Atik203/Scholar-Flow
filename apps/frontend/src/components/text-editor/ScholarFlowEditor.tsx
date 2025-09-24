@@ -17,7 +17,6 @@ import { useCallback, useEffect, useState } from "react";
 
 // TipTap Extensions
 import { Highlight } from "@tiptap/extension-highlight";
-import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
@@ -35,21 +34,24 @@ import {
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
-import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button";
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
+import { ResizableImageUploadButton } from "@/components/tiptap-ui/resizable-image-upload-button";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 
 // TipTap Node Extensions
 import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
-import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+import { ResizableImage } from "tiptap-extension-resizable-image";
+
+// Import ResizableImage styles
+import "tiptap-extension-resizable-image/styles.css";
 
 // Hooks
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lib
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import { handleImageUpload } from "@/lib/tiptap-utils";
 
 // Redux API
 import {
@@ -123,26 +125,31 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      Image.configure({
-        inline: false,
-        allowBase64: true,
-        HTMLAttributes: {
-          class: "scholar-flow-image",
+      ResizableImage.configure({
+        defaultWidth: 400,
+        defaultHeight: 300,
+        async onUpload(file: File) {
+          // Use our existing upload handler
+          try {
+            const url = await handleImageUpload(file);
+            return {
+              src: url,
+              "data-keep-ratio": true,
+            };
+          } catch (error) {
+            console.error("Upload failed:", error);
+            showErrorToast(
+              "Image upload failed",
+              error instanceof Error ? error.message : "Unknown error"
+            );
+            throw error;
+          }
         },
       }),
       Typography,
       Superscript,
       Subscript,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 5,
-        upload: handleImageUpload,
-        onError: (error) => {
-          console.error("Upload failed:", error);
-          showErrorToast("Image upload failed", error.message);
-        },
-      }),
+      // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
     content: "",
     onUpdate: () => {
@@ -186,19 +193,8 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [debouncedAutoSaveTimeoutId, setDebouncedAutoSaveTimeoutId] =
     useState<NodeJS.Timeout | null>(null);
 
-  // Initialize editor content when paper data is loaded
-  useEffect(() => {
-    if (paper && editor) {
-      setTitle(paper.title);
-      if (paper.contentHtml) {
-        editor.commands.setContent(paper.contentHtml);
-      }
-      setHasUnsavedChanges(false);
-    }
-  }, [paper, editor]);
-
-  // Manual save
-  const handleSave = async () => {
+  // Manual save function - defined before useEffect that uses it
+  const handleSave = useCallback(async () => {
     if (!editor) return;
 
     try {
@@ -217,7 +213,37 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       console.error("Save failed:", error);
       showErrorToast("Failed to save paper", error?.data?.message);
     }
-  };
+  }, [editor, paperId, title, updateContent]);
+
+  // Initialize editor content when paper data is loaded
+  useEffect(() => {
+    if (paper && editor) {
+      setTitle(paper.title);
+      if (paper.contentHtml) {
+        editor.commands.setContent(paper.contentHtml);
+      }
+      setHasUnsavedChanges(false);
+    }
+  }, [paper, editor]);
+
+  // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault(); // Prevent browser's default save behavior
+        handleSave();
+      }
+    };
+
+    // Add the event listener to the document
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleSave]); // Re-bind when handleSave changes
 
   // Publish draft
   const handlePublish = async () => {
@@ -455,7 +481,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <ToolbarSeparator />
 
               <ToolbarGroup>
-                <ImageUploadButton text="Image" />
+                <ResizableImageUploadButton text="Image" />
               </ToolbarGroup>
 
               <Spacer />
