@@ -382,7 +382,15 @@ export const editorPaperService = {
       authors: input.authors || [],
     };
 
-    return await prisma.$executeRaw`
+    const result = await prisma.$queryRaw<
+      {
+        id: string;
+        title: string;
+        isDraft: boolean;
+        isPublished: boolean;
+        createdAt: Date;
+      }[]
+    >`
       INSERT INTO "Paper" (
         id, "workspaceId", "uploaderId", title, "contentHtml", 
         source, "isDraft", "isPublished", "processingStatus", 
@@ -396,6 +404,8 @@ export const editorPaperService = {
       )
       RETURNING id, title, "isDraft", "isPublished", "createdAt"
     `;
+
+    return result[0]; // Return the first (and only) result
   },
 
   // Get editor paper content
