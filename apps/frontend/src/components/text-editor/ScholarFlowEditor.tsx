@@ -123,7 +123,13 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      Image,
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: "scholar-flow-image",
+        },
+      }),
       Typography,
       Superscript,
       Subscript,
