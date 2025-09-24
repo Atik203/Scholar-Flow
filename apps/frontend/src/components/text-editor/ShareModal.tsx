@@ -13,7 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Link, Mail, Share2, Users } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useShareViaEmailMutation } from "@/redux/api/paperApi";
+import { Copy, Link, Loader2, Mail, Share2, Users } from "lucide-react";
 import React, { useState } from "react";
 
 interface ShareModalProps {
@@ -34,11 +43,24 @@ export function ShareModal({
   const [shareUrl, setShareUrl] = useState("");
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
+  // Email sharing states
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [permission, setPermission] = useState<"view" | "edit">("view");
+  const [message, setMessage] = useState("");
+  const [shareViaEmail, { isLoading: isEmailSharing }] =
+    useShareViaEmailMutation();
+
   React.useEffect(() => {
     if (isOpen && isPublished) {
       // Generate shareable link for published papers
       const url = `${window.location.origin}/shared/paper/${paperId}`;
       setShareUrl(url);
+    } else if (!isOpen) {
+      // Reset email form when modal closes
+      setRecipientEmail("");
+      setPermission("view");
+      setMessage("");
+      setShareUrl("");
     }
   }, [isOpen, isPublished, paperId]);
 
@@ -63,6 +85,36 @@ export function ShareModal({
       console.error("Failed to generate share link:", error);
     } finally {
       setIsGeneratingLink(false);
+    }
+  };
+
+  const handleEmailShare = async () => {
+    if (!recipientEmail) {
+      return;
+    }
+
+    try {
+      await shareViaEmail({
+        paperId,
+        recipientEmail,
+        permission,
+        message,
+      }).unwrap();
+
+      showSuccessToast(
+        `Paper "${paperTitle}" shared with ${recipientEmail} successfully!`
+      );
+
+      // Reset form
+      setRecipientEmail("");
+      setMessage("");
+      setPermission("view");
+    } catch (error: any) {
+      console.error("Share via email failed:", error);
+      showSuccessToast(
+        error?.data?.message ||
+          "Failed to share paper via email. Please try again."
+      );
     }
   };
 
@@ -149,6 +201,59 @@ export function ShareModal({
               )}
             </div>
           )}
+
+          {/* Email Share */}
+          <div className="space-y-3">
+            <Label>Share via Email</Label>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="colleague@university.edu"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  className="flex-1"
+                />
+                <Select
+                  value={permission}
+                  onValueChange={(value: "view" | "edit") =>
+                    setPermission(value)
+                  }
+                >
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">View Only</SelectItem>
+                    <SelectItem value="edit">Can Edit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Textarea
+                placeholder="Add a personal message (optional)..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="min-h-[60px] resize-none"
+              />
+              <Button
+                onClick={handleEmailShare}
+                disabled={!recipientEmail || isEmailSharing}
+                className="w-full"
+              >
+                {isEmailSharing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Email Invitation
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
 
           {/* Quick Share Actions */}
           <div className="space-y-3">
