@@ -571,14 +571,14 @@ export const editorPaperController = {
     }
 
     try {
-      const result = await editorPaperService.createEditorPaper(
+      const paper = await editorPaperService.createEditorPaper(
         parsed.data,
         authReq.user.id
       );
 
       return sendSuccessResponse(
         res,
-        result,
+        { paper },
         "Editor paper created successfully",
         201
       );
