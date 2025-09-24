@@ -466,6 +466,10 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
               src: url,
               alt: filename,
               title: filename,
+              width: 400, // Set consistent width
+              height: 300, // Set consistent height
+              style:
+                "object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);", // Add styling for better appearance
             },
           };
         });

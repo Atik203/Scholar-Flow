@@ -247,3 +247,47 @@
     }
   }
 }
+
+/* Styles for uploaded images in the editor */
+.scholar-flow-editor {
+  .scholar-flow-image {
+    max-width: 100%;
+    width: 400px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 1rem auto;
+    display: block;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive sizing */
+    @media (max-width: 768px) {
+      width: 100%;
+      max-width: 350px;
+      height: 250px;
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+      max-width: 300px;
+      height: 200px;
+    }
+  }
+
+  /* Dark mode styles */
+  .dark & .scholar-flow-image {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.15);
+    }
+  }
+}
