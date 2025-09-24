@@ -1,3 +1,4 @@
+import axios from "axios";
 import puppeteer from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
@@ -716,6 +717,63 @@ export const exportService = {
       throw new Error("Paper not found or access denied");
     }
 
+    // Process images: convert external URLs to base64 for DOCX compatibility
+    let processedContent = paper.contentHtml || "<p>No content available.</p>";
+
+    try {
+      // Find all img tags and convert them to base64
+      const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/g;
+      const images: Array<{ original: string; base64: string }> = [];
+      let match;
+
+      while ((match = imgRegex.exec(processedContent)) !== null) {
+        const imgUrl = match[1];
+
+        // Skip if already processed or if it's already base64
+        if (
+          images.some((img) => img.original === imgUrl) ||
+          imgUrl.startsWith("data:")
+        ) {
+          continue;
+        }
+
+        try {
+          console.log(`[DOCX Export] Converting image to base64: ${imgUrl}`);
+          const response = await axios.get(imgUrl, {
+            responseType: "arraybuffer",
+            timeout: 10000, // 10 second timeout
+          });
+
+          const contentType = response.headers["content-type"] || "image/png";
+          const base64 = Buffer.from(response.data).toString("base64");
+          const base64Url = `data:${contentType};base64,${base64}`;
+
+          images.push({ original: imgUrl, base64: base64Url });
+        } catch (imgError) {
+          const errorMessage =
+            imgError instanceof Error ? imgError.message : String(imgError);
+          console.warn(
+            `[DOCX Export] Failed to convert image ${imgUrl}:`,
+            errorMessage
+          );
+          // Keep the original URL as fallback (might not work in DOCX but won't break)
+        }
+      }
+
+      // Replace all original URLs with base64 versions
+      for (const img of images) {
+        processedContent = processedContent.replaceAll(
+          img.original,
+          img.base64
+        );
+      }
+
+      console.log(`[DOCX Export] Converted ${images.length} images to base64`);
+    } catch (error) {
+      console.warn("[DOCX Export] Error processing images:", error);
+      // Continue with original content if image processing fails
+    }
+
     // Create HTML document with basic styling for DOCX
     const htmlContent = `
       <!DOCTYPE html>
@@ -734,6 +792,7 @@ export const exportService = {
           table { border-collapse: collapse; width: 100%; margin: 15px 0; }
           th, td { border: 1px solid #000; padding: 6px; }
           th { font-weight: bold; }
+          img { max-width: 400px; height: auto; display: block; margin: 10px auto; }
         </style>
       </head>
       <body>
@@ -742,7 +801,7 @@ export const exportService = {
         <p><em>Last Updated: ${paper.updatedAt.toLocaleDateString()}</em></p>
         ${paper.isDraft ? "<p><strong>Draft Version</strong></p>" : ""}
         <hr>
-        ${paper.contentHtml || "<p>No content available.</p>"}
+        ${processedContent}
       </body>
       </html>
     `;

@@ -3,7 +3,6 @@
 import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import { Button } from "@/components/tiptap-ui-primitive/button";
 import { focusNextNode, isValidPosition } from "@/lib/tiptap-utils";
-import { useUploadImageForEditorMutation } from "@/redux/api/paperApi";
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 import * as React from "react";
@@ -85,7 +84,6 @@ export interface UploadOptions {
  */
 function useFileUpload(options: UploadOptions) {
   const [fileItems, setFileItems] = React.useState<FileItem[]>([]);
-  const [uploadImageMutation] = useUploadImageForEditorMutation();
 
   const uploadFile = async (file: File): Promise<string | null> => {
     if (file.size > options.maxSize) {
@@ -110,27 +108,34 @@ function useFileUpload(options: UploadOptions) {
     setFileItems((prev) => [...prev, newFileItem]);
 
     try {
-      // Create FormData for the API call
-      const formData = new FormData();
-      formData.append("image", file);
-
-      // Use our Redux API mutation
-      const response = await uploadImageMutation(formData).unwrap();
-
-      if (!response?.url) {
-        throw new Error("Upload failed: No URL returned");
-      }
+      // Use the handleImageUpload function with progress callback
+      const url = await options.upload(
+        file,
+        // Progress callback
+        (event) => {
+          if (!abortController.signal.aborted) {
+            setFileItems((prev) =>
+              prev.map((item) =>
+                item.id === fileId
+                  ? { ...item, progress: event.progress }
+                  : item
+              )
+            );
+          }
+        },
+        abortController.signal
+      );
 
       if (!abortController.signal.aborted) {
         setFileItems((prev) =>
           prev.map((item) =>
             item.id === fileId
-              ? { ...item, status: "success", url: response.url, progress: 100 }
+              ? { ...item, status: "success", url, progress: 100 }
               : item
           )
         );
-        options.onSuccess?.(response.url);
-        return response.url;
+        options.onSuccess?.(url);
+        return url;
       }
 
       return null;
@@ -462,14 +467,12 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
           return {
             type: extension.options.type,
             attrs: {
-              ...extension.options,
               src: url,
               alt: filename,
               title: filename,
               width: 400, // Set consistent width
               height: 300, // Set consistent height
-              style:
-                "object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);", // Add styling for better appearance
+              "data-keep-ratio": true, // Enable aspect ratio preservation for ResizableImage
             },
           };
         });
