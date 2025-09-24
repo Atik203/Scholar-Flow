@@ -387,6 +387,14 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      transformResponse: (response: {
+        success: boolean;
+        data: { url: string; fileName: string };
+        message: string;
+      }) => {
+        console.log("Upload image response received:", response);
+        return response.data;
+      },
     }),
 
     shareViaEmail: builder.mutation<

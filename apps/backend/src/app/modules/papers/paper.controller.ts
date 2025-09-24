@@ -626,7 +626,7 @@ export const paperController = {
 
       await emailService.sendPaperShareEmail({
         recipientEmail,
-        senderName: authReq.user.name,
+        senderName: authReq.user.name || authReq.user.email,
         paperTitle: paperData.title,
         paperLink,
         permission,
@@ -802,61 +802,6 @@ export const editorPaperController = {
     return sendPaginatedResponse(res, papers, meta, "Editor papers retrieved");
   }),
 
-  // Upload image for editor
-  uploadImage: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
-
-    if (!req.file) {
-      throw new ApiError(400, "No image file provided");
-    }
-
-    const file = req.file;
-
-    // Validate file type
-    if (!file.mimetype.startsWith("image/")) {
-      throw new ApiError(400, "File must be an image");
-    }
-
-    // Validate file size (max 5MB for images)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new ApiError(400, "Image file too large. Maximum size is 5MB");
-    }
-
-    try {
-      // Generate unique filename with timestamp and user ID
-      const timestamp = Date.now();
-      const fileExtension = file.originalname.split(".").pop() || "jpg";
-      const fileName = `${authReq.user.id}_${timestamp}.${fileExtension}`;
-      const objectKey = `images/${fileName}`;
-
-      // Upload to S3
-      const uploadResult = await storage.uploadBuffer(
-        file.buffer,
-        objectKey,
-        file.mimetype
-      );
-
-      // Generate public URL
-      const imageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${objectKey}`;
-
-      return sendSuccessResponse(
-        res,
-        {
-          url: imageUrl,
-          fileName: fileName,
-          size: file.size,
-          mimetype: file.mimetype,
-        },
-        "Image uploaded successfully",
-        200
-      );
-    } catch (error) {
-      console.error("[EditorPaperController] Image upload failed:", error);
-      throw new ApiError(500, "Failed to upload image");
-    }
-  }),
-
   // Delete editor paper
   deleteEditorPaper: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
@@ -988,13 +933,19 @@ export const editorPaperController = {
         authReq.file.mimetype
       );
 
-      sendSuccessResponse(res, {
+      console.log("[EditorPaperController] Upload result:", result);
+
+      const responseData = {
         message: "Image uploaded successfully",
         data: {
           url: result.url,
           fileName: result.filename,
         },
-      });
+      };
+
+      console.log("[EditorPaperController] Sending response:", responseData);
+
+      sendSuccessResponse(res, responseData.data, responseData.message);
     } catch (error) {
       console.error("[EditorPaperController] Image upload failed:", error);
       throw new ApiError(500, "Failed to upload image");
