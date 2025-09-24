@@ -375,6 +375,13 @@ export const editorPaperService = {
       ? sanitizeHtml(input.content, sanitizeOptions)
       : "";
 
+    // Create metadata with authors
+    const metadata = {
+      source: "editor",
+      createdInEditor: true,
+      authors: input.authors || [],
+    };
+
     return await prisma.$executeRaw`
       INSERT INTO "Paper" (
         id, "workspaceId", "uploaderId", title, "contentHtml", 
@@ -384,7 +391,7 @@ export const editorPaperService = {
         gen_random_uuid(), ${input.workspaceId}, ${uploaderId}, 
         ${input.title}, ${sanitizedContent}, 'editor', 
         ${input.isDraft ?? true}, false, 'PROCESSED',
-        '{"source": "editor", "createdInEditor": true}'::jsonb,
+        ${JSON.stringify(metadata)}::jsonb,
         NOW(), NOW()
       )
       RETURNING id, title, "isDraft", "isPublished", "createdAt"

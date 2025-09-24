@@ -64,6 +64,7 @@ export interface CreateEditorPaperRequest {
   title: string;
   content?: string;
   isDraft?: boolean;
+  authors?: string[];
 }
 
 export interface UpdateEditorContentRequest {
