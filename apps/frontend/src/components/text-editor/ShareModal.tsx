@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { showApiErrorToast } from "@/lib/errorHandling";
 import { useShareViaEmailMutation } from "@/redux/api/paperApi";
 import { Copy, Link, Loader2, Mail, Share2, Users } from "lucide-react";
 import React, { useState } from "react";
@@ -111,10 +112,7 @@ export function ShareModal({
       setPermission("view");
     } catch (error: any) {
       console.error("Share via email failed:", error);
-      showSuccessToast(
-        error?.data?.message ||
-          "Failed to share paper via email. Please try again."
-      );
+      showApiErrorToast(error);
     }
   };
 

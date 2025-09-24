@@ -13,7 +13,7 @@ import {
   Send,
   Share2,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // TipTap Extensions
 import { Highlight } from "@tiptap/extension-highlight";
@@ -216,16 +216,50 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     }
   }, [editor, paperId, title, updateContent]);
 
-  // Initialize editor content when paper data is loaded
+  // Track initialization to avoid repeated setContent that can reset alignment/selection
+  const hasInitializedRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+
+  // Reset initialization flag when switching papers
   useEffect(() => {
-    if (paper && editor) {
-      setTitle(paper.title);
-      if (paper.contentHtml) {
-        editor.commands.setContent(paper.contentHtml);
+    hasInitializedRef.current = false;
+  }, [paperId]);
+
+  // Initialize editor content when paper data is loaded (once per paper)
+  useEffect(() => {
+    if (!editor || !paper) return;
+
+    // Always sync title from server
+    setTitle(paper.title);
+
+    if (hasInitializedRef.current) return;
+
+    const html = paper.contentHtml || "";
+
+    // Defer setContent to the next animation frame to avoid flushSync warnings
+    rafIdRef.current = window.requestAnimationFrame(() => {
+      if (editor.isDestroyed) return;
+      // Avoid emitting update to prevent triggering onUpdate during initial load
+      editor.commands.setContent(html, { emitUpdate: false });
+      hasInitializedRef.current = true;
+      // Optional: move cursor to end to avoid unexpected selection jumps
+      try {
+        const endPos = editor.state.doc.content.size;
+        editor.commands.setTextSelection(endPos);
+      } catch {
+        // no-op
       }
       setHasUnsavedChanges(false);
-    }
-  }, [paper, editor]);
+    });
+
+    // Cleanup any pending rAF on effect re-run or unmount
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [editor, paper]);
 
   // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
   useEffect(() => {
