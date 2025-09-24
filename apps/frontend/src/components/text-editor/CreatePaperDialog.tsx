@@ -36,7 +36,12 @@ const createPaperSchema = z.object({
   abstract: z.string().max(5000, "Abstract is too long").optional(),
   workspaceId: z.string().uuid("Please select a valid workspace"),
   authors: z
-    .array(z.string().min(1, "Author name is required").max(120, "Author name is too long"))
+    .array(
+      z
+        .string()
+        .min(1, "Author name is required")
+        .max(120, "Author name is too long")
+    )
     .min(1, "At least one author is required")
     .max(25, "Maximum 25 authors allowed"),
 });
