@@ -17,7 +17,13 @@ import {
   Move,
   Trash2,
 } from "lucide-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ResizableImage,
   ResizableImageComponent,
@@ -28,15 +34,24 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
   const editor = props.editor;
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  // Get position from node attributes, fallback to (0,0)
+  const position = useMemo(
+    () => ({
+      x: props.node.attrs.positionX || 0,
+      y: props.node.attrs.positionY || 0,
+    }),
+    [props.node.attrs.positionX, props.node.attrs.positionY]
+  );
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const setTextAlign = useCallback(
     (textAlign: string) => {
-      // Use setTimeout to avoid flushSync issues
-      setTimeout(() => {
+      // Use requestAnimationFrame to avoid flushSync issues
+      requestAnimationFrame(() => {
         editor.chain().focus().setTextAlign(textAlign).run();
-      }, 0);
+      });
     },
     [editor]
   );
@@ -51,11 +66,42 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
   }, [props.node.attrs.src]);
 
   const deleteImage = useCallback(() => {
-    // Use setTimeout to avoid flushSync issues
-    setTimeout(() => {
+    // Use requestAnimationFrame to avoid flushSync issues
+    requestAnimationFrame(() => {
       editor.chain().focus().deleteSelection().run();
-    }, 0);
+    });
   }, [editor]);
+
+  const updatePosition = useCallback(
+    (newPosition: { x: number; y: number }) => {
+      // Update node attributes to persist position
+      requestAnimationFrame(() => {
+        const { getPos } = props;
+        if (typeof getPos === "function") {
+          const pos = getPos();
+          if (typeof pos === "number") {
+            editor
+              .chain()
+              .focus()
+              .command(({ tr }) => {
+                tr.setNodeMarkup(pos, undefined, {
+                  ...props.node.attrs,
+                  positionX: newPosition.x,
+                  positionY: newPosition.y,
+                });
+                return true;
+              })
+              .run();
+          }
+        }
+      });
+    },
+    [editor, props]
+  );
+
+  const resetPosition = useCallback(() => {
+    updatePosition({ x: 0, y: 0 });
+  }, [updatePosition]);
 
   const handleDragStart = useCallback(
     (e: React.MouseEvent) => {
@@ -84,12 +130,14 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
       const maxX = window.innerWidth - 200;
       const maxY = window.innerHeight - 200;
 
-      setPosition({
+      const constrainedPosition = {
         x: Math.max(0, Math.min(newPosition.x, maxX)),
         y: Math.max(0, Math.min(newPosition.y, maxY)),
-      });
+      };
+
+      updatePosition(constrainedPosition);
     },
-    [isDragging, dragStart]
+    [isDragging, dragStart, updatePosition]
   );
 
   const handleDragEnd = useCallback(() => {
@@ -217,7 +265,7 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setPosition({ x: 0, y: 0 })}
+                onClick={resetPosition}
                 className="flex items-center gap-2 text-xs"
               >
                 <Move className="h-3 w-3" />
@@ -232,6 +280,33 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
 };
 
 export const ResizableImageWithPopover = ResizableImage.extend({
+  addAttributes() {
+    // Inherit attributes from parent ResizableImage and add position attributes
+    return {
+      ...this.parent?.(),
+      positionX: {
+        default: 0,
+        parseHTML: (element) =>
+          parseFloat(element.getAttribute("data-position-x") || "0"),
+        renderHTML: (attributes) => {
+          return {
+            "data-position-x": attributes.positionX,
+          };
+        },
+      },
+      positionY: {
+        default: 0,
+        parseHTML: (element) =>
+          parseFloat(element.getAttribute("data-position-y") || "0"),
+        renderHTML: (attributes) => {
+          return {
+            "data-position-y": attributes.positionY,
+          };
+        },
+      },
+    };
+  },
+
   addNodeView() {
     return ReactNodeViewRenderer((props) =>
       NodeView(props as unknown as ResizableImageNodeViewRendererProps)
