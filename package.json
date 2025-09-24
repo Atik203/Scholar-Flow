@@ -49,6 +49,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-window": "^1.8.11",
-    "sanitize-html": "^2.17.0"
+    "sanitize-html": "^2.17.0",
+    "tiptap-extension-resizable-image": "^2.0.0",
+    "tiptap-resizable-image": "^1.6.5"
   }
 }
