@@ -1,8 +1,9 @@
-import type { Node as TiptapNode } from "@tiptap/pm/model"
-import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state"
-import type { Editor } from "@tiptap/react"
+import type { Node as TiptapNode } from "@tiptap/pm/model";
+import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";
+import type { Editor } from "@tiptap/react";
+import { getSession } from "next-auth/react";
 
-export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export const MAC_SYMBOLS: Record<string, string> = {
   mod: "⌘",
@@ -18,12 +19,12 @@ export const MAC_SYMBOLS: Record<string, string> = {
   enter: "⏎",
   escape: "⎋",
   capslock: "⇪",
-} as const
+} as const;
 
 export function cn(
   ...classes: (string | boolean | undefined | null)[]
 ): string {
-  return classes.filter(Boolean).join(" ")
+  return classes.filter(Boolean).join(" ");
 }
 
 /**
@@ -34,7 +35,7 @@ export function isMac(): boolean {
   return (
     typeof navigator !== "undefined" &&
     navigator.platform.toLowerCase().includes("mac")
-  )
+  );
 }
 
 /**
@@ -50,12 +51,12 @@ export const formatShortcutKey = (
   capitalize: boolean = true
 ) => {
   if (isMac) {
-    const lowerKey = key.toLowerCase()
-    return MAC_SYMBOLS[lowerKey] || (capitalize ? key.toUpperCase() : key)
+    const lowerKey = key.toLowerCase();
+    return MAC_SYMBOLS[lowerKey] || (capitalize ? key.toUpperCase() : key);
   }
 
-  return capitalize ? key.charAt(0).toUpperCase() + key.slice(1) : key
-}
+  return capitalize ? key.charAt(0).toUpperCase() + key.slice(1) : key;
+};
 
 /**
  * Parses a shortcut key string into an array of formatted key symbols
@@ -65,19 +66,19 @@ export const formatShortcutKey = (
  * @returns Array of formatted shortcut key symbols
  */
 export const parseShortcutKeys = (props: {
-  shortcutKeys: string | undefined
-  delimiter?: string
-  capitalize?: boolean
+  shortcutKeys: string | undefined;
+  delimiter?: string;
+  capitalize?: boolean;
 }) => {
-  const { shortcutKeys, delimiter = "+", capitalize = true } = props
+  const { shortcutKeys, delimiter = "+", capitalize = true } = props;
 
-  if (!shortcutKeys) return []
+  if (!shortcutKeys) return [];
 
   return shortcutKeys
     .split(delimiter)
     .map((key) => key.trim())
-    .map((key) => formatShortcutKey(key, isMac(), capitalize))
-}
+    .map((key) => formatShortcutKey(key, isMac(), capitalize));
+};
 
 /**
  * Checks if a mark exists in the editor schema
@@ -89,9 +90,9 @@ export const isMarkInSchema = (
   markName: string,
   editor: Editor | null
 ): boolean => {
-  if (!editor?.schema) return false
-  return editor.schema.spec.marks.get(markName) !== undefined
-}
+  if (!editor?.schema) return false;
+  return editor.schema.spec.marks.get(markName) !== undefined;
+};
 
 /**
  * Checks if a node exists in the editor schema
@@ -103,9 +104,9 @@ export const isNodeInSchema = (
   nodeName: string,
   editor: Editor | null
 ): boolean => {
-  if (!editor?.schema) return false
-  return editor.schema.spec.nodes.get(nodeName) !== undefined
-}
+  if (!editor?.schema) return false;
+  return editor.schema.spec.nodes.get(nodeName) !== undefined;
+};
 
 /**
  * Moves the focus to the next node in the editor
@@ -113,30 +114,30 @@ export const isNodeInSchema = (
  * @returns boolean indicating if the focus was moved
  */
 export function focusNextNode(editor: Editor) {
-  const { state, view } = editor
-  const { doc, selection } = state
+  const { state, view } = editor;
+  const { doc, selection } = state;
 
-  const nextSel = Selection.findFrom(selection.$to, 1, true)
+  const nextSel = Selection.findFrom(selection.$to, 1, true);
   if (nextSel) {
-    view.dispatch(state.tr.setSelection(nextSel).scrollIntoView())
-    return true
+    view.dispatch(state.tr.setSelection(nextSel).scrollIntoView());
+    return true;
   }
 
-  const paragraphType = state.schema.nodes.paragraph
+  const paragraphType = state.schema.nodes.paragraph;
   if (!paragraphType) {
-    console.warn("No paragraph node type found in schema.")
-    return false
+    console.warn("No paragraph node type found in schema.");
+    return false;
   }
 
-  const end = doc.content.size
-  const para = paragraphType.create()
-  let tr = state.tr.insert(end, para)
+  const end = doc.content.size;
+  const para = paragraphType.create();
+  let tr = state.tr.insert(end, para);
 
   // Place the selection inside the new paragraph
-  const $inside = tr.doc.resolve(end + 1)
-  tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView()
-  view.dispatch(tr)
-  return true
+  const $inside = tr.doc.resolve(end + 1);
+  tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView();
+  view.dispatch(tr);
+  return true;
 }
 
 /**
@@ -145,7 +146,7 @@ export function focusNextNode(editor: Editor) {
  * @returns boolean indicating if the value is a valid number
  */
 export function isValidPosition(pos: number | null | undefined): pos is number {
-  return typeof pos === "number" && pos >= 0
+  return typeof pos === "number" && pos >= 0;
 }
 
 /**
@@ -158,23 +159,23 @@ export function isExtensionAvailable(
   editor: Editor | null,
   extensionNames: string | string[]
 ): boolean {
-  if (!editor) return false
+  if (!editor) return false;
 
   const names = Array.isArray(extensionNames)
     ? extensionNames
-    : [extensionNames]
+    : [extensionNames];
 
   const found = names.some((name) =>
     editor.extensionManager.extensions.some((ext) => ext.name === name)
-  )
+  );
 
   if (!found) {
     console.warn(
       `None of the extensions [${names.join(", ")}] were found in the editor schema. Ensure they are included in the editor configuration.`
-    )
+    );
   }
 
-  return found
+  return found;
 }
 
 /**
@@ -185,15 +186,15 @@ export function isExtensionAvailable(
  */
 export function findNodeAtPosition(editor: Editor, position: number) {
   try {
-    const node = editor.state.doc.nodeAt(position)
+    const node = editor.state.doc.nodeAt(position);
     if (!node) {
-      console.warn(`No node found at position ${position}`)
-      return null
+      console.warn(`No node found at position ${position}`);
+      return null;
     }
-    return node
+    return node;
   } catch (error) {
-    console.error(`Error getting node at position ${position}:`, error)
-    return null
+    console.error(`Error getting node at position ${position}:`, error);
+    return null;
   }
 }
 
@@ -206,52 +207,52 @@ export function findNodeAtPosition(editor: Editor, position: number) {
  * @returns An object with the position and node, or null if not found
  */
 export function findNodePosition(props: {
-  editor: Editor | null
-  node?: TiptapNode | null
-  nodePos?: number | null
+  editor: Editor | null;
+  node?: TiptapNode | null;
+  nodePos?: number | null;
 }): { pos: number; node: TiptapNode } | null {
-  const { editor, node, nodePos } = props
+  const { editor, node, nodePos } = props;
 
-  if (!editor || !editor.state?.doc) return null
+  if (!editor || !editor.state?.doc) return null;
 
   // Zero is valid position
-  const hasValidNode = node !== undefined && node !== null
-  const hasValidPos = isValidPosition(nodePos)
+  const hasValidNode = node !== undefined && node !== null;
+  const hasValidPos = isValidPosition(nodePos);
 
   if (!hasValidNode && !hasValidPos) {
-    return null
+    return null;
   }
 
   // First search for the node in the document if we have a node
   if (hasValidNode) {
-    let foundPos = -1
-    let foundNode: TiptapNode | null = null
+    let foundPos = -1;
+    let foundNode: TiptapNode | null = null;
 
     editor.state.doc.descendants((currentNode, pos) => {
       // TODO: Needed?
       // if (currentNode.type && currentNode.type.name === node!.type.name) {
       if (currentNode === node) {
-        foundPos = pos
-        foundNode = currentNode
-        return false
+        foundPos = pos;
+        foundNode = currentNode;
+        return false;
       }
-      return true
-    })
+      return true;
+    });
 
     if (foundPos !== -1 && foundNode !== null) {
-      return { pos: foundPos, node: foundNode }
+      return { pos: foundPos, node: foundNode };
     }
   }
 
   // If we have a valid position, use findNodeAtPosition
   if (hasValidPos) {
-    const nodeAtPos = findNodeAtPosition(editor, nodePos!)
+    const nodeAtPos = findNodeAtPosition(editor, nodePos!);
     if (nodeAtPos) {
-      return { pos: nodePos!, node: nodeAtPos }
+      return { pos: nodePos!, node: nodeAtPos };
     }
   }
 
-  return null
+  return null;
 }
 
 /**
@@ -264,24 +265,24 @@ export function isNodeTypeSelected(
   editor: Editor | null,
   types: string[] = []
 ): boolean {
-  if (!editor || !editor.state.selection) return false
+  if (!editor || !editor.state.selection) return false;
 
-  const { state } = editor
-  const { selection } = state
+  const { state } = editor;
+  const { selection } = state;
 
-  if (selection.empty) return false
+  if (selection.empty) return false;
 
   if (selection instanceof NodeSelection) {
-    const node = selection.node
-    return node ? types.includes(node.type.name) : false
+    const node = selection.node;
+    return node ? types.includes(node.type.name) : false;
   }
 
-  return false
+  return false;
 }
 
 /**
- * Handles image upload with progress tracking and abort capability
- * @param file The file to upload
+ * Handles image upload for the TipTap editor
+ * @param file The image file to upload
  * @param onProgress Optional callback for tracking upload progress
  * @param abortSignal Optional AbortSignal for cancelling the upload
  * @returns Promise resolving to the URL of the uploaded image
@@ -293,27 +294,129 @@ export const handleImageUpload = async (
 ): Promise<string> => {
   // Validate file
   if (!file) {
-    throw new Error("No file provided")
+    throw new Error("No file provided");
   }
 
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(
       `File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`
-    )
+    );
   }
 
-  // For demo/testing: Simulate upload progress. In production, replace the following code
-  // with your own upload implementation.
-  for (let progress = 0; progress <= 100; progress += 10) {
-    if (abortSignal?.aborted) {
-      throw new Error("Upload cancelled")
+  // Validate file type
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed."
+    );
+  }
+
+  try {
+    // Get NextAuth session for authentication
+    const session = await getSession();
+    const token = (session as { accessToken?: string } | null)?.accessToken;
+
+    if (!token) {
+      throw new Error("Authentication required. Please sign in.");
     }
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    onProgress?.({ progress })
-  }
 
-  return "/images/tiptap-ui-placeholder-image.jpg"
-}
+    // Create FormData for upload
+    const formData = new FormData();
+    formData.append("image", file);
+
+    // Create XMLHttpRequest for progress tracking
+    return new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      // Set up progress tracking
+      if (onProgress) {
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            onProgress({ progress });
+          }
+        });
+      }
+
+      // Handle abort signal
+      if (abortSignal) {
+        abortSignal.addEventListener("abort", () => {
+          xhr.abort();
+          reject(new Error("Upload cancelled"));
+        });
+      }
+
+      // Set up event handlers
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            console.log("Upload response received:", response);
+
+            if (response.success && response.data?.url) {
+              console.log("Upload successful, URL:", response.data.url);
+              resolve(response.data.url);
+            } else {
+              console.error("Upload failed - response:", response);
+              reject(
+                new Error(response.message || "Upload failed: No URL returned")
+              );
+            }
+          } catch (error) {
+            console.error("Response parsing error:", error);
+            console.error("Raw response text:", xhr.responseText);
+            reject(new Error("Invalid response from server"));
+          }
+        } else {
+          try {
+            const errorResponse = JSON.parse(xhr.responseText);
+            console.error("Upload failed with error response:", errorResponse);
+            reject(
+              new Error(
+                errorResponse.message ||
+                  `Upload failed with status ${xhr.status}`
+              )
+            );
+          } catch {
+            console.error(
+              "Upload failed with status and raw response:",
+              xhr.status,
+              xhr.responseText
+            );
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        }
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Network error during upload"));
+      };
+
+      xhr.ontimeout = () => {
+        reject(new Error("Upload timeout"));
+      };
+
+      // Configure request
+      const apiBaseUrl =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+      xhr.open("POST", `${apiBaseUrl}/editor/upload-image`);
+
+      // Add auth header
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+      // Set timeout (increased for slow S3 uploads)
+      xhr.timeout = 60000; // 60 seconds
+
+      // Start upload
+      xhr.send(formData);
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    throw new Error(
+      `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+};
 
 type ProtocolOptions = {
   /**
@@ -322,21 +425,20 @@ type ProtocolOptions = {
    * @example 'ftp'
    * @example 'git'
    */
-  scheme: string
+  scheme: string;
 
   /**
    * If enabled, it allows optional slashes after the protocol.
    * @default false
    * @example true
    */
-  optionalSlashes?: boolean
-}
+  optionalSlashes?: boolean;
+};
 
-type ProtocolConfig = Array<ProtocolOptions | string>
+type ProtocolConfig = Array<ProtocolOptions | string>;
 
 const ATTR_WHITESPACE =
-  // eslint-disable-next-line no-control-regex
-  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g
+  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g;
 
 export function isAllowedUri(
   uri: string | undefined,
@@ -353,29 +455,30 @@ export function isAllowedUri(
     "sms",
     "cid",
     "xmpp",
-  ]
+  ];
 
   if (protocols) {
     protocols.forEach((protocol) => {
       const nextProtocol =
-        typeof protocol === "string" ? protocol : protocol.scheme
+        typeof protocol === "string" ? protocol : protocol.scheme;
 
       if (nextProtocol) {
-        allowedProtocols.push(nextProtocol)
+        allowedProtocols.push(nextProtocol);
       }
-    })
+    });
   }
 
   return (
     !uri ||
-    uri.replace(ATTR_WHITESPACE, "").match(
-      new RegExp(
-        // eslint-disable-next-line no-useless-escape
-        `^(?:(?:${allowedProtocols.join("|")}):|[^a-z]|[a-z0-9+.\-]+(?:[^a-z+.\-:]|$))`,
-        "i"
+    uri
+      .replace(ATTR_WHITESPACE, "")
+      .match(
+        new RegExp(
+          `^(?:(?:${allowedProtocols.join("|")}):|[^a-z]|[a-z0-9+.\-]+(?:[^a-z+.\-:]|$))`,
+          "i"
+        )
       )
-    )
-  )
+  );
 }
 
 export function sanitizeUrl(
@@ -384,13 +487,13 @@ export function sanitizeUrl(
   protocols?: ProtocolConfig
 ): string {
   try {
-    const url = new URL(inputUrl, baseUrl)
+    const url = new URL(inputUrl, baseUrl);
 
     if (isAllowedUri(url.href, protocols)) {
-      return url.href
+      return url.href;
     }
   } catch {
     // If URL creation fails, it's considered invalid
   }
-  return "#"
+  return "#";
 }

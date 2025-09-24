@@ -11,6 +11,7 @@ import { editorPaperController, paperController } from "./paper.controller";
 import {
   createEditorPaperSchema,
   publishDraftSchema,
+  shareViaEmailSchema,
   updateEditorContentSchema,
   updatePaperMetadataSchema,
 } from "./paper.validation";
@@ -118,6 +119,15 @@ paperRoutes.post(
   paperOperationLimiter,
   authMiddleware as any,
   paperController.processPDFDirect as any
+);
+
+// Share paper via email
+paperRoutes.post(
+  "/share-email",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(shareViaEmailSchema),
+  paperController.shareViaEmail as any
 );
 
 // Editor-specific routes

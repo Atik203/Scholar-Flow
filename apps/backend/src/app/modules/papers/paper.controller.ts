@@ -557,6 +557,97 @@ export const paperController = {
       );
     }
   }),
+
+  shareViaEmail: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { paperId, recipientEmail, permission, message } = req.body;
+
+    // Validate input
+    if (!paperId || !recipientEmail || !permission) {
+      throw new ApiError(
+        400,
+        "Paper ID, recipient email, and permission are required"
+      );
+    }
+
+    if (!["view", "edit"].includes(permission)) {
+      throw new ApiError(400, "Permission must be 'view' or 'edit'");
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(recipientEmail)) {
+      throw new ApiError(400, "Invalid email format");
+    }
+
+    try {
+      // Get paper details
+      const paper = (await prisma.$queryRaw`
+        SELECT p.id, p.title, p.content, u.name as author_name
+        FROM "Paper" p
+        JOIN "User" u ON p."uploaderId" = u.id
+        WHERE p.id = ${paperId}
+      `) as any[];
+
+      if (!paper.length) {
+        throw new ApiError(404, "Paper not found");
+      }
+
+      const paperData = paper[0];
+
+      // Check if user has permission to share this paper
+      const hasPermission = (await prisma.$queryRaw`
+        SELECT 1 FROM "Paper" p
+        WHERE p.id = ${paperId}
+        AND (
+          p."uploaderId" = ${authReq.user.id}
+          OR EXISTS (
+            SELECT 1 FROM "CollectionPaper" cp
+            JOIN "CollectionMember" cm ON cp."collectionId" = cm."collectionId"
+            WHERE cp."paperId" = ${paperId}
+            AND cm."userId" = ${authReq.user.id}
+            AND cm.permission IN ('edit', 'admin')
+          )
+        )
+      `) as any[];
+
+      if (!hasPermission.length) {
+        throw new ApiError(
+          403,
+          "You don't have permission to share this paper"
+        );
+      }
+
+      // Generate paper link (assuming frontend URL structure)
+      const paperLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/papers/${paperId}`;
+
+      // Import and use email service
+      const { emailService } = await import("../../shared/emailService");
+
+      await emailService.sendPaperShareEmail({
+        recipientEmail,
+        senderName: authReq.user.name || authReq.user.email,
+        paperTitle: paperData.title,
+        paperLink,
+        permission,
+      });
+
+      sendSuccessResponse(res, {
+        message: "Paper shared successfully via email",
+        data: {
+          recipientEmail,
+          paperTitle: paperData.title,
+          permission,
+        },
+      });
+    } catch (error) {
+      console.error("[PaperController] Email share failed:", error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(500, "Failed to share paper via email");
+    }
+  }),
 };
 
 // Editor-specific controller functions
@@ -711,61 +802,6 @@ export const editorPaperController = {
     return sendPaginatedResponse(res, papers, meta, "Editor papers retrieved");
   }),
 
-  // Upload image for editor
-  uploadImage: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
-
-    if (!req.file) {
-      throw new ApiError(400, "No image file provided");
-    }
-
-    const file = req.file;
-
-    // Validate file type
-    if (!file.mimetype.startsWith("image/")) {
-      throw new ApiError(400, "File must be an image");
-    }
-
-    // Validate file size (max 5MB for images)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      throw new ApiError(400, "Image file too large. Maximum size is 5MB");
-    }
-
-    try {
-      // Generate unique filename with timestamp and user ID
-      const timestamp = Date.now();
-      const fileExtension = file.originalname.split(".").pop() || "jpg";
-      const fileName = `${authReq.user.id}_${timestamp}.${fileExtension}`;
-      const objectKey = `images/${fileName}`;
-
-      // Upload to S3
-      const uploadResult = await storage.uploadBuffer(
-        file.buffer,
-        objectKey,
-        file.mimetype
-      );
-
-      // Generate public URL
-      const imageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${objectKey}`;
-
-      return sendSuccessResponse(
-        res,
-        {
-          url: imageUrl,
-          fileName: fileName,
-          size: file.size,
-          mimetype: file.mimetype,
-        },
-        "Image uploaded successfully",
-        200
-      );
-    } catch (error) {
-      console.error("[EditorPaperController] Image upload failed:", error);
-      throw new ApiError(500, "Failed to upload image");
-    }
-  }),
-
   // Delete editor paper
   deleteEditorPaper: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
@@ -858,6 +894,61 @@ export const editorPaperController = {
     } catch (error) {
       console.error("[EditorPaperController] DOCX export failed:", error);
       throw new ApiError(500, "Failed to export DOCX");
+    }
+  }),
+
+  // Upload image for editor
+  uploadImage: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!authReq.file) {
+      throw new ApiError(400, "No image file provided");
+    }
+
+    // Validate file type
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (!allowedMimeTypes.includes(authReq.file.mimetype)) {
+      throw new ApiError(
+        400,
+        "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed."
+      );
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (authReq.file.size > maxSize) {
+      throw new ApiError(400, "File too large. Maximum size is 5MB.");
+    }
+
+    try {
+      // Upload to S3
+      const result = await storage.uploadFile(
+        authReq.file.buffer,
+        authReq.file.originalname || "image",
+        authReq.file.mimetype
+      );
+
+      console.log("[EditorPaperController] Upload result:", result);
+
+      const responseData = {
+        message: "Image uploaded successfully",
+        data: {
+          url: result.url,
+          fileName: result.filename,
+        },
+      };
+
+      console.log("[EditorPaperController] Sending response:", responseData);
+
+      sendSuccessResponse(res, responseData.data, responseData.message);
+    } catch (error) {
+      console.error("[EditorPaperController] Image upload failed:", error);
+      throw new ApiError(500, "Failed to upload image");
     }
   }),
 };
