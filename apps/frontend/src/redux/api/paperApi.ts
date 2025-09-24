@@ -14,6 +14,10 @@ export interface Paper {
   source?: string;
   doi?: string;
   processingStatus: "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
+  // Editor-specific fields
+  isDraft?: boolean;
+  isPublished?: boolean;
+  contentHtml?: string;
   createdAt: string;
   updatedAt: string;
   file?: {
@@ -52,6 +56,39 @@ export interface UpdatePaperMetadataRequest {
   abstract?: string;
   authors?: string[];
   year?: number;
+}
+
+// Editor-specific interfaces
+export interface CreateEditorPaperRequest {
+  workspaceId: string;
+  title: string;
+  content?: string;
+  isDraft?: boolean;
+}
+
+export interface UpdateEditorContentRequest {
+  id: string;
+  content: string;
+  title?: string;
+  isDraft?: boolean;
+}
+
+export interface PublishDraftRequest {
+  id: string;
+  title?: string;
+  abstract?: string;
+}
+
+export interface EditorPaper {
+  id: string;
+  title: string;
+  contentHtml?: string;
+  isDraft: boolean;
+  isPublished: boolean;
+  workspaceId: string;
+  uploaderId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProcessingStatusResponse {
@@ -249,6 +286,85 @@ export const paperApi = apiSlice.injectEndpoints({
         { type: "ProcessingStatus", id: paperId },
       ],
     }),
+
+    // Editor-specific endpoints
+    createEditorPaper: builder.mutation<
+      { data: { paper: EditorPaper } },
+      CreateEditorPaperRequest
+    >({
+      query: (body) => ({
+        url: "/editor",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Paper"],
+    }),
+
+    updateEditorContent: builder.mutation<
+      { data: { paper: EditorPaper } },
+      UpdateEditorContentRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/content`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    getEditorPaper: builder.query<{ data: EditorPaper }, string>({
+      query: (id) => ({
+        url: `/editor/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Paper", id }],
+    }),
+
+    listEditorPapers: builder.query<
+      { data: EditorPaper[] },
+      { workspaceId?: string; isDraft?: boolean }
+    >({
+      query: (params) => ({
+        url: "/editor",
+        method: "GET",
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.map(({ id }) => ({ type: "Paper" as const, id })),
+              "Paper",
+            ]
+          : ["Paper"],
+    }),
+
+    publishDraft: builder.mutation<
+      { data: { paper: EditorPaper } },
+      PublishDraftRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/publish`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    exportPaperPdf: builder.mutation<Blob, string>({
+      query: (id) => ({
+        url: `/editor/${id}/export/pdf`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
+
+    exportPaperDocx: builder.mutation<Blob, string>({
+      query: (id) => ({
+        url: `/editor/${id}/export/docx`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+    }),
   }),
 });
 
@@ -265,4 +381,12 @@ export const {
   useGetProcessingStatusQuery,
   useGetAllChunksQuery,
   useProcessPDFDirectMutation,
+  // Editor endpoints
+  useCreateEditorPaperMutation,
+  useUpdateEditorContentMutation,
+  useGetEditorPaperQuery,
+  useListEditorPapersQuery,
+  usePublishDraftMutation,
+  useExportPaperPdfMutation,
+  useExportPaperDocxMutation,
 } = paperApi;

@@ -180,8 +180,12 @@ model Paper {
   title       String
   abstract    String?
   metadata    Json    @db.JsonB
-  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar'
+  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar' | 'editor'
   doi         String? @unique
+
+  // Editor-specific fields
+  isDraft     Boolean @default(false) // True for draft papers created in editor
+  isPublished Boolean @default(false) // True when draft is published/finalized
 
   // Processing lifecycle fields
   processingStatus PaperProcessingStatus @default(UPLOADED)
