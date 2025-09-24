@@ -583,7 +583,7 @@ export const paperController = {
     try {
       // Get paper details
       const paper = (await prisma.$queryRaw`
-        SELECT p.id, p.title, p.content, u.name as author_name
+        SELECT p.id, p.title, p."contentHtml", u.name as author_name
         FROM "Paper" p
         JOIN "User" u ON p."uploaderId" = u.id
         WHERE p.id = ${paperId}
@@ -606,7 +606,7 @@ export const paperController = {
             JOIN "CollectionMember" cm ON cp."collectionId" = cm."collectionId"
             WHERE cp."paperId" = ${paperId}
             AND cm."userId" = ${authReq.user.id}
-            AND cm.permission IN ('edit', 'admin')
+            AND cm.permission = 'EDIT'
           )
         )
       `) as any[];

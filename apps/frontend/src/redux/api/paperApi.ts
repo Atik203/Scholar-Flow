@@ -410,7 +410,34 @@ export const paperApi = apiSlice.injectEndpoints({
         url: "/papers/share-email",
         method: "POST",
         body: data,
+        // Be tolerant of non-JSON responses to avoid PARSING_ERROR
+        responseHandler: async (response) => {
+          const text = await response.text();
+          try {
+            return JSON.parse(text);
+          } catch {
+            return { raw: text };
+          }
+        },
       }),
+      // Normalize backend response shape to a flat object for the UI
+      transformResponse: (res: any) => {
+        // Handle typical API format: { success, message, data }
+        // Some controllers may embed another { message, data } inside data
+        const innerMessage = res?.data?.message ?? res?.message;
+        const innerData = res?.data?.data ?? res?.data ?? res;
+        return {
+          message: innerMessage || "Paper shared successfully via email",
+          recipientEmail: innerData?.recipientEmail,
+          paperTitle: innerData?.paperTitle,
+          permission: innerData?.permission,
+        } as {
+          message: string;
+          recipientEmail: string;
+          paperTitle: string;
+          permission: string;
+        };
+      },
     }),
   }),
 });
