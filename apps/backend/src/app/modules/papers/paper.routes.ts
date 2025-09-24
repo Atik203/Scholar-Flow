@@ -7,8 +7,14 @@ import {
   paperUploadLimiter,
 } from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
-import { paperController } from "./paper.controller";
-import { updatePaperMetadataSchema } from "./paper.validation";
+import { editorPaperController, paperController } from "./paper.controller";
+import {
+  createEditorPaperSchema,
+  publishDraftSchema,
+  shareViaEmailSchema,
+  updateEditorContentSchema,
+  updatePaperMetadataSchema,
+} from "./paper.validation";
 
 // Memory storage is fine for MVP; switch to streaming for large PDFs later.
 const upload = multer({ storage: multer.memoryStorage() });
@@ -113,4 +119,100 @@ paperRoutes.post(
   paperOperationLimiter,
   authMiddleware as any,
   paperController.processPDFDirect as any
+);
+
+// Share paper via email
+paperRoutes.post(
+  "/share-email",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(shareViaEmailSchema),
+  paperController.shareViaEmail as any
+);
+
+// Editor-specific routes
+export const editorPaperRoutes: express.Router = express.Router();
+
+// Create new editor paper
+editorPaperRoutes.post(
+  "/",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(createEditorPaperSchema) as any,
+  editorPaperController.createEditorPaper as any
+);
+
+// Get user's editor papers (drafts and published)
+editorPaperRoutes.get(
+  "/",
+  paperListLimiter,
+  authMiddleware as any,
+  editorPaperController.getUserEditorPapers as any
+);
+
+// Get specific editor paper
+editorPaperRoutes.get(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getEditorPaper as any
+);
+
+// Update editor paper content
+editorPaperRoutes.put(
+  "/:id/content",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(updateEditorContentSchema) as any,
+  editorPaperController.updateEditorContent as any
+);
+
+// Auto-save editor content (no validation middleware for performance)
+editorPaperRoutes.patch(
+  "/:id/autosave",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.autoSaveContent as any
+);
+
+// Publish draft paper
+editorPaperRoutes.post(
+  "/:id/publish",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(publishDraftSchema) as any,
+  editorPaperController.publishDraft as any
+);
+
+// Delete editor paper
+editorPaperRoutes.delete(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.deleteEditorPaper as any
+);
+
+// Upload image for editor
+editorPaperRoutes.post(
+  "/upload-image",
+  paperUploadLimiter,
+  authMiddleware as any,
+  upload.single("image") as any,
+  editorPaperController.uploadImage as any
+);
+
+// Export paper as PDF
+editorPaperRoutes.get(
+  "/:id/export/pdf",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.exportPDF as any
+);
+
+// Export paper as DOCX
+editorPaperRoutes.get(
+  "/:id/export/docx",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.exportDOCX as any
 );
