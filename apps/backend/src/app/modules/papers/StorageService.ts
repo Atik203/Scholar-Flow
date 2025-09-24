@@ -35,17 +35,42 @@ export class StorageService {
           process.env.AWS_SECRET_ACCESS_KEY || process.env.S3_SECRET_KEY || "",
       },
       requestHandler: {
-        requestTimeout: 30000, // 30 second timeout
-        connectionTimeout: 5000, // 5 second connection timeout
+        requestTimeout: 60000, // 60 second timeout for large uploads
+        connectionTimeout: 15000, // 15 second connection timeout
       },
-      maxAttempts: 3, // Reduce retry attempts for faster failure
-      retryMode: "adaptive", // Use adaptive retry mode for better performance
+      maxAttempts: 3, // Allow more retries for reliability
+      retryMode: "adaptive", // Use adaptive retry mode for better handling
     });
     this.bucket = bucket;
 
     console.log(
       `[StorageService] Initialized with bucket: ${bucket}, region: ${region}`
     );
+
+    // Test connectivity on initialization (optional, for debugging)
+    this.testConnection().catch((error) => {
+      console.warn(
+        `[StorageService] Initial connection test failed:`,
+        error.message
+      );
+    });
+  }
+
+  /**
+   * Test S3 connectivity and permissions
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      console.log(`[StorageService] Testing S3 connection...`);
+      const { HeadBucketCommand } = await import("@aws-sdk/client-s3");
+      const command = new HeadBucketCommand({ Bucket: this.bucket });
+      await this.s3.send(command);
+      console.log(`[StorageService] S3 connection test successful`);
+      return true;
+    } catch (error) {
+      console.error(`[StorageService] S3 connection test failed:`, error);
+      return false;
+    }
   }
 
   async putObject(params: PutObjectParams) {
@@ -59,8 +84,8 @@ export class StorageService {
         Bucket: this.bucket,
         Key: params.key,
         Body: params.body,
-        ContentType: params.contentType,
-        ACL: "private",
+        ContentType: params.contentType || "application/octet-stream",
+        // Remove ACL as it might not be supported by all S3 configurations
       };
 
       const command = new PutObjectCommand(putObjectInput);
@@ -79,6 +104,22 @@ export class StorageService {
         `[StorageService] S3 putObject failed after ${uploadTime}ms:`,
         error
       );
+
+      // Add more specific error information for debugging
+      if (error instanceof Error) {
+        console.error(`[StorageService] Error name: ${error.name}`);
+        console.error(`[StorageService] Error message: ${error.message}`);
+        if ("code" in error) {
+          console.error(`[StorageService] Error code: ${(error as any).code}`);
+        }
+        if ("$metadata" in error) {
+          console.error(
+            `[StorageService] Error metadata:`,
+            (error as any).$metadata
+          );
+        }
+      }
+
       throw error;
     }
   }
@@ -113,5 +154,58 @@ export class StorageService {
     return await getSignedUrl(this.s3, command, {
       expiresIn: expiresSeconds,
     });
+  }
+
+  async uploadFile(
+    buffer: Buffer,
+    originalName: string,
+    contentType: string
+  ): Promise<{ url: string; filename: string; key: string }> {
+    const uploadStart = Date.now();
+
+    // Generate unique filename with timestamp
+    const timestamp = Date.now();
+    const fileExtension = originalName.split(".").pop();
+    const filename = `editor-images/${timestamp}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+
+    console.log(
+      `[StorageService] Uploading image: ${filename}, size: ${buffer.length} bytes, type: ${contentType}`
+    );
+
+    try {
+      // Upload to S3 without ACL (since bucket doesn't support them)
+      const result = await this.putObject({
+        key: filename,
+        body: buffer,
+        contentType: contentType,
+      });
+
+      const uploadTime = Date.now() - uploadStart;
+      console.log(`[StorageService] S3 putObject completed in ${uploadTime}ms`);
+
+      // Generate presigned URL for frontend access (shorter expiry for faster generation)
+      const presignedStart = Date.now();
+      const url = await this.getSignedUrl(filename, 1800); // 30 minutes expiry
+      const presignedTime = Date.now() - presignedStart;
+
+      const totalTime = Date.now() - uploadStart;
+      console.log(
+        `[StorageService] Presigned URL generated in ${presignedTime}ms`
+      );
+      console.log(`[StorageService] Image upload completed in ${totalTime}ms`);
+
+      return {
+        url: url,
+        filename: originalName,
+        key: result.key,
+      };
+    } catch (error) {
+      const uploadTime = Date.now() - uploadStart;
+      console.error(
+        `[StorageService] Image upload failed after ${uploadTime}ms:`,
+        error
+      );
+      throw error;
+    }
   }
 }

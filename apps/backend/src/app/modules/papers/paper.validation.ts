@@ -64,3 +64,37 @@ export type ListPapersQuery = z.infer<typeof listPapersQuerySchema>;
 export type UpdatePaperMetadataInput = z.infer<
   typeof updatePaperMetadataSchema
 >;
+
+// Editor-specific validation schemas
+export const createEditorPaperSchema = z.object({
+  workspaceId: z.string().uuid(),
+  title: z.string().min(1).max(300),
+  content: z.string().optional(), // HTML content
+  isDraft: z.boolean().optional().default(true),
+  authors: z.array(z.string().min(1).max(120)).max(25).optional(),
+});
+
+export const updateEditorContentSchema = z.object({
+  content: z.string(), // HTML content - required for updates
+  title: z.string().min(1).max(300).optional(),
+  isDraft: z.boolean().optional(),
+});
+
+export const publishDraftSchema = z.object({
+  title: z.string().min(1).max(300).optional(), // Allow title update on publish
+  abstract: z.string().max(5000).optional(),
+});
+
+export const shareViaEmailSchema = z.object({
+  paperId: z.string().uuid(),
+  recipientEmail: z.string().email(),
+  permission: z.enum(["view", "edit"]),
+  message: z.string().optional(),
+});
+
+export type CreateEditorPaperInput = z.infer<typeof createEditorPaperSchema>;
+export type UpdateEditorContentInput = z.infer<
+  typeof updateEditorContentSchema
+>;
+export type PublishDraftInput = z.infer<typeof publishDraftSchema>;
+export type ShareViaEmailInput = z.infer<typeof shareViaEmailSchema>;
