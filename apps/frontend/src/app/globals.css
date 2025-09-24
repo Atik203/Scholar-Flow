@@ -1,5 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../styles/_variables.scss";
+@import "../styles/_keyframe-animations.scss";
+@import "../components/tiptap-node/image-upload-node/image-upload-node.scss";
 
 @custom-variant dark (&:is(.dark *));
 

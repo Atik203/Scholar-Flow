@@ -1,6 +1,14 @@
+import puppeteer from "puppeteer";
+import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
 import prisma from "../../shared/prisma";
-import { UpdatePaperMetadataInput, UploadPaperInput } from "./paper.validation";
+import {
+  CreateEditorPaperInput,
+  PublishDraftInput,
+  UpdateEditorContentInput,
+  UpdatePaperMetadataInput,
+  UploadPaperInput,
+} from "./paper.validation";
 
 interface CreateUploadArgs {
   input: UploadPaperInput;
@@ -295,6 +303,456 @@ export const paperService = {
 
     // Return updated paper
     return this.getById(id);
+  },
+};
+
+// HTML sanitization configuration for rich text editor content
+const sanitizeOptions = {
+  allowedTags: [
+    "p",
+    "br",
+    "strong",
+    "b",
+    "em",
+    "i",
+    "u",
+    "s",
+    "sub",
+    "sup",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "ul",
+    "ol",
+    "li",
+    "blockquote",
+    "pre",
+    "code",
+    "a",
+    "img",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "div",
+    "span",
+  ],
+  allowedAttributes: {
+    a: ["href", "title", "target"],
+    img: ["src", "alt", "title", "width", "height"],
+    div: ["class"],
+    span: ["class", "style"],
+    p: ["class"],
+    h1: ["class"],
+    h2: ["class"],
+    h3: ["class"],
+    h4: ["class"],
+    h5: ["class"],
+    h6: ["class"],
+    blockquote: ["class"],
+    pre: ["class"],
+    code: ["class"],
+    table: ["class"],
+    thead: ["class"],
+    tbody: ["class"],
+    tr: ["class"],
+    th: ["class"],
+    td: ["class"],
+  },
+  allowedSchemes: ["http", "https", "mailto"],
+};
+
+// Editor-specific paper service functions
+export const editorPaperService = {
+  // Create a new editor-based paper (draft by default)
+  async createEditorPaper(input: CreateEditorPaperInput, uploaderId: string) {
+    const sanitizedContent = input.content
+      ? sanitizeHtml(input.content, sanitizeOptions)
+      : "";
+
+    // Create metadata with authors
+    const metadata = {
+      source: "editor",
+      createdInEditor: true,
+      authors: input.authors || [],
+    };
+
+    const result = await prisma.$queryRaw<
+      {
+        id: string;
+        title: string;
+        isDraft: boolean;
+        isPublished: boolean;
+        createdAt: Date;
+      }[]
+    >`
+      INSERT INTO "Paper" (
+        id, "workspaceId", "uploaderId", title, "contentHtml", 
+        source, "isDraft", "isPublished", "processingStatus", 
+        metadata, "createdAt", "updatedAt"
+      ) VALUES (
+        gen_random_uuid(), ${input.workspaceId}, ${uploaderId}, 
+        ${input.title}, ${sanitizedContent}, 'editor', 
+        ${input.isDraft ?? true}, false, 'PROCESSED',
+        ${JSON.stringify(metadata)}::jsonb,
+        NOW(), NOW()
+      )
+      RETURNING id, title, "isDraft", "isPublished", "createdAt"
+    `;
+
+    return result[0]; // Return the first (and only) result
+  },
+
+  // Get editor paper content
+  async getEditorPaperContent(paperId: string, userId: string) {
+    const result = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        contentHtml: string | null;
+        isDraft: boolean;
+        isPublished: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        uploaderId: string;
+      }>
+    >`
+      SELECT 
+        p.id, p.title, p."contentHtml", p."isDraft", p."isPublished",
+        p."createdAt", p."updatedAt", p."uploaderId"
+      FROM "Paper" p
+      INNER JOIN "WorkspaceMember" wm ON wm."workspaceId" = p."workspaceId"
+      WHERE p.id = ${paperId} 
+        AND wm."userId" = ${userId}
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+    `;
+
+    return result[0] || null;
+  },
+
+  // Update editor paper content
+  async updateEditorContent(
+    paperId: string,
+    input: UpdateEditorContentInput,
+    userId: string
+  ) {
+    const sanitizedContent = sanitizeHtml(input.content, sanitizeOptions);
+
+    const result = await prisma.$executeRaw`
+      UPDATE "Paper" 
+      SET 
+        "contentHtml" = ${sanitizedContent},
+        title = COALESCE(${input.title}, title),
+        "isDraft" = COALESCE(${input.isDraft}, "isDraft"),
+        "updatedAt" = NOW()
+      WHERE id = ${paperId} 
+        AND "uploaderId" = ${userId}
+        AND "isDeleted" = false
+        AND source = 'editor'
+      RETURNING id, title, "isDraft", "updatedAt"
+    `;
+
+    return result;
+  },
+
+  // Publish a draft paper
+  async publishDraft(
+    paperId: string,
+    input: PublishDraftInput,
+    userId: string
+  ) {
+    const result = await prisma.$executeRaw`
+      UPDATE "Paper" 
+      SET 
+        "isPublished" = true,
+        "isDraft" = false,
+        title = COALESCE(${input.title}, title),
+        abstract = COALESCE(${input.abstract}, abstract),
+        "updatedAt" = NOW()
+      WHERE id = ${paperId} 
+        AND "uploaderId" = ${userId}
+        AND "isDeleted" = false
+        AND source = 'editor'
+        AND "isDraft" = true
+      RETURNING id, title, "isPublished", "updatedAt"
+    `;
+
+    return result;
+  },
+
+  // Get user's editor papers (drafts and published)
+  async getUserEditorPapers(
+    userId: string,
+    isDraft?: boolean,
+    limit: number = 10,
+    offset: number = 0
+  ) {
+    if (isDraft !== undefined) {
+      return await prisma.$queryRaw<
+        Array<{
+          id: string;
+          title: string;
+          abstract: string | null;
+          isDraft: boolean;
+          isPublished: boolean;
+          createdAt: Date;
+          updatedAt: Date;
+          workspaceId: string;
+        }>
+      >`
+        SELECT 
+          p.id, p.title, p.abstract, p."isDraft", p."isPublished",
+          p."createdAt", p."updatedAt", p."workspaceId"
+        FROM "Paper" p
+        WHERE p."uploaderId" = ${userId}
+          AND p."isDeleted" = false
+          AND p.source = 'editor'
+          AND p."isDraft" = ${isDraft}
+        ORDER BY p."updatedAt" DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+    }
+
+    return await prisma.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        abstract: string | null;
+        isDraft: boolean;
+        isPublished: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        workspaceId: string;
+      }>
+    >`
+      SELECT 
+        p.id, p.title, p.abstract, p."isDraft", p."isPublished",
+        p."createdAt", p."updatedAt", p."workspaceId"
+      FROM "Paper" p
+      WHERE p."uploaderId" = ${userId}
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+      ORDER BY p."updatedAt" DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+  },
+
+  // Delete editor paper (soft delete)
+  async deleteEditorPaper(paperId: string, userId: string) {
+    return await prisma.$executeRaw`
+      UPDATE "Paper" 
+      SET "isDeleted" = true, "updatedAt" = NOW()
+      WHERE id = ${paperId} 
+        AND "uploaderId" = ${userId}
+        AND source = 'editor'
+    `;
+  },
+
+  // Auto-save functionality (updates content without changing draft status)
+  async autoSaveContent(paperId: string, content: string, userId: string) {
+    const sanitizedContent = sanitizeHtml(content, sanitizeOptions);
+
+    return await prisma.$executeRaw`
+      UPDATE "Paper" 
+      SET 
+        "contentHtml" = ${sanitizedContent},
+        "updatedAt" = NOW()
+      WHERE id = ${paperId} 
+        AND "uploaderId" = ${userId}
+        AND "isDeleted" = false
+        AND source = 'editor'
+    `;
+  },
+};
+
+// Export service functions
+export const exportService = {
+  // Generate PDF from HTML content
+  async generatePDF(paperId: string, userId: string): Promise<Buffer> {
+    // Get paper content
+    const paper = await editorPaperService.getEditorPaperContent(
+      paperId,
+      userId
+    );
+    if (!paper) {
+      throw new Error("Paper not found or access denied");
+    }
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
+    });
+
+    try {
+      const page = await browser.newPage();
+
+      // Create HTML document with styling
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${paper.title}</title>
+          <style>
+            body {
+              font-family: 'Times New Roman', serif;
+              line-height: 1.6;
+              margin: 40px;
+              color: #333;
+            }
+            h1, h2, h3, h4, h5, h6 {
+              color: #2c3e50;
+              margin-top: 24px;
+              margin-bottom: 16px;
+            }
+            h1 { font-size: 28px; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+            h2 { font-size: 24px; }
+            h3 { font-size: 20px; }
+            p { margin-bottom: 12px; text-align: justify; }
+            blockquote {
+              border-left: 4px solid #3498db;
+              margin: 16px 0;
+              padding: 8px 16px;
+              background-color: #f8f9fa;
+            }
+            pre {
+              background-color: #f4f4f4;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              padding: 12px;
+              overflow-x: auto;
+            }
+            code {
+              background-color: #f4f4f4;
+              padding: 2px 4px;
+              border-radius: 3px;
+              font-family: 'Courier New', monospace;
+            }
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              margin: 16px 0;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+              text-align: left;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            ul, ol {
+              margin-bottom: 12px;
+            }
+            li {
+              margin-bottom: 4px;
+            }
+            .title-page {
+              text-align: center;
+              margin-bottom: 40px;
+            }
+            .paper-info {
+              color: #7f8c8d;
+              font-style: italic;
+              margin-bottom: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="title-page">
+            <h1>${paper.title}</h1>
+            <div class="paper-info">
+              <p>Created: ${paper.createdAt.toLocaleDateString()}</p>
+              <p>Last Updated: ${paper.updatedAt.toLocaleDateString()}</p>
+              ${paper.isDraft ? "<p><strong>Draft Version</strong></p>" : ""}
+            </div>
+          </div>
+          <div class="content">
+            ${paper.contentHtml || "<p>No content available.</p>"}
+          </div>
+        </body>
+        </html>
+      `;
+
+      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "20mm",
+          right: "15mm",
+          bottom: "20mm",
+          left: "15mm",
+        },
+      });
+
+      return pdfBuffer;
+    } finally {
+      await browser.close();
+    }
+  },
+
+  // Generate DOCX from HTML content (using html-docx-js)
+  async generateDOCX(paperId: string, userId: string): Promise<Buffer> {
+    const htmlDocx = require("html-docx-js");
+
+    // Get paper content
+    const paper = await editorPaperService.getEditorPaperContent(
+      paperId,
+      userId
+    );
+    if (!paper) {
+      throw new Error("Paper not found or access denied");
+    }
+
+    // Create HTML document with basic styling for DOCX
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${paper.title}</title>
+        <style>
+          body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
+          h1 { font-size: 18pt; font-weight: bold; text-align: center; margin-bottom: 20px; }
+          h2 { font-size: 16pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; }
+          h3 { font-size: 14pt; font-weight: bold; margin-top: 15px; margin-bottom: 8px; }
+          p { margin-bottom: 12px; text-align: justify; }
+          blockquote { margin: 15px 0; padding: 10px 20px; border-left: 4px solid #ddd; }
+          pre, code { font-family: 'Courier New', monospace; }
+          table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+          th, td { border: 1px solid #000; padding: 6px; }
+          th { font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <h1>${paper.title}</h1>
+        <p><em>Created: ${paper.createdAt.toLocaleDateString()}</em></p>
+        <p><em>Last Updated: ${paper.updatedAt.toLocaleDateString()}</em></p>
+        ${paper.isDraft ? "<p><strong>Draft Version</strong></p>" : ""}
+        <hr>
+        ${paper.contentHtml || "<p>No content available.</p>"}
+      </body>
+      </html>
+    `;
+
+    // Generate DOCX and convert Blob to Buffer
+    const docxBlob = htmlDocx.asBlob(htmlContent);
+
+    // Convert Blob to Buffer properly
+    const arrayBuffer = await docxBlob.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   },
 };
 

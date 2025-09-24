@@ -10,11 +10,19 @@ import {
 } from "../../shared/sendResponse";
 import { StorageService } from "./StorageService";
 import { createPaperError } from "./paper.errors";
-import { ensureDevUserAndWorkspace, paperService } from "./paper.service";
 import {
+  editorPaperService,
+  ensureDevUserAndWorkspace,
+  exportService,
+  paperService,
+} from "./paper.service";
+import {
+  createEditorPaperSchema,
   deletePaperParamsSchema,
   getPaperParamsSchema,
   listPapersQuerySchema,
+  publishDraftSchema,
+  updateEditorContentSchema,
   updatePaperMetadataSchema,
   uploadPaperSchema,
 } from "./paper.validation";
@@ -547,6 +555,309 @@ export const paperController = {
         500,
         `Document processing failed: ${error instanceof Error ? error.message : String(error)}`
       );
+    }
+  }),
+};
+
+// Editor-specific controller functions
+export const editorPaperController = {
+  // Create a new editor paper
+  createEditorPaper: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = createEditorPaperSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid input");
+    }
+
+    try {
+      const paper = await editorPaperService.createEditorPaper(
+        parsed.data,
+        authReq.user.id
+      );
+
+      return sendSuccessResponse(
+        res,
+        { paper },
+        "Editor paper created successfully",
+        201
+      );
+    } catch (error) {
+      console.error("[EditorPaperController] Create failed:", error);
+      throw new ApiError(500, "Failed to create editor paper");
+    }
+  }),
+
+  // Get editor paper content
+  getEditorPaper: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    const paper = await editorPaperService.getEditorPaperContent(
+      parsed.data.id,
+      authReq.user.id
+    );
+
+    if (!paper) {
+      throw new ApiError(404, "Editor paper not found or access denied");
+    }
+
+    return sendSuccessResponse(res, paper, "Editor paper retrieved");
+  }),
+
+  // Update editor paper content
+  updateEditorContent: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const paramsParsed = getPaperParamsSchema.safeParse(req.params);
+    const bodyParsed = updateEditorContentSchema.safeParse(req.body);
+
+    if (!paramsParsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+    if (!bodyParsed.success) {
+      throw new ApiError(400, "Invalid content data");
+    }
+
+    const result = await editorPaperService.updateEditorContent(
+      paramsParsed.data.id,
+      bodyParsed.data,
+      authReq.user.id
+    );
+
+    if (!result || (Array.isArray(result) && result.length === 0)) {
+      throw new ApiError(404, "Editor paper not found or access denied");
+    }
+
+    return sendSuccessResponse(res, result, "Content updated successfully");
+  }),
+
+  // Auto-save editor content (lighter endpoint for frequent saves)
+  autoSaveContent: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const paramsParsed = getPaperParamsSchema.safeParse(req.params);
+
+    if (!paramsParsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+    if (!req.body.content || typeof req.body.content !== "string") {
+      throw new ApiError(400, "Content is required");
+    }
+
+    await editorPaperService.autoSaveContent(
+      paramsParsed.data.id,
+      req.body.content,
+      authReq.user.id
+    );
+
+    return sendSuccessResponse(res, {}, "Content auto-saved");
+  }),
+
+  // Publish a draft paper
+  publishDraft: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const paramsParsed = getPaperParamsSchema.safeParse(req.params);
+    const bodyParsed = publishDraftSchema.safeParse(req.body);
+
+    if (!paramsParsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+    if (!bodyParsed.success) {
+      throw new ApiError(400, "Invalid publish data");
+    }
+
+    const result = await editorPaperService.publishDraft(
+      paramsParsed.data.id,
+      bodyParsed.data,
+      authReq.user.id
+    );
+
+    if (!result || (Array.isArray(result) && result.length === 0)) {
+      throw new ApiError(404, "Draft not found or already published");
+    }
+
+    return sendSuccessResponse(res, result, "Paper published successfully");
+  }),
+
+  // Get user's editor papers
+  getUserEditorPapers: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { isDraft, page = 1, limit = 10 } = req.query;
+
+    const pageNum = parseInt(page as string, 10) || 1;
+    const limitNum = Math.min(parseInt(limit as string, 10) || 10, 50);
+    const offset = (pageNum - 1) * limitNum;
+
+    const draftFilter =
+      isDraft === "true" ? true : isDraft === "false" ? false : undefined;
+
+    const papers = await editorPaperService.getUserEditorPapers(
+      authReq.user.id,
+      draftFilter,
+      limitNum,
+      offset
+    );
+
+    const meta = {
+      page: pageNum,
+      limit: limitNum,
+      total: papers.length, // This would ideally be total count, but for now using current results
+      totalPage: Math.ceil(papers.length / limitNum),
+    };
+
+    return sendPaginatedResponse(res, papers, meta, "Editor papers retrieved");
+  }),
+
+  // Upload image for editor
+  uploadImage: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!req.file) {
+      throw new ApiError(400, "No image file provided");
+    }
+
+    const file = req.file;
+
+    // Validate file type
+    if (!file.mimetype.startsWith("image/")) {
+      throw new ApiError(400, "File must be an image");
+    }
+
+    // Validate file size (max 5MB for images)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      throw new ApiError(400, "Image file too large. Maximum size is 5MB");
+    }
+
+    try {
+      // Generate unique filename with timestamp and user ID
+      const timestamp = Date.now();
+      const fileExtension = file.originalname.split(".").pop() || "jpg";
+      const fileName = `${authReq.user.id}_${timestamp}.${fileExtension}`;
+      const objectKey = `images/${fileName}`;
+
+      // Upload to S3
+      const uploadResult = await storage.uploadBuffer(
+        file.buffer,
+        objectKey,
+        file.mimetype
+      );
+
+      // Generate public URL
+      const imageUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${objectKey}`;
+
+      return sendSuccessResponse(
+        res,
+        {
+          url: imageUrl,
+          fileName: fileName,
+          size: file.size,
+          mimetype: file.mimetype,
+        },
+        "Image uploaded successfully",
+        200
+      );
+    } catch (error) {
+      console.error("[EditorPaperController] Image upload failed:", error);
+      throw new ApiError(500, "Failed to upload image");
+    }
+  }),
+
+  // Delete editor paper
+  deleteEditorPaper: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = deletePaperParamsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    await editorPaperService.deleteEditorPaper(parsed.data.id, authReq.user.id);
+
+    return sendSuccessResponse(res, {}, "Editor paper deleted");
+  }),
+
+  // Export paper as PDF
+  exportPDF: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    try {
+      const pdfBuffer = await exportService.generatePDF(
+        parsed.data.id,
+        authReq.user.id
+      );
+
+      // Get paper title for filename
+      const paper = await editorPaperService.getEditorPaperContent(
+        parsed.data.id,
+        authReq.user.id
+      );
+
+      const filename = paper
+        ? `${paper.title.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`
+        : `paper_${parsed.data.id}.pdf`;
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader("Content-Length", pdfBuffer.length);
+
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("[EditorPaperController] PDF export failed:", error);
+      throw new ApiError(500, "Failed to export PDF");
+    }
+  }),
+
+  // Export paper as DOCX
+  exportDOCX: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+
+    try {
+      const docxBuffer = await exportService.generateDOCX(
+        parsed.data.id,
+        authReq.user.id
+      );
+
+      // Get paper title for filename
+      const paper = await editorPaperService.getEditorPaperContent(
+        parsed.data.id,
+        authReq.user.id
+      );
+
+      const filename = paper
+        ? `${paper.title.replace(/[^a-zA-Z0-9]/g, "_")}.docx`
+        : `paper_${parsed.data.id}.docx`;
+
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader("Content-Length", docxBuffer.length);
+
+      res.send(docxBuffer);
+    } catch (error) {
+      console.error("[EditorPaperController] DOCX export failed:", error);
+      throw new ApiError(500, "Failed to export DOCX");
     }
   }),
 };
