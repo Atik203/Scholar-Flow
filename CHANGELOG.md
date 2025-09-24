@@ -1,5 +1,46 @@
 # Scholar-Flow Changelog
 
+## v1.1.1 (2025-09-24) – Rich Text Editor & Content Management
+
+Author: @Atik203
+
+### Highlights – v1.1.1
+
+- **Complete Rich Text Editor Implementation**: Full-featured TipTap-based editor with comprehensive toolbar and extensions
+- **Advanced Auto-save System**: Debounced content saving with real-time status indicators and Ctrl+S keyboard support
+- **Export Functionality**: PDF and DOCX export with embedded images, proper styling, and metadata preservation
+- **Image Management**: Advanced image upload with S3 integration, resizing capabilities, and drag-and-drop support
+- **Sharing & Collaboration**: Email sharing with permission management and seamless integration with existing workspace system
+- **Draft/Publish Workflow**: Complete content lifecycle management with title editing and version control
+
+### Technical Implementation – v1.1.1
+
+#### Frontend Features
+
+- **TipTap Editor**: StarterKit, Typography, Superscript/Subscript, Text Alignment, Highlight, Task Lists
+- **Advanced Image Handling**: ResizableImageWithPopover extension with S3 upload integration
+- **Mobile-Responsive Design**: Collapsible toolbar, touch-friendly controls, and adaptive layouts
+- **Accessibility Support**: ARIA labels, keyboard navigation, and screen reader compatibility
+- **Error Handling**: Comprehensive retry logic, toast notifications, and graceful degradation
+
+#### Backend Features
+
+- **Content API Endpoints**: Full CRUD operations for editor papers with sanitized HTML storage
+- **Export Services**: Puppeteer-based PDF generation and html-docx-js DOCX creation with image embedding
+- **Auto-save System**: Lightweight endpoint for frequent content updates without full validation overhead
+- **Security**: HTML sanitization, rate limiting, and permission-based access control
+- **Performance**: Optimized database queries with proper indexing and caching strategies
+
+#### Key Technical Details
+
+- **Image Processing**: Automatic URL-to-base64 conversion for DOCX export compatibility
+- **Content Sanitization**: DOMPurify-style HTML cleaning for XSS prevention
+- **Database Integration**: Raw SQL queries via Prisma for optimized performance
+- **Error Management**: Production-grade error classes and standardized API responses
+- **Real-time Updates**: Debounced auto-save with conflict resolution and status tracking
+
+---
+
 ## v1.1.0 (2025-09-24) – Preview-first Extraction & Gotenberg
 
 Authors: @Atik203
