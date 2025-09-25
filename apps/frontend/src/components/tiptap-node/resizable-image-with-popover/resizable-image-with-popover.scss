@@ -1,0 +1,79 @@
+/* Resizable Image with Popover Styles */
+.image-component {
+  position: relative;
+  display: inline-block;
+  margin: 0.5rem 0;
+  transition: transform 0.2s ease-in-out;
+
+  &.dragging {
+    cursor: grabbing !important;
+    user-select: none;
+    z-index: 1000;
+    transform-origin: center;
+  }
+
+  .drag-handle {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1 !important;
+    }
+  }
+
+  &:hover .drag-handle {
+    opacity: 0.7;
+  }
+}
+
+.image-component [data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+.image-component img {
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.image-component:hover img {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure popover appears above other elements */
+.image-component .popover-content {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  z-index: 50;
+}
+
+/* Improve button styling in popover */
+.image-component .popover-content button {
+  transition: all 0.2s ease;
+}
+
+.image-component .popover-content button:hover {
+  background-color: #f1f5f9;
+}
+
+/* Selected node styling */
+.ProseMirror-selectednode .image-component img {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .image-component .popover-content {
+    padding: 6px;
+  }
+
+  .image-component .popover-content button {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+  }
+}

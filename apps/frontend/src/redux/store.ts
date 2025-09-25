@@ -1,3 +1,4 @@
+import { safeStorage } from "@/lib/storage";
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import {
   FLUSH,
@@ -8,7 +9,6 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import { apiSlice } from "./api/apiSlice";
 import authReducer from "./auth/authSlice";
 
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: "root",
-  storage,
+  storage: safeStorage,
   whitelist: ["auth"],
 };
 
@@ -31,7 +31,30 @@ export const makeStore = () => {
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
-          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+          ignoredActions: [
+            FLUSH,
+            REHYDRATE,
+            PAUSE,
+            PERSIST,
+            PURGE,
+            REGISTER,
+            // Ignore RTK Query actions that might have non-serializable data
+            "api/executeQuery/pending",
+            "api/executeQuery/fulfilled",
+            "api/executeQuery/rejected",
+            "api/executeMutation/pending",
+            "api/executeMutation/fulfilled",
+            "api/executeMutation/rejected",
+          ],
+          ignoredActionsPaths: ["meta.arg", "payload.timestamp"],
+          ignoredPaths: [
+            // Ignore RTK Query cache and mutations
+            "api.queries",
+            "api.mutations",
+            "api.provided",
+            "api.subscriptions",
+            "api.config",
+          ],
         },
       }).concat(apiSlice.middleware),
     devTools: process.env.NODE_ENV !== "production",

@@ -18,6 +18,7 @@ import {
   Menu,
   MessageSquare,
   Moon,
+  Newspaper,
   Phone,
   Sun,
   Users,
@@ -27,7 +28,7 @@ import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { UserMenu } from "./UserMenu";
 
 // Navigation structure with dropdowns
@@ -39,25 +40,25 @@ const navigationItems = [
     items: [
       {
         label: "Research Papers",
-        href: "/papers",
+        href: "/products/papers",
         description: "Discover and organize academic papers",
         icon: FileText,
       },
       {
         label: "Collections",
-        href: "/collections",
+        href: "/products/collections",
         description: "Create and share paper collections",
         icon: BookOpen,
       },
       {
         label: "Collaboration",
-        href: "/collaborate",
+        href: "/products/collaborate",
         description: "Work together on research projects",
         icon: Users,
       },
       {
         label: "AI Insights",
-        href: "/ai-insights",
+        href: "/products/ai-insights",
         description: "AI-powered research analysis",
         icon: Lightbulb,
       },
@@ -70,25 +71,25 @@ const navigationItems = [
     items: [
       {
         label: "Documentation",
-        href: "/docs",
+        href: "/resources/docs",
         description: "Complete API and usage guides",
         icon: BookMarked,
       },
       {
         label: "Tutorials",
-        href: "/tutorials",
+        href: "/resources/tutorials",
         description: "Step-by-step learning resources",
         icon: HelpCircle,
       },
       {
         label: "API Reference",
-        href: "/api",
+        href: "/resources/api",
         description: "Developer API documentation",
         icon: BookOpen,
       },
       {
         label: "Community",
-        href: "/community",
+        href: "/resources/community",
         description: "Connect with other researchers",
         icon: Users,
       },
@@ -101,27 +102,27 @@ const navigationItems = [
     items: [
       {
         label: "About Us",
-        href: "/about",
+        href: "/company/about",
         description: "Learn about our mission and team",
         icon: Building2,
       },
       {
         label: "Careers",
-        href: "/careers",
+        href: "/company/careers",
         description: "Join our growing team",
         icon: Users,
       },
       {
         label: "Contact",
-        href: "/contact",
+        href: "/company/contact",
         description: "Get in touch with our team",
         icon: Phone,
       },
       {
-        label: "Support",
-        href: "/support",
-        description: "Get help and support",
-        icon: MessageSquare,
+        label: "Press & News",
+        href: "/company/press",
+        description: "Latest news and media resources",
+        icon: Newspaper,
       },
     ],
   },
@@ -166,15 +167,41 @@ export const Navbar: React.FC = () => {
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hoveredDropdown, setHoveredDropdown] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleDropdownMouseEnter = (label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setHoveredDropdown(label);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setHoveredDropdown(null);
+    }, 150); // Small delay to prevent flickering
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const renderNavItem = (item: any) => {
     if (item.dropdown) {
       return (
-        <DropdownMenu key={item.label}>
+        <DropdownMenu key={item.label} open={hoveredDropdown === item.label}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               className="relative px-2.5 py-1.5 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 group hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+              onMouseEnter={() => handleDropdownMouseEnter(item.label)}
+              onMouseLeave={handleDropdownMouseLeave}
             >
               {item.label}
               <ChevronDown className="ml-1 h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
@@ -184,20 +211,22 @@ export const Navbar: React.FC = () => {
             align="start"
             className="w-80 p-2"
             sideOffset={8}
+            onMouseEnter={() => handleDropdownMouseEnter(item.label)}
+            onMouseLeave={handleDropdownMouseLeave}
           >
             <div className="grid gap-1">
               {item.items.map((dropdownItem: any) => (
                 <DropdownMenuItem key={dropdownItem.href} asChild>
                   <Link
                     href={dropdownItem.href}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent hover:scale-[1.02] transition-all duration-200 cursor-pointer group"
                   >
-                    <dropdownItem.icon className="h-5 w-5 text-primary mt-0.5" />
+                    <dropdownItem.icon className="h-5 w-5 text-primary mt-0.5 group-hover:scale-110 transition-transform duration-200" />
                     <div className="flex-1">
-                      <div className="font-medium text-foreground">
+                      <div className="font-medium text-foreground group-hover:text-primary transition-colors duration-200">
                         {dropdownItem.label}
                       </div>
-                      <div className="text-sm text-muted-foreground mt-0.5">
+                      <div className="text-sm text-muted-foreground mt-0.5 group-hover:text-foreground/80 transition-colors duration-200">
                         {dropdownItem.description}
                       </div>
                     </div>
@@ -276,13 +305,18 @@ export const Navbar: React.FC = () => {
             variant="outline"
             size="sm"
             aria-label="Toggle color theme"
-            className="w-8 h-8 sm:w-9 sm:h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
+            className="relative w-8 h-8 sm:w-9 sm:h-9 px-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
           >
-            {theme === "dark" ? (
-              <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
-            ) : (
-              <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
-            )}
+            {/* Render both icons to keep SSR/CSR markup identical and avoid hydration mismatches.
+                We animate visibility purely with CSS (dark: classes) instead of conditional JSX. */}
+            <Sun
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+              aria-hidden
+            />
+            <Moon
+              className="absolute h-3.5 w-3.5 sm:h-4 sm:w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+              aria-hidden
+            />
             <span className="sr-only">Toggle theme</span>
           </Button>
           {session ? (
@@ -316,9 +350,9 @@ export const Navbar: React.FC = () => {
                             <Link
                               href={dropdownItem.href}
                               onClick={() => setMobileOpen(false)}
-                              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+                              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-primary/5 hover:scale-[1.02] text-muted-foreground hover:text-foreground cursor-pointer group"
                             >
-                              <dropdownItem.icon className="h-4 w-4" />
+                              <dropdownItem.icon className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                               {dropdownItem.label}
                             </Link>
                           </li>
@@ -333,7 +367,7 @@ export const Navbar: React.FC = () => {
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
                       className={
-                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition hover:bg-primary/5 " +
+                        "flex items-center justify-between rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-primary/5 hover:scale-[1.02] cursor-pointer " +
                         (pathname === item.href
                           ? "text-primary font-medium bg-primary/10"
                           : "text-muted-foreground hover:text-foreground")

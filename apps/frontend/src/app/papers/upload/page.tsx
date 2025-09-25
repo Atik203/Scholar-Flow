@@ -1,90 +1,52 @@
-"use client";
+import { Metadata } from 'next';
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ArrowLeft, FileText, Upload } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+export const metadata: Metadata = {
+  title: 'Upload Papers - Scholar Flow',
+  description: 'Upload and manage your research papers with Scholar Flow.',
+};
 
 export default function PapersUploadPage() {
-  const { data: session, status } = useSession();
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    redirect("/login");
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Button asChild variant="ghost" className="mb-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <Upload className="h-8 w-8" />
-            Upload Papers
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-100">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">
+            Upload Research Papers
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Add research papers to your ScholarFlow library
-          </p>
-        </div>
-
-        <Card className="dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="dark:text-white">Paper Upload</CardTitle>
-            <CardDescription className="dark:text-gray-400">
-              This feature is coming soon in Phase 1 of ScholarFlow
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Paper Upload Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                We're working on implementing file upload functionality. You'll
-                be able to upload PDFs, extract text, and organize your research
-                papers.
-              </p>
-              <div className="space-y-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    Planned Features:
-                  </h4>
-                  <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                    <li>• PDF upload and text extraction</li>
-                    <li>• Automatic metadata detection</li>
-                    <li>• Full-text search capabilities</li>
-                    <li>• Citation management</li>
-                  </ul>
-                </div>
-                <Button asChild>
-                  <Link href="/dashboard">Return to Dashboard</Link>
-                </Button>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Upload Your Papers
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Upload your research papers to Scholar Flow for analysis, collaboration, 
+              and management. We support PDF files and will automatically extract 
+              text and metadata.
+            </p>
+            
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6">
+              <div className="text-gray-500 mb-4">
+                <svg className="mx-auto h-12 w-12" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </div>
+              <p className="text-lg text-gray-600 mb-2">
+                Drag and drop your PDF files here
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                or click to browse files
+              </p>
+              <button className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                Choose Files
+              </button>
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="text-sm text-gray-500">
+              <p>Supported formats: PDF</p>
+              <p>Maximum file size: 50MB</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

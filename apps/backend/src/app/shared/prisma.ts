@@ -27,17 +27,16 @@ const prismaClient =
 
 if (isDev) global.prisma = prismaClient;
 
-// Optional verbose query log only in dev
+// Optional performance-focused query log only in dev
 if (isDev) {
   // @ts-expect-error: Prisma Client extension type issue
   prismaClient.$on("query", (e: any) => {
-    console.log("-------------------------------------------");
-    console.log("Query: " + e.query);
-    console.log("-------------------------------------------");
-    console.log("Params: " + e.params);
-    console.log("-------------------------------------------");
-    console.log("Duration: " + e.duration + "ms");
-    console.log("-------------------------------------------");
+    // Only log slow queries (>100ms) to reduce console noise
+    if (e.duration > 100) {
+      console.log(
+        `[SLOW QUERY] ${e.duration}ms: ${e.query.substring(0, 100)}...`
+      );
+    }
   });
 }
 
