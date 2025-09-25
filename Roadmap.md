@@ -1,204 +1,156 @@
-# 📅 Week-by-Week Sprint Plan
+# Scholar-Flow Development Roadmap
+
+Author: Atik
+Last Updated: September 24, 2025
 
 > Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
 
-Phase 1 – MVP (Weeks 1–6)
+## Phase 1 – MVP (Weeks 1–6)
+
 Goal: Get a working core platform with minimal but functional features.
 
----
+### Week 1 – Project Setup & Foundations (Author: Atik) ✅
 
-Week 1 – Project Setup & Foundations (Author: Atik) ✅
+- [x] Setup & Configuration (monorepo, Next.js 15, Node.js backend)
+- [x] TypeScript, ESLint, Prettier, Husky hooks
+- [x] Prisma with PostgreSQL (User, Paper, Collection tables)
+- [x] Auth.js authentication (Google + email/password)
+- [x] Environment setup & Tailwind CSS + ShadCN UI + Redux Toolkit
 
-- [x] Setup & Configuration
-  - [x] Initialize monorepo / Next.js 15 + Node.js backend ✅
-  - [x] Configure TypeScript, ESLint, Prettier, Husky hooks ✅
-  - [x] Setup Prisma with PostgreSQL database schema (initial tables: User, Paper, Collection) ✅
-  - [x] Setup Auth.js authentication (Google + email/password) ✅
+### Week 2 – User Auth & Profile (Author: Atik) ✅
 
-- [x] Environment & DevOps
-  - [x] Setup .env variables and config for local and staging environments ✅
-  - [x] Integrate Tailwind CSS + ShadCN UI + Redux Toolkit store ✅
+- [x] Sign up / login / logout with Google OAuth
+- [x] JWT-based authentication with comprehensive testing
+- [x] User profile management & role-based access control
+- [x] Production-ready error handling & unique constraint management
 
----
+### Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅
 
-Week 2 – User Auth & Profile (Author: Atik) ✅
+- [x] Complete dashboard redesign with modern SaaS-style interface
+- [x] Responsive sidebar with collapsible navigation & mobile hamburger menu
+- [x] CSS Grid system with professional backdrop blur effects
+- [x] Custom theme integration with light/dark mode support
 
-- [x] Implement sign up / login / logout ✅
-- [x] OAuth authentication (Google OAuth with upsert handling) ✅
-- [x] Comprehensive authentication testing suite ✅
-- [x] Production-ready error handling and unique constraint management ✅
-- [x] JWT-based authentication with secure token management ✅
-- [x] Implement user profile page (basic: name, email, avatar) ✅
-- [x] Basic role-based access control for future admin support ✅
-- [x] Write first Prisma migrations for User table + seeds ✅
+### Week 3 – Paper Upload & Storage (Author: Atik) ✅
 
-**✅ Major Achievement:** OAuth Authentication System completed with proper Prisma upsert patterns.
+- [x] Password reset, email verification & user profile management
+- [x] Cloud storage integration (AWS S3) with file upload system
+- [x] Paper upload page (PDF, DOCX) with metadata extraction
+- [x] Modern paper viewing interface with fallback support
 
----
+### Week 3.5 – Enhanced UI/UX & Modern Paper Management (Author: Atik) ✅
 
-Week 3 – Paper Upload & Storage
+- [x] Advanced search page with comprehensive filters & fuzzy search
+- [x] Modern papers list with real-time search functionality
+- [x] Enhanced dashboard with improved navigation & quick actions
+- [x] Component architecture cleanup & duplicate code removal
 
-- [x] Add password reset & email verification flow & forgot password ✅ (Author: Atik+Salman)
-- [ ] Add API to update/edit user profile
-- [ ] Connect to cloud storage for file uploads
-- [ ] Build paper upload page (PDF, DOCX)
-- [ ] Store metadata (title, author, year) in DB
-- [ ] Extract text content from uploaded PDFs
-- [ ] Store original file in cloud storage (AWS S3)
-- [ ] UI for viewing uploaded papers
+### Week 4 – Basic Collections (Author: Atik+Salman) ✅
 
----
+**Key Features Delivered:**
 
-Week 4 – Basic Collections
+- [x] Create Collection flow with comprehensive CRUD operations (Author: Atik+Salman) ✅
+- [x] Add papers to collections with permission-based access control (Author: Atik) ✅
+- [x] Collection listing page with modern UI components (Author: Atik) ✅
+- [x] Advanced search & filter functionality (Author: Atik) ✅
+- [x] Backend CRUD operations for collections & papers (Author: Atik+Salman) ✅
+- [x] Collection privacy controls (public/private) (Author: Atik) ✅
+- [x] Paper-collection relationship management (Author: Atik) ✅
+- [x] Permission-based sharing system (VIEW/EDIT permissions) (Author: Atik) ✅
+- [x] Real-time cache invalidation and updates (Author: Atik) ✅
+- [x] Collection invitation system with email notifications (Author: Atik) ✅
 
-- [ ] Implement “Create Collection” flow
-- [ ] Add papers to collections
-- [ ] Collection listing page
-- [ ] Basic search & filter (by title, author)
-- [ ] Backend routes for CRUD on collections & papers
+### Week 4.5 – Advanced Workspace Management (Author: Atik) ✅
 
----
+**Key Features Delivered:**
 
-Week 5 – AI Summarization & Semantic Search
+- [x] Workspace settings and management interface with modern UI (Author: Atik) ✅
+- [x] Comprehensive workspace invitation system with email notifications (Author: Atik) ✅
+- [x] Role-based permission management (OWNER/ADMIN/TEAM_LEAD/PRO_RESEARCHER/RESEARCHER) (Author: Atik) ✅
+- [x] Workspace member management with add/remove/role update functionality (Author: Atik) ✅
+- [x] Invitation tracking system (sent/received invitations) (Author: Atik) ✅
+- [x] Accept/decline invitation workflow with status management (Author: Atik) ✅
+- [x] Real-time workspace updates and cache invalidation (Author: Atik) ✅
+- [x] Workspace edit functionality (name/description updates) (Author: Atik) ✅
+- [x] Activity logging for workspace actions and member changes (Author: Atik) ✅
+- [x] Advanced permission checks and security controls (Author: Atik) ✅
+- [x] Production-grade error handling and input validation (Author: Atik) ✅
+- [x] AWS SDK v3 migration for improved performance and modern tooling (Author: Atik) ✅
+- [x] Extract text content from uploaded PDFs & DOCX (Author: Atik+Salman) ✅
+      Preview & Extraction improvements:
+- [x] Gotenberg-based DOCX→PDF preview pipeline (Docker on EC2) for pixel‑perfect viewing (Author: Atik) ✅
+- [x] Preview‑first Extraction Text: view/preview for DOCX/PDF (no rich text editor yet) (Author: Atik) ✅
+- [x] Rich Text Editor Implementation with TipTap (Author: Atik) ✅
+  - Complete TipTap-based editor with comprehensive toolbar and extensions
+  - Auto-save functionality with debounced updates and real-time status indicators
+  - Advanced image upload and resizing with S3 integration
+  - Export to PDF and DOCX with embedded images and proper styling
+  - Share functionality with email notifications and permission management
+  - Draft/publish workflow with title editing and content persistence
+  - Mobile-responsive design with keyboard shortcuts and accessibility support
+
+### Week 5 – AI Summarization & Semantic Search
 
 - [ ] Integrate OpenAI/LLM API for summarization
-- [ ] Implement summary generation & store in DB
-- [ ] Implement vector search with embeddings (e.g., Pinecone / Supabase vector)
-- [ ] Search papers by semantic meaning
+- [ ] Vector search with embeddings & semantic paper search
+- [ ] Implement AI-powered search suggestions & filters
+
+### Week 6 – Annotation & Comments
+
+- [ ] Highlighting & annotations in PDF viewer
+- [ ] Comment threads & activity log for user interactions
+- [ ] Save annotations/comments (user & paper)
+- [ ] Dashboard analytics & versioning system
 
 ---
 
-Week 6 – Annotation & Comments
+## Phase 2 – Advanced Features (Weeks 7–14)
 
-- [ ] Enable highlighting & annotations in PDF viewer
-- [ ] Comment threads under papers
-- [ ] Save annotations/comments linked to user & paper
-- [ ] Basic activity log for user interactions
+Goal: Collaboration tools, advanced research utilities, improved UI.
 
----
+### Week 7-8 – Citation System
 
----
+- [ ] Parse references & citation relationships
+- [ ] Citation graph visualization & formatting (APA, MLA, IEEE)
 
-Phase 2 – Advanced Features (Weeks 7–14)
-Goal: Add collaboration tools, advanced research utilities, and improve UI.
+### Week 9-10 – Team Collaboration
 
----
+- [ ] Shared collections with role-based permissions
+- [ ] Team workspace & activity feed
 
-Week 7 – Citation Graph
+### Week 11-12 – Enhanced Features
 
-- [ ] Parse references from uploaded papers
-- [ ] Store citation relationships in DB
-- [ ] Generate citation graph visualization (D3.js or Cytoscape.js)
+- [ ] Dashboard analytics & versioning system
+- [ ] Mobile responsiveness improvements
 
----
+### Week 13-14 – AI Research Assistant
 
-Week 8 – Citation Formatting
-
-- [ ] Generate citations in APA, MLA, IEEE formats
-- [ ] “Copy Citation” button
-- [ ] Export all citations in a collection to a .bib / Word file
+- [ ] Chat with uploaded papers & multi-document Q&A
+- [ ] Final polishing & performance optimization
 
 ---
 
-Week 9 – Shared Collections (Team Collaboration)
+## Phase 3 – Premium & Integrations (Weeks 15–20)
 
-- [ ] Add CollectionMember table with roles: Owner, Editor, Viewer
-- [ ] Invite users via email
-- [ ] Role-based permissions on editing/viewing
+Goal: Monetization, admin tools, external integrations.
 
----
+### Week 15-16 – Payment System
 
-Week 10 – Team Workspace
+- [ ] Stripe & SSLCommerz integration
+- [ ] Subscription plans & premium features
 
-- [ ] Separate dashboard for team projects
-- [ ] Team-level collections
-- [ ] Activity feed showing changes by collaborators
+### Week 17-18 – Admin & Integrations
 
----
+- [ ] Admin panel & platform analytics
+- [ ] External API integrations (CrossRef, Semantic Scholar)
 
-Week 11 – Enhanced UI
+### Week 19-20 – Launch Preparation
 
-- [ ] Improve dashboard UI with analytics (e.g., number of papers, most cited authors)
-- [ ] Add dark/light theme toggle
-- [ ] Improve mobile responsiveness
+- [ ] Security audit & final QA
+- [ ] Production deployment & marketing
 
 ---
 
-Week 12 – Versioning
-
-- [ ] Track versions of uploaded papers
-- [ ] View change history of annotations & summaries
-
----
-
-Week 13 – AI Research Assistant
-
-- [ ] Chat with uploaded papers (contextual retrieval)
-- [ ] Multi-document question answering
-
----
-
-Week 14 – Polishing & Bug Fixes
-
-- [ ] Final pass on Phase 2 features
-- [ ] Fix UI glitches
-- [ ] Improve performance & query optimization
-
----
-
----
-
-Phase 3 – Premium & Integrations (Weeks 15–20)
-Goal: Monetization, admin tools, and external integrations.
-
----
-
-Week 15 – Payment System
-
-- [ ] Integrate Stripe for international payments
-- [ ] Integrate SSLCommerz for local payments
-- [ ] Setup subscription plans in DB (Plan, Subscription tables)
-- [ ] Payment success/failure webhooks
-
----
-
-Week 16 – Subscription Features
-
-- [ ] Restrict premium features (e.g., team size, AI assistant limit)
-- [ ] Upgrade/Downgrade plan flow
-- [ ] Invoice & billing history
-
----
-
-Week 17 – Admin Panel
-
-- [ ] Admin dashboard for managing users, papers, collections
-- [ ] Admin tools for banning, content removal
-- [ ] Analytics on platform usage
-
----
-
-Week 18 – External API Integrations
-
-- [ ] Integrate CrossRef API for metadata lookup
-- [ ] Integrate Semantic Scholar / arXiv API for paper search/import
-
----
-
-Week 19 – Final QA
-
-- [ ] Security audit
-- [ ] Code review & cleanup
-- [ ] Add tests for core features
-
----
-
-Week 20 – Launch
-
-- [ ] Deploy production build
-- [ ] Marketing page setup
-- [ ] Onboarding guide for first-time users
-
----
-
-✅ Total Duration: 20 weeks (~5 months)
+Total Duration: 20 weeks (~5 months)
+Current Status: Week 4.5 Complete – Advanced Workspace + Rich Text Editor with PDF/DOCX text extraction, preview, and comprehensive editing capabilities implemented ✅ (Authors: Atik+Salman)
+Last Updated: September 24, 2025

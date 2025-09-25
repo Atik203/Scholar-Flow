@@ -18,6 +18,11 @@ enum Role {
   ADMIN
 }
 
+enum CollectionPermission {
+  VIEW // Read-only access - can view collection and papers
+  EDIT // Full access - can edit, add/remove papers, delete collection
+}
+
 enum AnnotationType {
   HIGHLIGHT
   COMMENT
@@ -49,18 +54,26 @@ enum PlanTier {
   INSTITUTIONAL
 }
 
+// Processing lifecycle for uploaded papers (Week 3 feature)
+enum PaperProcessingStatus {
+  UPLOADED // File record created, extraction not started yet
+  PROCESSING // Extraction & chunking in progress
+  PROCESSED // All chunks stored successfully
+  FAILED // Processing failed; see processingError
+}
+
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  name         String?
-  firstName    String?
-  lastName     String?
-  institution  String?
-  fieldOfStudy String?
-  image        String?
-  password     String? // Optional password for demo/test users
-  role         Role    @default(RESEARCHER)
-  emailVerified DateTime? // When email was verified
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  name                   String?
+  firstName              String?
+  lastName               String?
+  institution            String?
+  fieldOfStudy           String?
+  image                  String?
+  password               String? // Optional password for demo/test users
+  role                   Role      @default(RESEARCHER)
+  emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
 
   // Auth.js relations
@@ -68,17 +81,21 @@ model User {
   sessions Session[]
 
   // App relations
-  memberships     WorkspaceMember[]
-  workspacesOwned Workspace[]       @relation("WorkspaceOwner")
-  uploadedPapers  Paper[]           @relation("PaperUploader")
-  annotations     Annotation[]
-  collections     Collection[]      @relation("CollectionOwner")
-  subscriptions   Subscription[]
-  payments        Payment[]
-  searchHistory   SearchHistory[]
-  notifications   Notification[]
-  usageEvents     UsageEvent[]
-  activities      ActivityLog[]
+  memberships              WorkspaceMember[]
+  workspacesOwned          Workspace[]           @relation("WorkspaceOwner")
+  uploadedPapers           Paper[]               @relation("PaperUploader")
+  annotations              Annotation[]
+  collections              Collection[]          @relation("CollectionOwner")
+  subscriptions            Subscription[]
+  payments                 Payment[]
+  searchHistory            SearchHistory[]
+  notifications            Notification[]
+  usageEvents              UsageEvent[]
+  activities               ActivityLog[]
+  // Sharing relations
+  collectionInvitesSent    CollectionMember[]    @relation("CollectionMemberInvitedBy")
+  workspaceInvitesReceived WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
+  workspaceInvitesSent     WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
 
   // Token relations
   tokens UserToken[]
@@ -92,11 +109,13 @@ model User {
 }
 
 model Workspace {
-  id          String            @id @default(uuid())
+  id          String                @id @default(uuid())
   name        String
+  description String?
   ownerId     String
-  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  owner       User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id])
   members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
   collections Collection[]
   papers      Paper[]
   activities  ActivityLog[]
@@ -126,6 +145,32 @@ model WorkspaceMember {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+  @@index([workspaceId])
+}
+
+model WorkspaceInvitation {
+  id          String           @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        Role             @default(RESEARCHER)
+  invitedAt   DateTime         @default(now())
+  // Invitation workflow fields
+  status      MembershipStatus @default(PENDING)
+  invitedById String?
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  user      User      @relation("WorkspaceInvitationUser", fields: [userId], references: [id])
+  invitedBy User?     @relation("WorkspaceInvitationInvitedBy", fields: [invitedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
 }
 
 model Paper {
@@ -135,8 +180,24 @@ model Paper {
   title       String
   abstract    String?
   metadata    Json    @db.JsonB
-  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar'
+  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar' | 'editor'
   doi         String? @unique
+
+  // Editor-specific fields
+  isDraft     Boolean @default(false) // True for draft papers created in editor
+  isPublished Boolean @default(false) // True when draft is published/finalized
+
+  // Processing lifecycle fields
+  processingStatus PaperProcessingStatus @default(UPLOADED)
+  processingError  String?
+  processedAt      DateTime?
+
+  // Document preview support - for enhanced text extraction view
+  previewFileKey    String? // S3 key for preview PDF (converted from DOCX)
+  previewMimeType   String? // MIME type of preview file (usually application/pdf)
+  originalMimeType  String? // Original uploaded MIME type (preserves DOCX, DOC, PDF)
+  contentHtml       String? // Sanitized HTML content for rich text editor
+  extractionVersion Int     @default(1) // Version for extraction algorithm
 
   uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
   workspace       Workspace         @relation(fields: [workspaceId], references: [id])
@@ -155,17 +216,23 @@ model Paper {
 
   @@index([workspaceId, createdAt])
   @@index([uploaderId])
+  // Optimized indexes for user-scoped and workspace-scoped queries
+  @@index([uploaderId, isDeleted, createdAt])
+  @@index([workspaceId, isDeleted, createdAt])
+  @@index([processingStatus, createdAt])
 }
 
 model PaperFile {
-  id              String  @id @default(uuid())
-  paperId         String  @unique
-  storageProvider String // s3 | gcs | local
-  objectKey       String
-  contentType     String?
-  sizeBytes       Int?
-  pageCount       Int?
-  checksum        String?
+  id               String    @id @default(uuid())
+  paperId          String    @unique
+  storageProvider  String // s3 | gcs | local
+  objectKey        String
+  contentType      String?
+  sizeBytes        Int?
+  pageCount        Int?
+  checksum         String?
+  originalFilename String? // Original uploaded filename
+  extractedAt      DateTime? // When text extraction completed
 
   paper Paper @relation(fields: [paperId], references: [id])
 
@@ -296,20 +363,28 @@ model CollectionPaper {
 }
 
 model CollectionMember {
-  id           String   @id @default(uuid())
+  id           String               @id @default(uuid())
   collectionId String
   userId       String
-  role         Role     @default(RESEARCHER)
-  invitedAt    DateTime @default(now())
+  role         Role                 @default(RESEARCHER)
+  permission   CollectionPermission @default(EDIT) // Collection-specific permission
+  invitedAt    DateTime             @default(now())
+  // Invitation workflow fields
+  status       MembershipStatus     @default(PENDING)
+  invitedById  String?
+  acceptedAt   DateTime?
+  declinedAt   DateTime?
 
   collection Collection @relation(fields: [collectionId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
+  invitedBy  User?      @relation("CollectionMemberInvitedBy", fields: [invitedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, userId])
+  @@index([collectionId])
 }
 
 model SearchHistory {
@@ -535,13 +610,13 @@ model VerificationToken {
 }
 
 model UserToken {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
-  token     String   @unique // Hashed token
+  token     String    @unique // Hashed token
   type      TokenType
   expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -554,4 +629,11 @@ model UserToken {
 enum TokenType {
   PASSWORD_RESET
   EMAIL_VERIFICATION
+}
+
+// Invitation/member status for collection sharing
+enum MembershipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }

@@ -23,6 +23,13 @@ export default {
     email: process.env.EMAIL,
     app_pass: process.env.APP_PASS,
   },
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined,
+    secure: process.env.SMTP_SECURE === "true",
+    user: process.env.SMTP_USER,
+    password: process.env.SMTP_PASSWORD,
+  },
   // Add other configurations as needed
   openai: {
     api_key: process.env.OPENAI_API_KEY,
@@ -36,6 +43,15 @@ export default {
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY,
     webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+  },
+  // Document conversion / preview configuration
+  docxToPdf: {
+    engine: process.env.DOCX_TO_PDF_ENGINE || "soffice",
+    gotenbergUrl: process.env.GOTENBERG_URL,
+    // Optional timeout in ms for external requests
+    requestTimeoutMs: process.env.GOTENBERG_TIMEOUT_MS
+      ? Number(process.env.GOTENBERG_TIMEOUT_MS)
+      : 10000,
   },
   ssl: {
     storeId: process.env.STORE_ID,

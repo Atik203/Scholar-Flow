@@ -1,0 +1,97 @@
+---
+description: Authentication patterns and security best practices
+globs:
+  - "apps/backend/src/app/modules/Auth/**"
+  - "apps/frontend/src/app/auth/**"
+  - "apps/frontend/src/app/api/auth/**"
+  - "apps/frontend/src/app/login/**"
+  - "apps/frontend/src/app/register/**"
+alwaysApply: false
+---
+
+# Authentication Rules
+
+## ✅ PRODUCTION-READY STATUS
+
+OAuth authentication system is COMPLETE and TESTED. Follow established patterns below.
+
+## Backend Authentication
+
+1. **OAuth Account Management**: ALWAYS use standard Prisma upsert for OAuth accounts.
+
+   ```typescript
+   // CORRECT - Standard Prisma upsert (PROVEN PATTERN)
+   const account = await prisma.account.upsert({
+     where: {
+       provider_providerAccountId: {
+         provider: accountData.provider,
+         providerAccountId: accountData.providerAccountId,
+       },
+     },
+     update: {
+       /* token updates */
+     },
+     create: {
+       /* full account data */
+     },
+   });
+   ```
+
+2. **Raw Query Warning**: Do NOT change OAuth account creation to raw queries - causes unique constraint errors (P2002).
+
+3. **Error Handling**: All auth methods must use try/catch with ApiError for consistent error responses.
+
+4. **Testing Requirements**: All authentication flows require comprehensive integration tests:
+   - New user OAuth sign-in ✅
+   - Existing user OAuth sign-in (duplicate prevention) ✅
+   - Token refresh scenarios ✅
+   - Account creation and upsert functionality ✅
+
+5. **Security Patterns**:
+   - Never trust client data - validate all inputs with Zod ✅
+   - Use JWT with proper expiry handling ✅
+   - Implement refresh token rotation ✅
+   - Secure cookie settings for production ✅
+
+## Frontend Authentication
+
+1. **Auth.js Integration**: Use standard Auth.js patterns with custom backend integration. ✅
+
+2. **State Management**: Use Redux Toolkit for authentication state management. ✅
+
+3. **UI Components**: Established auth pages with proper validation:
+   - Login page: Email/password + OAuth buttons ✅
+   - Register page: Full form with password strength + OAuth ✅
+   - Form validation with React Hook Form + Zod ✅
+   - Responsive design with proper error states ✅
+
+4. **Security & UX**:
+   - Password strength indicators ✅
+   - Form validation feedback ✅
+   - Loading states and error handling ✅
+   - Auth guards for protected routes ✅
+
+## Testing Standards
+
+1. **Integration Tests**: Required for all authentication endpoints and flows.
+2. **Mock Data**: Use consistent mock data patterns for OAuth profiles and account data.
+3. **Test Coverage**: Minimum 90% coverage for authentication-related code.
+4. **Database State**: Tests must handle database state properly (cleanup, isolation).
+
+## Documentation Requirements
+
+1. **Code Comments**: All auth-related functions must have JSDoc comments explaining their purpose.
+2. **Warning Comments**: Any deviation from standard Prisma patterns must include clear warnings.
+3. **Environment Variables**: Document all required auth-related environment variables.
+
+## Security Checklist
+
+- [ ] No secrets in code
+- [ ] Proper CORS configuration
+- [ ] Secure cookie settings
+- [ ] Input validation with Zod
+- [ ] Rate limiting on auth endpoints
+- [ ] Proper error messages (no information leakage)
+- [ ] HTTPS enforcement in production
+- [ ] JWT token expiry handling
+- [ ] Refresh token security
