@@ -22,18 +22,8 @@ const isValidDeepseekModel = (model: string): boolean => {
 
 export class DeepseekProvider extends BaseAiProvider {
   constructor(apiKey: string | undefined, requestTimeoutMs: number) {
-    super("deepseek", apiKey, requestTimeoutMs);
-
-    const isValidKey = apiKey && apiKey.startsWith("sk-") && apiKey.length > 20;
-    console.log(
-      `[Deepseek Provider] Initializing with API key: ${isValidKey ? "valid format" : "invalid/missing"}, timeout: ${requestTimeoutMs}ms`
-    );
-
-    if (!isValidKey && apiKey) {
-      console.warn(
-        `[Deepseek Provider] Invalid API key format. Expected format: sk-...`
-      );
-    }
+    const normalizedKey = apiKey?.trim();
+    super("deepseek", normalizedKey, requestTimeoutMs);
   }
 
   protected async performInsight(
@@ -52,8 +42,6 @@ export class DeepseekProvider extends BaseAiProvider {
         ? input.model || DEFAULT_MODEL
         : DEFAULT_MODEL;
 
-      console.log(`[Deepseek Provider] Making API call with model: ${model}`);
-
       // Build messages in OpenAI-compatible format (Deepseek uses OpenAI-compatible API)
       const messages = [
         {
@@ -61,23 +49,37 @@ export class DeepseekProvider extends BaseAiProvider {
           content:
             'You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways. ALWAYS respond in valid JSON format with the following structure: {"answer": "your detailed response here", "suggestions": ["suggestion1", "suggestion2"], "tokensUsed": number}',
         },
-        {
-          role: "system",
-          content: `Paper context:\\n${input.context}`,
-        },
-        ...(input.history || []).map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-        {
-          role: "user",
-          content: input.prompt,
-        },
       ];
 
-      const response = await fetch(
-        "https://api.deepseek.com/v1/chat/completions",
-        {
+      const trimmedContext = (input.context || "").trim();
+
+      if (trimmedContext) {
+        messages.push({
+          role: "system",
+          content: `Paper context:\n${trimmedContext}`,
+        });
+      }
+
+      if (Array.isArray(input.history)) {
+        for (const message of input.history) {
+          messages.push({ role: message.role, content: message.content });
+        }
+      }
+
+      messages.push({
+        role: "user",
+        content: input.prompt,
+      });
+
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.requestTimeoutMs
+      );
+
+      let response: Awaited<ReturnType<typeof fetch>>;
+      try {
+        response = await fetch("https://api.deepseek.com/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -90,9 +92,11 @@ export class DeepseekProvider extends BaseAiProvider {
             max_tokens: 900,
             stream: false,
           }),
-          signal: AbortSignal.timeout(this.requestTimeoutMs),
-        }
-      );
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -102,9 +106,7 @@ export class DeepseekProvider extends BaseAiProvider {
       }
 
       const data = (await response.json()) as any;
-      const messageContent = data.choices?.[0]?.message?.content || "";
-
-      console.log(`[Deepseek Provider] Raw response:`, messageContent);
+      const messageContent = data.choices?.[0]?.message?.content?.trim() || "";
 
       // Try to parse JSON response
       let parsed: any;
@@ -132,8 +134,6 @@ export class DeepseekProvider extends BaseAiProvider {
         tokensUsed: parsed.tokensUsed || data.usage?.total_tokens,
       };
     } catch (error) {
-      console.log(`[Deepseek Provider] Error:`, error);
-
       if (error instanceof Error) {
         throw new AiError(502, error.message, "AI_PROVIDER_ERROR", error.stack);
       }
