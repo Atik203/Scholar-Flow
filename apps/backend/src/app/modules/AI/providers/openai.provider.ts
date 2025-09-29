@@ -3,6 +3,8 @@ import { z } from "zod";
 import { AiError } from "../ai.errors";
 import { BaseAiProvider } from "../ai.provider";
 import {
+  AiInsightRequest,
+  AiInsightResult,
   AiMetadata,
   AiMetadataExtractionInput,
   AiMetadataExtractionResult,
@@ -11,6 +13,18 @@ import {
 } from "../ai.types";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
+
+// Free and affordable OpenAI models
+const FREE_MODELS = [
+  "gpt-4o-mini", // Most affordable GPT-4 variant
+  "gpt-3.5-turbo", // Affordable and fast
+  "gpt-3.5-turbo-16k", // Longer context
+];
+
+const isValidModel = (model: string): boolean => {
+  const validModels = [...FREE_MODELS, "gpt-4o", "gpt-4-turbo", "gpt-4"];
+  return validModels.includes(model);
+};
 
 const normalizeStringList = (
   value: unknown,
@@ -56,14 +70,35 @@ const summarySchema = z.object({
 
 type RawSummary = z.infer<typeof summarySchema>;
 
+const insightSchema = z.object({
+  answer: z.string().min(20).max(5000),
+  suggestions: z.union([z.array(z.string()), z.string()]).optional(),
+  tokensUsed: z.union([z.number(), z.string()]).optional(),
+});
+
+type RawInsight = z.infer<typeof insightSchema>;
+
 export class OpenAiProvider extends BaseAiProvider {
   private readonly client: OpenAI | null;
 
   constructor(apiKey: string | undefined, requestTimeoutMs: number) {
     super("openai", apiKey, requestTimeoutMs);
-    this.client = apiKey
+
+    // Validate API key format
+    const isValidKey = apiKey && apiKey.startsWith("sk-") && apiKey.length > 20;
+    console.log(
+      `[OpenAI Provider] Initializing with API key: ${isValidKey ? "valid format" : "invalid/missing"}, timeout: ${requestTimeoutMs}ms`
+    );
+
+    this.client = isValidKey
       ? new OpenAI({ apiKey, timeout: requestTimeoutMs })
       : null;
+
+    if (!isValidKey && apiKey) {
+      console.warn(
+        `[OpenAI Provider] Invalid API key format. Expected format: sk-...`
+      );
+    }
   }
 
   protected async performExtraction(
@@ -194,6 +229,118 @@ export class OpenAiProvider extends BaseAiProvider {
       throw new AiError(
         502,
         "OpenAI summary generation failed",
+        "AI_PROVIDER_ERROR"
+      );
+    }
+  }
+
+  protected async performInsight(
+    input: AiInsightRequest
+  ): Promise<AiInsightResult> {
+    console.log(
+      `[OpenAI Provider] performInsight called with prompt length: ${input.prompt.length}, context length: ${input.context.length}`
+    );
+
+    if (!this.client) {
+      console.log(`[OpenAI Provider] Client not configured`);
+      throw new AiError(
+        503,
+        "OpenAI provider not configured",
+        "AI_PROVIDER_DISABLED"
+      );
+    }
+
+    try {
+      const messages = [
+        {
+          role: "system" as const,
+          content:
+            'You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways. ALWAYS respond in valid JSON format with the following structure: {"answer": "your detailed response here", "suggestions": ["suggestion1", "suggestion2"], "tokensUsed": number}',
+        },
+        {
+          role: "system" as const,
+          content: `Paper context:\n${input.context}`,
+        },
+        ...((input.history ?? []).map((message) => ({
+          role: message.role,
+          content: message.content,
+        })) as Array<{
+          role: "user" | "assistant" | "system";
+          content: string;
+        }>),
+        {
+          role: "user" as const,
+          content: input.prompt,
+        },
+      ];
+
+      // Validate and use model
+      const requestedModel = input.model || DEFAULT_MODEL;
+      const modelToUse = isValidModel(requestedModel)
+        ? requestedModel
+        : DEFAULT_MODEL;
+
+      if (requestedModel !== modelToUse) {
+        console.warn(
+          `[OpenAI Provider] Invalid model '${requestedModel}', using '${modelToUse}' instead`
+        );
+      }
+
+      console.log(
+        `[OpenAI Provider] Making API call with model: ${modelToUse}`
+      );
+
+      const completion = await this.client.chat.completions.create({
+        model: modelToUse,
+        temperature: 0.4,
+        max_tokens: 900,
+        response_format: { type: "json_object" },
+        messages,
+      });
+
+      console.log(`[OpenAI Provider] API call successful, response received`);
+      const messageContent = completion.choices[0]?.message?.content || "";
+      console.log(`[OpenAI Provider] Raw response content:`, messageContent);
+
+      const parsed = this.safeParseJson(messageContent);
+      console.log(`[OpenAI Provider] Parsed JSON:`, parsed);
+
+      const validated = insightSchema.parse(parsed) as RawInsight;
+      const suggestions = normalizeStringList(validated.suggestions, 4);
+      const rawTokens =
+        typeof validated.tokensUsed === "string"
+          ? Number(validated.tokensUsed)
+          : validated.tokensUsed;
+      const tokensUsed = Number.isFinite(rawTokens ?? NaN)
+        ? (rawTokens as number)
+        : completion.usage?.total_tokens;
+
+      return {
+        provider: this.name,
+        message: {
+          role: "assistant",
+          content: validated.answer.trim(),
+        },
+        suggestions: suggestions,
+        rawResponse: completion,
+        tokensUsed: tokensUsed ?? undefined,
+      };
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new AiError(
+          error.status ?? 500,
+          error.message,
+          error.code ?? undefined
+        );
+      }
+
+      if (error instanceof Error) {
+        throw new AiError(502, error.message, "AI_PROVIDER_ERROR", error.stack);
+      }
+
+      throw new AiError(
+        502,
+        "OpenAI insight generation failed",
         "AI_PROVIDER_ERROR"
       );
     }

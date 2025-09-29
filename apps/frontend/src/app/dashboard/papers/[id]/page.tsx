@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AiInsightsPanel } from "@/components/papers/AiInsightsPanel";
 import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
@@ -533,6 +534,9 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
             {/* Document Extraction Viewer */}
             <ExtractionViewer paperId={paper.id} />
+
+            {/* AI Insights Panel */}
+            <AiInsightsPanel paperId={paper.id} paperTitle={paper.title} />
           </div>
 
           {/* Enhanced Sidebar */}

@@ -1,5 +1,7 @@
 import { AiError } from "./ai.errors";
 import {
+  AiInsightRequest,
+  AiInsightResult,
   AiMetadataExtractionInput,
   AiMetadataExtractionResult,
   AiProvider,
@@ -90,6 +92,37 @@ export abstract class BaseAiProvider implements AiProvider {
     }
   }
 
+  async generateInsights(
+    input: AiInsightRequest
+  ): Promise<AiInsightResult | null> {
+    if (!this.isEnabled() || !this.performInsight) {
+      return null;
+    }
+
+    try {
+      const sanitizedContext = this.sanitizeText(input.context);
+      const effectiveInput: AiInsightRequest = {
+        ...input,
+        context: sanitizedContext,
+        history: input.history ?? [],
+        timeoutMs: input.timeoutMs || this.requestTimeoutMs,
+      };
+
+      return await this.performInsight(effectiveInput);
+    } catch (error) {
+      if (error instanceof AiError) {
+        throw error;
+      }
+
+      throw new AiError(
+        502,
+        `${this.name} insight generation failed`,
+        "AI_PROVIDER_ERROR",
+        error instanceof Error ? error.stack : undefined
+      );
+    }
+  }
+
   protected sanitizeText(text: string): string {
     if (!text) {
       return "";
@@ -107,4 +140,6 @@ export abstract class BaseAiProvider implements AiProvider {
   protected abstract performSummary(
     input: AiSummaryRequest
   ): Promise<AiSummaryResult>;
+
+  protected performInsight?(input: AiInsightRequest): Promise<AiInsightResult>;
 }

@@ -4,6 +4,9 @@ import prisma from "../../shared/prisma";
 import { aiSummaryCache } from "./ai.cache";
 import { BaseAiProvider } from "./ai.provider";
 import type {
+  AiInsightMessagePayload,
+  AiInsightRequest,
+  AiInsightResult,
   AiMetadata,
   AiMetadataExtractionInput,
   AiMetadataExtractionResult,
@@ -211,6 +214,53 @@ const runSummaryHeuristics = (input: AiSummaryRequest): AiSummaryResult => {
     highlights: highlights.length ? highlights : undefined,
     followUpQuestions,
     rawResponse: { heuristic: true },
+  };
+};
+
+const sanitizeInsightHistory = (
+  history: AiInsightMessagePayload[] | undefined
+): AiInsightMessagePayload[] => {
+  if (!history || !history.length) {
+    return [];
+  }
+
+  return history
+    .slice(-6)
+    .map((message) => ({
+      role: message.role,
+      content: message.content.slice(0, 1600),
+    }))
+    .filter((message) => message.content.trim().length > 0);
+};
+
+const runInsightHeuristics = (input: AiInsightRequest): AiInsightResult => {
+  const question = input.prompt.trim();
+  const snippet = limitTextToWords(input.context, 160);
+
+  const analysisLines = [
+    "I'm working with an offline heuristic view of your paper.",
+    snippet ? `Key excerpt considered: ${snippet}` : undefined,
+    question ? `What you're asking: ${question}` : undefined,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const suggestions = [
+    "Highlight the specific evidence or data points supporting the claimed findings.",
+    "Compare these insights with related work to validate novelty or limitations.",
+    "Outline next experiments or questions that would strengthen the argument.",
+  ];
+
+  return {
+    provider: "heuristic",
+    message: {
+      role: "assistant",
+      content:
+        analysisLines.length > 0
+          ? `${analysisLines}\n\nConsider diving deeper into methodology, assumptions, and potential applications for more targeted insights.`
+          : "I can help more once additional context is available from the document processing pipeline.",
+    },
+    suggestions,
   };
 };
 
@@ -458,6 +508,52 @@ export const aiService = {
         data: heuristicResult.rawResponse,
         errors,
       },
+    };
+  },
+
+  async generateInsight(request: AiInsightRequest): Promise<AiInsightResult> {
+    const normalizedRequest: AiInsightRequest = {
+      ...request,
+      prompt: request.prompt.trim(),
+      context: request.context || "",
+      history: sanitizeInsightHistory(request.history),
+    };
+
+    if (!normalizedRequest.context.trim()) {
+      return runInsightHeuristics(normalizedRequest);
+    }
+
+    if (!config.ai.featuresEnabled) {
+      return runInsightHeuristics(normalizedRequest);
+    }
+
+    const providerInstances = getProviderInstances();
+    const errors: string[] = [];
+
+    for (const provider of providerInstances) {
+      if (
+        !provider.isEnabled() ||
+        typeof provider.generateInsights !== "function"
+      ) {
+        continue;
+      }
+
+      try {
+        const result = await provider.generateInsights(normalizedRequest);
+        if (result) {
+          return result;
+        }
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : String(error ?? "Unknown");
+        errors.push(errorMsg);
+      }
+    }
+
+    const fallback = runInsightHeuristics(normalizedRequest);
+    return {
+      ...fallback,
+      rawResponse: { errors },
     };
   },
 

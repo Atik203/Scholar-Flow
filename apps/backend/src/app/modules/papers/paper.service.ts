@@ -47,6 +47,25 @@ type StoredSummaryPayload = {
   provider?: string;
 };
 
+type InsightThreadRecord = {
+  id: string;
+  paperId: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  title: string | null;
+};
+
+type InsightMessageRecord = {
+  id: string;
+  threadId: string;
+  paperId: string;
+  role: string;
+  content: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+};
+
 const htmlToPlainText = (html: string | null | undefined) => {
   if (!html) {
     return "";
@@ -107,6 +126,16 @@ const deserializeSummaryPayload = (value: string): StoredSummaryPayload => {
   }
 
   return { summary: value };
+};
+
+const normalizeInsightMetadata = (
+  value: unknown
+): Record<string, unknown> | null => {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
 };
 
 export const paperService = {
@@ -567,6 +596,331 @@ export const paperService = {
         "updatedAt" = NOW(),
         "isDeleted" = false
     `;
+  },
+
+  async getInsightThread(
+    paperId: string,
+    userId: string
+  ): Promise<InsightThreadRecord | null> {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string | null;
+      }>
+    >`
+      SELECT id, "paperId", "userId", "createdAt", "updatedAt", title
+      FROM "AIInsightThread"
+      WHERE "paperId" = ${paperId}
+        AND "userId" = ${userId}
+        AND "isDeleted" = false
+      ORDER BY "updatedAt" DESC
+      LIMIT 1
+    `;
+
+    if (!rows.length) {
+      return null;
+    }
+
+    return rows[0];
+  },
+
+  async getOrCreateInsightThread(
+    paperId: string,
+    userId: string,
+    threadId?: string
+  ): Promise<InsightThreadRecord> {
+    // If threadId is provided, try to get that specific thread
+    if (threadId) {
+      const rows = await prisma.$queryRaw<
+        Array<{
+          id: string;
+          paperId: string;
+          userId: string;
+          createdAt: Date;
+          updatedAt: Date;
+          title: string | null;
+        }>
+      >`
+        SELECT id, "paperId", "userId", "createdAt", "updatedAt", title
+        FROM "AIInsightThread"
+        WHERE id = ${threadId}
+          AND "paperId" = ${paperId}
+          AND "userId" = ${userId}
+          AND "isDeleted" = false
+      `;
+
+      if (rows.length) {
+        return rows[0];
+      }
+    }
+
+    // Otherwise, get or create a default thread for this user/paper
+    const existing = await this.getInsightThread(paperId, userId);
+    if (existing) {
+      return existing;
+    }
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string | null;
+      }>
+    >`
+      INSERT INTO "AIInsightThread" (id, "paperId", "userId", title, metadata, "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), ${paperId}, ${userId}, NULL, NULL, NOW(), NOW(), false)
+      RETURNING id, "paperId", "userId", "createdAt", "updatedAt", title
+    `;
+
+    if (!rows.length) {
+      throw new Error("Failed to create AI insight thread");
+    }
+
+    return rows[0];
+  },
+
+  async recordInsightMessage(
+    threadId: string,
+    messageData: {
+      role: "user" | "assistant" | "system";
+      content: string;
+      metadata?: Record<string, unknown> | null;
+    }
+  ): Promise<InsightMessageRecord> {
+    // Get paperId from thread
+    const threadRows = await prisma.$queryRaw<Array<{ paperId: string }>>`
+      SELECT "paperId" FROM "AIInsightThread" WHERE id = ${threadId} AND "isDeleted" = false
+    `;
+
+    if (!threadRows.length) {
+      throw new Error("Thread not found");
+    }
+
+    const paperId = threadRows[0].paperId;
+    const metadataJson = messageData.metadata
+      ? JSON.stringify(messageData.metadata)
+      : null;
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+      }>
+    >`
+      INSERT INTO "AIInsightMessage" (id, "threadId", "paperId", role, content, metadata, "createdById", "createdAt", "updatedAt", "isDeleted")
+      VALUES (
+        gen_random_uuid(),
+        ${threadId},
+        ${paperId},
+        ${messageData.role},
+        ${messageData.content},
+        ${metadataJson}::jsonb,
+        NULL,
+        NOW(),
+        NOW(),
+        false
+      )
+      RETURNING id, "threadId", "paperId", role, content, metadata, "createdAt"
+    `;
+
+    if (!rows.length) {
+      throw new Error("Failed to persist AI insight message");
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "AIInsightThread"
+      SET "updatedAt" = NOW()
+      WHERE id = ${threadId}
+    `;
+
+    const row = rows[0];
+    return {
+      id: row.id,
+      threadId: row.threadId,
+      paperId: row.paperId,
+      role: row.role,
+      content: row.content,
+      metadata: normalizeInsightMetadata(row.metadata),
+      createdAt: row.createdAt,
+    };
+  },
+
+  async listInsightMessages(
+    threadId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<InsightMessageRecord[]> {
+    const offset = (page - 1) * limit;
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+      }>
+    >`
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt"
+      FROM "AIInsightMessage"
+      WHERE "threadId" = ${threadId}
+        AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `;
+
+    return rows.reverse().map((row) => ({
+      id: row.id,
+      threadId: row.threadId,
+      paperId: row.paperId,
+      role: row.role,
+      content: row.content,
+      metadata: normalizeInsightMetadata(row.metadata),
+      createdAt: row.createdAt,
+    }));
+  },
+
+  async getRecentInsightMessages(
+    threadId: string,
+    limit = 6
+  ): Promise<InsightMessageRecord[]> {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+      }>
+    >`
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt"
+      FROM "AIInsightMessage"
+      WHERE "threadId" = ${threadId}
+        AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+    `;
+
+    return rows
+      .map((row) => ({
+        id: row.id,
+        threadId: row.threadId,
+        paperId: row.paperId,
+        role: row.role,
+        content: row.content,
+        metadata: normalizeInsightMetadata(row.metadata),
+        createdAt: row.createdAt,
+      }))
+      .reverse();
+  },
+
+  async listInsightConversation(
+    paperId: string,
+    userId: string
+  ): Promise<{
+    thread: InsightThreadRecord;
+    messages: InsightMessageRecord[];
+  } | null> {
+    const thread = await this.getInsightThread(paperId, userId);
+    if (!thread) {
+      return null;
+    }
+
+    const messages = await this.listInsightMessages(thread.id);
+    return { thread, messages };
+  },
+
+  async getUserInsightThreads(
+    paperId: string,
+    userId: string
+  ): Promise<
+    Array<{
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      _count?: { messages: number };
+      messages?: Array<{
+        role: string;
+        content: string;
+        createdAt: Date;
+      }>;
+    }>
+  > {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        messageCount: bigint;
+        lastMessageRole: string | null;
+        lastMessageContent: string | null;
+        lastMessageCreatedAt: Date | null;
+      }>
+    >`
+      SELECT 
+        t.id,
+        t."createdAt",
+        t."updatedAt",
+        COUNT(m.id) as "messageCount",
+        (
+          SELECT role FROM "AIInsightMessage" m2 
+          WHERE m2."threadId" = t.id AND m2."isDeleted" = false 
+          ORDER BY m2."createdAt" DESC 
+          LIMIT 1
+        ) as "lastMessageRole",
+        (
+          SELECT content FROM "AIInsightMessage" m3 
+          WHERE m3."threadId" = t.id AND m3."isDeleted" = false 
+          ORDER BY m3."createdAt" DESC 
+          LIMIT 1
+        ) as "lastMessageContent",
+        (
+          SELECT "createdAt" FROM "AIInsightMessage" m4 
+          WHERE m4."threadId" = t.id AND m4."isDeleted" = false 
+          ORDER BY m4."createdAt" DESC 
+          LIMIT 1
+        ) as "lastMessageCreatedAt"
+      FROM "AIInsightThread" t
+      LEFT JOIN "AIInsightMessage" m ON t.id = m."threadId" AND m."isDeleted" = false
+      WHERE t."paperId" = ${paperId}
+        AND t."userId" = ${userId}
+        AND t."isDeleted" = false
+      GROUP BY t.id, t."createdAt", t."updatedAt"
+      ORDER BY t."updatedAt" DESC
+    `;
+
+    return rows.map((row) => ({
+      id: row.id,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      _count: { messages: Number(row.messageCount) },
+      messages: row.lastMessageContent
+        ? [
+            {
+              role: row.lastMessageRole!,
+              content: row.lastMessageContent,
+              createdAt: row.lastMessageCreatedAt!,
+            },
+          ]
+        : [],
+    }));
   },
 };
 
