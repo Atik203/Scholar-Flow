@@ -89,11 +89,13 @@ Goal: Get a working core platform with minimal but functional features.
   - Draft/publish workflow with title editing and content persistence
   - Mobile-responsive design with keyboard shortcuts and accessibility support
 
-### Week 5 – AI Summarization & Semantic Search
+### Week 5 – AI Summarization (Author: Atik) ✅
 
-- [ ] Integrate OpenAI/LLM API for summarization
-- [ ] Vector search with embeddings & semantic paper search
-- [ ] Implement AI-powered search suggestions & filters
+- [x] Integrate OpenAI/LLM API for summarization
+- [x] Multi-provider AI service (Gemini 2.5-flash-lite primary, OpenAI secondary)
+- [x] AI paper summarization with performance optimization
+- [x] Intelligent paper insights with contextual chat
+- [x] Paper context integration throughout chat session
 
 ### Week 6 – Annotation & Comments
 
