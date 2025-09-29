@@ -50,3 +50,16 @@ export const generateSummarySchema = z.object({
 });
 
 export type GenerateSummaryInput = z.infer<typeof generateSummarySchema>;
+
+export const generateInsightSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(6, "Please provide a question or prompt with at least six characters")
+    .max(1200, "Insight prompts should be shorter than 1200 characters"),
+  threadId: z.string().uuid().optional(),
+  refreshContext: z.boolean().optional(),
+  model: z.enum(["gpt-4o-mini", "gpt-3.5-turbo", "gpt-4o"]).optional(),
+});
+
+export type GenerateInsightInput = z.infer<typeof generateInsightSchema>;

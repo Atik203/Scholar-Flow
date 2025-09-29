@@ -173,7 +173,6 @@ const navigationItems = [
     title: "AI Insights",
     url: "/dashboard/ai-insights",
     icon: Brain,
-    badge: "New",
     minRole: USER_ROLES.RESEARCHER,
   },
 ];
@@ -340,9 +339,9 @@ export function AppSidebar() {
                   <Link href={item.url}>
                     <item.icon className="mr-2 h-4 w-4" />
                     <span>{item.title}</span>
-                    {item.badge && (
+                    {(item as any).badge && (
                       <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                        {item.badge}
+                        {(item as any).badge}
                       </span>
                     )}
                   </Link>

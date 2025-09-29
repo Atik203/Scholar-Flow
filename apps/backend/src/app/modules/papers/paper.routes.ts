@@ -10,6 +10,7 @@ import { validateRequestBody } from "../../middleware/validateRequest";
 import { editorPaperController, paperController } from "./paper.controller";
 import {
   createEditorPaperSchema,
+  generatePaperInsightSchema,
   generatePaperSummarySchema,
   publishDraftSchema,
   shareViaEmailSchema,
@@ -138,6 +139,23 @@ paperRoutes.post(
   authMiddleware as any,
   validateRequestBody(shareViaEmailSchema),
   paperController.shareViaEmail as any
+);
+
+// Generate AI insights for a paper (chat-like conversation)
+paperRoutes.post(
+  "/:id/insights",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperInsightSchema),
+  paperController.generateInsight as any
+);
+
+// Get insight conversation history for a paper
+paperRoutes.get(
+  "/:id/insights",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getInsightHistory as any
 );
 
 // Editor-specific routes
