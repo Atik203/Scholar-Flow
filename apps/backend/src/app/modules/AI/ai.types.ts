@@ -11,6 +11,43 @@ export interface AiMetadata {
   confidence?: number;
 }
 
+export type AiSummaryTone =
+  | "academic"
+  | "casual"
+  | "executive"
+  | "technical"
+  | "conversational";
+
+export type AiSummaryAudience =
+  | "researcher"
+  | "student"
+  | "executive"
+  | "general";
+
+export interface AiSummaryRequest {
+  paperId: string;
+  text: string;
+  instructions?: string;
+  focusAreas?: string[];
+  tone?: AiSummaryTone;
+  audience?: AiSummaryAudience;
+  language?: string;
+  wordLimit?: number;
+  workspaceId?: string;
+  uploaderId?: string;
+  timeoutMs?: number;
+}
+
+export interface AiSummaryResult {
+  provider: ProviderName;
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  rawResponse?: unknown;
+  tokensUsed?: number;
+  cached?: boolean;
+}
+
 export interface AiMetadataExtractionInput {
   text: string;
   originalTitle?: string | null;
@@ -38,4 +75,5 @@ export interface AiProvider {
   extractMetadata(
     input: AiMetadataExtractionInput
   ): Promise<AiMetadataExtractionResult | null>;
+  generateSummary(input: AiSummaryRequest): Promise<AiSummaryResult | null>;
 }

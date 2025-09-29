@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
@@ -8,6 +9,8 @@ import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
+import { aiSummaryCache } from "../AI/ai.cache";
+import { aiService } from "../AI/ai.service";
 import { StorageService } from "./StorageService";
 import { createPaperError } from "./paper.errors";
 import {
@@ -16,6 +19,7 @@ import {
   exportService,
   paperService,
 } from "./paper.service";
+import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
   createEditorPaperSchema,
   deletePaperParamsSchema,
@@ -265,6 +269,154 @@ export const paperController = {
     console.log(`[PaperController] Preview URL response:`, responseData);
 
     sendSuccessResponse(res, responseData, "Signed preview URL generated");
+  }),
+
+  generateSummary: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID format");
+    }
+
+    const paperId = params.data.id;
+    const options = req.body as GeneratePaperSummaryInput;
+
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      paperRecord
+    );
+    const focusAreas = options.focusAreas
+      ?.map((area: string) => area.trim())
+      .filter((area) => area.length > 0);
+
+    const summaryInput = {
+      paperId,
+      text: source.text,
+      instructions: options.instructions,
+      focusAreas,
+      tone: options.tone,
+      audience: options.audience,
+      language: options.language,
+      wordLimit: options.wordLimit,
+      workspaceId: paperRecord.workspaceId,
+      uploaderId: paperRecord.uploaderId,
+    };
+
+    const textHash = createHash("sha1")
+      .update(summaryInput.text || "")
+      .digest("hex");
+    const cacheParams = {
+      tone: summaryInput.tone,
+      audience: summaryInput.audience,
+      language: summaryInput.language,
+      wordLimit: summaryInput.wordLimit,
+      focus: summaryInput.focusAreas,
+      textHash,
+    };
+    const promptKey = summaryInput.instructions || "default";
+    const cacheKey = aiSummaryCache.buildKey(paperId, promptKey, cacheParams);
+    const promptHash = cacheKey.split(":").pop() ?? cacheKey;
+
+    if (!options.refresh) {
+      const stored = await paperService.findStoredSummary(paperId, promptHash);
+      if (stored) {
+        return sendSuccessResponse(
+          res,
+          {
+            summary: stored.summary,
+            highlights: stored.highlights || [],
+            followUpQuestions: stored.followUpQuestions || [],
+            provider: stored.provider || "heuristic",
+            model: stored.model,
+            tokensUsed: stored.tokensUsed ?? null,
+            cached: true,
+            promptHash,
+            source: source.source,
+            chunkCount: source.chunkCount,
+            generatedAt: stored.updatedAt.toISOString(),
+            refreshed: false,
+          },
+          "Summary retrieved from history"
+        );
+      }
+    } else {
+      await aiSummaryCache.invalidate(paperId);
+    }
+
+    const result = await aiService.generateSummary(summaryInput);
+
+    const providerPayload =
+      result.rawResponse &&
+      typeof result.rawResponse === "object" &&
+      result.rawResponse !== null &&
+      "data" in (result.rawResponse as Record<string, unknown>)
+        ? (result.rawResponse as { data?: Record<string, unknown> }).data
+        : result.rawResponse;
+
+    let modelName: string = result.provider;
+    if (
+      providerPayload &&
+      typeof providerPayload === "object" &&
+      providerPayload !== null
+    ) {
+      const rawModel = (providerPayload as Record<string, unknown>).model;
+      if (typeof rawModel === "string" && rawModel.trim()) {
+        modelName = rawModel;
+      }
+    }
+
+    await paperService.upsertSummaryRecord({
+      paperId,
+      model: modelName,
+      promptHash,
+      payload: {
+        summary: result.summary,
+        highlights: result.highlights,
+        followUpQuestions: result.followUpQuestions,
+        tokensUsed: result.tokensUsed ?? null,
+        provider: result.provider,
+      },
+    });
+
+    sendSuccessResponse(
+      res,
+      {
+        summary: result.summary,
+        highlights: result.highlights || [],
+        followUpQuestions: result.followUpQuestions || [],
+        provider: result.provider,
+        model: modelName,
+        tokensUsed: result.tokensUsed ?? null,
+        cached: Boolean(result.cached),
+        promptHash,
+        source: source.source,
+        chunkCount: source.chunkCount,
+        generatedAt: new Date().toISOString(),
+        refreshed: Boolean(options.refresh),
+      },
+      result.cached
+        ? "Summary retrieved from cache"
+        : "Summary generated successfully"
+    );
   }),
 
   updateMetadata: catchAsync(async (req: Request, res: Response) => {
@@ -560,7 +712,7 @@ export const paperController = {
 
   shareViaEmail: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
-    const { paperId, recipientEmail, permission, message } = req.body;
+    const { paperId, recipientEmail, permission } = req.body;
 
     // Validate input
     if (!paperId || !recipientEmail || !permission) {
