@@ -1,4 +1,5 @@
 import axios from "axios";
+import htmlDocx from "html-docx-js";
 import puppeteer from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
@@ -706,8 +707,6 @@ export const exportService = {
 
   // Generate DOCX from HTML content (using html-docx-js)
   async generateDOCX(paperId: string, userId: string): Promise<Buffer> {
-    const htmlDocx = require("html-docx-js");
-
     // Get paper content
     const paper = await editorPaperService.getEditorPaperContent(
       paperId,
@@ -806,12 +805,22 @@ export const exportService = {
       </html>
     `;
 
-    // Generate DOCX and convert Blob to Buffer
-    const docxBlob = htmlDocx.asBlob(htmlContent);
+    // Generate DOCX and convert to Buffer for storage/download
+    const docxBlob = htmlDocx.asBlob(htmlContent) as Buffer | Blob;
 
-    // Convert Blob to Buffer properly
-    const arrayBuffer = await docxBlob.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    if (Buffer.isBuffer(docxBlob)) {
+      return docxBlob;
+    }
+
+    if (
+      "arrayBuffer" in docxBlob &&
+      typeof docxBlob.arrayBuffer === "function"
+    ) {
+      const arrayBuffer = await docxBlob.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    }
+
+    throw new Error("DOCX export returned unsupported blob type");
   },
 };
 

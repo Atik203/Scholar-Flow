@@ -76,9 +76,15 @@ Required unless marked optional.
     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
     - How: Use your provider’s credentials (e.g., SendGrid, Mailgun)
 
-- OpenAI
-  - OPENAI_API_KEY
-  - How: [OpenAI Platform](https://platform.openai.com) > API keys (optional if AI features disabled)
+- AI Providers & Feature Flags
+  - OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEAK_API_KEY
+    - How: Generate from respective provider consoles (OpenAI, Google AI Studio, DeepSeek). Leave blank to disable that provider.
+  - AI_PROVIDER_FALLBACK_ORDER
+    - What: Comma-separated priority list (e.g., `openai,gemini,deepseek`). The orchestrator uses the first configured provider.
+  - AI_FEATURES_ENABLED
+    - What: Master switch for backend AI features. Set to `false` to bypass all AI enrichments.
+  - AI_REQUEST_TIMEOUT_MS
+    - What: Provider request timeout. Defaults to `15000` if unset.
 
 - AWS S3 (for file uploads)
   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME, AWS_REGION
@@ -105,6 +111,7 @@ Required unless marked optional.
 - NEXT_PUBLIC_FEATURE_ANNOTATIONS: `true|false`
 - NEXT_PUBLIC_FEATURE_CITATION_GRAPH: `false` (Phase 2+)
 - NEXT_PUBLIC_ENABLE_AI_FEATURES: `true|false`
+- NEXT_PUBLIC_AI_ASSISTANT_ENABLED: `true|false` (toggles UI affordances for AI assistant flows)
 - NEXT_PUBLIC_ENABLE_PAYMENTS: `true|false`
 - NEXT_PUBLIC_USE_PGVECTOR: `true|false` (mirrors backend USE_PGVECTOR for UI gating)
   - REDIS_URL
