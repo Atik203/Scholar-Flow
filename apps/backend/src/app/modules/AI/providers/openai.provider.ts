@@ -6,9 +6,33 @@ import {
   AiMetadata,
   AiMetadataExtractionInput,
   AiMetadataExtractionResult,
+  AiSummaryRequest,
+  AiSummaryResult,
 } from "../ai.types";
 
 const DEFAULT_MODEL = "gpt-4o-mini";
+
+const normalizeStringList = (
+  value: unknown,
+  maxItems = 8
+): string[] | undefined => {
+  if (Array.isArray(value)) {
+    const normalized = value
+      .map((entry) => entry?.toString().trim())
+      .filter((entry): entry is string => Boolean(entry));
+    return normalized.length ? normalized.slice(0, maxItems) : undefined;
+  }
+
+  if (typeof value === "string") {
+    const split = value
+      .split(/\n|\.|;|\r|,/) // break on punctuation and newlines
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0 && entry.length <= 240);
+    return split.length ? split.slice(0, maxItems) : undefined;
+  }
+
+  return undefined;
+};
 
 const metadataSchema = z.object({
   title: z.string().min(1).max(512).optional(),
@@ -22,6 +46,15 @@ const metadataSchema = z.object({
 });
 
 type RawMetadata = z.infer<typeof metadataSchema>;
+
+const summarySchema = z.object({
+  summary: z.string().min(40).max(2000),
+  highlights: z.union([z.array(z.string()), z.string()]).optional(),
+  followUpQuestions: z.union([z.array(z.string()), z.string()]).optional(),
+  tokensUsed: z.union([z.number(), z.string()]).optional(),
+});
+
+type RawSummary = z.infer<typeof summarySchema>;
 
 export class OpenAiProvider extends BaseAiProvider {
   private readonly client: OpenAI | null;
@@ -94,6 +127,78 @@ export class OpenAiProvider extends BaseAiProvider {
     }
   }
 
+  protected async performSummary(
+    input: AiSummaryRequest
+  ): Promise<AiSummaryResult> {
+    if (!this.client) {
+      throw new AiError(
+        503,
+        "OpenAI provider not configured",
+        "AI_PROVIDER_DISABLED"
+      );
+    }
+
+    try {
+      const completion = await this.client.chat.completions.create({
+        model: DEFAULT_MODEL,
+        temperature: 0.3,
+        max_tokens: Math.min(900, Math.max((input.wordLimit ?? 220) * 3, 600)),
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a senior research assistant. Produce structured JSON with a scholarly yet approachable tone.",
+          },
+          {
+            role: "user",
+            content: this.buildSummaryPrompt(input),
+          },
+        ],
+      });
+
+      const messageContent = completion.choices[0]?.message?.content || "";
+      const parsed = this.safeParseJson(messageContent);
+      const validated = summarySchema.parse(parsed) as RawSummary;
+      const highlights = normalizeStringList(validated.highlights);
+      const followUps = normalizeStringList(validated.followUpQuestions, 5);
+      const rawTokens =
+        typeof validated.tokensUsed === "string"
+          ? Number(validated.tokensUsed)
+          : validated.tokensUsed;
+      const tokensUsed = Number.isFinite(rawTokens ?? NaN)
+        ? (rawTokens as number)
+        : completion.usage?.total_tokens;
+
+      return {
+        provider: this.name,
+        summary: validated.summary.trim(),
+        highlights,
+        followUpQuestions: followUps,
+        rawResponse: completion,
+        tokensUsed: tokensUsed ?? undefined,
+      };
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new AiError(
+          error.status ?? 500,
+          error.message,
+          error.code ?? undefined
+        );
+      }
+
+      if (error instanceof Error) {
+        throw new AiError(502, error.message, "AI_PROVIDER_ERROR", error.stack);
+      }
+
+      throw new AiError(
+        502,
+        "OpenAI summary generation failed",
+        "AI_PROVIDER_ERROR"
+      );
+    }
+  }
+
   private buildPrompt(input: AiMetadataExtractionInput) {
     return [
       "Extract structured metadata for an academic paper.",
@@ -111,6 +216,35 @@ export class OpenAiProvider extends BaseAiProvider {
     ]
       .filter(Boolean)
       .join("\n");
+  }
+
+  private buildSummaryPrompt(input: AiSummaryRequest) {
+    const wordLimit = input.wordLimit ?? 220;
+    const audience = input.audience ?? "researcher";
+    const tone = input.tone ?? "academic";
+
+    const focusText =
+      input.focusAreas && input.focusAreas.length > 0
+        ? `Focus on: ${input.focusAreas.join(", ")}`
+        : undefined;
+
+    const instructions = [
+      `Summarise the following academic paper for a ${audience} audience.`,
+      `Adopt a ${tone} tone.`,
+      `Limit the overview to approximately ${wordLimit} words.`,
+      "Return JSON with keys: summary (string), highlights (array of strings with 3-5 bullet points), followUpQuestions (array of 2-4 thoughtful next questions).",
+      input.language
+        ? `Respond in ${input.language}.`
+        : "Respond in the same language as the source material if clear, otherwise use English.",
+      focusText,
+      input.instructions
+        ? `Additional instructions: ${input.instructions}`
+        : undefined,
+      "---",
+      input.text,
+    ];
+
+    return instructions.filter(Boolean).join("\n");
   }
 
   private safeParseJson(content: string): unknown {

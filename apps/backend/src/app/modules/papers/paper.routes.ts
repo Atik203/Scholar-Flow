@@ -10,6 +10,7 @@ import { validateRequestBody } from "../../middleware/validateRequest";
 import { editorPaperController, paperController } from "./paper.controller";
 import {
   createEditorPaperSchema,
+  generatePaperSummarySchema,
   publishDraftSchema,
   shareViaEmailSchema,
   updateEditorContentSchema,
@@ -60,6 +61,15 @@ paperRoutes.get(
   paperOperationLimiter,
   optionalAuth as any,
   paperController.getPreviewUrl as any
+);
+
+// Generate AI summary for a paper
+paperRoutes.post(
+  "/:id/summary",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperSummarySchema) as any,
+  paperController.generateSummary as any
 );
 
 // Update metadata (protected, but allow dev fallback)
