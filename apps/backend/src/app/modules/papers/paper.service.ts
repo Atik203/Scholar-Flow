@@ -64,6 +64,7 @@ type InsightMessageRecord = {
   content: string;
   metadata: Record<string, unknown> | null;
   createdAt: Date;
+  createdById: string | null;
 };
 
 const htmlToPlainText = (html: string | null | undefined) => {
@@ -692,6 +693,7 @@ export const paperService = {
       role: "user" | "assistant" | "system";
       content: string;
       metadata?: Record<string, unknown> | null;
+      createdById?: string | null;
     }
   ): Promise<InsightMessageRecord> {
     // Get paperId from thread
@@ -707,6 +709,7 @@ export const paperService = {
     const metadataJson = messageData.metadata
       ? JSON.stringify(messageData.metadata)
       : null;
+    const createdById = messageData.createdById ?? null;
 
     const rows = await prisma.$queryRaw<
       Array<{
@@ -717,6 +720,7 @@ export const paperService = {
         content: string;
         metadata: unknown;
         createdAt: Date;
+        createdById: string | null;
       }>
     >`
       INSERT INTO "AIInsightMessage" (id, "threadId", "paperId", role, content, metadata, "createdById", "createdAt", "updatedAt", "isDeleted")
@@ -727,12 +731,12 @@ export const paperService = {
         ${messageData.role},
         ${messageData.content},
         ${metadataJson}::jsonb,
-        NULL,
+        ${createdById},
         NOW(),
         NOW(),
         false
       )
-      RETURNING id, "threadId", "paperId", role, content, metadata, "createdAt"
+      RETURNING id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
     `;
 
     if (!rows.length) {
@@ -754,6 +758,7 @@ export const paperService = {
       content: row.content,
       metadata: normalizeInsightMetadata(row.metadata),
       createdAt: row.createdAt,
+      createdById: row.createdById,
     };
   },
 
@@ -773,9 +778,10 @@ export const paperService = {
         content: string;
         metadata: unknown;
         createdAt: Date;
+        createdById: string | null;
       }>
     >`
-      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt"
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
       FROM "AIInsightMessage"
       WHERE "threadId" = ${threadId}
         AND "isDeleted" = false
@@ -792,6 +798,7 @@ export const paperService = {
       content: row.content,
       metadata: normalizeInsightMetadata(row.metadata),
       createdAt: row.createdAt,
+      createdById: row.createdById,
     }));
   },
 
@@ -808,9 +815,10 @@ export const paperService = {
         content: string;
         metadata: unknown;
         createdAt: Date;
+        createdById: string | null;
       }>
     >`
-      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt"
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
       FROM "AIInsightMessage"
       WHERE "threadId" = ${threadId}
         AND "isDeleted" = false
@@ -827,6 +835,7 @@ export const paperService = {
         content: row.content,
         metadata: normalizeInsightMetadata(row.metadata),
         createdAt: row.createdAt,
+        createdById: row.createdById,
       }))
       .reverse();
   },
@@ -853,73 +862,52 @@ export const paperService = {
   ): Promise<
     Array<{
       id: string;
+      paperId: string;
+      userId: string;
       createdAt: Date;
       updatedAt: Date;
       _count?: { messages: number };
-      messages?: Array<{
-        role: string;
-        content: string;
-        createdAt: Date;
-      }>;
+      messages?: InsightMessageRecord[];
     }>
   > {
     const rows = await prisma.$queryRaw<
       Array<{
         id: string;
+        paperId: string;
+        userId: string;
         createdAt: Date;
         updatedAt: Date;
         messageCount: bigint;
-        lastMessageRole: string | null;
-        lastMessageContent: string | null;
-        lastMessageCreatedAt: Date | null;
       }>
     >`
       SELECT 
         t.id,
+        t."paperId",
+        t."userId",
         t."createdAt",
         t."updatedAt",
-        COUNT(m.id) as "messageCount",
-        (
-          SELECT role FROM "AIInsightMessage" m2 
-          WHERE m2."threadId" = t.id AND m2."isDeleted" = false 
-          ORDER BY m2."createdAt" DESC 
-          LIMIT 1
-        ) as "lastMessageRole",
-        (
-          SELECT content FROM "AIInsightMessage" m3 
-          WHERE m3."threadId" = t.id AND m3."isDeleted" = false 
-          ORDER BY m3."createdAt" DESC 
-          LIMIT 1
-        ) as "lastMessageContent",
-        (
-          SELECT "createdAt" FROM "AIInsightMessage" m4 
-          WHERE m4."threadId" = t.id AND m4."isDeleted" = false 
-          ORDER BY m4."createdAt" DESC 
-          LIMIT 1
-        ) as "lastMessageCreatedAt"
+        COUNT(m.id) as "messageCount"
       FROM "AIInsightThread" t
       LEFT JOIN "AIInsightMessage" m ON t.id = m."threadId" AND m."isDeleted" = false
       WHERE t."paperId" = ${paperId}
         AND t."userId" = ${userId}
         AND t."isDeleted" = false
-      GROUP BY t.id, t."createdAt", t."updatedAt"
+      GROUP BY t.id, t."paperId", t."userId", t."createdAt", t."updatedAt"
       ORDER BY t."updatedAt" DESC
     `;
 
-    return rows.map((row) => ({
+    const messagesByThread = await Promise.all(
+      rows.map((row) => this.getRecentInsightMessages(row.id, 10))
+    );
+
+    return rows.map((row, index) => ({
       id: row.id,
+      paperId: row.paperId,
+      userId: row.userId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       _count: { messages: Number(row.messageCount) },
-      messages: row.lastMessageContent
-        ? [
-            {
-              role: row.lastMessageRole!,
-              content: row.lastMessageContent,
-              createdAt: row.lastMessageCreatedAt!,
-            },
-          ]
-        : [],
+      messages: messagesByThread[index],
     }));
   },
 };

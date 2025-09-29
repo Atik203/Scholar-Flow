@@ -104,6 +104,7 @@ export interface AIInsightMessage {
   content: string;
   metadata?: Record<string, any>;
   createdAt: string;
+  createdById?: string | null;
 }
 
 export interface AIInsightThread {

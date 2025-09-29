@@ -14,17 +14,56 @@ import {
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 
-// Free and affordable OpenAI models
-const FREE_MODELS = [
-  "gpt-4o-mini", // Most affordable GPT-4 variant
-  "gpt-3.5-turbo", // Affordable and fast
-  "gpt-3.5-turbo-16k", // Longer context
+type OpenAIClientInstance = InstanceType<typeof OpenAI>;
+
+type JsonSchemaResponseFormat = {
+  type: "json_schema";
+  json_schema: {
+    name: string;
+    schema: Record<string, unknown>;
+    strict?: boolean;
+  };
+};
+
+type FallbackResponsesCreateParams = {
+  input: Array<{
+    role: "system" | "user" | "assistant";
+    content: Array<{ type: "text"; text: string }>;
+  }>;
+  response_format?: JsonSchemaResponseFormat;
+};
+
+type ResponsesCreateParams = OpenAIClientInstance extends {
+  responses: {
+    create: (...args: infer A) => unknown;
+  };
+}
+  ? A[0]
+  : FallbackResponsesCreateParams;
+
+type ResponsesInput = ResponsesCreateParams extends { input: infer I }
+  ? I
+  : FallbackResponsesCreateParams["input"];
+
+type ResponsesResponseFormat = ResponsesCreateParams extends {
+  response_format?: infer R;
+}
+  ? R
+  : JsonSchemaResponseFormat | undefined;
+
+const SUPPORTED_MODELS = [
+  "gpt-4o-mini",
+  "gpt-4o",
+  "gpt-4-turbo",
+  "gpt-4",
+  "gpt-3.5-turbo",
+  "gpt-3.5-turbo-16k",
 ];
 
-const isValidModel = (model: string): boolean => {
-  const validModels = [...FREE_MODELS, "gpt-4o", "gpt-4-turbo", "gpt-4"];
-  return validModels.includes(model);
-};
+const RESPONSES_MODELS = new Set(["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"]);
+
+const isValidModel = (model: string): boolean =>
+  SUPPORTED_MODELS.includes(model);
 
 const normalizeStringList = (
   value: unknown,
@@ -78,27 +117,109 @@ const insightSchema = z.object({
 
 type RawInsight = z.infer<typeof insightSchema>;
 
+const METADATA_RESPONSE_SCHEMA = {
+  name: "AiMetadataResponse",
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      abstract: { type: "string" },
+      authors: {
+        anyOf: [
+          { type: "array", items: { type: "string" } },
+          { type: "string" },
+        ],
+      },
+      year: {
+        anyOf: [{ type: "number" }, { type: "string" }],
+      },
+      doi: { type: "string" },
+      keywords: {
+        anyOf: [
+          { type: "array", items: { type: "string" } },
+          { type: "string" },
+        ],
+      },
+      source: { type: "string" },
+      confidence: {
+        anyOf: [{ type: "number" }, { type: "string" }],
+      },
+    },
+  },
+  strict: false,
+} as const;
+
+const SUMMARY_RESPONSE_SCHEMA = {
+  name: "AiSummaryResponse",
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["summary"],
+    properties: {
+      summary: { type: "string" },
+      highlights: {
+        anyOf: [
+          { type: "array", items: { type: "string" } },
+          { type: "string" },
+        ],
+      },
+      followUpQuestions: {
+        anyOf: [
+          { type: "array", items: { type: "string" } },
+          { type: "string" },
+        ],
+      },
+      tokensUsed: {
+        anyOf: [{ type: "number" }, { type: "string" }],
+      },
+    },
+  },
+  strict: false,
+} as const;
+
+const INSIGHT_RESPONSE_SCHEMA = {
+  name: "AiInsightResponse",
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["answer"],
+    properties: {
+      answer: { type: "string" },
+      suggestions: {
+        anyOf: [
+          { type: "array", items: { type: "string" } },
+          { type: "string" },
+        ],
+      },
+      tokensUsed: {
+        anyOf: [{ type: "number" }, { type: "string" }],
+      },
+    },
+  },
+  strict: false,
+} as const;
+
 export class OpenAiProvider extends BaseAiProvider {
   private readonly client: OpenAI | null;
 
   constructor(apiKey: string | undefined, requestTimeoutMs: number) {
-    super("openai", apiKey, requestTimeoutMs);
+    const normalizedKey = apiKey?.trim();
+    super("openai", normalizedKey, requestTimeoutMs);
 
-    // Validate API key format
-    const isValidKey = apiKey && apiKey.startsWith("sk-") && apiKey.length > 20;
-    console.log(
-      `[OpenAI Provider] Initializing with API key: ${isValidKey ? "valid format" : "invalid/missing"}, timeout: ${requestTimeoutMs}ms`
+    const isValidKey = Boolean(
+      normalizedKey &&
+        normalizedKey.startsWith("sk-") &&
+        normalizedKey.length >= 20
     );
 
     this.client = isValidKey
-      ? new OpenAI({ apiKey, timeout: requestTimeoutMs })
+      ? new OpenAI({ apiKey: normalizedKey, timeout: requestTimeoutMs })
       : null;
+  }
 
-    if (!isValidKey && apiKey) {
-      console.warn(
-        `[OpenAI Provider] Invalid API key format. Expected format: sk-...`
-      );
-    }
+  override isEnabled(): boolean {
+    return Boolean(this.client);
   }
 
   protected async performExtraction(
@@ -113,33 +234,33 @@ export class OpenAiProvider extends BaseAiProvider {
     }
 
     try {
-      const completion = await this.client.chat.completions.create({
-        model: DEFAULT_MODEL,
-        temperature: 0.2,
-        max_tokens: 600,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert research metadata assistant. Extract structured metadata strictly as JSON.",
-          },
-          {
-            role: "user",
-            content: this.buildPrompt(input),
-          },
-        ],
-      });
+      const { payload, raw } = await this.callStructuredJson(
+        {
+          model: DEFAULT_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an expert research metadata assistant. Respond strictly with a JSON object representing the extracted metadata.",
+            },
+            {
+              role: "user",
+              content: this.buildPrompt(input),
+            },
+          ],
+          temperature: 0.2,
+          maxTokens: 700,
+          responseSchema: METADATA_RESPONSE_SCHEMA,
+        },
+        metadataSchema
+      );
 
-      const messageContent = completion.choices[0]?.message?.content || "";
-      const parsed = this.safeParseJson(messageContent);
-      const validated = metadataSchema.parse(parsed);
-      const metadata = this.normalizeMetadata(validated);
+      const metadata = this.normalizeMetadata(payload);
 
       return {
         provider: this.name,
         metadata,
-        rawResponse: completion,
+        rawResponse: raw,
       };
     } catch (error) {
       if (error instanceof APIError) {
@@ -174,27 +295,28 @@ export class OpenAiProvider extends BaseAiProvider {
     }
 
     try {
-      const completion = await this.client.chat.completions.create({
-        model: DEFAULT_MODEL,
-        temperature: 0.3,
-        max_tokens: Math.min(900, Math.max((input.wordLimit ?? 220) * 3, 600)),
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a senior research assistant. Produce structured JSON with a scholarly yet approachable tone.",
-          },
-          {
-            role: "user",
-            content: this.buildSummaryPrompt(input),
-          },
-        ],
-      });
+      const { payload, raw, tokens } = await this.callStructuredJson(
+        {
+          model: DEFAULT_MODEL,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a senior research assistant. Return a JSON object describing the requested summary, highlights, and follow-up questions.",
+            },
+            {
+              role: "user",
+              content: this.buildSummaryPrompt(input),
+            },
+          ],
+          temperature: 0.3,
+          maxTokens: Math.min(900, Math.max((input.wordLimit ?? 220) * 3, 600)),
+          responseSchema: SUMMARY_RESPONSE_SCHEMA,
+        },
+        summarySchema
+      );
 
-      const messageContent = completion.choices[0]?.message?.content || "";
-      const parsed = this.safeParseJson(messageContent);
-      const validated = summarySchema.parse(parsed) as RawSummary;
+      const validated = payload as RawSummary;
       const highlights = normalizeStringList(validated.highlights);
       const followUps = normalizeStringList(validated.followUpQuestions, 5);
       const rawTokens =
@@ -203,14 +325,14 @@ export class OpenAiProvider extends BaseAiProvider {
           : validated.tokensUsed;
       const tokensUsed = Number.isFinite(rawTokens ?? NaN)
         ? (rawTokens as number)
-        : completion.usage?.total_tokens;
+        : tokens;
 
       return {
         provider: this.name,
         summary: validated.summary.trim(),
         highlights,
         followUpQuestions: followUps,
-        rawResponse: completion,
+        rawResponse: raw,
         tokensUsed: tokensUsed ?? undefined,
       };
     } catch (error) {
@@ -237,12 +359,7 @@ export class OpenAiProvider extends BaseAiProvider {
   protected async performInsight(
     input: AiInsightRequest
   ): Promise<AiInsightResult> {
-    console.log(
-      `[OpenAI Provider] performInsight called with prompt length: ${input.prompt.length}, context length: ${input.context.length}`
-    );
-
     if (!this.client) {
-      console.log(`[OpenAI Provider] Client not configured`);
       throw new AiError(
         503,
         "OpenAI provider not configured",
@@ -251,61 +368,52 @@ export class OpenAiProvider extends BaseAiProvider {
     }
 
     try {
-      const messages = [
+      const requestedModel = input.model || DEFAULT_MODEL;
+      const messages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }> = [
         {
-          role: "system" as const,
+          role: "system",
           content:
-            'You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways. ALWAYS respond in valid JSON format with the following structure: {"answer": "your detailed response here", "suggestions": ["suggestion1", "suggestion2"], "tokensUsed": number}',
-        },
-        {
-          role: "system" as const,
-          content: `Paper context:\n${input.context}`,
-        },
-        ...((input.history ?? []).map((message) => ({
-          role: message.role,
-          content: message.content,
-        })) as Array<{
-          role: "user" | "assistant" | "system";
-          content: string;
-        }>),
-        {
-          role: "user" as const,
-          content: input.prompt,
+            "You are a senior research mentor helping a scholar interpret and apply insights from a paper. Always return a JSON object with keys: answer (string), suggestions (array of strings), tokensUsed (number).",
         },
       ];
 
-      // Validate and use model
-      const requestedModel = input.model || DEFAULT_MODEL;
-      const modelToUse = isValidModel(requestedModel)
-        ? requestedModel
-        : DEFAULT_MODEL;
+      const trimmedContext = (input.context || "").trim();
 
-      if (requestedModel !== modelToUse) {
-        console.warn(
-          `[OpenAI Provider] Invalid model '${requestedModel}', using '${modelToUse}' instead`
+      if (trimmedContext) {
+        messages.push({
+          role: "system",
+          content: `Paper context:\n${trimmedContext}`,
+        });
+      }
+
+      if (Array.isArray(input.history)) {
+        messages.push(
+          ...input.history.map((message) => ({
+            role: message.role,
+            content: String(message.content ?? ""),
+          }))
         );
       }
 
-      console.log(
-        `[OpenAI Provider] Making API call with model: ${modelToUse}`
+      messages.push({ role: "user", content: input.prompt });
+
+      const modelToUse = this.resolveModel(requestedModel);
+
+      const { payload, raw, tokens } = await this.callStructuredJson(
+        {
+          model: modelToUse,
+          messages,
+          temperature: 0.4,
+          maxTokens: 900,
+          responseSchema: INSIGHT_RESPONSE_SCHEMA,
+        },
+        insightSchema
       );
 
-      const completion = await this.client.chat.completions.create({
-        model: modelToUse,
-        temperature: 0.4,
-        max_tokens: 900,
-        response_format: { type: "json_object" },
-        messages,
-      });
-
-      console.log(`[OpenAI Provider] API call successful, response received`);
-      const messageContent = completion.choices[0]?.message?.content || "";
-      console.log(`[OpenAI Provider] Raw response content:`, messageContent);
-
-      const parsed = this.safeParseJson(messageContent);
-      console.log(`[OpenAI Provider] Parsed JSON:`, parsed);
-
-      const validated = insightSchema.parse(parsed) as RawInsight;
+      const validated = payload as RawInsight;
       const suggestions = normalizeStringList(validated.suggestions, 4);
       const rawTokens =
         typeof validated.tokensUsed === "string"
@@ -313,7 +421,7 @@ export class OpenAiProvider extends BaseAiProvider {
           : validated.tokensUsed;
       const tokensUsed = Number.isFinite(rawTokens ?? NaN)
         ? (rawTokens as number)
-        : completion.usage?.total_tokens;
+        : tokens;
 
       return {
         provider: this.name,
@@ -322,7 +430,7 @@ export class OpenAiProvider extends BaseAiProvider {
           content: validated.answer.trim(),
         },
         suggestions: suggestions,
-        rawResponse: completion,
+        rawResponse: raw,
         tokensUsed: tokensUsed ?? undefined,
       };
     } catch (error) {
@@ -344,6 +452,187 @@ export class OpenAiProvider extends BaseAiProvider {
         "AI_PROVIDER_ERROR"
       );
     }
+  }
+
+  private resolveModel(model?: string): string {
+    if (model && isValidModel(model)) {
+      return model;
+    }
+    return DEFAULT_MODEL;
+  }
+
+  private useResponsesApi(model: string): boolean {
+    return RESPONSES_MODELS.has(model);
+  }
+
+  private async callStructuredJson<T>(
+    params: {
+      model?: string;
+      messages: Array<{
+        role: "system" | "user" | "assistant";
+        content: string;
+      }>;
+      temperature: number;
+      maxTokens: number;
+      responseSchema?: {
+        name: string;
+        schema: Record<string, unknown>;
+        strict?: boolean;
+      };
+    },
+    validator: z.ZodType<T>
+  ): Promise<{ payload: T; raw: unknown; tokens?: number }> {
+    if (!this.client) {
+      throw new AiError(
+        503,
+        "OpenAI provider not configured",
+        "AI_PROVIDER_DISABLED"
+      );
+    }
+
+    const modelToUse = this.resolveModel(params.model);
+    const responseFormat: ResponsesResponseFormat | undefined =
+      params.responseSchema
+        ? {
+            type: "json_schema",
+            json_schema: params.responseSchema,
+          }
+        : undefined;
+
+    if (this.useResponsesApi(modelToUse) && this.client.responses) {
+      const input = params.messages.map((message) => ({
+        role: message.role,
+        content: [{ type: "text", text: message.content }],
+      })) as unknown as ResponsesInput;
+
+      const responsesClient = this.client.responses as unknown as {
+        create: (body: Record<string, unknown>) => Promise<unknown>;
+      };
+
+      const requestBody: Record<string, unknown> = {
+        model: modelToUse,
+        temperature: params.temperature,
+        max_output_tokens: params.maxTokens,
+        input,
+      };
+
+      if (responseFormat) {
+        requestBody.response_format = responseFormat as unknown;
+      }
+
+      const response = await responsesClient.create(requestBody);
+
+      const text = this.extractResponseText(response);
+      const parsed = this.safeParseJson(text);
+      const payload = validator.parse(parsed) as T;
+      const tokens = this.extractTokenUsage((response as any).usage);
+
+      return { payload, raw: response, tokens };
+    }
+
+    const completion = await this.client.chat.completions.create({
+      model: modelToUse,
+      temperature: params.temperature,
+      max_tokens: params.maxTokens,
+      messages: params.messages,
+    });
+
+    const messageContent = completion.choices[0]?.message?.content ?? "";
+    const parsed = this.safeParseJson(messageContent);
+    const payload = validator.parse(parsed) as T;
+    const tokens = this.extractTokenUsage(completion.usage);
+
+    return { payload, raw: completion, tokens };
+  }
+
+  private extractResponseText(response: unknown): string {
+    if (!response || typeof response !== "object") {
+      return "";
+    }
+
+    const outputText = (response as { output_text?: string }).output_text;
+    if (typeof outputText === "string" && outputText.trim()) {
+      return outputText;
+    }
+
+    const output = (response as { output?: unknown }).output;
+    if (Array.isArray(output)) {
+      for (const item of output) {
+        if (
+          item &&
+          typeof item === "object" &&
+          Array.isArray((item as { content?: unknown[] }).content)
+        ) {
+          for (const part of (item as { content: Array<{ text?: string }> })
+            .content) {
+            if (part && typeof part.text === "string" && part.text.trim()) {
+              return part.text;
+            }
+          }
+        }
+      }
+    }
+
+    const choices = (response as { choices?: unknown[] }).choices;
+    if (Array.isArray(choices) && choices.length > 0) {
+      const firstChoice = choices[0] as
+        | { message?: { content?: string | Array<{ text?: string }> } }
+        | undefined;
+      const content = firstChoice?.message?.content;
+      if (typeof content === "string" && content.trim()) {
+        return content;
+      }
+      if (Array.isArray(content)) {
+        return content
+          .map((entry) =>
+            entry && typeof entry.text === "string" ? entry.text : ""
+          )
+          .join("")
+          .trim();
+      }
+    }
+
+    return "";
+  }
+
+  private extractTokenUsage(usage: unknown): number | undefined {
+    if (!usage || typeof usage !== "object") {
+      return undefined;
+    }
+
+    const total = (usage as { total_tokens?: number }).total_tokens;
+    if (typeof total === "number") {
+      return total;
+    }
+
+    const promptTokens =
+      (
+        usage as {
+          prompt_tokens?: number;
+          input_tokens?: number;
+        }
+      ).prompt_tokens ?? (usage as { input_tokens?: number }).input_tokens;
+
+    const completionTokens =
+      (
+        usage as {
+          completion_tokens?: number;
+          output_tokens?: number;
+          response_tokens?: number;
+        }
+      ).completion_tokens ??
+      (usage as { output_tokens?: number }).output_tokens ??
+      (usage as { response_tokens?: number }).response_tokens;
+
+    const prompt = typeof promptTokens === "number" ? promptTokens : 0;
+    const completion =
+      typeof completionTokens === "number" ? completionTokens : 0;
+
+    if (prompt === 0 && completion === 0) {
+      return undefined;
+    }
+
+    return prompt + completion;
   }
 
   private buildPrompt(input: AiMetadataExtractionInput) {
@@ -405,7 +694,7 @@ export class OpenAiProvider extends BaseAiProvider {
       } catch (err) {
         throw new AiError(
           500,
-          "Unable to parse metadata JSON",
+          "Unable to parse AI JSON response",
           "AI_RESPONSE_PARSE_ERROR"
         );
       }
