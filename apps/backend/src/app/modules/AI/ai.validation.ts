@@ -55,11 +55,8 @@ const insightModelSchema = z.enum([
   "gpt-4o-mini",
   "gpt-3.5-turbo",
   "gpt-4o",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
-  "gemini-pro",
-  "deepseek-chat",
-  "deepseek-coder",
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
 ]);
 
 export const generateInsightSchema = z.object({

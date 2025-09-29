@@ -1,4 +1,4 @@
-export type ProviderName = "openai" | "gemini" | "deepseek" | "heuristic";
+export type ProviderName = "openai" | "gemini" | "heuristic";
 
 export interface AiMetadata {
   title?: string;
