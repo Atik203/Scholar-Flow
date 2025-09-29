@@ -92,7 +92,10 @@ describe("Paper Insight Context Integration", () => {
     );
 
     // Always get paper content for context (our fix)
-    const source = await paperService.getSummarySourceText(paperId, mockPaperRecord);
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      mockPaperRecord
+    );
     const paperContext = source.text || "";
 
     // Generate insight with context
@@ -117,7 +120,8 @@ describe("Paper Insight Context Integration", () => {
     // Verify that generateInsight was called with the paper context
     expect(generateInsightSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        context: "This is the extracted paper content that should be included as context.",
+        context:
+          "This is the extracted paper content that should be included as context.",
         prompt: "What is the main finding?",
         history: [
           { role: "user", content: "Previous question" },
@@ -182,7 +186,10 @@ describe("Paper Insight Context Integration", () => {
     );
 
     // Always get paper content for context (our fix)
-    const source = await paperService.getSummarySourceText(paperId, mockPaperRecord);
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      mockPaperRecord
+    );
     const paperContext = source.text || "";
 
     const insightInput = {
