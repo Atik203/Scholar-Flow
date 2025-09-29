@@ -512,14 +512,18 @@ export const aiService = {
   },
 
   async generateInsight(request: AiInsightRequest): Promise<AiInsightResult> {
+    const sanitizedHistory = sanitizeInsightHistory(request.history);
     const normalizedRequest: AiInsightRequest = {
       ...request,
       prompt: request.prompt.trim(),
       context: request.context || "",
-      history: sanitizeInsightHistory(request.history),
+      history: sanitizedHistory,
     };
 
-    if (!normalizedRequest.context.trim()) {
+    const hasContext = normalizedRequest.context.trim().length > 0;
+    const hasHistory = sanitizedHistory.length > 0;
+
+    if (!hasContext && !hasHistory) {
       return runInsightHeuristics(normalizedRequest);
     }
 
