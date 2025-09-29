@@ -23,6 +23,7 @@ import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
   createEditorPaperSchema,
   deletePaperParamsSchema,
+  generatePaperInsightSchema,
   getPaperParamsSchema,
   listPapersQuerySchema,
   publishDraftSchema,
@@ -798,6 +799,201 @@ export const paperController = {
         throw error;
       }
       throw new ApiError(500, "Failed to share paper via email");
+    }
+  }),
+
+  // Generate AI insights for a paper (chat-like conversation)
+  generateInsight: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const body = generatePaperInsightSchema.safeParse(req.body);
+    if (!body.success) {
+      const errorDetails = body.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      throw createPaperError.validationFailed(errorDetails);
+    }
+
+    const { id: paperId } = params.data;
+    const { message: prompt, threadId, model } = body.data;
+
+    // Check if paper exists and user has access
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    // Verify user access permissions
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    try {
+      // Get or create insight thread
+      const thread = await paperService.getOrCreateInsightThread(
+        paperId,
+        authReq.user.id,
+        threadId
+      );
+
+      // Get recent conversation history for context
+      const recentMessages = await paperService.listInsightMessages(
+        thread.id,
+        1, // page
+        10 // limit - last 10 messages for context
+      );
+
+      // Get paper content for context if this is a new conversation
+      let paperContext = "";
+      if (recentMessages.length === 0) {
+        const source = await paperService.getSummarySourceText(
+          paperId,
+          paperRecord
+        );
+        paperContext = source.text || "";
+      }
+
+      // Generate insight using AI service
+      const insightInput = {
+        paperId,
+        threadId: thread.id,
+        prompt,
+        context: paperContext,
+        conversationHistory: recentMessages.map((msg) => ({
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+          timestamp: msg.createdAt,
+        })),
+        workspaceId: paperRecord.workspaceId,
+        uploaderId: paperRecord.uploaderId,
+        ...(model && { model }),
+      };
+
+      const result = await aiService.generateInsight(insightInput);
+
+      // Record both user prompt and AI response
+      await paperService.recordInsightMessage(thread.id, {
+        role: "user",
+        content: prompt,
+      });
+
+      await paperService.recordInsightMessage(thread.id, {
+        role: "assistant",
+        content: result.message.content,
+        metadata: {
+          provider: result.provider,
+          tokensUsed: result.tokensUsed,
+          suggestions: result.suggestions,
+        },
+      });
+
+      sendSuccessResponse(
+        res,
+        {
+          threadId: thread.id,
+          answer: result.message.content,
+          suggestions: result.suggestions || [],
+          provider: result.provider,
+          tokensUsed: result.tokensUsed ?? null,
+          generatedAt: new Date().toISOString(),
+        },
+        "Insight generated successfully"
+      );
+    } catch (error) {
+      console.error("[PaperController] Insight generation failed:", error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw createPaperError.insightGenerationFailed(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }),
+
+  // Get insight conversation history for a paper
+  getInsightHistory: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const { id: paperId } = params.data;
+    const { threadId, page = 1, limit = 20 } = req.query;
+
+    // Check if paper exists and user has access
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    try {
+      if (threadId) {
+        // Get specific thread messages
+        const messages = await paperService.listInsightMessages(
+          threadId as string,
+          parseInt(page as string, 10) || 1,
+          Math.min(parseInt(limit as string, 10) || 20, 50)
+        );
+
+        sendSuccessResponse(
+          res,
+          {
+            threadId,
+            messages,
+            pagination: {
+              page: parseInt(page as string, 10) || 1,
+              limit: Math.min(parseInt(limit as string, 10) || 20, 50),
+              total: messages.length, // This would ideally be total count
+            },
+          },
+          "Insight history retrieved"
+        );
+      } else {
+        // Get all threads for this paper and user
+        const threads = await paperService.getUserInsightThreads(
+          paperId,
+          authReq.user.id
+        );
+
+        sendSuccessResponse(
+          res,
+          {
+            paperId,
+            threads: threads.map((thread) => ({
+              id: thread.id,
+              createdAt: thread.createdAt,
+              updatedAt: thread.updatedAt,
+              messageCount: thread._count?.messages || 0,
+              lastMessage: thread.messages?.[0] || null,
+            })),
+          },
+          "Insight threads retrieved"
+        );
+      }
+    } catch (error) {
+      console.error("[PaperController] Get insight history failed:", error);
+      throw createPaperError.insightHistoryFailed(
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }),
 };

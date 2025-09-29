@@ -1,7 +1,7 @@
-import { createClient, RedisClientOptions, RedisClientType } from "redis";
+import { createClient, RedisClientOptions } from "redis";
 import config from "../config";
 
-export type RedisInstance = RedisClientType | null;
+export type RedisInstance = ReturnType<typeof createClient> | null;
 
 let client: RedisInstance = null;
 let connectingPromise: Promise<RedisInstance> | null = null;
@@ -14,17 +14,21 @@ const buildRedisOptions = (): RedisClientOptions | null => {
     return null;
   }
 
-  const socketOptions: NonNullable<RedisClientOptions["socket"]> = {
-    host,
-    port,
-    tls: tls ? {} : undefined,
-  };
-
-  return {
-    socket: socketOptions,
+  const baseOptions: RedisClientOptions = {
+    socket: {
+      host,
+      port,
+    },
     password: password || undefined,
     database: typeof db === "number" ? db : 0,
   };
+
+  // Add TLS if enabled
+  if (tls && baseOptions.socket) {
+    (baseOptions.socket as any).tls = {};
+  }
+
+  return baseOptions;
 };
 
 export const getRedisClient = async (): Promise<RedisInstance> => {
@@ -54,8 +58,9 @@ export const getRedisClient = async (): Promise<RedisInstance> => {
       .connect()
       .then(() => {
         if (process.env.NODE_ENV !== "test") {
+          const socket = options.socket as { host?: string; port?: number };
           console.log(
-            `✅ Connected to Redis at ${options.socket?.host}:${options.socket?.port} (db ${options.database ?? 0})`
+            `✅ Connected to Redis at ${socket?.host}:${socket?.port} (db ${options.database ?? 0})`
           );
         }
         client = redisClient;
