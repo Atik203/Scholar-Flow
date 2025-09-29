@@ -26,7 +26,7 @@ const parseNumber = (value: string | undefined, defaultValue: number) => {
 };
 
 const parseFallbackOrder = (value: string | undefined) =>
-  (value || "openai,gemini,deepseek")
+  (value || "gemini,openai")
     .split(",")
     .map((provider) => provider.trim().toLowerCase())
     .filter(Boolean);
@@ -64,9 +64,6 @@ export default {
   },
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,
-  },
-  deepseek: {
-    apiKey: process.env.DEEPSEAK_API_KEY,
   },
   ai: {
     featuresEnabled: parseBoolean(process.env.AI_FEATURES_ENABLED, true),
