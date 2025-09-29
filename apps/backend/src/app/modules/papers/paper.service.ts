@@ -25,6 +25,90 @@ interface CreateUploadArgs {
   objectKey: string;
 }
 
+const MAX_SUMMARY_SOURCE_LENGTH = 60000;
+
+type PaperSummaryRecord = {
+  id: string;
+  workspaceId: string;
+  uploaderId: string;
+  workspaceOwnerId: string;
+  title: string;
+  abstract: string | null;
+  metadata: Record<string, unknown> | null;
+  contentHtml: string | null;
+  updatedAt: Date;
+};
+
+type StoredSummaryPayload = {
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  tokensUsed?: number | null;
+  provider?: string;
+};
+
+const htmlToPlainText = (html: string | null | undefined) => {
+  if (!html) {
+    return "";
+  }
+
+  const stripped = sanitizeHtml(html, {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  return stripped.replace(/\s+/g, " ").trim();
+};
+
+const truncateText = (text: string, limit: number) =>
+  text.length > limit ? text.slice(0, limit) : text;
+
+const normalizeMetadata = (
+  metadata: unknown
+): Record<string, unknown> | null => {
+  if (!metadata) {
+    return null;
+  }
+
+  if (typeof metadata === "object" && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return typeof parsed === "object" && parsed !== null ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
+const serializeSummaryPayload = (payload: StoredSummaryPayload) =>
+  JSON.stringify(payload);
+
+const deserializeSummaryPayload = (value: string): StoredSummaryPayload => {
+  if (!value) {
+    return { summary: "" };
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed === "object" && parsed !== null) {
+      const normalized = parsed as StoredSummaryPayload;
+      if (typeof normalized.summary === "string") {
+        return normalized;
+      }
+    }
+  } catch {
+    // Fallback to treating the raw string as summary text
+  }
+
+  return { summary: value };
+};
+
 export const paperService = {
   async createUploadedPaper(args: CreateUploadArgs) {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
@@ -305,6 +389,184 @@ export const paperService = {
 
     // Return updated paper
     return this.getById(id);
+  },
+
+  async getPaperForSummary(
+    paperId: string
+  ): Promise<PaperSummaryRecord | null> {
+    const result = await prisma.$queryRaw<
+      Array<Omit<PaperSummaryRecord, "metadata"> & { metadata: any }>
+    >`
+      SELECT 
+        p.id,
+        p."workspaceId",
+        p."uploaderId",
+        w."ownerId" AS "workspaceOwnerId",
+        p.title,
+        p.abstract,
+        p.metadata,
+        p."contentHtml",
+        p."updatedAt"
+      FROM "Paper" p
+      JOIN "Workspace" w ON w.id = p."workspaceId"
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (!result.length) {
+      return null;
+    }
+
+    const record = result[0];
+
+    return {
+      ...record,
+      metadata: normalizeMetadata(record.metadata),
+    };
+  },
+
+  async userHasSummaryAccess(
+    record: PaperSummaryRecord,
+    userId: string
+  ): Promise<boolean> {
+    if (record.uploaderId === userId || record.workspaceOwnerId === userId) {
+      return true;
+    }
+
+    const membership = await prisma.$queryRaw<Array<{ exists: number }>>`
+      SELECT 1 as exists
+      FROM "WorkspaceMember"
+      WHERE "workspaceId" = ${record.workspaceId}
+        AND "userId" = ${userId}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    return membership.length > 0;
+  },
+
+  async getSummarySourceText(
+    paperId: string,
+    record: PaperSummaryRecord
+  ): Promise<{
+    text: string;
+    source: "chunks" | "content" | "abstract" | "metadata" | "empty";
+    chunkCount: number;
+  }> {
+    const chunks = await prisma.$queryRaw<Array<{ content: string }>>`
+      SELECT content
+      FROM "PaperChunk"
+      WHERE "paperId" = ${paperId} AND "isDeleted" = false
+      ORDER BY idx ASC
+      LIMIT 200
+    `;
+
+    const chunkText = chunks
+      .map((chunk) => chunk.content?.trim())
+      .filter((content): content is string => Boolean(content))
+      .join("\n\n");
+
+    if (chunkText) {
+      return {
+        text: truncateText(chunkText, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "chunks",
+        chunkCount: chunks.length,
+      };
+    }
+
+    const contentText = htmlToPlainText(record.contentHtml);
+    if (contentText) {
+      return {
+        text: truncateText(contentText, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "content",
+        chunkCount: chunks.length,
+      };
+    }
+
+    if (record.abstract) {
+      return {
+        text: truncateText(record.abstract, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "abstract",
+        chunkCount: chunks.length,
+      };
+    }
+
+    const metadataAbstract = record.metadata?.abstract;
+    if (typeof metadataAbstract === "string" && metadataAbstract.trim()) {
+      return {
+        text: truncateText(metadataAbstract, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "metadata",
+        chunkCount: chunks.length,
+      };
+    }
+
+    return {
+      text: "",
+      source: "empty",
+      chunkCount: chunks.length,
+    };
+  },
+
+  async findStoredSummary(
+    paperId: string,
+    promptHash: string
+  ): Promise<
+    | (StoredSummaryPayload & {
+        model: string;
+        updatedAt: Date;
+      })
+    | null
+  > {
+    const rows = await prisma.$queryRaw<
+      Array<{ summary: string; model: string; updatedAt: Date }>
+    >`
+      SELECT summary, model, "updatedAt"
+      FROM "AISummary"
+      WHERE "paperId" = ${paperId}
+        AND "promptHash" = ${promptHash}
+        AND "isDeleted" = false
+      ORDER BY "updatedAt" DESC
+      LIMIT 1
+    `;
+
+    if (!rows.length) {
+      return null;
+    }
+
+    const parsed = deserializeSummaryPayload(rows[0].summary);
+
+    return {
+      ...parsed,
+      model: rows[0].model,
+      updatedAt: rows[0].updatedAt,
+    };
+  },
+
+  async upsertSummaryRecord(args: {
+    paperId: string;
+    model: string;
+    promptHash: string;
+    payload: StoredSummaryPayload;
+  }) {
+    const summaryJson = serializeSummaryPayload(args.payload);
+
+    await prisma.$executeRaw`
+      INSERT INTO "AISummary" (id, "paperId", model, summary, "promptHash", "createdAt", "updatedAt")
+      VALUES (
+        gen_random_uuid(),
+        ${args.paperId},
+        ${args.model},
+        ${summaryJson},
+        ${args.promptHash},
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT ("paperId", model, "promptHash")
+      DO UPDATE SET
+        summary = EXCLUDED.summary,
+        "updatedAt" = NOW(),
+        "isDeleted" = false
+    `;
   },
 };
 

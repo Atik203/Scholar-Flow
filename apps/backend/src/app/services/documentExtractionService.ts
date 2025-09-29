@@ -1,6 +1,6 @@
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
-import { aiMetadataService } from "../modules/AI/ai.service";
+import { aiService } from "../modules/AI/ai.service";
 import { StorageService } from "../modules/papers/StorageService";
 import prisma from "../shared/prisma";
 import { docxToPdfService } from "./docxToPdfService";
@@ -199,7 +199,7 @@ export class DocumentExtractionService {
 
       if (metadataText.trim().length > 0) {
         try {
-          await aiMetadataService.extractAndPersistMetadata({
+          await aiService.extractAndPersistMetadata({
             paperId,
             text: metadataText,
             originalTitle: paper.title,

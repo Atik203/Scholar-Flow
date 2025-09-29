@@ -58,6 +58,44 @@ export interface UpdatePaperMetadataRequest {
   year?: number;
 }
 
+export type PaperSummaryTone =
+  | "academic"
+  | "technical"
+  | "executive"
+  | "casual"
+  | "conversational";
+
+export type PaperSummaryAudience =
+  | "researcher"
+  | "student"
+  | "executive"
+  | "general";
+
+export interface PaperSummaryRequest {
+  instructions?: string;
+  focusAreas?: string[];
+  tone?: PaperSummaryTone;
+  audience?: PaperSummaryAudience;
+  language?: string;
+  wordLimit?: number;
+  refresh?: boolean;
+}
+
+export interface PaperSummaryResponse {
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  provider: string;
+  model: string;
+  tokensUsed?: number | null;
+  cached: boolean;
+  promptHash: string;
+  source: string;
+  chunkCount: number;
+  generatedAt: string;
+  refreshed: boolean;
+}
+
 // Editor-specific interfaces
 export interface CreateEditorPaperRequest {
   workspaceId: string;
@@ -439,6 +477,19 @@ export const paperApi = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    generatePaperSummary: builder.mutation<
+      PaperSummaryResponse,
+      { paperId: string; input?: PaperSummaryRequest }
+    >({
+      query: ({ paperId, input }) => ({
+        url: `/papers/${paperId}/summary`,
+        method: "POST",
+        body: input ?? {},
+      }),
+      transformResponse: (response: { data: PaperSummaryResponse }) =>
+        response.data,
+    }),
   }),
 });
 
@@ -465,4 +516,5 @@ export const {
   useExportPaperDocxMutation,
   useUploadImageForEditorMutation,
   useShareViaEmailMutation,
+  useGeneratePaperSummaryMutation,
 } = paperApi;
