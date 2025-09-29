@@ -237,9 +237,14 @@ const runInsightHeuristics = (input: AiInsightRequest): AiInsightResult => {
   const question = input.prompt.trim();
   const snippet = limitTextToWords(input.context, 160);
 
+  const hasContext = snippet.length > 0;
+  const reasonLine = hasContext
+    ? "I'm falling back to a heuristic summary because the AI providers couldn't return a full answer just now."
+    : "Your paper text hasn't finished processing yet, so I'm sharing heuristic guidance while we wait for the full content.";
+
   const analysisLines = [
-    "I'm working with an offline heuristic view of your paper.",
-    snippet ? `Key excerpt considered: ${snippet}` : undefined,
+    reasonLine,
+    hasContext ? `Key excerpt considered: ${snippet}` : undefined,
     question ? `What you're asking: ${question}` : undefined,
   ]
     .filter(Boolean)
@@ -257,7 +262,7 @@ const runInsightHeuristics = (input: AiInsightRequest): AiInsightResult => {
       role: "assistant",
       content:
         analysisLines.length > 0
-          ? `${analysisLines}\n\nConsider diving deeper into methodology, assumptions, and potential applications for more targeted insights.`
+          ? `${analysisLines}\n\nConsider diving deeper into methodology, assumptions, and potential applications for more targeted insights. You can re-run this insight once the document has finished processing or try again in a moment.`
           : "I can help more once additional context is available from the document processing pipeline.",
     },
     suggestions,
