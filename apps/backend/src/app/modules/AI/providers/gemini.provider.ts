@@ -23,16 +23,8 @@ const isValidGeminiModel = (model: string): boolean => {
 
 export class GeminiProvider extends BaseAiProvider {
   constructor(apiKey: string | undefined, requestTimeoutMs: number) {
-    super("gemini", apiKey, requestTimeoutMs);
-
-    const isValidKey = apiKey && apiKey.length > 10;
-    console.log(
-      `[Gemini Provider] Initializing with API key: ${isValidKey ? "valid format" : "invalid/missing"}, timeout: ${requestTimeoutMs}ms`
-    );
-
-    if (!isValidKey && apiKey) {
-      console.warn(`[Gemini Provider] Invalid API key format`);
-    }
+    const normalizedKey = apiKey?.trim();
+    super("gemini", normalizedKey, requestTimeoutMs);
   }
 
   protected async performInsight(
@@ -50,54 +42,67 @@ export class GeminiProvider extends BaseAiProvider {
       const model = isValidGeminiModel(input.model || DEFAULT_MODEL)
         ? input.model || DEFAULT_MODEL
         : DEFAULT_MODEL;
+      const instructions =
+        "You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways. Return a JSON object with keys: answer (string), suggestions (array of strings), tokensUsed (number).";
 
-      console.log(`[Gemini Provider] Making API call with model: ${model}`);
+      const historyText = Array.isArray(input.history)
+        ? input.history
+            .map(
+              (msg) =>
+                `${msg.role === "assistant" ? "Assistant" : "User"}: ${msg.content}`
+            )
+            .join("\n")
+        : "";
 
-      // Build conversation history
-      const conversationParts = [
-        {
-          text: `You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways.
+      const contextBlock = input.context.trim()
+        ? `Paper context:\n${input.context.trim()}`
+        : "";
 
-Paper context:
-${input.context}
+      const combinedPrompt = [
+        instructions,
+        contextBlock,
+        historyText ? `Conversation history:\n${historyText}` : undefined,
+        `Current question: ${input.prompt}`,
+        "Respond strictly in JSON.",
+      ]
+        .filter(Boolean)
+        .join("\n\n");
 
-Conversation history:
-${(input.history || []).map((msg) => `${msg.role === "user" ? "Human" : "Assistant"}: ${msg.content}`).join("\\n")}
-
-Current question: ${input.prompt}
-
-Please respond in JSON format with the following structure:
-{
-  "answer": "your detailed response here",
-  "suggestions": ["suggestion1", "suggestion2"],
-  "tokensUsed": estimated_token_count
-}`,
-        },
-      ];
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: conversationParts,
-              },
-            ],
-            generationConfig: {
-              temperature: 0.4,
-              maxOutputTokens: 900,
-              topP: 0.8,
-              topK: 40,
-            },
-          }),
-          signal: AbortSignal.timeout(this.requestTimeoutMs),
-        }
+      const controller = new AbortController();
+      const timeout = setTimeout(
+        () => controller.abort(),
+        this.requestTimeoutMs
       );
+
+      let response: Awaited<ReturnType<typeof fetch>>;
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: combinedPrompt }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.4,
+                maxOutputTokens: 900,
+                topP: 0.8,
+                topK: 40,
+              },
+            }),
+            signal: controller.signal,
+          }
+        );
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -106,8 +111,6 @@ Please respond in JSON format with the following structure:
 
       const data = (await response.json()) as any;
       const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-      console.log(`[Gemini Provider] Raw response:`, content);
 
       // Try to parse JSON response
       let parsed: any;
@@ -135,8 +138,6 @@ Please respond in JSON format with the following structure:
         tokensUsed: parsed.tokensUsed || data.usageMetadata?.totalTokenCount,
       };
     } catch (error) {
-      console.log(`[Gemini Provider] Error:`, error);
-
       if (error instanceof Error) {
         throw new AiError(502, error.message, "AI_PROVIDER_ERROR", error.stack);
       }

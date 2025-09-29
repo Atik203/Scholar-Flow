@@ -868,10 +868,9 @@ export const paperController = {
         threadId: thread.id,
         prompt,
         context: paperContext,
-        conversationHistory: recentMessages.map((msg) => ({
+        history: recentMessages.map((msg) => ({
           role: msg.role as "user" | "assistant",
           content: msg.content,
-          timestamp: msg.createdAt,
         })),
         workspaceId: paperRecord.workspaceId,
         uploaderId: paperRecord.uploaderId,
@@ -884,6 +883,7 @@ export const paperController = {
       await paperService.recordInsightMessage(thread.id, {
         role: "user",
         content: prompt,
+        createdById: authReq.user.id,
       });
 
       await paperService.recordInsightMessage(thread.id, {
@@ -894,6 +894,7 @@ export const paperController = {
           tokensUsed: result.tokensUsed,
           suggestions: result.suggestions,
         },
+        createdById: authReq.user.id,
       });
 
       sendSuccessResponse(
@@ -980,10 +981,14 @@ export const paperController = {
             paperId,
             threads: threads.map((thread) => ({
               id: thread.id,
+              paperId: thread.paperId,
+              userId: thread.userId,
               createdAt: thread.createdAt,
               updatedAt: thread.updatedAt,
-              messageCount: thread._count?.messages || 0,
-              lastMessage: thread.messages?.[0] || null,
+              _count: thread._count ?? {
+                messages: thread.messages?.length ?? 0,
+              },
+              messages: thread.messages ?? [],
             })),
           },
           "Insight threads retrieved"
