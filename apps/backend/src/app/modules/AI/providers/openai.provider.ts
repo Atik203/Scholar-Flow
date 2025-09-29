@@ -12,7 +12,12 @@ import {
   AiSummaryResult,
 } from "../ai.types";
 
-const DEFAULT_MODEL = "gpt-4o-mini";
+const DEFAULT_MODEL = "gpt-4o-mini"; // Most cost-effective GPT-4 class model
+const COST_EFFECTIVE_MODELS = [
+  "gpt-4o-mini", // Primary cost-effective model
+  "gpt-3.5-turbo", // Fallback cost-effective option
+  "gpt-4o", // Higher capability when needed
+];
 
 type OpenAIClientInstance = InstanceType<typeof OpenAI>;
 
@@ -51,12 +56,13 @@ type ResponsesResponseFormat = ResponsesCreateParams extends {
   ? R
   : JsonSchemaResponseFormat | undefined;
 
+// Prioritize cost-effective models (ordered by cost efficiency)
 const SUPPORTED_MODELS = [
-  "gpt-4o-mini",
-  "gpt-4o",
+  "gpt-4o-mini", // Most cost-effective GPT-4 class model
+  "gpt-3.5-turbo", // Very cost-effective for simpler tasks
+  "gpt-4o", // Higher capability when needed
   "gpt-4-turbo",
   "gpt-4",
-  "gpt-3.5-turbo",
   "gpt-3.5-turbo-16k",
 ];
 
@@ -462,7 +468,8 @@ export class OpenAiProvider extends BaseAiProvider {
   }
 
   private useResponsesApi(model: string): boolean {
-    return RESPONSES_MODELS.has(model);
+    // Disable Responses API to use standard chat completions API
+    return false;
   }
 
   private async callStructuredJson<T>(
@@ -517,7 +524,10 @@ export class OpenAiProvider extends BaseAiProvider {
       };
 
       if (responseFormat) {
-        requestBody.response_format = responseFormat as unknown;
+        // Use the new text.format parameter structure for Responses API
+        requestBody.text = {
+          format: responseFormat as unknown,
+        };
       }
 
       const response = await responsesClient.create(requestBody);

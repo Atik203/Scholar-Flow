@@ -15,22 +15,17 @@ import type {
   ProviderName,
   ProviderStatus,
 } from "./ai.types";
-import { DeepseekProvider } from "./providers/deepseek.provider";
 import { GeminiProvider } from "./providers/gemini.provider";
 import { OpenAiProvider } from "./providers/openai.provider";
 
 const providers: Record<ProviderName, BaseAiProvider | null> = {
   openai: new OpenAiProvider(config.openai.apiKey, config.ai.requestTimeoutMs),
   gemini: new GeminiProvider(config.gemini.apiKey, config.ai.requestTimeoutMs),
-  deepseek: new DeepseekProvider(
-    config.deepseek.apiKey,
-    config.ai.requestTimeoutMs
-  ),
   heuristic: null,
 };
 
 const isKnownProvider = (value: string): value is ProviderName =>
-  ["openai", "gemini", "deepseek", "heuristic"].includes(value as ProviderName);
+  ["openai", "gemini", "heuristic"].includes(value as ProviderName);
 
 type MetadataPersistOptions = {
   paperId: string;
@@ -271,7 +266,7 @@ const runInsightHeuristics = (input: AiInsightRequest): AiInsightResult => {
 
 export const aiService = {
   getProviderStatuses(): ProviderStatus[] {
-    return ["openai", "gemini", "deepseek"].map((provider) => {
+    return ["gemini", "openai"].map((provider) => {
       const instance = providers[provider as ProviderName];
       return {
         provider: provider as ProviderName,
