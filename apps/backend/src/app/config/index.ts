@@ -3,6 +3,34 @@ import path from "path";
 
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 
+const parseBoolean = (value: string | undefined, defaultValue = false) => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (["false", "0", "no"].includes(normalized)) {
+    return false;
+  }
+  if (["true", "1", "yes"].includes(normalized)) {
+    return true;
+  }
+  return defaultValue;
+};
+
+const parseNumber = (value: string | undefined, defaultValue: number) => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : defaultValue;
+};
+
+const parseFallbackOrder = (value: string | undefined) =>
+  (value || "openai,gemini,deepseek")
+    .split(",")
+    .map((provider) => provider.trim().toLowerCase())
+    .filter(Boolean);
+
 export default {
   env: process.env.NODE_ENV,
   port: process.env.PORT,
@@ -32,13 +60,30 @@ export default {
   },
   // Add other configurations as needed
   openai: {
-    api_key: process.env.OPENAI_API_KEY,
+    apiKey: process.env.OPENAI_API_KEY,
+  },
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY,
+  },
+  deepseek: {
+    apiKey: process.env.DEEPSEAK_API_KEY,
+  },
+  ai: {
+    featuresEnabled: parseBoolean(process.env.AI_FEATURES_ENABLED, true),
+    requestTimeoutMs: parseNumber(process.env.AI_REQUEST_TIMEOUT_MS, 15000),
+    providerFallbackOrder: parseFallbackOrder(
+      process.env.AI_PROVIDER_FALLBACK_ORDER
+    ),
   },
   aws: {
     access_key_id: process.env.AWS_ACCESS_KEY_ID,
     secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,
     bucket_name: process.env.AWS_BUCKET_NAME,
     region: process.env.AWS_REGION,
+  },
+  featureFlags: {
+    uploads: parseBoolean(process.env.FEATURE_UPLOADS, true),
+    aiEnabled: parseBoolean(process.env.AI_FEATURES_ENABLED, true),
   },
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY,
