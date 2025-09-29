@@ -48,6 +48,33 @@ export interface AiSummaryResult {
   cached?: boolean;
 }
 
+export type AiChatRole = "user" | "assistant" | "system";
+
+export interface AiInsightMessagePayload {
+  role: AiChatRole;
+  content: string;
+}
+
+export interface AiInsightRequest {
+  paperId: string;
+  prompt: string;
+  context: string;
+  history?: AiInsightMessagePayload[];
+  workspaceId?: string;
+  uploaderId?: string;
+  userId?: string;
+  timeoutMs?: number;
+  model?: string;
+}
+
+export interface AiInsightResult {
+  provider: ProviderName;
+  message: AiInsightMessagePayload;
+  suggestions?: string[];
+  tokensUsed?: number;
+  rawResponse?: unknown;
+}
+
 export interface AiMetadataExtractionInput {
   text: string;
   originalTitle?: string | null;
@@ -76,4 +103,5 @@ export interface AiProvider {
     input: AiMetadataExtractionInput
   ): Promise<AiMetadataExtractionResult | null>;
   generateSummary(input: AiSummaryRequest): Promise<AiSummaryResult | null>;
+  generateInsights?(input: AiInsightRequest): Promise<AiInsightResult | null>;
 }

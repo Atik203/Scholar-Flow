@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { generateSummarySchema } from "../AI/ai.validation";
+import {
+  generateInsightSchema,
+  generateSummarySchema,
+} from "../AI/ai.validation";
 
 // Upload schema (multipart form fields except file which comes from multer)
 export const uploadPaperSchema = z.object({
@@ -94,6 +97,7 @@ export const shareViaEmailSchema = z.object({
 });
 
 export const generatePaperSummarySchema = generateSummarySchema;
+export const generatePaperInsightSchema = generateInsightSchema;
 
 export type CreateEditorPaperInput = z.infer<typeof createEditorPaperSchema>;
 export type UpdateEditorContentInput = z.infer<
@@ -103,4 +107,7 @@ export type PublishDraftInput = z.infer<typeof publishDraftSchema>;
 export type ShareViaEmailInput = z.infer<typeof shareViaEmailSchema>;
 export type GeneratePaperSummaryInput = z.infer<
   typeof generatePaperSummarySchema
+>;
+export type GeneratePaperInsightInput = z.infer<
+  typeof generatePaperInsightSchema
 >;
