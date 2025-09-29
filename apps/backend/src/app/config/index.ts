@@ -75,6 +75,13 @@ export default {
       process.env.AI_PROVIDER_FALLBACK_ORDER
     ),
   },
+  redis: {
+    host: process.env.REDIS_HOST || "localhost",
+    port: parseNumber(process.env.REDIS_PORT, 6379),
+    password: process.env.REDIS_PASSWORD,
+    db: parseNumber(process.env.REDIS_DB, 0),
+    tls: parseBoolean(process.env.REDIS_TLS_ENABLED, false),
+  },
   aws: {
     access_key_id: process.env.AWS_ACCESS_KEY_ID,
     secret_access_key: process.env.AWS_SECRET_ACCESS_KEY,

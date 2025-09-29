@@ -71,6 +71,10 @@ export const PAPER_ERRORS = {
     message: "Paper is currently being processed",
     statusCode: 409,
   },
+  SUMMARY_GENERATION_FAILED: {
+    message: "Failed to generate AI summary",
+    statusCode: 502,
+  },
 
   // Operation errors
   DELETE_FAILED: { message: "Failed to delete paper", statusCode: 500 },
@@ -129,6 +133,12 @@ export const createPaperError = {
       PAPER_ERRORS.AUTHENTICATION_REQUIRED.statusCode
     ),
 
+  insufficientPermissions: () =>
+    new PaperError(
+      PAPER_ERRORS.INSUFFICIENT_PERMISSIONS.message,
+      PAPER_ERRORS.INSUFFICIENT_PERMISSIONS.statusCode
+    ),
+
   paperNotFound: (paperId?: string) =>
     new PaperError(
       PAPER_ERRORS.PAPER_NOT_FOUND.message +
@@ -153,5 +163,12 @@ export const createPaperError = {
       PAPER_ERRORS.STORAGE_ERROR.message +
         (operation ? ` during ${operation}` : ""),
       PAPER_ERRORS.STORAGE_ERROR.statusCode
+    ),
+
+  summaryGenerationFailed: (details?: string) =>
+    new PaperError(
+      PAPER_ERRORS.SUMMARY_GENERATION_FAILED.message +
+        (details ? `: ${details}` : ""),
+      PAPER_ERRORS.SUMMARY_GENERATION_FAILED.statusCode
     ),
 };

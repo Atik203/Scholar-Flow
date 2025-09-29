@@ -3,6 +3,8 @@ import {
   AiMetadataExtractionInput,
   AiMetadataExtractionResult,
   AiProvider,
+  AiSummaryRequest,
+  AiSummaryResult,
   ProviderName,
 } from "./ai.types";
 
@@ -57,6 +59,37 @@ export abstract class BaseAiProvider implements AiProvider {
     }
   }
 
+  async generateSummary(
+    input: AiSummaryRequest
+  ): Promise<AiSummaryResult | null> {
+    if (!this.isEnabled()) {
+      return null;
+    }
+
+    try {
+      const sanitizedText = this.sanitizeText(input.text);
+      const effectiveInput: AiSummaryRequest = {
+        ...input,
+        text: sanitizedText,
+        timeoutMs: input.timeoutMs || this.requestTimeoutMs,
+        wordLimit: input.wordLimit ?? 220,
+      };
+
+      return await this.performSummary(effectiveInput);
+    } catch (error) {
+      if (error instanceof AiError) {
+        throw error;
+      }
+
+      throw new AiError(
+        502,
+        `${this.name} summary generation failed`,
+        "AI_PROVIDER_ERROR",
+        error instanceof Error ? error.stack : undefined
+      );
+    }
+  }
+
   protected sanitizeText(text: string): string {
     if (!text) {
       return "";
@@ -70,4 +103,8 @@ export abstract class BaseAiProvider implements AiProvider {
   protected abstract performExtraction(
     input: AiMetadataExtractionInput
   ): Promise<AiMetadataExtractionResult>;
+
+  protected abstract performSummary(
+    input: AiSummaryRequest
+  ): Promise<AiSummaryResult>;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
@@ -88,7 +89,6 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
     data: paper,
     isLoading,
     isError,
-    error,
   } = useGetPaperQuery(resolvedParams.id);
 
   // Debug logging to check raw paper data
@@ -111,17 +111,11 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
   const startEditing = () => {
     if (paper) {
-      console.log("Starting edit - paper metadata:", paper.metadata);
-      console.log("Current authors:", paper.metadata?.authors);
       setEditTitle(paper.title);
       setEditAbstract(paper.abstract || "");
       setEditAuthors(paper.metadata?.authors || []);
       setEditYear(paper.metadata?.year || "");
       setIsEditing(true);
-      console.log(
-        "Edit state initialized - editAuthors:",
-        paper.metadata?.authors || []
-      );
     }
   };
 
@@ -152,17 +146,13 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
       year: editYear || undefined,
     };
 
-    console.log("Updating paper with data:", updateData);
-
     try {
-      const result = await updateMetadata(updateData).unwrap();
-      console.log("Update result:", result);
+      await updateMetadata(updateData).unwrap();
 
       setIsEditing(false);
       showSuccessToast("Paper metadata updated successfully");
-    } catch (error) {
+    } catch (_error) {
       showErrorToast("Failed to update paper metadata");
-      console.error("Update error:", error);
     }
   };
 
@@ -173,9 +163,8 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
       await deletePaper(paper.id).unwrap();
       showSuccessToast("Paper deleted successfully");
       router.push("/dashboard/papers");
-    } catch (error) {
+    } catch (_error) {
       showErrorToast("Failed to delete paper");
-      console.error("Delete error:", error);
     }
   };
 
@@ -548,6 +537,8 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
           {/* Enhanced Sidebar */}
           <div className="space-y-6">
+            <AiSummaryPanel paperId={paper.id} paperTitle={paper.title} />
+
             {/* Enhanced File Info */}
             <Card className="shadow-sm border-border/50 hover:shadow-md transition-shadow">
               <CardHeader className="pb-3 bg-gradient-to-r from-background to-muted/20">
