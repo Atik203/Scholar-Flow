@@ -852,15 +852,12 @@ export const paperController = {
         10 // limit - last 10 messages for context
       );
 
-      // Get paper content for context if this is a new conversation
-      let paperContext = "";
-      if (recentMessages.length === 0) {
-        const source = await paperService.getSummarySourceText(
-          paperId,
-          paperRecord
-        );
-        paperContext = source.text || "";
-      }
+      // Always get paper content for context so AI knows what paper we're discussing
+      const source = await paperService.getSummarySourceText(
+        paperId,
+        paperRecord
+      );
+      const paperContext = source.text || "";
 
       // Generate insight using AI service
       const insightInput = {
