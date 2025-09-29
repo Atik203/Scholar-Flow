@@ -63,38 +63,25 @@ const AI_MODELS = [
     description: "Best quality responses for complex analysis",
     provider: "OpenAI",
   },
-  // Google Gemini Models (Free)
+  // Google Gemini Models (Free - Primary Choice)
   {
-    value: "gemini-1.5-flash",
-    label: "Gemini 1.5 Flash (Google - Free & Fast)",
-    description: "Fast and free Google AI model",
+    value: "gemini-2.5-flash-lite",
+    label: "Gemini 2.5 Flash Lite (Primary - Free)",
+    description: "Latest lightweight Google AI model, very fast and free",
     provider: "Google",
   },
   {
-    value: "gemini-1.5-pro",
-    label: "Gemini 1.5 Pro (Google - Free)",
-    description: "More capable Google AI model with free usage",
+    value: "gemini-2.5-flash",
+    label: "Gemini 2.5 Flash (Google - Free)",
+    description: "Enhanced Google AI model with improved capabilities",
     provider: "Google",
-  },
-  // Deepseek Models (Very Affordable)
-  {
-    value: "deepseek-chat",
-    label: "Deepseek Chat (Very Affordable)",
-    description: "High-quality responses at very low cost",
-    provider: "Deepseek",
-  },
-  {
-    value: "deepseek-coder",
-    label: "Deepseek Coder (Code Specialist)",
-    description: "Specialized for technical and code-related analysis",
-    provider: "Deepseek",
   },
 ];
 
 export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
   const [prompt, setPrompt] = useState("");
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash-lite");
 
   const {
     data: insightsData,

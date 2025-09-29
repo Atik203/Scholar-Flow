@@ -9,12 +9,11 @@ import {
   AiSummaryResult,
 } from "../ai.types";
 
-// Google Gemini free models
-const DEFAULT_MODEL = "gemini-1.5-flash";
+// Google Gemini cost-effective models (2.5 series only)
+const DEFAULT_MODEL = "gemini-2.5-flash-lite";
 const FREE_MODELS = [
-  "gemini-1.5-flash", // Fast and free
-  "gemini-1.5-pro", // More capable, also free with limits
-  "gemini-pro", // Legacy model
+  "gemini-2.5-flash-lite", // Lightweight and cost-effective
+  "gemini-2.5-flash", // More capable but still cost-effective
 ];
 
 const isValidGeminiModel = (model: string): boolean => {
@@ -81,7 +80,7 @@ export class GeminiProvider extends BaseAiProvider {
         ? input.model || DEFAULT_MODEL
         : DEFAULT_MODEL;
       const instructions =
-        "You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers with optional actionable takeaways. Return a JSON object with keys: answer (string), suggestions (array of strings), tokensUsed (number).";
+        "You are a senior research mentor helping a scholar interpret and apply insights from a paper. Provide clear, structured answers in natural conversational style. Be helpful, insightful, and provide actionable takeaways when relevant. Respond directly and naturally - do not use JSON format.";
 
       const historyText = Array.isArray(input.history)
         ? input.history
@@ -101,7 +100,6 @@ export class GeminiProvider extends BaseAiProvider {
         contextBlock,
         historyText ? `Conversation history:\n${historyText}` : undefined,
         `Current question: ${input.prompt}`,
-        "Respond strictly in JSON.",
       ]
         .filter(Boolean)
         .join("\n\n");
