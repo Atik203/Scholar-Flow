@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { withOptimize } from "@prisma/extension-optimize";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -6,11 +7,13 @@ const isDev = process.env.NODE_ENV !== "production";
 // Enrich global type for TypeScript
 declare global {
   // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
+  var prisma: any; // Use 'any' to support extended Prisma Client
+  let basePrismaClient: PrismaClient | undefined;
 }
 
-const prismaClient =
-  global.prisma ||
+// Create base Prisma client first
+const basePrismaClient =
+  global.basePrismaClient ||
   new PrismaClient({
     log: isDev
       ? [
@@ -25,12 +28,9 @@ const prismaClient =
         ],
   });
 
-if (isDev) global.prisma = prismaClient;
-
-// Optional performance-focused query log only in dev
+// Attach event listeners to base client before extensions
 if (isDev) {
-  // @ts-expect-error: Prisma Client extension type issue
-  prismaClient.$on("query", (e: any) => {
+  basePrismaClient.$on("query", (e: any) => {
     // Only log slow queries (>100ms) to reduce console noise
     if (e.duration > 100) {
       console.log(
@@ -38,6 +38,20 @@ if (isDev) {
       );
     }
   });
+}
+
+// Apply extensions to create the final client
+const prismaClient =
+  global.prisma ||
+  basePrismaClient.$extends(
+    withOptimize({
+      apiKey: process.env.OPTIMIZE_API_KEY!,
+    })
+  );
+
+if (isDev) {
+  global.prisma = prismaClient;
+  global.basePrismaClient = basePrismaClient;
 }
 
 export default prismaClient;
