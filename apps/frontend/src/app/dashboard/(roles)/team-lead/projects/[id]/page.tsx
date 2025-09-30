@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const projectsDetail = {
   "fusion-pipeline": {
@@ -44,14 +45,10 @@ const projectsDetail = {
   },
 } as const;
 
-interface TeamLeadProjectDetailProps {
-  params: { id: string };
-}
-
-export default function TeamLeadProjectDetail({
-  params,
-}: TeamLeadProjectDetailProps) {
-  const detail = projectsDetail[params.id as keyof typeof projectsDetail];
+export default function TeamLeadProjectDetail() {
+  const params = useParams();
+  const id = params.id as string;
+  const detail = projectsDetail[id as keyof typeof projectsDetail];
 
   return (
     <div className="space-y-6">

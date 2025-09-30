@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 const insightsDetail = {
   "vector-discovery": {
@@ -38,14 +39,10 @@ const insightsDetail = {
   },
 } as const;
 
-interface ProResearcherInsightDetailProps {
-  params: { id: string };
-}
-
-export default function ProResearcherInsightDetail({
-  params,
-}: ProResearcherInsightDetailProps) {
-  const detail = insightsDetail[params.id as keyof typeof insightsDetail];
+export default function ProResearcherInsightDetail() {
+  const params = useParams();
+  const id = params.id as string;
+  const detail = insightsDetail[id as keyof typeof insightsDetail];
 
   return (
     <div className="space-y-6">
