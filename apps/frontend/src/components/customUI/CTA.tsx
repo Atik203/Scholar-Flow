@@ -8,10 +8,10 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 export const CTA: React.FC = () => {
-  const { isAuthenticated, isLoading } = usePublicRoute();
+  const { isAuthenticated, isLoading, user } = usePublicRoute();
   const pathname = usePathname();
 
-  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname);
+  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname, user?.role);
   return (
     <section
       id="pricing"

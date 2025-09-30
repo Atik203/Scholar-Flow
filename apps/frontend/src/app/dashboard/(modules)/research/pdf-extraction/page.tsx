@@ -32,6 +32,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { getRoleDashboardUrl } from "@/lib/auth/redirects";
 import {
   useGetPaperFileUrlQuery,
   useListPapersQuery,
@@ -55,11 +56,14 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function PdfExtractionPage() {
   const { isLoading } = useProtectedRoute();
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
   const [selectedPaper, setSelectedPaper] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterByPage, setFilterByPage] = useState<number | null>(null);
@@ -155,7 +159,7 @@ export default function PdfExtractionPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
+            <Link href={getRoleDashboardUrl(userRole)}>
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard

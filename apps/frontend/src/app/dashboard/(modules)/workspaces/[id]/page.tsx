@@ -33,6 +33,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
@@ -61,13 +62,16 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function WorkspaceDetailPage() {
   const isProtected = useProtectedRoute();
+  const { data: session } = useSession();
   const router = useRouter();
+  const userRole = session?.user?.role || "";
   const params = useParams();
   const id = params.id as string;
 
@@ -158,7 +162,7 @@ export default function WorkspaceDetailPage() {
     try {
       await deleteWorkspace(id).unwrap();
       showSuccessToast("Workspace deleted successfully");
-      router.push("/dashboard/workspaces");
+      router.push(buildRoleScopedPath(userRole, "/workspaces"));
     } catch (error: any) {
       showApiErrorToast(error);
     }
@@ -192,7 +196,7 @@ export default function WorkspaceDetailPage() {
             access to it.
           </p>
           <Button asChild>
-            <Link href="/dashboard/workspaces">
+            <Link href={buildRoleScopedPath(userRole, "/workspaces")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Workspaces
             </Link>
@@ -211,7 +215,7 @@ export default function WorkspaceDetailPage() {
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-4">
           <Button asChild variant="outline" size="sm">
-            <Link href="/dashboard/workspaces">
+            <Link href={buildRoleScopedPath(userRole, "/workspaces")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Workspaces
             </Link>
