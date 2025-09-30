@@ -10,6 +10,8 @@ import { validateRequestBody } from "../../middleware/validateRequest";
 import { editorPaperController, paperController } from "./paper.controller";
 import {
   createEditorPaperSchema,
+  generatePaperInsightSchema,
+  generatePaperSummarySchema,
   publishDraftSchema,
   shareViaEmailSchema,
   updateEditorContentSchema,
@@ -60,6 +62,15 @@ paperRoutes.get(
   paperOperationLimiter,
   optionalAuth as any,
   paperController.getPreviewUrl as any
+);
+
+// Generate AI summary for a paper
+paperRoutes.post(
+  "/:id/summary",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperSummarySchema) as any,
+  paperController.generateSummary as any
 );
 
 // Update metadata (protected, but allow dev fallback)
@@ -128,6 +139,23 @@ paperRoutes.post(
   authMiddleware as any,
   validateRequestBody(shareViaEmailSchema),
   paperController.shareViaEmail as any
+);
+
+// Generate AI insights for a paper (chat-like conversation)
+paperRoutes.post(
+  "/:id/insights",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperInsightSchema),
+  paperController.generateInsight as any
+);
+
+// Get insight conversation history for a paper
+paperRoutes.get(
+  "/:id/insights",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getInsightHistory as any
 );
 
 // Editor-specific routes

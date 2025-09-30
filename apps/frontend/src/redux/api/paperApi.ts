@@ -58,6 +58,87 @@ export interface UpdatePaperMetadataRequest {
   year?: number;
 }
 
+export type PaperSummaryTone =
+  | "academic"
+  | "technical"
+  | "executive"
+  | "casual"
+  | "conversational";
+
+export type PaperSummaryAudience =
+  | "researcher"
+  | "student"
+  | "executive"
+  | "general";
+
+export interface PaperSummaryRequest {
+  instructions?: string;
+  focusAreas?: string[];
+  tone?: PaperSummaryTone;
+  audience?: PaperSummaryAudience;
+  language?: string;
+  wordLimit?: number;
+  refresh?: boolean;
+}
+
+export interface PaperSummaryResponse {
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  provider: string;
+  model: string;
+  tokensUsed?: number | null;
+  cached: boolean;
+  promptHash: string;
+  source: string;
+  chunkCount: number;
+  generatedAt: string;
+  refreshed: boolean;
+}
+
+// AI Insights interfaces
+export interface AIInsightMessage {
+  id: string;
+  threadId: string;
+  role: "user" | "assistant";
+  content: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  createdById?: string | null;
+}
+
+export interface AIInsightThread {
+  id: string;
+  paperId: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    messages: number;
+  };
+  messages?: AIInsightMessage[];
+}
+
+export interface GenerateInsightRequest {
+  message: string;
+  threadId?: string;
+  model?: string;
+}
+
+export interface GenerateInsightResponse {
+  threadId: string;
+  answer: string;
+  suggestions?: string[];
+  provider: string;
+  model?: string;
+  tokensUsed?: number;
+}
+
+export interface PaperInsightsResponse {
+  paperId: string;
+  threads: AIInsightThread[];
+}
+
 // Editor-specific interfaces
 export interface CreateEditorPaperRequest {
   workspaceId: string;
@@ -439,6 +520,47 @@ export const paperApi = apiSlice.injectEndpoints({
         };
       },
     }),
+
+    generatePaperSummary: builder.mutation<
+      PaperSummaryResponse,
+      { paperId: string; input?: PaperSummaryRequest }
+    >({
+      query: ({ paperId, input }) => ({
+        url: `/papers/${paperId}/summary`,
+        method: "POST",
+        body: input ?? {},
+      }),
+      transformResponse: (response: { data: PaperSummaryResponse }) =>
+        response.data,
+    }),
+
+    // AI Insights endpoints
+    generatePaperInsight: builder.mutation<
+      GenerateInsightResponse,
+      { paperId: string; input: GenerateInsightRequest }
+    >({
+      query: ({ paperId, input }) => ({
+        url: `/papers/${paperId}/insights`,
+        method: "POST",
+        body: input,
+      }),
+      transformResponse: (response: { data: GenerateInsightResponse }) =>
+        response.data,
+      invalidatesTags: (result, error, { paperId }) => [
+        { type: "AIInsight", id: paperId },
+        { type: "Paper", id: paperId },
+      ],
+    }),
+
+    getPaperInsights: builder.query<PaperInsightsResponse, string>({
+      query: (paperId) => `/papers/${paperId}/insights`,
+      transformResponse: (response: { data: PaperInsightsResponse }) =>
+        response.data,
+      providesTags: (result, error, paperId) => [
+        { type: "AIInsight", id: paperId },
+        { type: "Paper", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -465,4 +587,8 @@ export const {
   useExportPaperDocxMutation,
   useUploadImageForEditorMutation,
   useShareViaEmailMutation,
+  useGeneratePaperSummaryMutation,
+  // AI Insights endpoints
+  useGeneratePaperInsightMutation,
+  useGetPaperInsightsQuery,
 } = paperApi;

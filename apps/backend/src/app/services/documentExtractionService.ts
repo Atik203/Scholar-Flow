@@ -1,5 +1,6 @@
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
+import { aiService } from "../modules/AI/ai.service";
 import { StorageService } from "../modules/papers/StorageService";
 import prisma from "../shared/prisma";
 import { docxToPdfService } from "./docxToPdfService";
@@ -190,6 +191,41 @@ export class DocumentExtractionService {
           },
         }),
       ]);
+
+      const metadataText =
+        extractionResult.text ||
+        extractionResult.chunks?.map((chunk) => chunk.content).join("\n") ||
+        "";
+
+      if (metadataText.trim().length > 0) {
+        try {
+          await aiService.extractAndPersistMetadata({
+            paperId,
+            text: metadataText,
+            originalTitle: paper.title,
+            currentTitle: paper.title,
+            currentAbstract: paper.abstract,
+            existingMetadata: paper.metadata as unknown as Record<
+              string,
+              unknown
+            > | null,
+            workspaceId: paper.workspaceId,
+            uploaderId: paper.uploaderId,
+          });
+          console.log(
+            `[DocumentExtraction] AI metadata enrichment applied for paper: ${paperId}`
+          );
+        } catch (metadataError) {
+          console.error(
+            `[DocumentExtraction] AI metadata enrichment failed for paper: ${paperId}`,
+            metadataError
+          );
+        }
+      } else {
+        console.warn(
+          `[DocumentExtraction] Skipping AI metadata enrichment for paper: ${paperId} (no text available)`
+        );
+      }
 
       console.log(
         `[DocumentExtraction] Successfully completed extraction for paper: ${paperId}`
@@ -389,7 +425,6 @@ export class DocumentExtractionService {
     const sections = this.identifyDocumentSections(text);
 
     let chunkIndex = 0;
-    let currentPage = 1;
     const safePageCount = Math.max(1, pageCount);
 
     // Process each section
@@ -564,7 +599,7 @@ export class DocumentExtractionService {
     let lastIndex = 0;
 
     while ((match = htmlSectionRegex.exec(html)) !== null) {
-      const [fullMatch, tag, attributes, content] = match;
+      const [fullMatch, tag] = match;
 
       // Add any content before this match
       if (match.index > lastIndex) {
