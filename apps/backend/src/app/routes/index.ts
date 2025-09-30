@@ -3,6 +3,7 @@ import {
   getApiStatus,
   getAvailableRoutes,
 } from "../controllers/status.controller";
+import { adminRoutes } from "../modules/Admin/admin.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { collectionRoutes } from "../modules/Collection/collection.routes";
 import { userRoutes } from "../modules/User/user.routes";
@@ -24,6 +25,7 @@ router.get("/routes", getAvailableRoutes);
 router.use("/health", healthRoutes);
 router.use("/user", userRoutes);
 router.use("/auth", authRoutes);
+router.use("/admin", adminRoutes);
 router.use("/papers", paperRoutes);
 router.use("/editor", editorPaperRoutes); // Editor-specific paper routes
 router.use("/collections", collectionRoutes);

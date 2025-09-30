@@ -86,6 +86,7 @@ export const apiSlice = createApi({
     "Annotation",
     "ProcessingStatus",
     "AIInsight",
+    "Admin",
   ],
   keepUnusedDataFor: 30, // Keep data for 30 seconds by default
   refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
