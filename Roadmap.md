@@ -107,9 +107,10 @@ Goal: Get a working core platform with minimal but functional features.
 ### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
-- [ ] Comment threads & activity log for user interactions
+- [ ] Referencing system for academic citations
 - [ ] Save annotations/comments (user & paper)
-- [ ] Dashboard analytics & versioning system
+- [ ] Research comment threads & activity log for user interactions
+- [ ] Research Notes
 
 ---
 
