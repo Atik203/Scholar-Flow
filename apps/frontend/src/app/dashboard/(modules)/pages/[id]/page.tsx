@@ -18,18 +18,14 @@ import {
   ROLE_LABELS,
 } from "@/lib/auth/roles";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 import { RESEARCHER_PAGES_BY_ID } from "../pages.data";
 
-interface ResearcherPageDetailProps {
-  params: { id: string };
-}
-
-export default function ResearcherPageDetail({
-  params,
-}: ResearcherPageDetailProps) {
+export default function ResearcherPageDetail() {
+  const params = useParams();
+  const id = params.id as string;
   const { user, isAuthenticated } = useProtectedRoute();
 
   const scopedPath = useCallback(
@@ -37,7 +33,7 @@ export default function ResearcherPageDetail({
     [user?.role]
   );
 
-  const detail = useMemo(() => RESEARCHER_PAGES_BY_ID[params.id], [params.id]);
+  const detail = useMemo(() => RESEARCHER_PAGES_BY_ID[id], [id]);
 
   if (!detail) {
     notFound();
