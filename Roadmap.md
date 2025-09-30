@@ -97,6 +97,13 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Intelligent paper insights with contextual chat
 - [x] Paper context integration throughout chat session
 
+### Week 5.5 – Dashboard & Routing Refresh (Author: Atik) ✅
+
+- [x] Convert dashboard navigation to role-scoped routes with shared module wrappers
+- [x] Launch admin overview workspace with production-ready analytics cards
+- [x] Align workspace/member screens with new layout (name/email fixes, invitation UX)
+- [x] Update middleware, redirects, and AppSidebar to honor role-based landing pages
+
 ### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
@@ -154,5 +161,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 5 Complete – AI Summarization & Multi-Provider AI Integration with Gemini and OpenAI, intelligent paper insights, and contextual chat capabilities fully implemented ✅ (Author: Atik)
+Current Status: Week 5.5 Complete – AI summarization + insights shipped alongside role-based dashboard refresh and admin tooling ✅ (Author: Atik)
 Last Updated: September 30, 2025

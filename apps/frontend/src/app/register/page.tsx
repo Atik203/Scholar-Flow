@@ -16,7 +16,7 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -133,11 +133,20 @@ export default function RegisterPage() {
       });
 
       if (signInResult?.ok) {
-        // Use smart redirect
-        const redirectUrl = handleAuthRedirect(true, searchParams);
+        // Wait for session to be updated
+        const session = await getSession();
+
+        // Use smart redirect with user role
+        const redirectUrl = handleAuthRedirect(
+          true,
+          searchParams,
+          "/login",
+          session?.user?.role
+        );
         router.push(redirectUrl);
       } else {
         // If auto sign-in fails, redirect to login page with callback
+        const callbackUrl = getCallbackUrl(searchParams);
         const loginUrl = new URL("/login", window.location.origin);
         if (callbackUrl !== "/dashboard") {
           loginUrl.searchParams.set("callbackUrl", callbackUrl);

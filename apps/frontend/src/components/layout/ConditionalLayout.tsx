@@ -24,7 +24,10 @@ const dashboardPages = [
   "/analytics",
   "/search",
   "/trends",
-  "/admin",
+  "/dashboard/researcher",
+  "/dashboard/pro-researcher",
+  "/dashboard/team-lead",
+  "/dashboard/admin",
 ];
 
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {

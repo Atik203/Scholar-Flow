@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getRoleDashboardBasePath } from "@/lib/auth/roles";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -27,6 +28,7 @@ export function UserMenu({ className }: UserMenuProps) {
   }
 
   const { user } = session;
+  const dashboardHref = getRoleDashboardBasePath(user.role);
   const initials = user.name
     ? user.name
         .split(" ")
@@ -93,7 +95,7 @@ export function UserMenu({ className }: UserMenuProps) {
 
         {/* Menu Items */}
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/dashboard" className="flex items-center">
+          <Link href={dashboardHref} className="flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
