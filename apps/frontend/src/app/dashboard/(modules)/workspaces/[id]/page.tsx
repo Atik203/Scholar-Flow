@@ -680,10 +680,10 @@ export default function WorkspaceDetailPage() {
                         </div>
                         <div>
                           <p className="font-medium">
-                            {member.user?.name || member.user?.email}
+                            {member.name || member.email}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {member.user?.email}
+                            {member.email}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             Joined{" "}
