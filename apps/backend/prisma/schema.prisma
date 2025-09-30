@@ -109,9 +109,10 @@ model User {
   CollectionPaper   CollectionPaper[]
   CollectionMember  CollectionMember[]
 
-  // Indexes for admin queries performance
-  @@index([createdAt, role])
-  @@index([role, isDeleted])
+  // Optimized indexes for common query patterns
+  @@index([isDeleted, createdAt]) // For listing active users sorted by creation
+  @@index([role, isDeleted, createdAt]) // For role-filtered queries
+  @@index([email, isDeleted]) // For email lookups with deletion filter
 }
 
 model Workspace {
@@ -132,7 +133,7 @@ model Workspace {
   Subscription Subscription[]
   UsageEvent   UsageEvent[]
 
-  @@index([ownerId])
+  @@index([ownerId, isDeleted, createdAt]) // For user's active workspaces
 }
 
 model WorkspaceMember {
@@ -150,8 +151,8 @@ model WorkspaceMember {
   isDeleted Boolean  @default(false)
 
   @@unique([workspaceId, userId])
-  @@index([userId])
-  @@index([workspaceId])
+  @@index([userId, isDeleted]) // For user's workspace lookups
+  @@index([workspaceId, isDeleted, role]) // For workspace member filtering by role
 }
 
 model WorkspaceInvitation {
@@ -175,8 +176,8 @@ model WorkspaceInvitation {
   isDeleted Boolean  @default(false)
 
   @@unique([workspaceId, userId])
-  @@index([workspaceId])
-  @@index([userId])
+  @@index([workspaceId, status, isDeleted]) // For pending invitation lookups
+  @@index([userId, status, isDeleted]) // For user's pending invitations
 }
 
 model Paper {
@@ -283,7 +284,8 @@ model Citation {
   isDeleted Boolean  @default(false)
 
   @@unique([sourcePaperId, targetPaperId, context])
-  @@index([targetPaperId])
+  @@index([targetPaperId, isDeleted]) // For citation lookups
+  @@index([sourcePaperId, isDeleted]) // Implicit from unique, but explicit for clarity
 }
 
 model Annotation {
@@ -307,8 +309,9 @@ model Annotation {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([paperId])
-  @@index([userId])
+  @@index([paperId, isDeleted, createdAt]) // For paper annotations sorted by date
+  @@index([userId, isDeleted]) // For user's annotations
+  @@index([parentId, isDeleted]) // For annotation threads
 }
 
 model AnnotationVersion {
@@ -347,8 +350,8 @@ model Collection {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([workspaceId])
-  @@index([ownerId])
+  @@index([workspaceId, isDeleted])
+  @@index([ownerId, isDeleted, createdAt]) // Optimized for getUserCollections query
 }
 
 model CollectionPaper {
@@ -367,7 +370,8 @@ model CollectionPaper {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, paperId])
-  @@index([paperId])
+  @@index([collectionId, isDeleted]) // For collection paper lookups
+  @@index([paperId, isDeleted]) // For paper collection lookups
 }
 
 model CollectionMember {
@@ -392,7 +396,8 @@ model CollectionMember {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, userId])
-  @@index([collectionId])
+  @@index([collectionId, status, isDeleted]) // For active member lookups
+  @@index([userId, isDeleted]) // For user's collection memberships
 }
 
 model SearchHistory {
@@ -507,9 +512,9 @@ model Subscription {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([userId])
-  @@index([workspaceId])
-  @@index([planId])
+  @@index([userId, status, isDeleted]) // For user's active subscriptions
+  @@index([workspaceId, status, isDeleted]) // For workspace subscriptions
+  @@index([status, expiresAt]) // For expiration checks
 }
 
 model Payment {
@@ -643,9 +648,9 @@ model Session {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  // Indexes for admin queries performance  
+  // Optimized index - composite is sufficient for session lookups
   @@index([userId, expires])
-  @@index([expires])
+  @@index([expires, isDeleted]) // For cleanup queries
 }
 
 model VerificationToken {
@@ -672,10 +677,9 @@ model UserToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([token])
-  @@index([type])
-  @@index([expiresAt])
+  @@index([token, used]) // For token validation
+  @@index([userId, type, used]) // For user's active tokens by type
+  @@index([expiresAt, used]) // For cleanup queries
 }
 
 enum TokenType {
