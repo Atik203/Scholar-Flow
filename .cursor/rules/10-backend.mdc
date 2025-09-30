@@ -7,13 +7,13 @@ alwaysApply: false
 
 # Backend Rules
 
-## ✅ ESTABLISHED SYSTEMS (Phase 1 Complete - September 17, 2025)
+## ✅ ESTABLISHED SYSTEMS (Phase 1 – Week 5.5)
 
 1. **Authentication**: OAuth (Google/GitHub) + JWT system with upsert handling ✅
-2. **Paper Management**: Complete upload, S3 storage, metadata extraction ✅  
-3. **User Profiles**: CRUD operations with validation and security ✅
-4. **File Processing**: PDF upload with metadata extraction ✅
-5. **Production Improvements**: Security, performance, monitoring, error handling ✅
+2. **Paper Management**: Upload, S3 storage, metadata extraction, AI summarization cache ✅
+3. **User Profiles & Workspaces**: CRUD, permissions, invitations, activity logging ✅
+4. **AI Insights**: Gemini-first + OpenAI fallback service powering summaries/chat ✅
+5. **Production Readiness**: Security, monitoring, health checks, rate limiting ✅
 
 ## Architecture & Structure
 

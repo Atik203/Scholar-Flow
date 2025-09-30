@@ -1,5 +1,25 @@
 # Scholar-Flow Changelog
 
+## v1.1.3 (2025-09-30) – Role-Based Dashboard Refresh
+
+Author: @Atik203
+
+### Highlights – v1.1.3
+
+- **Role-Scoped Navigation**: Dashboard URLs now live under `/dashboard/{role}/…` with shared module wrappers and thin role exports for every surface.
+- **Admin Workspace**: New admin overview with curated KPIs, action shortcuts, and consistent DashboardLayout usage across admin tools.
+- **Middleware & Redirects**: Auth middleware, verify-email flows, and CTA buttons updated to respect role-specific landing pages.
+- **Workspace UX Polish**: Members tab now shows accurate name + email metadata, plus unified layout across workspace tabs.
+- **Sidebar Consistency**: AppSidebar + navigation config rewritten to map roles directly to refreshed routes.
+
+### Technical Notes – v1.1.3
+
+- Consolidated dashboard module exports to a shared `(modules)` directory consumed by `(roles)` wrappers.
+- Added `getRoleDashboardUrl` helper and propagated through auth routes, CTA/Hero components, and research tools.
+- Wrapped admin pages (overview, users, settings, system, analytics) with `DashboardLayout` for shell parity.
+- Hardened middleware redirect logic to derive role slug from session and route users accordingly.
+- Updated RTK Query-powered workspace views to rely on top-level member fields (`name`, `email`) returned by SQL joins.
+
 ## v1.1.2 (2025-09-30) – AI Integration Complete
 
 Author: @Atik203
