@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { resolveRoleScopedHref } from "@/lib/auth/roles";
 import {
   useGetCollectionStatsQuery,
   useGetMyCollectionsQuery,
@@ -34,12 +35,17 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function CollectionsPage() {
-  const isProtected = useProtectedRoute();
+  const { user, isAuthenticated } = useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("all");
+
+  const scopedHref = useCallback(
+    (href: string) => resolveRoleScopedHref(user?.role, href),
+    [user?.role]
+  );
 
   // Fetch workspaces for selection
   const { data: workspacesData } = useListWorkspacesQuery({
@@ -73,7 +79,7 @@ export default function CollectionsPage() {
     }
   }, [workspacesData, selectedWorkspaceId]);
 
-  if (!isProtected) return null;
+  if (!isAuthenticated) return null;
 
   const collections = collectionsData?.result || [];
   const stats = statsData || {};
@@ -100,9 +106,11 @@ export default function CollectionsPage() {
             <Button asChild>
               <Link
                 href={
-                  selectedWorkspaceId
-                    ? `/dashboard/collections/create?workspaceId=${selectedWorkspaceId}`
-                    : "/dashboard/collections/create"
+                  selectedWorkspaceId && selectedWorkspaceId !== "all"
+                    ? scopedHref(
+                        `/dashboard/collections/create?workspaceId=${selectedWorkspaceId}`
+                      )
+                    : scopedHref("/dashboard/collections/create")
                 }
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -299,7 +307,9 @@ export default function CollectionsPage() {
                     </p>
                     {!searchTerm && (
                       <Button asChild>
-                        <Link href="/dashboard/collections/create">
+                        <Link
+                          href={scopedHref("/dashboard/collections/create")}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Create Collection
                         </Link>
@@ -399,7 +409,7 @@ export default function CollectionsPage() {
                     View collections shared with you by other users
                   </p>
                   <Button asChild>
-                    <Link href="/dashboard/collections/shared">
+                    <Link href={scopedHref("/dashboard/collections/shared")}>
                       <Users className="mr-2 h-4 w-4" />
                       View Shared Collections
                     </Link>

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
@@ -28,12 +29,17 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function PapersPage() {
-  const isProtected = useProtectedRoute();
+  const { user, isAuthenticated } = useProtectedRoute();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
+
+  const scopedPath = useCallback(
+    (segment: string) => buildRoleScopedPath(user?.role, segment),
+    [user?.role]
+  );
 
   // Fetch workspaces for selection
   const { data: workspacesData } = useListWorkspacesQuery({
@@ -57,7 +63,7 @@ export default function PapersPage() {
     }
   }, [workspacesData, selectedWorkspaceId]);
 
-  if (!isProtected) {
+  if (!isAuthenticated) {
     return null; // Loading state handled by useProtectedRoute
   }
 
@@ -90,7 +96,7 @@ export default function PapersPage() {
           </div>
           <div className="flex gap-3">
             <Button asChild variant="outline">
-              <Link href="/dashboard/papers/search">
+              <Link href={scopedPath("/papers/search")}>
                 <Search className="mr-2 h-4 w-4" />
                 Advanced Search
               </Link>
@@ -99,8 +105,8 @@ export default function PapersPage() {
               <Link
                 href={
                   selectedWorkspaceId
-                    ? `/dashboard/papers/upload?workspaceId=${selectedWorkspaceId}`
-                    : "/dashboard/papers/upload"
+                    ? `${scopedPath("/papers/upload")}?workspaceId=${selectedWorkspaceId}`
+                    : scopedPath("/papers/upload")
                 }
               >
                 <Upload className="mr-2 h-4 w-4" />
@@ -229,7 +235,7 @@ export default function PapersPage() {
                 Add research papers to your workspace with automatic processing
               </p>
               <Button asChild className="w-full">
-                <Link href="/dashboard/papers/upload">Get Started</Link>
+                <Link href={scopedPath("/papers/upload")}>Get Started</Link>
               </Button>
             </CardContent>
           </Card>
@@ -251,7 +257,7 @@ export default function PapersPage() {
                 Find papers with powerful filters and AI-powered search
               </p>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/dashboard/papers/search">Search Papers</Link>
+                <Link href={scopedPath("/papers/search")}>Search Papers</Link>
               </Button>
             </CardContent>
           </Card>
@@ -275,8 +281,8 @@ export default function PapersPage() {
                 <Link
                   href={
                     selectedWorkspaceId
-                      ? `/dashboard/collections?workspaceId=${selectedWorkspaceId}`
-                      : "/dashboard/collections"
+                      ? `${scopedPath("/collections")}?workspaceId=${selectedWorkspaceId}`
+                      : scopedPath("/collections")
                   }
                 >
                   Manage Collections
