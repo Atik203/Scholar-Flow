@@ -103,13 +103,19 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Launch admin overview workspace with production-ready analytics cards
 - [x] Align workspace/member screens with new layout (name/email fixes, invitation UX)
 - [x] Update middleware, redirects, and AppSidebar to honor role-based landing pages
+- [x] Dynamic admin system monitoring with real-time metrics (CPU, memory, storage, database)
+- [x] Accurate CPU usage calculation using Node.js os module with idle/total times
+- [x] Smart storage tracking with dynamic estimation based on actual database usage
+- [x] Real-time polling (10s) with RTK Query and comprehensive health status dashboard
+- [x] Production-grade components (HealthCard, PerformanceBar, SystemInfoRow) with lazy loading
 
 ### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
-- [ ] Comment threads & activity log for user interactions
+- [ ] Referencing system for academic citations
 - [ ] Save annotations/comments (user & paper)
-- [ ] Dashboard analytics & versioning system
+- [ ] Research comment threads & activity log for user interactions
+- [ ] Research Notes
 
 ---
 
@@ -161,5 +167,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 5.5 Complete – AI summarization + insights shipped alongside role-based dashboard refresh and admin tooling ✅ (Author: Atik)
+Current Status: Week 5.5 Complete – AI summarization + insights + role-based dashboard refresh + dynamic admin system monitoring ✅ (Author: Atik)
 Last Updated: September 30, 2025
