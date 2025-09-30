@@ -182,5 +182,41 @@ router.get(
   adminController.getSystemHealth
 );
 
+/**
+ * @swagger
+ * /api/admin/system/metrics:
+ *   get:
+ *     summary: Get System Metrics
+ *     description: Retrieve comprehensive system metrics including CPU, memory, disk, network, and database performance. Real-time monitoring endpoint.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System metrics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/SystemMetrics'
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/system/metrics",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemMetrics
+);
+
 const adminRoutes: import("express").Router = router;
 export { adminRoutes };

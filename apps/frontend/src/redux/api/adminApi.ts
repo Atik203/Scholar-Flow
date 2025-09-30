@@ -89,6 +89,57 @@ export interface RecentUsersParams {
   status?: "active" | "inactive" | "all";
 }
 
+export interface SystemMetrics {
+  health: {
+    database: "healthy" | "degraded" | "unhealthy";
+    server: "healthy" | "degraded" | "unhealthy";
+    storage: "healthy" | "warning" | "critical";
+    cpu: "healthy" | "warning" | "critical";
+  };
+  performance: {
+    cpu: {
+      usage: number;
+      cores: number;
+      loadAverage: number[];
+    };
+    memory: {
+      total: number;
+      used: number;
+      free: number;
+      usagePercentage: number;
+    };
+    disk: {
+      total: number;
+      used: number;
+      free: number;
+      usagePercentage: number;
+      ioPercentage: number;
+    };
+    network: {
+      bytesReceived: number;
+      bytesSent: number;
+      activeConnections: number;
+      bandwidth: number;
+    };
+  };
+  systemInfo: {
+    platform: string;
+    nodeVersion: string;
+    databaseVersion: string;
+    totalMemory: string;
+    storageCapacity: string;
+    uptime: number;
+    lastChecked: Date;
+  };
+  database: {
+    status: "healthy" | "degraded" | "unhealthy";
+    responseTime: number;
+    activeConnections: number;
+    maxConnections: number;
+    connectionPoolUsage: number;
+  };
+}
+
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get system statistics
@@ -172,6 +223,14 @@ export const adminApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 60,
       transformResponse: (response: { data: SystemHealth }) => response.data,
     }),
+
+    // Get system metrics
+    getSystemMetrics: builder.query<SystemMetrics, void>({
+      query: () => "/admin/system/metrics",
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 10, // 10 seconds cache for real-time monitoring
+      transformResponse: (response: { data: SystemMetrics }) => response.data,
+    }),
   }),
 });
 
@@ -182,4 +241,5 @@ export const {
   useGetRoleDistributionQuery,
   useGetPaperStatsQuery,
   useGetSystemHealthQuery,
+  useGetSystemMetricsQuery,
 } = adminApi;
