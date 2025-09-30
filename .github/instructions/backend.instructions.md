@@ -4,9 +4,13 @@ applyTo: "apps/backend/**"
 
 # Backend Development Instructions
 
-## ✅ Phase 1 Status: OAuth Authentication System Complete
+## ✅ Phase 1 Progress (Week 5.5)
 
-Production-ready authentication with comprehensive testing and proper error handling.
+- OAuth authentication, paper management, collections, and workspaces are production-ready.
+- Week 5 AI summarization + multi-provider insights shipped (Gemini primary, OpenAI fallback).
+- Week 5.5 dashboard restructure delivered with role-based routing, admin tools, and workspace refinements.
+
+Keep new work aligned with these shipped milestones and follow the standards below.
 
 ## 🚀 Production-Ready Improvements (September 17, 2025)
 

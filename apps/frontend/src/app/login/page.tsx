@@ -90,8 +90,13 @@ export default function LoginPage() {
           dismissToast(loadingToast);
           showAuthSuccessToast("Email/Password");
 
-          // Use smart redirect
-          const redirectUrl = handleAuthRedirect(true, searchParams);
+          // Use smart redirect with user role
+          const redirectUrl = handleAuthRedirect(
+            true,
+            searchParams,
+            "/login",
+            session.user?.role
+          );
           router.push(redirectUrl);
         }
       }
@@ -123,13 +128,20 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
+        // Wait for session to be updated
+        const session = await getSession();
         dismissToast(loadingToast);
         showAuthSuccessToast(
           provider.charAt(0).toUpperCase() + provider.slice(1)
         );
 
-        // Use smart redirect
-        const redirectUrl = handleAuthRedirect(true, searchParams);
+        // Use smart redirect with user role
+        const redirectUrl = handleAuthRedirect(
+          true,
+          searchParams,
+          "/login",
+          session?.user?.role
+        );
         router.push(redirectUrl);
       }
     } catch (error) {

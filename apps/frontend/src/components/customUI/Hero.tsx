@@ -19,10 +19,10 @@ import React from "react";
 
 export const Hero: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
-  const { isAuthenticated, isLoading } = usePublicRoute();
+  const { isAuthenticated, isLoading, user } = usePublicRoute();
   const pathname = usePathname();
 
-  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname);
+  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname, user?.role);
 
   const features = [
     {

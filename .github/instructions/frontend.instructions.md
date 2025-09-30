@@ -4,9 +4,13 @@ applyTo: "apps/frontend/**"
 
 # Frontend Development Instructions
 
-## ✅ Phase 1 Status: Authentication UI Complete
+## ✅ Phase 1 Progress (Week 5.5)
 
-OAuth authentication, login/register pages, and form validation are production-ready.
+- Auth flows, modern dashboard shell, paper/collection/workspace tooling are live.
+- Week 5 AI chat + summarization UI launched (Gemini-first with OpenAI fallback).
+- Week 5.5 introduced role-scoped dashboard routing and admin overview UX refresh.
+
+Keep new UI consistent with these delivered experiences and the standards below.
 
 ## 🚀 Advanced Error Handling (September 17, 2025)
 

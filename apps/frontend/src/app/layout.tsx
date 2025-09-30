@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
@@ -21,6 +22,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
+
   return (
     <html lang="en" suppressHydrationWarning data-lt-installed="true">
       <body className={inter.className}>
@@ -33,6 +36,7 @@ export default function RootLayout({
           </ReduxProvider>
         </NextAuthProvider>
         <Analytics />
+        {gaId && <GoogleAnalytics measurementId={gaId} />}
       </body>
     </html>
   );
