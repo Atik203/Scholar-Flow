@@ -6,6 +6,61 @@ export const USER_ROLES = {
   ADMIN: "ADMIN",
 } as const;
 
+export const ROLE_SLUGS = {
+  [USER_ROLES.RESEARCHER]: "researcher",
+  [USER_ROLES.PRO_RESEARCHER]: "pro-researcher",
+  [USER_ROLES.TEAM_LEAD]: "team-lead",
+  [USER_ROLES.ADMIN]: "admin",
+} as const;
+
+export const DEFAULT_ROLE_SLUG = ROLE_SLUGS[USER_ROLES.RESEARCHER];
+
+export const getRoleSlug = (role?: string) => {
+  if (!role) return DEFAULT_ROLE_SLUG;
+  return ROLE_SLUGS[role as keyof typeof ROLE_SLUGS] ?? DEFAULT_ROLE_SLUG;
+};
+
+export const getRoleDashboardBasePath = (role?: string) =>
+  `/dashboard/${getRoleSlug(role)}`;
+
+export const buildRoleScopedPath = (role: string | undefined, segment = "") => {
+  const basePath = getRoleDashboardBasePath(role);
+  if (!segment) return basePath;
+  return segment.startsWith("/")
+    ? `${basePath}${segment}`
+    : `${basePath}/${segment}`;
+};
+
+export const resolveRoleScopedHref = (
+  role: string | undefined,
+  href: string
+) => {
+  const [pathPart, search = ""] = href.split("?");
+  const stripped = pathPart.startsWith("/dashboard")
+    ? pathPart.slice("/dashboard".length)
+    : pathPart;
+  const segment = stripped.startsWith("/")
+    ? stripped
+    : stripped
+      ? `/${stripped}`
+      : "";
+  const resolved = buildRoleScopedPath(role, segment);
+  return search ? `${resolved}?${search}` : resolved;
+};
+
+export const ROLE_BY_SLUG = Object.entries(ROLE_SLUGS).reduce(
+  (acc, [roleKey, slug]) => {
+    acc[slug] = roleKey as keyof typeof USER_ROLES;
+    return acc;
+  },
+  {} as Record<string, keyof typeof USER_ROLES>
+);
+
+export const getRoleBySlug = (slug?: string) => {
+  if (!slug) return undefined;
+  return ROLE_BY_SLUG[slug];
+};
+
 export const ROLE_HIERARCHY = {
   RESEARCHER: 1,
   PRO_RESEARCHER: 2,
@@ -117,9 +172,24 @@ export const ROLE_PERMISSIONS = {
 export type UserRole = keyof typeof USER_ROLES;
 
 // Role-based navigation items
+type NavigationLink = {
+  label: string;
+  href: string;
+  permission: string;
+};
+
+const resolveNavigationLinks = (
+  userRole: string | undefined,
+  links: NavigationLink[]
+) =>
+  links.map((link) => ({
+    ...link,
+    href: buildRoleScopedPath(userRole, link.href),
+  }));
+
 export const getNavigationItems = (userRole?: string) => {
-  const baseItems = [
-    { label: "Dashboard", href: "/dashboard", permission: "dashboard:read" },
+  const baseItems: NavigationLink[] = [
+    { label: "Dashboard", href: "", permission: "dashboard:read" },
     { label: "Papers", href: "/papers", permission: "paper:read" },
     {
       label: "Collections",
@@ -128,8 +198,12 @@ export const getNavigationItems = (userRole?: string) => {
     },
   ];
 
-  const proItems = [
-    { label: "Workspaces", href: "/workspaces", permission: "workspace:read" },
+  const proItems: NavigationLink[] = [
+    {
+      label: "Workspaces",
+      href: "/workspaces",
+      permission: "workspace:read",
+    },
     {
       label: "Collaboration",
       href: "/collaborate",
@@ -137,33 +211,29 @@ export const getNavigationItems = (userRole?: string) => {
     },
   ];
 
-  const teamLeadItems = [
+  const teamLeadItems: NavigationLink[] = [
     { label: "Team", href: "/team", permission: "user:read_team" },
     { label: "Analytics", href: "/analytics", permission: "analytics:read" },
   ];
 
-  const adminItems = [
-    { label: "Admin", href: "/admin", permission: "admin:dashboard" },
-    { label: "Users", href: "/admin/users", permission: "user:read" },
-    {
-      label: "Settings",
-      href: "/admin/settings",
-      permission: "admin:settings",
-    },
+  const adminItems: NavigationLink[] = [
+    { label: "Admin", href: "/admin-overview", permission: "admin:dashboard" },
+    { label: "Users", href: "/users", permission: "user:read" },
+    { label: "Settings", href: "/settings", permission: "admin:settings" },
   ];
 
-  let items = [...baseItems];
+  let items = [...resolveNavigationLinks(userRole, baseItems)];
 
   if (hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER)) {
-    items = [...items, ...proItems];
+    items = [...items, ...resolveNavigationLinks(userRole, proItems)];
   }
 
   if (hasRoleAccess(userRole, USER_ROLES.TEAM_LEAD)) {
-    items = [...items, ...teamLeadItems];
+    items = [...items, ...resolveNavigationLinks(userRole, teamLeadItems)];
   }
 
   if (hasRoleAccess(userRole, USER_ROLES.ADMIN)) {
-    items = [...items, ...adminItems];
+    items = [...items, ...resolveNavigationLinks(userRole, adminItems)];
   }
 
   return items;

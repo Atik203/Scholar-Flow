@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { USER_ROLES } from "@/lib/auth/roles";
+import { USER_ROLES, resolveRoleScopedHref } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
@@ -45,7 +45,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Base quick actions available to all roles (now defined as a function to use workspace context)
 const getBaseQuickActions = (workspaceId?: string) => [
@@ -54,8 +54,8 @@ const getBaseQuickActions = (workspaceId?: string) => [
     description: "Add a new research paper to your collection",
     icon: Plus,
     href: workspaceId
-      ? `/dashboard/papers/upload?workspaceId=${workspaceId}`
-      : "/dashboard/papers/upload",
+      ? `/papers/upload?workspaceId=${workspaceId}`
+      : "/papers/upload",
     color: "bg-blue-500 hover:bg-blue-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -63,7 +63,7 @@ const getBaseQuickActions = (workspaceId?: string) => [
     title: "View Papers",
     description: "View and manage your research papers",
     icon: FileText,
-    href: "/dashboard/papers",
+    href: "/papers",
     color: "bg-green-500 hover:bg-green-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -71,7 +71,7 @@ const getBaseQuickActions = (workspaceId?: string) => [
     title: "Search Papers",
     description: "Find and explore research papers",
     icon: Search,
-    href: "/dashboard/papers/search",
+    href: "/papers/search",
     color: "bg-purple-500 hover:bg-purple-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -80,8 +80,8 @@ const getBaseQuickActions = (workspaceId?: string) => [
     description: "View and manage your paper collections",
     icon: BookOpen,
     href: workspaceId
-      ? `/dashboard/collections?workspaceId=${workspaceId}`
-      : "/dashboard/collections",
+      ? `/collections?workspaceId=${workspaceId}`
+      : "/collections",
     color: "bg-orange-500 hover:bg-orange-600",
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -94,7 +94,7 @@ const roleSpecificActions = {
       title: "Advanced Analytics",
       description: "Access detailed research analytics and insights",
       icon: Settings,
-      href: "/dashboard/analytics",
+      href: "",
       color: "bg-indigo-500 hover:bg-indigo-600",
     },
   ],
@@ -103,7 +103,7 @@ const roleSpecificActions = {
       title: "Team Management",
       description: "Manage team members and permissions",
       icon: Users,
-      href: "/dashboard/collaborations/teams/manage",
+      href: "",
       color: "bg-cyan-500 hover:bg-cyan-600",
     },
   ],
@@ -112,7 +112,7 @@ const roleSpecificActions = {
       title: "Admin Panel",
       description: "System administration and user management",
       icon: Shield,
-      href: "/dashboard/admin",
+      href: "",
       color: "bg-red-500 hover:bg-red-600",
     },
   ],
@@ -369,6 +369,13 @@ export default function DashboardPage() {
     );
   }, [workspacesData, selectedWorkspaceId]);
 
+  const userRole = user?.role || USER_ROLES.RESEARCHER;
+
+  const scopedHref = useCallback(
+    (href: string) => resolveRoleScopedHref(user?.role, href),
+    [user?.role]
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -377,14 +384,15 @@ export default function DashboardPage() {
     );
   }
 
-  const userRole = user?.role || USER_ROLES.RESEARCHER;
-
   // Get actions available to the user based on their role
   const getAvailableActions = () => {
     const actions = [...getBaseQuickActions(selectedWorkspaceId)];
     const userRoleActions =
       roleSpecificActions[userRole as keyof typeof roleSpecificActions] || [];
-    return [...actions, ...userRoleActions];
+    return [...actions, ...userRoleActions].map((action) => ({
+      ...action,
+      href: scopedHref(action.href),
+    }));
   };
 
   const availableActions = getAvailableActions();
@@ -658,7 +666,7 @@ export default function DashboardPage() {
                 className="justify-start h-auto p-3"
               >
                 <Link
-                  href="/dashboard/research/pdf-extraction"
+                  href={scopedHref("/research/pdf-extraction")}
                   className="flex items-center gap-3 w-full"
                 >
                   <div className="p-2 rounded-lg bg-emerald-500 text-white">
@@ -678,7 +686,7 @@ export default function DashboardPage() {
                 className="justify-start h-auto p-3"
               >
                 <Link
-                  href="/dashboard/papers/search"
+                  href={scopedHref("/papers/search")}
                   className="flex items-center gap-3 w-full"
                 >
                   <div className="p-2 rounded-lg bg-blue-500 text-white">
@@ -698,7 +706,7 @@ export default function DashboardPage() {
                 className="justify-start h-auto p-3 sm:col-span-2"
               >
                 <Link
-                  href="/dashboard/analytics"
+                  href={scopedHref("/analytics")}
                   className="flex items-center gap-3 w-full"
                 >
                   <div className="p-2 rounded-lg bg-purple-500 text-white">
@@ -848,7 +856,7 @@ export default function DashboardPage() {
               ))}
               <div className="pt-2">
                 <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link href="/dashboard/papers">
+                  <Link href={scopedHref("/papers")}>
                     View All Papers
                     <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Link>
@@ -919,7 +927,7 @@ export default function DashboardPage() {
                   asChild
                   className="w-full text-xs sm:text-sm"
                 >
-                  <Link href="/dashboard/papers/search">
+                  <Link href={scopedHref("/papers/search")}>
                     Explore Papers
                     <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Link>
@@ -971,7 +979,7 @@ export default function DashboardPage() {
                   asChild
                   className="w-full text-xs sm:text-sm"
                 >
-                  <Link href="/dashboard/papers/search">
+                  <Link href={scopedHref("/papers/search")}>
                     Explore
                     <ArrowUpRight className="h-3 w-3 ml-1" />
                   </Link>

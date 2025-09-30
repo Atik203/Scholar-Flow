@@ -1,8 +1,17 @@
+import { getRoleBySlug, getRoleSlug } from "@/lib/auth/roles";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 // Define protected routes that require authentication
-const protectedRoutes = ["/dashboard", "/profile", "/settings", "/admin"];
+const protectedRoutes = [
+  "/dashboard",
+  "/dashboard/researcher",
+  "/dashboard/pro-researcher",
+  "/dashboard/team-lead",
+  "/dashboard/admin",
+  "/profile",
+  "/settings",
+];
 
 // Define auth routes that should redirect to dashboard if user is already logged in
 const authRoutes = ["/login", "/register", "/auth/signin"];
@@ -67,10 +76,12 @@ export default withAuth(
 
     // 3. Handle auth routes when user is already authenticated
     if (isAuthenticated && matchesRoute(authRoutes, pathname)) {
+      const roleSlug = getRoleSlug((token as any)?.role);
+      const dashboardPath = `/dashboard/${roleSlug}`;
       console.log(
-        `🔄 Redirecting authenticated user from ${pathname} to /dashboard`
+        `🔄 Redirecting authenticated user from ${pathname} to ${dashboardPath}`
       );
-      return createRedirect("/dashboard");
+      return createRedirect(dashboardPath);
     }
 
     // 4. Handle protected routes when user is not authenticated
@@ -87,6 +98,27 @@ export default withAuth(
     // 5. Handle public routes - allow access regardless of auth status
     if (matchesRoute(publicRoutes, pathname)) {
       return NextResponse.next();
+    }
+
+    // 5.1. Redirect legacy dashboard routes without role segment
+    if (isAuthenticated && pathname.startsWith("/dashboard/")) {
+      const segments = pathname.split("/").filter(Boolean);
+      if (segments.length > 1) {
+        const maybeRoleSlug = segments[1];
+        const hasRoleSegment = !!getRoleBySlug(maybeRoleSlug);
+
+        if (!hasRoleSegment) {
+          const roleSlug = getRoleSlug((token as any)?.role);
+          const newPath = ["/dashboard", roleSlug, ...segments.slice(1)].join(
+            "/"
+          );
+          const redirectUrl = new URL(
+            newPath + request.nextUrl.search,
+            request.url
+          );
+          return NextResponse.redirect(redirectUrl);
+        }
+      }
     }
 
     // 6. Handle root path based on authentication status
