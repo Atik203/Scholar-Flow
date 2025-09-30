@@ -108,6 +108,10 @@ model User {
   AnnotationVersion AnnotationVersion[]
   CollectionPaper   CollectionPaper[]
   CollectionMember  CollectionMember[]
+
+  // Indexes for admin queries performance
+  @@index([createdAt, role])
+  @@index([role, isDeleted])
 }
 
 model Workspace {
@@ -638,6 +642,10 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
+
+  // Indexes for admin queries performance  
+  @@index([userId, expires])
+  @@index([expires])
 }
 
 model VerificationToken {
