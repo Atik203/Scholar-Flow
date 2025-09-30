@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
@@ -8,6 +9,8 @@ import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
+import { aiSummaryCache } from "../AI/ai.cache";
+import { aiService } from "../AI/ai.service";
 import { StorageService } from "./StorageService";
 import { createPaperError } from "./paper.errors";
 import {
@@ -16,9 +19,11 @@ import {
   exportService,
   paperService,
 } from "./paper.service";
+import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
   createEditorPaperSchema,
   deletePaperParamsSchema,
+  generatePaperInsightSchema,
   getPaperParamsSchema,
   listPapersQuerySchema,
   publishDraftSchema,
@@ -265,6 +270,154 @@ export const paperController = {
     console.log(`[PaperController] Preview URL response:`, responseData);
 
     sendSuccessResponse(res, responseData, "Signed preview URL generated");
+  }),
+
+  generateSummary: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID format");
+    }
+
+    const paperId = params.data.id;
+    const options = req.body as GeneratePaperSummaryInput;
+
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      paperRecord
+    );
+    const focusAreas = options.focusAreas
+      ?.map((area: string) => area.trim())
+      .filter((area) => area.length > 0);
+
+    const summaryInput = {
+      paperId,
+      text: source.text,
+      instructions: options.instructions,
+      focusAreas,
+      tone: options.tone,
+      audience: options.audience,
+      language: options.language,
+      wordLimit: options.wordLimit,
+      workspaceId: paperRecord.workspaceId,
+      uploaderId: paperRecord.uploaderId,
+    };
+
+    const textHash = createHash("sha1")
+      .update(summaryInput.text || "")
+      .digest("hex");
+    const cacheParams = {
+      tone: summaryInput.tone,
+      audience: summaryInput.audience,
+      language: summaryInput.language,
+      wordLimit: summaryInput.wordLimit,
+      focus: summaryInput.focusAreas,
+      textHash,
+    };
+    const promptKey = summaryInput.instructions || "default";
+    const cacheKey = aiSummaryCache.buildKey(paperId, promptKey, cacheParams);
+    const promptHash = cacheKey.split(":").pop() ?? cacheKey;
+
+    if (!options.refresh) {
+      const stored = await paperService.findStoredSummary(paperId, promptHash);
+      if (stored) {
+        return sendSuccessResponse(
+          res,
+          {
+            summary: stored.summary,
+            highlights: stored.highlights || [],
+            followUpQuestions: stored.followUpQuestions || [],
+            provider: stored.provider || "heuristic",
+            model: stored.model,
+            tokensUsed: stored.tokensUsed ?? null,
+            cached: true,
+            promptHash,
+            source: source.source,
+            chunkCount: source.chunkCount,
+            generatedAt: stored.updatedAt.toISOString(),
+            refreshed: false,
+          },
+          "Summary retrieved from history"
+        );
+      }
+    } else {
+      await aiSummaryCache.invalidate(paperId);
+    }
+
+    const result = await aiService.generateSummary(summaryInput);
+
+    const providerPayload =
+      result.rawResponse &&
+      typeof result.rawResponse === "object" &&
+      result.rawResponse !== null &&
+      "data" in (result.rawResponse as Record<string, unknown>)
+        ? (result.rawResponse as { data?: Record<string, unknown> }).data
+        : result.rawResponse;
+
+    let modelName: string = result.provider;
+    if (
+      providerPayload &&
+      typeof providerPayload === "object" &&
+      providerPayload !== null
+    ) {
+      const rawModel = (providerPayload as Record<string, unknown>).model;
+      if (typeof rawModel === "string" && rawModel.trim()) {
+        modelName = rawModel;
+      }
+    }
+
+    await paperService.upsertSummaryRecord({
+      paperId,
+      model: modelName,
+      promptHash,
+      payload: {
+        summary: result.summary,
+        highlights: result.highlights,
+        followUpQuestions: result.followUpQuestions,
+        tokensUsed: result.tokensUsed ?? null,
+        provider: result.provider,
+      },
+    });
+
+    sendSuccessResponse(
+      res,
+      {
+        summary: result.summary,
+        highlights: result.highlights || [],
+        followUpQuestions: result.followUpQuestions || [],
+        provider: result.provider,
+        model: modelName,
+        tokensUsed: result.tokensUsed ?? null,
+        cached: Boolean(result.cached),
+        promptHash,
+        source: source.source,
+        chunkCount: source.chunkCount,
+        generatedAt: new Date().toISOString(),
+        refreshed: Boolean(options.refresh),
+      },
+      result.cached
+        ? "Summary retrieved from cache"
+        : "Summary generated successfully"
+    );
   }),
 
   updateMetadata: catchAsync(async (req: Request, res: Response) => {
@@ -560,7 +713,7 @@ export const paperController = {
 
   shareViaEmail: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
-    const { paperId, recipientEmail, permission, message } = req.body;
+    const { paperId, recipientEmail, permission } = req.body;
 
     // Validate input
     if (!paperId || !recipientEmail || !permission) {
@@ -646,6 +799,203 @@ export const paperController = {
         throw error;
       }
       throw new ApiError(500, "Failed to share paper via email");
+    }
+  }),
+
+  // Generate AI insights for a paper (chat-like conversation)
+  generateInsight: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const body = generatePaperInsightSchema.safeParse(req.body);
+    if (!body.success) {
+      const errorDetails = body.error.issues
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join(", ");
+      throw createPaperError.validationFailed(errorDetails);
+    }
+
+    const { id: paperId } = params.data;
+    const { message: prompt, threadId, model } = body.data;
+
+    // Check if paper exists and user has access
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    // Verify user access permissions
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    try {
+      // Get or create insight thread
+      const thread = await paperService.getOrCreateInsightThread(
+        paperId,
+        authReq.user.id,
+        threadId
+      );
+
+      // Get recent conversation history for context
+      const recentMessages = await paperService.listInsightMessages(
+        thread.id,
+        1, // page
+        10 // limit - last 10 messages for context
+      );
+
+      // Always get paper content for context so AI knows what paper we're discussing
+      const source = await paperService.getSummarySourceText(
+        paperId,
+        paperRecord
+      );
+      const paperContext = source.text || "";
+
+      // Generate insight using AI service
+      const insightInput = {
+        paperId,
+        threadId: thread.id,
+        prompt,
+        context: paperContext,
+        history: recentMessages.map((msg) => ({
+          role: msg.role as "user" | "assistant",
+          content: msg.content,
+        })),
+        workspaceId: paperRecord.workspaceId,
+        uploaderId: paperRecord.uploaderId,
+        ...(model && { model }),
+      };
+
+      const result = await aiService.generateInsight(insightInput);
+
+      // Record both user prompt and AI response
+      await paperService.recordInsightMessage(thread.id, {
+        role: "user",
+        content: prompt,
+        createdById: authReq.user.id,
+      });
+
+      await paperService.recordInsightMessage(thread.id, {
+        role: "assistant",
+        content: result.message.content,
+        metadata: {
+          provider: result.provider,
+          tokensUsed: result.tokensUsed,
+          suggestions: result.suggestions,
+        },
+        createdById: authReq.user.id,
+      });
+
+      sendSuccessResponse(
+        res,
+        {
+          threadId: thread.id,
+          answer: result.message.content,
+          suggestions: result.suggestions || [],
+          provider: result.provider,
+          tokensUsed: result.tokensUsed ?? null,
+          generatedAt: new Date().toISOString(),
+        },
+        "Insight generated successfully"
+      );
+    } catch (error) {
+      console.error("[PaperController] Insight generation failed:", error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw createPaperError.insightGenerationFailed(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }),
+
+  // Get insight conversation history for a paper
+  getInsightHistory: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const { id: paperId } = params.data;
+    const { threadId, page = 1, limit = 20 } = req.query;
+
+    // Check if paper exists and user has access
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    try {
+      if (threadId) {
+        // Get specific thread messages
+        const messages = await paperService.listInsightMessages(
+          threadId as string,
+          parseInt(page as string, 10) || 1,
+          Math.min(parseInt(limit as string, 10) || 20, 50)
+        );
+
+        sendSuccessResponse(
+          res,
+          {
+            threadId,
+            messages,
+            pagination: {
+              page: parseInt(page as string, 10) || 1,
+              limit: Math.min(parseInt(limit as string, 10) || 20, 50),
+              total: messages.length, // This would ideally be total count
+            },
+          },
+          "Insight history retrieved"
+        );
+      } else {
+        // Get all threads for this paper and user
+        const threads = await paperService.getUserInsightThreads(
+          paperId,
+          authReq.user.id
+        );
+
+        sendSuccessResponse(
+          res,
+          {
+            paperId,
+            threads: threads.map((thread) => ({
+              id: thread.id,
+              paperId: thread.paperId,
+              userId: thread.userId,
+              createdAt: thread.createdAt,
+              updatedAt: thread.updatedAt,
+              _count: thread._count ?? {
+                messages: thread.messages?.length ?? 0,
+              },
+              messages: thread.messages ?? [],
+            })),
+          },
+          "Insight threads retrieved"
+        );
+      }
+    } catch (error) {
+      console.error("[PaperController] Get insight history failed:", error);
+      throw createPaperError.insightHistoryFailed(
+        error instanceof Error ? error.message : String(error)
+      );
     }
   }),
 };

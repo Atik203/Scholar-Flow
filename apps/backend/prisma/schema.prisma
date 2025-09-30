@@ -81,21 +81,23 @@ model User {
   sessions Session[]
 
   // App relations
-  memberships              WorkspaceMember[]
-  workspacesOwned          Workspace[]           @relation("WorkspaceOwner")
-  uploadedPapers           Paper[]               @relation("PaperUploader")
-  annotations              Annotation[]
-  collections              Collection[]          @relation("CollectionOwner")
-  subscriptions            Subscription[]
-  payments                 Payment[]
-  searchHistory            SearchHistory[]
-  notifications            Notification[]
-  usageEvents              UsageEvent[]
-  activities               ActivityLog[]
+  memberships               WorkspaceMember[]
+  workspacesOwned           Workspace[]           @relation("WorkspaceOwner")
+  uploadedPapers            Paper[]               @relation("PaperUploader")
+  annotations               Annotation[]
+  collections               Collection[]          @relation("CollectionOwner")
+  subscriptions             Subscription[]
+  payments                  Payment[]
+  searchHistory             SearchHistory[]
+  notifications             Notification[]
+  usageEvents               UsageEvent[]
+  activities                ActivityLog[]
+  aiInsightThreads          AIInsightThread[]
+  aiInsightMessagesAuthored AIInsightMessage[]    @relation("AIInsightMessageAuthor")
   // Sharing relations
-  collectionInvitesSent    CollectionMember[]    @relation("CollectionMemberInvitedBy")
-  workspaceInvitesReceived WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
-  workspaceInvitesSent     WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
+  collectionInvitesSent     CollectionMember[]    @relation("CollectionMemberInvitedBy")
+  workspaceInvitesReceived  WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
+  workspaceInvitesSent      WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
 
   // Token relations
   tokens UserToken[]
@@ -199,15 +201,17 @@ model Paper {
   contentHtml       String? // Sanitized HTML content for rich text editor
   extractionVersion Int     @default(1) // Version for extraction algorithm
 
-  uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
-  workspace       Workspace         @relation(fields: [workspaceId], references: [id])
-  file            PaperFile?
-  chunks          PaperChunk[]
-  citationsFrom   Citation[]        @relation("CitationsFrom")
-  citationsTo     Citation[]        @relation("CitationsTo")
-  annotations     Annotation[]
-  collectionJoins CollectionPaper[]
-  aiSummaries     AISummary[]
+  uploader          User               @relation("PaperUploader", fields: [uploaderId], references: [id])
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id])
+  file              PaperFile?
+  chunks            PaperChunk[]
+  citationsFrom     Citation[]         @relation("CitationsFrom")
+  citationsTo       Citation[]         @relation("CitationsTo")
+  annotations       Annotation[]
+  collectionJoins   CollectionPaper[]
+  aiSummaries       AISummary[]
+  aiInsightThreads  AIInsightThread[]
+  aiInsightMessages AIInsightMessage[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -417,6 +421,46 @@ model AISummary {
   isDeleted Boolean  @default(false)
 
   @@unique([paperId, model, promptHash])
+}
+
+model AIInsightThread {
+  id       String  @id @default(uuid())
+  paperId  String
+  userId   String
+  title    String?
+  metadata Json?   @db.JsonB
+
+  paper    Paper              @relation(fields: [paperId], references: [id])
+  user     User               @relation(fields: [userId], references: [id])
+  messages AIInsightMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([paperId, userId, isDeleted], map: "idx_ai_insight_thread_lookup")
+  @@index([userId, createdAt], map: "idx_ai_insight_thread_user")
+}
+
+model AIInsightMessage {
+  id          String  @id @default(uuid())
+  threadId    String
+  paperId     String
+  role        String
+  content     String
+  metadata    Json?   @db.JsonB
+  createdById String?
+
+  thread    AIInsightThread @relation(fields: [threadId], references: [id])
+  paper     Paper           @relation(fields: [paperId], references: [id])
+  createdBy User?           @relation("AIInsightMessageAuthor", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([threadId, createdAt], map: "idx_ai_insight_msg_thread")
+  @@index([paperId, createdAt], map: "idx_ai_insight_msg_paper")
 }
 
 model Plan {

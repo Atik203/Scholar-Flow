@@ -71,6 +71,22 @@ export const PAPER_ERRORS = {
     message: "Paper is currently being processed",
     statusCode: 409,
   },
+  SUMMARY_GENERATION_FAILED: {
+    message: "Failed to generate AI summary",
+    statusCode: 502,
+  },
+  INSIGHT_THREAD_NOT_FOUND: {
+    message: "AI insight thread not found",
+    statusCode: 404,
+  },
+  INSIGHT_ACCESS_DENIED: {
+    message: "You do not have access to this AI insight conversation",
+    statusCode: 403,
+  },
+  INSIGHT_GENERATION_FAILED: {
+    message: "Failed to generate AI insight",
+    statusCode: 502,
+  },
 
   // Operation errors
   DELETE_FAILED: { message: "Failed to delete paper", statusCode: 500 },
@@ -129,6 +145,12 @@ export const createPaperError = {
       PAPER_ERRORS.AUTHENTICATION_REQUIRED.statusCode
     ),
 
+  insufficientPermissions: () =>
+    new PaperError(
+      PAPER_ERRORS.INSUFFICIENT_PERMISSIONS.message,
+      PAPER_ERRORS.INSUFFICIENT_PERMISSIONS.statusCode
+    ),
+
   paperNotFound: (paperId?: string) =>
     new PaperError(
       PAPER_ERRORS.PAPER_NOT_FOUND.message +
@@ -153,5 +175,37 @@ export const createPaperError = {
       PAPER_ERRORS.STORAGE_ERROR.message +
         (operation ? ` during ${operation}` : ""),
       PAPER_ERRORS.STORAGE_ERROR.statusCode
+    ),
+
+  summaryGenerationFailed: (details?: string) =>
+    new PaperError(
+      PAPER_ERRORS.SUMMARY_GENERATION_FAILED.message +
+        (details ? `: ${details}` : ""),
+      PAPER_ERRORS.SUMMARY_GENERATION_FAILED.statusCode
+    ),
+
+  insightThreadNotFound: () =>
+    new PaperError(
+      PAPER_ERRORS.INSIGHT_THREAD_NOT_FOUND.message,
+      PAPER_ERRORS.INSIGHT_THREAD_NOT_FOUND.statusCode
+    ),
+
+  insightAccessDenied: () =>
+    new PaperError(
+      PAPER_ERRORS.INSIGHT_ACCESS_DENIED.message,
+      PAPER_ERRORS.INSIGHT_ACCESS_DENIED.statusCode
+    ),
+
+  insightGenerationFailed: (details?: string) =>
+    new PaperError(
+      PAPER_ERRORS.INSIGHT_GENERATION_FAILED.message +
+        (details ? `: ${details}` : ""),
+      PAPER_ERRORS.INSIGHT_GENERATION_FAILED.statusCode
+    ),
+
+  insightHistoryFailed: (details?: string) =>
+    new PaperError(
+      "Failed to retrieve insight history" + (details ? `: ${details}` : ""),
+      500
     ),
 };
