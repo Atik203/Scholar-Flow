@@ -87,3 +87,54 @@ export interface IPaperStats {
   failedPapers: number;
   averageProcessingTime: number;
 }
+
+export interface ISystemMetrics {
+  health: {
+    database: "healthy" | "degraded" | "unhealthy";
+    server: "healthy" | "degraded" | "unhealthy";
+    storage: "healthy" | "warning" | "critical";
+    cpu: "healthy" | "warning" | "critical";
+  };
+  performance: {
+    cpu: {
+      usage: number; // percentage
+      cores: number;
+      loadAverage: number[];
+    };
+    memory: {
+      total: number; // bytes
+      used: number; // bytes
+      free: number; // bytes
+      usagePercentage: number;
+    };
+    disk: {
+      total: number; // bytes
+      used: number; // bytes
+      free: number; // bytes
+      usagePercentage: number;
+      ioPercentage: number;
+    };
+    network: {
+      bytesReceived: number;
+      bytesSent: number;
+      activeConnections: number;
+      bandwidth: number; // percentage
+    };
+  };
+  systemInfo: {
+    platform: string;
+    nodeVersion: string;
+    databaseVersion: string;
+    totalMemory: string;
+    storageCapacity: string;
+    uptime: number; // seconds
+    lastChecked: Date;
+  };
+  database: {
+    status: "healthy" | "degraded" | "unhealthy";
+    responseTime: number; // ms
+    activeConnections: number;
+    maxConnections: number;
+    connectionPoolUsage: number; // percentage
+  };
+}

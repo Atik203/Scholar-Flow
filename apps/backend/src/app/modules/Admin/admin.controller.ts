@@ -158,6 +158,29 @@ class AdminController {
       });
     }
   );
+
+  /**
+   * Get comprehensive system metrics
+   * GET /api/admin/system/metrics
+   */
+  getSystemMetrics: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const metrics = await adminService.getSystemMetrics();
+
+      // Set aggressive cache for real-time monitoring (10 seconds)
+      res.set({
+        "Cache-Control": `public, max-age=10`,
+        "X-Cache-Duration": "10s",
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "System metrics retrieved successfully",
+        data: metrics,
+      });
+    }
+  );
 }
 
 export const adminController = new AdminController();
