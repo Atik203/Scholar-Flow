@@ -1,10 +1,10 @@
 # Scholar-Flow Changelog
 
-## v1.2.0 (2025-09-30) – AI Integration Complete
+## v1.1.2 (2025-09-30) – AI Integration Complete
 
 Author: @Atik203
 
-### Highlights – v1.2.0
+### Highlights – v1.1.2
 
 - **Multi-Provider AI Service**: Comprehensive AI integration with Gemini 2.5-flash-lite (primary, free) and OpenAI gpt-4o-mini (secondary) with intelligent fallback system
 - **AI Paper Summarization**: Production-grade paper summarization with performance optimization, caching, and comprehensive error handling
@@ -13,7 +13,7 @@ Author: @Atik203
 - **Natural Language Interface**: Updated AI providers to return conversational responses for improved user experience
 - **Cost-Effective Architecture**: Prioritized free AI models while maintaining high-quality responses and reliability
 
-### Technical Implementation – v1.2.0
+### Technical Implementation – v1.1.2
 
 #### AI Service Architecture
 

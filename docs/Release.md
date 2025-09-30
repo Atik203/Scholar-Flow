@@ -1,65 +1,42 @@
-## v1.1.1
+## v1.1.2
 
-Release date: 2025-09-24  
 Author: @Atik203
 
-### Overview – v1.1.1
+### Highlights – v1.1.2
 
-- **Complete Rich Text Editor**: Comprehensive TipTap-based editor implementation with full content lifecycle management
-- **Advanced Export System**: PDF and DOCX generation with embedded image processing and proper styling
-- **Auto-save & Real-time Updates**: Debounced content saving with status indicators and conflict resolution
-- **Professional UI/UX**: Mobile-responsive design with accessibility support and keyboard shortcuts
+- **Multi-Provider AI Service**: Comprehensive AI integration with Gemini 2.5-flash-lite (primary, free) and OpenAI gpt-4o-mini (secondary) with intelligent fallback system
+- **AI Paper Summarization**: Production-grade paper summarization with performance optimization, caching, and comprehensive error handling
+- **Intelligent Paper Insights**: Context-aware AI chat system allowing natural conversations about specific papers
+- **Paper Context Integration**: AI maintains full awareness of paper content throughout entire chat conversations
+- **Natural Language Interface**: Updated AI providers to return conversational responses for improved user experience
+- **Cost-Effective Architecture**: Prioritized free AI models while maintaining high-quality responses and reliability
 
-### Feature Details – v1.1.1
+### Technical Implementation – v1.1.2
 
-#### Rich Text Editor – v1.1.1
+#### AI Service Architecture
 
-- **Full TipTap Integration**: StarterKit, Typography, Text Alignment, Highlight, Task Lists, Superscript/Subscript
-- **Advanced Image Handling**: Resizable images with S3 upload, drag-and-drop support, and popover controls
-- **Auto-save System**: 2-second debounced saves with real-time status indicators and Ctrl+S support
-- **Draft/Publish Workflow**: Complete content lifecycle with title editing and version management
-- **Share Integration**: Email sharing with permission management and seamless workspace integration
+- **BaseAiProvider Pattern**: Modular provider system with configurable fallback order ["gemini", "openai"]
+- **Gemini Integration**: v1beta API with 2.5-flash-lite and 2.5-flash models, natural conversational responses
+- **OpenAI Integration**: Cost-effective gpt-4o-mini model with structured JSON responses and error handling
+- **Context Management**: Always include paper extracted text as context for AI insights and conversations
+- **Performance Optimization**: Response caching, token usage monitoring, and request timeout handling
+- **Production Testing**: 8/8 AI provider smoke tests passing with real API integration
 
-#### Export & Content Management – v1.1.1
+#### Backend Improvements
 
-- **PDF Export**: Puppeteer-based generation with embedded images, custom styling, and metadata preservation
-- **DOCX Export**: HTML-to-DOCX conversion with automatic image base64 embedding for compatibility
-- **Content Security**: HTML sanitization, XSS prevention, and secure image URL processing
-- **Performance Optimization**: Efficient database queries, proper indexing, and optimized API endpoints
+- **Paper Controller**: Enhanced generateInsight endpoint to always include paper context
+- **AI Cache System**: Intelligent caching for paper summaries and AI responses
+- **Error Handling**: Production-grade error classes and fallback mechanisms
+- **Provider Configuration**: Environment-based configuration with feature flags and API key management
 
-#### Technical Architecture – v1.1.1
+#### Frontend Experience
 
-- **Backend APIs**: Full CRUD operations for editor papers with raw SQL via Prisma for performance
-- **Image Processing**: S3 integration with signed URLs and automatic format conversion for exports
-- **Error Handling**: Comprehensive retry logic, graceful degradation, and production-grade error management
-- **Mobile Support**: Responsive toolbar, touch-friendly controls, and adaptive layouts
+- **Natural Chat Interface**: Fixed JSON response display, now shows conversational AI responses
+- **Model Selection**: Updated AI model picker with Gemini prioritized as primary free option
+- **Error Recovery**: Automatic retry logic for network errors and provider failover
+- **Toast Integration**: Seamless error/success notifications using Sonner with proper retry handling
 
-### Status – v1.1.1
+### Removed
 
-#### Completed – v1.1.1
-
-- Rich text editor with comprehensive toolbar and extensions
-- Auto-save functionality with debounced updates and status tracking
-- PDF and DOCX export with embedded images and proper styling
-- Image upload and management with S3 integration and resizing
-- Share functionality with email notifications and permission management
-- Mobile-responsive design with accessibility and keyboard support
-- Production-grade error handling and security measures
-
-#### Technical Achievements – v1.1.1
-
-- HTML sanitization and XSS prevention for secure content storage
-- Optimized database operations with raw SQL queries for performance
-- Advanced image processing with automatic base64 conversion for exports
-- Real-time content synchronization with conflict resolution
-- Comprehensive API endpoints with proper rate limiting and validation
-
-### Deployment Notes – v1.1.1
-
-- Requires Puppeteer dependencies for PDF generation: `yarn add puppeteer`
-- Requires html-docx-js for DOCX export: `yarn add html-docx-js`
-- Ensure S3 configuration for image upload functionality
-- Database migrations included for contentHtml column and editor paper support
-- Backward-compatible with existing paper management system
-
----
+- **Deepseek Provider**: Removed paid AI provider to focus on free, cost-effective solutions
+- **JSON Chat Responses**: Eliminated technical JSON display in favor of natural conversation flow
