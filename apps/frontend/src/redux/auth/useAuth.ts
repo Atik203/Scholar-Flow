@@ -10,6 +10,16 @@ export function useAuth() {
   const { data: session, status } = useSession();
   const dispatch = useDispatch();
 
+  // LOG WHAT WE'RE GETTING FROM useSession
+  useEffect(() => {
+    console.log("🔐 useAuth - useSession returned:", {
+      status,
+      hasSession: !!session,
+      sessionKeys: session ? Object.keys(session) : [],
+      session: JSON.stringify(session, null, 2),
+    });
+  }, [session, status]);
+
   const {
     data: userData,
     isLoading: isUserLoading,
@@ -38,9 +48,13 @@ export function useAuth() {
   }, [session, userData, status, dispatch, isUserLoading, userError]);
 
   return {
-    user: userData?.data?.user || null,
+    // Use session.user as primary source, fallback to API data
+    // This allows authentication to work immediately after NextAuth login
+    user: session?.user || userData?.data?.user || null,
     isLoading: status === "loading" || isUserLoading,
-    isAuthenticated: !!session && !!userData?.data?.user,
+    // Trust NextAuth session for authentication status
+    // Don't wait for backend API call to complete
+    isAuthenticated: !!session,
     error: userError,
     session,
   };
