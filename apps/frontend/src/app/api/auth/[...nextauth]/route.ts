@@ -149,9 +149,27 @@ const customAdapter = {
   },
 };
 
+console.log("🔧 NextAuth Configuration Initializing...");
+console.log("🔧 NODE_ENV:", process.env.NODE_ENV);
+console.log("🔧 NEXTAUTH_SECRET set:", !!process.env.NEXTAUTH_SECRET);
+console.log("🔧 NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+
 const handler = NextAuth({
   // Enable debug mode in development
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // FORCE debug mode to see all NextAuth internals
+
+  // CRITICAL: Add logger to see what's happening
+  logger: {
+    error(code, metadata) {
+      console.error("🚨 NextAuth Error:", code, metadata);
+    },
+    warn(code) {
+      console.warn("⚠️ NextAuth Warning:", code);
+    },
+    debug(code, metadata) {
+      console.log("🐛 NextAuth Debug:", code, metadata);
+    },
+  },
 
   // Use JWT strategy for stateless sessions (no database adapter)
   session: {
@@ -339,10 +357,20 @@ const handler = NextAuth({
           email: user.email,
           role: (user as any).role,
         });
+
+        // CRITICAL: Ensure all required fields are set
         token.role = (user as any).role || "RESEARCHER";
         token.id = user.id;
-        // Ensure NextAuth subject aligns with backend user id
-        token.sub = user.id;
+        token.sub = user.id; // CRITICAL: Must set sub for NextAuth to work
+        token.email = user.email;
+        token.name = user.name;
+        token.picture = user.image;
+
+        console.log("🔑 ✅ Token seeded successfully:", {
+          sub: token.sub,
+          id: token.id,
+          role: token.role,
+        });
       }
 
       // For subsequent callbacks, ensure sub is aligned if token.id exists
@@ -351,23 +379,36 @@ const handler = NextAuth({
         token.sub = token.id as string;
       }
 
+      // Validate token has required fields
+      if (!token.sub || !token.email) {
+        console.error("🔑 ❌ CRITICAL: Token missing required fields", {
+          sub: token.sub,
+          email: token.email,
+        });
+        // Return token anyway to avoid breaking the session
+      }
+
       // Mint a backend JWT for API calls
       const secret = process.env.NEXTAUTH_SECRET ?? "";
       const subject = (token.sub as string) || (token.id as string);
       if (secret && subject) {
-        console.log("🔑 Minting backend JWT for subject:", subject);
-        const payload = {
-          sub: subject,
-          email: token.email,
-          role: (token.role as string) || "RESEARCHER",
-        };
-        // 1h expiry is fine for Phase 1; refresh handled by NextAuth session
-        const backendAccessToken = jsonwebtoken.sign(payload, secret, {
-          expiresIn: "1h",
-        });
-        (token as { backendAccessToken?: string }).backendAccessToken =
-          backendAccessToken;
-        console.log("🔑 Backend JWT created successfully");
+        try {
+          console.log("🔑 Minting backend JWT for subject:", subject);
+          const payload = {
+            sub: subject,
+            email: token.email,
+            role: (token.role as string) || "RESEARCHER",
+          };
+          // 1h expiry is fine for Phase 1; refresh handled by NextAuth session
+          const backendAccessToken = jsonwebtoken.sign(payload, secret, {
+            expiresIn: "1h",
+          });
+          (token as { backendAccessToken?: string }).backendAccessToken =
+            backendAccessToken;
+          console.log("🔑 ✅ Backend JWT created successfully");
+        } catch (error) {
+          console.error("🔑 ❌ Failed to create backend JWT:", error);
+        }
       } else {
         console.error(
           "🔑 ❌ Cannot create backend JWT - missing secret or subject"
@@ -382,20 +423,46 @@ const handler = NextAuth({
       console.log("👤 Token present:", !!token);
       console.log("👤 Session.user present:", !!session.user);
 
-      if (token && session.user) {
+      if (!token) {
+        console.error("👤 ❌ CRITICAL: No token in session callback");
+        return session;
+      }
+
+      if (!session.user) {
+        console.error("👤 ❌ CRITICAL: No session.user in session callback");
+        // Try to reconstruct user from token
+        session.user = {
+          id: token.sub as string,
+          email: token.email as string,
+          name: token.name as string,
+          image: token.picture as string,
+          role: (token.role as string) || "RESEARCHER",
+        } as any;
+        console.log("👤 ⚠️ Reconstructed session.user from token");
+      }
+
+      // Populate session with token data
+      try {
         console.log("👤 Populating session with token data:", {
           id: token.sub,
           email: token.email,
           role: token.role,
         });
+
         session.user.id = token.sub as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.image = token.picture as string;
         session.user.role = (token.role as string) || "RESEARCHER";
         session.accessToken = token.backendAccessToken as string | undefined;
-        console.log("👤 Session populated successfully");
-      } else {
-        console.error(
-          "👤 ❌ Cannot populate session - missing token or session.user"
-        );
+
+        console.log("👤 ✅ Session populated successfully:", {
+          userId: session.user.id,
+          role: session.user.role,
+          hasAccessToken: !!session.accessToken,
+        });
+      } catch (error) {
+        console.error("👤 ❌ Error populating session:", error);
       }
 
       console.log("👤 Session callback returning session");

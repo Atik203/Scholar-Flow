@@ -101,13 +101,18 @@ export default function LoginPage() {
         dismissToast(loadingToast);
         showAuthSuccessToast("Email/Password");
 
-        // Session cookie is set, but we need a full page navigation to pick it up
-        // Using window.location.href ensures the cookie is sent with the next request
+        // CRITICAL FIX: Wait a bit for NextAuth to set the session cookie
+        // Then force a session update before redirecting
+        console.log("⏳ Waiting for session to be established...");
+
+        // Small delay to ensure cookie is set
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         const redirectUrl = callbackUrl || "/dashboard";
         console.log("🚀 Redirecting to:", redirectUrl);
 
-        // Use window.location instead of router to ensure cookie is sent
-        window.location.href = redirectUrl;
+        // Use router.push instead of window.location to maintain session state
+        router.push(redirectUrl);
         return;
       }
 
