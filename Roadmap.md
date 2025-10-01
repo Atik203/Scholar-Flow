@@ -137,21 +137,10 @@ Goal: Get a working core platform with minimal but functional features.
   - [x] Enhanced Open Graph and Twitter Card metadata
   - [x] PWA meta tags and viewport configuration
 
-**Performance Achievement:**
-
-- ✅ Performance: 89/100 (+51 from 38 baseline) - Target: 85+ EXCEEDED
-- ✅ Accessibility: 100/100 - Target: 100 ACHIEVED
-- ✅ Best Practices: 100/100 - Target: 100 ACHIEVED
-- ✅ SEO: 100/100 - Target: 100 ACHIEVED
-- ✅ FCP: 0.8s (-1.1s, 58% improvement)
-- ✅ LCP: 2.3s (-0.5s, 18% improvement)
-- ✅ TBT: 1,040ms (-1,320ms, 56% improvement)
-- ✅ Query Time: 200-400ms reduction with caching
-
 ### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
-- [ ] Referencing system for academic citations
+- [ ] Referencing system for academic citations with BibTeX/EndNote export and formatting (APA, MLA, IEEE)
 - [ ] Save annotations/comments (user & paper)
 - [ ] Research comment threads & activity log for user interactions
 - [ ] Research Notes
