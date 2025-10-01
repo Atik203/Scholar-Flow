@@ -2,5 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "buildCommand": "corepack enable && corepack yarn turbo run build",
-  "installCommand": "corepack enable && corepack yarn install --immutable"
+  "installCommand": "corepack enable && corepack yarn install --immutable",
+  "env": {
+    "ENABLE_EXPERIMENTAL_COREPACK": "1"
+  }
 }
