@@ -71,11 +71,41 @@ const nextConfig: NextConfig = {
     return [
       {
         // Cache static assets aggressively
-        source: "/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico)",
+        source: "/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico|woff|woff2)",
         headers: [
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        // Cache HTML pages with revalidation
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=3600, must-revalidate",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
         ],
       },
