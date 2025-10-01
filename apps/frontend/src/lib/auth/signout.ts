@@ -54,18 +54,50 @@ export async function handleSignOut(redirectUrl: string = "/"): Promise<void> {
       credentials: "include", // Important: include cookies
     });
 
-    // Step 4: Clear all cookies (NextAuth session cookies)
+    // Step 4: Aggressively clear ALL NextAuth cookies with every possible attribute
     if (typeof document !== "undefined") {
+      const cookiesToClear = [
+        "next-auth.session-token",
+        "__Secure-next-auth.session-token",
+        "next-auth.callback-url",
+        "__Secure-next-auth.callback-url",
+        "next-auth.csrf-token",
+        "__Host-next-auth.csrf-token",
+      ];
+
+      // Clear known NextAuth cookies
+      cookiesToClear.forEach((cookieName) => {
+        // Try every possible combination to ensure deletion
+        const deletionStrings = [
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure;`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; samesite=lax;`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=lax;`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}; secure;`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`,
+          `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}; secure;`,
+        ];
+        deletionStrings.forEach((str) => (document.cookie = str));
+      });
+
+      // Also scan and clear any cookie that looks like NextAuth
       document.cookie.split(";").forEach((cookie) => {
         const [name] = cookie.split("=");
+        const trimmedName = name.trim();
         if (
-          name.trim().startsWith("next-auth") ||
-          name.trim().startsWith("__Secure-next-auth")
+          trimmedName.includes("next-auth") ||
+          trimmedName.includes("__Secure-next-auth") ||
+          trimmedName.includes("__Host-next-auth")
         ) {
-          // Clear both secure and non-secure variants
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure;`;
-          document.cookie = `${name.trim()}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+          const deletionStrings = [
+            `${trimmedName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`,
+            `${trimmedName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure;`,
+            `${trimmedName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`,
+            `${trimmedName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}; secure;`,
+            `${trimmedName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`,
+          ];
+          deletionStrings.forEach((str) => (document.cookie = str));
         }
       });
     }
