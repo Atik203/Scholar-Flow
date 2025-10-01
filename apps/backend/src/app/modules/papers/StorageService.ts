@@ -173,31 +173,36 @@ export class StorageService {
     );
 
     try {
-      // Upload to S3 without ACL (since bucket doesn't support them)
-      const result = await this.putObject({
-        key: filename,
-        body: buffer,
-        contentType: contentType,
-      });
+      // Upload to S3
+      const putObjectInput: PutObjectCommandInput = {
+        Bucket: this.bucket,
+        Key: filename,
+        Body: buffer,
+        ContentType: contentType,
+      };
+
+      const command = new PutObjectCommand(putObjectInput);
+      await this.s3.send(command);
 
       const uploadTime = Date.now() - uploadStart;
       console.log(`[StorageService] S3 putObject completed in ${uploadTime}ms`);
 
-      // Generate presigned URL for frontend access (shorter expiry for faster generation)
+      // Generate presigned URL with 7-day expiry (604800 seconds)
+      // This provides a good balance between security and usability
       const presignedStart = Date.now();
-      const url = await this.getSignedUrl(filename, 1800); // 30 minutes expiry
+      const url = await this.getSignedUrl(filename, 604800); // 7 days
       const presignedTime = Date.now() - presignedStart;
 
       const totalTime = Date.now() - uploadStart;
       console.log(
-        `[StorageService] Presigned URL generated in ${presignedTime}ms`
+        `[StorageService] Presigned URL generated in ${presignedTime}ms with 7-day expiry`
       );
       console.log(`[StorageService] Image upload completed in ${totalTime}ms`);
 
       return {
         url: url,
         filename: originalName,
-        key: result.key,
+        key: filename,
       };
     } catch (error) {
       const uploadTime = Date.now() - uploadStart;
