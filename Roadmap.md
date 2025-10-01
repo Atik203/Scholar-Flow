@@ -1,5 +1,8 @@
 # Scholar-Flow Development Roadmap
 
+Author: Atik
+Last Updated: September 24, 2025
+
 > Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
 
 ## Phase 1 – MVP (Weeks 1–6)
@@ -74,19 +77,73 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Production-grade error handling and input validation (Author: Atik) ✅
 - [x] AWS SDK v3 migration for improved performance and modern tooling (Author: Atik) ✅
 - [x] Extract text content from uploaded PDFs & DOCX (Author: Atik+Salman) ✅
+      Preview & Extraction improvements:
+- [x] Gotenberg-based DOCX→PDF preview pipeline (Docker on EC2) for pixel‑perfect viewing (Author: Atik) ✅
+- [x] Preview‑first Extraction Text: view/preview for DOCX/PDF (no rich text editor yet) (Author: Atik) ✅
+- [x] Rich Text Editor Implementation with TipTap (Author: Atik) ✅
+  - Complete TipTap-based editor with comprehensive toolbar and extensions
+  - Auto-save functionality with debounced updates and real-time status indicators
+  - Advanced image upload and resizing with S3 integration
+  - Export to PDF and DOCX with embedded images and proper styling
+  - Share functionality with email notifications and permission management
+  - Draft/publish workflow with title editing and content persistence
+  - Mobile-responsive design with keyboard shortcuts and accessibility support
 
-### Week 5 – AI Summarization & Semantic Search
+### Week 5 – AI Summarization (Author: Atik) ✅
 
-- [ ] Integrate OpenAI/LLM API for summarization
-- [ ] Vector search with embeddings & semantic paper search
-- [ ] Implement AI-powered search suggestions & filters
+- [x] Integrate OpenAI/LLM API for summarization
+- [x] Multi-provider AI service (Gemini 2.5-flash-lite primary, OpenAI secondary)
+- [x] AI paper summarization with performance optimization
+- [x] Intelligent paper insights with contextual chat
+- [x] Paper context integration throughout chat session
+- [x] Convert dashboard navigation to role-scoped routes with shared module wrappers
+- [x] Launch admin overview workspace with production-ready analytics cards
+- [x] Align workspace/member screens with new layout (name/email fixes, invitation UX)
+- [x] Update middleware, redirects, and AppSidebar to honor role-based landing pages
+- [x] Dynamic admin system monitoring with real-time metrics (CPU, memory, storage, database)
+- [x] Accurate CPU usage calculation using Node.js os module with idle/total times
+- [x] Smart storage tracking with dynamic estimation based on actual database usage
+- [x] Real-time polling (10s) with RTK Query and comprehensive health status dashboard
+- [x] Production-grade components (HealthCard, PerformanceBar, SystemInfoRow) with lazy loading
+
+### Week 5.5 – Performance Optimization & Production Hardening (Author: Atik) ✅
+
+**Phase 1-4 Complete: Lighthouse Score Achievement**
+
+- [x] **Phase 1 & 2 - Quick Wins & Critical Optimizations** ✅
+  - [x] Next.js compiler optimizations (SWC, modularizeImports, optimizeCss)
+  - [x] Route-based code splitting with dynamic imports
+  - [x] Font loading optimization (display: swap, preload)
+  - [x] Image optimization (AVIF, WebP, cache headers)
+  - [x] React Query optimizations (staleTime, keepUnusedDataFor)
+  - [x] Component-level optimization (React.memo, useMemo, useCallback)
+  - [x] Redis caching with free tier optimization (30MB, 50KB limits)
+  - [x] Database indexes (5 on Paper, 3 on CollectionPaper)
+  - [x] HTTP caching middleware with ETag support
+
+- [x] **Phase 3 - Advanced Optimizations** ✅
+  - [x] PWA implementation with service worker (offline support, caching strategies)
+  - [x] Manifest.json with app shortcuts and icons
+  - [x] Skeleton loading states (PaperCard, Dashboard, Table, Form)
+  - [x] Enhanced security headers (CSP, HSTS, X-Frame-Options)
+  - [x] Progressive loading patterns for better UX
+
+- [x] **Phase 4 - Security & SEO** ✅
+  - [x] Production-grade CSP headers (prevent XSS, whitelist domains)
+  - [x] HSTS with 1-year max-age and preload
+  - [x] X-Frame-Options (DENY) and X-Content-Type-Options (nosniff)
+  - [x] robots.txt with proper crawling rules
+  - [x] Structured data (JSON-LD) for WebApplication schema
+  - [x] Enhanced Open Graph and Twitter Card metadata
+  - [x] PWA meta tags and viewport configuration
 
 ### Week 6 – Annotation & Comments
 
 - [ ] Highlighting & annotations in PDF viewer
-- [ ] Comment threads & activity log for user interactions
+- [ ] Referencing system for academic citations with BibTeX/EndNote export and formatting (APA, MLA, IEEE)
 - [ ] Save annotations/comments (user & paper)
-- [ ] Dashboard analytics & versioning system
+- [ ] Research comment threads & activity log for user interactions
+- [ ] Research Notes
 
 ---
 
@@ -138,5 +195,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 4.5 Complete – Advanced Workspace + PDF/DOCX text extraction and high‑fidelity preview implemented ✅ (Authors: Atik+Salman)
-Last Updated: September 21, 2025
+Current Status: Week 5.75 Complete – Performance optimization complete with all Lighthouse targets achieved (Performance: 89, Accessibility: 100, Best Practices: 100, SEO: 100) ✅ (Author: Atik)
+Last Updated: October 1, 2025

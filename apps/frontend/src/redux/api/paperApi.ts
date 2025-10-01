@@ -14,6 +14,10 @@ export interface Paper {
   source?: string;
   doi?: string;
   processingStatus: "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
+  // Editor-specific fields
+  isDraft?: boolean;
+  isPublished?: boolean;
+  contentHtml?: string;
   createdAt: string;
   updatedAt: string;
   file?: {
@@ -52,6 +56,128 @@ export interface UpdatePaperMetadataRequest {
   abstract?: string;
   authors?: string[];
   year?: number;
+}
+
+export type PaperSummaryTone =
+  | "academic"
+  | "technical"
+  | "executive"
+  | "casual"
+  | "conversational";
+
+export type PaperSummaryAudience =
+  | "researcher"
+  | "student"
+  | "executive"
+  | "general";
+
+export interface PaperSummaryRequest {
+  instructions?: string;
+  focusAreas?: string[];
+  tone?: PaperSummaryTone;
+  audience?: PaperSummaryAudience;
+  language?: string;
+  wordLimit?: number;
+  refresh?: boolean;
+}
+
+export interface PaperSummaryResponse {
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  provider: string;
+  model: string;
+  tokensUsed?: number | null;
+  cached: boolean;
+  promptHash: string;
+  source: string;
+  chunkCount: number;
+  generatedAt: string;
+  refreshed: boolean;
+}
+
+// AI Insights interfaces
+export interface AIInsightMessage {
+  id: string;
+  threadId: string;
+  role: "user" | "assistant";
+  content: string;
+  metadata?: Record<string, any>;
+  createdAt: string;
+  createdById?: string | null;
+}
+
+export interface AIInsightThread {
+  id: string;
+  paperId: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    messages: number;
+  };
+  messages?: AIInsightMessage[];
+}
+
+export interface GenerateInsightRequest {
+  message: string;
+  threadId?: string;
+  model?: string;
+}
+
+export interface GenerateInsightResponse {
+  threadId: string;
+  answer: string;
+  suggestions?: string[];
+  provider: string;
+  model?: string;
+  tokensUsed?: number;
+}
+
+export interface PaperInsightsResponse {
+  paperId: string;
+  threads: AIInsightThread[];
+}
+
+// Editor-specific interfaces
+export interface CreateEditorPaperRequest {
+  workspaceId: string;
+  title: string;
+  content?: string;
+  isDraft?: boolean;
+  authors?: string[];
+}
+
+export interface UpdateEditorContentRequest {
+  id: string;
+  content: string;
+  title?: string;
+  isDraft?: boolean;
+}
+
+export interface PublishDraftRequest {
+  id: string;
+  title?: string;
+  abstract?: string;
+}
+
+export interface ShareViaEmailRequest {
+  paperId: string;
+  recipientEmail: string;
+  permission: "view" | "edit";
+  message?: string;
+}
+
+export interface EditorPaper {
+  id: string;
+  title: string;
+  contentHtml?: string;
+  isDraft: boolean;
+  isPublished: boolean;
+  workspaceId: string;
+  uploaderId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ProcessingStatusResponse {
@@ -136,6 +262,24 @@ export const paperApi = apiSlice.injectEndpoints({
       string
     >({
       query: (id) => `/papers/${id}/file-url`,
+      providesTags: (result, error, id) => [{ type: "Paper", id }],
+    }),
+
+    getPaperPreviewUrl: builder.query<
+      {
+        success: boolean;
+        data: {
+          url: string;
+          mime: string;
+          expiresIn: number;
+          isPreview: boolean;
+          originalMimeType?: string;
+        };
+        message: string;
+      },
+      string
+    >({
+      query: (id) => `/papers/${id}/preview-url`,
       providesTags: (result, error, id) => [{ type: "Paper", id }],
     }),
 
@@ -231,6 +375,192 @@ export const paperApi = apiSlice.injectEndpoints({
         { type: "ProcessingStatus", id: paperId },
       ],
     }),
+
+    // Editor-specific endpoints
+    createEditorPaper: builder.mutation<
+      { data: { paper: EditorPaper } },
+      CreateEditorPaperRequest
+    >({
+      query: (body) => ({
+        url: "/editor",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Paper"],
+    }),
+
+    updateEditorContent: builder.mutation<
+      { data: { paper: EditorPaper } },
+      UpdateEditorContentRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/content`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    getEditorPaper: builder.query<{ data: EditorPaper }, string>({
+      query: (id) => ({
+        url: `/editor/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Paper", id }],
+    }),
+
+    listEditorPapers: builder.query<
+      { data: EditorPaper[] },
+      { workspaceId?: string; isDraft?: boolean }
+    >({
+      query: (params) => ({
+        url: "/editor",
+        method: "GET",
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.map(({ id }) => ({ type: "Paper" as const, id })),
+              "Paper",
+            ]
+          : ["Paper"],
+    }),
+
+    publishDraft: builder.mutation<
+      { data: { paper: EditorPaper } },
+      PublishDraftRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/publish`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    exportPaperPdf: builder.mutation<Blob, string>({
+      query: (id) => ({
+        url: `/editor/${id}/export/pdf`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      // Don't serialize blob responses in Redux
+      transformResponse: (response: Blob) => response,
+    }),
+
+    exportPaperDocx: builder.mutation<Blob, string>({
+      query: (id) => ({
+        url: `/editor/${id}/export/docx`,
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      // Don't serialize blob responses in Redux
+      transformResponse: (response: Blob) => response,
+    }),
+
+    uploadImageForEditor: builder.mutation<
+      { url: string; fileName: string },
+      FormData
+    >({
+      query: (formData) => ({
+        url: "/editor/upload-image",
+        method: "POST",
+        body: formData,
+      }),
+      transformResponse: (response: {
+        success: boolean;
+        data: { url: string; fileName: string };
+        message: string;
+      }) => {
+        console.log("Upload image response received:", response);
+        return response.data;
+      },
+    }),
+
+    shareViaEmail: builder.mutation<
+      {
+        message: string;
+        recipientEmail: string;
+        paperTitle: string;
+        permission: string;
+      },
+      ShareViaEmailRequest
+    >({
+      query: (data) => ({
+        url: "/papers/share-email",
+        method: "POST",
+        body: data,
+        // Be tolerant of non-JSON responses to avoid PARSING_ERROR
+        responseHandler: async (response) => {
+          const text = await response.text();
+          try {
+            return JSON.parse(text);
+          } catch {
+            return { raw: text };
+          }
+        },
+      }),
+      // Normalize backend response shape to a flat object for the UI
+      transformResponse: (res: any) => {
+        // Handle typical API format: { success, message, data }
+        // Some controllers may embed another { message, data } inside data
+        const innerMessage = res?.data?.message ?? res?.message;
+        const innerData = res?.data?.data ?? res?.data ?? res;
+        return {
+          message: innerMessage || "Paper shared successfully via email",
+          recipientEmail: innerData?.recipientEmail,
+          paperTitle: innerData?.paperTitle,
+          permission: innerData?.permission,
+        } as {
+          message: string;
+          recipientEmail: string;
+          paperTitle: string;
+          permission: string;
+        };
+      },
+    }),
+
+    generatePaperSummary: builder.mutation<
+      PaperSummaryResponse,
+      { paperId: string; input?: PaperSummaryRequest }
+    >({
+      query: ({ paperId, input }) => ({
+        url: `/papers/${paperId}/summary`,
+        method: "POST",
+        body: input ?? {},
+      }),
+      transformResponse: (response: { data: PaperSummaryResponse }) =>
+        response.data,
+    }),
+
+    // AI Insights endpoints
+    generatePaperInsight: builder.mutation<
+      GenerateInsightResponse,
+      { paperId: string; input: GenerateInsightRequest }
+    >({
+      query: ({ paperId, input }) => ({
+        url: `/papers/${paperId}/insights`,
+        method: "POST",
+        body: input,
+      }),
+      transformResponse: (response: { data: GenerateInsightResponse }) =>
+        response.data,
+      invalidatesTags: (result, error, { paperId }) => [
+        { type: "AIInsight", id: paperId },
+        { type: "Paper", id: paperId },
+      ],
+    }),
+
+    getPaperInsights: builder.query<PaperInsightsResponse, string>({
+      query: (paperId) => `/papers/${paperId}/insights`,
+      transformResponse: (response: { data: PaperInsightsResponse }) =>
+        response.data,
+      providesTags: (result, error, paperId) => [
+        { type: "AIInsight", id: paperId },
+        { type: "Paper", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -239,6 +569,7 @@ export const {
   useListPapersQuery,
   useGetPaperQuery,
   useGetPaperFileUrlQuery,
+  useGetPaperPreviewUrlQuery,
   useUpdatePaperMetadataMutation,
   useDeletePaperMutation,
   useGetDevWorkspaceQuery,
@@ -246,4 +577,18 @@ export const {
   useGetProcessingStatusQuery,
   useGetAllChunksQuery,
   useProcessPDFDirectMutation,
+  // Editor endpoints
+  useCreateEditorPaperMutation,
+  useUpdateEditorContentMutation,
+  useGetEditorPaperQuery,
+  useListEditorPapersQuery,
+  usePublishDraftMutation,
+  useExportPaperPdfMutation,
+  useExportPaperDocxMutation,
+  useUploadImageForEditorMutation,
+  useShareViaEmailMutation,
+  useGeneratePaperSummaryMutation,
+  // AI Insights endpoints
+  useGeneratePaperInsightMutation,
+  useGetPaperInsightsQuery,
 } = paperApi;

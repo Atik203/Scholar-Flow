@@ -1,5 +1,6 @@
 "use client";
 
+import { showErrorToast } from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -127,6 +128,8 @@ export function PdfProcessingStatus({
       setIsPolling(false);
 
       // Show user-friendly error message
+      let errorMessage = "Failed to start PDF processing";
+
       if (
         error &&
         typeof error === "object" &&
@@ -135,9 +138,33 @@ export function PdfProcessingStatus({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        console.error("API Error:", (error.data as any).message);
+        const apiMessage = (error.data as any).message;
+        console.error("API Error:", apiMessage);
+
+        // Provide user-friendly messages for specific errors
+        if (apiMessage.includes("No text content found in PDF")) {
+          errorMessage = "Image-based PDF detected";
+          showErrorToast(
+            errorMessage,
+            "This PDF contains only images. Text extraction is not possible for scanned documents."
+          );
+        } else {
+          errorMessage = apiMessage;
+          showErrorToast(errorMessage);
+        }
       } else if (error && typeof error === "object" && "message" in error) {
-        console.error("Network Error:", (error as any).message);
+        const networkMessage = (error as any).message;
+        console.error("Network Error:", networkMessage);
+        errorMessage = "Network error occurred";
+        showErrorToast(
+          errorMessage,
+          "Please check your connection and try again."
+        );
+      } else {
+        showErrorToast(
+          errorMessage,
+          "An unexpected error occurred while starting processing."
+        );
       }
     }
   };
@@ -155,6 +182,8 @@ export function PdfProcessingStatus({
       console.error("Failed to process PDF directly:", error);
 
       // Show user-friendly error message
+      let errorMessage = "Failed to process PDF";
+
       if (
         error &&
         typeof error === "object" &&
@@ -163,9 +192,33 @@ export function PdfProcessingStatus({
         typeof error.data === "object" &&
         "message" in error.data
       ) {
-        console.error("API Error:", (error.data as any).message);
+        const apiMessage = (error.data as any).message;
+        console.error("API Error:", apiMessage);
+
+        // Provide user-friendly messages for specific errors
+        if (apiMessage.includes("No text content found in PDF")) {
+          errorMessage = "Image-based PDF detected";
+          showErrorToast(
+            errorMessage,
+            "This PDF contains only images. Text extraction is not possible for scanned documents."
+          );
+        } else {
+          errorMessage = apiMessage;
+          showErrorToast(errorMessage);
+        }
       } else if (error && typeof error === "object" && "message" in error) {
-        console.error("Network Error:", (error as any).message);
+        const networkMessage = (error as any).message;
+        console.error("Network Error:", networkMessage);
+        errorMessage = "Network error occurred";
+        showErrorToast(
+          errorMessage,
+          "Please check your connection and try again."
+        );
+      } else {
+        showErrorToast(
+          errorMessage,
+          "An unexpected error occurred during processing."
+        );
       }
     }
   };
@@ -348,10 +401,39 @@ export function PdfProcessingStatus({
             </div>
             {processingError && (
               <div className="p-3 bg-muted/50 rounded-lg">
-                <p className="text-sm font-medium mb-1">Error details:</p>
-                <p className="text-xs text-muted-foreground">
-                  {processingError}
+                <p className="text-sm font-medium mb-1">
+                  {processingError === "No text content found in PDF"
+                    ? "Image-based PDF detected"
+                    : "Error details:"}
                 </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  {processingError === "No text content found in PDF"
+                    ? "This PDF appears to contain only images (scanned document) rather than selectable text. Text extraction is not possible for image-based PDFs."
+                    : processingError}
+                </p>
+                {processingError === "No text content found in PDF" && (
+                  <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
+                    <p className="text-xs text-blue-800 dark:text-blue-200 font-medium mb-1">
+                      💡 Suggestions:
+                    </p>
+                    <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                      <li>
+                        • Use OCR software to convert the PDF to text-based
+                        format
+                      </li>
+                      <li>
+                        • Re-scan the document with text recognition enabled
+                      </li>
+                      <li>
+                        • Convert to a text-based PDF using tools like Adobe
+                        Acrobat
+                      </li>
+                      <li>
+                        • You can still view and download the PDF normally
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </div>

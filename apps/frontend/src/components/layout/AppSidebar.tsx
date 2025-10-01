@@ -7,7 +7,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
-import { USER_ROLES } from "@/lib/auth/roles";
+import {
+  USER_ROLES,
+  buildRoleScopedPath,
+  hasRoleAccess,
+} from "@/lib/auth/roles";
+import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   BookOpen,
@@ -35,12 +40,36 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 
-// Navigation items for different user roles
-const navigationItems = [
+type SidebarLink = {
+  title: string;
+  icon: LucideIcon;
+  path: string;
+  minRole: string;
+  badge?: string;
+};
+
+type SidebarItem = {
+  title: string;
+  icon: LucideIcon;
+  minRole: string;
+  path?: string;
+  badge?: string;
+  items?: SidebarLink[];
+};
+
+type ResolvedSidebarLink = SidebarLink & { href: string };
+
+type ResolvedSidebarItem = Omit<SidebarItem, "path" | "items"> & {
+  href: string;
+  items?: ResolvedSidebarLink[];
+};
+
+const navigationItems: SidebarItem[] = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    path: "",
     icon: Home,
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -51,18 +80,21 @@ const navigationItems = [
     items: [
       {
         title: "All Papers",
-        url: "/dashboard/papers",
+        path: "/papers",
         icon: FileText,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Upload Paper",
-        url: "/dashboard/papers/upload",
+        path: "/papers/upload",
         icon: Upload,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Search Papers",
-        url: "/dashboard/papers/search",
+        path: "/papers/search",
         icon: Search,
+        minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
@@ -73,18 +105,21 @@ const navigationItems = [
     items: [
       {
         title: "My Collections",
-        url: "/dashboard/collections",
+        path: "/collections",
         icon: BookOpen,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Create Collection",
-        url: "/dashboard/collections/create",
+        path: "/collections/create",
         icon: Plus,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Shared Collections",
-        url: "/dashboard/collections/shared",
+        path: "/collections/shared",
         icon: Users,
+        minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
@@ -95,18 +130,21 @@ const navigationItems = [
     items: [
       {
         title: "My Workspaces",
-        url: "/dashboard/workspaces",
+        path: "/workspaces",
         icon: Layers,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Create Workspace",
-        url: "/dashboard/workspaces/create",
+        path: "/workspaces/create",
         icon: Plus,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Shared Workspaces",
-        url: "/dashboard/workspaces/shared",
+        path: "/workspaces/shared",
         icon: Users,
+        minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
@@ -117,28 +155,33 @@ const navigationItems = [
     items: [
       {
         title: "PDF Text Extraction",
-        url: "/dashboard/research/pdf-extraction",
+        path: "/research/pdf-extraction",
         icon: TextCursor,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Text Editor",
-        url: "/dashboard/research/editor",
+        path: "/research/editor",
         icon: FileText,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Citations",
-        url: "/dashboard/research/citations",
+        path: "/research/citations",
         icon: Quote,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Annotations",
-        url: "/dashboard/research/annotations",
+        path: "/research/annotations",
         icon: Highlighter,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Research Notes",
-        url: "/dashboard/research/notes",
+        path: "/research/notes",
         icon: MessageSquare,
+        minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
@@ -149,75 +192,76 @@ const navigationItems = [
     items: [
       {
         title: "My Teams",
-        url: "/dashboard/collaborations/teams",
+        path: "/collaborations/teams",
         icon: Users,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Active Projects",
-        url: "/dashboard/collaborations/projects",
+        path: "/collaborations/projects",
         icon: Building2,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Shared Projects",
-        url: "/dashboard/collaborations/projects/shared",
+        path: "/collaborations/projects/shared",
         icon: Building2,
+        minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Invitations",
-        url: "/dashboard/collaborations/invitations",
+        path: "/collaborations/invitations",
         icon: Star,
+        minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
   {
     title: "AI Insights",
-    url: "/dashboard/ai-insights",
+    path: "/ai-insights",
     icon: Brain,
-    badge: "New",
     minRole: USER_ROLES.RESEARCHER,
   },
 ];
 
-// Pro/Advanced features
-const proFeatures = [
+const proFeatures: SidebarLink[] = [
   {
     title: "Analytics",
-    url: "/dashboard/analytics",
+    path: "/analytics",
     icon: BarChart3,
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
   {
     title: "Advanced Search",
-    url: "/dashboard/search/advanced",
+    path: "/search/advanced",
     icon: Zap,
     badge: "Pro",
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
   {
     title: "Research Trends",
-    url: "/dashboard/trends",
+    path: "/trends",
     icon: TrendingUp,
     minRole: USER_ROLES.PRO_RESEARCHER,
   },
 ];
 
-// Admin features
-const adminFeatures = [
+const adminFeatures: SidebarLink[] = [
   {
-    title: "Admin Panel",
-    url: "/dashboard/admin",
+    title: "Admin Overview",
+    path: "/admin-overview",
     icon: Shield,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "User Management",
-    url: "/dashboard/admin/users",
+    path: "/users",
     icon: Users,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "System Settings",
-    url: "/dashboard/admin/settings",
+    path: "/settings",
     icon: Settings,
     minRole: USER_ROLES.ADMIN,
   },
@@ -230,29 +274,54 @@ export function AppSidebar() {
   const user = session?.user;
   const userRole = user?.role || USER_ROLES.RESEARCHER;
 
-  // Helper function to check if user has required role
-  const hasRole = (minRole: string) => {
-    const roleHierarchy = [
-      USER_ROLES.RESEARCHER,
-      USER_ROLES.PRO_RESEARCHER,
-      USER_ROLES.TEAM_LEAD,
-      USER_ROLES.ADMIN,
-    ];
-    const userRoleIndex = roleHierarchy.indexOf(userRole as any);
-    const minRoleIndex = roleHierarchy.indexOf(minRole as any);
-    return userRoleIndex >= minRoleIndex;
-  };
+  const resolvedNavigationItems = useMemo<ResolvedSidebarItem[]>(() => {
+    return navigationItems
+      .filter((item) => hasRoleAccess(userRole, item.minRole))
+      .map<ResolvedSidebarItem>((item) => {
+        const { path = "", items: rawItems, ...rest } = item;
+        const href = buildRoleScopedPath(userRole, path);
+        const resolvedItems = rawItems
+          ?.filter((subItem) => hasRoleAccess(userRole, subItem.minRole))
+          .map<ResolvedSidebarLink>((subItem) => {
+            const { path: subPath, ...subRest } = subItem;
+            return {
+              ...subRest,
+              path: subPath,
+              href: buildRoleScopedPath(userRole, subPath),
+            };
+          });
 
-  // Filter navigation items based on user role
-  const filteredNavItems = navigationItems.filter((item) =>
-    hasRole(item.minRole)
-  );
-  const filteredProFeatures = proFeatures.filter((item) =>
-    hasRole(item.minRole)
-  );
-  const filteredAdminFeatures = adminFeatures.filter((item) =>
-    hasRole(item.minRole)
-  );
+        return {
+          ...rest,
+          href,
+          items: resolvedItems,
+        };
+      });
+  }, [userRole]);
+
+  const resolvedProFeatures = useMemo<ResolvedSidebarLink[]>(() => {
+    if (!hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER)) {
+      return [];
+    }
+
+    return proFeatures
+      .filter((item) => hasRoleAccess(userRole, item.minRole))
+      .map((item) => ({
+        ...item,
+        href: buildRoleScopedPath(userRole, item.path),
+      }));
+  }, [userRole]);
+
+  const resolvedAdminFeatures = useMemo<ResolvedSidebarLink[]>(() => {
+    if (!hasRoleAccess(userRole, USER_ROLES.ADMIN)) {
+      return [];
+    }
+
+    return adminFeatures.map((item) => ({
+      ...item,
+      href: buildRoleScopedPath(userRole, item.path),
+    }));
+  }, [userRole]);
 
   return (
     <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
@@ -280,22 +349,63 @@ export function AppSidebar() {
           <WorkspaceSwitcher />
         </div>
 
+        {/* Admin Features */}
+        {resolvedAdminFeatures.length > 0 && (
+          <div className="mb-6">
+            <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
+              Administration
+            </h3>
+            <nav className="space-y-1">
+              {resolvedAdminFeatures.map((item) => {
+                const isActive = pathname === item.href;
+
+                return (
+                  <Button
+                    key={item.title}
+                    variant="ghost"
+                    asChild
+                    className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : ""
+                    }`}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </Button>
+                );
+              })}
+            </nav>
+          </div>
+        )}
+
         {/* Main Navigation */}
         <div className="mb-6">
           <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
             Navigation
           </h3>
           <nav className="space-y-1">
-            {filteredNavItems.map((item) => {
-              const isActive = pathname === item.url;
+            {resolvedNavigationItems.map((item) => {
+              const sectionActive = item.items
+                ? item.items.some((subItem) =>
+                    pathname.startsWith(subItem.href)
+                  )
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
 
-              if (item.items) {
+              if (item.items?.length) {
                 return (
-                  <Collapsible key={item.title} defaultOpen>
+                  <Collapsible key={item.title} defaultOpen={sectionActive}>
                     <CollapsibleTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+                          sectionActive
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                            : ""
+                        }`}
                       >
                         <item.icon className="mr-2 h-4 w-4" />
                         <span>{item.title}</span>
@@ -303,28 +413,34 @@ export function AppSidebar() {
                       </Button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pl-6 space-y-1">
-                      {item.items.map((subItem) => (
-                        <Button
-                          key={subItem.title}
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                          className={`w-full justify-start px-2 py-1 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                            pathname === subItem.url
-                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                              : ""
-                          }`}
-                        >
-                          <Link href={subItem.url}>
-                            <subItem.icon className="mr-2 h-3 w-3" />
-                            <span className="text-sm">{subItem.title}</span>
-                          </Link>
-                        </Button>
-                      ))}
+                      {item.items.map((subItem) => {
+                        const isActive = pathname.startsWith(subItem.href);
+
+                        return (
+                          <Button
+                            key={subItem.title}
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className={`w-full justify-start px-2 py-1 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+                              isActive
+                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                : ""
+                            }`}
+                          >
+                            <Link href={subItem.href}>
+                              <subItem.icon className="mr-2 h-3 w-3" />
+                              <span className="text-sm">{subItem.title}</span>
+                            </Link>
+                          </Button>
+                        );
+                      })}
                     </CollapsibleContent>
                   </Collapsible>
                 );
               }
+
+              const isActive = pathname === item.href;
 
               return (
                 <Button
@@ -337,7 +453,7 @@ export function AppSidebar() {
                       : ""
                   }`}
                 >
-                  <Link href={item.url}>
+                  <Link href={item.href}>
                     <item.icon className="mr-2 h-4 w-4" />
                     <span>{item.title}</span>
                     {item.badge && (
@@ -353,62 +469,38 @@ export function AppSidebar() {
         </div>
 
         {/* Pro Features */}
-        {filteredProFeatures.length > 0 && (
+        {resolvedProFeatures.length > 0 && (
           <div className="mb-6">
             <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
               Pro Features
             </h3>
             <nav className="space-y-1">
-              {filteredProFeatures.map((item) => (
-                <Button
-                  key={item.title}
-                  variant="ghost"
-                  asChild
-                  className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                    pathname === item.url
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : ""
-                  }`}
-                >
-                  <Link href={item.url}>
-                    <item.icon className="mr-2 h-4 w-4" />
-                    <span>{item.title}</span>
-                    {item.badge && (
-                      <span className="ml-auto rounded-full bg-chart-1 px-2 py-0.5 text-xs text-white">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                </Button>
-              ))}
-            </nav>
-          </div>
-        )}
+              {resolvedProFeatures.map((item) => {
+                const isActive = pathname === item.href;
 
-        {/* Admin Features */}
-        {filteredAdminFeatures.length > 0 && (
-          <div className="mb-6">
-            <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
-              Administration
-            </h3>
-            <nav className="space-y-1">
-              {filteredAdminFeatures.map((item) => (
-                <Button
-                  key={item.title}
-                  variant="ghost"
-                  asChild
-                  className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                    pathname === item.url
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : ""
-                  }`}
-                >
-                  <Link href={item.url}>
-                    <item.icon className="mr-2 h-4 w-4" />
-                    <span>{item.title}</span>
-                  </Link>
-                </Button>
-              ))}
+                return (
+                  <Button
+                    key={item.title}
+                    variant="ghost"
+                    asChild
+                    className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : ""
+                    }`}
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="mr-2 h-4 w-4" />
+                      <span>{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto rounded-full bg-chart-1 px-2 py-0.5 text-xs text-white">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  </Button>
+                );
+              })}
             </nav>
           </div>
         )}

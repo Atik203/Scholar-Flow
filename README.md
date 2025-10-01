@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.0.5-blue)](./Release.md)
+[![Version](https://img.shields.io/badge/version-1.1.5-blue)](./docs/Release.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
@@ -17,14 +17,21 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## ✨ Features
 
-### 📚 Paper Management
+### � Rich Text Editing & Paper Management
 
+- **Rich Text Editor**: Full-featured TipTap-based editor for research papers with advanced formatting, tables, lists, and more
+- **Auto-save & Drafts**: Debounced auto-save, manual save, and draft/publish workflow with real-time status
+- **Export to PDF/DOCX**: One-click export with embedded images and professional styling
+- **Image Upload**: Drag-and-drop or paste images directly into the editor, with S3 storage and resizing
 - **Smart Upload**: Drag-and-drop PDF upload with automatic metadata extraction
 - **AI Metadata**: Automatic title, author, and abstract extraction from PDFs
 - **Advanced Search**: Full-text search with filters (author, date, type, keywords)
 - **PDF Preview**: Secure in-app PDF viewer with responsive design
 
-### 🔐 Authentication & Security
+### � Sharing & Collaboration
+
+- **Email Sharing**: Share papers via email with permission management (view/edit)
+- **Workspace Collaboration**: Invite users to collections and workspaces with role-based access
 
 - **Multiple Auth Options**: Google OAuth, GitHub OAuth, and email/password
 - **Secure Sessions**: JWT-based authentication with refresh tokens
@@ -37,6 +44,16 @@ ScholarFlow is a modern research paper management and collaboration platform des
 - **Interactive Dashboard**: Quick access to papers, search, and collections
 - **Real-time Feedback**: Loading states, error handling, and success notifications
 - **Accessibility**: WCAG compliant with keyboard navigation support
+
+### 🔧 Admin Dashboard & System Monitoring
+
+- **Real-Time System Metrics**: Live monitoring with 10-second auto-refresh for CPU, memory, storage, and database
+- **Accurate CPU Tracking**: Intelligent CPU usage calculation using idle/total times from Node.js os module
+- **Smart Storage Analytics**: Dynamic storage estimation based on actual database usage with realistic percentages
+- **Health Status Dashboard**: Comprehensive health cards (Database/Server/Storage/CPU) with automatic status classification
+- **Performance Visualization**: Auto-colored progress bars that adapt based on metric values (green→blue→yellow→red)
+- **System Information Panel**: Real-time platform, Node.js version, database version, memory, and uptime display
+- **Production-Grade Architecture**: HTTP caching, rate limiting, admin-only access, lazy loading with code splitting
 
 ### 🏗️ Production-Ready Infrastructure
 
@@ -168,16 +185,42 @@ yarn clean              # Clean build artifacts
 yarn reset              # Reset node_modules and rebuild
 ```
 
-## 🌟 Current Features (v1.0.5)
+## 🌟 Current Features (v1.1.4)
+
+### Content Management & Editing
+
+- ✅ **Rich Text Editor**: TipTap-based, with advanced formatting, tables, lists, and image upload
+- ✅ **Auto-save & Drafts**: Debounced auto-save, manual save, and draft/publish workflow
+- ✅ **Export to PDF/DOCX**: One-click export with embedded images and professional styling
+- ✅ **Image Upload**: Drag-and-drop or paste images, S3 storage, resizing
+- ✅ **Email Sharing**: Share papers via email with permission management
+
+### Authentication & Security
 
 - ✅ **Authentication System**: Google/GitHub OAuth + email/password
+- ✅ **Production Security**: Rate limiting, monitoring, error handling, admin-only access
+
+### Paper Management
+
 - ✅ **Paper Upload**: Multi-file drag-and-drop with S3 storage
 - ✅ **Metadata Extraction**: AI-powered title, author, abstract extraction
 - ✅ **Advanced Search**: Full-text search with comprehensive filters
 - ✅ **PDF Preview**: Secure iframe-based PDF viewer
-- ✅ **Dashboard**: Quick access and navigation
+
+### Admin & System Monitoring (v1.1.4)
+
+- ✅ **Real-Time System Metrics**: Live CPU, memory, storage, database monitoring with 10s auto-refresh
+- ✅ **Accurate CPU Tracking**: Intelligent calculation using Node.js os module (idle/total times)
+- ✅ **Smart Storage Analytics**: Dynamic estimation (10x usage, min 100GB) for realistic percentages
+- ✅ **Health Dashboard**: Auto-classified status cards (healthy/degraded/unhealthy/warning/critical)
+- ✅ **Performance Visualization**: Auto-colored bars (green→blue→yellow→red based on values)
+- ✅ **System Information**: Real-time platform, versions, memory, uptime display
+
+### User Experience
+
+- ✅ **Dashboard**: Quick access and navigation with role-based routing
 - ✅ **Responsive UI**: Mobile-first design with modern components
-- ✅ **Production Security**: Rate limiting, monitoring, error handling
+- ✅ **Lazy Loading**: Code splitting with React.lazy and Suspense boundaries
 
 ## 🗺️ Roadmap
 
@@ -185,6 +228,10 @@ yarn reset              # Reset node_modules and rebuild
 
 - [x] Authentication & User Management
 - [x] Paper Upload & Storage
+- [x] Rich Text Editor & Content Management
+- [x] Export to PDF/DOCX
+- [x] Image Upload & Sharing
+- [x] Admin Dashboard & System Monitoring
 - [ ] Collections & Organization (In Progress)
 
 ### Phase 2 - AI-Powered Features
@@ -206,7 +253,7 @@ yarn reset              # Reset node_modules and rebuild
 - [**API Documentation**](./docs/API.md) - Complete API reference
 - [**UI Design System**](./docs/UI_DESIGN.md) - Component guidelines
 - [**Development Guide**](./docs/DEVELOPMENT.md) - Setup and contribution guide
-- [**Release Notes**](./Release.md) - Version history and changes
+- [**Release Notes**](./docs/Release.md) - Version history and changes
 - [**Roadmap**](./Roadmap.md) - Feature development timeline
 
 ## 🤝 Contributing

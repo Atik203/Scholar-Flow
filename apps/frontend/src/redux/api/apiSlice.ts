@@ -81,12 +81,18 @@ export const apiSlice = createApi({
     "Collection",
     "CollectionPaper",
     "CollectionMember",
+    "CollectionInvite",
     "Workspace",
     "User",
     "Annotation",
     "ProcessingStatus",
+    "AIInsight",
+    "Admin",
   ],
-  keepUnusedDataFor: 30, // Keep data for 30 seconds by default
-  refetchOnMountOrArgChange: 30, // Refetch if data is older than 30 seconds
+  // Performance optimizations
+  keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)
+  refetchOnMountOrArgChange: 60, // Only refetch if data is older than 1 minute
+  refetchOnFocus: false, // Disable expensive refetch on window focus
+  refetchOnReconnect: true, // Refetch when internet reconnects
   endpoints: () => ({}),
 });

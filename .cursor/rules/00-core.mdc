@@ -22,11 +22,11 @@ description: Core project standards and architecture
 
 ## Project Status
 
-- **Current Phase**: Phase 1 MVP - **Paper Management System completed** ✅ + **Production-Ready Improvements** ✅ (September 17, 2025)
+- **Current Phase**: Phase 1 MVP – Week 5.5 complete (AI summarization + role-based dashboard refresh)
 - **Technology Stack**: Next.js 15 + Express.js + PostgreSQL + Prisma ORM + TypeScript + Sonner (Toast)
-- **Major Completions**: OAuth authentication ✅, Paper upload & storage ✅, Modern UI/UX ✅, Production security & performance ✅
-- **Recent Improvements**: Security hardening, performance monitoring, comprehensive error handling, health checks ✅
-- **Roadmap**: Only build features in current phase (see `Roadmap.md`)
+- **Major Completions**: OAuth auth ✅, Paper/collection/workspace systems ✅, AI insights ✅, Modern dashboard UX ✅
+- **Recent Improvements**: Security hardening, performance monitoring, comprehensive error handling, health checks, admin dashboard routing ✅
+- **Roadmap**: Ship only in-phase work; see `Roadmap.md` before starting new features
 
 ## Quality Gates
 
