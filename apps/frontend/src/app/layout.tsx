@@ -6,9 +6,17 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+
+// Viewport configuration (separate from metadata in Next.js 15+)
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+};
 
 // Optimize font loading with display swap and fallbacks
 const inter = Inter({
@@ -35,12 +43,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "ScholarFlow Team" }],
   manifest: "/manifest.json",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   openGraph: {
     title: "ScholarFlow - AI-Powered Research Paper Hub",
     description:
