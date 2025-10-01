@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { CacheKeys, CacheTTL } from "../../cache/cacheKeys";
+import cacheService from "../../cache/cacheService";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
 
@@ -467,6 +469,14 @@ export class PaperService {
    * Source: optimized soft delete operation
    */
   static async delete(id: string) {
+    // Get paper details before deletion for cache invalidation
+    const paperToDelete = await prisma.$queryRaw<any[]>`
+      SELECT "uploaderId", "workspaceId"
+      FROM "Paper"
+      WHERE id = ${id}
+      LIMIT 1
+    `;
+
     // Soft delete the paper
     await prisma.$queryRaw`
       UPDATE "Paper" 
@@ -474,9 +484,36 @@ export class PaperService {
       WHERE id = ${id}
     `;
 
-    // Return the updated paper
+    // Invalidate related caches
+    if (paperToDelete[0]) {
+      const { uploaderId, workspaceId } = paperToDelete[0];
+      await cacheService.deletePattern(CacheKeys.paper.byUser(uploaderId));
+      if (workspaceId) {
+        await cacheService.deletePattern(
+          CacheKeys.paper.byWorkspace(workspaceId)
+        );
+      }
+      await cacheService.delete(CacheKeys.paper.byId(id));
+    }
+
+    // Return the updated paper with only necessary fields
     const papers = await prisma.$queryRaw<any[]>`
-      SELECT * FROM "Paper"
+      SELECT 
+        id, 
+        title, 
+        authors, 
+        abstract,
+        "publicationDate",
+        status,
+        "fileUrl",
+        "thumbnailUrl",
+        "pageCount",
+        "uploaderId",
+        "workspaceId",
+        "isDeleted",
+        "createdAt",
+        "updatedAt"
+      FROM "Paper"
       WHERE id = ${id}
       LIMIT 1
     `;
@@ -486,6 +523,7 @@ export class PaperService {
 
   /**
    * Get papers by user using $queryRaw for optimized user-specific paper retrieval
+   * Phase 2: Added caching for performance optimization
    * Source: optimized user paper query with search and pagination
    */
   static async getByUser(
@@ -496,6 +534,18 @@ export class PaperService {
     const limit = options.limit || 10;
     const page = options.page || 1;
     const skip = (page - 1) * limit;
+
+    // Generate cache key based on query parameters
+    const workspaceId = params.workspaceId || undefined;
+    const cacheKey = CacheKeys.paper.list(userId, workspaceId, page, limit);
+
+    // Try to get from cache first (only if no search - search results shouldn't be cached long)
+    if (!params.search) {
+      const cached = await cacheService.get<any>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
 
     let papers: any[];
     let totalResult: any[];
@@ -566,7 +616,7 @@ export class PaperService {
       })),
     }));
 
-    return {
+    const response = {
       result: papersWithChunks,
       meta: {
         page,
@@ -575,6 +625,13 @@ export class PaperService {
         totalPage,
       },
     };
+
+    // Cache the result for 5 minutes if no search
+    if (!params.search) {
+      await cacheService.set(cacheKey, response, CacheTTL.MEDIUM);
+    }
+
+    return response;
   }
 
   /**

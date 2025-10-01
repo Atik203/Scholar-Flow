@@ -1,13 +1,55 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Allow transpiling our shared packages in the monorepo
-    // https://nextjs.org/docs/app/building-your-application/optimizing/packages
-    // For Next 15, prefer the 'transpilePackages' option at the root level
+  // Compiler optimizations for production performance
+  compiler: {
+    // Remove console logs in production except errors and warnings
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"],
+          }
+        : false,
   },
-  // transpilePackages removed as we're no longer using workspace packages
+
+  // Note: SWC minification is enabled by default in Next.js 15+
+  // No need to explicitly set swcMinify anymore
+
+  // Optimize package imports for better tree-shaking
+  modularizeImports: {
+    lodash: {
+      transform: "lodash/{{member}}",
+    },
+    "date-fns": {
+      transform: "date-fns/{{member}}",
+    },
+    "@radix-ui/react-icons": {
+      transform: "@radix-ui/react-icons/dist/{{member}}",
+    },
+  },
+
+  experimental: {
+    // Optimize specific package imports automatically
+    optimizePackageImports: [
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
+      "lucide-react",
+    ],
+    // Enable CSS optimization (inline critical CSS, defer non-critical)
+    // Uses beasties (formerly critters) for critical CSS extraction
+    optimizeCss: true,
+  },
+
+  // Image optimization configuration
   images: {
+    // Use modern image formats for better compression
+    formats: ["image/avif", "image/webp"],
+    // Cache optimized images for 60 seconds minimum
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: "https",
@@ -23,6 +65,23 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // Add cache headers for static assets
+  async headers() {
+    return [
+      {
+        // Cache static assets aggressively
+        source: "/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
+
   async rewrites() {
     // Don't rewrite any API routes - handle them directly
     // NextAuth routes (/api/auth/*) stay on frontend
