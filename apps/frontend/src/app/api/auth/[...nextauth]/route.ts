@@ -150,6 +150,9 @@ const customAdapter = {
 };
 
 const handler = NextAuth({
+  // Enable debug mode in development
+  debug: process.env.NODE_ENV === "development",
+
   // Use JWT strategy for stateless sessions (no database adapter)
   session: {
     strategy: "jwt",
@@ -185,7 +188,7 @@ const handler = NextAuth({
 
         if (!credentials?.email || !credentials?.password) {
           console.log("❌ Missing credentials");
-          return null;
+          throw new Error("Missing credentials");
         }
 
         try {
@@ -210,21 +213,25 @@ const handler = NextAuth({
             body: JSON.stringify(requestBody),
           });
 
-          console.log("Response status:", response.status);
-          console.log("Response ok:", response.ok);
+          console.log("✅ Response status:", response.status);
+          console.log("✅ Response ok:", response.ok);
 
           if (!response.ok) {
             const errorText = await response.text();
-            console.log("Error response:", errorText);
-            return null;
+            console.log("❌ Error response:", errorText);
+            throw new Error(errorText || "Authentication failed");
           }
 
           const data = await response.json();
-          console.log("Response data:", data);
+          console.log("✅ Response data:", data);
           const user = data.data.user;
 
           if (user) {
-            console.log("User found:", user);
+            console.log("✅ User authenticated:", {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+            });
             return {
               id: user.id,
               email: user.email,
@@ -234,10 +241,11 @@ const handler = NextAuth({
             };
           }
 
-          console.log("No user in response");
-          return null;
+          console.log("❌ No user in response");
+          throw new Error("No user data returned");
         } catch (error) {
-          console.error("Authentication error:", error);
+          console.error("❌ Authentication error:", error);
+          // Return null instead of throwing to allow NextAuth to handle the error
           return null;
         }
       },
@@ -253,9 +261,14 @@ const handler = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
+      console.log("🔐 SIGNIN CALLBACK CALLED");
+      console.log("🔐 Provider:", account?.provider);
+      console.log("🔐 User:", user?.email);
+
       try {
         // Only handle OAuth providers, not credentials
         if (account?.provider === "credentials") {
+          console.log("🔐 Credentials provider - allowing signin");
           return true; // Allow credentials signin to proceed
         }
 
@@ -314,8 +327,18 @@ const handler = NextAuth({
       }
     },
     async jwt({ token, user, account }) {
+      console.log("🔑 JWT CALLBACK CALLED");
+      console.log("🔑 User present:", !!user);
+      console.log("🔑 Token sub:", token.sub);
+      console.log("🔑 Token id:", token.id);
+
       // Seed defaults on first sign in
       if (user) {
+        console.log("🔑 First sign-in, seeding token with user data:", {
+          id: user.id,
+          email: user.email,
+          role: (user as any).role,
+        });
         token.role = (user as any).role || "RESEARCHER";
         token.id = user.id;
         // Ensure NextAuth subject aligns with backend user id
@@ -324,6 +347,7 @@ const handler = NextAuth({
 
       // For subsequent callbacks, ensure sub is aligned if token.id exists
       if (token.id && token.sub !== token.id) {
+        console.log("🔑 Aligning token.sub with token.id:", token.id);
         token.sub = token.id as string;
       }
 
@@ -331,6 +355,7 @@ const handler = NextAuth({
       const secret = process.env.NEXTAUTH_SECRET ?? "";
       const subject = (token.sub as string) || (token.id as string);
       if (secret && subject) {
+        console.log("🔑 Minting backend JWT for subject:", subject);
         const payload = {
           sub: subject,
           email: token.email,
@@ -342,15 +367,38 @@ const handler = NextAuth({
         });
         (token as { backendAccessToken?: string }).backendAccessToken =
           backendAccessToken;
+        console.log("🔑 Backend JWT created successfully");
+      } else {
+        console.error(
+          "🔑 ❌ Cannot create backend JWT - missing secret or subject"
+        );
       }
+
+      console.log("🔑 JWT callback returning token");
       return token;
     },
     async session({ session, token }) {
+      console.log("👤 SESSION CALLBACK CALLED");
+      console.log("👤 Token present:", !!token);
+      console.log("👤 Session.user present:", !!session.user);
+
       if (token && session.user) {
+        console.log("👤 Populating session with token data:", {
+          id: token.sub,
+          email: token.email,
+          role: token.role,
+        });
         session.user.id = token.sub as string;
         session.user.role = (token.role as string) || "RESEARCHER";
         session.accessToken = token.backendAccessToken as string | undefined;
+        console.log("👤 Session populated successfully");
+      } else {
+        console.error(
+          "👤 ❌ Cannot populate session - missing token or session.user"
+        );
       }
+
+      console.log("👤 Session callback returning session");
       return session;
     },
   },
