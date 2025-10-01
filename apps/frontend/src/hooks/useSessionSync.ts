@@ -19,18 +19,18 @@ export function useSessionSync() {
   const lastSessionRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Don't do anything while loading
+    // CRITICAL: Wait for NextAuth to finish loading before making decisions
     if (status === "loading") {
       return;
     }
 
     const currentSessionId = session?.user?.id || null;
 
-    // Case 1: No NextAuth session but Redux has user data
-    // This means user signed out or session expired - clear Redux
-    if (!session && reduxUser) {
+    // Case 1: Session is explicitly unauthenticated (not loading, not authenticated)
+    // AND Redux still has user data - this is stale data that needs clearing
+    if (status === "unauthenticated" && !session && reduxUser) {
       console.log(
-        "[SessionSync] No NextAuth session detected, clearing Redux state"
+        "[SessionSync] NextAuth status is 'unauthenticated', clearing Redux state"
       );
       dispatch(clearCredentials());
       lastSessionRef.current = null;

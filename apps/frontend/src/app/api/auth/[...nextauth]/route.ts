@@ -154,6 +154,19 @@ const handler = NextAuth({
   session: {
     strategy: "jwt",
     maxAge: 60 * 60, // 1 hour (matches backend token expiry)
+    updateAge: 60 * 5, // Update session every 5 minutes
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60, // 1 hour
+      },
+    },
   },
   // adapter: customAdapter,
   providers: [
