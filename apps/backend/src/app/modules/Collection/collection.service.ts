@@ -1,6 +1,21 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../../shared/prisma";
 
+type CollectionAggregateRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  isPublic: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string;
+  workspaceId: string | null;
+  ownerEmail: string | null;
+  ownerName: string | null;
+  paperCount: number;
+  memberCount: number;
+};
+
 /**
  * Collection Service with optimized $queryRaw operations
  */
@@ -11,7 +26,14 @@ export class CollectionService {
    */
   static async getCollectionStats() {
     try {
-      const stats = await prisma.$queryRaw<any[]>`
+      const stats = await prisma.$queryRaw<
+        Array<{
+          totalCollections: number;
+          publicCollections: number;
+          privateCollections: number;
+          avgPapersPerCollection: number;
+        }>
+      >`
         SELECT 
           COUNT(*)::int as "totalCollections",
           COUNT(CASE WHEN "isPublic" = true THEN 1 END)::int as "publicCollections",
@@ -50,82 +72,66 @@ export class CollectionService {
     isPublic?: boolean
   ) {
     try {
-      let collections: any[];
-      let totalCount: any[];
+      const visibilityFilter =
+        isPublic !== undefined
+          ? Prisma.sql`AND c."isPublic" = ${isPublic}`
+          : Prisma.empty;
 
-      if (isPublic !== undefined) {
-        collections = await prisma.$queryRaw<any[]>`
-          SELECT 
-            c.id,
-            c.name,
-            c.description,
-            c."isPublic",
-            c."createdAt",
-            c."updatedAt",
-            c."ownerId",
-            c."workspaceId",
-            u.email as "ownerEmail",
-            u.name as "ownerName",
-            COALESCE(COUNT(cp.id), 0)::int as "paperCount"
-          FROM "Collection" c
-          LEFT JOIN "User" u ON c."ownerId" = u.id
-          LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId" AND cp."isDeleted" = false
-          WHERE c."isDeleted" = false AND c."isPublic" = ${isPublic}
-          GROUP BY c.id, u.email, u.name, c."ownerId", c."workspaceId"
-          ORDER BY c."createdAt" DESC
-          LIMIT ${limit} OFFSET ${skip}
-        `;
-
-        totalCount = await prisma.$queryRaw<any[]>`
-          SELECT COUNT(*)::int as count
-          FROM "Collection"
-          WHERE "isDeleted" = false AND "isPublic" = ${isPublic}
-        `;
-      } else {
-        collections = await prisma.$queryRaw<any[]>`
-          SELECT 
-            c.id,
-            c.name,
-            c.description,
-            c."isPublic",
-            c."createdAt",
-            c."updatedAt",
-            c."ownerId",
-            c."workspaceId",
-            u.email as "ownerEmail",
-            u.name as "ownerName",
-            COALESCE(COUNT(cp.id), 0)::int as "paperCount"
-          FROM "Collection" c
-          LEFT JOIN "User" u ON c."ownerId" = u.id
-          LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId" AND cp."isDeleted" = false
-          WHERE c."isDeleted" = false
-          GROUP BY c.id, u.email, u.name, c."ownerId", c."workspaceId"
-          ORDER BY c."createdAt" DESC
-          LIMIT ${limit} OFFSET ${skip}
-        `;
-
-        totalCount = await prisma.$queryRaw<any[]>`
-          SELECT COUNT(*)::int as count
-          FROM "Collection"
+      const collections = await prisma.$queryRaw<CollectionAggregateRow[]>`
+        SELECT 
+          c.id,
+          c.name,
+          c.description,
+          c."isPublic",
+          c."createdAt",
+          c."updatedAt",
+          c."ownerId",
+          c."workspaceId",
+          u.email as "ownerEmail",
+          u.name as "ownerName",
+          COALESCE(paper_counts.paper_count, 0)::int as "paperCount",
+          COALESCE(member_counts.member_count, 0)::int as "memberCount"
+        FROM "Collection" c
+        LEFT JOIN "User" u ON c."ownerId" = u.id
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS paper_count
+          FROM "CollectionPaper"
           WHERE "isDeleted" = false
-        `;
-      }
+          GROUP BY "collectionId"
+        ) paper_counts ON paper_counts."collectionId" = c.id
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS member_count
+          FROM "CollectionMember"
+          WHERE "isDeleted" = false AND status = 'ACCEPTED'
+          GROUP BY "collectionId"
+        ) member_counts ON member_counts."collectionId" = c.id
+        WHERE c."isDeleted" = false
+        ${visibilityFilter}
+        ORDER BY c."createdAt" DESC
+        LIMIT ${limit} OFFSET ${skip}
+      `;
+
+      const totalCount = await prisma.$queryRaw<Array<{ count: number }>>`
+        SELECT COUNT(*)::int as count
+        FROM "Collection" c
+        WHERE c."isDeleted" = false
+        ${visibilityFilter}
+      `;
 
       const total = totalCount[0]?.count || 0;
       const page = Math.floor(skip / limit) + 1;
       const totalPage = Math.ceil(total / limit);
 
-      // Transform the data to match the expected frontend format
       const transformedCollections = collections.map((collection) => ({
         ...collection,
         owner: {
           id: collection.ownerId,
-          name: collection.ownerName,
-          email: collection.ownerEmail,
+          name: collection.ownerName || "Unknown",
+          email: collection.ownerEmail || "unknown@example.com",
         },
         _count: {
           papers: collection.paperCount,
-          members: 0, // Default value, can be enhanced later
+          members: collection.memberCount ?? 0,
         },
       }));
 
@@ -159,28 +165,60 @@ export class CollectionService {
       const ws: string | null =
         workspaceId && workspaceId.trim() !== "" ? workspaceId : null;
 
-      const collections = await prisma.$queryRaw<any[]>`
-        SELECT DISTINCT
-          c.id,
-          c.name,
-          c.description,
-          c."isPublic",
-          c."createdAt",
-          c."updatedAt",
-          c."ownerId",
-          c."workspaceId",
-          COALESCE(COUNT(cp.id), 0)::int as "paperCount"
-        FROM "Collection" c
-        LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId" AND cp."isDeleted" = false
-        LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."isDeleted" = false
-        WHERE c."isDeleted" = false 
-          AND (
-            c."ownerId" = ${userId} 
-            OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
-          )
-          ${ws ? Prisma.sql`AND c."workspaceId" = ${ws}` : Prisma.empty}
-        GROUP BY c.id, c."ownerId", c."workspaceId"
-        ORDER BY c."createdAt" DESC
+      const workspaceFilter = ws
+        ? Prisma.sql`AND c."workspaceId" = ${ws}`
+        : Prisma.empty;
+
+      const collections = await prisma.$queryRaw<CollectionAggregateRow[]>`
+        WITH accessible AS (
+          SELECT 
+            c.id,
+            c.name,
+            c.description,
+            c."isPublic",
+            c."createdAt",
+            c."updatedAt",
+            c."ownerId",
+            c."workspaceId"
+          FROM "Collection" c
+          LEFT JOIN "CollectionMember" cm
+            ON c.id = cm."collectionId" AND cm."isDeleted" = false
+          WHERE c."isDeleted" = false
+            AND (
+              c."ownerId" = ${userId} 
+              OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
+            )
+            ${workspaceFilter}
+          GROUP BY c.id
+        )
+        SELECT 
+          a.id,
+          a.name,
+          a.description,
+          a."isPublic",
+          a."createdAt",
+          a."updatedAt",
+          a."ownerId",
+          a."workspaceId",
+          u.email AS "ownerEmail",
+          u.name AS "ownerName",
+          COALESCE(paper_counts.paper_count, 0)::int AS "paperCount",
+          COALESCE(member_counts.member_count, 0)::int AS "memberCount"
+        FROM accessible a
+        LEFT JOIN "User" u ON u.id = a."ownerId"
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS paper_count
+          FROM "CollectionPaper"
+          WHERE "isDeleted" = false
+          GROUP BY "collectionId"
+        ) paper_counts ON paper_counts."collectionId" = a.id
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS member_count
+          FROM "CollectionMember"
+          WHERE "isDeleted" = false AND status = 'ACCEPTED'
+          GROUP BY "collectionId"
+        ) member_counts ON member_counts."collectionId" = a.id
+        ORDER BY a."createdAt" DESC
         LIMIT ${limit} OFFSET ${skip}
       `;
 
@@ -190,47 +228,39 @@ export class CollectionService {
         );
       }
 
-      const totalResult = await prisma.$queryRaw<any[]>`
-        SELECT COUNT(DISTINCT c.id)::int as count
-        FROM "Collection" c
-        LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."isDeleted" = false
-        WHERE c."isDeleted" = false 
-          AND (
-            c."ownerId" = ${userId} 
-            OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
-          )
-          ${ws ? Prisma.sql`AND c."workspaceId" = ${ws}` : Prisma.empty}
+      const totalResult = await prisma.$queryRaw<Array<{ count: number }>>`
+        SELECT COUNT(*)::int as count
+        FROM (
+          SELECT c.id
+          FROM "Collection" c
+          LEFT JOIN "CollectionMember" cm
+            ON c.id = cm."collectionId" AND cm."isDeleted" = false
+          WHERE c."isDeleted" = false 
+            AND (
+              c."ownerId" = ${userId} 
+              OR (cm."userId" = ${userId} AND cm."status" = 'ACCEPTED')
+            )
+            ${workspaceFilter}
+          GROUP BY c.id
+        ) accessible_ids
       `;
 
       const total = totalResult[0]?.count || 0;
       const page = Math.floor(skip / limit) + 1;
       const totalPage = Math.ceil(total / limit);
 
-      // Get owner information for each collection
-      const ownerIds = [...new Set(collections.map((c) => c.ownerId))];
-      const owners = await prisma.user.findMany({
-        where: { id: { in: ownerIds } },
-        select: { id: true, name: true, email: true },
-      });
-
-      const ownerMap = new Map(owners.map((owner) => [owner.id, owner]));
-
-      // Transform the data to match the expected frontend format
-      const transformedCollections = collections.map((collection) => {
-        const owner = ownerMap.get(collection.ownerId);
-        return {
-          ...collection,
-          owner: {
-            id: collection.ownerId,
-            name: owner?.name || "Unknown",
-            email: owner?.email || "unknown@example.com",
-          },
-          _count: {
-            papers: collection.paperCount,
-            members: 0, // Default value, can be enhanced later
-          },
-        };
-      });
+      const transformedCollections = collections.map((collection) => ({
+        ...collection,
+        owner: {
+          id: collection.ownerId,
+          name: collection.ownerName || "Unknown",
+          email: collection.ownerEmail || "unknown@example.com",
+        },
+        _count: {
+          papers: collection.paperCount,
+          members: collection.memberCount ?? 0,
+        },
+      }));
 
       if (process.env.NODE_ENV === "development") {
         console.log(
@@ -253,17 +283,13 @@ export class CollectionService {
     }
   }
 
-  /**
-   * Search collections using $queryRaw with text matching
-   * Source: optimized collection search with relevance scoring
-   */
   static async searchCollections(
     searchTerm: string,
     limit: number = 10,
     skip: number = 0
   ) {
     try {
-      const collections = await prisma.$queryRaw<any[]>`
+      const collections = await prisma.$queryRaw<CollectionAggregateRow[]>`
         SELECT 
           c.id,
           c.name,
@@ -273,7 +299,8 @@ export class CollectionService {
           c."updatedAt",
           u.email as "ownerEmail",
           u.name as "ownerName",
-          COALESCE(COUNT(cp.id), 0)::int as "paperCount",
+          COALESCE(paper_counts.paper_count, 0)::int as "paperCount",
+          COALESCE(member_counts.member_count, 0)::int as "memberCount",
           (
             CASE 
               WHEN c.name ILIKE ${`%${searchTerm}%`} THEN 10 
@@ -286,22 +313,45 @@ export class CollectionService {
           ) as relevance_score
         FROM "Collection" c
         LEFT JOIN "User" u ON c."ownerId" = u.id
-        LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId"
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS paper_count
+          FROM "CollectionPaper"
+          WHERE "isDeleted" = false
+          GROUP BY "collectionId"
+        ) paper_counts ON paper_counts."collectionId" = c.id
+        LEFT JOIN (
+          SELECT "collectionId", COUNT(*)::int AS member_count
+          FROM "CollectionMember"
+          WHERE "isDeleted" = false AND status = 'ACCEPTED'
+          GROUP BY "collectionId"
+        ) member_counts ON member_counts."collectionId" = c.id
         WHERE c."isDeleted" = false
           AND (
             c.name ILIKE ${`%${searchTerm}%`} 
             OR c.description ILIKE ${`%${searchTerm}%`}
           )
-        GROUP BY c.id, u.email, u.name
         ORDER BY relevance_score DESC, c."createdAt" DESC
         LIMIT ${limit} OFFSET ${skip}
       `;
 
+      const transformedCollections = collections.map((collection) => ({
+        ...collection,
+        owner: {
+          id: collection.ownerId,
+          name: collection.ownerName || "Unknown",
+          email: collection.ownerEmail || "unknown@example.com",
+        },
+        _count: {
+          papers: collection.paperCount,
+          members: collection.memberCount ?? 0,
+        },
+      }));
+
       return {
-        result: collections,
+        result: transformedCollections,
         meta: {
           searchTerm,
-          count: collections.length,
+          count: transformedCollections.length,
         },
       };
     } catch (error) {
@@ -320,7 +370,9 @@ export class CollectionService {
     userId: string
   ): Promise<boolean> {
     try {
-      const result = await prisma.$queryRaw<any[]>`
+      const result = await prisma.$queryRaw<
+        Array<{ hasEditPermission: boolean }>
+      >`
         SELECT 
           CASE 
             WHEN c."ownerId" = ${userId} THEN true
@@ -350,7 +402,9 @@ export class CollectionService {
     userId: string
   ): Promise<"OWNER" | "EDIT" | "VIEW" | null> {
     try {
-      const result = await prisma.$queryRaw<any[]>`
+      const result = await prisma.$queryRaw<
+        Array<{ permission: "OWNER" | "EDIT" | "VIEW" | null }>
+      >`
         SELECT 
           CASE 
             WHEN c."ownerId" = ${userId} THEN 'OWNER'

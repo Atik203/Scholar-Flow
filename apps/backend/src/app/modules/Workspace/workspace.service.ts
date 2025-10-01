@@ -12,25 +12,50 @@ export class WorkspaceService {
     const whereShared = scope === "shared";
 
     const rows = await prisma.$queryRaw<any[]>`
-      SELECT w.*,
-             (SELECT COUNT(*)::int FROM "WorkspaceMember" wm WHERE wm."workspaceId" = w.id AND wm."isDeleted" = false) as "memberCount",
-             (SELECT COUNT(*)::int FROM "Collection" c WHERE c."workspaceId" = w.id AND c."isDeleted" = false) as "collectionCount",
-             (SELECT COUNT(*)::int FROM "Paper" p WHERE p."workspaceId" = w.id AND p."isDeleted" = false) as "paperCount",
-             (w."ownerId" = ${userId}) as "isOwner"
-      FROM "Workspace" w
-      JOIN "WorkspaceMember" m ON m."workspaceId" = w.id AND m."isDeleted" = false
-      WHERE m."userId" = ${userId} AND w."isDeleted" = false
-        AND (${whereOwned} = false OR w."ownerId" = ${userId})
-        AND (${whereShared} = false OR w."ownerId" != ${userId})
-      ORDER BY w."createdAt" DESC
+      WITH filtered_workspaces AS (
+        SELECT w.*
+        FROM "Workspace" w
+        JOIN "WorkspaceMember" m ON m."workspaceId" = w.id AND m."isDeleted" = false
+        WHERE m."userId" = ${userId}
+          AND w."isDeleted" = false
+          AND (${whereOwned} = false OR w."ownerId" = ${userId})
+          AND (${whereShared} = false OR w."ownerId" != ${userId})
+      )
+      SELECT
+        fw.*,
+        (fw."ownerId" = ${userId})::boolean AS "isOwner",
+        COALESCE(member_counts.member_count, 0)::int AS "memberCount",
+        COALESCE(collection_counts.collection_count, 0)::int AS "collectionCount",
+        COALESCE(paper_counts.paper_count, 0)::int AS "paperCount"
+      FROM filtered_workspaces fw
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS member_count
+        FROM "WorkspaceMember"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) member_counts ON member_counts."workspaceId" = fw.id
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS collection_count
+        FROM "Collection"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) collection_counts ON collection_counts."workspaceId" = fw.id
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS paper_count
+        FROM "Paper"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) paper_counts ON paper_counts."workspaceId" = fw.id
+      ORDER BY fw."createdAt" DESC
       LIMIT ${limit} OFFSET ${skip}
     `;
+
     const totalRes = await prisma.$queryRaw<any[]>`
       SELECT COUNT(*)::int as count
-      FROM "WorkspaceMember" m
-      JOIN "Workspace" w ON w.id = m."workspaceId" AND w."isDeleted" = false
+      FROM "Workspace" w
+      JOIN "WorkspaceMember" m ON m."workspaceId" = w.id AND m."isDeleted" = false
       WHERE m."userId" = ${userId}
-        AND m."isDeleted" = false
+        AND w."isDeleted" = false
         AND (${whereOwned} = false OR w."ownerId" = ${userId})
         AND (${whereShared} = false OR w."ownerId" != ${userId})
     `;
