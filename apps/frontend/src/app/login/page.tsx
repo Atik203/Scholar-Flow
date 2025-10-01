@@ -43,8 +43,12 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Auth guard - redirects to dashboard if already authenticated
-  const { isLoading: authLoading } = useAuthRoute();
+  // Check if already authenticated (but don't auto-redirect during login process)
+  // This prevents race conditions between login flow and auth guard
+  const { isLoading: authLoading, isAuthenticated } = useAuthRoute();
+
+  // If already authenticated and NOT in the middle of logging in, let useAuthRoute handle redirect
+  // The isLoading check ensures we don't interfere with active login attempts
 
   const {
     register,
@@ -70,6 +74,7 @@ export default function LoginPage() {
     try {
       const callbackUrl = getCallbackUrl(searchParams);
 
+      console.log("🔐 Starting credentials sign-in...");
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -77,48 +82,41 @@ export default function LoginPage() {
         callbackUrl,
       });
 
+      console.log("📋 SignIn result:", result);
+
       if (result?.error) {
         dismissToast(loadingToast);
-        showAuthErrorToast("Invalid email or password");
+        console.error("❌ Sign-in error:", result.error);
+        showAuthErrorToast(
+          result.error === "CredentialsSignin"
+            ? "Invalid email or password"
+            : result.error
+        );
         return;
       }
 
       if (result?.ok) {
-        let session = null;
-        for (let i = 0; i < 10 && !session; i++) {
-          session = await getSession();
-          if (!session) {
-            await new Promise((resolve) => setTimeout(resolve, 200));
-          }
-        }
-
-        if (!session) {
-          dismissToast(loadingToast);
-          showAuthErrorToast(
-            "We couldn't verify your session. Please try again."
-          );
-          return;
-        }
-
+        console.log("✅ Sign-in successful, session created");
+        
         dismissToast(loadingToast);
         showAuthSuccessToast("Email/Password");
 
-        const redirectUrl = handleAuthRedirect(
-          true,
-          searchParams,
-          "/login",
-          session.user?.role
-        );
-
-        router.replace(redirectUrl);
+        // Session cookie is set, but we need a full page navigation to pick it up
+        // Using window.location.href ensures the cookie is sent with the next request
+        const redirectUrl = callbackUrl || "/dashboard";
+        console.log("🚀 Redirecting to:", redirectUrl);
+        
+        // Use window.location instead of router to ensure cookie is sent
+        window.location.href = redirectUrl;
         return;
       }
 
       dismissToast(loadingToast);
+      console.error("❌ Unexpected sign-in result:", result);
       showAuthErrorToast("Sign-in response was unexpected. Please try again.");
     } catch (error) {
       dismissToast(loadingToast);
-      console.error("Sign-in error:", error);
+      console.error("❌ Sign-in error:", error);
       showAuthErrorToast("An unexpected error occurred while signing in");
     } finally {
       setIsLoading(null);
@@ -132,59 +130,18 @@ export default function LoginPage() {
     try {
       const callbackUrl = getCallbackUrl(searchParams);
 
-      const result = await signIn(provider, {
-        redirect: false,
-        callbackUrl,
+      // OAuth MUST use redirect: true to properly navigate to provider auth page
+      // NextAuth will handle the complete OAuth flow including callback
+      await signIn(provider, {
+        callbackUrl, // NextAuth will redirect here after successful auth
       });
 
-      if (result?.error) {
-        dismissToast(loadingToast);
-        showAuthErrorToast(`Failed to sign in with ${provider}`);
-        return;
-      }
-
-      if (result?.ok) {
-        let session = null;
-        for (let i = 0; i < 10 && !session; i++) {
-          session = await getSession();
-          if (!session) {
-            await new Promise((resolve) => setTimeout(resolve, 200));
-          }
-        }
-
-        if (!session) {
-          dismissToast(loadingToast);
-          showAuthErrorToast(
-            `We couldn't verify your ${provider} session. Please try again.`
-          );
-          return;
-        }
-
-        dismissToast(loadingToast);
-        showAuthSuccessToast(
-          provider.charAt(0).toUpperCase() + provider.slice(1)
-        );
-
-        const redirectUrl = handleAuthRedirect(
-          true,
-          searchParams,
-          "/login",
-          session.user?.role
-        );
-
-        router.replace(redirectUrl);
-        return;
-      }
-
-      dismissToast(loadingToast);
-      showAuthErrorToast(
-        `Sign-in with ${provider} was interrupted. Try again.`
-      );
+      // Note: Code after this won't execute because signIn() redirects
+      // If we reach here, there was an error (signIn returns Promise<undefined> on redirect)
     } catch (error) {
       dismissToast(loadingToast);
       console.error(`${provider} sign-in error:`, error);
       showAuthErrorToast(`An error occurred while signing in with ${provider}`);
-    } finally {
       setIsLoading(null);
     }
   };

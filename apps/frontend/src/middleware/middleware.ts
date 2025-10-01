@@ -60,7 +60,7 @@ export default withAuth(
       );
     };
 
-    // 1. Handle API routes - let them pass through
+    // 1. Handle API routes - let them pass through (especially NextAuth)
     if (pathname.startsWith("/api/")) {
       return NextResponse.next();
     }
@@ -75,7 +75,18 @@ export default withAuth(
     }
 
     // 3. Handle auth routes when user is already authenticated
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+
     if (isAuthenticated && matchesRoute(authRoutes, pathname)) {
+      // If user is authenticated and on auth page with callbackUrl, redirect to callback
+      if (callbackUrl) {
+        console.log(
+          `🔄 Authenticated user on auth page, redirecting to callback: ${callbackUrl}`
+        );
+        return createRedirect(callbackUrl);
+      }
+
+      // If user is authenticated on auth page without callback, redirect to dashboard
       const roleSlug = getRoleSlug((token as any)?.role);
       const dashboardPath = `/dashboard/${roleSlug}`;
       console.log(
