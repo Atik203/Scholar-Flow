@@ -30,8 +30,12 @@ export function useAuth() {
       // Only clear credentials if we're sure the user is unauthenticated
       // AND we're not currently loading user data
       dispatch(clearCredentials());
+    } else if (userError && !isUserLoading) {
+      // Clear credentials if there's an error fetching user (e.g., account deleted)
+      console.warn("User fetch failed, clearing credentials:", userError);
+      dispatch(clearCredentials());
     }
-  }, [session, userData, status, dispatch, isUserLoading]);
+  }, [session, userData, status, dispatch, isUserLoading, userError]);
 
   return {
     user: userData?.data?.user || null,
