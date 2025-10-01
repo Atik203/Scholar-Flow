@@ -7,7 +7,7 @@ import {
 } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
-import { getCallbackUrl, handleAuthRedirect } from "@/lib/auth/redirects";
+import { getCallbackUrl } from "@/lib/auth/redirects";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -21,7 +21,7 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { getSession, signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -97,7 +97,7 @@ export default function LoginPage() {
 
       if (result?.ok) {
         console.log("✅ Sign-in successful, session created");
-        
+
         dismissToast(loadingToast);
         showAuthSuccessToast("Email/Password");
 
@@ -105,7 +105,7 @@ export default function LoginPage() {
         // Using window.location.href ensures the cookie is sent with the next request
         const redirectUrl = callbackUrl || "/dashboard";
         console.log("🚀 Redirecting to:", redirectUrl);
-        
+
         // Use window.location instead of router to ensure cookie is sent
         window.location.href = redirectUrl;
         return;
