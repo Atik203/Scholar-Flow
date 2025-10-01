@@ -223,11 +223,7 @@ model Paper {
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
 
-  @@index([workspaceId, createdAt])
-  @@index([uploaderId])
-  // Optimized indexes for user-scoped and workspace-scoped queries
-  @@index([uploaderId, isDeleted, createdAt])
-  @@index([workspaceId, isDeleted, createdAt])
+  // Optimized index for processing status dashboards
   @@index([processingStatus, createdAt])
 }
 
@@ -370,8 +366,6 @@ model CollectionPaper {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, paperId])
-  @@index([collectionId, isDeleted]) // For collection paper lookups
-  @@index([paperId, isDeleted]) // For paper collection lookups
 }
 
 model CollectionMember {

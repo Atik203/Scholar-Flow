@@ -3,17 +3,7 @@ import { withOptimize } from "@prisma/extension-optimize";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// Use a global cached instance to avoid exhausting connections in serverless
-// Enrich global type for TypeScript
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: any; // Use 'any' to support extended Prisma Client
-  let basePrismaClient: PrismaClient | undefined;
-}
-
-// Create base Prisma client first
-const basePrismaClient =
-  global.basePrismaClient ||
+const createBasePrismaClient = () =>
   new PrismaClient({
     log: isDev
       ? [
@@ -28,30 +18,36 @@ const basePrismaClient =
         ],
   });
 
-// Attach event listeners to base client before extensions
-if (isDev) {
-  basePrismaClient.$on("query", (e: any) => {
-    // Only log slow queries (>100ms) to reduce console noise
-    if (e.duration > 100) {
-      console.log(
-        `[SLOW QUERY] ${e.duration}ms: ${e.query.substring(0, 100)}...`
-      );
-    }
-  });
-}
-
-// Apply extensions to create the final client
-const prismaClient =
-  global.prisma ||
-  basePrismaClient.$extends(
+const createExtendedClient = (baseClient: PrismaClient) =>
+  baseClient.$extends(
     withOptimize({
       apiKey: process.env.OPTIMIZE_API_KEY!,
     })
   );
 
+type OptimizePrismaClient = ReturnType<typeof createExtendedClient>;
+
+const globalForPrisma = globalThis as typeof globalThis & {
+  prisma?: OptimizePrismaClient;
+  basePrismaClient?: PrismaClient;
+};
+
+const basePrismaClient =
+  globalForPrisma.basePrismaClient ?? createBasePrismaClient();
+
+// Attach event listeners to base client before extensions
 if (isDev) {
-  global.prisma = prismaClient;
-  global.basePrismaClient = basePrismaClient;
+  // Query logging handled by Prisma log config above
+  // Extended client logs are managed through the optimize extension
+}
+
+// Apply extensions to create the final client
+const prismaClient =
+  globalForPrisma.prisma ?? createExtendedClient(basePrismaClient);
+
+if (isDev) {
+  globalForPrisma.prisma = prismaClient;
+  globalForPrisma.basePrismaClient = basePrismaClient;
 }
 
 export default prismaClient;
