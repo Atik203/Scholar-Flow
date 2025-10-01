@@ -1,5 +1,6 @@
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
+import { BrowserCleanup } from "@/components/providers/BrowserCleanup";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { SessionSyncProvider } from "@/components/providers/SessionSyncProvider";
@@ -134,6 +135,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <BrowserCleanup />
         <ServiceWorkerRegistration />
         <NextAuthProvider>
           <ReduxProvider>
