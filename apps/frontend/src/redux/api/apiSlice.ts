@@ -81,6 +81,7 @@ export const apiSlice = createApi({
     "Collection",
     "CollectionPaper",
     "CollectionMember",
+    "CollectionInvite",
     "Workspace",
     "User",
     "Annotation",
