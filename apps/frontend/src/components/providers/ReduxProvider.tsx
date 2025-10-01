@@ -1,6 +1,7 @@
 "use client";
 
 import { makeStore, type AppStore } from "@/redux/store";
+import { setAppPersistor, setAppStore } from "@/redux/storeAccess";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { Provider } from "react-redux";
 import { persistStore } from "redux-persist";
@@ -22,6 +23,8 @@ export function ReduxProvider({ children }: ReduxProviderProps) {
   if (!storeRef.current) {
     storeRef.current = makeStore();
     persistorRef.current = persistStore(storeRef.current);
+    setAppStore(storeRef.current);
+    setAppPersistor(persistorRef.current);
   }
 
   // During SSR, render without PersistGate

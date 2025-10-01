@@ -339,6 +339,12 @@ const handler = NextAuth({
       return session;
     },
   },
+  events: {
+    async signOut({ token, session }) {
+      // Clear any server-side session data
+      console.log("User signed out:", token?.sub || session?.user?.email);
+    },
+  },
   pages: {
     signIn: "/login",
     error: "/auth/error",

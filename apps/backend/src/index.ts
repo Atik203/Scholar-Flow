@@ -14,11 +14,21 @@ const PORT = config.port || 5000;
 // Security middleware
 app.use(helmet() as unknown as RequestHandler);
 app.use(compression() as unknown as RequestHandler);
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000",
+  "https://scholar-flow-ai.vercel.app", // production
+];
 
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }) as unknown as RequestHandler
 );

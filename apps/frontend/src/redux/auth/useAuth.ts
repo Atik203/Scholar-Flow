@@ -26,10 +26,12 @@ export function useAuth() {
           accessToken: session.accessToken,
         })
       );
-    } else if (status === "unauthenticated") {
+    } else if (status === "unauthenticated" && !isUserLoading) {
+      // Only clear credentials if we're sure the user is unauthenticated
+      // AND we're not currently loading user data
       dispatch(clearCredentials());
     }
-  }, [session, userData, status, dispatch]);
+  }, [session, userData, status, dispatch, isUserLoading]);
 
   return {
     user: userData?.data?.user || null,

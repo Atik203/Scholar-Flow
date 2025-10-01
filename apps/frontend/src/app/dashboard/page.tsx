@@ -15,13 +15,17 @@ export default function DashboardIndex() {
   }, [user?.role]);
 
   useEffect(() => {
+    // Don't do anything while still loading authentication state
     if (isLoading) return;
 
+    // Only redirect to login if we're SURE the user is not authenticated
+    // This prevents redirect loops during sign-in
     if (!isAuthenticated) {
       router.replace("/login?callbackUrl=/dashboard");
       return;
     }
 
+    // Redirect to role-specific dashboard
     router.replace(target);
   }, [isLoading, isAuthenticated, target, router]);
 
