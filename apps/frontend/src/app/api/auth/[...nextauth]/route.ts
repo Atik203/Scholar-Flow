@@ -150,6 +150,11 @@ const customAdapter = {
 };
 
 const handler = NextAuth({
+  // Use JWT strategy for stateless sessions (no database adapter)
+  session: {
+    strategy: "jwt",
+    maxAge: 60 * 60, // 1 hour (matches backend token expiry)
+  },
   // adapter: customAdapter,
   providers: [
     CredentialsProvider({
@@ -233,9 +238,6 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
