@@ -2,6 +2,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
+import { SessionSyncProvider } from "@/components/providers/SessionSyncProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
@@ -136,6 +137,7 @@ export default function RootLayout({
         <ServiceWorkerRegistration />
         <NextAuthProvider>
           <ReduxProvider>
+            <SessionSyncProvider />
             <ThemeProvider>
               <ConditionalLayout>{children}</ConditionalLayout>
               <ToastProvider />
