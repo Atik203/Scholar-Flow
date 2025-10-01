@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
+import { getCallbackUrl, getRoleDashboardUrl } from "@/lib/auth/redirects";
+
 interface UseAuthGuardOptions {
   redirectTo?: string;
   requireAuth?: boolean;
@@ -46,7 +48,24 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
 
     // Redirect authenticated users from auth routes
     if (!requireAuth && isAuthenticated && redirectAuthenticatedTo) {
-      router.replace(redirectAuthenticatedTo);
+      let destination = redirectAuthenticatedTo;
+
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const callback = getCallbackUrl(params, destination);
+        if (callback) {
+          destination = callback;
+        }
+      }
+
+      if (
+        session?.user?.role &&
+        (destination === "/dashboard" || destination === "/dashboard/")
+      ) {
+        destination = getRoleDashboardUrl(session.user.role);
+      }
+
+      router.replace(destination);
       return;
     }
   }, [
@@ -56,6 +75,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     redirectTo,
     redirectAuthenticatedTo,
     router,
+    session?.user?.role,
   ]);
 
   return {

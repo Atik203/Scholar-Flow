@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { USER_ROLES, hasPermission } from "@/lib/auth/roles";
+import { handleSignOut } from "@/lib/auth/signout";
 import { useDeleteAccountMutation } from "@/redux/api/userApi";
 import {
   Bell,
@@ -47,7 +48,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -125,8 +126,8 @@ export default function SettingsPage() {
         "Your account has been successfully deleted. You will be logged out."
       );
 
-      // Sign out and redirect to home page
-      await signOut({ callbackUrl: "/" });
+      // Sign out and redirect to home page with full cleanup
+      await handleSignOut("/");
     } catch (error: any) {
       console.error("Delete account error:", error);
       const errorMessage =

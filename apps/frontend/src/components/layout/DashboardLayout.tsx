@@ -19,12 +19,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { handleSignOutWithLoading } from "@/lib/auth/signout";
 import { LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 
 interface DashboardLayoutProps {
@@ -79,10 +80,11 @@ function ThemeToggle() {
 
 function UserMenu() {
   const { data: session } = useSession();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const user = session?.user;
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleSignOut = () => {
+    void handleSignOutWithLoading(setIsSigningOut);
   };
 
   return (
@@ -129,9 +131,9 @@ function UserMenu() {
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
+        <DropdownMenuItem onClick={handleSignOut} disabled={isSigningOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          Log out
+          {isSigningOut ? "Signing out..." : "Log out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

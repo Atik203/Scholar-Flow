@@ -84,22 +84,38 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
-        // Wait for session to be updated
-        const session = await getSession();
-        if (session) {
-          dismissToast(loadingToast);
-          showAuthSuccessToast("Email/Password");
-
-          // Use smart redirect with user role
-          const redirectUrl = handleAuthRedirect(
-            true,
-            searchParams,
-            "/login",
-            session.user?.role
-          );
-          router.push(redirectUrl);
+        let session = null;
+        for (let i = 0; i < 10 && !session; i++) {
+          session = await getSession();
+          if (!session) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+          }
         }
+
+        if (!session) {
+          dismissToast(loadingToast);
+          showAuthErrorToast(
+            "We couldn't verify your session. Please try again."
+          );
+          return;
+        }
+
+        dismissToast(loadingToast);
+        showAuthSuccessToast("Email/Password");
+
+        const redirectUrl = handleAuthRedirect(
+          true,
+          searchParams,
+          "/login",
+          session.user?.role
+        );
+
+        router.replace(redirectUrl);
+        return;
       }
+
+      dismissToast(loadingToast);
+      showAuthErrorToast("Sign-in response was unexpected. Please try again.");
     } catch (error) {
       dismissToast(loadingToast);
       console.error("Sign-in error:", error);
@@ -128,22 +144,42 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
-        // Wait for session to be updated
-        const session = await getSession();
+        let session = null;
+        for (let i = 0; i < 10 && !session; i++) {
+          session = await getSession();
+          if (!session) {
+            await new Promise((resolve) => setTimeout(resolve, 200));
+          }
+        }
+
+        if (!session) {
+          dismissToast(loadingToast);
+          showAuthErrorToast(
+            `We couldn't verify your ${provider} session. Please try again.`
+          );
+          return;
+        }
+
         dismissToast(loadingToast);
         showAuthSuccessToast(
           provider.charAt(0).toUpperCase() + provider.slice(1)
         );
 
-        // Use smart redirect with user role
         const redirectUrl = handleAuthRedirect(
           true,
           searchParams,
           "/login",
-          session?.user?.role
+          session.user?.role
         );
-        router.push(redirectUrl);
+
+        router.replace(redirectUrl);
+        return;
       }
+
+      dismissToast(loadingToast);
+      showAuthErrorToast(
+        `Sign-in with ${provider} was interrupted. Try again.`
+      );
     } catch (error) {
       dismissToast(loadingToast);
       console.error(`${provider} sign-in error:`, error);
