@@ -95,9 +95,32 @@ export class WorkspaceService {
 
   static async getWorkspace(userId: string, id: string) {
     const rows = await prisma.$queryRaw<any[]>`
-      SELECT w.*
+      SELECT
+        w.*,
+        (w."ownerId" = ${userId})::boolean AS "isOwner",
+        COALESCE(member_counts.member_count, 0)::int AS "memberCount",
+        COALESCE(collection_counts.collection_count, 0)::int AS "collectionCount",
+        COALESCE(paper_counts.paper_count, 0)::int AS "paperCount"
       FROM "Workspace" w
       JOIN "WorkspaceMember" m ON m."workspaceId" = w.id AND m."isDeleted" = false
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS member_count
+        FROM "WorkspaceMember"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) member_counts ON member_counts."workspaceId" = w.id
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS collection_count
+        FROM "Collection"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) collection_counts ON collection_counts."workspaceId" = w.id
+      LEFT JOIN (
+        SELECT "workspaceId", COUNT(*)::int AS paper_count
+        FROM "Paper"
+        WHERE "isDeleted" = false
+        GROUP BY "workspaceId"
+      ) paper_counts ON paper_counts."workspaceId" = w.id
       WHERE w.id = ${id} AND w."isDeleted" = false AND m."userId" = ${userId}
       LIMIT 1
     `;
