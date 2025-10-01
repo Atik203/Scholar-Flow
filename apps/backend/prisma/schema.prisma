@@ -223,8 +223,13 @@ model Paper {
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
 
-  // Optimized index for processing status dashboards
-  @@index([processingStatus, createdAt])
+  // Optimized indexes for common query patterns
+  @@index([processingStatus, createdAt]) // For processing status dashboards
+  @@index([uploaderId, workspaceId, isDeleted, createdAt]) // Hot path: user's papers in workspace
+  @@index([workspaceId, isDeleted, createdAt]) // Workspace paper listings
+  @@index([uploaderId, isDeleted]) // User's all papers (cross-workspace)
+  @@index([isDraft, isDeleted]) // Filter draft papers
+  @@index([doi, isDeleted]) // DOI lookups
 }
 
 model PaperFile {
@@ -366,6 +371,9 @@ model CollectionPaper {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, paperId])
+  @@index([collectionId, isDeleted, addedAt]) // Collection's papers sorted by add date
+  @@index([paperId, isDeleted]) // Paper's collections lookup
+  @@index([addedById, isDeleted]) // Papers added by specific user
 }
 
 model CollectionMember {

@@ -9,16 +9,39 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useListEditorPapersQuery } from "@/redux/api/paperApi";
 import { Download, FileText, Plus, Save } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { CreatePaperDialog } from "./CreatePaperDialog";
+import { EditorSkeleton } from "./EditorSkeleton";
 import { PapersList } from "./PapersList";
-import { ScholarFlowEditor } from "./ScholarFlowEditor";
+
+// Lazy load the heavy TipTap editor (reduces initial bundle by ~3.5MB)
+const ScholarFlowEditor = dynamic(
+  () =>
+    import("./ScholarFlowEditor").then((mod) => ({
+      default: mod.ScholarFlowEditor,
+    })),
+  {
+    loading: () => <EditorSkeleton />,
+    ssr: false,
+  }
+);
 
 export function TextEditorDashboard() {
   const [activeTab, setActiveTab] = useState("papers");
   const [currentPaper, setCurrentPaper] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+
+  // Fetch all papers to calculate stats
+  const { data: allPapersResponse } = useListEditorPapersQuery({});
+  const allPapers = allPapersResponse?.data || [];
+
+  // Calculate stats
+  const totalPapers = allPapers.length;
+  const drafts = allPapers.filter((paper: any) => paper.isDraft).length;
+  const published = allPapers.filter((paper: any) => !paper.isDraft).length;
 
   const handleCreateNew = () => {
     setIsCreateDialogOpen(true);
@@ -77,8 +100,10 @@ export function TextEditorDashboard() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">+0 from last month</p>
+            <div className="text-2xl font-bold">{totalPapers}</div>
+            <p className="text-xs text-muted-foreground">
+              {totalPapers === 0 ? "No papers yet" : "All your papers"}
+            </p>
           </CardContent>
         </Card>
 
@@ -88,8 +113,10 @@ export function TextEditorDashboard() {
             <Save className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Ready to publish</p>
+            <div className="text-2xl font-bold">{drafts}</div>
+            <p className="text-xs text-muted-foreground">
+              {drafts === 0 ? "No drafts" : "Ready to publish"}
+            </p>
           </CardContent>
         </Card>
 
@@ -99,9 +126,9 @@ export function TextEditorDashboard() {
             <Download className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{published}</div>
             <p className="text-xs text-muted-foreground">
-              Available for sharing
+              {published === 0 ? "None published" : "Available for sharing"}
             </p>
           </CardContent>
         </Card>
