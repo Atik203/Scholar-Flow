@@ -37,8 +37,22 @@ const basePrismaClient =
 
 // Attach event listeners to base client before extensions
 if (isDev) {
-  // Query logging handled by Prisma log config above
-  // Extended client logs are managed through the optimize extension
+  // Query performance logging for development using event listeners
+  basePrismaClient.$on("query" as never, (e: any) => {
+    const duration = e.duration;
+
+    // Log slow queries (>100ms) to help identify optimization opportunities
+    if (duration > 100) {
+      console.warn(
+        `⚠️ Slow query detected: ${e.query.substring(0, 100)}... took ${duration}ms`
+      );
+      if (duration > 500) {
+        console.error(
+          `🔴 VERY slow query: ${e.query.substring(0, 100)}... took ${duration}ms - NEEDS OPTIMIZATION!`
+        );
+      }
+    }
+  });
 }
 
 // Apply extensions to create the final client
