@@ -16,8 +16,41 @@ import "./app/services/pdfProcessingQueue";
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
-// Security middleware
-app.use(helmet() as unknown as RequestHandler);
+// Security middleware with enhanced CSP and security headers
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        connectSrc: [
+          "'self'",
+          "https://api.openai.com",
+          "https://generativelanguage.googleapis.com",
+        ],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: "deny", // Prevent clickjacking
+    },
+    noSniff: true, // Prevent MIME type sniffing
+    xssFilter: true, // Enable XSS filter
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin",
+    },
+  }) as unknown as RequestHandler
+);
 app.use(compression() as unknown as RequestHandler);
 
 // CORS configuration
