@@ -10,10 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getRoleDashboardBasePath } from "@/lib/auth/roles";
+import { handleSignOutWithLoading } from "@/lib/auth/signout";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface UserMenuProps {
   className?: string;
@@ -21,7 +22,7 @@ interface UserMenuProps {
 
 export function UserMenu({ className }: UserMenuProps) {
   const { data: session } = useSession();
-  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (!session?.user) {
     return null;
@@ -38,8 +39,8 @@ export function UserMenu({ className }: UserMenuProps) {
         .slice(0, 2)
     : user.email?.[0]?.toUpperCase() || "U";
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleSignOut = () => {
+    void handleSignOutWithLoading(setIsSigningOut);
   };
 
   return (
@@ -120,9 +121,10 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuItem
           className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
           onClick={handleSignOut}
+          disabled={isSigningOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{isSigningOut ? "Signing out..." : "Log out"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
