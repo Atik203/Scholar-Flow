@@ -1,11 +1,10 @@
 {
   "version": 2,
   "env": {
-    "YARN_IGNORE_ENGINES": "true",
-    "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    "YARN_IGNORE_ENGINES": "true"
   },
   "installCommand": "cd ../.. && corepack enable && corepack yarn install --immutable",
-  "buildCommand": "cd ../.. && corepack enable && corepack yarn workspace @scholar-flow/backend db:generate && corepack yarn workspace @scholar-flow/backend build",
+  "buildCommand": "cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
   "outputDirectory": "dist",
   "rewrites": [
     {
