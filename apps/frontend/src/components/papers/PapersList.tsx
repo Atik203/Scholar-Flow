@@ -50,13 +50,170 @@ import {
 } from "@/redux/api/paperApi";
 import { Calendar, Eye, FileText, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 // Using native date formatting to avoid external dependency
 
 interface PapersListProps {
   searchTerm?: string;
   workspaceId?: string;
 }
+
+// Memoized PaperRow component to prevent unnecessary re-renders
+interface PaperRowProps {
+  paper: Paper;
+  isDeleting: boolean;
+  isProcessing: boolean;
+  previewPaperId: string | null;
+  previewLoading: boolean;
+  previewUrlData: any;
+  onDelete: (paperId: string, paperTitle: string) => void;
+  onProcess: (paperId: string, paperTitle: string) => void;
+  onPreviewChange: (paperId: string | null) => void;
+  formatDate: (dateString: string) => string;
+  formatFileSize: (bytes?: number) => string;
+  getProcessingStatusBadge: (status: string) => {
+    variant: "secondary" | "default" | "outline" | "destructive";
+    label: string;
+  };
+}
+
+const PaperRow = memo(function PaperRow({
+  paper,
+  isDeleting,
+  isProcessing,
+  previewPaperId,
+  previewLoading,
+  previewUrlData,
+  onDelete,
+  onProcess,
+  onPreviewChange,
+  formatDate,
+  formatFileSize,
+  getProcessingStatusBadge,
+}: PaperRowProps) {
+  const statusBadge = getProcessingStatusBadge(paper.processingStatus);
+  const isPreviewOpen = previewPaperId === paper.id;
+
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="flex flex-col">
+          <span className="font-medium">{paper.title}</span>
+          {paper.metadata.authors && (
+            <span className="text-sm text-muted-foreground">
+              {paper.metadata.authors.join(", ")}
+            </span>
+          )}
+          {paper.metadata.year && (
+            <span className="text-sm text-muted-foreground">
+              {paper.metadata.year}
+            </span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
+      </TableCell>
+      <TableCell>
+        <div className="flex flex-col text-sm">
+          <span>{paper.file?.originalFilename || "N/A"}</span>
+          <span className="text-muted-foreground">
+            {formatFileSize(paper.file?.sizeBytes)}
+          </span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center text-sm">
+          <Calendar className="mr-1 h-3 w-3" />
+          {formatDate(paper.createdAt)}
+        </div>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/dashboard/papers/${paper.id}`}>
+              <Eye className="h-4 w-4" />
+            </Link>
+          </Button>
+          {paper.processingStatus === "UPLOADED" && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onProcess(paper.id, paper.title)}
+              disabled={isProcessing}
+              title="Start PDF processing"
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
+          {paper.file && (
+            <Dialog
+              open={isPreviewOpen}
+              onOpenChange={(open) => onPreviewChange(open ? paper.id : null)}
+            >
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  Preview
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                  <DialogTitle>{paper.title}</DialogTitle>
+                </DialogHeader>
+                <div className="max-h-[80vh] overflow-auto">
+                  {previewLoading && (
+                    <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
+                      Loading preview...
+                    </div>
+                  )}
+                  {previewUrlData?.data?.url && (
+                    <DocumentPreview
+                      fileUrl={previewUrlData.data.url}
+                      fileName={paper.file?.originalFilename}
+                      mimeType={paper.file?.contentType}
+                      originalFilename={paper.file?.originalFilename}
+                      className="mx-auto"
+                    />
+                  )}
+                  {!previewLoading && !previewUrlData?.data?.url && (
+                    <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
+                      Preview unavailable
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={isDeleting}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Paper</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{paper.title}"? This action
+                  cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDelete(paper.id, paper.title)}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
 
 export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   const [page, setPage] = useState(1);
@@ -81,7 +238,7 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   const { data: previewUrlData, isFetching: previewLoading } =
     useGetPaperFileUrlQuery(previewPaperId || "", { skip: !previewPaperId });
 
-  // Filter papers based on search term
+  // Filter papers based on search term - memoized to prevent recalculation on every render
   const filteredPapers: Paper[] = useMemo(() => {
     if (!papersData?.items || !searchTerm.trim()) {
       return papersData?.items || [];
@@ -98,27 +255,35 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
     );
   }, [papersData?.items, searchTerm]);
 
-  const handleDeletePaper = async (paperId: string, paperTitle: string) => {
-    try {
-      await deletePaper(paperId).unwrap();
-      showSuccessToast(`Paper "${paperTitle}" deleted successfully`);
-    } catch (error) {
-      showErrorToast("Failed to delete paper");
-      console.error("Delete error:", error);
-    }
-  };
+  // Memoized handlers to prevent recreation on every render
+  const handleDeletePaper = useCallback(
+    async (paperId: string, paperTitle: string) => {
+      try {
+        await deletePaper(paperId).unwrap();
+        showSuccessToast(`Paper "${paperTitle}" deleted successfully`);
+      } catch (error) {
+        showErrorToast("Failed to delete paper");
+        console.error("Delete error:", error);
+      }
+    },
+    [deletePaper]
+  );
 
-  const handleProcessPDF = async (paperId: string, paperTitle: string) => {
-    try {
-      await processPDF(paperId).unwrap();
-      showSuccessToast(`PDF processing started for "${paperTitle}"`);
-    } catch (error) {
-      showErrorToast("Failed to start PDF processing");
-      console.error("Processing error:", error);
-    }
-  };
+  const handleProcessPDF = useCallback(
+    async (paperId: string, paperTitle: string) => {
+      try {
+        await processPDF(paperId).unwrap();
+        showSuccessToast(`PDF processing started for "${paperTitle}"`);
+      } catch (error) {
+        showErrorToast("Failed to start PDF processing");
+        console.error("Processing error:", error);
+      }
+    },
+    [processPDF]
+  );
 
-  const getProcessingStatusBadge = (status: string) => {
+  // Memoized utility functions
+  const getProcessingStatusBadge = useCallback((status: string) => {
     const statusMap = {
       UPLOADED: { variant: "secondary" as const, label: "Uploaded" },
       PROCESSING: { variant: "default" as const, label: "Processing" },
@@ -126,21 +291,21 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
       FAILED: { variant: "destructive" as const, label: "Failed" },
     };
     return statusMap[status as keyof typeof statusMap] || statusMap.UPLOADED;
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
+  }, []);
 
-  const formatFileSize = (bytes?: number) => {
+  const formatFileSize = useCallback((bytes?: number) => {
     if (!bytes) return "N/A";
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mb.toFixed(1)} MB`;
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -256,145 +421,23 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {papers.map((paper) => {
-              const statusBadge = getProcessingStatusBadge(
-                paper.processingStatus
-              );
-              return (
-                <TableRow key={paper.id}>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{paper.title}</span>
-                      {paper.metadata.authors && (
-                        <span className="text-sm text-muted-foreground">
-                          {paper.metadata.authors.join(", ")}
-                        </span>
-                      )}
-                      {paper.metadata.year && (
-                        <span className="text-sm text-muted-foreground">
-                          {paper.metadata.year}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusBadge.variant}>
-                      {statusBadge.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col text-sm">
-                      <span>{paper.file?.originalFilename || "N/A"}</span>
-                      <span className="text-muted-foreground">
-                        {formatFileSize(paper.file?.sizeBytes)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center text-sm">
-                      <Calendar className="mr-1 h-3 w-3" />
-                      {formatDate(paper.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/papers/${paper.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      {paper.processingStatus === "UPLOADED" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleProcessPDF(paper.id, paper.title)
-                          }
-                          disabled={isProcessing}
-                          title="Start PDF processing"
-                        >
-                          <Play className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {paper.file && (
-                        <Dialog
-                          open={previewPaperId === paper.id}
-                          onOpenChange={(open) =>
-                            setPreviewPaperId(open ? paper.id : null)
-                          }
-                        >
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              Preview
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
-                            <DialogHeader>
-                              <DialogTitle>{paper.title}</DialogTitle>
-                            </DialogHeader>
-                            <div className="max-h-[80vh] overflow-auto">
-                              {previewLoading && (
-                                <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
-                                  Loading preview...
-                                </div>
-                              )}
-                              {previewUrlData?.data?.url && (
-                                <DocumentPreview
-                                  fileUrl={previewUrlData.data.url}
-                                  fileName={paper.file?.originalFilename}
-                                  mimeType={paper.file?.contentType}
-                                  originalFilename={
-                                    paper.file?.originalFilename
-                                  }
-                                  className="mx-auto"
-                                />
-                              )}
-                              {!previewLoading &&
-                                !previewUrlData?.data?.url && (
-                                  <div className="h-64 flex items-center justify-center text-sm text-muted-foreground">
-                                    Preview unavailable
-                                  </div>
-                                )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isDeleting}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Paper</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Are you sure you want to delete "{paper.title}"?
-                              This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() =>
-                                handleDeletePaper(paper.id, paper.title)
-                              }
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {papers.map((paper) => (
+              <PaperRow
+                key={paper.id}
+                paper={paper}
+                isDeleting={isDeleting}
+                isProcessing={isProcessing}
+                previewPaperId={previewPaperId}
+                previewLoading={previewLoading}
+                previewUrlData={previewUrlData}
+                onDelete={handleDeletePaper}
+                onProcess={handleProcessPDF}
+                onPreviewChange={setPreviewPaperId}
+                formatDate={formatDate}
+                formatFileSize={formatFileSize}
+                getProcessingStatusBadge={getProcessingStatusBadge}
+              />
+            ))}
           </TableBody>
         </Table>
 

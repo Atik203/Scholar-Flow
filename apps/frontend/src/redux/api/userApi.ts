@@ -55,6 +55,29 @@ export const userApi = apiSlice.injectEndpoints({
       providesTags: ["User"],
     }),
 
+    // Get all users (Admin only)
+    getAllUsers: builder.query<
+      {
+        success: boolean;
+        message: string;
+        data: User[];
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { page?: number; limit?: number; search?: string; role?: string }
+    >({
+      query: ({ page = 1, limit = 10, search, role } = {}) => ({
+        url: "/user",
+        params: { page, limit, search, role },
+      }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((u) => ({ type: "User" as const, id: u.id })),
+              { type: "User" as const, id: "LIST" },
+            ]
+          : [{ type: "User" as const, id: "LIST" }],
+    }),
+
     // Update user profile
     updateProfile: builder.mutation<
       UpdateProfileResponse,
@@ -96,6 +119,7 @@ export const userApi = apiSlice.injectEndpoints({
 
 export const {
   useGetProfileQuery,
+  useGetAllUsersQuery,
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,

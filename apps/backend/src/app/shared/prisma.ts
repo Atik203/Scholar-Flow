@@ -1,16 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+import { withOptimize } from "@prisma/extension-optimize";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// Use a global cached instance to avoid exhausting connections in serverless
-// Enrich global type for TypeScript
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
-
-const prismaClient =
-  global.prisma ||
+const createBasePrismaClient = () =>
   new PrismaClient({
     log: isDev
       ? [
@@ -25,19 +18,50 @@ const prismaClient =
         ],
   });
 
-if (isDev) global.prisma = prismaClient;
+const createExtendedClient = (baseClient: PrismaClient) =>
+  baseClient.$extends(
+    withOptimize({
+      apiKey: process.env.OPTIMIZE_API_KEY!,
+    })
+  );
 
-// Optional performance-focused query log only in dev
+type OptimizePrismaClient = ReturnType<typeof createExtendedClient>;
+
+const globalForPrisma = globalThis as typeof globalThis & {
+  prisma?: OptimizePrismaClient;
+  basePrismaClient?: PrismaClient;
+};
+
+const basePrismaClient =
+  globalForPrisma.basePrismaClient ?? createBasePrismaClient();
+
+// Attach event listeners to base client before extensions
 if (isDev) {
-  // @ts-expect-error: Prisma Client extension type issue
-  prismaClient.$on("query", (e: any) => {
-    // Only log slow queries (>100ms) to reduce console noise
-    if (e.duration > 100) {
-      console.log(
-        `[SLOW QUERY] ${e.duration}ms: ${e.query.substring(0, 100)}...`
+  // Query performance logging for development using event listeners
+  basePrismaClient.$on("query" as never, (e: any) => {
+    const duration = e.duration;
+
+    // Log slow queries (>100ms) to help identify optimization opportunities
+    if (duration > 100) {
+      console.warn(
+        `⚠️ Slow query detected: ${e.query.substring(0, 100)}... took ${duration}ms`
       );
+      if (duration > 500) {
+        console.error(
+          `🔴 VERY slow query: ${e.query.substring(0, 100)}... took ${duration}ms - NEEDS OPTIMIZATION!`
+        );
+      }
     }
   });
+}
+
+// Apply extensions to create the final client
+const prismaClient =
+  globalForPrisma.prisma ?? createExtendedClient(basePrismaClient);
+
+if (isDev) {
+  globalForPrisma.prisma = prismaClient;
+  globalForPrisma.basePrismaClient = basePrismaClient;
 }
 
 export default prismaClient;

@@ -7,18 +7,14 @@ alwaysApply: false
 
 # Frontend Rules
 
-## ✅ ESTABLISHED PATTERNS (Phase 1 Complete - September 17, 2025)
+## ✅ ESTABLISHED PATTERNS (Phase 1 – Week 5.5)
 
-1. **Authentication UI**: Login/register pages with OAuth integration ✅
-2. **Form Validation**: React Hook Form + Zod validation ✅
-3. **Error Handling**: Comprehensive error states and loading indicators ✅
-4. **Responsive Design**: Mobile-first with proper breakpoints ✅
-5. **Paper Management**: Complete upload, storage, and viewing system with S3 integration ✅
-6. **Modern Dashboard**: SaaS-style interface with role-based quick actions ✅
-7. **Advanced Search**: Real-time search with filters and fuzzy matching ✅
-8. **PDF Handling**: Fallback viewer with robust error handling ✅
-9. **Navigation**: Enhanced sidebar with proper routing and mobile responsiveness ✅
-10. **Advanced Error Handling**: Sonner integration, retry logic, and smart error classification ✅
+1. **Authentication UI**: Login/register with OAuth + proper validation ✅
+2. **Dashboard Shell**: Role-scoped routing + admin overview refresh ✅
+3. **Paper & Collection UX**: Upload, search, preview, rich editor flows ✅
+4. **Workspace Tools**: Member management, invitations, activity views ✅
+5. **AI Experience**: Gemini-first chat + summarization UI with fallback ✅
+6. **Error Handling**: Sonner integration, retry logic, and smart error classification ✅
 
 ## Core Development Standards
 

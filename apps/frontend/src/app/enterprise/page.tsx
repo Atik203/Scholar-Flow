@@ -140,6 +140,7 @@ export default function EnterprisePage() {
                   "Role-based Access Control",
                   "Data Encryption",
                   "Audit Logs",
+                  "Regular Security Audits",
                 ],
               },
               {
@@ -152,6 +153,7 @@ export default function EnterprisePage() {
                   "Global CDN",
                   "99.99% Uptime SLA",
                   "Auto-scaling",
+                  "High Availability"
                 ],
               },
               {
@@ -164,6 +166,7 @@ export default function EnterprisePage() {
                   "Custom User Roles",
                   "Team Analytics",
                   "Bulk Operations",
+                  "Collaboration Tools",
                 ],
               },
               {
@@ -176,6 +179,7 @@ export default function EnterprisePage() {
                   "Webhook Support",
                   "LDAP/AD Integration",
                   "Custom Connectors",
+                  "Data Import Services",
                 ],
               },
               {
@@ -188,6 +192,7 @@ export default function EnterprisePage() {
                   "Custom Domain",
                   "White-label UI",
                   "Institutional SSO",
+                  "Branded Email Notifications",
                 ],
               },
               {
@@ -200,6 +205,7 @@ export default function EnterprisePage() {
                   "Dedicated Account Manager",
                   "Training Sessions",
                   "Implementation Support",
+                  "Regular Check-ins",
                 ],
               },
             ].map(({ icon: Icon, title, description, features }) => (

@@ -81,21 +81,23 @@ model User {
   sessions Session[]
 
   // App relations
-  memberships              WorkspaceMember[]
-  workspacesOwned          Workspace[]           @relation("WorkspaceOwner")
-  uploadedPapers           Paper[]               @relation("PaperUploader")
-  annotations              Annotation[]
-  collections              Collection[]          @relation("CollectionOwner")
-  subscriptions            Subscription[]
-  payments                 Payment[]
-  searchHistory            SearchHistory[]
-  notifications            Notification[]
-  usageEvents              UsageEvent[]
-  activities               ActivityLog[]
+  memberships               WorkspaceMember[]
+  workspacesOwned           Workspace[]           @relation("WorkspaceOwner")
+  uploadedPapers            Paper[]               @relation("PaperUploader")
+  annotations               Annotation[]
+  collections               Collection[]          @relation("CollectionOwner")
+  subscriptions             Subscription[]
+  payments                  Payment[]
+  searchHistory             SearchHistory[]
+  notifications             Notification[]
+  usageEvents               UsageEvent[]
+  activities                ActivityLog[]
+  aiInsightThreads          AIInsightThread[]
+  aiInsightMessagesAuthored AIInsightMessage[]    @relation("AIInsightMessageAuthor")
   // Sharing relations
-  collectionInvitesSent    CollectionMember[]    @relation("CollectionMemberInvitedBy")
-  workspaceInvitesReceived WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
-  workspaceInvitesSent     WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
+  collectionInvitesSent     CollectionMember[]    @relation("CollectionMemberInvitedBy")
+  workspaceInvitesReceived  WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
+  workspaceInvitesSent      WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
 
   // Token relations
   tokens UserToken[]
@@ -106,6 +108,11 @@ model User {
   AnnotationVersion AnnotationVersion[]
   CollectionPaper   CollectionPaper[]
   CollectionMember  CollectionMember[]
+
+  // Optimized indexes for common query patterns
+  @@index([isDeleted, createdAt]) // For listing active users sorted by creation
+  @@index([role, isDeleted, createdAt]) // For role-filtered queries
+  @@index([email, isDeleted]) // For email lookups with deletion filter
 }
 
 model Workspace {
@@ -126,7 +133,7 @@ model Workspace {
   Subscription Subscription[]
   UsageEvent   UsageEvent[]
 
-  @@index([ownerId])
+  @@index([ownerId, isDeleted, createdAt]) // For user's active workspaces
 }
 
 model WorkspaceMember {
@@ -144,8 +151,8 @@ model WorkspaceMember {
   isDeleted Boolean  @default(false)
 
   @@unique([workspaceId, userId])
-  @@index([userId])
-  @@index([workspaceId])
+  @@index([userId, isDeleted]) // For user's workspace lookups
+  @@index([workspaceId, isDeleted, role]) // For workspace member filtering by role
 }
 
 model WorkspaceInvitation {
@@ -169,8 +176,8 @@ model WorkspaceInvitation {
   isDeleted Boolean  @default(false)
 
   @@unique([workspaceId, userId])
-  @@index([workspaceId])
-  @@index([userId])
+  @@index([workspaceId, status, isDeleted]) // For pending invitation lookups
+  @@index([userId, status, isDeleted]) // For user's pending invitations
 }
 
 model Paper {
@@ -180,35 +187,49 @@ model Paper {
   title       String
   abstract    String?
   metadata    Json    @db.JsonB
-  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar'
+  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar' | 'editor'
   doi         String? @unique
+
+  // Editor-specific fields
+  isDraft     Boolean @default(false) // True for draft papers created in editor
+  isPublished Boolean @default(false) // True when draft is published/finalized
 
   // Processing lifecycle fields
   processingStatus PaperProcessingStatus @default(UPLOADED)
   processingError  String?
   processedAt      DateTime?
 
-  uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
-  workspace       Workspace         @relation(fields: [workspaceId], references: [id])
-  file            PaperFile?
-  chunks          PaperChunk[]
-  citationsFrom   Citation[]        @relation("CitationsFrom")
-  citationsTo     Citation[]        @relation("CitationsTo")
-  annotations     Annotation[]
-  collectionJoins CollectionPaper[]
-  aiSummaries     AISummary[]
+  // Document preview support - for enhanced text extraction view
+  previewFileKey    String? // S3 key for preview PDF (converted from DOCX)
+  previewMimeType   String? // MIME type of preview file (usually application/pdf)
+  originalMimeType  String? // Original uploaded MIME type (preserves DOCX, DOC, PDF)
+  contentHtml       String? // Sanitized HTML content for rich text editor
+  extractionVersion Int     @default(1) // Version for extraction algorithm
+
+  uploader          User               @relation("PaperUploader", fields: [uploaderId], references: [id])
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id])
+  file              PaperFile?
+  chunks            PaperChunk[]
+  citationsFrom     Citation[]         @relation("CitationsFrom")
+  citationsTo       Citation[]         @relation("CitationsTo")
+  annotations       Annotation[]
+  collectionJoins   CollectionPaper[]
+  aiSummaries       AISummary[]
+  aiInsightThreads  AIInsightThread[]
+  aiInsightMessages AIInsightMessage[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
 
-  @@index([workspaceId, createdAt])
-  @@index([uploaderId])
-  // Optimized indexes for user-scoped and workspace-scoped queries
-  @@index([uploaderId, isDeleted, createdAt])
-  @@index([workspaceId, isDeleted, createdAt])
-  @@index([processingStatus, createdAt])
+  // Optimized indexes for common query patterns
+  @@index([processingStatus, createdAt]) // For processing status dashboards
+  @@index([uploaderId, workspaceId, isDeleted, createdAt]) // Hot path: user's papers in workspace
+  @@index([workspaceId, isDeleted, createdAt]) // Workspace paper listings
+  @@index([uploaderId, isDeleted]) // User's all papers (cross-workspace)
+  @@index([isDraft, isDeleted]) // Filter draft papers
+  @@index([doi, isDeleted]) // DOI lookups
 }
 
 model PaperFile {
@@ -264,7 +285,8 @@ model Citation {
   isDeleted Boolean  @default(false)
 
   @@unique([sourcePaperId, targetPaperId, context])
-  @@index([targetPaperId])
+  @@index([targetPaperId, isDeleted]) // For citation lookups
+  @@index([sourcePaperId, isDeleted]) // Implicit from unique, but explicit for clarity
 }
 
 model Annotation {
@@ -288,8 +310,9 @@ model Annotation {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([paperId])
-  @@index([userId])
+  @@index([paperId, isDeleted, createdAt]) // For paper annotations sorted by date
+  @@index([userId, isDeleted]) // For user's annotations
+  @@index([parentId, isDeleted]) // For annotation threads
 }
 
 model AnnotationVersion {
@@ -328,8 +351,8 @@ model Collection {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([workspaceId])
-  @@index([ownerId])
+  @@index([workspaceId, isDeleted])
+  @@index([ownerId, isDeleted, createdAt]) // Optimized for getUserCollections query
 }
 
 model CollectionPaper {
@@ -348,7 +371,9 @@ model CollectionPaper {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, paperId])
-  @@index([paperId])
+  @@index([collectionId, isDeleted, addedAt]) // Collection's papers sorted by add date
+  @@index([paperId, isDeleted]) // Paper's collections lookup
+  @@index([addedById, isDeleted]) // Papers added by specific user
 }
 
 model CollectionMember {
@@ -373,7 +398,8 @@ model CollectionMember {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, userId])
-  @@index([collectionId])
+  @@index([collectionId, status, isDeleted]) // For active member lookups
+  @@index([userId, isDeleted]) // For user's collection memberships
 }
 
 model SearchHistory {
@@ -406,6 +432,46 @@ model AISummary {
   isDeleted Boolean  @default(false)
 
   @@unique([paperId, model, promptHash])
+}
+
+model AIInsightThread {
+  id       String  @id @default(uuid())
+  paperId  String
+  userId   String
+  title    String?
+  metadata Json?   @db.JsonB
+
+  paper    Paper              @relation(fields: [paperId], references: [id])
+  user     User               @relation(fields: [userId], references: [id])
+  messages AIInsightMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([paperId, userId, isDeleted], map: "idx_ai_insight_thread_lookup")
+  @@index([userId, createdAt], map: "idx_ai_insight_thread_user")
+}
+
+model AIInsightMessage {
+  id          String  @id @default(uuid())
+  threadId    String
+  paperId     String
+  role        String
+  content     String
+  metadata    Json?   @db.JsonB
+  createdById String?
+
+  thread    AIInsightThread @relation(fields: [threadId], references: [id])
+  paper     Paper           @relation(fields: [paperId], references: [id])
+  createdBy User?           @relation("AIInsightMessageAuthor", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([threadId, createdAt], map: "idx_ai_insight_msg_thread")
+  @@index([paperId, createdAt], map: "idx_ai_insight_msg_paper")
 }
 
 model Plan {
@@ -448,9 +514,9 @@ model Subscription {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([userId])
-  @@index([workspaceId])
-  @@index([planId])
+  @@index([userId, status, isDeleted]) // For user's active subscriptions
+  @@index([workspaceId, status, isDeleted]) // For workspace subscriptions
+  @@index([status, expiresAt]) // For expiration checks
 }
 
 model Payment {
@@ -583,6 +649,10 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
+
+  // Optimized index - composite is sufficient for session lookups
+  @@index([userId, expires])
+  @@index([expires, isDeleted]) // For cleanup queries
 }
 
 model VerificationToken {
@@ -609,10 +679,9 @@ model UserToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([token])
-  @@index([type])
-  @@index([expiresAt])
+  @@index([token, used]) // For token validation
+  @@index([userId, type, used]) // For user's active tokens by type
+  @@index([expiresAt, used]) // For cleanup queries
 }
 
 enum TokenType {

@@ -1,7 +1,9 @@
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
+import { aiService } from "../modules/AI/ai.service";
 import { StorageService } from "../modules/papers/StorageService";
 import prisma from "../shared/prisma";
+import { docxToPdfService } from "./docxToPdfService";
 
 export interface DocumentExtractionResult {
   success: boolean;
@@ -109,23 +111,77 @@ export class DocumentExtractionService {
         return extractionResult;
       }
 
+      // Generate preview PDF for DOCX files (for better format preservation in UI)
+      let previewFileKey: string | null = null;
+      let previewMimeType: string | null = null;
+
+      if (fileExtension === "docx") {
+        try {
+          console.log(
+            `[DocumentExtraction] Generating preview PDF for DOCX: ${paperId}`
+          );
+          const previewResult = await this.generatePreviewPdf(
+            paperId,
+            fileBuffer,
+            fileName
+          );
+          if (previewResult.success && previewResult.previewFileKey) {
+            previewFileKey = previewResult.previewFileKey;
+            previewMimeType = "application/pdf";
+            console.log(
+              `[DocumentExtraction] Preview PDF generated: ${previewFileKey}`
+            );
+          } else {
+            console.warn(
+              `[DocumentExtraction] Preview generation failed: ${previewResult.error}`
+            );
+          }
+        } catch (previewError) {
+          console.error(
+            `[DocumentExtraction] Preview generation error:`,
+            previewError
+          );
+          // Don't fail the entire extraction if preview generation fails
+        }
+      }
+
       // Store chunks in database
       console.log(
         `[DocumentExtraction] Storing chunks in database for paper: ${paperId}`
       );
       await this.storeChunks(paperId, extractionResult.chunks!);
 
-      // Update paper processing status and file info
+      // Update paper processing status and file info including preview data
       console.log(
         `[DocumentExtraction] Updating paper status to PROCESSED for paper: ${paperId}`
       );
+
+      const paperUpdateData: any = {
+        processingStatus: "PROCESSED",
+        processedAt: new Date(),
+        originalMimeType:
+          paper.file?.contentType ||
+          `application/${fileExtension === "docx" ? "vnd.openxmlformats-officedocument.wordprocessingml.document" : fileExtension}`,
+        extractionVersion: 1,
+      };
+
+      // Add preview data if available
+      if (previewFileKey && previewMimeType) {
+        paperUpdateData.previewFileKey = previewFileKey;
+        paperUpdateData.previewMimeType = previewMimeType;
+      }
+
+      // Store sanitized HTML content for rich text editor (future use)
+      if (extractionResult.htmlContent) {
+        paperUpdateData.contentHtml = this.sanitizeHtmlForEditor(
+          extractionResult.htmlContent
+        );
+      }
+
       await Promise.all([
         prisma.paper.update({
           where: { id: paperId },
-          data: {
-            processingStatus: "PROCESSED",
-            processedAt: new Date(),
-          },
+          data: paperUpdateData,
         }),
         prisma.paperFile.update({
           where: { paperId },
@@ -135,6 +191,41 @@ export class DocumentExtractionService {
           },
         }),
       ]);
+
+      const metadataText =
+        extractionResult.text ||
+        extractionResult.chunks?.map((chunk) => chunk.content).join("\n") ||
+        "";
+
+      if (metadataText.trim().length > 0) {
+        try {
+          await aiService.extractAndPersistMetadata({
+            paperId,
+            text: metadataText,
+            originalTitle: paper.title,
+            currentTitle: paper.title,
+            currentAbstract: paper.abstract,
+            existingMetadata: paper.metadata as unknown as Record<
+              string,
+              unknown
+            > | null,
+            workspaceId: paper.workspaceId,
+            uploaderId: paper.uploaderId,
+          });
+          console.log(
+            `[DocumentExtraction] AI metadata enrichment applied for paper: ${paperId}`
+          );
+        } catch (metadataError) {
+          console.error(
+            `[DocumentExtraction] AI metadata enrichment failed for paper: ${paperId}`,
+            metadataError
+          );
+        }
+      } else {
+        console.warn(
+          `[DocumentExtraction] Skipping AI metadata enrichment for paper: ${paperId} (no text available)`
+        );
+      }
 
       console.log(
         `[DocumentExtraction] Successfully completed extraction for paper: ${paperId}`
@@ -334,7 +425,6 @@ export class DocumentExtractionService {
     const sections = this.identifyDocumentSections(text);
 
     let chunkIndex = 0;
-    let currentPage = 1;
     const safePageCount = Math.max(1, pageCount);
 
     // Process each section
@@ -509,7 +599,7 @@ export class DocumentExtractionService {
     let lastIndex = 0;
 
     while ((match = htmlSectionRegex.exec(html)) !== null) {
-      const [fullMatch, tag, attributes, content] = match;
+      const [fullMatch, tag] = match;
 
       // Add any content before this match
       if (match.index > lastIndex) {
@@ -690,6 +780,102 @@ export class DocumentExtractionService {
           includeHtml: true,
         });
       }
+    }
+  }
+
+  /**
+   * Generate preview PDF for DOCX files using docxToPdfService
+   */
+  private async generatePreviewPdf(
+    paperId: string,
+    docxBuffer: Buffer,
+    originalFilename: string
+  ): Promise<{ success: boolean; previewFileKey?: string; error?: string }> {
+    try {
+      console.log(
+        `[DocumentExtraction] Converting DOCX to PDF for preview: ${paperId}`
+      );
+
+      const conversionResult = await docxToPdfService.convertDocxToPdf(
+        docxBuffer,
+        {
+          timeoutMs: 180000, // 3 minutes for large documents
+        }
+      );
+
+      if (!conversionResult.success || !conversionResult.pdfBuffer) {
+        return {
+          success: false,
+          error: conversionResult.error || "PDF conversion failed",
+        };
+      }
+
+      // Upload preview PDF to S3 in a dedicated previews folder
+      const previewFileName = originalFilename.replace(
+        /\.(docx|doc)$/i,
+        ".pdf"
+      );
+      const previewObjectKey = `previews/${paperId}/${Date.now()}-${previewFileName}`;
+
+      console.log(
+        `[DocumentExtraction] Uploading preview PDF to S3: ${previewObjectKey}`
+      );
+
+      await this.storage.putObject({
+        key: previewObjectKey,
+        body: conversionResult.pdfBuffer,
+        contentType: "application/pdf",
+      });
+
+      console.log(
+        `[DocumentExtraction] Preview PDF generated successfully in ${conversionResult.conversionTimeMs}ms`
+      );
+
+      return {
+        success: true,
+        previewFileKey: previewObjectKey,
+      };
+    } catch (error) {
+      console.error(
+        `[DocumentExtraction] Preview PDF generation failed:`,
+        error
+      );
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown preview generation error",
+      };
+    }
+  }
+
+  /**
+   * Sanitize HTML content for rich text editor storage
+   * This is a basic implementation - consider using a library like DOMPurify for production
+   */
+  private sanitizeHtmlForEditor(html: string): string {
+    try {
+      // Basic HTML sanitization for editor content
+      // Remove script tags and potentially dangerous attributes
+      let sanitized = html
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+        .replace(/on\w+="[^"]*"/gi, "") // Remove event handlers
+        .replace(/javascript:/gi, "") // Remove javascript: protocol
+        .replace(/data:/gi, "") // Remove data: protocol for security
+        .replace(/<iframe\b[^>]*>/gi, "") // Remove iframes
+        .replace(/<embed\b[^>]*>/gi, "") // Remove embeds
+        .replace(/<object\b[^>]*>.*?<\/object>/gi, ""); // Remove objects
+
+      // Limit the size to prevent abuse (100KB limit)
+      if (sanitized.length > 102400) {
+        sanitized = sanitized.substring(0, 102400) + "... [content truncated]";
+      }
+
+      return sanitized;
+    } catch (error) {
+      console.error(`[DocumentExtraction] HTML sanitization failed:`, error);
+      return ""; // Return empty string if sanitization fails
     }
   }
 }

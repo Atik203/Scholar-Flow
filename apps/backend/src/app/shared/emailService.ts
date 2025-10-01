@@ -304,6 +304,73 @@ class EmailService {
   }
 
   /**
+   * Send paper sharing notification
+   */
+  async sendPaperShareEmail(data: {
+    recipientEmail: string;
+    recipientName?: string;
+    senderName: string;
+    paperTitle: string;
+    paperLink: string;
+    permission: "view" | "edit";
+  }): Promise<void> {
+    const permissionText =
+      data.permission === "edit" ? "edit and comment on" : "view";
+    const actionText = data.permission === "edit" ? "Edit Paper" : "View Paper";
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Paper Shared with You - ScholarFlow</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #059669; color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9fafb; }
+            .button { display: inline-block; padding: 12px 24px; background: #059669; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+            .paper-info { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #059669; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Paper Shared with You</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${data.recipientName || "there"},</p>
+              <p><strong>${data.senderName}</strong> has shared a research paper with you on ScholarFlow.</p>
+              
+              <div class="paper-info">
+                <h3 style="margin: 0 0 10px 0; color: #059669;">${data.paperTitle}</h3>
+                <p style="margin: 0; color: #6b7280;">You can <strong>${permissionText}</strong> this paper.</p>
+              </div>
+              
+              <p>Click the button below to access the paper:</p>
+              <a href="${data.paperLink}" class="button" role="button">${actionText}</a>
+              
+              <p>ScholarFlow makes research collaboration seamless. Start exploring and contributing to cutting-edge research today!</p>
+              <p>Best regards,<br>The ScholarFlow Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+              <p>If you don't want to receive these notifications, you can manage your preferences in your account settings.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: data.recipientEmail,
+      subject: `${data.senderName} shared "${data.paperTitle}" with you - ScholarFlow`,
+      html,
+    });
+  }
+
+  /**
    * Convert HTML to plain text for email clients that don't support HTML
    */
   private htmlToText(html: string): string {

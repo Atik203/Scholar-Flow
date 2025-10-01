@@ -255,7 +255,7 @@ export const collectionApi = apiSlice.injectEndpoints({
         result: response.data,
         meta: response.meta,
       }),
-      providesTags: ["Collection"],
+      providesTags: ["CollectionInvite", "Collection"],
       keepUnusedDataFor: 0,
       forceRefetch({ currentArg, previousArg }) {
         return true; // Always refetch
@@ -278,7 +278,7 @@ export const collectionApi = apiSlice.injectEndpoints({
         result: response.data,
         meta: response.meta,
       }),
-      providesTags: ["Collection"],
+      providesTags: ["CollectionInvite", "Collection"],
       keepUnusedDataFor: 0,
       forceRefetch({ currentArg, previousArg }) {
         return true; // Always refetch
@@ -372,6 +372,7 @@ export const collectionApi = apiSlice.injectEndpoints({
         { type: "Collection", id },
         { type: "Collection", id: "LIST" },
         { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
       ],
     }),
 
@@ -386,6 +387,7 @@ export const collectionApi = apiSlice.injectEndpoints({
         { type: "Collection", id },
         { type: "Collection", id: "LIST" },
         { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
       ],
     }),
 
@@ -400,6 +402,7 @@ export const collectionApi = apiSlice.injectEndpoints({
         { type: "Collection", id },
         { type: "Collection", id: "LIST" },
         { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
       ],
     }),
   }),
