@@ -90,6 +90,7 @@ app.use("*", ((
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Scholar-Flow API running on port ${PORT}`);
+
   console.log(`📖 Environment: ${config.env}`);
 });
 
