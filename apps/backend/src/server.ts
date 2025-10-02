@@ -93,7 +93,7 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.0.5",
+    version: "1.1.5",
     documentation: "/docs",
     api: "/api",
     health: "/health",
@@ -124,6 +124,10 @@ if (process.env.VERCEL !== "1") {
   const startServer = (desiredPort: number, attempt = 0) => {
     const server = app.listen(desiredPort, () => {
       console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
+      console.log(
+        "[Boot] DATABASE_URL present:",
+        Boolean(process.env.DATABASE_URL)
+      );
       console.log(`📖 Environment: ${config.env}`);
     });
 
