@@ -7,7 +7,9 @@ import {
 } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
+import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
 import { getCallbackUrl } from "@/lib/auth/redirects";
+import { useAppDispatch } from "@/redux/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -21,7 +23,6 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -42,6 +43,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
 
   // Check if already authenticated (but don't auto-redirect during login process)
   // This prevents race conditions between login flow and auth guard
@@ -75,50 +77,27 @@ export default function LoginPage() {
       const callbackUrl = getCallbackUrl(searchParams);
 
       console.log("🔐 Starting credentials sign-in...");
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
+      const result = await signInWithCredentials(
+        data.email,
+        data.password,
+        dispatch
+      );
 
-      console.log("📋 SignIn result:", result);
-
-      if (result?.error) {
+      if (!result.success) {
         dismissToast(loadingToast);
         console.error("❌ Sign-in error:", result.error);
-        showAuthErrorToast(
-          result.error === "CredentialsSignin"
-            ? "Invalid email or password"
-            : result.error
-        );
+        showAuthErrorToast(result.error || "Invalid email or password");
         return;
       }
 
-      if (result?.ok) {
-        console.log("✅ Sign-in successful, session created");
-
-        dismissToast(loadingToast);
-        showAuthSuccessToast("Email/Password");
-
-        // CRITICAL FIX: Wait a bit for NextAuth to set the session cookie
-        // Then force a session update before redirecting
-        console.log("⏳ Waiting for session to be established...");
-
-        // Small delay to ensure cookie is set
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        const redirectUrl = callbackUrl || "/dashboard";
-        console.log("🚀 Redirecting to:", redirectUrl);
-
-        // Use router.push instead of window.location to maintain session state
-        router.push(redirectUrl);
-        return;
-      }
-
+      console.log("✅ Sign-in successful, credentials stored in Redux");
       dismissToast(loadingToast);
-      console.error("❌ Unexpected sign-in result:", result);
-      showAuthErrorToast("Sign-in response was unexpected. Please try again.");
+      showAuthSuccessToast("Welcome back!");
+
+      // Redirect to callback URL or dashboard
+      const redirectUrl = callbackUrl || "/dashboard";
+      console.log("🚀 Redirecting to:", redirectUrl);
+      router.push(redirectUrl);
     } catch (error) {
       dismissToast(loadingToast);
       console.error("❌ Sign-in error:", error);
@@ -128,23 +107,17 @@ export default function LoginPage() {
     }
   };
 
-  const handleSocialLogin = async (provider: "google" | "github") => {
+  const handleSocialLogin = (provider: "google" | "github") => {
     setIsLoading(provider);
-    const loadingToast = showLoadingToast(`Signing in with ${provider}...`);
+    showLoadingToast(`Redirecting to ${provider}...`);
 
     try {
       const callbackUrl = getCallbackUrl(searchParams);
+      console.log(`🔐 Starting ${provider} OAuth sign-in...`);
 
-      // OAuth MUST use redirect: true to properly navigate to provider auth page
-      // NextAuth will handle the complete OAuth flow including callback
-      await signIn(provider, {
-        callbackUrl, // NextAuth will redirect here after successful auth
-      });
-
-      // Note: Code after this won't execute because signIn() redirects
-      // If we reach here, there was an error (signIn returns Promise<undefined> on redirect)
+      // Redirect to OAuth provider (page will navigate away)
+      signInWithOAuth(provider, callbackUrl);
     } catch (error) {
-      dismissToast(loadingToast);
       console.error(`${provider} sign-in error:`, error);
       showAuthErrorToast(`An error occurred while signing in with ${provider}`);
       setIsLoading(null);

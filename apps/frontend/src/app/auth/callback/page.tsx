@@ -5,7 +5,7 @@ import {
   showAuthSuccessToast,
 } from "@/components/providers/ToastProvider";
 import { handleAuthRedirect } from "@/lib/auth/redirects";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
  */
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { session, status } = useAuth();
   const [hasRedirected, setHasRedirected] = useState(false);
   const searchParams = useSearchParams();
 

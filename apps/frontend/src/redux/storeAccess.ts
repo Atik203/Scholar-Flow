@@ -15,7 +15,7 @@ export function getAppStore() {
 export function resetAppState() {
   const store = storeRef;
   if (store) {
-    // Clear credentials first
+    // Clear auth state
     store.dispatch(clearCredentials());
 
     // Reset entire API state including all cached queries

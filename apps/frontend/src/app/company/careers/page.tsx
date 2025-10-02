@@ -17,7 +17,7 @@ import {
   Rocket,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -196,7 +196,7 @@ const stats = [
 ];
 
 export default function CareersPage() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const isAuthenticated = !!session;
 
   return (

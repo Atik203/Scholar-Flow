@@ -1,10 +1,10 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import { useEffect } from "react";
 
 export default function TestSessionPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useAuth();
 
   useEffect(() => {
     console.log("🧪 TEST SESSION PAGE");

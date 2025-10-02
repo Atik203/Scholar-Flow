@@ -13,8 +13,19 @@ import {
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { authController } from "./auth.controller";
 import { authValidation } from "./auth.validation";
+import * as oauthController from "./oauth.controller";
 
 const router: express.Router = express.Router();
+
+// OAuth routes
+router.get("/oauth/google", oauthController.initiateGoogleOAuth);
+router.get("/oauth/github", oauthController.initiateGitHubOAuth);
+
+// OAuth callbacks - support both GET (direct from provider) and POST (from frontend)
+router.post("/oauth/google/callback", oauthController.handleGoogleCallback);
+router.get("/oauth/google/callback", oauthController.handleGoogleCallback);
+router.post("/oauth/github/callback", oauthController.handleGitHubCallback);
+router.get("/oauth/github/callback", oauthController.handleGitHubCallback);
 
 // Public routes
 router.post(
