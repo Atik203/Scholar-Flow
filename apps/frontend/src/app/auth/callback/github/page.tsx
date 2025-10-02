@@ -10,6 +10,9 @@ import { useAppDispatch } from "@/redux/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+// Global flag to prevent duplicate processing across component remounts
+let globalProcessingFlag = false;
+
 export default function GitHubCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -19,20 +22,71 @@ export default function GitHubCallbackPage() {
   const hasProcessedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent duplicate processing
+    // CRITICAL: Check global flag FIRST to prevent race conditions
+    if (globalProcessingFlag) {
+      console.log(
+        "🔒 [GLOBAL] GitHub OAuth already processing globally, skipping..."
+      );
+      return;
+    }
+
+    // Prevent duplicate processing at component level
     if (hasProcessedRef.current || isProcessing) {
-      console.log("🔒 GitHub OAuth callback already processing, skipping...");
+      console.log(
+        "🔒 [LOCAL] GitHub OAuth callback already processing, skipping..."
+      );
       return;
     }
 
     const handleCallback = async () => {
-      // Mark as processing immediately
-      hasProcessedRef.current = true;
-      setIsProcessing(true);
-
       const code = searchParams?.get("code");
       const errorParam = searchParams?.get("error");
       const state = searchParams?.get("state");
+
+      if (!code) {
+        if (errorParam) {
+          setError(`GitHub authentication failed: ${errorParam}`);
+          showAuthErrorToast(`Authentication failed: ${errorParam}`);
+          setTimeout(() => router.push("/login"), 2000);
+        }
+        return;
+      }
+
+      // **CRITICAL DEDUPLICATION CHECK** - Prevent processing same code twice
+      const processedCodeKey = `oauth_processed_${code.substring(0, 10)}`;
+      const alreadyProcessed = localStorage.getItem(processedCodeKey);
+
+      if (alreadyProcessed) {
+        console.log("🔒 OAuth code already processed, skipping...");
+        // Code was already used, redirect to dashboard
+        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
+        router.push(callbackUrl);
+        return;
+      }
+
+      // Mark as processing immediately - GLOBAL FLAG FIRST!
+      globalProcessingFlag = true;
+      hasProcessedRef.current = true;
+      setIsProcessing(true);
+      localStorage.setItem(processedCodeKey, Date.now().toString());
+
+      console.log("✅ All processing flags set:", {
+        global: globalProcessingFlag,
+        ref: hasProcessedRef.current,
+        state: true,
+        localStorage: processedCodeKey,
+      });
+
+      // Clean up old processed codes (older than 5 minutes)
+      const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("oauth_processed_")) {
+          const timestamp = parseInt(localStorage.getItem(key) || "0");
+          if (timestamp < fiveMinutesAgo) {
+            localStorage.removeItem(key);
+          }
+        }
+      });
 
       // Decode the state parameter to get the original callback URL
       const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
