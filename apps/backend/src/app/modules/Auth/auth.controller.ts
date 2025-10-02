@@ -29,6 +29,24 @@ class AuthController {
 
       const user = await authService.signInWithPassword(email, password);
 
+      // Generate JWT access token
+      const jwtSecret = process.env.NEXTAUTH_SECRET;
+      if (!jwtSecret) {
+        throw new AppError(500, "JWT secret not configured");
+      }
+
+      const accessToken = jwt.sign(
+        {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          image: user.image,
+        },
+        jwtSecret,
+        { expiresIn: "7d" }
+      );
+
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -41,6 +59,7 @@ class AuthController {
             image: user.image,
             role: user.role,
           },
+          accessToken,
         },
       });
     }
@@ -72,6 +91,24 @@ class AuthController {
         role
       );
 
+      // Generate JWT access token for immediate login after registration
+      const jwtSecret = process.env.NEXTAUTH_SECRET;
+      if (!jwtSecret) {
+        throw new AppError(500, "JWT secret not configured");
+      }
+
+      const accessToken = jwt.sign(
+        {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          image: user.image,
+        },
+        jwtSecret,
+        { expiresIn: "7d" }
+      );
+
       sendResponse(res, {
         statusCode: 201,
         success: true,
@@ -88,6 +125,7 @@ class AuthController {
             role: user.role,
             createdAt: user.createdAt,
           },
+          accessToken,
         },
       });
     }
