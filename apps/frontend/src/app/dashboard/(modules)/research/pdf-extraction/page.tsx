@@ -56,13 +56,13 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function PdfExtractionPage() {
   const { isLoading } = useProtectedRoute();
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const userRole = session?.user?.role;
   const [selectedPaper, setSelectedPaper] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");

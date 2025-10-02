@@ -20,6 +20,7 @@ import {
   useDeletePaperMutation,
   useListEditorPapersQuery,
 } from "@/redux/api/paperApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import {
   Clock,
@@ -31,7 +32,6 @@ import {
   Share,
   Trash2,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
 interface PapersListProps {
@@ -39,7 +39,7 @@ interface PapersListProps {
 }
 
 export function PapersList({ onPaperSelect }: PapersListProps) {
-  const { data: session, status } = useSession();
+  const { session, status } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<
     "all" | "drafts" | "published"

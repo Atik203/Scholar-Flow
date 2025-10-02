@@ -26,4 +26,3 @@ export {
   useProtectedRoute,
   usePublicRoute,
 } from "./useAuthGuard";
-export { useSessionSync } from "./useSessionSync";

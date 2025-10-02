@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getRoleDashboardBasePath } from "@/lib/auth/roles";
 import { handleSignOutWithLoading } from "@/lib/auth/signout";
+import { useAuth } from "@/redux/auth/useAuth";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -21,7 +21,7 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (!session?.user) {

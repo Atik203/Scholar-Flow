@@ -78,7 +78,7 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
@@ -90,7 +90,7 @@ export default function CollectionDetailPage({
 }) {
   const isProtected = useProtectedRoute();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitePermission, setInvitePermission] = useState<"VIEW" | "EDIT">(

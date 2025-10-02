@@ -8,15 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAppSelector } from "@/redux/hooks";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import { useCallback, useEffect, useState } from "react";
 
 interface DiagnosticData {
-  nextAuthSession: any;
-  nextAuthStatus: string;
-  reduxUser: any;
-  reduxToken: string | null;
+  reduxAuthUser: any;
+  reduxAuthStatus: string;
+  reduxAccessToken: string | null;
   cookies: string[];
   serverHasSession: boolean | null;
   localStorageKeys: string[];
@@ -25,9 +23,7 @@ interface DiagnosticData {
 }
 
 export default function DiagnosticPage() {
-  const { data: session, status } = useSession();
-  const reduxUser = useAppSelector((state) => state.auth.user);
-  const reduxToken = useAppSelector((state) => state.auth.accessToken);
+  const { user: reduxAuthUser, accessToken, status } = useAuth();
   const [diagnostics, setDiagnostics] = useState<DiagnosticData | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
 
@@ -44,10 +40,9 @@ export default function DiagnosticPage() {
     }
 
     const data: DiagnosticData = {
-      nextAuthSession: session,
-      nextAuthStatus: status,
-      reduxUser,
-      reduxToken,
+      reduxAuthUser: reduxAuthUser,
+      reduxAuthStatus: status,
+      reduxAccessToken: accessToken ?? null,
       cookies: document.cookie
         .split(";")
         .filter((c) => c.trim())
@@ -58,7 +53,7 @@ export default function DiagnosticPage() {
       timestamp: new Date().toISOString(),
     };
     setDiagnostics(data);
-  }, [session, status, reduxUser, reduxToken]);
+  }, [status, reduxAuthUser, accessToken]);
 
   useEffect(() => {
     collectDiagnostics();
@@ -133,34 +128,36 @@ export default function DiagnosticPage() {
             <CardDescription>
               Status:{" "}
               <span className="font-semibold">
-                {diagnostics.nextAuthStatus}
+                {diagnostics.reduxAuthStatus}
               </span>
             </CardDescription>
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-96 text-xs">
-              {JSON.stringify(diagnostics.nextAuthSession, null, 2)}
+              {JSON.stringify(diagnostics.reduxAuthUser, null, 2)}
             </pre>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Redux State</CardTitle>
-            <CardDescription>Client-side auth state</CardDescription>
+            <CardTitle>Session User Snapshot</CardTitle>
+            <CardDescription>
+              User data resolved from NextAuth session and `/auth/me`
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <p className="font-semibold mb-2">User:</p>
                 <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-48 text-xs">
-                  {JSON.stringify(diagnostics.reduxUser, null, 2)}
+                  {JSON.stringify(diagnostics.reduxAuthUser, null, 2)}
                 </pre>
               </div>
               <div>
-                <p className="font-semibold mb-2">Token:</p>
+                <p className="font-semibold mb-2">Backend Access Token:</p>
                 <pre className="bg-muted p-4 rounded-lg overflow-auto text-xs">
-                  {diagnostics.reduxToken || "null"}
+                  {diagnostics.reduxAccessToken || "null"}
                 </pre>
               </div>
             </div>
@@ -274,9 +271,9 @@ export default function DiagnosticPage() {
             <div className="p-3 bg-muted rounded-lg">
               <p className="font-semibold">Session Status:</p>
               <p>
-                {diagnostics.nextAuthStatus === "authenticated"
+                {diagnostics.reduxAuthStatus === "authenticated"
                   ? "✅ NextAuth session is active"
-                  : diagnostics.nextAuthStatus === "loading"
+                  : diagnostics.reduxAuthStatus === "loading"
                     ? "⏳ Loading session..."
                     : "❌ No active session"}
               </p>
@@ -290,11 +287,11 @@ export default function DiagnosticPage() {
               </p>
             </div>
             <div className="p-3 bg-muted rounded-lg">
-              <p className="font-semibold">Redux State:</p>
+              <p className="font-semibold">Session User:</p>
               <p>
-                {diagnostics.reduxUser
-                  ? "⚠️ Redux has user data (potential persistence issue)"
-                  : "✅ Redux state is clean"}
+                {diagnostics.reduxAuthUser
+                  ? "✅ Session user data is available"
+                  : "ℹ️ No session user resolved"}
               </p>
             </div>
             <div className="p-3 bg-muted rounded-lg">
@@ -308,24 +305,19 @@ export default function DiagnosticPage() {
             <div className="p-3 bg-muted rounded-lg">
               <p className="font-semibold">Diagnosis:</p>
               <p>
-                {diagnostics.nextAuthStatus === "authenticated" &&
-                diagnostics.serverHasSession &&
-                !diagnostics.reduxUser
-                  ? "🔴 PERSISTENT SESSION BUG: NextAuth session exists without login! Click 'Sign Out & Clear Everything' to fix."
-                  : diagnostics.nextAuthStatus === "unauthenticated" &&
-                      diagnostics.reduxUser
-                    ? "🔴 ISSUE FOUND: Redux has user data but no NextAuth session. SessionSync should clear this."
-                    : diagnostics.nextAuthStatus === "authenticated" &&
-                        diagnostics.reduxUser
-                      ? "✅ Normal: Both NextAuth and Redux have user data (logged in state)"
-                      : diagnostics.nextAuthStatus === "unauthenticated" &&
-                          !diagnostics.reduxUser &&
+                {diagnostics.reduxAuthStatus === "authenticated" &&
+                diagnostics.serverHasSession
+                  ? "✅ Authenticated: NextAuth session and server cookie detected"
+                  : diagnostics.reduxAuthStatus === "authenticated" &&
+                      !diagnostics.serverHasSession
+                    ? "⚠️ Client considers session active but server cookie is missing"
+                    : diagnostics.reduxAuthStatus === "unauthenticated" &&
+                        diagnostics.serverHasSession
+                      ? "⚠️ Server shows a session cookie but client is logged out"
+                      : diagnostics.reduxAuthStatus === "unauthenticated" &&
                           !diagnostics.serverHasSession
-                        ? "✅ Normal: Completely logged out"
-                        : diagnostics.serverHasSession &&
-                            diagnostics.nextAuthStatus !== "authenticated"
-                          ? "⚠️ Server has session cookie but client doesn't recognize it"
-                          : "⚠️ Unusual state detected"}
+                        ? "✅ Logged out cleanly"
+                        : "⏳ Session is loading or in an unexpected state"}
               </p>
             </div>
           </div>

@@ -25,8 +25,8 @@ import {
   useCreateWorkspaceMutation,
   useListWorkspacesQuery,
 } from "@/redux/api/workspaceApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import { Building2, ChevronsUpDown, Plus } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 
@@ -37,7 +37,7 @@ interface WorkspaceSwitcherProps {
 export function WorkspaceSwitcher({
   currentWorkspaceId,
 }: WorkspaceSwitcherProps) {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const { data, isLoading } = useListWorkspacesQuery({ scope: "all" });
   const [createWorkspace, { isLoading: creating }] =
     useCreateWorkspaceMutation();

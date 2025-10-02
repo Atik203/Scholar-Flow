@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   BookMarked,
   BookOpen,
@@ -24,7 +25,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -162,7 +162,7 @@ const navigationItems = [
 ];
 
 export const Navbar: React.FC = () => {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const { theme, setTheme } = useTheme();
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark");
   const pathname = usePathname();

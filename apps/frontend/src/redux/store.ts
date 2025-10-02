@@ -1,9 +1,62 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+} from "redux-persist";
 import { apiSlice } from "./api/apiSlice";
 import authReducer from "./auth/authSlice";
 
+// Create a noop storage for SSR
+const createNoopStorage = () => {
+  return {
+    getItem(_key: string) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: string, value: any) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: string) {
+      return Promise.resolve();
+    },
+  };
+};
+
+// Create client-side localStorage wrapper
+const createLocalStorage = () => {
+  return {
+    getItem(key: string) {
+      return Promise.resolve(window.localStorage.getItem(key));
+    },
+    setItem(key: string, value: string) {
+      return Promise.resolve(window.localStorage.setItem(key, value));
+    },
+    removeItem(key: string) {
+      return Promise.resolve(window.localStorage.removeItem(key));
+    },
+  };
+};
+
+// Use localStorage on client, noop on server
+const storage =
+  typeof window !== "undefined" ? createLocalStorage() : createNoopStorage();
+
+// Persist config for auth slice only
+const authPersistConfig = {
+  key: "scholarflow-auth",
+  storage,
+  whitelist: ["user", "accessToken", "isAuthenticated"], // Only persist these fields
+};
+
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
+
 const rootReducer = combineReducers({
-  auth: authReducer,
+  auth: persistedAuthReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
 
@@ -14,6 +67,13 @@ export const makeStore = () => {
       getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: [
+            // Ignore redux-persist actions
+            FLUSH,
+            REHYDRATE,
+            PAUSE,
+            PERSIST,
+            PURGE,
+            REGISTER,
             // Ignore RTK Query actions that might have non-serializable data
             "api/executeQuery/pending",
             "api/executeQuery/fulfilled",
@@ -40,3 +100,6 @@ export const makeStore = () => {
 export type AppStore = ReturnType<typeof makeStore>;
 export type RootState = ReturnType<AppStore["getState"]>;
 export type AppDispatch = AppStore["dispatch"];
+
+// Persistor for PersistGate
+export const createPersistor = (store: AppStore) => persistStore(store);

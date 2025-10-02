@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { handleSignOutWithLoading } from "@/lib/auth/signout";
+import { useAuth } from "@/redux/auth/useAuth";
 import { LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -79,7 +79,7 @@ function ThemeToggle() {
 }
 
 function UserMenu() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const user = session?.user;
 
