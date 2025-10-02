@@ -18,6 +18,12 @@ interface GoogleTokenResponse {
   token_type: string;
 }
 
+interface OAuthErrorResponse {
+  error?: string;
+  error_description?: string;
+  message?: string;
+}
+
 interface GoogleProfile {
   id: string;
   email: string;
@@ -182,19 +188,21 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
     });
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json().catch(() => ({}));
+      const errorData = (await tokenResponse
+        .json()
+        .catch(() => ({}))) as OAuthErrorResponse;
+      const errorMessage =
+        errorData.error_description ??
+        errorData.error ??
+        errorData.message ??
+        "Failed to exchange authorization code";
       console.error("❌ Google token exchange failed:", {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         error: errorData,
         redirectUri,
       });
-      throw new AppError(
-        401,
-        errorData.error_description ||
-          errorData.error ||
-          "Failed to exchange authorization code"
-      );
+      throw new AppError(401, errorMessage);
     }
 
     const tokens = (await tokenResponse.json()) as GoogleTokenResponse;
@@ -299,19 +307,21 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
     );
 
     if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json().catch(() => ({}));
+      const errorData = (await tokenResponse
+        .json()
+        .catch(() => ({}))) as OAuthErrorResponse;
+      const errorMessage =
+        errorData.error_description ??
+        errorData.error ??
+        errorData.message ??
+        "Failed to exchange authorization code";
       console.error("❌ GitHub token exchange failed:", {
         status: tokenResponse.status,
         statusText: tokenResponse.statusText,
         error: errorData,
         redirectUri,
       });
-      throw new AppError(
-        401,
-        errorData.error_description ||
-          errorData.error ||
-          "Failed to exchange authorization code"
-      );
+      throw new AppError(401, errorMessage);
     }
 
     const tokens = (await tokenResponse.json()) as GitHubTokenResponse;
