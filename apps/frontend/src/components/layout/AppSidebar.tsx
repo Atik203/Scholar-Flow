@@ -12,6 +12,7 @@ import {
   buildRoleScopedPath,
   hasRoleAccess,
 } from "@/lib/auth/roles";
+import { useAuth } from "@/redux/auth/useAuth";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -37,7 +38,6 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
@@ -268,7 +268,7 @@ const adminFeatures: SidebarLink[] = [
 ];
 
 export function AppSidebar() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const pathname = usePathname();
 
   const user = session?.user;

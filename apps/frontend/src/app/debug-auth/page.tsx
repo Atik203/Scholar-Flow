@@ -4,12 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signInWithCredentials } from "@/lib/auth/authHelpers";
+import { handleSignOut } from "@/lib/auth/signout";
+import { useAuth } from "@/redux/auth/useAuth";
+import { useAppDispatch } from "@/redux/hooks";
 import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 
 export default function AuthDebugPage() {
-  const { data: session, status, update } = useSession();
+  const { session, status } = useAuth();
+  const dispatch = useAppDispatch();
   const [testEmail, setTestEmail] = useState("test@example.com");
   const [testPassword, setTestPassword] = useState("test123");
   const [testResult, setTestResult] = useState<any>(null);
@@ -21,11 +25,11 @@ export default function AuthDebugPage() {
 
     try {
       console.log("🧪 Starting credentials test...");
-      const result = await signIn("credentials", {
-        email: testEmail,
-        password: testPassword,
-        redirect: false,
-      });
+      const result = await signInWithCredentials(
+        testEmail,
+        testPassword,
+        dispatch
+      );
 
       console.log("🧪 Test result:", result);
       setTestResult(result);
@@ -76,8 +80,10 @@ export default function AuthDebugPage() {
   const refreshSession = async () => {
     setIsLoading(true);
     try {
-      await update();
-      alert("Session refreshed! Check the session data below.");
+      // Session is automatically synced from Redux Persist
+      alert(
+        "Session state is automatically managed by Redux Persist. Check the session data below."
+      );
     } catch (error) {
       alert(`Failed to refresh session: ${error}`);
     } finally {
@@ -138,7 +144,10 @@ export default function AuthDebugPage() {
               Check Cookies
             </Button>
             {status === "authenticated" && (
-              <Button variant="destructive" onClick={() => signOut()}>
+              <Button
+                variant="destructive"
+                onClick={() => handleSignOut("/login")}
+              >
                 Sign Out
               </Button>
             )}

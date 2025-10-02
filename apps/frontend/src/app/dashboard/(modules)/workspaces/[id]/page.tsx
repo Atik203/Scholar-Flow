@@ -62,14 +62,14 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function WorkspaceDetailPage() {
   const isProtected = useProtectedRoute();
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const router = useRouter();
   const userRole = session?.user?.role || "";
   const params = useParams();

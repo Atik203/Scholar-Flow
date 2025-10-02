@@ -1,9 +1,8 @@
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import { BrowserCleanup } from "@/components/providers/BrowserCleanup";
-import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
-import { SessionSyncProvider } from "@/components/providers/SessionSyncProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
@@ -137,15 +136,14 @@ export default function RootLayout({
       <body className={inter.className}>
         <BrowserCleanup />
         <ServiceWorkerRegistration />
-        <NextAuthProvider>
-          <ReduxProvider>
-            <SessionSyncProvider />
+        <ReduxProvider>
+          <AuthProvider>
             <ThemeProvider>
               <ConditionalLayout>{children}</ConditionalLayout>
               <ToastProvider />
             </ThemeProvider>
-          </ReduxProvider>
-        </NextAuthProvider>
+          </AuthProvider>
+        </ReduxProvider>
         <Analytics />
         {gaId && <GoogleAnalytics measurementId={gaId} />}
       </body>
