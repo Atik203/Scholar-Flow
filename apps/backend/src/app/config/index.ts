@@ -43,6 +43,7 @@ export default {
     reset_pass_token_expires_in: process.env.RESET_PASS_TOKEN_EXPIRES_IN,
   },
   reset_pass_link: process.env.RESET_PASS_LINK,
+  frontend_url: process.env.FRONTEND_URL || "http://localhost:3000",
   verify_email_link:
     process.env.VERIFY_EMAIL_LINK ||
     process.env.RESET_PASS_LINK?.replace("/reset-password", "/verify-email") ||
@@ -92,6 +93,23 @@ export default {
   stripe: {
     secret_key: process.env.STRIPE_SECRET_KEY,
     webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+    prices: {
+      pro: {
+        monthly: process.env.STRIPE_PRICE_PRO_MONTHLY,
+        annual: process.env.STRIPE_PRICE_PRO_ANNUAL,
+      },
+      team: {
+        monthly: process.env.STRIPE_PRICE_TEAM_MONTHLY,
+        annual: process.env.STRIPE_PRICE_TEAM_ANNUAL,
+      },
+      enterprise: {
+        monthly: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY,
+        annual: process.env.STRIPE_PRICE_ENTERPRISE_ANNUAL,
+      },
+    },
+    billingPortalReturnUrl:
+      process.env.STRIPE_BILLING_PORTAL_RETURN_URL ||
+      `${process.env.FRONTEND_URL}/dashboard/billing`,
   },
   // Document conversion / preview configuration
   docxToPdf: {

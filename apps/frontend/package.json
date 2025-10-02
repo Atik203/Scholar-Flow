@@ -33,6 +33,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@reduxjs/toolkit": "^2.8.2",
+    "@stripe/stripe-js": "^8.0.0",
     "@tiptap/extension-color": "^3.5.1",
     "@tiptap/extension-highlight": "^3.5.1",
     "@tiptap/extension-horizontal-rule": "^3.5.1",

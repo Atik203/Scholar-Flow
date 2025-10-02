@@ -76,6 +76,12 @@ model User {
   emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
 
+  // Stripe subscription fields
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String? // The price ID of the current subscription
+  stripeCurrentPeriodEnd DateTime? // When the current subscription period ends
+
   // Auth.js relations
   accounts Account[]
   sessions Session[]
@@ -499,9 +505,15 @@ model Subscription {
   planId                 String
   status                 SubscriptionStatus
   provider               PaymentProvider
-  providerCustomerId     String?
-  providerSubscriptionId String?
+  providerCustomerId     String? // Stripe customer ID
+  providerSubscriptionId String? // Stripe subscription ID
   cancelAtPeriodEnd      Boolean            @default(false)
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  canceledAt             DateTime?
+  trialStart             DateTime?
+  trialEnd               DateTime?
+  seats                  Int                @default(1) // Number of seats/team members
   startedAt              DateTime           @default(now())
   expiresAt              DateTime
 
@@ -517,6 +529,8 @@ model Subscription {
   @@index([userId, status, isDeleted]) // For user's active subscriptions
   @@index([workspaceId, status, isDeleted]) // For workspace subscriptions
   @@index([status, expiresAt]) // For expiration checks
+  @@index([providerSubscriptionId]) // For Stripe subscription lookups
+  @@index([providerCustomerId, status]) // For customer subscription queries
 }
 
 model Payment {
@@ -543,19 +557,22 @@ model Payment {
 model WebhookEvent {
   id          String          @id @default(uuid())
   provider    PaymentProvider
-  eventId     String
-  type        String
+  eventId     String // Stripe event ID (e.g., evt_xxx)
+  type        String // Event type (e.g., checkout.session.completed)
   payload     Json            @db.JsonB
   receivedAt  DateTime        @default(now())
   processedAt DateTime?
-  status      String
+  status      String // pending, processed, failed
   error       String?
+  attempts    Int             @default(0) // Number of processing attempts
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
   @@unique([provider, eventId])
+  @@index([status, receivedAt]) // For retry queries
+  @@index([type, processedAt]) // For event type analytics
 }
 
 model Notification {

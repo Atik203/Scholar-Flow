@@ -20,6 +20,7 @@ import {
   Brain,
   Building2,
   ChevronRight,
+  CreditCard,
   FileText,
   Highlighter,
   Home,
@@ -220,6 +221,12 @@ const navigationItems: SidebarItem[] = [
     title: "AI Insights",
     path: "/ai-insights",
     icon: Brain,
+    minRole: USER_ROLES.RESEARCHER,
+  },
+  {
+    title: "Billing",
+    path: "/billing",
+    icon: CreditCard,
     minRole: USER_ROLES.RESEARCHER,
   },
 ];
