@@ -48,6 +48,51 @@ export interface UserGrowthData {
   activeUsers: number;
 }
 
+export interface RevenueAnalytics {
+  mrr: {
+    amount: number;
+    currency: string;
+  };
+  arr: {
+    amount: number;
+    currency: string;
+  };
+  totalRevenue: {
+    amount: number;
+    currency: string;
+    period: string;
+  };
+  subscriptions: {
+    byStatus: Array<{ status: string; count: number }>;
+    byPlan: Array<{ plan: string; count: number }>;
+    new: number;
+    canceled: number;
+  };
+  payments: {
+    failed: number;
+  };
+  metrics: {
+    arpu: number;
+    activeUsers: number;
+    churnRate: number;
+  };
+  revenueTrend: Array<{
+    date: string;
+    revenue: number;
+    transactionCount: number;
+  }>;
+  timeRange: string;
+}
+
+export interface TopCustomer {
+  userId: string;
+  name: string;
+  email: string;
+  totalSpent: number;
+  subscriptionStatus: string;
+  currentPlan: string;
+}
+
 export interface RoleDistribution {
   role: string;
   count: number;
@@ -231,6 +276,28 @@ export const adminApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 10, // 10 seconds cache for real-time monitoring
       transformResponse: (response: { data: SystemMetrics }) => response.data,
     }),
+
+    // Get revenue analytics
+    getRevenueAnalytics: builder.query<
+      RevenueAnalytics,
+      { timeRange?: "7d" | "30d" | "90d" | "1y" }
+    >({
+      query: ({ timeRange = "30d" }) =>
+        `/admin/analytics/revenue?timeRange=${timeRange}`,
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 300, // 5 minutes cache
+      transformResponse: (response: { data: RevenueAnalytics }) =>
+        response.data,
+    }),
+
+    // Get top customers
+    getTopCustomers: builder.query<TopCustomer[], { limit?: number }>({
+      query: ({ limit = 10 }) =>
+        `/admin/analytics/top-customers?limit=${limit}`,
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 60,
+      transformResponse: (response: { data: TopCustomer[] }) => response.data,
+    }),
   }),
 });
 
@@ -242,4 +309,6 @@ export const {
   useGetPaperStatsQuery,
   useGetSystemHealthQuery,
   useGetSystemMetricsQuery,
+  useGetRevenueAnalyticsQuery,
+  useGetTopCustomersQuery,
 } = adminApi;
