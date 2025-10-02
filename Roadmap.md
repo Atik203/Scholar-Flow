@@ -1,13 +1,13 @@
 # Scholar-Flow Development Roadmap
 
-Author: @Atik203
+Author: Atik
 Last Updated: October 3, 2025
 
 ## Phase 1 – MVP (Weeks 1–6)
 
 Goal: Get a working core platform with minimal but functional features.
 
-### Week 1 – Project Setup & Foundations (Author: @Atik203) ✅
+### Week 1 – Project Setup & Foundations (Author: Atik) ✅
 
 - [x] Setup & Configuration (monorepo, Next.js 15, Node.js backend)
 - [x] TypeScript, ESLint, Prettier, Husky hooks
@@ -15,35 +15,35 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Auth.js authentication (Google + email/password)
 - [x] Environment setup & Tailwind CSS + ShadCN UI + Redux Toolkit
 
-### Week 2 – User Auth & Profile (Author: @Atik203) ✅
+### Week 2 – User Auth & Profile (Author: Atik) ✅
 
 - [x] Sign up / login / logout with Google OAuth
 - [x] JWT-based authentication with comprehensive testing
 - [x] User profile management & role-based access control
 - [x] Production-ready error handling & unique constraint management
 
-### Week 2.5 – Modern UI/UX Redesign (Author: @Atik203) ✅
+### Week 2.5 – Modern UI/UX Redesign (Author: Atik) ✅
 
 - [x] Complete dashboard redesign with modern SaaS-style interface
 - [x] Responsive sidebar with collapsible navigation & mobile hamburger menu
 - [x] CSS Grid system with professional backdrop blur effects
 - [x] Custom theme integration with light/dark mode support
 
-### Week 3 – Paper Upload & Storage (Author: @Atik203) ✅
+### Week 3 – Paper Upload & Storage (Author: Atik) ✅
 
 - [x] Password reset, email verification & user profile management
 - [x] Cloud storage integration (AWS S3) with file upload system
 - [x] Paper upload page (PDF, DOCX) with metadata extraction
 - [x] Modern paper viewing interface with fallback support
 
-### Week 3.5 – Enhanced UI/UX & Modern Paper Management (Author: @Atik203) ✅
+### Week 3.5 – Enhanced UI/UX & Modern Paper Management (Author: Atik) ✅
 
 - [x] Advanced search page with comprehensive filters & fuzzy search
 - [x] Modern papers list with real-time search functionality
 - [x] Enhanced dashboard with improved navigation & quick actions
 - [x] Component architecture cleanup & duplicate code removal
 
-### Week 4 – Basic Collections (Author: @Atik203 + Salman) ✅
+### Week 4 – Basic Collections (Author: Atik + Salman) ✅
 
 **Key Features Delivered:**
 
@@ -56,24 +56,24 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Paper-collection relationship management (Author: Atik) ✅
 - [x] Permission-based sharing system (VIEW/EDIT permissions) (Author: Atik) ✅
 - [x] Real-time cache invalidation and updates (Author: Atik) ✅
-- [x] Collection invitation system with email notifications (Author: @Atik203) ✅
+- [x] Collection invitation system with email notifications (Author: Atik) ✅
 
-### Week 4.5 – Advanced Workspace Management (Author: @Atik203) ✅
+### Week 4.5 – Advanced Workspace Management (Author: Atik) ✅
 
 **Key Features Delivered:**
 
-- [x] Workspace settings and management interface with modern UI (Author: @Atik203) ✅
-- [x] Comprehensive workspace invitation system with email notifications (Author: @Atik203) ✅
-- [x] Role-based permission management (OWNER/ADMIN/TEAM_LEAD/PRO_RESEARCHER/RESEARCHER) (Author: @Atik203) ✅
-- [x] Workspace member management with add/remove/role update functionality (Author: @Atik203) ✅
-- [x] Invitation tracking system (sent/received invitations) (Author: @Atik203) ✅
-- [x] Accept/decline invitation workflow with status management (Author: @Atik203) ✅
-- [x] Real-time workspace updates and cache invalidation (Author: @Atik203) ✅
-- [x] Workspace edit functionality (name/description updates) (Author: @Atik203) ✅
-- [x] Activity logging for workspace actions and member changes (Author: @Atik203) ✅
-- [x] Advanced permission checks and security controls (Author: @Atik203) ✅
-- [x] Production-grade error handling and input validation (Author: @Atik203) ✅
-- [x] AWS SDK v3 migration for improved performance and modern tooling (Author: @Atik203) ✅
+- [x] Workspace settings and management interface with modern UI (Author: Atik) ✅
+- [x] Comprehensive workspace invitation system with email notifications (Author: Atik) ✅
+- [x] Role-based permission management (OWNER/ADMIN/TEAM_LEAD/PRO_RESEARCHER/RESEARCHER) (Author: Atik) ✅
+- [x] Workspace member management with add/remove/role update functionality (Author: Atik) ✅
+- [x] Invitation tracking system (sent/received invitations) (Author: Atik) ✅
+- [x] Accept/decline invitation workflow with status management (Author: Atik) ✅
+- [x] Real-time workspace updates and cache invalidation (Author: Atik) ✅
+- [x] Workspace edit functionality (name/description updates) (Author: Atik) ✅
+- [x] Activity logging for workspace actions and member changes (Author: Atik) ✅
+- [x] Advanced permission checks and security controls (Author: Atik) ✅
+- [x] Production-grade error handling and input validation (Author: Atik) ✅
+- [x] AWS SDK v3 migration for improved performance and modern tooling (Author: Atik) ✅
 - [x] Extract text content from uploaded PDFs & DOCX (Author: Atik+Salman) ✅
       Preview & Extraction improvements:
 - [x] Gotenberg-based DOCX→PDF preview pipeline (Docker on EC2) for pixel‑perfect viewing (Author: Atik) ✅
@@ -87,7 +87,7 @@ Goal: Get a working core platform with minimal but functional features.
   - Draft/publish workflow with title editing and content persistence
   - Mobile-responsive design with keyboard shortcuts and accessibility support
 
-### Week 5 – AI Summarization (Author: @Atik203) ✅
+### Week 5 – AI Summarization (Author: Atik) ✅
 
 - [x] Integrate OpenAI/LLM API for summarization
 - [x] Multi-provider AI service (Gemini 2.5-flash-lite primary, OpenAI secondary)
@@ -104,7 +104,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Real-time polling (10s) with RTK Query and comprehensive health status dashboard
 - [x] Production-grade components (HealthCard, PerformanceBar, SystemInfoRow) with lazy loading
 
-### Week 5.5 – Performance Optimization & Production Hardening (Author: @Atik203) ✅
+### Week 5.5 – Performance Optimization & Production Hardening (Author: Atik) ✅
 
 ### Phase 1-4 Complete: Lighthouse Score Achievement
 
@@ -135,7 +135,7 @@ Goal: Get a working core platform with minimal but functional features.
   - [x] Enhanced Open Graph and Twitter Card metadata
   - [x] PWA meta tags and viewport configuration
 
-### Week 6 – Stripe Payment System (Author: @Atik203) ✅
+### Week 6 – Stripe Payment System (Author: Atik) ✅
 
 - [x] Stripe integration with live subscription billing (v1.1.6)
 - [x] Implement webhook handling for subscription events
@@ -199,5 +199,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 6.5 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
+Current Status: Week 6 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
 Last Updated: October 1, 2025
