@@ -41,6 +41,14 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter as unknown as RequestHandler);
 
+// Stripe webhook - MUST be before express.json() to preserve raw body
+import { webhookController } from "./app/modules/Billing/webhook.controller";
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  webhookController.handleStripeWebhook as unknown as RequestHandler
+);
+
 // Request parsing
 app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
 app.use(

@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import config from "../../config";
 import catchAsync from "../../shared/catchAsync";
 import prismaClient from "../../shared/prisma";
-import stripe from "../../shared/stripe";
+import stripe, { getRoleFromPriceId } from "../../shared/stripe";
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_STATUS } from "./billing.constant";
 import { BillingError } from "./billing.error";
 
@@ -12,6 +12,15 @@ import { BillingError } from "./billing.error";
  * Webhook handler for Stripe events
  * Raw body parsing required for signature verification
  */
+type StripeWebhookEventType =
+  (typeof STRIPE_WEBHOOK_EVENTS)[keyof typeof STRIPE_WEBHOOK_EVENTS];
+
+const logDebug = (...args: unknown[]) => {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(...args);
+  }
+};
+
 export const handleStripeWebhook = catchAsync(
   async (req: Request, res: Response): Promise<void> => {
     const sig = req.headers["stripe-signature"];
@@ -53,8 +62,11 @@ export const handleStripeWebhook = catchAsync(
     `;
 
     if (existingEvent.length > 0) {
-      console.log(`Duplicate webhook event: ${event.id}, skipping`);
-      return res.status(200).json({ received: true, duplicate: true });
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`Duplicate webhook event: ${event.id}, skipping`);
+      }
+      res.status(200).json({ received: true, duplicate: true });
+      return;
     }
 
     // Store webhook event
@@ -114,7 +126,10 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
 
     case STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_CREATED:
     case STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED:
-      await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+      await handleSubscriptionUpdated(
+        event.data.object as Stripe.Subscription,
+        event.type as StripeWebhookEventType
+      );
       break;
 
     case STRIPE_WEBHOOK_EVENTS.CUSTOMER_SUBSCRIPTION_DELETED:
@@ -130,7 +145,7 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
       break;
 
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      logDebug(`Unhandled event type: ${event.type}`);
   }
 }
 
@@ -142,9 +157,10 @@ async function handleCheckoutSessionCompleted(
 ): Promise<void> {
   const userId = session.metadata?.userId;
   const workspaceId = session.metadata?.workspaceId || null;
-  const planTier = session.metadata?.planTier;
+  const stripePriceId = session.metadata?.priceId;
+  const planTier = session.metadata?.planTier ?? null;
 
-  if (!userId || !planTier) {
+  if (!userId || !stripePriceId) {
     throw new Error("Missing required metadata in checkout session");
   }
 
@@ -162,68 +178,156 @@ async function handleCheckoutSessionCompleted(
     subscriptionId
   )) as Stripe.Subscription;
 
-  // Find or create plan
-  const plan = await prismaClient.$queryRaw<Array<{ id: string }>>`
-    SELECT id
+  const { currentPeriodStart, currentPeriodEnd } =
+    getSubscriptionPeriodBounds(stripeSubscription);
+
+  const stripeCustomerId =
+    typeof stripeSubscription.customer === "string"
+      ? stripeSubscription.customer
+      : (stripeSubscription.customer?.id ?? null);
+
+  if (currentPeriodEnd === null) {
+    throw BillingError.webhookProcessingFailed(
+      STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_COMPLETED,
+      "Stripe subscription missing current period end"
+    );
+  }
+
+  // Determine billing interval (month/year) from Stripe subscription
+  const subscriptionInterval =
+    stripeSubscription.items.data[0]?.plan?.interval ?? "month";
+  const normalizedInterval =
+    subscriptionInterval === "year" ? "annual" : "monthly";
+
+  // Find plan by Stripe price ID
+  const planByPrice = await prismaClient.$queryRaw<
+    Array<{ id: string; code: string }>
+  >`
+    SELECT id, code
     FROM "Plan"
-    WHERE code = ${planTier}
+    WHERE "stripePriceId" = ${stripePriceId}
       AND "isDeleted" = false
     LIMIT 1
   `;
 
-  if (plan.length === 0) {
-    throw new Error(`Plan not found: ${planTier}`);
+  let planId = planByPrice[0]?.id ?? null;
+
+  if (!planId && planTier) {
+    const fallbackCode = `${planTier}_${normalizedInterval}`;
+    const fallbackPlan = await prismaClient.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "Plan"
+      WHERE code = ${fallbackCode}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    planId = fallbackPlan[0]?.id ?? null;
+  }
+
+  if (!planId) {
+    throw new Error(`Plan not found for Stripe price ID: ${stripePriceId}`);
   }
 
   // Create subscription record
   const status = mapStripeStatus(stripeSubscription.status);
-
-  await prismaClient.$executeRaw`
-    INSERT INTO "Subscription" (
-      id,
-      "userId",
-      "workspaceId",
-      "planId",
-      status,
-      provider,
-      "providerCustomerId",
-      "providerSubscriptionId",
-      "currentPeriodStart",
-      "currentPeriodEnd",
-      "trialStart",
-      "trialEnd",
-      "startedAt",
-      "expiresAt",
-      "createdAt",
-      "updatedAt"
-    ) VALUES (
-      gen_random_uuid(),
-      ${userId},
-      ${workspaceId},
-      ${plan[0].id},
-      ${status}::"SubscriptionStatus",
-      'STRIPE',
-      ${stripeSubscription.customer as string},
-      ${stripeSubscription.id},
-      to_timestamp(${Number(stripeSubscription.current_period_start)}),
-      to_timestamp(${Number(stripeSubscription.current_period_end)}),
-      ${stripeSubscription.trial_start ? Prisma.sql`to_timestamp(${Number(stripeSubscription.trial_start)})` : null},
-      ${stripeSubscription.trial_end ? Prisma.sql`to_timestamp(${Number(stripeSubscription.trial_end)})` : null},
-      NOW(),
-      to_timestamp(${Number(stripeSubscription.current_period_end)}),
-      NOW(),
-      NOW()
-    )
-    ON CONFLICT ("providerSubscriptionId")
-    DO UPDATE SET
-      status = EXCLUDED.status,
-      "currentPeriodStart" = EXCLUDED."currentPeriodStart",
-      "currentPeriodEnd" = EXCLUDED."currentPeriodEnd",
-      "expiresAt" = EXCLUDED."expiresAt",
-      "updatedAt" = NOW()
+  const existingSubscription = await prismaClient.$queryRaw<
+    Array<{ id: string }>
+  >`
+    SELECT id
+    FROM "Subscription"
+    WHERE "providerSubscriptionId" = ${stripeSubscription.id}
+      AND "isDeleted" = false
+    LIMIT 1
   `;
 
-  console.log(
+  const canceledAtSql =
+    stripeSubscription.canceled_at != null
+      ? Prisma.sql`to_timestamp(${Number(stripeSubscription.canceled_at)})`
+      : Prisma.sql`NULL`;
+
+  if (existingSubscription.length > 0) {
+    await prismaClient.$executeRaw`
+      UPDATE "Subscription"
+      SET
+        "planId" = ${planId},
+        "workspaceId" = ${workspaceId},
+        status = ${status}::"SubscriptionStatus",
+        provider = 'STRIPE',
+        "providerCustomerId" = ${stripeCustomerId},
+        "providerSubscriptionId" = ${stripeSubscription.id},
+        "cancelAtPeriodEnd" = ${stripeSubscription.cancel_at_period_end},
+        "currentPeriodStart" = ${toTimestampSql(currentPeriodStart)},
+        "currentPeriodEnd" = ${toTimestampSql(currentPeriodEnd)},
+        "trialStart" = ${toTimestampSql(stripeSubscription.trial_start ?? null)},
+        "trialEnd" = ${toTimestampSql(stripeSubscription.trial_end ?? null)},
+        "canceledAt" = ${canceledAtSql},
+        "expiresAt" = ${toTimestampSql(currentPeriodEnd)},
+        "updatedAt" = NOW()
+      WHERE id = ${existingSubscription[0].id}
+    `;
+  } else {
+    await prismaClient.$executeRaw`
+      INSERT INTO "Subscription" (
+        id,
+        "userId",
+        "workspaceId",
+        "planId",
+        status,
+        provider,
+        "providerCustomerId",
+        "providerSubscriptionId",
+        "cancelAtPeriodEnd",
+        "currentPeriodStart",
+        "currentPeriodEnd",
+        "trialStart",
+        "trialEnd",
+        "startedAt",
+        "expiresAt",
+        "createdAt",
+        "updatedAt"
+      ) VALUES (
+        gen_random_uuid(),
+        ${userId},
+        ${workspaceId},
+        ${planId},
+        ${status}::"SubscriptionStatus",
+        'STRIPE',
+        ${stripeCustomerId},
+        ${stripeSubscription.id},
+        ${stripeSubscription.cancel_at_period_end},
+        ${toTimestampSql(currentPeriodStart)},
+        ${toTimestampSql(currentPeriodEnd)},
+        ${toTimestampSql(stripeSubscription.trial_start ?? null)},
+        ${toTimestampSql(stripeSubscription.trial_end ?? null)},
+        NOW(),
+        ${toTimestampSql(currentPeriodEnd)},
+        NOW(),
+        NOW()
+      )
+    `;
+  }
+
+  // Update user role and Stripe subscription fields based on price ID
+  // stripePriceId comes from session metadata at function start
+  const userRole = getRoleFromPriceId(stripePriceId);
+
+  await prismaClient.$executeRaw`
+    UPDATE "User"
+    SET
+      role = ${userRole}::"Role",
+      "stripeSubscriptionId" = ${stripeSubscription.id},
+      "stripePriceId" = ${stripePriceId},
+      "stripeCurrentPeriodEnd" = ${toTimestampSql(currentPeriodEnd)},
+      "updatedAt" = NOW()
+    WHERE id = ${userId}
+  `;
+
+  logDebug(
+    `User ${userId} role updated to ${userRole} with subscription ${stripeSubscription.id}`
+  );
+
+  logDebug(
     `Subscription created/updated for user ${userId}: ${stripeSubscription.id}`
   );
 }
@@ -232,25 +336,79 @@ async function handleCheckoutSessionCompleted(
  * Handle subscription updated event
  */
 async function handleSubscriptionUpdated(
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
+  eventType: StripeWebhookEventType
 ): Promise<void> {
-  const sub = subscription as any;
   const status = mapStripeStatus(subscription.status);
+  const { currentPeriodStart, currentPeriodEnd } =
+    getSubscriptionPeriodBounds(subscription);
+
+  if (currentPeriodEnd === null) {
+    throw BillingError.webhookProcessingFailed(
+      eventType,
+      "Stripe subscription missing current period end"
+    );
+  }
 
   await prismaClient.$executeRaw`
     UPDATE "Subscription"
     SET
       status = ${status}::"SubscriptionStatus",
-      "currentPeriodStart" = to_timestamp(${Number(sub.current_period_start)}),
-      "currentPeriodEnd" = to_timestamp(${Number(sub.current_period_end)}),
+      "currentPeriodStart" = ${toTimestampSql(currentPeriodStart)},
+      "currentPeriodEnd" = ${toTimestampSql(currentPeriodEnd)},
       "cancelAtPeriodEnd" = ${subscription.cancel_at_period_end},
       "canceledAt" = ${subscription.canceled_at ? Prisma.sql`to_timestamp(${Number(subscription.canceled_at)})` : null},
-      "expiresAt" = to_timestamp(${Number(sub.current_period_end)}),
+      "expiresAt" = ${toTimestampSql(currentPeriodEnd)},
       "updatedAt" = NOW()
     WHERE "providerSubscriptionId" = ${subscription.id}
   `;
 
-  console.log(`Subscription updated: ${subscription.id}`);
+  // Get the Stripe price ID and update user fields
+  const stripePriceId = subscription.items.data[0]?.price?.id || null;
+
+  if (stripePriceId) {
+    // Find user by Stripe customer ID
+    const user = await prismaClient.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "User"
+      WHERE "stripeCustomerId" = ${subscription.customer as string}
+      LIMIT 1
+    `;
+
+    if (user.length > 0) {
+      const userId = user[0].id;
+      const userRole = getRoleFromPriceId(stripePriceId);
+
+      // Only update role if subscription is active
+      if (status === SUBSCRIPTION_STATUS.ACTIVE) {
+        await prismaClient.$executeRaw`
+          UPDATE "User"
+          SET
+            role = ${userRole}::"Role",
+            "stripeSubscriptionId" = ${subscription.id},
+            "stripePriceId" = ${stripePriceId},
+            "stripeCurrentPeriodEnd" = ${toTimestampSql(currentPeriodEnd)},
+            "updatedAt" = NOW()
+          WHERE id = ${userId}
+        `;
+
+        logDebug(`User ${userId} role updated to ${userRole}`);
+      } else {
+        // Just update subscription fields without changing role
+        await prismaClient.$executeRaw`
+          UPDATE "User"
+          SET
+            "stripeSubscriptionId" = ${subscription.id},
+            "stripePriceId" = ${stripePriceId},
+            "stripeCurrentPeriodEnd" = ${toTimestampSql(currentPeriodEnd)},
+            "updatedAt" = NOW()
+          WHERE id = ${userId}
+        `;
+      }
+    }
+  }
+
+  logDebug(`Subscription updated: ${subscription.id}`);
 }
 
 /**
@@ -268,17 +426,40 @@ async function handleSubscriptionDeleted(
     WHERE "providerSubscriptionId" = ${subscription.id}
   `;
 
-  console.log(`Subscription canceled: ${subscription.id}`);
+  // Find user by Stripe customer ID and revert to free tier
+  const user = await prismaClient.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "User"
+    WHERE "stripeCustomerId" = ${subscription.customer as string}
+    LIMIT 1
+  `;
+
+  if (user.length > 0) {
+    const userId = user[0].id;
+
+    // Revert user to RESEARCHER role (free tier) and clear Stripe fields
+    await prismaClient.$executeRaw`
+      UPDATE "User"
+      SET
+        role = 'RESEARCHER',
+        "stripeSubscriptionId" = NULL,
+        "stripePriceId" = NULL,
+        "stripeCurrentPeriodEnd" = NULL,
+        "updatedAt" = NOW()
+      WHERE id = ${userId}
+    `;
+
+    logDebug(`User ${userId} role reverted to RESEARCHER (free tier)`);
+  }
+
+  logDebug(`Subscription canceled: ${subscription.id}`);
 }
 
 /**
  * Handle invoice paid event
  */
 async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
-  const subscriptionField = invoice.subscription as
-    | string
-    | Stripe.Subscription
-    | null;
+  const subscriptionField = getSubscriptionFromInvoice(invoice);
   if (!subscriptionField) {
     return;
   }
@@ -337,7 +518,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       "updatedAt" = NOW()
   `;
 
-  console.log(`Invoice paid recorded: ${invoice.id}`);
+  logDebug(`Invoice paid recorded: ${invoice.id}`);
 }
 
 /**
@@ -346,10 +527,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
 async function handleInvoicePaymentFailed(
   invoice: Stripe.Invoice
 ): Promise<void> {
-  const subscriptionField = invoice.subscription as
-    | string
-    | Stripe.Subscription
-    | null;
+  const subscriptionField = getSubscriptionFromInvoice(invoice);
   if (!subscriptionField) {
     return;
   }
@@ -370,7 +548,7 @@ async function handleInvoicePaymentFailed(
 
   // TODO: Send notification to user about failed payment
 
-  console.log(`Invoice payment failed: ${invoice.id}`);
+  logDebug(`Invoice payment failed: ${invoice.id}`);
 }
 
 /**
@@ -392,6 +570,60 @@ function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): string {
     default:
       return SUBSCRIPTION_STATUS.EXPIRED;
   }
+}
+
+type SubscriptionPeriodBounds = {
+  currentPeriodStart: number | null;
+  currentPeriodEnd: number | null;
+};
+
+function toTimestampSql(seconds: number | null | undefined): Prisma.Sql {
+  return seconds != null
+    ? Prisma.sql`to_timestamp(${seconds})`
+    : Prisma.sql`NULL`;
+}
+
+function getSubscriptionPeriodBounds(
+  subscription: Stripe.Subscription
+): SubscriptionPeriodBounds {
+  const items = subscription.items?.data ?? [];
+
+  const referenceItem = items.reduce<Stripe.SubscriptionItem | undefined>(
+    (latest, item) => {
+      if (!latest) {
+        return item;
+      }
+
+      return item.current_period_end > latest.current_period_end
+        ? item
+        : latest;
+    },
+    undefined
+  );
+
+  if (!referenceItem) {
+    return {
+      currentPeriodStart: null,
+      currentPeriodEnd: null,
+    };
+  }
+
+  return {
+    currentPeriodStart: referenceItem.current_period_start ?? null,
+    currentPeriodEnd: referenceItem.current_period_end ?? null,
+  };
+}
+
+function getSubscriptionFromInvoice(
+  invoice: Stripe.Invoice
+): string | Stripe.Subscription | null {
+  const subscriptionDetails = invoice.parent?.subscription_details;
+
+  if (!subscriptionDetails?.subscription) {
+    return null;
+  }
+
+  return subscriptionDetails.subscription;
 }
 
 export const webhookController = {
