@@ -6,24 +6,58 @@ import { apiSlice } from "./apiSlice";
  */
 
 export interface CheckoutSessionRequest {
-  planTier: "pro" | "team" | "enterprise";
-  interval: "monthly" | "annual";
+  priceId: string;
   workspaceId?: string;
   successUrl?: string;
   cancelUrl?: string;
 }
 
+/**
+ * Response from backend: {success, message, data: {sessionId, url}}
+ * Note: RTK Query's .unwrap() returns the full response object from server,
+ * including the wrapper. Access checkout URL via: response.data.url
+ *
+ * Backend response example:
+ * {
+ *   "success": true,
+ *   "message": "Checkout session created successfully",
+ *   "data": {
+ *     "sessionId": "cs_test_...",
+ *     "url": "https://checkout.stripe.com/c/pay/cs_test_..."
+ *   }
+ * }
+ */
 export interface CheckoutSessionResponse {
-  sessionId: string;
-  url: string;
+  success: boolean;
+  message: string;
+  data: {
+    sessionId: string;
+    url: string;
+  };
 }
 
 export interface PortalSessionRequest {
   returnUrl?: string;
 }
 
+/**
+ * Response from backend: {success, message, data: {url}}
+ * Note: RTK Query's .unwrap() returns the full response object from server,
+ * including the wrapper. Access portal URL via: response.data.url
+ *
+ * Backend response example:
+ * {
+ *   "success": true,
+ *   "message": "Portal session created successfully",
+ *   "data": { "url": "https://billing.stripe.com/..." }
+ * }
+ */
 export interface PortalSessionResponse {
-  url: string;
+  success: boolean;
+  message: string;
+  data: {
+    url: string;
+  };
 }
 
 export interface Subscription {
