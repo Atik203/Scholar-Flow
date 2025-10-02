@@ -287,7 +287,11 @@ export default function PricingPage() {
                     {plan.name === "Enterprise" ? (
                       "Contact Sales"
                     ) : (
-                      <Link href="/login">
+                      <Link
+                        href={
+                          plan.name === "Free" ? "/login" : "/dashboard/billing"
+                        }
+                      >
                         {plan.name === "Free"
                           ? "Get Started"
                           : `Start ${plan.name} Trial`}
