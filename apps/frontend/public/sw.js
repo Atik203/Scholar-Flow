@@ -54,14 +54,27 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
+  // Skip non-GET requests (POST, PUT, DELETE, etc.) - CRITICAL FOR OAUTH
   if (request.method !== "GET") {
-    return;
+    console.log("[Service Worker] Skipping non-GET request:", request.method, url.pathname);
+    return; // Let the request pass through without interference
   }
 
   // Skip chrome extensions and other non-http(s) requests
   if (!url.protocol.startsWith("http")) {
     return;
+  }
+
+  // CRITICAL: Skip OAuth authentication endpoints entirely
+  // These must not be cached or intercepted to prevent duplicate calls
+  if (
+    url.pathname.includes("/auth/oauth/") ||
+    url.pathname.includes("/auth/callback/") ||
+    url.pathname.includes("/auth/signin") ||
+    url.pathname.includes("/auth/register")
+  ) {
+    console.log("[Service Worker] Skipping auth endpoint:", url.pathname);
+    return; // Let auth requests pass through without caching
   }
 
   // API requests - Network first, cache fallback
