@@ -27,7 +27,7 @@ import {
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import { ArrowLeft, BookOpen, Building2, Globe, Lock } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -36,7 +36,7 @@ export default function CreateCollectionPage() {
   const isProtected = useProtectedRoute();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
+  const { session } = useAuth();
 
   const [createCollection, { isLoading: isSubmitting }] =
     useCreateCollectionMutation();

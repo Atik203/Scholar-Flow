@@ -1,6 +1,7 @@
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
-import { NextAuthProvider } from "@/components/providers/NextAuthProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { BrowserCleanup } from "@/components/providers/BrowserCleanup";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
@@ -133,15 +134,16 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <BrowserCleanup />
         <ServiceWorkerRegistration />
-        <NextAuthProvider>
-          <ReduxProvider>
+        <ReduxProvider>
+          <AuthProvider>
             <ThemeProvider>
               <ConditionalLayout>{children}</ConditionalLayout>
               <ToastProvider />
             </ThemeProvider>
-          </ReduxProvider>
-        </NextAuthProvider>
+          </AuthProvider>
+        </ReduxProvider>
         <Analytics />
         {gaId && <GoogleAnalytics measurementId={gaId} />}
       </body>
