@@ -218,5 +218,66 @@ router.get(
   adminController.getSystemMetrics
 );
 
+/**
+ * @swagger
+ * /api/admin/analytics/revenue:
+ *   get:
+ *     summary: Get Revenue Analytics
+ *     description: Retrieve comprehensive revenue analytics including MRR, ARR, subscription metrics, and trends
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: timeRange
+ *         schema:
+ *           type: string
+ *           enum: [7d, 30d, 90d, 1y]
+ *           default: 30d
+ *         description: Time range for analytics
+ *     responses:
+ *       200:
+ *         description: Revenue analytics retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/revenue",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getRevenueAnalytics
+);
+
+/**
+ * @swagger
+ * /api/admin/analytics/top-customers:
+ *   get:
+ *     summary: Get Top Paying Customers
+ *     description: Retrieve list of top paying customers with their subscription details
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of customers to return
+ *     responses:
+ *       200:
+ *         description: Top customers retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/top-customers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getTopCustomers
+);
+
 const adminRoutes: import("express").Router = router;
 export { adminRoutes };
