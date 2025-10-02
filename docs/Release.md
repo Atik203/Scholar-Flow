@@ -1,171 +1,73 @@
-## v1.1.5
+## v1.1.6
 
 Author: @Atik203  
-Date: October 1, 2025
+Date: October 3, 2025
 
-### Highlights – v1.1.5 (Performance Optimization & Production Hardening)
+### Highlights – v1.1.6 (Billing & Subscription Launch)
 
-- **🎯 Lighthouse Perfect Scores**: Performance 89/100, Accessibility 100/100, Best Practices 100/100, SEO 100/100
-- **🚀 Core Web Vitals**: 58% faster FCP (1.9s→0.8s), 56% less TBT (2,360ms→1,040ms), 18% faster LCP (2.8s→2.3s)
-- **📱 PWA Implementation**: Service worker with offline support, installable app, manifest with shortcuts
-- **🔒 Production Security**: CSP headers, HSTS with preload, X-Frame-Options, comprehensive security hardening
-- **🎨 UX Enhancements**: Skeleton loading states, predictive prefetching, client-side caching utilities
-- **⚡ Backend Performance**: Redis caching, HTTP ETag support, query optimization, composite database indexes
-- **📊 SEO Excellence**: Structured data (JSON-LD), robots.txt, enhanced Open Graph/Twitter Cards, PWA metadata
+- **🔐 Stripe Checkout & Webhooks**: Production-ready checkout flow with signed metadata, idempotent webhook storage, and automatic role propagation from price IDs.
+- **💳 Unified Billing Dashboard**: Centralized billing view in the dashboard with real-time plan state, actionable CTA buttons, and guard rails for team roles.
+- **🔁 Subscription Sync**: Background processors reconcile subscription records, ensure cancellation/reactivation states, and backfill trial period metadata.
+- **🧭 Seamless Navigation**: Persistent Billing entry in the app shell with auto-refreshing auth session to surface subscription changes instantly.
+- **🛡️ Resilience & Monitoring**: Duplicate-event filtering, structured webhook logs, and failure tracking for future replay tooling.
 
-### Technical Summary – v1.1.5
+### Technical Summary – v1.1.6
 
-#### Phase 1 & 2: Quick Wins & Critical Optimizations
+#### Stripe Billing Platform
 
-**Frontend Optimizations:**
+- Checkout sessions embed workspace, plan tier, and price IDs to support granular billing per workspace.
+- Webhook pipeline verifies signatures, stores payloads in `WebhookEvent`, and processes `checkout.session.completed`, subscription lifecycle, and invoice events.
+- Billing errors normalized through `BillingError` with feature-specific codes, feeding the global API error handler.
+- Subscription state machine updates Prisma `Subscription` records and enforces role mapping via `getRoleFromPriceId`.
 
-- Next.js compiler optimizations: SWC minification, modularizeImports (lodash, date-fns, @radix-ui)
-- Experimental optimizeCss for critical CSS extraction and inline optimization
-- Route-based code splitting: Dynamic imports for GoogleAnalytics, ToastProvider
-- Font optimization: Inter with display='swap', preload, fallback chain
-- Image optimization: AVIF/WebP formats, 60s cache TTL, remote patterns
-- React Query: staleTime 300s, keepUnusedDataFor 300s, disabled refetchOnFocus
-- Component memoization: React.memo(), useMemo(), useCallback() on PapersList
-- Redux store optimization: Enhanced cache strategies, normalized state
+#### Frontend Subscription Experience
 
-**Backend Optimizations:**
+- Dashboard billing route (`/dashboard/billing`) shows current plan, upcoming renewals, and links to Stripe portal.
+- Success and cancel routes deliver contextual messaging after checkout while refreshing session state.
+- Shared billing components provide CTA buttons, pricing tables, and stateful loading feedback backed by RTK Query.
+- Navigation highlights Billing in the sidebar for all authenticated roles with permission-aware visibility.
 
-- Redis caching: Dual-layer (Redis + in-memory), LRU eviction, 30MB/50KB limits
-- Database indexes: 5 composite on Paper, 3 on CollectionPaper (uploaderId+workspaceId+isDeleted+createdAt)
-- Query optimization: Removed SELECT \*, specific column selection, pagination on all lists
-- Slow query logging: >100ms warnings, >500ms errors
-- HTTP caching middleware: ETag generation/validation, Cache-Control with stale-while-revalidate
-- Performance monitoring: Response time tracking, X-Response-Time headers
+#### Reliability & Monitoring
 
-#### Phase 3: Advanced Optimizations
+- Idempotent webhook handling prevents double processing via `WebhookEvent` lookups.
+- Background retries on failed payloads increment attempt counters and log structured failures for reprocessing.
+- Rate limiting on billing endpoints piggybacks existing middleware to protect webhook and checkout flows.
+- Development-only debug logging keeps production output clean while supporting local tracing.
 
-**PWA Implementation:**
-
-- Service worker (`sw.js`): Cache-first (static assets), network-first (API/dynamic)
-- Offline support: Intelligent fallbacks, background sync infrastructure
-- Manifest.json: App shortcuts (Dashboard, Upload, Search), 192x192 & 512x512 icons
-- ServiceWorkerRegistration: Auto-update checking (hourly), production-only registration
-
-**UI/UX Enhancements:**
-
-- Skeleton components: PaperCardSkeleton, DashboardSkeleton, TableSkeleton, FormSkeleton
-- Client-side caching: useClientStorage hook (localStorage, sessionStorage, IndexedDB)
-- Predictive prefetching: PrefetchLink component with hover/viewport intersection
-- Google Analytics optimization: Async script loading with Next.js Script component
-
-**Backend Advanced:**
-
-- Query optimizer: Prisma middleware for query analysis, N+1 detection, slow query warnings
-- Performance monitoring: Query timing, pattern detection, optimization suggestions
-
-#### Phase 4: Security & SEO
-
-**Security Hardening:**
-
-- CSP headers: Strict directives, XSS prevention, domain whitelisting (fonts, APIs)
-- HSTS: 1-year max-age, includeSubDomains, preload
-- X-Frame-Options: DENY (clickjacking protection)
-- X-Content-Type-Options: nosniff (MIME sniffing prevention)
-- Referrer-Policy: strict-origin-when-cross-origin
-- Permissions-Policy: camera=(), microphone=(), geolocation=()
-
-**SEO Excellence:**
-
-- robots.txt: Proper crawling rules (disallow: /api/, /dashboard/; allow: /, /login, /signup)
-- Structured data: JSON-LD WebApplication schema with aggregate rating
-- Enhanced metadata: Open Graph (title, description, url, locale), Twitter Cards (site, creator)
-- PWA meta tags: apple-web-app-capable, theme-color, viewport configuration
-- Manifest integration: Linked from layout.tsx metadata
-
-#### Performance Achievements
-
-**Lighthouse Scores:**
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Performance | 38/100 | 89/100 | +51 points (134%) |
-| Accessibility | 95/100 | 100/100 | +5 points (Perfect) |
-| Best Practices | 74/100 | 100/100 | +26 points (Perfect) |
-| SEO | 91/100 | 100/100 | +9 points (Perfect) |
-
-**Core Web Vitals:**
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| FCP | 1.9s | 0.8s | -1.1s (58% faster) |
-| LCP | 2.8s | 2.3s | -0.5s (18% faster) |
-| TBT | 2,360ms | 1,040ms | -1,320ms (56% reduction) |
-| Query Time | 500ms+ | 100-300ms | -200-400ms |
-
-#### Files Created (7 new files)
+#### Files Updated
 
 **Backend:**
 
-- `apps/backend/src/app/middleware/cacheMiddleware.ts` - HTTP caching with ETag support
-- `apps/backend/src/app/utils/queryOptimizer.ts` - Prisma query analysis and optimization
+- `apps/backend/src/app/modules/Billing/billing.controller.ts`
+- `apps/backend/src/app/modules/Billing/billing.service.ts`
+- `apps/backend/src/app/modules/Billing/billing.routes.ts`
+- `apps/backend/src/app/modules/Billing/billing.validation.ts`
+- `apps/backend/src/app/modules/Billing/billing.error.ts`
+- `apps/backend/src/app/modules/Billing/webhook.controller.ts`
+- `apps/backend/src/app/shared/stripe.ts`
 
 **Frontend:**
 
-- `apps/frontend/public/robots.txt` - SEO crawling rules
-- `apps/frontend/public/manifest.json` - PWA manifest with app shortcuts
-- `apps/frontend/public/sw.js` - Service worker for offline support
-- `apps/frontend/src/components/pwa/ServiceWorkerRegistration.tsx` - SW registration
-- `apps/frontend/src/components/skeletons/index.tsx` - Loading skeleton components
-- `apps/frontend/src/hooks/useClientStorage.ts` - Client-side storage utilities
-- `apps/frontend/src/components/navigation/PrefetchLink.tsx` - Predictive prefetching
+- `apps/frontend/src/app/dashboard/billing/page.tsx`
+- `apps/frontend/src/app/dashboard/billing/cancel/page.tsx`
+- `apps/frontend/src/app/dashboard/billing/success/page.tsx`
+- `apps/frontend/src/components/billing/ManageSubscriptionButton.tsx`
+- `apps/frontend/src/components/billing/StripePricingTable.tsx`
+- `apps/frontend/src/components/navigation/Sidebar.tsx`
+- `apps/frontend/src/app/layout.tsx`
 
-**Documentation:**
+### Testing & Validation – v1.1.6
 
-- `PERFORMANCE_ACHIEVEMENT_SUMMARY.md` - Comprehensive optimization report
+- ✅ Stripe CLI + local tunnel scenarios for checkout success, cancellation, and invoice failure paths
+- ✅ Automated RTK Query tests for subscription fetching and plan management mutations
+- ✅ Manual QA: dashboard billing view, portal session creation, role transition propagation
+- ✅ Webhook replay testing to verify duplicate suppression and error escalation
 
-#### Files Modified
+### Impact Summary – v1.1.6
 
-**Backend:**
-
-- `apps/backend/src/server.ts` - Enhanced helmet CSP, HSTS, security headers
-- `apps/backend/src/app/shared/prisma.ts` - Integrated query optimizer middleware
-
-**Frontend:**
-
-- `apps/frontend/src/app/layout.tsx` - Viewport export, PWA meta, structured data
-- `apps/frontend/next.config.ts` - Enhanced security headers, cache headers
-- `apps/frontend/src/redux/api/apiSlice.ts` - Optimized cache strategies
-- `apps/frontend/src/components/papers/PapersList.tsx` - React.memo, useMemo, useCallback
-- `apps/frontend/src/components/analytics/GoogleAnalytics.tsx` - Async script loading
-
-#### Testing & Validation
-
-- ✅ Build success: 1m35s, 130 static routes, zero errors
-- ✅ TypeScript: No compilation errors
-- ✅ Performance: All Lighthouse targets exceeded
-- ✅ Security: CSP, HSTS, frame protection verified
-- ✅ PWA: Installability and offline support tested
-- ✅ SEO: Structured data and metadata validated
-
-### Impact Summary
-
-**Performance Gains:**
-
-- 51-point Lighthouse performance improvement (38→89)
-- 200-400ms reduction in query response times
-- 80% reduction in unnecessary React re-renders
-- 30KB reduction in initial bundle size
-- 58% faster First Contentful Paint
-
-**Production Readiness:**
-
-- Perfect Accessibility, Best Practices, and SEO scores
-- Production-grade security headers
-- PWA with offline support and installability
-- Comprehensive error handling and monitoring
-- Redis caching with intelligent eviction
-
-**Developer Experience:**
-
-- Reusable skeleton loading components
-- Client-side caching utilities
-- Predictive prefetching helpers
-- Query optimization middleware
-- Performance monitoring tools
-
----
+- Paid plan activations now update workspace roles within seconds of checkout completion.
+- Team leads gain in-app controls to cancel or reactivate subscriptions without dashboard context switching.
+- Webhook observability enables safer future automation (replay & analytics) with structured storage.
+- Billing surfaced as a first-class navigation item, clarifying upgrade paths for free-tier users.
 
 ---

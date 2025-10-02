@@ -1,24 +1,33 @@
 # Scholar-Flow Changelog
 
+## v1.1.6 (2025-10-03) – Billing & Subscription Launch
+
+- Finalized Stripe checkout with reliable webhook processing and plan syncing
+- Refreshed dashboard billing experience with real-time role updates and plan details
+- Added universal Billing navigation entry and auth refresh to surface subscription status instantly
+
 ## v1.1.5 (2025-10-01) – Performance Optimization & Production Hardening
 
 Author: @Atik203
 
 ### Highlights – v1.1.5
 
-**Lighthouse Perfect Scores Achieved:**
+#### Lighthouse Perfect Scores Achieved
+
 - Performance: 89/100 (+51 from 38 baseline) - Target 85+ EXCEEDED
 - Accessibility: 100/100 - PERFECT SCORE
-- Best Practices: 100/100 - PERFECT SCORE  
+- Best Practices: 100/100 - PERFECT SCORE
 - SEO: 100/100 - PERFECT SCORE
 
-**Core Performance Improvements:**
+#### Core Performance Improvements
+
 - FCP: 1.9s → 0.8s (-1.1s, 58% faster)
 - LCP: 2.8s → 2.3s (-0.5s, 18% faster)
 - TBT: 2,360ms → 1,040ms (-1,320ms, 56% reduction)
 - Query Time: 500ms+ → 100-300ms (-60% average)
 
-**Key Features:**
+#### Key Features
+
 - PWA implementation with service worker and offline support
 - Production-grade security headers (CSP, HSTS, X-Frame-Options)
 - Redis caching with free tier optimization (30MB, 50KB limits)
@@ -29,30 +38,35 @@ Author: @Atik203
 
 ### Technical Implementation – v1.1.5
 
-**Phase 1 & 2: Quick Wins & Critical Optimizations**
+#### Phase 1 & 2: Quick Wins & Critical Optimizations
+
 - Next.js: SWC, modularizeImports, optimizeCss, code splitting, font/image optimization
 - React: memo/useMemo/useCallback on hot paths, Redux cache optimization
 - Backend: Redis caching, HTTP ETag, 8 composite indexes, query optimizer middleware
 - Result: +40 performance points, 80% fewer re-renders, 30KB smaller bundles
 
-**Phase 3: Advanced Optimizations**
+#### Phase 3: Advanced Optimizations
+
 - PWA: Service worker (cache-first/network-first), manifest, offline support
 - UX: Skeleton components, client-side caching, predictive prefetching
 - Analytics: Async Google Analytics loading
 - Result: +15 performance points, installable app, better perceived performance
 
-**Phase 4: Security & SEO**
+#### Phase 4: Security & SEO
+
 - Security: CSP headers, HSTS (1-year + preload), X-Frame-Options DENY
 - SEO: robots.txt, JSON-LD structured data, Open Graph, Twitter Cards, PWA meta
 - Result: Perfect Best Practices and SEO scores
 
 ### Files Created
 
-**Backend (2 files):**
+#### Backend (2 files)
+
 - `apps/backend/src/app/middleware/cacheMiddleware.ts` - HTTP caching with ETag
 - `apps/backend/src/app/utils/queryOptimizer.ts` - Prisma query analysis
 
-**Frontend (7 files):**
+#### Frontend (7 files)
+
 - `apps/frontend/public/robots.txt` - SEO optimization
 - `apps/frontend/public/manifest.json` - PWA manifest
 - `apps/frontend/public/sw.js` - Service worker
@@ -61,16 +75,19 @@ Author: @Atik203
 - `apps/frontend/src/hooks/useClientStorage.ts` - Storage utilities
 - `apps/frontend/src/components/navigation/PrefetchLink.tsx` - Prefetching
 
-**Documentation:**
+#### Documentation
+
 - `PERFORMANCE_ACHIEVEMENT_SUMMARY.md` - Full optimization report
 
 ### Files Modified
 
-**Backend:**
+#### Backend
+
 - `apps/backend/src/server.ts` - Enhanced security headers
 - `apps/backend/src/app/shared/prisma.ts` - Query optimizer integration
 
-**Frontend:**
+#### Frontend
+
 - `apps/frontend/src/app/layout.tsx` - Viewport export, PWA meta, structured data
 - `apps/frontend/next.config.ts` - Security/cache headers
 - `apps/frontend/src/redux/api/apiSlice.ts` - Cache optimization
@@ -86,4 +103,3 @@ Author: @Atik203
 - ✅ Performance: Query times, re-renders, bundle sizes validated
 
 ---
-
