@@ -87,6 +87,14 @@ export class BillingError extends ApiError {
     );
   }
 
+  static webhookRawBodyMissing() {
+    return new BillingError(
+      500,
+      "Stripe webhook raw body unavailable for signature verification",
+      "WEBHOOK_RAW_BODY_MISSING"
+    );
+  }
+
   static webhookProcessingFailed(eventType: string, reason?: string) {
     return new BillingError(
       500,

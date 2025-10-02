@@ -8,6 +8,8 @@ import stripe, { getRoleFromPriceId } from "../../shared/stripe";
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_STATUS } from "./billing.constant";
 import { BillingError } from "./billing.error";
 
+type RawBodyRequest = Request & { rawBody?: Buffer | string };
+
 /**
  * Webhook handler for Stripe events
  * Raw body parsing required for signature verification
@@ -33,17 +35,25 @@ export const handleStripeWebhook = catchAsync(
       throw new Error("STRIPE_WEBHOOK_SECRET not configured");
     }
 
+    const rawBody = getRawBodyBuffer(req as RawBodyRequest);
+
     let event: Stripe.Event;
 
     try {
       // Verify webhook signature
       event = stripe.webhooks.constructEvent(
-        req.body,
+        rawBody,
         sig,
         config.stripe.webhook_secret
       );
     } catch (error) {
-      console.error("Webhook signature verification failed:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown verification error";
+
+      console.error("Webhook signature verification failed", {
+        message: errorMessage,
+      });
+
       throw BillingError.webhookSignatureVerificationFailed();
     }
 
@@ -147,6 +157,28 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
     default:
       logDebug(`Unhandled event type: ${event.type}`);
   }
+}
+
+function getRawBodyBuffer(req: RawBodyRequest): Buffer {
+  const possibleRawBody = req.rawBody;
+
+  if (Buffer.isBuffer(possibleRawBody)) {
+    return possibleRawBody;
+  }
+
+  if (typeof possibleRawBody === "string") {
+    return Buffer.from(possibleRawBody, "utf8");
+  }
+
+  if (Buffer.isBuffer(req.body)) {
+    return req.body;
+  }
+
+  if (typeof req.body === "string") {
+    return Buffer.from(req.body, "utf8");
+  }
+
+  throw BillingError.webhookRawBodyMissing();
 }
 
 /**
