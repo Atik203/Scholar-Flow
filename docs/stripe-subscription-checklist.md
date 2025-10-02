@@ -21,6 +21,8 @@
 - ✅ Frontend Stripe.js integration with lazy loading
 - ✅ Success and cancel pages for post-checkout flow
 - ✅ Modern pricing page with animations and CTAs
+- ✅ Stripe prebuilt pricing table embed for self-serve upgrades (auto-syncs with Stripe products)
+- ✅ Stripe API v2024 compatibility updates (subscription item periods + invoice parent payloads)
 
 ### Remaining Tasks ⏳
 
@@ -41,6 +43,7 @@
   - ✅ `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_ANNUAL`, `STRIPE_PRICE_TEAM_MONTHLY`, `STRIPE_PRICE_TEAM_ANNUAL`
   - ✅ `STRIPE_BILLING_PORTAL_RETURN_URL`
   - ✅ `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+  - ✅ `NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID`
   - ✅ `NEXT_PUBLIC_STRIPE_PRICE_*` (client-side price IDs)
   - ✅ `NEXT_PUBLIC_ENABLE_PAYMENTS` + `NEXT_PUBLIC_FEATURE_BILLING`
 - [x] **Config wiring**: Extend `apps/backend/src/app/config/index.ts` to map new Stripe vars. Mirror in frontend `featureFlags` + config modules.
@@ -100,6 +103,7 @@
   - ✅ Provides actions: upgrade, downgrade, manage payment methods (link to portal), cancel at period end
   - ✅ Uses RTK Query for billing endpoints. Hooks into error handlers
   - ✅ Modern gradient design with animations and responsive layout
+  - ✅ Embeds Stripe Pricing Table when configured, falling back to manual plans when IDs are unavailable
 - [x] **Access gating**: Ready for protected routes (AI features, collection limits, etc.) to respect subscription tier using server-provided entitlements.
 - [x] **UI states**: Loading, empty (no subscription), trial countdown, payment failed warnings all implemented.
 - [ ] **Analytics**: Emit events for upgrade attempts/success/failure if analytics integration available.
@@ -137,7 +141,7 @@
 - [ ] Multiple sessions opened concurrently — return existing subscription instead of creating new.
 - [ ] Seat overages (team invites more members than plan allows) — enforce limits or auto-increase quantity with user confirmation.
 - [ ] Failed webhook delivery (Stripe outage) — implement Stripe CLI replay / manual replay instructions.
-- [ ] Timezone drift — base expiry on Stripe `current_period_end` (UTC) and convert server side.
+- [x] Timezone drift — base expiry on Stripe `current_period_end` (UTC) and convert server side (handled via webhook ingestion timestamps).
 - [ ] Refunds / credits — decide policy and implement manual admin endpoint if needed.
 - [ ] Downgrading from multi-seat to single-seat — handle member eviction policy.
 - [ ] Graceful feature degradation when `NEXT_PUBLIC_ENABLE_PAYMENTS=false` (hide UI, block endpoints) to support phased rollout.

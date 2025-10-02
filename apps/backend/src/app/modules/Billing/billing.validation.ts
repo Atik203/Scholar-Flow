@@ -10,19 +10,25 @@ export const billingValidation = {
   /**
    * POST /billing/checkout-session
    * Create a Stripe Checkout session for plan upgrade
+   * Simplified to match example project: accepts priceId directly
    */
   createCheckoutSession: z.object({
-    body: z.object({
-      planTier: z.enum([
-        PLAN_TIERS.PRO,
-        PLAN_TIERS.TEAM,
-        PLAN_TIERS.ENTERPRISE,
-      ]),
-      interval: z.enum([BILLING_INTERVALS.MONTHLY, BILLING_INTERVALS.ANNUAL]),
-      workspaceId: z.string().uuid().optional(),
-      successUrl: z.string().url().optional(),
-      cancelUrl: z.string().url().optional(),
-    }),
+    priceId: z.string().min(1, "Price ID is required"),
+    workspaceId: z.string().uuid().optional(),
+    successUrl: z.string().url().optional(),
+    cancelUrl: z.string().url().optional(),
+  }),
+
+  /**
+   * Legacy support: Accept planTier + interval for backward compatibility
+   * @deprecated Use priceId instead
+   */
+  createCheckoutSessionLegacy: z.object({
+    planTier: z.enum([PLAN_TIERS.PRO, PLAN_TIERS.TEAM, PLAN_TIERS.ENTERPRISE]),
+    interval: z.enum([BILLING_INTERVALS.MONTHLY, BILLING_INTERVALS.ANNUAL]),
+    workspaceId: z.string().uuid().optional(),
+    successUrl: z.string().url().optional(),
+    cancelUrl: z.string().url().optional(),
   }),
 
   /**
@@ -30,9 +36,7 @@ export const billingValidation = {
    * Create a Stripe Customer Portal session
    */
   createPortalSession: z.object({
-    body: z.object({
-      returnUrl: z.string().url().optional(),
-    }),
+    returnUrl: z.string().url().optional(),
   }),
 
   /**
@@ -50,11 +54,9 @@ export const billingValidation = {
    * Programmatic plan management
    */
   managePlan: z.object({
-    body: z.object({
-      action: z.enum(["cancel", "reactivate", "update_seats"]),
-      workspaceId: z.string().uuid().optional(),
-      seats: z.number().int().positive().optional(),
-    }),
+    action: z.enum(["cancel", "reactivate", "update_seats"]),
+    workspaceId: z.string().uuid().optional(),
+    seats: z.number().int().positive().optional(),
   }),
 
   /**
@@ -68,13 +70,11 @@ export const billingValidation = {
 
 export type CreateCheckoutSessionInput = z.infer<
   typeof billingValidation.createCheckoutSession
->["body"];
+>;
 export type CreatePortalSessionInput = z.infer<
   typeof billingValidation.createPortalSession
->["body"];
+>;
 export type GetSubscriptionInput = z.infer<
   typeof billingValidation.getSubscription
 >["query"];
-export type ManagePlanInput = z.infer<
-  typeof billingValidation.managePlan
->["body"];
+export type ManagePlanInput = z.infer<typeof billingValidation.managePlan>;

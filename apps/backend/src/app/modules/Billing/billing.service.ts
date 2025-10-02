@@ -2,7 +2,13 @@ import { Prisma } from "@prisma/client";
 import Stripe from "stripe";
 import config from "../../config";
 import prismaClient from "../../shared/prisma";
-import stripe, { isStripeError, logStripeError } from "../../shared/stripe";
+import stripe, {
+  getPlanNameFromPriceId,
+  isStripeError,
+  isValidPriceId,
+  logStripeError,
+  STRIPE_PRICE_IDS,
+} from "../../shared/stripe";
 import {
   BILLING_INTERVALS,
   PLAN_FEATURES,
@@ -45,6 +51,36 @@ const getPriceId = (planTier: string, interval: string): string | undefined => {
   }
 
   return undefined;
+};
+
+/**
+ * Get plan tier from Stripe price ID
+ * Maps price IDs to plan tier codes
+ */
+const getPlanTierFromPriceId = (priceId: string): string => {
+  const prices = config.stripe.prices;
+
+  // Check Pro plans
+  if (priceId === prices.pro.monthly || priceId === prices.pro.annual) {
+    return PLAN_TIERS.PRO;
+  }
+
+  // Check Team plans
+  if (priceId === prices.team.monthly || priceId === prices.team.annual) {
+    return PLAN_TIERS.TEAM;
+  }
+
+  // Check Enterprise plans
+  if (
+    priceId === prices.enterprise?.monthly ||
+    priceId === prices.enterprise?.annual
+  ) {
+    return PLAN_TIERS.ENTERPRISE;
+  }
+
+  throw BillingError.checkoutSessionCreationFailed(
+    `Invalid or unconfigured price ID: ${priceId}`
+  );
 };
 
 /**
@@ -99,6 +135,7 @@ const getOrCreateStripeCustomer = async (
 
 /**
  * Create a Stripe Checkout session for plan upgrade
+ * Simplified to accept priceId directly (matches example project pattern)
  */
 export const createCheckoutSession = async (
   userId: string,
@@ -106,25 +143,17 @@ export const createCheckoutSession = async (
   name: string | undefined,
   input: CreateCheckoutSessionInput
 ): Promise<{ sessionId: string; url: string }> => {
-  const { planTier, interval, workspaceId, successUrl, cancelUrl } = input;
+  const { priceId, workspaceId, successUrl, cancelUrl } = input;
 
-  // Validate plan tier
-  if (!Object.values(PLAN_TIERS).includes(planTier as any)) {
-    throw BillingError.invalidPlan(planTier);
-  }
-
-  // Validate interval
-  if (!Object.values(BILLING_INTERVALS).includes(interval as any)) {
-    throw BillingError.invalidInterval(interval);
-  }
-
-  // Get Stripe price ID
-  const priceId = getPriceId(planTier, interval);
-  if (!priceId) {
-    throw BillingError.invalidPlan(
-      `No price configured for ${planTier} ${interval}`
+  // Validate price ID
+  if (!isValidPriceId(priceId)) {
+    throw BillingError.checkoutSessionCreationFailed(
+      `Invalid or unconfigured Stripe price ID: ${priceId}. Update STRIPE_PRICE_* env variables.`
     );
   }
+
+  // Derive plan tier from price ID
+  const planTier = getPlanTierFromPriceId(priceId);
 
   // Get or create Stripe customer
   const customerId = await getOrCreateStripeCustomer(userId, email, name);
@@ -159,7 +188,7 @@ export const createCheckoutSession = async (
 
   try {
     // Create Checkout session with idempotency key
-    const idempotencyKey = `checkout_${userId}_${planTier}_${interval}_${Date.now()}`;
+    const idempotencyKey = `checkout_${userId}_${priceId}_${Date.now()}`;
 
     const session = await stripe.checkout.sessions.create(
       {
@@ -174,10 +203,10 @@ export const createCheckoutSession = async (
         ],
         success_url:
           successUrl ||
-          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url:
           cancelUrl ||
-          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing/cancel?reason=user_canceled`,
+          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/pricing`,
         subscription_data: allowTrial
           ? {
               trial_period_days: TRIAL_PERIOD_DAYS,
@@ -198,7 +227,7 @@ export const createCheckoutSession = async (
           userId,
           workspaceId: workspaceId || "",
           planTier,
-          interval,
+          priceId,
         },
         allow_promotion_codes: true,
         billing_address_collection: "auto",

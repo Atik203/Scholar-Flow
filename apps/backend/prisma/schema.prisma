@@ -76,8 +76,11 @@ model User {
   emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
 
-  // Stripe customer ID for billing
-  stripeCustomerId String? @unique
+  // Stripe subscription fields
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String? // The price ID of the current subscription
+  stripeCurrentPeriodEnd DateTime? // When the current subscription period ends
 
   // Auth.js relations
   accounts Account[]

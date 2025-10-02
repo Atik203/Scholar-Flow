@@ -68,3 +68,62 @@ export const isStripeError = (
     typeof (error as any).type === "string"
   );
 };
+
+/**
+ * Stripe Price IDs from configuration
+ * These map to specific subscription plans and billing intervals
+ */
+export const STRIPE_PRICE_IDS = {
+  pro_monthly: config.stripe.prices.pro.monthly || "",
+  pro_annual: config.stripe.prices.pro.annual || "",
+  team_monthly: config.stripe.prices.team.monthly || "",
+  team_annual: config.stripe.prices.team.annual || "",
+} as const;
+
+export type StripePriceId = keyof typeof STRIPE_PRICE_IDS;
+
+/**
+ * Helper function to determine user role based on Stripe price ID
+ * Maps subscription tiers to application roles
+ */
+export function getRoleFromPriceId(
+  priceId: string
+): "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" {
+  if (
+    priceId === STRIPE_PRICE_IDS.pro_monthly ||
+    priceId === STRIPE_PRICE_IDS.pro_annual
+  ) {
+    return "PRO_RESEARCHER";
+  } else if (
+    priceId === STRIPE_PRICE_IDS.team_monthly ||
+    priceId === STRIPE_PRICE_IDS.team_annual
+  ) {
+    return "TEAM_LEAD";
+  }
+  return "RESEARCHER";
+}
+
+/**
+ * Helper function to get human-readable plan name from price ID
+ */
+export function getPlanNameFromPriceId(priceId: string): string {
+  if (
+    priceId === STRIPE_PRICE_IDS.pro_monthly ||
+    priceId === STRIPE_PRICE_IDS.pro_annual
+  ) {
+    return "Pro";
+  } else if (
+    priceId === STRIPE_PRICE_IDS.team_monthly ||
+    priceId === STRIPE_PRICE_IDS.team_annual
+  ) {
+    return "Team";
+  }
+  return "Free";
+}
+
+/**
+ * Validates if a given price ID is configured in the system
+ */
+export function isValidPriceId(priceId: string): boolean {
+  return Object.values(STRIPE_PRICE_IDS).includes(priceId);
+}
