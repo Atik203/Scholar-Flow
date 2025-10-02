@@ -1,10 +1,9 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
 import { getCallbackUrl, getRoleDashboardUrl } from "@/lib/auth/redirects";
+import { useAuth } from "@/redux/auth/useAuth";
 
 interface UseAuthGuardOptions {
   redirectTo?: string;
@@ -13,9 +12,7 @@ interface UseAuthGuardOptions {
 }
 
 /**
- * Auth guard hook for client-side route protection
- * @param options Configuration options for the auth guard
- * @returns Authentication status and loading state
+ * Simplified auth guard hook using Redux auth state
  */
 export function useAuthGuard(options: UseAuthGuardOptions = {}) {
   const {
@@ -24,20 +21,17 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     redirectAuthenticatedTo,
   } = options;
 
-  const { data: session, status } = useSession();
+  const { user, status, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
-  const isLoading = status === "loading";
-  const isAuthenticated = !!session;
 
   useEffect(() => {
-    if (isLoading) return; // Don't redirect while session is loading
+    if (status === "loading") return;
 
     // Redirect unauthenticated users from protected routes
     if (requireAuth && !isAuthenticated) {
       const currentPath = window.location.pathname;
       const loginUrl = new URL(redirectTo, window.location.origin);
 
-      // Add callback URL for post-login redirect
       if (currentPath !== "/" && currentPath !== redirectTo) {
         loginUrl.searchParams.set("callbackUrl", currentPath);
       }
@@ -59,30 +53,23 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
       }
 
       if (
-        session?.user?.role &&
+        user?.role &&
         (destination === "/dashboard" || destination === "/dashboard/")
       ) {
-        destination = getRoleDashboardUrl(session.user.role);
+        destination = getRoleDashboardUrl(user.role);
       }
 
       router.replace(destination);
       return;
     }
-  }, [
-    isAuthenticated,
-    isLoading,
-    requireAuth,
-    redirectTo,
-    redirectAuthenticatedTo,
-    router,
-    session?.user?.role,
-  ]);
+  }, [isAuthenticated, status, requireAuth, redirectTo, redirectAuthenticatedTo, router, user?.role]);
 
   return {
     isAuthenticated,
+    status,
     isLoading,
-    session,
-    user: session?.user || null,
+    session: isAuthenticated ? { user } : null,
+    user: isAuthenticated ? user : null,
   };
 }
 
@@ -110,12 +97,13 @@ export function useAuthRoute(redirectTo: string = "/dashboard") {
  * Public route guard - allows access regardless of auth status
  */
 export function usePublicRoute() {
-  const { data: session, status } = useSession();
+  const { user, isAuthenticated, isLoading, status } = useAuth();
 
   return {
-    isAuthenticated: !!session,
-    isLoading: status === "loading",
-    session,
-    user: session?.user || null,
+    isAuthenticated,
+    isLoading,
+    status,
+    session: isAuthenticated ? { user } : null,
+    user: isAuthenticated ? user : null,
   };
 }

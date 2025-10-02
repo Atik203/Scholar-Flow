@@ -1,89 +1,36 @@
+/**
+ * Simple useAuth hook that reads from Redux store
+ * Replaces NextAuth useSession with Redux-based auth state
+ */
+
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useGetCurrentUserQuery } from "./authApi";
-import { clearCredentials, setCredentials } from "./authSlice";
+import { useAppSelector } from "../hooks";
+import {
+  selectAccessToken,
+  selectAuthLoading,
+  selectCurrentUser,
+  selectIsAuthenticated,
+} from "./authSlice";
 
 export function useAuth() {
-  const { data: session, status } = useSession();
-  const dispatch = useDispatch();
-
-  // LOG WHAT WE'RE GETTING FROM useSession
-  useEffect(() => {
-    console.log("🔐 useAuth - useSession returned:", {
-      status,
-      hasSession: !!session,
-      sessionKeys: session ? Object.keys(session) : [],
-      session: JSON.stringify(session, null, 2),
-    });
-  }, [session, status]);
-
-  const {
-    data: userData,
-    isLoading: isUserLoading,
-    error: userError,
-  } = useGetCurrentUserQuery(undefined, {
-    skip: !session?.accessToken,
-  });
-
-  useEffect(() => {
-    if (session?.accessToken && userData?.data?.user) {
-      dispatch(
-        setCredentials({
-          user: userData.data.user,
-          accessToken: session.accessToken,
-        })
-      );
-    } else if (status === "unauthenticated" && !isUserLoading) {
-      // Only clear credentials if we're sure the user is unauthenticated
-      // AND we're not currently loading user data
-      dispatch(clearCredentials());
-    } else if (userError && !isUserLoading) {
-      // Clear credentials if there's an error fetching user (e.g., account deleted)
-      console.warn("User fetch failed, clearing credentials:", userError);
-      dispatch(clearCredentials());
-    }
-  }, [session, userData, status, dispatch, isUserLoading, userError]);
+  const user = useAppSelector(selectCurrentUser);
+  const accessToken = useAppSelector(selectAccessToken);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isLoading = useAppSelector(selectAuthLoading);
 
   return {
-    // Use session.user as primary source, fallback to API data
-    // This allows authentication to work immediately after NextAuth login
-    user: session?.user || userData?.data?.user || null,
-    isLoading: status === "loading" || isUserLoading,
-    // Trust NextAuth session for authentication status
-    // Don't wait for backend API call to complete
-    isAuthenticated: !!session,
-    error: userError,
-    session,
+    user,
+    accessToken,
+    status: isLoading
+      ? ("loading" as const)
+      : isAuthenticated
+        ? ("authenticated" as const)
+        : ("unauthenticated" as const),
+    isAuthenticated,
+    isLoading,
+    // Legacy compat: expose session-like object for components that expect it
+    session: isAuthenticated && user ? { user, accessToken } : null,
+    error: null,
   };
-}
-
-export function useAuthSync() {
-  const { data: session } = useSession();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (session?.user && session?.accessToken) {
-      dispatch(
-        setCredentials({
-          user: {
-            id: session.user.id || "",
-            email: session.user.email || "",
-            name: session.user.name || null,
-            firstName: null,
-            lastName: null,
-            institution: null,
-            fieldOfStudy: null,
-            image: session.user.image || null,
-            role: (session.user as any).role || "RESEARCHER",
-          },
-          accessToken: session.accessToken,
-        })
-      );
-    } else {
-      dispatch(clearCredentials());
-    }
-  }, [session, dispatch]);
 }

@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { USER_ROLES, hasPermission } from "@/lib/auth/roles";
 import { handleSignOut } from "@/lib/auth/signout";
 import { useDeleteAccountMutation } from "@/redux/api/userApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   Bell,
   Database,
@@ -48,13 +49,12 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { redirect, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function SettingsPage() {
-  const { data: session, status } = useSession();
+  const { session, status } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
