@@ -5,6 +5,7 @@ import {
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
+import { billingRoutes } from "../modules/Billing/billing.routes";
 import { collectionRoutes } from "../modules/Collection/collection.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
@@ -26,6 +27,7 @@ router.use("/health", healthRoutes);
 router.use("/user", userRoutes);
 router.use("/auth", authRoutes);
 router.use("/admin", adminRoutes);
+router.use("/billing", billingRoutes);
 router.use("/papers", paperRoutes);
 router.use("/editor", editorPaperRoutes); // Editor-specific paper routes
 router.use("/collections", collectionRoutes);
