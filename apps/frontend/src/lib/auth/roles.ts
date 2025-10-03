@@ -200,6 +200,11 @@ export const getNavigationItems = (userRole?: string) => {
 
   const proItems: NavigationLink[] = [
     {
+      label: "Analytics",
+      href: "/analytics",
+      permission: "analytics:read",
+    },
+    {
       label: "Workspaces",
       href: "/workspaces",
       permission: "workspace:read",
@@ -213,7 +218,6 @@ export const getNavigationItems = (userRole?: string) => {
 
   const teamLeadItems: NavigationLink[] = [
     { label: "Team", href: "/team", permission: "user:read_team" },
-    { label: "Analytics", href: "/analytics", permission: "analytics:read" },
   ];
 
   const adminItems: NavigationLink[] = [
