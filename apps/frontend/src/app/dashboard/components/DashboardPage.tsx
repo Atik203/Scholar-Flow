@@ -324,7 +324,7 @@ export default function DashboardPage() {
         icon: FileText,
         color: "text-blue-600",
         bgColor: "bg-blue-50 dark:bg-blue-950/20",
-        iconColor: "text-blue-600 dark:text-blue-400",
+        iconColor: "text-blue-600 dark:text-white",
         details: `${processingPapers} processing${failedPapers > 0 ? `, ${failedPapers} failed` : ""}`,
       },
       {
@@ -1178,7 +1178,7 @@ export default function DashboardPage() {
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors group"
                 >
                   <div className="rounded p-2 bg-blue-50 dark:bg-blue-950/20 flex-shrink-0">
-                    <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <FileText className="h-4 w-4 text-blue-600 dark:text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm line-clamp-1 group-hover:text-primary">

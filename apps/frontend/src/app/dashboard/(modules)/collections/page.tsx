@@ -173,7 +173,7 @@ export default function CollectionsPage() {
                   </p>
                 </div>
                 <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950/20">
-                  <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <BookOpen className="h-4 w-4 text-blue-600 dark:text-white" />
                 </div>
               </div>
             </CardContent>

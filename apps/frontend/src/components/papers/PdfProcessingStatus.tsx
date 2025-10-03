@@ -413,10 +413,10 @@ export function PdfProcessingStatus({
                 </p>
                 {processingError === "No text content found in PDF" && (
                   <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-950 rounded border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs text-blue-800 dark:text-blue-200 font-medium mb-1">
+                    <p className="text-xs text-blue-800 dark:text-white font-medium mb-1">
                       💡 Suggestions:
                     </p>
-                    <ul className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+                    <ul className="text-xs text-blue-700 dark:text-white space-y-1">
                       <li>
                         • Use OCR software to convert the PDF to text-based
                         format
