@@ -61,12 +61,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [accessToken, currentUser, currentUserResponse?.data?.user, dispatch]);
 
   useEffect(() => {
-    // After hydration, mark auth as ready
+    // After hydration, mark auth as ready (run once on mount)
     // redux-persist will have already restored auth state
-    if (isLoading) {
-      dispatch(setLoading(false));
-    }
-  }, [dispatch, isLoading]);
+    dispatch(setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   return <>{children}</>;
 }
