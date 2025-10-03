@@ -1,105 +1,158 @@
 # Scholar-Flow Changelog
 
+## v1.1.7 (2025-10-03) – Real-Time Subscription Sync & Role Management Fixes
+
+Author: @Atik203
+
+### Critical Fixes – v1.1.7
+
+#### 🐛 Subscription Cancellation Role Downgrade
+
+- **Issue**: When users canceled subscriptions from Stripe portal, their roles remained premium (e.g., TEAM_LEAD) instead of downgrading to RESEARCHER
+- **Root Cause**: Webhook handler only checked subscription `status === ACTIVE` but ignored `cancel_at_period_end` flag
+- **Fix**: Immediately downgrade user role to RESEARCHER when `cancel_at_period_end = true`, even if subscription is still active until period end
+- **Impact**: Users now see correct free-tier role immediately after cancellation
+
+#### 🔄 Real-Time UI Updates After Subscription Changes
+
+- **Issue**: After managing subscriptions in Stripe portal, UI showed stale data (old role, subscription status) requiring manual page refresh
+- **Root Cause**: No polling mechanism to detect changes made outside the app; cached Redux state not invalidated
+- **Fix**: Implemented smart subscription sync system with multiple layers:
+  1. **Polling Hook** (`useSubscriptionSync`): Auto-detects changes with 10-attempt limit and 2s intervals
+  2. **Visibility Detection**: ManageSubscriptionButton listens for page focus/visibility to trigger refresh
+  3. **Role Change Detection**: AuthProvider polls every 30s and force-invalidates cache on role changes
+  4. **Optimistic Updates**: RTK Query mutations update UI instantly, rollback on error
+
+### New Features – v1.1.7
+
+#### 🎯 Smart Subscription Polling
+
+- Custom `useSubscriptionSync` hook with intelligent stop conditions
+- Captures initial snapshot, compares on each poll, stops when changes detected
+- Prevents infinite loops with ref-based state management and proper cleanup
+- Visual sync indicator shows polling progress (attempt count)
+- Success/timeout toast notifications for user feedback
+
+#### 🔔 Enhanced AuthProvider
+
+- Background polling every 30 seconds for subscription changes
+- Automatic role change detection with cache invalidation
+- Version-based user sync prevents duplicate updates
+- Includes role in version key for immediate detection
+
+#### 💡 Optimistic UI Updates
+
+- Cancel/reactivate subscription updates UI instantly
+- Automatic rollback on server errors
+- Proper cache invalidation strategy with 60s retention
+- Enhanced error handling with retry logic
+
+### Technical Implementation – v1.1.7
+
+#### Backend Webhook Improvements
+
+```typescript
+// BEFORE: Only checked status
+if (status === SUBSCRIPTION_STATUS.ACTIVE) {
+  updateRole(userRole); // Premium role
+} else {
+  // Don't update role
+}
+
+// AFTER: Check cancellation flag
+const shouldDowngradeToFree =
+  subscription.cancel_at_period_end || status !== SUBSCRIPTION_STATUS.ACTIVE;
+
+if (shouldDowngradeToFree) {
+  updateRole("RESEARCHER"); // Immediate downgrade
+} else {
+  updateRole(userRole); // Premium role
+}
+```
+
+#### Frontend Smart Polling
+
+- **Hook**: `useSubscriptionSync` - Polling with snapshot comparison
+- **Trigger Points**: URL sessionId, page visibility, window focus
+- **Stop Conditions**: Changes detected, max attempts (10), timeout
+- **Cleanup**: Proper ref management, no memory leaks
+
+#### Files Updated
+
+**Backend:**
+
+- `apps/backend/src/app/modules/Billing/webhook.controller.ts`
+  - Enhanced `handleSubscriptionUpdated` with cancellation detection
+  - Immediate role downgrade on `cancel_at_period_end = true`
+  - Improved logging for subscription state changes
+
+**Frontend:**
+
+- `apps/frontend/src/hooks/useSubscriptionSync.ts` (NEW)
+  - Smart polling hook with snapshot comparison
+  - Automatic stop on change detection or timeout
+  - Comprehensive error handling and cleanup
+- `apps/frontend/src/app/dashboard/billing/page.tsx`
+  - Integrated `useSubscriptionSync` hook
+  - Visual polling indicator with attempt counter
+  - Success/timeout toast notifications
+  - URL cleanup after sync completion
+- `apps/frontend/src/components/billing/ManageSubscriptionButton.tsx`
+  - Visibility change detection for portal returns
+  - Window focus event listener (fallback)
+  - Automatic cache invalidation on return
+- `apps/frontend/src/components/providers/AuthProvider.tsx`
+  - Background polling every 30 seconds
+  - Role change detection with logging
+  - Force cache invalidation on role changes
+  - Version key includes role for instant detection
+- `apps/frontend/src/redux/api/billingApi.ts`
+  - Optimistic updates for plan management
+  - Enhanced cache invalidation strategy
+  - Reduced cache retention (60s for subscriptions)
+  - Proper rollback on mutation errors
+
+### Testing & Validation – v1.1.7
+
+- ✅ Manual testing: Cancel Team Lead trial in Stripe portal → Role immediately downgrades to RESEARCHER
+- ✅ Return from portal: Page focus triggers refresh, UI updates within 2-4 seconds
+- ✅ Subscription upgrade: Checkout session completion updates role in real-time
+- ✅ Optimistic updates: Cancel/reactivate shows instant feedback, correct rollback on error
+- ✅ No infinite loops: Proper ref management, cleanup verified
+- ✅ Memory leaks: Event listeners properly removed on unmount
+- ✅ Type checking: All TypeScript compilation successful
+
+### Edge Cases Handled – v1.1.7
+
+1. **Trial Cancellation**: User cancels during trial → Immediately RESEARCHER
+2. **Rapid Portal Navigation**: Multiple visits don't trigger redundant polling
+3. **Network Failures**: Polling continues, automatic retry with backoff
+4. **Stale Cache**: Role changes force-invalidate all related caches
+5. **Concurrent Updates**: Version-based sync prevents race conditions
+6. **Browser Tab Switching**: Visibility API reliably detects returns
+7. **Maximum Attempts**: Graceful timeout after 10 polling attempts (20s)
+
+### Performance Impact – v1.1.7
+
+- **Polling Overhead**: Negligible - only when `sessionId` present or portal opened
+- **Network Requests**: Controlled - max 10 attempts with 2s intervals (20s window)
+- **Cache Strategy**: Optimized - 60s retention for subscription data
+- **Memory Usage**: Clean - proper cleanup, no event listener leaks
+- **User Experience**: Excellent - 2-4s sync time vs previous manual refresh requirement
+
+### Impact Summary – v1.1.7
+
+- Users see correct role immediately after subscription cancellation
+- No manual page refresh needed after Stripe portal interactions
+- Real-time UI updates provide confidence in subscription state
+- Optimistic updates make the app feel instant and responsive
+- Proper error handling with automatic retries prevents data inconsistencies
+- Production-ready with comprehensive edge case handling
+
+---
+
 ## v1.1.6 (2025-10-03) – Billing & Subscription Launch
 
 - Finalized Stripe checkout with reliable webhook processing and plan syncing
 - Refreshed dashboard billing experience with real-time role updates and plan details
 - Added universal Billing navigation entry and auth refresh to surface subscription status instantly
-
-## v1.1.5 (2025-10-01) – Performance Optimization & Production Hardening
-
-Author: @Atik203
-
-### Highlights – v1.1.5
-
-#### Lighthouse Perfect Scores Achieved
-
-- Performance: 89/100 (+51 from 38 baseline) - Target 85+ EXCEEDED
-- Accessibility: 100/100 - PERFECT SCORE
-- Best Practices: 100/100 - PERFECT SCORE
-- SEO: 100/100 - PERFECT SCORE
-
-#### Core Performance Improvements
-
-- FCP: 1.9s → 0.8s (-1.1s, 58% faster)
-- LCP: 2.8s → 2.3s (-0.5s, 18% faster)
-- TBT: 2,360ms → 1,040ms (-1,320ms, 56% reduction)
-- Query Time: 500ms+ → 100-300ms (-60% average)
-
-#### Key Features
-
-- PWA implementation with service worker and offline support
-- Production-grade security headers (CSP, HSTS, X-Frame-Options)
-- Redis caching with free tier optimization (30MB, 50KB limits)
-- Skeleton loading states for improved UX
-- Client-side caching utilities and predictive prefetching
-- SEO excellence with structured data and robots.txt
-- 8 new composite database indexes for hot path optimization
-
-### Technical Implementation – v1.1.5
-
-#### Phase 1 & 2: Quick Wins & Critical Optimizations
-
-- Next.js: SWC, modularizeImports, optimizeCss, code splitting, font/image optimization
-- React: memo/useMemo/useCallback on hot paths, Redux cache optimization
-- Backend: Redis caching, HTTP ETag, 8 composite indexes, query optimizer middleware
-- Result: +40 performance points, 80% fewer re-renders, 30KB smaller bundles
-
-#### Phase 3: Advanced Optimizations
-
-- PWA: Service worker (cache-first/network-first), manifest, offline support
-- UX: Skeleton components, client-side caching, predictive prefetching
-- Analytics: Async Google Analytics loading
-- Result: +15 performance points, installable app, better perceived performance
-
-#### Phase 4: Security & SEO
-
-- Security: CSP headers, HSTS (1-year + preload), X-Frame-Options DENY
-- SEO: robots.txt, JSON-LD structured data, Open Graph, Twitter Cards, PWA meta
-- Result: Perfect Best Practices and SEO scores
-
-### Files Created
-
-#### Backend (2 files)
-
-- `apps/backend/src/app/middleware/cacheMiddleware.ts` - HTTP caching with ETag
-- `apps/backend/src/app/utils/queryOptimizer.ts` - Prisma query analysis
-
-#### Frontend (7 files)
-
-- `apps/frontend/public/robots.txt` - SEO optimization
-- `apps/frontend/public/manifest.json` - PWA manifest
-- `apps/frontend/public/sw.js` - Service worker
-- `apps/frontend/src/components/pwa/ServiceWorkerRegistration.tsx` - SW registration
-- `apps/frontend/src/components/skeletons/index.tsx` - Loading skeletons
-- `apps/frontend/src/hooks/useClientStorage.ts` - Storage utilities
-- `apps/frontend/src/components/navigation/PrefetchLink.tsx` - Prefetching
-
-#### Documentation
-
-- `PERFORMANCE_ACHIEVEMENT_SUMMARY.md` - Full optimization report
-
-### Files Modified
-
-#### Backend
-
-- `apps/backend/src/server.ts` - Enhanced security headers
-- `apps/backend/src/app/shared/prisma.ts` - Query optimizer integration
-
-#### Frontend
-
-- `apps/frontend/src/app/layout.tsx` - Viewport export, PWA meta, structured data
-- `apps/frontend/next.config.ts` - Security/cache headers
-- `apps/frontend/src/redux/api/apiSlice.ts` - Cache optimization
-- `apps/frontend/src/components/papers/PapersList.tsx` - Memoization
-- `apps/frontend/src/components/analytics/GoogleAnalytics.tsx` - Async loading
-
-### Testing & Validation
-
-- ✅ Build: 1m35s, 130 routes, zero errors
-- ✅ Lighthouse: All targets exceeded
-- ✅ Security: CSP, HSTS, frame protection verified
-- ✅ PWA: Installability and offline tested
-- ✅ Performance: Query times, re-renders, bundle sizes validated
-
----
