@@ -97,7 +97,10 @@ export const billingApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["User"], // Invalidate user data after checkout
+      // Invalidate user data after checkout to ensure fresh subscription info
+      invalidatesTags: ["User"],
+      // Don't retry checkout session creation on failure
+      extraOptions: { maxRetries: 0 },
     }),
 
     /**
@@ -112,6 +115,8 @@ export const billingApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+      // Don't invalidate immediately - user will return from portal later
+      // Invalidation handled by ManageSubscriptionButton on return
     }),
 
     /**
@@ -130,6 +135,8 @@ export const billingApi = apiSlice.injectEndpoints({
         data: Subscription | null;
       }) => response.data,
       providesTags: ["User"], // Cache invalidated when user data changes
+      // Keep subscription data fresh
+      keepUnusedDataFor: 60, // 1 minute cache
     }),
 
     /**
@@ -141,6 +148,36 @@ export const billingApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
+      // Optimistically update subscription status
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        // Optimistic update based on action
+        const patchResult = dispatch(
+          billingApi.util.updateQueryData(
+            "getSubscription",
+            { workspaceId: arg.workspaceId },
+            (draft) => {
+              if (!draft) return;
+
+              if (arg.action === "cancel") {
+                draft.cancelAtPeriodEnd = true;
+              } else if (arg.action === "reactivate") {
+                draft.cancelAtPeriodEnd = false;
+              }
+              // seats update will be handled by server response
+            }
+          )
+        );
+
+        try {
+          await queryFulfilled;
+
+          // After success, invalidate to get fresh data from server
+          dispatch(apiSlice.util.invalidateTags(["User"]));
+        } catch {
+          // Rollback optimistic update on error
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["User"], // Invalidate subscription data
     }),
   }),
