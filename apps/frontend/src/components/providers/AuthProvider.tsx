@@ -8,7 +8,6 @@
 import { useGetCurrentUserQuery } from "@/redux/auth/authApi";
 import {
   selectAccessToken,
-  selectAuthLoading,
   selectCurrentUser,
   selectIsAuthenticated,
   setCredentials,
@@ -16,7 +15,7 @@ import {
   updateUser,
 } from "@/redux/auth/authSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -25,9 +24,10 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const dispatch = useAppDispatch();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const isLoading = useAppSelector(selectAuthLoading);
   const accessToken = useAppSelector(selectAccessToken);
   const currentUser = useAppSelector(selectCurrentUser);
+  const hasInitialized = useRef(false);
+  const lastSyncedUserVersion = useRef<string | null>(null);
 
   const shouldFetchUser = Boolean(accessToken || isAuthenticated);
 
@@ -38,35 +38,64 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refetchOnReconnect: true,
   });
 
+  const fetchedUser = currentUserResponse?.data?.user;
+  const fetchedUserVersionKey = fetchedUser
+    ? `${fetchedUser.id}:${fetchedUser.updatedAt ?? ""}`
+    : null;
+  const currentUserId = currentUser?.id ?? null;
+  const stableFetchedUser = useMemo(
+    () => (fetchedUserVersionKey ? (fetchedUser ?? null) : null),
+    [fetchedUser, fetchedUserVersionKey]
+  );
+
   useEffect(() => {
-    const fetchedUser = currentUserResponse?.data?.user;
+    if (!accessToken) {
+      lastSyncedUserVersion.current = null;
+    }
+  }, [accessToken]);
 
-    if (!fetchedUser) {
+  // Initialize auth state once on mount
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      // After hydration, mark auth as ready (run once on mount)
+      // redux-persist will have already restored auth state
+      dispatch(setLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Update user data when fetched
+  useEffect(() => {
+    if (!fetchedUserVersionKey || !accessToken || !stableFetchedUser) {
       return;
     }
 
-    if (currentUser) {
-      dispatch(updateUser(fetchedUser));
+    const fetchedVersionKey = fetchedUserVersionKey;
+
+    if (lastSyncedUserVersion.current === fetchedVersionKey) {
       return;
     }
 
-    if (accessToken) {
+    if (!currentUserId || currentUserId !== stableFetchedUser.id) {
       dispatch(
         setCredentials({
-          user: fetchedUser,
+          user: stableFetchedUser,
           accessToken,
         })
       );
+    } else {
+      dispatch(updateUser(stableFetchedUser));
     }
-  }, [accessToken, currentUser, currentUserResponse?.data?.user, dispatch]);
 
-  useEffect(() => {
-    // After hydration, mark auth as ready
-    // redux-persist will have already restored auth state
-    if (isLoading) {
-      dispatch(setLoading(false));
-    }
-  }, [dispatch, isLoading]);
+    lastSyncedUserVersion.current = fetchedVersionKey;
+  }, [
+    accessToken,
+    currentUserId,
+    dispatch,
+    fetchedUserVersionKey,
+    stableFetchedUser,
+  ]);
 
   return <>{children}</>;
 }
