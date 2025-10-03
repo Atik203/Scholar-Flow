@@ -8,7 +8,7 @@ let connectingPromise: Promise<RedisInstance> | null = null;
 let connectionFailed = false;
 
 const buildRedisOptions = (): RedisClientOptions | null => {
-  const { host, port, password, db, tls } = config.redis;
+  const { host, port, password, username, db, tls } = config.redis;
 
   if (!host || !port) {
     return null;
@@ -18,8 +18,19 @@ const buildRedisOptions = (): RedisClientOptions | null => {
     socket: {
       host,
       port,
+      connectTimeout: 10000, // 10 second timeout for Redis Cloud
+      reconnectStrategy: (retries) => {
+        // Stop reconnecting after 3 attempts during startup
+        if (retries > 3) {
+          connectionFailed = true;
+          return new Error("Max reconnection attempts reached");
+        }
+        // Exponential backoff: 1s, 2s, 3s
+        return Math.min(retries * 1000, 3000);
+      },
     },
     password: password || undefined,
+    username: username || undefined,
     database: typeof db === "number" ? db : 0,
   };
 
