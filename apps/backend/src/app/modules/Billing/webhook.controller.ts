@@ -9,6 +9,7 @@ import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_STATUS } from "./billing.constant";
 import { BillingError } from "./billing.error";
 
 type RawBodyRequest = Request & { rawBody?: Buffer | string };
+type MutableRawBodyRequest = RawBodyRequest & { body?: unknown };
 
 /**
  * Webhook handler for Stripe events
@@ -35,7 +36,7 @@ export const handleStripeWebhook = catchAsync(
       throw new Error("STRIPE_WEBHOOK_SECRET not configured");
     }
 
-    const rawBody = getRawBodyBuffer(req as RawBodyRequest);
+    const rawBody = await getRawBodyBuffer(req as RawBodyRequest);
 
     let event: Stripe.Event;
 
@@ -163,18 +164,22 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
  * Extract raw body buffer from request for Stripe signature verification
  * Handles both local (express.raw) and Vercel serverless (direct Buffer) cases
  */
-function getRawBodyBuffer(req: RawBodyRequest): Buffer {
+async function getRawBodyBuffer(req: RawBodyRequest): Promise<Buffer> {
   // Case 1: Check rawBody property (custom middleware)
   const possibleRawBody = req.rawBody;
 
   if (Buffer.isBuffer(possibleRawBody)) {
     logDebug("[Webhook] Raw body extracted from req.rawBody (Buffer)");
+    (req as RawBodyRequest).rawBody = possibleRawBody;
     return possibleRawBody;
   }
 
   if (typeof possibleRawBody === "string") {
     logDebug("[Webhook] Raw body extracted from req.rawBody (string)");
-    return Buffer.from(possibleRawBody, "utf8");
+    const buffer = Buffer.from(possibleRawBody, "utf8");
+    (req as RawBodyRequest).rawBody = buffer;
+    (req as MutableRawBodyRequest).body = buffer;
+    return buffer;
   }
 
   // Case 2: Check req.body (Vercel serverless or express.raw)
@@ -182,12 +187,16 @@ function getRawBodyBuffer(req: RawBodyRequest): Buffer {
     logDebug(
       "[Webhook] Raw body extracted from req.body (Buffer) - Vercel mode"
     );
+    (req as RawBodyRequest).rawBody = req.body;
     return req.body;
   }
 
   if (typeof req.body === "string") {
     logDebug("[Webhook] Raw body extracted from req.body (string)");
-    return Buffer.from(req.body, "utf8");
+    const buffer = Buffer.from(req.body, "utf8");
+    (req as RawBodyRequest).rawBody = buffer;
+    (req as MutableRawBodyRequest).body = buffer;
+    return buffer;
   }
 
   // Case 3: Check if body is already parsed JSON (should not happen, but handle gracefully)
@@ -201,7 +210,30 @@ function getRawBodyBuffer(req: RawBodyRequest): Buffer {
     throw BillingError.webhookRawBodyMissing();
   }
 
-  console.error("[Webhook] No raw body found in req.body or req.rawBody");
+  // Case 4: Attempt to read from request stream if not yet consumed (e.g., serverless environments)
+  if (!req.readableEnded && req.readable !== false) {
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of req) {
+      if (typeof chunk === "string") {
+        chunks.push(Buffer.from(chunk));
+      } else {
+        chunks.push(Buffer.from(chunk));
+      }
+    }
+
+    if (chunks.length > 0) {
+      const buffer = Buffer.concat(chunks);
+      (req as RawBodyRequest).rawBody = buffer;
+      (req as MutableRawBodyRequest).body = buffer;
+      logDebug("[Webhook] Raw body captured by manual stream read");
+      return buffer;
+    }
+  }
+
+  console.error(
+    "[Webhook] No raw body found in req stream after fallback attempts"
+  );
   throw BillingError.webhookRawBodyMissing();
 }
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import { ExtractedTextDisplay } from "@/components/papers/ExtractedTextDisplay";
+import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,19 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   ArrowLeft,
-  Building2,
-  FileText,
-  Filter,
-  Search,
   BookOpen,
-  Clock,
+  Building2,
   CheckCircle,
+  Clock,
+  FileText,
+  Search,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -74,13 +72,15 @@ export default function PapersSearchPage() {
   // Filter papers based on status
   const filteredPapers = useMemo(() => {
     if (!papersData?.items) return [];
-    
+
     let filtered = papersData.items;
-    
+
     if (statusFilter !== "all") {
-      filtered = filtered.filter((paper) => paper.processingStatus === statusFilter);
+      filtered = filtered.filter(
+        (paper) => paper.processingStatus === statusFilter
+      );
     }
-    
+
     return filtered;
   }, [papersData?.items, statusFilter]);
 
@@ -90,12 +90,22 @@ export default function PapersSearchPage() {
 
   // Calculate stats
   const totalPapers = papersData?.items?.length || 0;
-  const processedPapers = papersData?.items?.filter((p) => p.processingStatus === "PROCESSED").length || 0;
-  const processingPapers = papersData?.items?.filter((p) => p.processingStatus === "PROCESSING").length || 0;
-  const uploadedPapers = papersData?.items?.filter((p) => p.processingStatus === "UPLOADED").length || 0;
-  const failedPapers = papersData?.items?.filter((p) => p.processingStatus === "FAILED").length || 0;
+  const processedPapers =
+    papersData?.items?.filter((p) => p.processingStatus === "PROCESSED")
+      .length || 0;
+  const processingPapers =
+    papersData?.items?.filter((p) => p.processingStatus === "PROCESSING")
+      .length || 0;
+  const uploadedPapers =
+    papersData?.items?.filter((p) => p.processingStatus === "UPLOADED")
+      .length || 0;
+  const failedPapers =
+    papersData?.items?.filter((p) => p.processingStatus === "FAILED").length ||
+    0;
 
-  const selectedPaper = papersData?.items?.find((p) => p.id === selectedPaperId);
+  const selectedPaper = papersData?.items?.find(
+    (p) => p.id === selectedPaperId
+  );
 
   return (
     <DashboardLayout>
@@ -163,7 +173,7 @@ export default function PapersSearchPage() {
                   <p className="text-2xl font-bold">{totalPapers}</p>
                 </div>
                 <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950/20">
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-white" />
                 </div>
               </div>
             </CardContent>
@@ -176,7 +186,9 @@ export default function PapersSearchPage() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Processed
                   </p>
-                  <p className="text-2xl font-bold text-green-600">{processedPapers}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {processedPapers}
+                  </p>
                 </div>
                 <div className="rounded-full p-2 bg-green-50 dark:bg-green-950/20">
                   <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -192,7 +204,9 @@ export default function PapersSearchPage() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Processing
                   </p>
-                  <p className="text-2xl font-bold text-yellow-600">{processingPapers}</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {processingPapers}
+                  </p>
                 </div>
                 <div className="rounded-full p-2 bg-yellow-50 dark:bg-yellow-950/20">
                   <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
@@ -208,10 +222,12 @@ export default function PapersSearchPage() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Ready
                   </p>
-                  <p className="text-2xl font-bold text-blue-600">{uploadedPapers}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {uploadedPapers}
+                  </p>
                 </div>
                 <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950/20">
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-white" />
                 </div>
               </div>
             </CardContent>
@@ -224,7 +240,9 @@ export default function PapersSearchPage() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Failed
                   </p>
-                  <p className="text-2xl font-bold text-red-600">{failedPapers}</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {failedPapers}
+                  </p>
                 </div>
                 <div className="rounded-full p-2 bg-red-50 dark:bg-red-950/20">
                   <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
@@ -270,10 +288,22 @@ export default function PapersSearchPage() {
                   {filteredPapers.map((paper) => {
                     const isSelected = selectedPaperId === paper.id;
                     const statusBadge = {
-                      UPLOADED: { variant: "secondary" as const, label: "Ready" },
-                      PROCESSING: { variant: "default" as const, label: "Processing" },
-                      PROCESSED: { variant: "outline" as const, label: "Processed" },
-                      FAILED: { variant: "destructive" as const, label: "Failed" },
+                      UPLOADED: {
+                        variant: "secondary" as const,
+                        label: "Ready",
+                      },
+                      PROCESSING: {
+                        variant: "default" as const,
+                        label: "Processing",
+                      },
+                      PROCESSED: {
+                        variant: "outline" as const,
+                        label: "Processed",
+                      },
+                      FAILED: {
+                        variant: "destructive" as const,
+                        label: "Failed",
+                      },
                     }[paper.processingStatus];
 
                     return (
@@ -292,7 +322,10 @@ export default function PapersSearchPage() {
                               <h4 className="font-medium text-sm line-clamp-2">
                                 {paper.title}
                               </h4>
-                              <Badge variant={statusBadge.variant} className="text-xs shrink-0 ml-2">
+                              <Badge
+                                variant={statusBadge.variant}
+                                className="text-xs shrink-0 ml-2"
+                              >
                                 {statusBadge.label}
                               </Badge>
                             </div>
@@ -312,7 +345,7 @@ export default function PapersSearchPage() {
                       </Card>
                     );
                   })}
-                  
+
                   {filteredPapers.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
                       <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -380,7 +413,8 @@ export default function PapersSearchPage() {
                     <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <h3 className="text-lg font-medium mb-2">Select a Paper</h3>
                     <p className="text-sm">
-                      Choose a paper from the list to search through its extracted content
+                      Choose a paper from the list to search through its
+                      extracted content
                     </p>
                   </div>
                 </CardContent>
