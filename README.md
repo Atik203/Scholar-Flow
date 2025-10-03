@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.1.6-blue)](./docs/Release.md)
+[![Version](https://img.shields.io/badge/version-1.1.8-blue)](./docs/Release.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
@@ -192,8 +192,6 @@ yarn clean              # Clean build artifacts
 yarn reset              # Reset node_modules and rebuild
 ```
 
-## 🌟 Current Features (v1.1.6)
-
 ### Content Management & Editing
 
 - ✅ **Rich Text Editor**: TipTap-based, with advanced formatting, tables, lists, and image upload
@@ -214,7 +212,7 @@ yarn reset              # Reset node_modules and rebuild
 - ✅ **Advanced Search**: Full-text search with comprehensive filters
 - ✅ **PDF Preview**: Secure iframe-based PDF viewer
 
-### Admin & System Monitoring (v1.1.4)
+### Admin & System Monitoring
 
 - ✅ **Real-Time System Metrics**: Live CPU, memory, storage, database monitoring with 10s auto-refresh
 - ✅ **Accurate CPU Tracking**: Intelligent calculation using Node.js os module (idle/total times)
@@ -228,32 +226,6 @@ yarn reset              # Reset node_modules and rebuild
 - ✅ **Dashboard**: Quick access and navigation with role-based routing
 - ✅ **Responsive UI**: Mobile-first design with modern components
 - ✅ **Lazy Loading**: Code splitting with React.lazy and Suspense boundaries
-
-## 🗺️ Roadmap
-
-### Phase 1 (Current) - Core Features
-
-- [x] Authentication & User Management
-- [x] Paper Upload & Storage
-- [x] Rich Text Editor & Content Management
-- [x] Export to PDF/DOCX
-- [x] Image Upload & Sharing
-- [x] Admin Dashboard & System Monitoring
-- [ ] Collections & Organization (In Progress)
-
-### Phase 2 - AI-Powered Features
-
-- [ ] AI Research Assistant
-- [ ] Smart Recommendations
-- [ ] Paper Summarization
-- [ ] Citation Analysis
-
-### Phase 3 - Advanced Collaboration
-
-- [ ] Real-time Collaboration
-- [ ] Shared Workspaces
-- [ ] Integration Hub (Zotero, Mendeley)
-- [ ] Advanced Analytics
 
 ## 📚 Documentation
 
