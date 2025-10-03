@@ -286,7 +286,11 @@ export function AppSidebar() {
       .filter((item) => hasRoleAccess(userRole, item.minRole))
       .map<ResolvedSidebarItem>((item) => {
         const { path = "", items: rawItems, ...rest } = item;
-        const href = buildRoleScopedPath(userRole, path);
+        // Special case for billing - use direct path instead of role-scoped
+        const href =
+          item.title === "Billing"
+            ? "/dashboard/billing"
+            : buildRoleScopedPath(userRole, path);
         const resolvedItems = rawItems
           ?.filter((subItem) => hasRoleAccess(userRole, subItem.minRole))
           .map<ResolvedSidebarLink>((subItem) => {
