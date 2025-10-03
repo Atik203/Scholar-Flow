@@ -77,6 +77,7 @@ export default {
     host: process.env.REDIS_HOST || "localhost",
     port: parseNumber(process.env.REDIS_PORT, 6379),
     password: process.env.REDIS_PASSWORD,
+    username: process.env.REDIS_USERNAME,
     db: parseNumber(process.env.REDIS_DB, 0),
     tls: parseBoolean(process.env.REDIS_TLS_ENABLED, false),
   },
