@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscriptionSync } from "@/hooks/useSubscriptionSync";
 import { apiSlice } from "@/redux/api/apiSlice";
 import { useGetSubscriptionQuery } from "@/redux/api/billingApi";
 import { useAuth } from "@/redux/auth/useAuth";
@@ -21,12 +22,14 @@ import {
   Clock,
   CreditCard,
   Crown,
+  RefreshCw,
   Users,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { redirect, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const PLAN_DISPLAY = {
   RESEARCHER: {
@@ -85,23 +88,71 @@ export default function BillingPage() {
     refetch,
   } = useGetSubscriptionQuery({});
   const searchParams = useSearchParams();
+  const router = useRouter();
   const sessionId = searchParams?.get("session_id");
   const dispatch = useAppDispatch();
 
+  // Track if user came back from Stripe portal/checkout
+  const [shouldSync, setShouldSync] = useState(false);
+  const [hasShownSuccessToast, setHasShownSuccessToast] = useState(false);
+
+  // Smart subscription sync hook
+  const { isPolling, attemptCount, maxAttempts } = useSubscriptionSync({
+    enabled: shouldSync,
+    maxAttempts: 10,
+    pollingInterval: 2000,
+    onSyncComplete: useCallback(() => {
+      console.log("[BillingPage] Subscription sync completed successfully");
+      setShouldSync(false);
+
+      // Show success toast only once
+      if (!hasShownSuccessToast) {
+        toast.success("Subscription updated successfully!");
+        setHasShownSuccessToast(true);
+      }
+
+      // Clean up URL (remove session_id)
+      if (sessionId) {
+        router.replace("/dashboard/billing");
+      }
+    }, [sessionId, router, hasShownSuccessToast]),
+    onSyncTimeout: useCallback(() => {
+      console.warn("[BillingPage] Subscription sync timed out");
+      setShouldSync(false);
+      toast.info(
+        "Subscription data may take a moment to update. Please refresh if needed."
+      );
+
+      // Clean up URL
+      if (sessionId) {
+        router.replace("/dashboard/billing");
+      }
+    }, [sessionId, router]),
+  });
+
+  // Initial data fetch on mount
   useEffect(() => {
     // Always ensure we have fresh subscription data on mount
     refetch();
   }, [refetch]);
 
+  // Handle return from Stripe checkout/portal
   useEffect(() => {
     if (!sessionId || !isAuthenticated) {
       return;
     }
 
-    // Invalidate user cache and refetch subscription when returning from Stripe checkout
+    // User returned from Stripe - start sync polling
+    console.log(
+      "[BillingPage] Detected return from Stripe, starting subscription sync"
+    );
+
+    // Invalidate cache first
     dispatch(apiSlice.util.invalidateTags(["User"]));
-    refetch();
-  }, [dispatch, isAuthenticated, refetch, sessionId]);
+
+    // Enable polling
+    setShouldSync(true);
+  }, [dispatch, isAuthenticated, sessionId]);
 
   if (!isLoading && !isAuthenticated) {
     redirect("/signin");
@@ -195,13 +246,30 @@ export default function BillingPage() {
       <div className="container mx-auto max-w-6xl px-4 py-10">
         <div className="space-y-8">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Billing & Subscription
-            </h1>
-            <p className="text-muted-foreground">
-              Manage your plan, monitor billing timelines, and keep your account
-              details current.
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Billing & Subscription
+                </h1>
+                <p className="text-muted-foreground">
+                  Manage your plan, monitor billing timelines, and keep your
+                  account details current.
+                </p>
+              </div>
+
+              {/* Syncing indicator */}
+              {isPolling && (
+                <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2">
+                  <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+                  <div className="text-sm">
+                    <p className="font-medium text-primary">Syncing...</p>
+                    <p className="text-xs text-muted-foreground">
+                      {attemptCount}/{maxAttempts}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <Card className="relative overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-chart-1/10 shadow-sm">

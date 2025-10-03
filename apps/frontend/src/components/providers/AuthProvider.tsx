@@ -5,6 +5,7 @@
 
 "use client";
 
+import { apiSlice } from "@/redux/api/apiSlice";
 import { useGetCurrentUserQuery } from "@/redux/auth/authApi";
 import {
   selectAccessToken,
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const currentUser = useAppSelector(selectCurrentUser);
   const hasInitialized = useRef(false);
   const lastSyncedUserVersion = useRef<string | null>(null);
+  const previousRoleRef = useRef<string | null>(null);
 
   const shouldFetchUser = Boolean(accessToken || isAuthenticated);
 
@@ -36,11 +38,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // Ensure we always have the freshest user after mutations invalidating the tag
     refetchOnMountOrArgChange: true,
     refetchOnReconnect: true,
+    // Poll for changes every 30 seconds if authenticated (for subscription updates)
+    pollingInterval: isAuthenticated ? 30000 : undefined,
   });
 
   const fetchedUser = currentUserResponse?.data?.user;
   const fetchedUserVersionKey = fetchedUser
-    ? `${fetchedUser.id}:${fetchedUser.updatedAt ?? ""}`
+    ? `${fetchedUser.id}:${fetchedUser.updatedAt ?? ""}:${fetchedUser.role ?? ""}`
     : null;
   const currentUserId = currentUser?.id ?? null;
   const stableFetchedUser = useMemo(
@@ -76,6 +80,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (lastSyncedUserVersion.current === fetchedVersionKey) {
       return;
     }
+
+    // Detect role changes for logging/notifications
+    const fetchedRole = stableFetchedUser.role;
+    const hadRoleChange =
+      previousRoleRef.current !== null &&
+      previousRoleRef.current !== fetchedRole;
+
+    if (hadRoleChange) {
+      console.log("[AuthProvider] User role changed:", {
+        from: previousRoleRef.current,
+        to: fetchedRole,
+      });
+
+      // Force invalidate all cached data to reflect role changes
+      dispatch(
+        apiSlice.util.invalidateTags(["User", "Collection", "Workspace"])
+      );
+    }
+
+    // Update role reference
+    previousRoleRef.current = fetchedRole || null;
 
     if (!currentUserId || currentUserId !== stableFetchedUser.id) {
       dispatch(
