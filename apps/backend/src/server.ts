@@ -1,6 +1,11 @@
 import compression from "compression";
 import cors from "cors";
-import express, { RequestHandler } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -9,6 +14,10 @@ import { setupSwagger } from "./app/config/swagger";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
+import {
+  captureStripeRawBody,
+  isStripeWebhookPath,
+} from "./app/utils/stripeWebhook";
 
 // Initialize queue processing
 import "./app/services/pdfProcessingQueue";
@@ -77,31 +86,36 @@ const limiter = rateLimit({
 app.use("/api/", limiter as unknown as import("express").RequestHandler);
 
 // Stripe webhook - MUST be before express.json() to preserve raw body
-// In Vercel, body comes as Buffer already due to bodyParser: false in api/[...all].js
 import { webhookController } from "./app/modules/Billing/webhook.controller";
-if (process.env.VERCEL === "1") {
-  // Vercel: body arrives as Buffer, no middleware needed
-  app.post(
-    "/webhooks/stripe",
-    webhookController.handleStripeWebhook as unknown as RequestHandler
-  );
-} else {
-  // Local/standard deployment: use express.raw to get Buffer
-  app.post(
-    "/webhooks/stripe",
-    express.raw({ type: "application/json" }),
-    webhookController.handleStripeWebhook as unknown as RequestHandler
-  );
-}
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  captureStripeRawBody,
+  webhookController.handleStripeWebhook as unknown as RequestHandler
+);
 
 // Request parsing
-app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "50mb",
-  }) as unknown as RequestHandler
-);
+const jsonParser = express.json({ limit: "50mb" });
+const urlencodedParser = express.urlencoded({
+  extended: true,
+  limit: "50mb",
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return jsonParser(req, res, next);
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return urlencodedParser(req, res, next);
+});
 
 // Logging
 if (config.env !== "production") {

@@ -7,6 +7,7 @@ import {
   billingSubscriptionLimiter,
 } from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
+import { captureStripeRawBody } from "../../utils/stripeWebhook";
 import { billingController } from "./billing.controller";
 import { billingValidation } from "./billing.validation";
 import { webhookController } from "./webhook.controller";
@@ -20,6 +21,7 @@ const router: express.Router = express.Router();
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
+  captureStripeRawBody,
   webhookController.handleStripeWebhook
 );
 
