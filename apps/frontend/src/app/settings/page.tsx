@@ -31,7 +31,10 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { USER_ROLES, hasPermission } from "@/lib/auth/roles";
 import { handleSignOut } from "@/lib/auth/signout";
-import { useDeleteAccountMutation } from "@/redux/api/userApi";
+import {
+  useDeleteAccountMutation,
+  useGetUserAnalyticsQuery,
+} from "@/redux/api/userApi";
 import { useAuth } from "@/redux/auth/useAuth";
 import {
   Bell,
@@ -58,6 +61,8 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
+  const { data: analyticsData } = useGetUserAnalyticsQuery();
+
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -95,6 +100,7 @@ export default function SettingsPage() {
 
   const { user } = session;
   const userRole = user.role || USER_ROLES.RESEARCHER;
+  const userPlan = analyticsData?.data?.plan || "FREE";
 
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications((prev) => ({ ...prev, [key]: value }));
@@ -534,10 +540,22 @@ export default function SettingsPage() {
                         Plan
                       </Label>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline">Free</Badge>
-                        <Button variant="link" size="sm" className="h-auto p-0">
-                          Upgrade
-                        </Button>
+                        <Badge
+                          variant={userPlan === "PRO" ? "default" : "secondary"}
+                          className="font-semibold"
+                        >
+                          {userPlan}
+                        </Badge>
+                        {userPlan === "FREE" && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-primary"
+                            onClick={() => router.push("/pricing")}
+                          >
+                            Upgrade to PRO
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
