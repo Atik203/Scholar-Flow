@@ -372,10 +372,11 @@ const getUserAnalytics = async (user: IAuthUser) => {
     // Get papers count and storage used
     const paperStats = await prisma.$queryRaw<any[]>`
       SELECT 
-        COUNT(*)::INTEGER as "totalPapers",
-        COALESCE(SUM("fileSize"), 0)::BIGINT as "totalStorage"
-      FROM "Paper"
-      WHERE "uploaderId" = ${user.id} AND "isDeleted" = false
+        COUNT(DISTINCT p.id)::INTEGER as "totalPapers",
+        COALESCE(SUM(pf."sizeBytes"), 0)::BIGINT as "totalStorage"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON p.id = pf."paperId" AND pf."isDeleted" = false
+      WHERE p."uploaderId" = ${user.id} AND p."isDeleted" = false
     `;
 
     // Get collections count
@@ -386,11 +387,14 @@ const getUserAnalytics = async (user: IAuthUser) => {
     `;
 
     // Get AI tokens usage (from UsageEvent)
+    // Sum units for AI-related events (ai_summarize, semantic_search, etc.)
     const tokenStats = await prisma.$queryRaw<any[]>`
       SELECT 
-        COALESCE(SUM("tokensUsed"), 0)::INTEGER as "totalTokensUsed"
+        COALESCE(SUM("units"), 0)::INTEGER as "totalTokensUsed"
       FROM "UsageEvent"
       WHERE "userId" = ${user.id}
+        AND "isDeleted" = false
+        AND ("kind" LIKE 'ai_%' OR "kind" = 'semantic_search')
     `;
 
     // Get papers uploaded over time (last 30 days for chart)
@@ -422,13 +426,14 @@ const getUserAnalytics = async (user: IAuthUser) => {
     // Get storage usage by month (last 6 months)
     const storageOverTime = await prisma.$queryRaw<any[]>`
       SELECT 
-        DATE_TRUNC('month', "createdAt") as month,
-        SUM("fileSize")::BIGINT as "totalSize"
-      FROM "Paper"
-      WHERE "uploaderId" = ${user.id} 
-        AND "isDeleted" = false
-        AND "createdAt" >= NOW() - INTERVAL '6 months'
-      GROUP BY DATE_TRUNC('month', "createdAt")
+        DATE_TRUNC('month', p."createdAt") as month,
+        COALESCE(SUM(pf."sizeBytes"), 0)::BIGINT as "totalSize"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON p.id = pf."paperId" AND pf."isDeleted" = false
+      WHERE p."uploaderId" = ${user.id} 
+        AND p."isDeleted" = false
+        AND p."createdAt" >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', p."createdAt")
       ORDER BY month ASC
     `;
 

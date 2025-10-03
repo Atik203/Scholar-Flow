@@ -34,10 +34,8 @@ import {
   Shield,
   Star,
   TextCursor,
-  TrendingUp,
   Upload,
   Users,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -224,32 +222,16 @@ const navigationItems: SidebarItem[] = [
     minRole: USER_ROLES.RESEARCHER,
   },
   {
+    title: "Analytics",
+    path: "/analytics",
+    icon: BarChart3,
+    minRole: USER_ROLES.RESEARCHER,
+  },
+  {
     title: "Billing",
     path: "/billing",
     icon: CreditCard,
     minRole: USER_ROLES.RESEARCHER,
-  },
-];
-
-const proFeatures: SidebarLink[] = [
-  {
-    title: "Analytics",
-    path: "/analytics",
-    icon: BarChart3,
-    minRole: USER_ROLES.PRO_RESEARCHER,
-  },
-  {
-    title: "Advanced Search",
-    path: "/search/advanced",
-    icon: Zap,
-    badge: "Pro",
-    minRole: USER_ROLES.PRO_RESEARCHER,
-  },
-  {
-    title: "Research Trends",
-    path: "/trends",
-    icon: TrendingUp,
-    minRole: USER_ROLES.PRO_RESEARCHER,
   },
 ];
 
@@ -308,19 +290,6 @@ export function AppSidebar() {
           items: resolvedItems,
         };
       });
-  }, [userRole]);
-
-  const resolvedProFeatures = useMemo<ResolvedSidebarLink[]>(() => {
-    if (!hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER)) {
-      return [];
-    }
-
-    return proFeatures
-      .filter((item) => hasRoleAccess(userRole, item.minRole))
-      .map((item) => ({
-        ...item,
-        href: buildRoleScopedPath(userRole, item.path),
-      }));
   }, [userRole]);
 
   const resolvedAdminFeatures = useMemo<ResolvedSidebarLink[]>(() => {
@@ -478,43 +447,6 @@ export function AppSidebar() {
             })}
           </nav>
         </div>
-
-        {/* Pro Features */}
-        {resolvedProFeatures.length > 0 && (
-          <div className="mb-6">
-            <h3 className="px-2 mb-2 text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider">
-              Pro Features
-            </h3>
-            <nav className="space-y-1">
-              {resolvedProFeatures.map((item) => {
-                const isActive = pathname === item.href;
-
-                return (
-                  <Button
-                    key={item.title}
-                    variant="ghost"
-                    asChild
-                    className={`w-full justify-start px-2 py-2 h-auto font-normal text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : ""
-                    }`}
-                  >
-                    <Link href={item.href}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      <span>{item.title}</span>
-                      {item.badge && (
-                        <span className="ml-auto rounded-full bg-chart-1 px-2 py-0.5 text-xs text-white">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </Button>
-                );
-              })}
-            </nav>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
