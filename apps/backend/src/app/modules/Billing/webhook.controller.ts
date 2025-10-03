@@ -159,25 +159,49 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
   }
 }
 
+/**
+ * Extract raw body buffer from request for Stripe signature verification
+ * Handles both local (express.raw) and Vercel serverless (direct Buffer) cases
+ */
 function getRawBodyBuffer(req: RawBodyRequest): Buffer {
+  // Case 1: Check rawBody property (custom middleware)
   const possibleRawBody = req.rawBody;
 
   if (Buffer.isBuffer(possibleRawBody)) {
+    logDebug("[Webhook] Raw body extracted from req.rawBody (Buffer)");
     return possibleRawBody;
   }
 
   if (typeof possibleRawBody === "string") {
+    logDebug("[Webhook] Raw body extracted from req.rawBody (string)");
     return Buffer.from(possibleRawBody, "utf8");
   }
 
+  // Case 2: Check req.body (Vercel serverless or express.raw)
   if (Buffer.isBuffer(req.body)) {
+    logDebug(
+      "[Webhook] Raw body extracted from req.body (Buffer) - Vercel mode"
+    );
     return req.body;
   }
 
   if (typeof req.body === "string") {
+    logDebug("[Webhook] Raw body extracted from req.body (string)");
     return Buffer.from(req.body, "utf8");
   }
 
+  // Case 3: Check if body is already parsed JSON (should not happen, but handle gracefully)
+  if (req.body && typeof req.body === "object") {
+    console.error(
+      "[Webhook] Body already parsed as JSON - cannot verify signature"
+    );
+    console.error(
+      "[Webhook] This indicates body parsing middleware is running before webhook route"
+    );
+    throw BillingError.webhookRawBodyMissing();
+  }
+
+  console.error("[Webhook] No raw body found in req.body or req.rawBody");
   throw BillingError.webhookRawBodyMissing();
 }
 
