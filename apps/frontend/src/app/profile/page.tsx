@@ -21,6 +21,7 @@ import { ROLE_DESCRIPTIONS, USER_ROLES } from "@/lib/auth/roles";
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
+  useUploadProfilePictureMutation,
 } from "@/redux/api/userApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -90,6 +91,8 @@ export default function ProfilePage() {
   } = useGetProfileQuery();
 
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+  const [uploadProfilePicture, { isLoading: isUploading }] =
+    useUploadProfilePictureMutation();
 
   // Form handling with react-hook-form
   const {
@@ -217,24 +220,76 @@ export default function ProfilePage() {
           <div className="lg:col-span-2">
             <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader className="text-center">
-                <div className="relative mx-auto">
-                  <Avatar className="h-24 w-24 ring-4 ring-primary/20">
-                    <AvatarImage
-                      src={user?.image || ""}
-                      alt={user?.name || "User"}
-                      className="object-cover"
+                <div className="flex justify-center mb-4">
+                  <div className="relative group">
+                    <Avatar className="h-32 w-32">
+                      <AvatarImage
+                        src={user?.image || ""}
+                        alt={user?.name || "User"}
+                      />
+                      <AvatarFallback className="text-4xl">
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <label
+                      htmlFor="profile-picture-upload"
+                      className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors shadow-lg"
+                    >
+                      {isUploading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <Camera className="h-5 w-5" />
+                      )}
+                    </label>
+                    <input
+                      id="profile-picture-upload"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        // Validate file size (5MB limit)
+                        if (file.size > 5 * 1024 * 1024) {
+                          showErrorToast("File size must be less than 5MB");
+                          return;
+                        }
+
+                        // Validate file type
+                        if (
+                          !["image/jpeg", "image/png", "image/webp"].includes(
+                            file.type
+                          )
+                        ) {
+                          showErrorToast(
+                            "Only JPEG, PNG, and WebP images are allowed"
+                          );
+                          return;
+                        }
+
+                        try {
+                          const formData = new FormData();
+                          formData.append("file", file);
+
+                          await uploadProfilePicture(formData).unwrap();
+                          showSuccessToast(
+                            "Profile picture updated successfully"
+                          );
+                          refetch();
+                        } catch (error: any) {
+                          showErrorToast(
+                            error?.data?.message ||
+                              "Failed to upload profile picture"
+                          );
+                        }
+
+                        // Reset input
+                        e.target.value = "";
+                      }}
+                      disabled={isUploading}
                     />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg dark:bg-primary/20">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0 dark:border-gray-600"
-                  >
-                    <Camera className="h-4 w-4" />
-                  </Button>
+                  </div>
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold text-gray-900 dark:text-white">

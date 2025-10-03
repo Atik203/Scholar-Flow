@@ -47,6 +47,60 @@ export interface DeleteAccountResponse {
   };
 }
 
+// Upload profile picture response interface
+export interface UploadProfilePictureResponse {
+  success: boolean;
+  message: string;
+  data: {
+    imageUrl: string;
+    message: string;
+  };
+}
+
+// User analytics response interface
+export interface UserAnalyticsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    plan: "FREE" | "PRO";
+    limits: {
+      maxPapers: number;
+      maxStorage: number;
+      maxTokens: number;
+      maxCollections: number;
+    };
+    usage: {
+      papers: {
+        total: number;
+        limit: number;
+        percentage: number;
+      };
+      collections: {
+        total: number;
+        limit: number;
+        percentage: number;
+      };
+      storage: {
+        used: number;
+        limit: number;
+        percentage: number;
+        unit: string;
+      };
+      tokens: {
+        used: number;
+        limit: number;
+        percentage: number;
+      };
+    };
+    charts: {
+      papersOverTime: Array<{ date: string; count: number }>;
+      collectionsOverTime: Array<{ date: string; count: number }>;
+      storageOverTime: Array<{ month: string; size: number }>;
+      papersByStatus: Array<{ status: string; count: number }>;
+    };
+  };
+}
+
 export const userApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get user profile
@@ -114,6 +168,25 @@ export const userApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    // Upload profile picture
+    uploadProfilePicture: builder.mutation<
+      UploadProfilePictureResponse,
+      FormData
+    >({
+      query: (formData) => ({
+        url: "/user/upload-profile-picture",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+
+    // Get user analytics
+    getUserAnalytics: builder.query<UserAnalyticsResponse, void>({
+      query: () => "/user/analytics",
+      providesTags: ["User"],
+    }),
   }),
 });
 
@@ -123,4 +196,6 @@ export const {
   useUpdateProfileMutation,
   useChangePasswordMutation,
   useDeleteAccountMutation,
+  useUploadProfilePictureMutation,
+  useGetUserAnalyticsQuery,
 } = userApi;

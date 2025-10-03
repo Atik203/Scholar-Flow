@@ -1,8 +1,9 @@
-import { IPaginationOptions } from "../../interfaces/pagination";
-import prisma from "../../shared/prisma";
-// TypedSQL usage is optional; fallback to Prisma count in Phase 1
+import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import prisma from "../../shared/prisma";
+import { StorageService } from "../papers/StorageService";
 import { UpdateProfileInput } from "./user.validation";
 
 const getAllFromDB = async (params: any, options: IPaginationOptions) => {
@@ -271,10 +272,269 @@ const deleteAccount = async (user: IAuthUser) => {
   }
 };
 
+/**
+ * Upload profile picture to S3 and update user record
+ * Uses permanent URLs (no expiration) for profile pictures
+ */
+const uploadProfilePicture = async (
+  user: IAuthUser,
+  file: Express.Multer.File
+) => {
+  try {
+    // Verify user exists
+    const existingUsers = await prisma.$queryRaw<any[]>`
+      SELECT id, email, "isDeleted"
+      FROM "User"
+      WHERE id = ${user.id} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (existingUsers.length === 0) {
+      throw new ApiError(404, "User not found or account deleted");
+    }
+
+    // Initialize storage service
+    const storageService = new StorageService();
+
+    // Generate unique file key for profile picture
+    const fileExtension = file.mimetype.split("/")[1];
+    const fileKey = `profile-pictures/${user.id}/${randomUUID()}.${fileExtension}`;
+
+    // Upload to S3 with public-read ACL
+    await storageService.putObject({
+      key: fileKey,
+      body: file.buffer,
+      contentType: file.mimetype,
+    });
+
+    // Generate permanent public URL (no expiration)
+    // Profile pictures are uploaded with public-read ACL for permanent access
+    const bucket = process.env.AWS_BUCKET_NAME || process.env.S3_BUCKET;
+    const region = process.env.AWS_REGION || "us-east-1";
+    const imageUrl = `https://${bucket}.s3.${region}.amazonaws.com/${fileKey}`;
+
+    // Update user profile with new image URL
+    await prisma.$queryRaw`
+      UPDATE "User" 
+      SET image = ${imageUrl}, "updatedAt" = NOW()
+      WHERE id = ${user.id} AND "isDeleted" = false
+    `;
+
+    // Return updated user data
+    const users = await prisma.$queryRaw<any[]>`
+      SELECT id, email, name, "firstName", "lastName", institution, "fieldOfStudy",
+             image, role, "createdAt", "updatedAt"
+      FROM "User"
+      WHERE id = ${user.id} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (users.length === 0) {
+      throw new ApiError(404, "User not found after update");
+    }
+
+    return {
+      ...users[0],
+      imageUrl,
+      message: "Profile picture uploaded successfully",
+    };
+  } catch (error) {
+    console.error("Error uploading profile picture:", error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(500, "Failed to upload profile picture");
+  }
+};
+
+/**
+ * Get comprehensive user analytics including papers, collections, storage, and tokens
+ */
+const getUserAnalytics = async (user: IAuthUser) => {
+  try {
+    // Verify user exists
+    const existingUsers = await prisma.$queryRaw<any[]>`
+      SELECT id, email, role, "stripeSubscriptionId", "stripePriceId", "isDeleted"
+      FROM "User"
+      WHERE id = ${user.id} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (existingUsers.length === 0) {
+      throw new ApiError(404, "User not found or account deleted");
+    }
+
+    const userData = existingUsers[0];
+
+    // Determine user plan (Free or Pro based on Stripe subscription)
+    const plan = userData.stripeSubscriptionId ? "PRO" : "FREE";
+
+    // Get papers count and storage used
+    const paperStats = await prisma.$queryRaw<any[]>`
+      SELECT 
+        COUNT(*)::INTEGER as "totalPapers",
+        COALESCE(SUM("fileSize"), 0)::BIGINT as "totalStorage"
+      FROM "Paper"
+      WHERE "uploaderId" = ${user.id} AND "isDeleted" = false
+    `;
+
+    // Get collections count
+    const collectionStats = await prisma.$queryRaw<any[]>`
+      SELECT COUNT(*)::INTEGER as "totalCollections"
+      FROM "Collection"
+      WHERE "ownerId" = ${user.id} AND "isDeleted" = false
+    `;
+
+    // Get AI tokens usage (from UsageEvent)
+    const tokenStats = await prisma.$queryRaw<any[]>`
+      SELECT 
+        COALESCE(SUM("tokensUsed"), 0)::INTEGER as "totalTokensUsed"
+      FROM "UsageEvent"
+      WHERE "userId" = ${user.id}
+    `;
+
+    // Get papers uploaded over time (last 30 days for chart)
+    const papersOverTime = await prisma.$queryRaw<any[]>`
+      SELECT 
+        DATE("createdAt") as date,
+        COUNT(*)::INTEGER as count
+      FROM "Paper"
+      WHERE "uploaderId" = ${user.id} 
+        AND "isDeleted" = false
+        AND "createdAt" >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `;
+
+    // Get collections created over time (last 30 days)
+    const collectionsOverTime = await prisma.$queryRaw<any[]>`
+      SELECT 
+        DATE("createdAt") as date,
+        COUNT(*)::INTEGER as count
+      FROM "Collection"
+      WHERE "ownerId" = ${user.id} 
+        AND "isDeleted" = false
+        AND "createdAt" >= NOW() - INTERVAL '30 days'
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `;
+
+    // Get storage usage by month (last 6 months)
+    const storageOverTime = await prisma.$queryRaw<any[]>`
+      SELECT 
+        DATE_TRUNC('month', "createdAt") as month,
+        SUM("fileSize")::BIGINT as "totalSize"
+      FROM "Paper"
+      WHERE "uploaderId" = ${user.id} 
+        AND "isDeleted" = false
+        AND "createdAt" >= NOW() - INTERVAL '6 months'
+      GROUP BY DATE_TRUNC('month', "createdAt")
+      ORDER BY month ASC
+    `;
+
+    // Get papers by processing status
+    const papersByStatus = await prisma.$queryRaw<any[]>`
+      SELECT 
+        "processingStatus",
+        COUNT(*)::INTEGER as count
+      FROM "Paper"
+      WHERE "uploaderId" = ${user.id} AND "isDeleted" = false
+      GROUP BY "processingStatus"
+    `;
+
+    // Convert storage from bytes to MB for easier reading
+    const totalStorageMB =
+      Number(paperStats[0]?.totalStorage || 0) / (1024 * 1024);
+
+    // Plan limits
+    const planLimits = {
+      FREE: {
+        maxPapers: 50,
+        maxStorage: 1024, // 1GB in MB
+        maxTokens: 10000,
+        maxCollections: 10,
+      },
+      PRO: {
+        maxPapers: -1, // Unlimited
+        maxStorage: 51200, // 50GB in MB
+        maxTokens: 1000000,
+        maxCollections: -1, // Unlimited
+      },
+    };
+
+    const limits = planLimits[plan as keyof typeof planLimits];
+
+    return {
+      plan,
+      limits,
+      usage: {
+        papers: {
+          total: Number(paperStats[0]?.totalPapers || 0),
+          limit: limits.maxPapers,
+          percentage:
+            limits.maxPapers === -1
+              ? 0
+              : (Number(paperStats[0]?.totalPapers || 0) / limits.maxPapers) *
+                100,
+        },
+        collections: {
+          total: Number(collectionStats[0]?.totalCollections || 0),
+          limit: limits.maxCollections,
+          percentage:
+            limits.maxCollections === -1
+              ? 0
+              : (Number(collectionStats[0]?.totalCollections || 0) /
+                  limits.maxCollections) *
+                100,
+        },
+        storage: {
+          used: totalStorageMB,
+          limit: limits.maxStorage,
+          percentage: (totalStorageMB / limits.maxStorage) * 100,
+          unit: "MB",
+        },
+        tokens: {
+          used: Number(tokenStats[0]?.totalTokensUsed || 0),
+          limit: limits.maxTokens,
+          percentage:
+            (Number(tokenStats[0]?.totalTokensUsed || 0) / limits.maxTokens) *
+            100,
+        },
+      },
+      charts: {
+        papersOverTime: papersOverTime.map((row) => ({
+          date: row.date,
+          count: Number(row.count),
+        })),
+        collectionsOverTime: collectionsOverTime.map((row) => ({
+          date: row.date,
+          count: Number(row.count),
+        })),
+        storageOverTime: storageOverTime.map((row) => ({
+          month: row.month,
+          size: Number(row.totalSize) / (1024 * 1024), // Convert to MB
+        })),
+        papersByStatus: papersByStatus.map((row) => ({
+          status: row.processingStatus,
+          count: Number(row.count),
+        })),
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching user analytics:", error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(500, "Failed to fetch user analytics");
+  }
+};
+
 export const userService = {
   getAllFromDB,
   getMyProfile,
   updateProfile,
   changePassword,
   deleteAccount,
+  uploadProfilePicture,
+  getUserAnalytics,
 };

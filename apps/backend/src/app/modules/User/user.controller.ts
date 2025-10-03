@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
@@ -87,16 +88,78 @@ const deleteAccount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const uploadProfilePicture = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "Profile picture file is required");
+  }
+
+  // Validate file type
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+  ];
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    throw new ApiError(
+      400,
+      "Invalid file type. Only JPEG, PNG, and WebP images are allowed"
+    );
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (req.file.size > maxSize) {
+    throw new ApiError(400, "File size too large. Maximum size is 5MB");
+  }
+
+  const result = await userService.uploadProfilePicture(user, req.file);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile picture uploaded successfully!",
+    data: result,
+  });
+});
+
+const getUserAnalytics = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  const result = await userService.getUserAnalytics(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User analytics retrieved successfully!",
+    data: result,
+  });
+});
+
 export const userController: {
   getAllFromDB: AsyncRequestHandler;
   getMyProfile: AsyncRequestHandler;
   updateProfile: AsyncRequestHandler;
   changePassword: AsyncRequestHandler;
   deleteAccount: AsyncRequestHandler;
+  uploadProfilePicture: AsyncRequestHandler;
+  getUserAnalytics: AsyncRequestHandler;
 } = {
   getAllFromDB,
   getMyProfile,
   updateProfile,
   changePassword,
   deleteAccount,
+  uploadProfilePicture,
+  getUserAnalytics,
 };
