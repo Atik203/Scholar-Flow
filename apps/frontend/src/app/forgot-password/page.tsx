@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: ForgotPasswordFormData) => {
     try {
       const result = await forgotPassword(data).unwrap();
-      
+
       if (result.success) {
         setIsSubmitted(true);
         toast.success("Password reset email sent!", {
@@ -109,12 +109,13 @@ export default function ForgotPasswordPage() {
                 <div className="flex items-start gap-3">
                   <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-left">
-                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                    <p className="text-sm font-medium text-blue-900 dark:text-white">
                       Security Notice
                     </p>
-                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                      The reset link will expire in 15 minutes for your security.
-                      If you didn't request this, you can safely ignore this email.
+                    <p className="text-xs text-blue-700 dark:text-white mt-1">
+                      The reset link will expire in 15 minutes for your
+                      security. If you didn't request this, you can safely
+                      ignore this email.
                     </p>
                   </div>
                 </div>
@@ -131,7 +132,7 @@ export default function ForgotPasswordPage() {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Try another email
                 </Button>
-                
+
                 <Link href="/login">
                   <Button className="w-full" size="lg">
                     Back to login
@@ -320,9 +321,7 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            <h2 className="text-3xl font-bold mb-4">
-              Secure Account Recovery
-            </h2>
+            <h2 className="text-3xl font-bold mb-4">Secure Account Recovery</h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-md mx-auto">
               Get back to your research quickly and securely with our
               industry-standard password recovery process.

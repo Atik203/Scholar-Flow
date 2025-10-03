@@ -40,7 +40,7 @@ export default function AiInsightsPage() {
         <div className="bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border dark:border-gray-700">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
-              <Bot className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              <Bot className="h-8 w-8 text-blue-600 dark:text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold">AI Insights</h1>
@@ -57,7 +57,7 @@ export default function AiInsightsPage() {
           <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <MessageCircle className="h-5 w-5 text-blue-600 dark:text-white" />
                 <CardTitle className="text-lg">Interactive Chat</CardTitle>
               </div>
             </CardHeader>
