@@ -16,6 +16,12 @@ import "./app/services/pdfProcessingQueue";
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
+// Trust proxy when behind Vercel/reverse proxy (required for rate limiting and IP detection)
+if (process.env.VERCEL === "1" || config.env === "production") {
+  app.set("trust proxy", true);
+  console.log("[Config] Trust proxy enabled for production/Vercel environment");
+}
+
 // Security middleware with enhanced CSP and security headers
 app.use(
   helmet({
@@ -71,12 +77,22 @@ const limiter = rateLimit({
 app.use("/api/", limiter as unknown as import("express").RequestHandler);
 
 // Stripe webhook - MUST be before express.json() to preserve raw body
+// In Vercel, body comes as Buffer already due to bodyParser: false in api/[...all].js
 import { webhookController } from "./app/modules/Billing/webhook.controller";
-app.post(
-  "/webhooks/stripe",
-  express.raw({ type: "application/json" }),
-  webhookController.handleStripeWebhook as unknown as RequestHandler
-);
+if (process.env.VERCEL === "1") {
+  // Vercel: body arrives as Buffer, no middleware needed
+  app.post(
+    "/webhooks/stripe",
+    webhookController.handleStripeWebhook as unknown as RequestHandler
+  );
+} else {
+  // Local/standard deployment: use express.raw to get Buffer
+  app.post(
+    "/webhooks/stripe",
+    express.raw({ type: "application/json" }),
+    webhookController.handleStripeWebhook as unknown as RequestHandler
+  );
+}
 
 // Request parsing
 app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
