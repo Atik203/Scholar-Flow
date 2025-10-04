@@ -1,8 +1,17 @@
+import { getRoleBySlug, getRoleSlug } from "@/lib/auth/roles";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 // Define protected routes that require authentication
-const protectedRoutes = ["/dashboard", "/profile", "/settings", "/admin"];
+const protectedRoutes = [
+  "/dashboard",
+  "/dashboard/researcher",
+  "/dashboard/pro-researcher",
+  "/dashboard/team-lead",
+  "/dashboard/admin",
+  "/profile",
+  "/settings",
+];
 
 // Define auth routes that should redirect to dashboard if user is already logged in
 const authRoutes = ["/login", "/register", "/auth/signin"];
@@ -21,6 +30,9 @@ const publicRoutes = [
   // Products are public-facing marketing pages
   "/papers",
   "/collections",
+  "/workspaces",
+  "/research",
+  "/collaborations",
   "/collaborate",
   "/ai-insights",
   "/products",
@@ -48,7 +60,7 @@ export default withAuth(
       );
     };
 
-    // 1. Handle API routes - let them pass through
+    // 1. Handle API routes - let them pass through (especially NextAuth)
     if (pathname.startsWith("/api/")) {
       return NextResponse.next();
     }
@@ -63,27 +75,61 @@ export default withAuth(
     }
 
     // 3. Handle auth routes when user is already authenticated
+    const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+
     if (isAuthenticated && matchesRoute(authRoutes, pathname)) {
+      // If user is authenticated and on auth page with callbackUrl, redirect to callback
+      if (callbackUrl) {
+        console.log(
+          `🔄 Authenticated user on auth page, redirecting to callback: ${callbackUrl}`
+        );
+        return createRedirect(callbackUrl);
+      }
+
+      // If user is authenticated on auth page without callback, redirect to dashboard
+      const roleSlug = getRoleSlug((token as any)?.role);
+      const dashboardPath = `/dashboard/${roleSlug}`;
       console.log(
-        `🔄 Redirecting authenticated user from ${pathname} to /dashboard`
+        `🔄 Redirecting authenticated user from ${pathname} to ${dashboardPath}`
       );
-      return createRedirect("/dashboard");
+      return createRedirect(dashboardPath);
     }
 
     // 4. Handle protected routes when user is not authenticated
+    // DISABLED: Let client-side useAuthGuard handle this to avoid race conditions
+    // after login when the cookie isn't immediately available in middleware
     if (!isAuthenticated && matchesRoute(protectedRoutes, pathname)) {
       console.log(
-        `🔒 Redirecting unauthenticated user from ${pathname} to /login`
+        `⚠️ User appears unauthenticated for ${pathname}, allowing through for client-side check`
       );
-      // Store the intended destination for post-login redirect
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+      // Allow the request through - client-side guards will handle redirect if needed
+      return NextResponse.next();
     }
 
     // 5. Handle public routes - allow access regardless of auth status
     if (matchesRoute(publicRoutes, pathname)) {
       return NextResponse.next();
+    }
+
+    // 5.1. Redirect legacy dashboard routes without role segment
+    if (isAuthenticated && pathname.startsWith("/dashboard/")) {
+      const segments = pathname.split("/").filter(Boolean);
+      if (segments.length > 1) {
+        const maybeRoleSlug = segments[1];
+        const hasRoleSegment = !!getRoleBySlug(maybeRoleSlug);
+
+        if (!hasRoleSegment) {
+          const roleSlug = getRoleSlug((token as any)?.role);
+          const newPath = ["/dashboard", roleSlug, ...segments.slice(1)].join(
+            "/"
+          );
+          const redirectUrl = new URL(
+            newPath + request.nextUrl.search,
+            request.url
+          );
+          return NextResponse.redirect(redirectUrl);
+        }
+      }
     }
 
     // 6. Handle root path based on authentication status
@@ -117,13 +163,26 @@ export default withAuth(
         }
 
         // For protected routes, require token
+        // BUT: Allow dashboard access even without token in middleware
+        // Let client-side useAuthGuard handle the redirect if session is truly missing
+        // This fixes the race condition where cookie isn't set yet after login
         if (matchesRoute(protectedRoutes, pathname)) {
-          return !!token;
+          // If no token, log it but allow through
+          // The client-side auth guard will handle actual protection
+          if (!token) {
+            console.log(
+              `⚠️ No token in middleware for ${pathname}, allowing through for client-side check`
+            );
+          }
+          return true; // Changed from !!token to true
         }
 
         // Default to allowing access
         return true;
       },
+    },
+    pages: {
+      signIn: "/login",
     },
   }
 );

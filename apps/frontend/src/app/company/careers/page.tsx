@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -17,7 +18,6 @@ import {
   Rocket,
   Users,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -164,7 +164,7 @@ const values = [
     title: "Research First",
     description:
       "Every decision is guided by what helps researchers do their best work.",
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300",
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-white",
   },
   {
     title: "Intellectual Curiosity",
@@ -196,7 +196,7 @@ const stats = [
 ];
 
 export default function CareersPage() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const isAuthenticated = !!session;
 
   return (

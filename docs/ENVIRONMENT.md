@@ -76,9 +76,15 @@ Required unless marked optional.
     - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
     - How: Use your provider’s credentials (e.g., SendGrid, Mailgun)
 
-- OpenAI
-  - OPENAI_API_KEY
-  - How: [OpenAI Platform](https://platform.openai.com) > API keys (optional if AI features disabled)
+- AI Providers & Feature Flags
+  - OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEAK_API_KEY
+    - How: Generate from respective provider consoles (OpenAI, Google AI Studio, DeepSeek). Leave blank to disable that provider.
+  - AI_PROVIDER_FALLBACK_ORDER
+    - What: Comma-separated priority list (e.g., `openai,gemini,deepseek`). The orchestrator uses the first configured provider.
+  - AI_FEATURES_ENABLED
+    - What: Master switch for backend AI features. Set to `false` to bypass all AI enrichments.
+  - AI_REQUEST_TIMEOUT_MS
+    - What: Provider request timeout. Defaults to `15000` if unset.
 
 - AWS S3 (for file uploads)
   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME, AWS_REGION
@@ -105,6 +111,7 @@ Required unless marked optional.
 - NEXT_PUBLIC_FEATURE_ANNOTATIONS: `true|false`
 - NEXT_PUBLIC_FEATURE_CITATION_GRAPH: `false` (Phase 2+)
 - NEXT_PUBLIC_ENABLE_AI_FEATURES: `true|false`
+- NEXT_PUBLIC_AI_ASSISTANT_ENABLED: `true|false` (toggles UI affordances for AI assistant flows)
 - NEXT_PUBLIC_ENABLE_PAYMENTS: `true|false`
 - NEXT_PUBLIC_USE_PGVECTOR: `true|false` (mirrors backend USE_PGVECTOR for UI gating)
   - REDIS_URL
@@ -163,6 +170,159 @@ If using Stripe CLI, forward events locally:
 # Replace <whsec_...> with the returned signing secret and set STRIPE_WEBHOOK_SECRET
 stripe listen --forward-to http://localhost:5000/webhooks/stripe
 ```
+
+## Gotenberg on GCP (Cloud Run)
+
+Use Cloud Run to host the Gotenberg container for DOCX→PDF conversion. This keeps conversions off Vercel serverless and gives you longer timeouts and more memory.
+
+Prerequisites
+
+- Google Cloud project with billing enabled
+- gcloud CLI installed and authenticated
+- Cloud Run and Artifact Registry APIs enabled
+
+Quick deploy (official image)
+
+```bash
+# Pick a region (e.g., us-central1)
+gcloud run deploy scholarflow-gotenberg \
+  --image=gotenberg/gotenberg:8 \
+  --port=3000 \
+  --region=us-central1 \
+  --memory=1Gi --cpu=1 \
+  --allow-unauthenticated
+```
+
+After deploy, copy the service URL (e.g., <https://scholarflow-gotenberg-xxxx-uc.a.run.app>).
+
+Optional: custom image with fonts
+
+```dockerfile
+FROM gotenberg/gotenberg:8
+USER root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends fonts-dejavu fonts-liberation fonts-noto-core && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+USER 1001
+```
+
+Build and push to Artifact Registry, then deploy that image to Cloud Run.
+
+Backend env wiring
+
+- In `apps/backend/.env` (and `.env.example`):
+  - `DOCX_TO_PDF_ENGINE=gotenberg`
+  - `GOTENBERG_URL=<your-cloud-run-url>`
+
+Example:
+
+```env
+DOCX_TO_PDF_ENGINE=gotenberg
+GOTENBERG_URL=https://scholarflow-gotenberg-xxxx-uc.a.run.app
+```
+
+Verification
+
+- From your dev machine:
+  - Open the URL to ensure it responds. For full testing, run a DOCX→PDF conversion from the backend worker and confirm a PDF is produced.
+  - Watch logs: `gcloud run services logs tail scholarflow-gotenberg --region=us-central1`
+
+Security & limits
+
+- Leave the service public during early dev; later, restrict with an auth proxy or Cloud Run “authenticated” and sign requests from your backend.
+- Choose `--memory=1Gi` (or more) for complex files; increase if you see OOM.
+- Keep conversions async in your queue with a 2–5 minute timeout and retry with backoff.
+
+## Gotenberg on AWS (EC2 Free Tier)
+
+If GCP isn’t an option, you can run Gotenberg on an AWS EC2 Free Tier instance (t2.micro/t3.micro) for low-volume usage and development.
+
+What you’ll set up
+
+- 1x EC2 instance (Ubuntu) eligible for Free Tier
+- Docker installed on the instance
+- Gotenberg container running on port 3000
+- Security Group locked down to your backend’s IP
+
+Step-by-step
+
+1. Launch EC2 instance
+
+- Navigate to AWS Console → EC2 → Instances → Launch instances
+- Name: `scholarflow-gotenberg`
+- AMI: Ubuntu LTS (e.g., 22.04)
+- Instance type: `t2.micro` or `t3.micro` (Free Tier eligible)
+- Key pair: create/download one (for SSH)
+- Network settings:
+  - Create/select a Security Group
+  - Inbound rules: allow SSH (22) from your IP; add TCP 3000 from your backend’s known IP or temporarily from your IP for testing
+- Storage: keep defaults
+- Launch instance
+
+1. Connect and install Docker
+
+SSH into the instance (replace with your values):
+
+```bash
+ssh -i /path/to/key.pem ubuntu@ec2-xx-yy-zz-ww.compute-1.amazonaws.com
+```
+
+Install Docker and fonts:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker.io fonts-dejavu fonts-liberation fonts-noto-core
+sudo usermod -aG docker $USER
+sudo systemctl enable --now docker
+newgrp docker
+```
+
+1. Run Gotenberg
+
+```bash
+docker run -d --name gotenberg \
+  -p 3000:3000 \
+  -e LOG_LEVEL=info \
+  --restart unless-stopped \
+  gotenberg/gotenberg:8
+```
+
+1. Set backend env vars
+
+- In `apps/backend/.env`:
+
+```env
+DOCX_TO_PDF_ENGINE=gotenberg
+GOTENBERG_URL=http://<ec2-public-ip>:3000
+```
+
+1. Lock down access
+
+- Edit the EC2 Security Group:
+  - Restrict inbound port 3000 to only your backend server’s IP address (or your office/static IP during testing)
+  - Keep SSH (22) restricted to your IP
+
+1. Verify conversion
+
+- From your backend machine, call the service via your worker and ensure a PDF is generated
+- Tail container logs if needed:
+
+```bash
+docker logs -f gotenberg
+```
+
+Ops tips
+
+- Instance sizing: micro is fine for small/medium DOCX; upgrade if you see OOM or slow conversions
+- Reliability: configure retries/backoff in your queue; keep conversions asynchronous
+- Fonts: install the fonts your documents use for better fidelity (Noto, Liberation, DejaVu)
+- Backups: this service is stateless; you can recreate it quickly if needed
+
+Cost notes
+
+- The EC2 Free Tier allows ~750 hours/month for 12 months; data transfer and extras may incur costs
+- Avoid Elastic IP charges by keeping the EIP attached; otherwise use the instance public IP
+- Do not add a load balancer or ECR unless needed—they add cost
 
 ## End-to-End Dev Checklist
 
