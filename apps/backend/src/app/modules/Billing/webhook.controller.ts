@@ -82,7 +82,7 @@ export const handleStripeWebhook = catchAsync(
 
     // Store webhook event
     await prismaClient.$executeRaw`
-      INSERT INTO "WebhookEvent" (id, provider, "eventId", type, payload, status, "receivedAt", "createdAt", "updatedAt")
+      INSERT INTO "WebhookEvent" (id, provider, "eventId", type, payload, status, "receivedAt", "createdAt", "updatedAt", "isDeleted")
       VALUES (
         gen_random_uuid(),
         'STRIPE',
@@ -92,7 +92,8 @@ export const handleStripeWebhook = catchAsync(
         'pending',
         NOW(),
         NOW(),
-        NOW()
+        NOW(),
+        false
       )
     `;
 
@@ -373,7 +374,8 @@ async function handleCheckoutSessionCompleted(
         "startedAt",
         "expiresAt",
         "createdAt",
-        "updatedAt"
+        "updatedAt",
+        "isDeleted"
       ) VALUES (
         gen_random_uuid(),
         ${userId},
@@ -391,7 +393,8 @@ async function handleCheckoutSessionCompleted(
         NOW(),
         ${toTimestampSql(currentPeriodEnd)},
         NOW(),
-        NOW()
+        NOW(),
+        false
       )
     `;
   }
@@ -586,7 +589,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       status,
       raw,
       "createdAt",
-      "updatedAt"
+      "updatedAt",
+      "isDeleted"
     ) VALUES (
       gen_random_uuid(),
       ${subscription[0].userId},
@@ -598,7 +602,8 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       'SUCCEEDED',
       ${JSON.stringify(invoice)}::jsonb,
       NOW(),
-      NOW()
+      NOW(),
+      false
     )
     ON CONFLICT ("transactionId")
     DO UPDATE SET

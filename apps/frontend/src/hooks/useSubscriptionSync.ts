@@ -77,16 +77,23 @@ export function useSubscriptionSync({
   const initialSnapshotRef = useRef<SubscriptionSnapshot | null>(null);
   const lastKnownSnapshotRef = useRef<SubscriptionSnapshot | null>(null);
 
-  // Query hooks with manual control
+  // Query hooks - Always keep subscriptions active to allow refetch
+  // The queries are cached and controlled via polling logic, not skip
   const { refetch: refetchProfile } = useGetProfileQuery(undefined, {
-    skip: true, // Skip automatic fetching, we'll trigger manually
+    // Don't skip - we need the query to be subscribed for refetch to work
+    refetchOnMountOrArgChange: false, // Don't auto-refetch
+    refetchOnFocus: false, // Don't refetch on window focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
   const { data: subscription, refetch: refetchSubscription } =
     useGetSubscriptionQuery(
       {},
       {
-        skip: true, // Skip automatic fetching
+        // Don't skip - we need the query to be subscribed for refetch to work
+        refetchOnMountOrArgChange: false,
+        refetchOnFocus: false,
+        refetchOnReconnect: false,
       }
     );
 
@@ -126,19 +133,38 @@ export function useSubscriptionSync({
    * Force refresh all subscription-related data
    */
   const forceRefresh = useCallback(async () => {
+    if (!enabled) {
+      console.warn("[useSubscriptionSync] Skipping refresh - sync not enabled");
+      return false;
+    }
+
     try {
       // Invalidate all user-related cache
       dispatch(apiSlice.util.invalidateTags(["User"]));
 
       // Force refetch profile and subscription in parallel
-      await Promise.all([refetchProfile(), refetchSubscription()]);
+      // These should be safe to call since queries are not skipped when enabled
+      const results = await Promise.allSettled([
+        refetchProfile(),
+        refetchSubscription(),
+      ]);
 
-      return true;
+      // Check if any refetch failed
+      const allSucceeded = results.every(
+        (result) => result.status === "fulfilled"
+      );
+
+      if (!allSucceeded) {
+        const failures = results.filter((r) => r.status === "rejected");
+        console.error("[useSubscriptionSync] Some refetches failed:", failures);
+      }
+
+      return allSucceeded;
     } catch (error) {
       console.error("[useSubscriptionSync] Error during refresh:", error);
       return false;
     }
-  }, [dispatch, refetchProfile, refetchSubscription]);
+  }, [dispatch, refetchProfile, refetchSubscription, enabled]);
 
   /**
    * Stop polling and cleanup
