@@ -463,8 +463,8 @@ class AuthService {
     try {
       // Create session using $queryRaw
       await prisma.$queryRaw`
-        INSERT INTO "Session" ("sessionToken", "userId", expires, "createdAt", "updatedAt")
-        VALUES (${sessionData.sessionToken}, ${userId}, ${sessionData.expires}, NOW(), NOW())
+        INSERT INTO "Session" (id, "sessionToken", "userId", expires, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${sessionData.sessionToken}, ${userId}, ${sessionData.expires}, NOW(), NOW(), false)
       `;
 
       // Return the created session
