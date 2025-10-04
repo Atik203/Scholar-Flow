@@ -19,11 +19,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import {
   useCreateWorkspaceMutation,
   useListWorkspacesQuery,
 } from "@/redux/api/workspaceApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import { Building2, ChevronsUpDown, Plus } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -35,6 +37,7 @@ interface WorkspaceSwitcherProps {
 export function WorkspaceSwitcher({
   currentWorkspaceId,
 }: WorkspaceSwitcherProps) {
+  const { session } = useAuth();
   const { data, isLoading } = useListWorkspacesQuery({ scope: "all" });
   const [createWorkspace, { isLoading: creating }] =
     useCreateWorkspaceMutation();
@@ -42,6 +45,8 @@ export function WorkspaceSwitcher({
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
   const router = useRouter();
   const pathname = usePathname();
+
+  const userRole = session?.user?.role || "";
 
   const workspaces = data?.data || [];
   const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId);
@@ -58,7 +63,7 @@ export function WorkspaceSwitcher({
       setNewWorkspaceName("");
       setShowCreateDialog(false);
       // Navigate to the new workspace
-      router.push(`/dashboard/workspaces/${result.id}`);
+      router.push(buildRoleScopedPath(userRole, `/workspaces/${result.id}`));
     } catch (error: any) {
       showApiErrorToast(error);
     }
@@ -66,12 +71,8 @@ export function WorkspaceSwitcher({
 
   const handleWorkspaceSwitch = (workspaceId: string) => {
     // Determine the target route based on current pathname
-    if (pathname.startsWith("/dashboard/workspaces/")) {
-      router.push(`/dashboard/workspaces/${workspaceId}`);
-    } else {
-      // For other dashboard routes, go to workspace overview
-      router.push(`/dashboard/workspaces/${workspaceId}`);
-    }
+    const workspacePath = `/workspaces/${workspaceId}`;
+    router.push(buildRoleScopedPath(userRole, workspacePath));
   };
 
   if (isLoading) {

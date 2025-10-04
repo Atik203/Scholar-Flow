@@ -1,7 +1,7 @@
+import { getAppStore } from "@/redux/storeAccess";
 import type { Node as TiptapNode } from "@tiptap/pm/model";
 import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
-import { getSession } from "next-auth/react";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -312,12 +312,22 @@ export const handleImageUpload = async (
   }
 
   try {
-    // Get NextAuth session for authentication
-    const session = await getSession();
-    const token = (session as { accessToken?: string } | null)?.accessToken;
+    // Get token from Redux store for authentication
+    const store = getAppStore();
+
+    if (!store) {
+      throw new Error(
+        "Redux store not initialized. This function can only be used in client components after authentication."
+      );
+    }
+
+    const state = store.getState();
+    const token = state?.auth?.accessToken;
 
     if (!token) {
-      throw new Error("Authentication required. Please sign in.");
+      throw new Error(
+        "Authentication required. Please sign in to upload images."
+      );
     }
 
     // Create FormData for upload

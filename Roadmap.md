@@ -1,9 +1,7 @@
 # Scholar-Flow Development Roadmap
 
 Author: Atik
-Last Updated: September 24, 2025
-
-> Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
+Last Updated: October 3, 2025
 
 ## Phase 1 – MVP (Weeks 1–6)
 
@@ -45,7 +43,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Enhanced dashboard with improved navigation & quick actions
 - [x] Component architecture cleanup & duplicate code removal
 
-### Week 4 – Basic Collections (Author: Atik+Salman) ✅
+### Week 4 – Basic Collections (Author: Atik + Salman) ✅
 
 **Key Features Delivered:**
 
@@ -89,24 +87,54 @@ Goal: Get a working core platform with minimal but functional features.
   - Draft/publish workflow with title editing and content persistence
   - Mobile-responsive design with keyboard shortcuts and accessibility support
 
-### Week 5 – AI Summarization & Semantic Search
+### Week 5 – AI Summarization and Chat (Author: Atik) ✅
 
-- [ ] Integrate OpenAI/LLM API for summarization
-- [ ] Vector search with embeddings & semantic paper search
-- [ ] Implement AI-powered search suggestions & filters
+- [x] Integrate OpenAI/LLM API for summarization
+- [x] Multi-provider AI service (Gemini 2.5-flash-lite primary, OpenAI secondary)
+- [x] AI paper summarization with performance optimization
+- [x] Intelligent paper insights with contextual chat
+- [x] Paper context integration throughout chat session
+- [x] Convert dashboard navigation to role-scoped routes with shared module wrappers
+- [x] Launch admin overview workspace with production-ready analytics cards
+- [x] Align workspace/member screens with new layout (name/email fixes, invitation UX)
+- [x] Update middleware, redirects, and AppSidebar to honor role-based landing pages
+- [x] Dynamic admin system monitoring with real-time metrics (CPU, memory, storage, database)
+- [x] Accurate CPU usage calculation using Node.js os module with idle/total times
+- [x] Smart storage tracking with dynamic estimation based on actual database usage
+- [x] Real-time polling (10s) with RTK Query and comprehensive health status dashboard
+- [x] Production-grade components (HealthCard, PerformanceBar, SystemInfoRow) with lazy loading
 
-### Week 6 – Annotation & Comments
+### Week 5.5 – Performance Optimization & Production Hardening (Author: Atik) ✅
 
-- [ ] Highlighting & annotations in PDF viewer
-- [ ] Comment threads & activity log for user interactions
-- [ ] Save annotations/comments (user & paper)
-- [ ] Dashboard analytics & versioning system
+- [x] Next.js compiler optimizations (SWC, modularizeImports, code splitting)
+- [x] Font & image optimization (AVIF/WebP, display swap, cache headers)
+- [x] React Query & component optimization (staleTime, memo, useMemo)
+- [x] Redis caching with free tier limits (30MB, 50KB per key)
+- [x] Database indexing (8 composite indexes on Paper, CollectionPaper)
+- [x] PWA implementation (service worker, offline support, manifest.json)
+- [x] Skeleton loading states (Dashboard, PaperCard, Table, Form)
+- [x] Production security headers (CSP, HSTS, X-Frame-Options)
+- [x] SEO enhancements (robots.txt, JSON-LD schema, Open Graph)
+- [x] HTTP caching middleware with ETag support
 
----
+### Week 6 – Stripe Payment and Analytics System (Author: Atik) ✅
 
-## Phase 2 – Advanced Features (Weeks 7–14)
+- [x] Stripe integration with live subscription billing (v1.1.6)
+- [x] Implement webhook handling for subscription events
+- [x] Add support for multiple payment methods (credit card, PayPal, etc.)
+- [x] Manage subscription upgrades/downgrades and proration
+- [x] Subscription plans & premium features (Stripe checkout, dashboard billing UI)
+- [x] Added billing page to dashboard with plan details and real-time status
+- [x] Modern Analytics Dashboard: Improved chart colors, legends, dark mode, progress bars
+- [x] Admin Analytics dashboard with user management and system information
 
-Goal: Collaboration tools, advanced research utilities, improved UI.
+### Week 6 – Annotation & Collaboration
+
+- [ ] PDF highlighting & annotation
+- [ ] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
+- [ ] Save user/paper comments
+- [ ] Threaded research discussions & activity log
+- [ ] Research notes system
 
 ### Week 7-8 – Citation System
 
@@ -125,7 +153,7 @@ Goal: Collaboration tools, advanced research utilities, improved UI.
 
 ### Week 13-14 – AI Research Assistant
 
-- [ ] Chat with uploaded papers & multi-document Q&A
+- [ ] Advanced AI summarization & insights
 - [ ] Final polishing & performance optimization
 
 ---
@@ -133,11 +161,6 @@ Goal: Collaboration tools, advanced research utilities, improved UI.
 ## Phase 3 – Premium & Integrations (Weeks 15–20)
 
 Goal: Monetization, admin tools, external integrations.
-
-### Week 15-16 – Payment System
-
-- [ ] Stripe & SSLCommerz integration
-- [ ] Subscription plans & premium features
 
 ### Week 17-18 – Admin & Integrations
 
@@ -152,5 +175,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 4.5 Complete – Advanced Workspace + Rich Text Editor with PDF/DOCX text extraction, preview, and comprehensive editing capabilities implemented ✅ (Authors: Atik+Salman)
-Last Updated: September 24, 2025
+Current Status: Week 6 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
+Last Updated: October 4, 2025

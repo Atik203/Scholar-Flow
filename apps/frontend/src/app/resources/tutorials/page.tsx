@@ -13,11 +13,11 @@ import {
   Video,
   Zap,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function TutorialsPage() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const isAuthenticated = !!session;
 
   return (

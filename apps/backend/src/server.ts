@@ -1,6 +1,11 @@
 import compression from "compression";
 import cors from "cors";
-import express, { RequestHandler } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -9,6 +14,10 @@ import { setupSwagger } from "./app/config/swagger";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
+import {
+  captureStripeRawBody,
+  isStripeWebhookPath,
+} from "./app/utils/stripeWebhook";
 
 // Initialize queue processing
 import "./app/services/pdfProcessingQueue";
@@ -16,8 +25,47 @@ import "./app/services/pdfProcessingQueue";
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
-// Security middleware
-app.use(helmet() as unknown as RequestHandler);
+// Trust proxy when behind Vercel/reverse proxy (required for rate limiting and IP detection)
+if (process.env.VERCEL === "1" || config.env === "production") {
+  app.set("trust proxy", true);
+  console.log("[Config] Trust proxy enabled for production/Vercel environment");
+}
+
+// Security middleware with enhanced CSP and security headers
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        connectSrc: [
+          "'self'",
+          "https://api.openai.com",
+          "https://generativelanguage.googleapis.com",
+        ],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: "deny", // Prevent clickjacking
+    },
+    noSniff: true, // Prevent MIME type sniffing
+    xssFilter: true, // Enable XSS filter
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin",
+    },
+  }) as unknown as RequestHandler
+);
 app.use(compression() as unknown as RequestHandler);
 
 // CORS configuration
@@ -31,20 +79,43 @@ app.use(
 // Rate limiting (typing relaxed for dev boot)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // TESTING: Increased from 100 to 1000 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
 });
 // Cast to any to avoid TS overload mismatch while bootstrapping
 app.use("/api/", limiter as unknown as import("express").RequestHandler);
 
-// Request parsing
-app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "50mb",
-  }) as unknown as RequestHandler
+// Stripe webhook - MUST be before express.json() to preserve raw body
+import { webhookController } from "./app/modules/Billing/webhook.controller";
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  captureStripeRawBody,
+  webhookController.handleStripeWebhook as unknown as RequestHandler
 );
+
+// Request parsing
+const jsonParser = express.json({ limit: "50mb" });
+const urlencodedParser = express.urlencoded({
+  extended: true,
+  limit: "50mb",
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return jsonParser(req, res, next);
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return urlencodedParser(req, res, next);
+});
 
 // Logging
 if (config.env !== "production") {
@@ -60,7 +131,7 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.0.5",
+    version: "1.1.5",
     documentation: "/docs",
     api: "/api",
     health: "/health",
@@ -91,6 +162,10 @@ if (process.env.VERCEL !== "1") {
   const startServer = (desiredPort: number, attempt = 0) => {
     const server = app.listen(desiredPort, () => {
       console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
+      console.log(
+        "[Boot] DATABASE_URL present:",
+        Boolean(process.env.DATABASE_URL)
+      );
       console.log(`📖 Environment: ${config.env}`);
     });
 

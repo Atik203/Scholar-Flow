@@ -20,3 +20,9 @@ export {
   useIsTablet,
   useMediaQuery,
 } from "./use-media-query";
+export {
+  useAuthGuard,
+  useAuthRoute,
+  useProtectedRoute,
+  usePublicRoute,
+} from "./useAuthGuard";

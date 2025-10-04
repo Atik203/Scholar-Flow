@@ -1,4 +1,5 @@
 import axios from "axios";
+import htmlDocx from "html-docx-js";
 import puppeteer from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
@@ -24,76 +25,339 @@ interface CreateUploadArgs {
   objectKey: string;
 }
 
+const MAX_SUMMARY_SOURCE_LENGTH = 60000;
+
+type PaperSummaryRecord = {
+  id: string;
+  workspaceId: string;
+  uploaderId: string;
+  workspaceOwnerId: string;
+  title: string;
+  abstract: string | null;
+  metadata: Record<string, unknown> | null;
+  contentHtml: string | null;
+  updatedAt: Date;
+};
+
+type StoredSummaryPayload = {
+  summary: string;
+  highlights?: string[];
+  followUpQuestions?: string[];
+  tokensUsed?: number | null;
+  provider?: string;
+};
+
+type InsightThreadRecord = {
+  id: string;
+  paperId: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  title: string | null;
+};
+
+type InsightMessageRecord = {
+  id: string;
+  threadId: string;
+  paperId: string;
+  role: string;
+  content: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: Date;
+  createdById: string | null;
+};
+
+const htmlToPlainText = (html: string | null | undefined) => {
+  if (!html) {
+    return "";
+  }
+
+  const stripped = sanitizeHtml(html, {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+
+  return stripped.replace(/\s+/g, " ").trim();
+};
+
+const truncateText = (text: string, limit: number) =>
+  text.length > limit ? text.slice(0, limit) : text;
+
+const normalizeMetadata = (
+  metadata: unknown
+): Record<string, unknown> | null => {
+  if (!metadata) {
+    return null;
+  }
+
+  if (typeof metadata === "object" && !Array.isArray(metadata)) {
+    return metadata as Record<string, unknown>;
+  }
+
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return typeof parsed === "object" && parsed !== null ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+};
+
+const serializeSummaryPayload = (payload: StoredSummaryPayload) =>
+  JSON.stringify(payload);
+
+const deserializeSummaryPayload = (value: string): StoredSummaryPayload => {
+  if (!value) {
+    return { summary: "" };
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed === "object" && parsed !== null) {
+      const normalized = parsed as StoredSummaryPayload;
+      if (typeof normalized.summary === "string") {
+        return normalized;
+      }
+    }
+  } catch {
+    // Fallback to treating the raw string as summary text
+  }
+
+  return { summary: value };
+};
+
+const normalizeInsightMetadata = (
+  value: unknown
+): Record<string, unknown> | null => {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
+};
+
 export const paperService = {
   async createUploadedPaper(args: CreateUploadArgs) {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
     console.log("Creating uploaded paper with authors:", input.authors);
 
-    const createStart = Date.now();
-    const created = await prisma.paper.create({
-      data: {
-        workspaceId,
-        uploaderId,
-        title: input.title || file.originalname,
-        metadata: {
-          authors: input.authors || [],
-          year: input.year,
-          source: input.source || "upload",
-        },
-        source: input.source || "upload",
-        file: {
-          create: {
-            storageProvider: "s3",
-            objectKey,
-            contentType: file.mimetype,
-            sizeBytes: file.size,
-            originalFilename: file.originalname,
-          },
-        },
-      },
-      include: { file: true },
-    });
-    console.log(`[PaperService] Prisma create: ${Date.now() - createStart}ms`);
-
-    // Dev verification: confirm relation back to user reflects the new paper
-    const verifyStart = Date.now();
     try {
-      const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
+      const createStart = Date.now();
+      const metadata = {
+        authors: input.authors || [],
+        year: input.year,
+        source: input.source || "upload",
+      };
+
+      const createdRows = await prisma.$queryRaw<
+        Array<{
+          id: string;
+          workspaceId: string;
+          uploaderId: string;
+          title: string;
+          abstract: string | null;
+          metadata: unknown;
+          source: string | null;
+          doi: string | null;
+          processingStatus: string;
+          createdAt: Date;
+          updatedAt: Date;
+          previewFileKey: string | null;
+          previewMimeType: string | null;
+          originalMimeType: string | null;
+          file_id: string | null;
+          storageProvider: string | null;
+          objectKey: string | null;
+          contentType: string | null;
+          sizeBytes: number | null;
+          originalFilename: string | null;
+          extractedAt: Date | null;
+        }>
+      >`
+      WITH inserted_paper AS (
+        INSERT INTO "Paper" (
+          id, "workspaceId", "uploaderId", title, metadata, source,
+          "processingStatus", "createdAt", "updatedAt", "isDeleted"
+        ) VALUES (
+          gen_random_uuid(),
+          ${workspaceId},
+          ${uploaderId},
+          ${input.title || file.originalname},
+          ${JSON.stringify(metadata)}::jsonb,
+          ${input.source || "upload"},
+          'UPLOADED'::"PaperProcessingStatus",
+          NOW(),
+          NOW(),
+          false
+        )
+        RETURNING
+          id,
+          "workspaceId",
+          "uploaderId",
+          title,
+          abstract,
+          metadata,
+          source,
+          doi,
+          "processingStatus",
+          "createdAt",
+          "updatedAt",
+          "previewFileKey",
+          "previewMimeType",
+          "originalMimeType"
+      ),
+      inserted_file AS (
+        INSERT INTO "PaperFile" (
+          id,
+          "paperId",
+          "storageProvider",
+          "objectKey",
+          "contentType",
+          "sizeBytes",
+          "originalFilename",
+          "createdAt",
+          "updatedAt",
+          "isDeleted"
+        )
+        SELECT
+          gen_random_uuid(),
+          p.id,
+          's3',
+          ${objectKey},
+          ${file.mimetype},
+          ${file.size},
+          ${file.originalname},
+          NOW(),
+          NOW(),
+          false
+        FROM inserted_paper p
+        RETURNING
+          id,
+          "paperId",
+          "storageProvider",
+          "objectKey",
+          "contentType",
+          "sizeBytes",
+          "originalFilename",
+          "extractedAt"
+      )
+      SELECT
+        p.id,
+        p."workspaceId",
+        p."uploaderId",
+        p.title,
+        p.abstract,
+        p.metadata,
+        p.source,
+        p.doi,
+        p."processingStatus",
+        p."createdAt",
+        p."updatedAt",
+        p."previewFileKey",
+        p."previewMimeType",
+        p."originalMimeType",
+        f.id AS file_id,
+        f."storageProvider",
+        f."objectKey",
+        f."contentType",
+        f."sizeBytes",
+        f."originalFilename",
+        f."extractedAt"
+      FROM inserted_paper p
+      LEFT JOIN inserted_file f ON f."paperId" = p.id
+    `;
+
+      const createdRow = createdRows[0];
+      if (!createdRow) {
+        throw new Error("Failed to create paper record");
+      }
+
+      const created = {
+        id: createdRow.id,
+        workspaceId: createdRow.workspaceId,
+        uploaderId: createdRow.uploaderId,
+        title: createdRow.title,
+        abstract: createdRow.abstract,
+        metadata: normalizeMetadata(createdRow.metadata),
+        source: createdRow.source,
+        doi: createdRow.doi,
+        processingStatus: createdRow.processingStatus,
+        createdAt: createdRow.createdAt,
+        updatedAt: createdRow.updatedAt,
+        previewFileKey: createdRow.previewFileKey,
+        previewMimeType: createdRow.previewMimeType,
+        originalMimeType: createdRow.originalMimeType,
+        file: createdRow.file_id
+          ? {
+              id: createdRow.file_id,
+              storageProvider: createdRow.storageProvider,
+              objectKey: createdRow.objectKey,
+              contentType: createdRow.contentType,
+              sizeBytes: createdRow.sizeBytes,
+              originalFilename: createdRow.originalFilename,
+              extractedAt: createdRow.extractedAt,
+            }
+          : null,
+      };
+      console.log(
+        `[PaperService] Prisma create: ${Date.now() - createStart}ms`
+      );
+
+      // Dev verification: confirm relation back to user reflects the new paper
+      const verifyStart = Date.now();
+      try {
+        const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*)::bigint as count FROM "Paper" WHERE "uploaderId" = ${uploaderId} AND "isDeleted" = false
       `;
-      console.log(
-        "[PaperUpload] User",
-        uploaderId,
-        "now has uploadedPapers count:",
-        Number(count)
-      );
-    } catch (e) {
-      console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
-    }
-    console.log(
-      `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
-    );
-
-    // Queue document extraction for background processing (non-blocking)
-    const queueStart = Date.now();
-    // Fire and forget - don't wait for Redis queue operations
-    queueDocumentExtraction(created.id)
-      .then(() => {
         console.log(
-          `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
+          "[PaperUpload] User",
+          uploaderId,
+          "now has uploadedPapers count:",
+          Number(count)
         );
-      })
-      .catch((error) => {
-        console.error(
-          `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
-          error
-        );
-      });
-    console.log(
-      `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
-    );
+      } catch (e) {
+        console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
+      }
+      console.log(
+        `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
+      );
 
-    return created;
+      // Queue document extraction for background processing (non-blocking)
+      const queueStart = Date.now();
+      // Fire and forget - don't wait for Redis queue operations
+      queueDocumentExtraction(created.id)
+        .then(() => {
+          console.log(
+            `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
+          );
+        })
+        .catch((error) => {
+          console.error(
+            `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
+            error
+          );
+        });
+      console.log(
+        `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
+      );
+
+      return created;
+    } catch (error) {
+      console.error("❌ ERROR IN createUploadedPaper:", {
+        error,
+        errorMessage: (error as Error)?.message,
+        errorCode: (error as any)?.code,
+        errorDetail: (error as any)?.detail,
+        errorColumn: (error as any)?.column,
+        errorTable: (error as any)?.table,
+        errorConstraint: (error as any)?.constraint,
+        stack: (error as Error)?.stack,
+      });
+      throw error;
+    }
   },
 
   async countByUser(userId: string) {
@@ -305,6 +569,497 @@ export const paperService = {
     // Return updated paper
     return this.getById(id);
   },
+
+  async getPaperForSummary(
+    paperId: string
+  ): Promise<PaperSummaryRecord | null> {
+    const result = await prisma.$queryRaw<
+      Array<Omit<PaperSummaryRecord, "metadata"> & { metadata: any }>
+    >`
+      SELECT 
+        p.id,
+        p."workspaceId",
+        p."uploaderId",
+        w."ownerId" AS "workspaceOwnerId",
+        p.title,
+        p.abstract,
+        p.metadata,
+        p."contentHtml",
+        p."updatedAt"
+      FROM "Paper" p
+      JOIN "Workspace" w ON w.id = p."workspaceId"
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (!result.length) {
+      return null;
+    }
+
+    const record = result[0];
+
+    return {
+      ...record,
+      metadata: normalizeMetadata(record.metadata),
+    };
+  },
+
+  async userHasSummaryAccess(
+    record: PaperSummaryRecord,
+    userId: string
+  ): Promise<boolean> {
+    if (record.uploaderId === userId || record.workspaceOwnerId === userId) {
+      return true;
+    }
+
+    const membership = await prisma.$queryRaw<Array<{ exists: number }>>`
+      SELECT 1 as exists
+      FROM "WorkspaceMember"
+      WHERE "workspaceId" = ${record.workspaceId}
+        AND "userId" = ${userId}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    return membership.length > 0;
+  },
+
+  async getSummarySourceText(
+    paperId: string,
+    record: PaperSummaryRecord
+  ): Promise<{
+    text: string;
+    source: "chunks" | "content" | "abstract" | "metadata" | "empty";
+    chunkCount: number;
+  }> {
+    const chunks = await prisma.$queryRaw<Array<{ content: string }>>`
+      SELECT content
+      FROM "PaperChunk"
+      WHERE "paperId" = ${paperId} AND "isDeleted" = false
+      ORDER BY idx ASC
+      LIMIT 200
+    `;
+
+    const chunkText = chunks
+      .map((chunk) => chunk.content?.trim())
+      .filter((content): content is string => Boolean(content))
+      .join("\n\n");
+
+    if (chunkText) {
+      return {
+        text: truncateText(chunkText, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "chunks",
+        chunkCount: chunks.length,
+      };
+    }
+
+    const contentText = htmlToPlainText(record.contentHtml);
+    if (contentText) {
+      return {
+        text: truncateText(contentText, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "content",
+        chunkCount: chunks.length,
+      };
+    }
+
+    if (record.abstract) {
+      return {
+        text: truncateText(record.abstract, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "abstract",
+        chunkCount: chunks.length,
+      };
+    }
+
+    const metadataAbstract = record.metadata?.abstract;
+    if (typeof metadataAbstract === "string" && metadataAbstract.trim()) {
+      return {
+        text: truncateText(metadataAbstract, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "metadata",
+        chunkCount: chunks.length,
+      };
+    }
+
+    return {
+      text: "",
+      source: "empty",
+      chunkCount: chunks.length,
+    };
+  },
+
+  async findStoredSummary(
+    paperId: string,
+    promptHash: string
+  ): Promise<
+    | (StoredSummaryPayload & {
+        model: string;
+        updatedAt: Date;
+      })
+    | null
+  > {
+    const rows = await prisma.$queryRaw<
+      Array<{ summary: string; model: string; updatedAt: Date }>
+    >`
+      SELECT summary, model, "updatedAt"
+      FROM "AISummary"
+      WHERE "paperId" = ${paperId}
+        AND "promptHash" = ${promptHash}
+        AND "isDeleted" = false
+      ORDER BY "updatedAt" DESC
+      LIMIT 1
+    `;
+
+    if (!rows.length) {
+      return null;
+    }
+
+    const parsed = deserializeSummaryPayload(rows[0].summary);
+
+    return {
+      ...parsed,
+      model: rows[0].model,
+      updatedAt: rows[0].updatedAt,
+    };
+  },
+
+  async upsertSummaryRecord(args: {
+    paperId: string;
+    model: string;
+    promptHash: string;
+    payload: StoredSummaryPayload;
+  }) {
+    const summaryJson = serializeSummaryPayload(args.payload);
+
+    await prisma.$executeRaw`
+      INSERT INTO "AISummary" (id, "paperId", model, summary, "promptHash", "createdAt", "updatedAt", "isDeleted")
+      VALUES (
+        gen_random_uuid(),
+        ${args.paperId},
+        ${args.model},
+        ${summaryJson},
+        ${args.promptHash},
+        NOW(),
+        NOW(),
+        false
+      )
+      ON CONFLICT ("paperId", model, "promptHash")
+      DO UPDATE SET
+        summary = EXCLUDED.summary,
+        "updatedAt" = NOW(),
+        "isDeleted" = false
+    `;
+  },
+
+  async getInsightThread(
+    paperId: string,
+    userId: string
+  ): Promise<InsightThreadRecord | null> {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string | null;
+      }>
+    >`
+      SELECT id, "paperId", "userId", "createdAt", "updatedAt", title
+      FROM "AIInsightThread"
+      WHERE "paperId" = ${paperId}
+        AND "userId" = ${userId}
+        AND "isDeleted" = false
+      ORDER BY "updatedAt" DESC
+      LIMIT 1
+    `;
+
+    if (!rows.length) {
+      return null;
+    }
+
+    return rows[0];
+  },
+
+  async getOrCreateInsightThread(
+    paperId: string,
+    userId: string,
+    threadId?: string
+  ): Promise<InsightThreadRecord> {
+    // If threadId is provided, try to get that specific thread
+    if (threadId) {
+      const rows = await prisma.$queryRaw<
+        Array<{
+          id: string;
+          paperId: string;
+          userId: string;
+          createdAt: Date;
+          updatedAt: Date;
+          title: string | null;
+        }>
+      >`
+        SELECT id, "paperId", "userId", "createdAt", "updatedAt", title
+        FROM "AIInsightThread"
+        WHERE id = ${threadId}
+          AND "paperId" = ${paperId}
+          AND "userId" = ${userId}
+          AND "isDeleted" = false
+      `;
+
+      if (rows.length) {
+        return rows[0];
+      }
+    }
+
+    // Otherwise, get or create a default thread for this user/paper
+    const existing = await this.getInsightThread(paperId, userId);
+    if (existing) {
+      return existing;
+    }
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string | null;
+      }>
+    >`
+      INSERT INTO "AIInsightThread" (id, "paperId", "userId", title, metadata, "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), ${paperId}, ${userId}, NULL, NULL, NOW(), NOW(), false)
+      RETURNING id, "paperId", "userId", "createdAt", "updatedAt", title
+    `;
+
+    if (!rows.length) {
+      throw new Error("Failed to create AI insight thread");
+    }
+
+    return rows[0];
+  },
+
+  async recordInsightMessage(
+    threadId: string,
+    messageData: {
+      role: "user" | "assistant" | "system";
+      content: string;
+      metadata?: Record<string, unknown> | null;
+      createdById?: string | null;
+    }
+  ): Promise<InsightMessageRecord> {
+    // Get paperId from thread
+    const threadRows = await prisma.$queryRaw<Array<{ paperId: string }>>`
+      SELECT "paperId" FROM "AIInsightThread" WHERE id = ${threadId} AND "isDeleted" = false
+    `;
+
+    if (!threadRows.length) {
+      throw new Error("Thread not found");
+    }
+
+    const paperId = threadRows[0].paperId;
+    const metadataJson = messageData.metadata
+      ? JSON.stringify(messageData.metadata)
+      : null;
+    const createdById = messageData.createdById ?? null;
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+        createdById: string | null;
+      }>
+    >`
+      INSERT INTO "AIInsightMessage" (id, "threadId", "paperId", role, content, metadata, "createdById", "createdAt", "updatedAt", "isDeleted")
+      VALUES (
+        gen_random_uuid(),
+        ${threadId},
+        ${paperId},
+        ${messageData.role},
+        ${messageData.content},
+        ${metadataJson}::jsonb,
+        ${createdById},
+        NOW(),
+        NOW(),
+        false
+      )
+      RETURNING id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
+    `;
+
+    if (!rows.length) {
+      throw new Error("Failed to persist AI insight message");
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "AIInsightThread"
+      SET "updatedAt" = NOW()
+      WHERE id = ${threadId}
+    `;
+
+    const row = rows[0];
+    return {
+      id: row.id,
+      threadId: row.threadId,
+      paperId: row.paperId,
+      role: row.role,
+      content: row.content,
+      metadata: normalizeInsightMetadata(row.metadata),
+      createdAt: row.createdAt,
+      createdById: row.createdById,
+    };
+  },
+
+  async listInsightMessages(
+    threadId: string,
+    page: number = 1,
+    limit: number = 20
+  ): Promise<InsightMessageRecord[]> {
+    const offset = (page - 1) * limit;
+
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+        createdById: string | null;
+      }>
+    >`
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
+      FROM "AIInsightMessage"
+      WHERE "threadId" = ${threadId}
+        AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `;
+
+    return rows.reverse().map((row) => ({
+      id: row.id,
+      threadId: row.threadId,
+      paperId: row.paperId,
+      role: row.role,
+      content: row.content,
+      metadata: normalizeInsightMetadata(row.metadata),
+      createdAt: row.createdAt,
+      createdById: row.createdById,
+    }));
+  },
+
+  async getRecentInsightMessages(
+    threadId: string,
+    limit = 6
+  ): Promise<InsightMessageRecord[]> {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        threadId: string;
+        paperId: string;
+        role: string;
+        content: string;
+        metadata: unknown;
+        createdAt: Date;
+        createdById: string | null;
+      }>
+    >`
+      SELECT id, "threadId", "paperId", role, content, metadata, "createdAt", "createdById"
+      FROM "AIInsightMessage"
+      WHERE "threadId" = ${threadId}
+        AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit}
+    `;
+
+    return rows
+      .map((row) => ({
+        id: row.id,
+        threadId: row.threadId,
+        paperId: row.paperId,
+        role: row.role,
+        content: row.content,
+        metadata: normalizeInsightMetadata(row.metadata),
+        createdAt: row.createdAt,
+        createdById: row.createdById,
+      }))
+      .reverse();
+  },
+
+  async listInsightConversation(
+    paperId: string,
+    userId: string
+  ): Promise<{
+    thread: InsightThreadRecord;
+    messages: InsightMessageRecord[];
+  } | null> {
+    const thread = await this.getInsightThread(paperId, userId);
+    if (!thread) {
+      return null;
+    }
+
+    const messages = await this.listInsightMessages(thread.id);
+    return { thread, messages };
+  },
+
+  async getUserInsightThreads(
+    paperId: string,
+    userId: string
+  ): Promise<
+    Array<{
+      id: string;
+      paperId: string;
+      userId: string;
+      createdAt: Date;
+      updatedAt: Date;
+      _count?: { messages: number };
+      messages?: InsightMessageRecord[];
+    }>
+  > {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        messageCount: bigint;
+      }>
+    >`
+      SELECT 
+        t.id,
+        t."paperId",
+        t."userId",
+        t."createdAt",
+        t."updatedAt",
+        COUNT(m.id) as "messageCount"
+      FROM "AIInsightThread" t
+      LEFT JOIN "AIInsightMessage" m ON t.id = m."threadId" AND m."isDeleted" = false
+      WHERE t."paperId" = ${paperId}
+        AND t."userId" = ${userId}
+        AND t."isDeleted" = false
+      GROUP BY t.id, t."paperId", t."userId", t."createdAt", t."updatedAt"
+      ORDER BY t."updatedAt" DESC
+    `;
+
+    const messagesByThread = await Promise.all(
+      rows.map((row) => this.getRecentInsightMessages(row.id, 10))
+    );
+
+    return rows.map((row, index) => ({
+      id: row.id,
+      paperId: row.paperId,
+      userId: row.userId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      _count: { messages: Number(row.messageCount) },
+      messages: messagesByThread[index],
+    }));
+  },
 };
 
 // HTML sanitization configuration for rich text editor content
@@ -395,13 +1150,13 @@ export const editorPaperService = {
       INSERT INTO "Paper" (
         id, "workspaceId", "uploaderId", title, "contentHtml", 
         source, "isDraft", "isPublished", "processingStatus", 
-        metadata, "createdAt", "updatedAt"
+        metadata, "createdAt", "updatedAt", "isDeleted"
       ) VALUES (
         gen_random_uuid(), ${input.workspaceId}, ${uploaderId}, 
         ${input.title}, ${sanitizedContent}, 'editor', 
         ${input.isDraft ?? true}, false, 'PROCESSED',
         ${JSON.stringify(metadata)}::jsonb,
-        NOW(), NOW()
+        NOW(), NOW(), false
       )
       RETURNING id, title, "isDraft", "isPublished", "createdAt"
     `;
@@ -706,8 +1461,6 @@ export const exportService = {
 
   // Generate DOCX from HTML content (using html-docx-js)
   async generateDOCX(paperId: string, userId: string): Promise<Buffer> {
-    const htmlDocx = require("html-docx-js");
-
     // Get paper content
     const paper = await editorPaperService.getEditorPaperContent(
       paperId,
@@ -806,12 +1559,22 @@ export const exportService = {
       </html>
     `;
 
-    // Generate DOCX and convert Blob to Buffer
-    const docxBlob = htmlDocx.asBlob(htmlContent);
+    // Generate DOCX and convert to Buffer for storage/download
+    const docxBlob = htmlDocx.asBlob(htmlContent) as Buffer | Blob;
 
-    // Convert Blob to Buffer properly
-    const arrayBuffer = await docxBlob.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    if (Buffer.isBuffer(docxBlob)) {
+      return docxBlob;
+    }
+
+    if (
+      "arrayBuffer" in docxBlob &&
+      typeof docxBlob.arrayBuffer === "function"
+    ) {
+      const arrayBuffer = await docxBlob.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    }
+
+    throw new Error("DOCX export returned unsupported blob type");
   },
 };
 
@@ -819,22 +1582,103 @@ export const exportService = {
 export async function ensureDevUserAndWorkspace(devEmail?: string) {
   const email =
     devEmail || process.env.DEV_UPLOAD_USER_EMAIL || "dev-uploader@example.com";
-  let user = await prisma.user.findUnique({ where: { email } });
+  let [user] = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      email: string;
+      name: string | null;
+      role: string;
+    }>
+  >`
+    SELECT id, email, name, role
+    FROM "User"
+    WHERE email = ${email}
+    LIMIT 1
+  `;
+
   if (!user) {
-    user = await prisma.user.create({
-      data: { email, name: "Dev Uploader", role: "RESEARCHER" },
-    });
+    const insertedUsers = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string;
+        name: string | null;
+        role: string;
+      }>
+    >`
+      INSERT INTO "User" (id, email, name, role, "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), ${email}, 'Dev Uploader', 'RESEARCHER'::"Role", NOW(), NOW(), false)
+      RETURNING id, email, name, role
+    `;
+    user = insertedUsers[0];
   }
-  let workspace = await prisma.workspace.findFirst({
-    where: { ownerId: user.id },
-  });
+
+  if (!user) {
+    throw new Error("Failed to ensure development user");
+  }
+
+  let [workspace] = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      name: string;
+      ownerId: string;
+    }>
+  >`
+    SELECT id, name, "ownerId"
+    FROM "Workspace"
+    WHERE "ownerId" = ${user.id}
+    ORDER BY "createdAt" ASC
+    LIMIT 1
+  `;
+
   if (!workspace) {
-    workspace = await prisma.workspace.create({
-      data: { name: "Dev Workspace", ownerId: user.id },
-    });
-    await prisma.workspaceMember.create({
-      data: { workspaceId: workspace.id, userId: user.id, role: "RESEARCHER" },
-    });
+    const insertedWorkspaces = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        name: string;
+        ownerId: string;
+      }>
+    >`
+      INSERT INTO "Workspace" (id, name, "ownerId", "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), 'Dev Workspace', ${user.id}, NOW(), NOW(), false)
+      RETURNING id, name, "ownerId"
+    `;
+    workspace = insertedWorkspaces[0];
   }
+
+  if (!workspace) {
+    throw new Error("Failed to ensure development workspace");
+  }
+
+  const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "WorkspaceMember"
+    WHERE "workspaceId" = ${workspace.id}
+      AND "userId" = ${user.id}
+    LIMIT 1
+  `;
+
+  if (!memberRows.length) {
+    await prisma.$executeRaw`
+      INSERT INTO "WorkspaceMember" (
+        id,
+        "workspaceId",
+        "userId",
+        role,
+        "createdAt",
+        "updatedAt",
+        "isDeleted"
+      ) VALUES (
+        gen_random_uuid(),
+        ${workspace.id},
+        ${user.id},
+        'RESEARCHER'::"Role",
+        NOW(),
+        NOW(),
+        false
+      )
+      ON CONFLICT ("workspaceId", "userId") DO NOTHING
+    `;
+  }
+
   return { user, workspace };
 }

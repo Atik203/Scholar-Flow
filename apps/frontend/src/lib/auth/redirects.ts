@@ -1,11 +1,24 @@
 "use client";
 
+import { getRoleSlug } from "./roles";
+
 /**
  * Utility functions for handling authentication redirects and navigation
  */
 
 /**
+ * Get the role-based dashboard URL for a user
+ * @param role - User's role
+ * @returns Role-scoped dashboard path (e.g., /dashboard/researcher)
+ */
+export function getRoleDashboardUrl(role?: string): string {
+  const roleSlug = getRoleSlug(role);
+  return `/dashboard/${roleSlug}`;
+}
+
+/**
  * Get the callback URL from query parameters or use a default
+ * Note: defaultUrl will be overridden with role-specific path if user session is available
  */
 export function getCallbackUrl(
   searchParams?: URLSearchParams,
@@ -45,12 +58,15 @@ export function validateCallbackUrl(
       // Prevent open redirects - only allow our own paths
       const allowedPaths = [
         "/dashboard",
+        "/dashboard/researcher",
+        "/dashboard/pro-researcher",
+        "/dashboard/team-lead",
+        "/dashboard/admin",
         "/profile",
         "/papers",
         "/collections",
         "/collaborate",
         "/settings",
-        "/admin",
       ];
 
       const isAllowed = allowedPaths.some(
@@ -108,42 +124,66 @@ export function buildRegisterUrl(callbackUrl?: string): string {
 
 /**
  * Handle post-authentication redirect
+ * @param isSuccess - Whether authentication was successful
+ * @param searchParams - URL search parameters that may contain callbackUrl
+ * @param errorUrl - URL to redirect to on error
+ * @param userRole - Optional user role to redirect to role-specific dashboard
  */
 export function handleAuthRedirect(
   isSuccess: boolean,
   searchParams?: URLSearchParams,
-  errorUrl: string = "/login"
+  errorUrl: string = "/login",
+  userRole?: string
 ): string {
   if (isSuccess) {
-    return getCallbackUrl(searchParams);
+    const callbackUrl = getCallbackUrl(searchParams);
+
+    // If callback is the generic /dashboard and we have a role, use role-specific dashboard
+    if (callbackUrl === "/dashboard" && userRole) {
+      return getRoleDashboardUrl(userRole);
+    }
+
+    return callbackUrl;
   }
   return errorUrl;
 }
 
 /**
  * Smart navigation based on authentication status
+ * @param isAuthenticated - Whether the user is authenticated
+ * @param currentPath - Current pathname
+ * @param userRole - Optional user role for role-specific dashboard redirect
  */
 export function getSmartRedirectUrl(
   isAuthenticated: boolean,
-  currentPath: string
+  currentPath: string,
+  userRole?: string
 ): string | null {
   // If user is authenticated and on auth pages, redirect to dashboard
   if (
     isAuthenticated &&
     ["/login", "/register", "/auth/signin"].includes(currentPath)
   ) {
+    // If we have a user role, redirect to role-specific dashboard
+    if (userRole) {
+      return getRoleDashboardUrl(userRole);
+    }
+    // Fallback to generic dashboard (middleware will redirect to role-specific)
     return "/dashboard";
   }
 
   // If user is not authenticated and on protected routes, redirect to login
   const protectedRoutes = [
     "/dashboard",
+    "/dashboard/researcher",
+    "/dashboard/pro-researcher",
+    "/dashboard/team-lead",
+    "/dashboard/admin",
     "/profile",
     "/papers",
     "/collections",
     "/collaborate",
     "/settings",
-    "/admin",
   ];
   const isProtectedRoute = protectedRoutes.some(
     (route) => currentPath === route || currentPath.startsWith(route + "/")
@@ -158,12 +198,21 @@ export function getSmartRedirectUrl(
 
 /**
  * Enhanced "Get Started" navigation logic
+ * @param isAuthenticated - Whether the user is authenticated
+ * @param currentPath - Current pathname
+ * @param userRole - Optional user role for role-specific dashboard redirect
  */
 export function getGetStartedUrl(
   isAuthenticated: boolean,
-  currentPath: string = "/"
+  currentPath: string = "/",
+  userRole?: string
 ): string {
   if (isAuthenticated) {
+    // If we have a user role, redirect to role-specific dashboard
+    if (userRole) {
+      return getRoleDashboardUrl(userRole);
+    }
+    // Fallback to generic dashboard (middleware will redirect to role-specific)
     return "/dashboard";
   }
 

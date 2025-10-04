@@ -1,5 +1,7 @@
+import { Prisma } from "@prisma/client";
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
+import { aiService } from "../modules/AI/ai.service";
 import { StorageService } from "../modules/papers/StorageService";
 import prisma from "../shared/prisma";
 import { docxToPdfService } from "./docxToPdfService";
@@ -25,11 +27,110 @@ export interface DocumentProcessingOptions {
   includeHtml?: boolean;
 }
 
+type DocumentPaperRecord = {
+  id: string;
+  title: string;
+  abstract: string | null;
+  metadata: unknown;
+  workspaceId: string;
+  uploaderId: string;
+  processingStatus: string;
+  file: null | {
+    id: string;
+    objectKey: string;
+    contentType: string | null;
+    originalFilename: string | null;
+  };
+};
+
+type DocumentPaperRow = {
+  id: string;
+  title: string;
+  abstract: string | null;
+  metadata: unknown;
+  workspaceId: string;
+  uploaderId: string;
+  processingStatus: string;
+  fileId: string | null;
+  objectKey: string | null;
+  contentType: string | null;
+  originalFilename: string | null;
+};
+
 export class DocumentExtractionService {
   private storage: StorageService;
 
   constructor() {
     this.storage = new StorageService();
+  }
+
+  private mapPaperRow(row: DocumentPaperRow): DocumentPaperRecord {
+    return {
+      id: row.id,
+      title: row.title,
+      abstract: row.abstract,
+      metadata: row.metadata,
+      workspaceId: row.workspaceId,
+      uploaderId: row.uploaderId,
+      processingStatus: row.processingStatus,
+      file: row.fileId
+        ? {
+            id: row.fileId,
+            objectKey: row.objectKey ?? "",
+            contentType: row.contentType,
+            originalFilename: row.originalFilename,
+          }
+        : null,
+    };
+  }
+
+  private async fetchPaperWithFile(
+    paperId: string
+  ): Promise<DocumentPaperRecord | null> {
+    const rows = await prisma.$queryRaw<DocumentPaperRow[]>`
+      SELECT
+        p.id,
+        p.title,
+        p.abstract,
+        p.metadata,
+        p."workspaceId",
+        p."uploaderId",
+        p."processingStatus",
+        pf.id                AS "fileId",
+        pf."objectKey",
+        pf."contentType",
+        pf."originalFilename"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON pf."paperId" = p.id AND pf."isDeleted" = false
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+      LIMIT 1
+    `;
+
+    const row = rows[0];
+    return row ? this.mapPaperRow(row) : null;
+  }
+
+  private async fetchUnprocessedPapers(): Promise<DocumentPaperRecord[]> {
+    const rows = await prisma.$queryRaw<DocumentPaperRow[]>`
+      SELECT
+        p.id,
+        p.title,
+        p.abstract,
+        p.metadata,
+        p."workspaceId",
+        p."uploaderId",
+        p."processingStatus",
+        pf.id                AS "fileId",
+        pf."objectKey",
+        pf."contentType",
+        pf."originalFilename"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON pf."paperId" = p.id AND pf."isDeleted" = false
+      WHERE p."processingStatus" = 'UPLOADED'
+        AND p."isDeleted" = false
+    `;
+
+    return rows.map((row) => this.mapPaperRow(row));
   }
 
   /**
@@ -45,10 +146,7 @@ export class DocumentExtractionService {
       );
 
       // Get paper and file info
-      const paper = await prisma.paper.findUnique({
-        where: { id: paperId },
-        include: { file: true },
-      });
+      const paper = await this.fetchPaperWithFile(paperId);
 
       if (!paper || !paper.file) {
         console.error(
@@ -65,10 +163,11 @@ export class DocumentExtractionService {
       );
 
       // Update processing status
-      await prisma.paper.update({
-        where: { id: paperId },
-        data: { processingStatus: "PROCESSING" },
-      });
+      await prisma.$executeRaw`
+        UPDATE "Paper"
+        SET "processingStatus" = 'PROCESSING', "updatedAt" = NOW()
+        WHERE id = ${paperId}
+      `;
 
       // Download file from S3
       console.log(
@@ -100,13 +199,13 @@ export class DocumentExtractionService {
       }
 
       if (!extractionResult.success) {
-        await prisma.paper.update({
-          where: { id: paperId },
-          data: {
-            processingStatus: "FAILED",
-            processingError: extractionResult.error,
-          },
-        });
+        await prisma.$executeRaw`
+          UPDATE "Paper"
+          SET "processingStatus" = 'FAILED',
+              "processingError" = ${extractionResult.error},
+              "updatedAt" = NOW()
+          WHERE id = ${paperId}
+        `;
         return extractionResult;
       }
 
@@ -155,41 +254,89 @@ export class DocumentExtractionService {
         `[DocumentExtraction] Updating paper status to PROCESSED for paper: ${paperId}`
       );
 
-      const paperUpdateData: any = {
-        processingStatus: "PROCESSED",
-        processedAt: new Date(),
-        originalMimeType:
-          paper.file?.contentType ||
-          `application/${fileExtension === "docx" ? "vnd.openxmlformats-officedocument.wordprocessingml.document" : fileExtension}`,
-        extractionVersion: 1,
-      };
+      const originalMimeType =
+        paper.file?.contentType ||
+        `application/${
+          fileExtension === "docx"
+            ? "vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : fileExtension
+        }`;
 
-      // Add preview data if available
+      const sanitizedHtml = extractionResult.htmlContent
+        ? this.sanitizeHtmlForEditor(extractionResult.htmlContent)
+        : null;
+
+      const paperSetClauses: Prisma.Sql[] = [
+        Prisma.sql`"processingStatus" = 'PROCESSED'`,
+        Prisma.sql`"processedAt" = NOW()`,
+        Prisma.sql`"originalMimeType" = ${originalMimeType}`,
+        Prisma.sql`"extractionVersion" = 1`,
+      ];
+
       if (previewFileKey && previewMimeType) {
-        paperUpdateData.previewFileKey = previewFileKey;
-        paperUpdateData.previewMimeType = previewMimeType;
-      }
-
-      // Store sanitized HTML content for rich text editor (future use)
-      if (extractionResult.htmlContent) {
-        paperUpdateData.contentHtml = this.sanitizeHtmlForEditor(
-          extractionResult.htmlContent
+        paperSetClauses.push(Prisma.sql`"previewFileKey" = ${previewFileKey}`);
+        paperSetClauses.push(
+          Prisma.sql`"previewMimeType" = ${previewMimeType}`
         );
       }
 
+      if (sanitizedHtml) {
+        paperSetClauses.push(Prisma.sql`"contentHtml" = ${sanitizedHtml}`);
+      }
+
+      paperSetClauses.push(Prisma.sql`"updatedAt" = NOW()`);
+
       await Promise.all([
-        prisma.paper.update({
-          where: { id: paperId },
-          data: paperUpdateData,
-        }),
-        prisma.paperFile.update({
-          where: { paperId },
-          data: {
-            pageCount: extractionResult.pageCount,
-            extractedAt: new Date(),
-          },
-        }),
+        prisma.$executeRaw(
+          Prisma.sql`
+            UPDATE "Paper"
+            SET ${Prisma.join(paperSetClauses)}
+            WHERE id = ${paperId}
+          `
+        ),
+        prisma.$executeRaw`
+          UPDATE "PaperFile"
+          SET "pageCount" = ${extractionResult.pageCount ?? null},
+              "extractedAt" = NOW(),
+              "updatedAt" = NOW()
+          WHERE "paperId" = ${paperId}
+        `,
       ]);
+
+      const metadataText =
+        extractionResult.text ||
+        extractionResult.chunks?.map((chunk) => chunk.content).join("\n") ||
+        "";
+
+      if (metadataText.trim().length > 0) {
+        try {
+          await aiService.extractAndPersistMetadata({
+            paperId,
+            text: metadataText,
+            originalTitle: paper.title,
+            currentTitle: paper.title,
+            currentAbstract: paper.abstract,
+            existingMetadata: paper.metadata as unknown as Record<
+              string,
+              unknown
+            > | null,
+            workspaceId: paper.workspaceId,
+            uploaderId: paper.uploaderId,
+          });
+          console.log(
+            `[DocumentExtraction] AI metadata enrichment applied for paper: ${paperId}`
+          );
+        } catch (metadataError) {
+          console.error(
+            `[DocumentExtraction] AI metadata enrichment failed for paper: ${paperId}`,
+            metadataError
+          );
+        }
+      } else {
+        console.warn(
+          `[DocumentExtraction] Skipping AI metadata enrichment for paper: ${paperId} (no text available)`
+        );
+      }
 
       console.log(
         `[DocumentExtraction] Successfully completed extraction for paper: ${paperId}`
@@ -202,16 +349,18 @@ export class DocumentExtractionService {
         error
       );
 
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       // Update processing status to failed
       try {
-        await prisma.paper.update({
-          where: { id: paperId },
-          data: {
-            processingStatus: "FAILED",
-            processingError:
-              error instanceof Error ? error.message : "Unknown error",
-          },
-        });
+        await prisma.$executeRaw`
+          UPDATE "Paper"
+          SET "processingStatus" = 'FAILED',
+              "processingError" = ${errorMessage},
+              "updatedAt" = NOW()
+          WHERE id = ${paperId}
+        `;
       } catch (updateError) {
         console.error(
           `[DocumentExtraction] Failed to update error status for paper ${paperId}:`,
@@ -221,7 +370,7 @@ export class DocumentExtractionService {
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
       };
     }
   }
@@ -389,7 +538,6 @@ export class DocumentExtractionService {
     const sections = this.identifyDocumentSections(text);
 
     let chunkIndex = 0;
-    let currentPage = 1;
     const safePageCount = Math.max(1, pageCount);
 
     // Process each section
@@ -564,7 +712,7 @@ export class DocumentExtractionService {
     let lastIndex = 0;
 
     while ((match = htmlSectionRegex.exec(html)) !== null) {
-      const [fullMatch, tag, attributes, content] = match;
+      const [fullMatch, tag] = match;
 
       // Add any content before this match
       if (match.index > lastIndex) {
@@ -700,9 +848,10 @@ export class DocumentExtractionService {
     }>
   ): Promise<void> {
     // Delete existing chunks first
-    await prisma.paperChunk.deleteMany({
-      where: { paperId },
-    });
+    await prisma.$executeRaw`
+      DELETE FROM "PaperChunk"
+      WHERE "paperId" = ${paperId}
+    `;
 
     // Prepare chunks for insertion
     const prepared = chunks
@@ -717,7 +866,17 @@ export class DocumentExtractionService {
       .filter((c) => c.content && c.content.length > 0);
 
     if (prepared.length > 0) {
-      await prisma.paperChunk.createMany({ data: prepared });
+      const values = prepared.map(
+        (chunk) =>
+          Prisma.sql`(gen_random_uuid(), ${paperId}, ${chunk.idx}, ${chunk.page ?? null}, ${chunk.content}, ${chunk.tokenCount ?? null}, NOW(), NOW(), false)`
+      );
+
+      await prisma.$executeRaw(
+        Prisma.sql`
+          INSERT INTO "PaperChunk" (id, "paperId", "idx", "page", "content", "tokenCount", "createdAt", "updatedAt", "isDeleted")
+          VALUES ${Prisma.join(values)}
+        `
+      );
     }
   }
 
@@ -725,13 +884,7 @@ export class DocumentExtractionService {
    * Process all unprocessed papers with the new extraction service
    */
   async processUnprocessedPapers(): Promise<void> {
-    const unprocessedPapers = await prisma.paper.findMany({
-      where: {
-        processingStatus: "UPLOADED",
-        isDeleted: false,
-      },
-      include: { file: true },
-    });
+    const unprocessedPapers = await this.fetchUnprocessedPapers();
 
     console.log(
       `[DocumentExtraction] Found ${unprocessedPapers.length} unprocessed papers`
