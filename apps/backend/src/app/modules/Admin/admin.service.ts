@@ -3,6 +3,7 @@
  * Handles admin dashboard data operations with optimized queries
  */
 
+import os from "os";
 import AppError from "../../errors/AppError";
 import prisma from "../../shared/prisma";
 import { ADMIN_ERROR_MESSAGES } from "./admin.constant";
@@ -20,7 +21,7 @@ import {
 class AdminService {
   /**
    * Get comprehensive system statistics
-   * Using Prisma Client for reliability
+   * Using $queryRaw for optimized performance
    */
   async getSystemStats(): Promise<ISystemStats> {
     try {
@@ -28,81 +29,62 @@ class AdminService {
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-      // Get total counts
-      const [totalUsers, totalPapers, activeSessions] = await Promise.all([
-        prisma.user.count({ where: { isDeleted: false } }),
-        prisma.paper.count({ where: { isDeleted: false } }),
-        prisma.session.count({ where: { expires: { gt: now } } }),
-      ]);
+      // Get all statistics in a single optimized query
+      const statsResults = await prisma.$queryRaw<
+        Array<{
+          totalUsers: number;
+          totalPapers: number;
+          activeSessions: number;
+          totalStorageBytes: number;
+          newUsersLast30Days: number;
+          newUsersPrevious30Days: number;
+          newPapersLast30Days: number;
+          newPapersPrevious30Days: number;
+          storageAddedLast30Days: number;
+          storageAddedPrevious30Days: number;
+        }>
+      >`
+        SELECT 
+          (SELECT COUNT(*)::int FROM "User" WHERE "isDeleted" = false) as "totalUsers",
+          (SELECT COUNT(*)::int FROM "Paper" WHERE "isDeleted" = false) as "totalPapers",
+          (SELECT COUNT(*)::int FROM "Session" WHERE expires > ${now}) as "activeSessions",
+          (SELECT COALESCE(SUM("sizeBytes")::bigint, 0) FROM "PaperFile" WHERE "isDeleted" = false) as "totalStorageBytes",
+          (SELECT COUNT(*)::int FROM "User" WHERE "createdAt" >= ${thirtyDaysAgo} AND "isDeleted" = false) as "newUsersLast30Days",
+          (SELECT COUNT(*)::int FROM "User" WHERE "createdAt" >= ${sixtyDaysAgo} AND "createdAt" < ${thirtyDaysAgo} AND "isDeleted" = false) as "newUsersPrevious30Days",
+          (SELECT COUNT(*)::int FROM "Paper" WHERE "createdAt" >= ${thirtyDaysAgo} AND "isDeleted" = false) as "newPapersLast30Days",
+          (SELECT COUNT(*)::int FROM "Paper" WHERE "createdAt" >= ${sixtyDaysAgo} AND "createdAt" < ${thirtyDaysAgo} AND "isDeleted" = false) as "newPapersPrevious30Days",
+          (
+            SELECT COALESCE(SUM(pf."sizeBytes")::bigint, 0)
+            FROM "PaperFile" pf
+            INNER JOIN "Paper" p ON pf."paperId" = p.id
+            WHERE pf."isDeleted" = false 
+              AND p."createdAt" >= ${thirtyDaysAgo}
+              AND p."isDeleted" = false
+          ) as "storageAddedLast30Days",
+          (
+            SELECT COALESCE(SUM(pf."sizeBytes")::bigint, 0)
+            FROM "PaperFile" pf
+            INNER JOIN "Paper" p ON pf."paperId" = p.id
+            WHERE pf."isDeleted" = false 
+              AND p."createdAt" >= ${sixtyDaysAgo}
+              AND p."createdAt" < ${thirtyDaysAgo}
+              AND p."isDeleted" = false
+          ) as "storageAddedPrevious30Days"
+      `;
 
-      // Get storage from PaperFile
-      const storageResult = await prisma.paperFile.aggregate({
-        where: { isDeleted: false },
-        _sum: { sizeBytes: true },
-      });
-      const totalStorageBytes = storageResult._sum.sizeBytes || 0;
-
-      // Get new users in last 30 days
-      const newUsersLast30Days = await prisma.user.count({
-        where: {
-          createdAt: { gte: thirtyDaysAgo },
-          isDeleted: false,
-        },
-      });
-
-      // Get new users in previous 30 days (30-60 days ago)
-      const newUsersPrevious30Days = await prisma.user.count({
-        where: {
-          createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-          isDeleted: false,
-        },
-      });
-
-      // Get new papers in last 30 days
-      const newPapersLast30Days = await prisma.paper.count({
-        where: {
-          createdAt: { gte: thirtyDaysAgo },
-          isDeleted: false,
-        },
-      });
-
-      // Get new papers in previous 30 days
-      const newPapersPrevious30Days = await prisma.paper.count({
-        where: {
-          createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-          isDeleted: false,
-        },
-      });
-
-      // Get storage added in last 30 days
-      const storageAddedLast30DaysResult = await prisma.paperFile.aggregate({
-        where: {
-          isDeleted: false,
-          paper: {
-            createdAt: { gte: thirtyDaysAgo },
-            isDeleted: false,
-          },
-        },
-        _sum: { sizeBytes: true },
-      });
-      const storageAddedLast30Days =
-        storageAddedLast30DaysResult._sum.sizeBytes || 0;
-
-      // Get storage added in previous 30 days
-      const storageAddedPrevious30DaysResult = await prisma.paperFile.aggregate(
-        {
-          where: {
-            isDeleted: false,
-            paper: {
-              createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-              isDeleted: false,
-            },
-          },
-          _sum: { sizeBytes: true },
-        }
+      const stats = statsResults[0];
+      const totalUsers = stats.totalUsers;
+      const totalPapers = stats.totalPapers;
+      const activeSessions = stats.activeSessions;
+      const totalStorageBytes = Number(stats.totalStorageBytes);
+      const newUsersLast30Days = stats.newUsersLast30Days;
+      const newUsersPrevious30Days = stats.newUsersPrevious30Days;
+      const newPapersLast30Days = stats.newPapersLast30Days;
+      const newPapersPrevious30Days = stats.newPapersPrevious30Days;
+      const storageAddedLast30Days = Number(stats.storageAddedLast30Days);
+      const storageAddedPrevious30Days = Number(
+        stats.storageAddedPrevious30Days
       );
-      const storageAddedPrevious30Days =
-        storageAddedPrevious30DaysResult._sum.sizeBytes || 0;
 
       // Calculate growth percentages
       const userGrowthPercent = this.calculateGrowthPercentage(
@@ -237,21 +219,20 @@ class AdminService {
 
   /**
    * Get user growth data for the last 30 days
-   * Using Prisma Client for reliability
+   * Using $queryRaw for optimized performance
    */
   async getUserGrowthData(): Promise<IUserGrowthData[]> {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-      // Get users created in the last 30 days
-      const users = await prisma.user.findMany({
-        where: {
-          createdAt: { gte: thirtyDaysAgo },
-          isDeleted: false,
-        },
-        select: { createdAt: true },
-        orderBy: { createdAt: "asc" },
-      });
+      // Get users created in the last 30 days using $queryRaw
+      const users = await prisma.$queryRaw<Array<{ createdAt: Date }>>`
+        SELECT "createdAt"
+        FROM "User"
+        WHERE "createdAt" >= ${thirtyDaysAgo}
+          AND "isDeleted" = false
+        ORDER BY "createdAt" ASC
+      `;
 
       // Group by date
       const groupedByDate = new Map<string, number>();
@@ -283,33 +264,30 @@ class AdminService {
 
   /**
    * Get role distribution statistics
-   * Using Prisma Client for reliability
+   * Using $queryRaw for optimized performance
    */
   async getRoleDistribution(): Promise<IRoleDistribution[]> {
     try {
-      // Get all users grouped by role
-      const users = await prisma.user.findMany({
-        where: { isDeleted: false },
-        select: { role: true },
-      });
+      // Get role distribution using $queryRaw with aggregation
+      const roleStats = await prisma.$queryRaw<
+        Array<{ role: string; count: number }>
+      >`
+        SELECT 
+          role,
+          COUNT(*)::int as count
+        FROM "User"
+        WHERE "isDeleted" = false
+        GROUP BY role
+      `;
 
-      // Count by role
-      const roleCounts = new Map<string, number>();
-      users.forEach((user) => {
-        roleCounts.set(user.role, (roleCounts.get(user.role) || 0) + 1);
-      });
-
-      const total = users.length;
+      const total = roleStats.reduce((sum, stat) => sum + stat.count, 0);
 
       // Convert to array and calculate percentages
-      const distribution: IRoleDistribution[] = [];
-      roleCounts.forEach((count, role) => {
-        distribution.push({
-          role,
-          count,
-          percentage: Math.round((count / total) * 100),
-        });
-      });
+      const distribution: IRoleDistribution[] = roleStats.map((stat) => ({
+        role: stat.role,
+        count: stat.count,
+        percentage: Math.round((stat.count / total) * 100),
+      }));
 
       // Sort by count descending
       return distribution.sort((a, b) => b.count - a.count);
@@ -321,53 +299,44 @@ class AdminService {
 
   /**
    * Get paper processing statistics
-   * Using Prisma Client for reliability
+   * Using $queryRaw for optimized performance
    */
   async getPaperStats(): Promise<IPaperStats> {
     try {
-      // Get all papers
-      const papers = await prisma.paper.findMany({
-        where: { isDeleted: false },
-        select: {
-          processingStatus: true,
-          createdAt: true,
-          processedAt: true,
-        },
-      });
+      // Get paper statistics using $queryRaw with aggregation
+      const paperStatsResult = await prisma.$queryRaw<
+        Array<{
+          totalPapers: number;
+          processingPapers: number;
+          completedPapers: number;
+          failedPapers: number;
+          avgProcessingTimeSeconds: number | null;
+        }>
+      >`
+        SELECT 
+          COUNT(*)::int as "totalPapers",
+          COUNT(*) FILTER (WHERE "processingStatus" = 'PROCESSING')::int as "processingPapers",
+          COUNT(*) FILTER (WHERE "processingStatus" = 'PROCESSED')::int as "completedPapers",
+          COUNT(*) FILTER (WHERE "processingStatus" = 'FAILED')::int as "failedPapers",
+          AVG(
+            CASE 
+              WHEN "processingStatus" = 'PROCESSED' AND "processedAt" IS NOT NULL
+              THEN EXTRACT(EPOCH FROM ("processedAt" - "createdAt"))
+              ELSE NULL
+            END
+          )::int as "avgProcessingTimeSeconds"
+        FROM "Paper"
+        WHERE "isDeleted" = false
+      `;
 
-      const totalPapers = papers.length;
-      const processingPapers = papers.filter(
-        (p) => p.processingStatus === "PROCESSING"
-      ).length;
-      const completedPapers = papers.filter(
-        (p) => p.processingStatus === "PROCESSED"
-      ).length;
-      const failedPapers = papers.filter(
-        (p) => p.processingStatus === "FAILED"
-      ).length;
-
-      // Calculate average processing time for completed papers
-      const processedWithTime = papers.filter(
-        (p) => p.processingStatus === "PROCESSED" && p.processedAt
-      );
-
-      let averageProcessingTime = 0;
-      if (processedWithTime.length > 0) {
-        const totalTime = processedWithTime.reduce((sum, p) => {
-          const time =
-            (p.processedAt!.getTime() - p.createdAt.getTime()) / 1000;
-          return sum + time;
-        }, 0);
-        averageProcessingTime = Math.floor(
-          totalTime / processedWithTime.length
-        );
-      }
+      const stats = paperStatsResult[0];
+      const averageProcessingTime = stats.avgProcessingTimeSeconds || 0;
 
       return {
-        totalPapers,
-        processingPapers,
-        completedPapers,
-        failedPapers,
+        totalPapers: stats.totalPapers,
+        processingPapers: stats.processingPapers,
+        completedPapers: stats.completedPapers,
+        failedPapers: stats.failedPapers,
         averageProcessingTime,
       };
     } catch (error) {
@@ -392,8 +361,16 @@ class AdminService {
         Array<{ count: number }>
       >`SELECT COUNT(*)::int as count FROM pg_stat_activity WHERE datname = current_database()`;
 
-      // Get storage info
-      const storageStats = await this.getSystemStats();
+      // Get storage info using $queryRaw
+      const storageResult = await prisma.$queryRaw<
+        Array<{ totalStorageBytes: number }>
+      >`
+        SELECT COALESCE(SUM("sizeBytes")::bigint, 0) as "totalStorageBytes"
+        FROM "PaperFile"
+        WHERE "isDeleted" = false
+      `;
+      const totalStorageBytes = Number(storageResult[0].totalStorageBytes);
+      const storageUsed = this.formatBytes(totalStorageBytes);
 
       // Calculate uptime (placeholder - would need actual implementation)
       const uptime = process.uptime();
@@ -410,8 +387,8 @@ class AdminService {
           activeConnections: connections[0].count,
         },
         storage: {
-          total: storageStats.storageUsed,
-          used: storageStats.storageUsed,
+          total: storageUsed,
+          used: storageUsed,
           available: "Available", // Placeholder
           percentageUsed: 0, // Would need actual calculation
         },
@@ -450,10 +427,10 @@ class AdminService {
   /**
    * Get comprehensive system metrics
    * Includes performance, health, and system information
+   * Using $queryRaw for optimized database operations
    */
   async getSystemMetrics(): Promise<ISystemMetrics> {
     try {
-      const os = require("os");
       const startTime = Date.now();
 
       // Test database connection and get response time
@@ -504,12 +481,15 @@ class AdminService {
       const usedMemory = totalMemory - freeMemory;
       const memoryUsagePercentage = (usedMemory / totalMemory) * 100;
 
-      // Storage metrics - Calculate actual disk usage from database
-      const storageResult = await prisma.paperFile.aggregate({
-        where: { isDeleted: false },
-        _sum: { sizeBytes: true },
-      });
-      const usedStorage = Number(storageResult._sum.sizeBytes) || 0;
+      // Storage metrics - Calculate actual disk usage from database using $queryRaw
+      const storageResult = await prisma.$queryRaw<
+        Array<{ totalStorageBytes: number }>
+      >`
+        SELECT COALESCE(SUM("sizeBytes")::bigint, 0) as "totalStorageBytes"
+        FROM "PaperFile"
+        WHERE "isDeleted" = false
+      `;
+      const usedStorage = Number(storageResult[0].totalStorageBytes);
 
       // Get a more realistic total storage estimate
       // We'll use 10x the current usage with a minimum of 100GB
