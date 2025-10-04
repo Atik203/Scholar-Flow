@@ -1,12 +1,21 @@
 import compression from "compression";
 import cors from "cors";
-import express, { RequestHandler } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
 import config from "./app/config";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import router from "./app/routes";
+import {
+  captureStripeRawBody,
+  isStripeWebhookPath,
+} from "./app/utils/stripeWebhook";
 
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
@@ -14,11 +23,21 @@ const PORT = config.port || 5000;
 // Security middleware
 app.use(helmet() as unknown as RequestHandler);
 app.use(compression() as unknown as RequestHandler);
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000",
+  "https://scholar-flow-ai.vercel.app", // production
+];
 
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }) as unknown as RequestHandler
 );
@@ -31,14 +50,37 @@ const limiter = rateLimit({
 });
 app.use("/api/", limiter as unknown as RequestHandler);
 
-// Request parsing
-app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "50mb",
-  }) as unknown as RequestHandler
+// Stripe webhook - MUST be before express.json() to preserve raw body
+import { webhookController } from "./app/modules/Billing/webhook.controller";
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  captureStripeRawBody,
+  webhookController.handleStripeWebhook as unknown as RequestHandler
 );
+
+// Request parsing
+const jsonParser = express.json({ limit: "50mb" });
+const urlencodedParser = express.urlencoded({
+  extended: true,
+  limit: "50mb",
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return jsonParser(req, res, next);
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return urlencodedParser(req, res, next);
+});
 
 // Logging
 if (config.env !== "production") {
@@ -80,6 +122,7 @@ app.use("*", ((
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Scholar-Flow API running on port ${PORT}`);
+
   console.log(`📖 Environment: ${config.env}`);
 });
 

@@ -2,7 +2,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { usePublicRoute } from "@/hooks/useAuthGuard";
-import { getGetStartedUrl } from "@/lib/auth/redirects";
+import { getRoleDashboardUrl } from "@/lib/auth/redirects";
 import { Typography, TypographyComponents } from "@/lib/typography";
 import { motion, useReducedMotion } from "framer-motion";
 import {
@@ -14,15 +14,38 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export const Hero: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
-  const { isAuthenticated, isLoading } = usePublicRoute();
-  const pathname = usePathname();
+  const { isAuthenticated, isLoading, user } = usePublicRoute();
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
 
-  const getStartedUrl = getGetStartedUrl(isAuthenticated, pathname);
+  // Get direct role-based dashboard URL for authenticated users
+  const dashboardUrl =
+    isAuthenticated && user?.role ? getRoleDashboardUrl(user.role) : "/login";
+
+  // Prefetch dashboard for faster navigation
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      router.prefetch(dashboardUrl);
+    }
+  }, [isAuthenticated, user?.role, dashboardUrl, router]);
+
+  const handleGetStarted = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+
+    try {
+      // Use router.push for faster client-side navigation
+      await router.push(dashboardUrl);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setIsNavigating(false);
+    }
+  };
 
   const features = [
     {
@@ -102,17 +125,15 @@ export const Hero: React.FC = () => {
             className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
             <Button
-              asChild
               size="lg"
               variant="gradient"
               className="btn-hover-glow btn-shine btn-inner-glow shadow-xl hover:shadow-2xl transition-all duration-300"
-              loading={isLoading}
-              loadingText="Loading..."
+              loading={isLoading || isNavigating}
+              loadingText={isNavigating ? "Redirecting..." : "Loading..."}
+              onClick={handleGetStarted}
             >
-              <Link href={getStartedUrl}>
-                {isAuthenticated ? "Go to Dashboard" : "Get Started"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              {isAuthenticated ? "Go to Dashboard" : "Get Started"}
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button
               asChild

@@ -2,15 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// Use a global cached instance to avoid exhausting connections in serverless
-// Enrich global type for TypeScript
-declare global {
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
-
-const prismaClient =
-  global.prisma ||
+const createBasePrismaClient = () =>
   new PrismaClient({
     log: isDev
       ? [
@@ -25,20 +17,34 @@ const prismaClient =
         ],
   });
 
-if (isDev) global.prisma = prismaClient;
+const globalForPrisma = globalThis as typeof globalThis & {
+  prisma?: PrismaClient;
+};
 
-// Optional verbose query log only in dev
-if (isDev) {
-  // @ts-expect-error: Prisma Client extension type issue
-  prismaClient.$on("query", (e: any) => {
-    console.log("-------------------------------------------");
-    console.log("Query: " + e.query);
-    console.log("-------------------------------------------");
-    console.log("Params: " + e.params);
-    console.log("-------------------------------------------");
-    console.log("Duration: " + e.duration + "ms");
-    console.log("-------------------------------------------");
+const prismaClient = globalForPrisma.prisma ?? createBasePrismaClient();
+
+// Attach event listeners to base client before extensions
+if (isDev && !globalForPrisma.prisma) {
+  // Query performance logging for development using event listeners
+  prismaClient.$on("query" as never, (e: any) => {
+    const duration = e.duration;
+
+    // Log slow queries (>100ms) to help identify optimization opportunities
+    if (duration > 100) {
+      console.warn(
+        `⚠️ Slow query detected: ${e.query.substring(0, 100)}... took ${duration}ms`
+      );
+      if (duration > 500) {
+        console.error(
+          `🔴 VERY slow query: ${e.query.substring(0, 100)}... took ${duration}ms - NEEDS OPTIMIZATION!`
+        );
+      }
+    }
   });
+}
+
+if (isDev) {
+  globalForPrisma.prisma = prismaClient;
 }
 
 export default prismaClient;

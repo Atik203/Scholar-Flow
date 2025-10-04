@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getRoleDashboardUrl } from "@/lib/auth/redirects";
 import {
   useGetCurrentUserQuery,
   useSendEmailVerificationMutation,
@@ -422,7 +423,7 @@ export default function VerifyEmailPage() {
                   </Button>
                 </Link>
 
-                <Link href="/dashboard">
+                <Link href={getRoleDashboardUrl(currentUser?.data?.user?.role)}>
                   <Button variant="outline" className="w-full" size="lg">
                     Go to Dashboard
                     <ArrowRight className="h-4 w-4 ml-2" />

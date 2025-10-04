@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
@@ -25,7 +25,7 @@ class AuthService {
    */
   async createOrUpdateUser(userData: IUserData) {
     try {
-      const userId = userData.id || uuidv4();
+      const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
       const user = await prisma.user.upsert({
@@ -56,8 +56,21 @@ class AuthService {
    */
   async createOrUpdateUserWithOAuth(userData: IUserData) {
     try {
-      const userId = userData.id || uuidv4();
+      const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
+
+      // First check if user exists and is deleted
+      const existingUser = await prisma.user.findUnique({
+        where: { email: userData.email },
+        select: { id: true, isDeleted: true },
+      });
+
+      if (existingUser && existingUser.isDeleted) {
+        throw new ApiError(
+          403,
+          "Your account has been deactivated. Please contact support."
+        );
+      }
 
       const user = await prisma.user.upsert({
         where: { email: userData.email },
@@ -79,6 +92,9 @@ class AuthService {
 
       return user;
     } catch (error) {
+      if (error instanceof ApiError) {
+        throw error; // Re-throw our custom errors
+      }
       console.error("Error creating/updating OAuth user:", error);
       throw new ApiError(500, AUTH_ERROR_MESSAGES.OAUTH_ERROR);
     }
@@ -174,7 +190,7 @@ class AuthService {
 
       // Create full name from first and last name
       const name = `${firstName} ${lastName}`.trim();
-      const userId = uuidv4();
+      const userId = randomUUID();
 
       // Create new user using $queryRaw with proper role casting
       await prisma.$queryRaw`
@@ -447,8 +463,8 @@ class AuthService {
     try {
       // Create session using $queryRaw
       await prisma.$queryRaw`
-        INSERT INTO "Session" ("sessionToken", "userId", expires, "createdAt", "updatedAt")
-        VALUES (${sessionData.sessionToken}, ${userId}, ${sessionData.expires}, NOW(), NOW())
+        INSERT INTO "Session" (id, "sessionToken", "userId", expires, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${sessionData.sessionToken}, ${userId}, ${sessionData.expires}, NOW(), NOW(), false)
       `;
 
       // Return the created session

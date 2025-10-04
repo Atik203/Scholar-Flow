@@ -4,9 +4,37 @@ applyTo: "apps/backend/**"
 
 # Backend Development Instructions
 
-## ✅ Phase 1 Status: OAuth Authentication System Complete
+## ✅ Phase 1 Progress (Week 5.5)
 
-Production-ready authentication with comprehensive testing and proper error handling.
+- OAuth authentication, paper management, collections, and workspaces are production-ready.
+- Week 5 AI summarization + multi-provider insights shipped (Gemini primary, OpenAI fallback).
+- Week 5.5 dashboard restructure delivered with role-based routing, admin tools, and workspace refinements.
+
+Keep new work aligned with these shipped milestones and follow the standards below.
+
+## 🚀 Production-Ready Improvements (September 17, 2025)
+
+### Security & Performance Standards
+
+- **Debug Logging Control**: Auth middleware conditionally logs only in development (`NODE_ENV !== "production"`)
+- **Type Safety**: Replace all `any` types with proper interfaces (use `AuthenticatedRequest` for authenticated routes)
+- **Rate Limiting**: Apply paper-specific rate limiters (`paperUploadLimiter`, `paperListLimiter`, `paperOperationLimiter`) to all endpoints
+- **Database Performance**: Add composite indexes for hot query paths (e.g., `Paper` queries by `uploaderId + workspaceId`)
+- **Performance Monitoring**: Use `performanceMonitor` middleware to track response times and add `X-Response-Time` headers
+
+### Error Handling Standards
+
+- **Backend Error Classes**: Create feature-specific error classes (e.g., `PaperError`) extending `ApiError` for consistent error responses
+- **Standardized Error Format**: All errors follow `{ success: false, message: string, statusCode: number, errorCode?: string, details?: object }`
+- **Health Check Endpoints**: Comprehensive monitoring at `/api/health/*` (basic, detailed, live, ready probes)
+
+### Production Pitfalls to Avoid
+
+- ❌ Logging debug info in production (always check `NODE_ENV`)
+- ❌ Using `any` types (use proper interfaces like `AuthenticatedRequest`)
+- ❌ Missing rate limiting on upload/mutation endpoints
+- ❌ Missing performance monitoring on critical paths
+- ❌ Not handling BigInt serialization in JSON (cast to integer in SQL)
 
 ## Architecture & Structure
 

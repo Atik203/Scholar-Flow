@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../styles/_variables.scss";
+@import "../styles/_keyframe-animations.scss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -710,4 +712,165 @@ html {
     height: 0;
     opacity: 0;
   }
+}
+
+/* TipTap Image Upload Styles */
+.tiptap-image-upload {
+  margin: 2rem 0;
+}
+
+.tiptap-image-upload input[type="file"] {
+  display: none;
+}
+
+.tiptap-image-upload-dropzone {
+  position: relative;
+  width: 3.125rem;
+  height: 3.75rem;
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: center;
+  user-select: none;
+}
+
+.tiptap-image-upload-icon {
+  color: hsl(var(--muted-foreground));
+}
+
+.tiptap-image-upload-dropzone-rect-primary {
+  fill: hsl(var(--border));
+  stroke: hsl(var(--border));
+}
+
+.tiptap-image-upload-dropzone-rect-secondary {
+  fill: hsl(var(--muted));
+}
+
+.tiptap-image-upload-drag-area {
+  border: 2px dashed hsl(var(--border));
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: hsl(var(--muted) / 0.5);
+}
+
+.tiptap-image-upload-drag-area:hover {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--muted) / 0.8);
+}
+
+.tiptap-image-upload-drag-area.drag-active {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+}
+
+.tiptap-image-upload-drag-area.drag-over {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
+}
+
+.tiptap-image-upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tiptap-image-upload-text {
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.tiptap-image-upload-subtext {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.tiptap-image-upload-preview {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  padding: 1rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-image-upload-progress {
+  width: 100%;
+  height: 4px;
+  background: hsl(var(--muted));
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.tiptap-image-upload-progress::after {
+  content: "";
+  display: block;
+  height: 100%;
+  background: hsl(var(--primary));
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.tiptap-image-upload-preview-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tiptap-image-upload-file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.tiptap-image-upload-file-icon {
+  width: 2rem;
+  height: 2rem;
+  background: hsl(var(--muted));
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: hsl(var(--muted-foreground));
+}
+
+.tiptap-image-upload-details {
+  flex: 1;
+}
+
+.tiptap-image-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tiptap-image-upload-progress-text {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.tiptap-image-upload-previews {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tiptap-image-upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-image-upload-icon-container {
+  margin-bottom: 0.75rem;
 }
