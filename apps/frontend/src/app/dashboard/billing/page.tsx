@@ -86,7 +86,7 @@ export default function BillingPage() {
     data: subscription,
     isLoading: isLoadingSubscription,
     refetch,
-  } = useGetSubscriptionQuery({});
+  } = useGetSubscriptionQuery({}, { refetchOnMountOrArgChange: true });
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams?.get("session_id");
@@ -95,6 +95,7 @@ export default function BillingPage() {
   // Track if user came back from Stripe portal/checkout
   const [shouldSync, setShouldSync] = useState(false);
   const [hasShownSuccessToast, setHasShownSuccessToast] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Smart subscription sync hook
   const { isPolling, attemptCount, maxAttempts } = useSubscriptionSync({
@@ -132,9 +133,18 @@ export default function BillingPage() {
 
   // Initial data fetch on mount
   useEffect(() => {
-    // Always ensure we have fresh subscription data on mount
-    refetch();
-  }, [refetch]);
+    // Mark as initialized after first render
+    if (!isInitialized && !isLoadingSubscription) {
+      setIsInitialized(true);
+    }
+  }, [isInitialized, isLoadingSubscription]);
+
+  // Refetch subscription data only after initialization
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      refetch();
+    }
+  }, [isInitialized, isAuthenticated, refetch]);
 
   // Handle return from Stripe checkout/portal
   useEffect(() => {
