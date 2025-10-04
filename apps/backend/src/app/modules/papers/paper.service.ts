@@ -144,71 +144,220 @@ export const paperService = {
     const { input, file, uploaderId, workspaceId, objectKey } = args;
     console.log("Creating uploaded paper with authors:", input.authors);
 
-    const createStart = Date.now();
-    const created = await prisma.paper.create({
-      data: {
-        workspaceId,
-        uploaderId,
-        title: input.title || file.originalname,
-        metadata: {
-          authors: input.authors || [],
-          year: input.year,
-          source: input.source || "upload",
-        },
-        source: input.source || "upload",
-        file: {
-          create: {
-            storageProvider: "s3",
-            objectKey,
-            contentType: file.mimetype,
-            sizeBytes: file.size,
-            originalFilename: file.originalname,
-          },
-        },
-      },
-      include: { file: true },
-    });
-    console.log(`[PaperService] Prisma create: ${Date.now() - createStart}ms`);
-
-    // Dev verification: confirm relation back to user reflects the new paper
-    const verifyStart = Date.now();
     try {
-      const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
+      const createStart = Date.now();
+      const metadata = {
+        authors: input.authors || [],
+        year: input.year,
+        source: input.source || "upload",
+      };
+
+      const createdRows = await prisma.$queryRaw<
+        Array<{
+          id: string;
+          workspaceId: string;
+          uploaderId: string;
+          title: string;
+          abstract: string | null;
+          metadata: unknown;
+          source: string | null;
+          doi: string | null;
+          processingStatus: string;
+          createdAt: Date;
+          updatedAt: Date;
+          previewFileKey: string | null;
+          previewMimeType: string | null;
+          originalMimeType: string | null;
+          file_id: string | null;
+          storageProvider: string | null;
+          objectKey: string | null;
+          contentType: string | null;
+          sizeBytes: number | null;
+          originalFilename: string | null;
+          extractedAt: Date | null;
+        }>
+      >`
+      WITH inserted_paper AS (
+        INSERT INTO "Paper" (
+          id, "workspaceId", "uploaderId", title, metadata, source,
+          "processingStatus", "createdAt", "updatedAt", "isDeleted"
+        ) VALUES (
+          gen_random_uuid(),
+          ${workspaceId},
+          ${uploaderId},
+          ${input.title || file.originalname},
+          ${JSON.stringify(metadata)}::jsonb,
+          ${input.source || "upload"},
+          'UPLOADED'::"PaperProcessingStatus",
+          NOW(),
+          NOW(),
+          false
+        )
+        RETURNING
+          id,
+          "workspaceId",
+          "uploaderId",
+          title,
+          abstract,
+          metadata,
+          source,
+          doi,
+          "processingStatus",
+          "createdAt",
+          "updatedAt",
+          "previewFileKey",
+          "previewMimeType",
+          "originalMimeType"
+      ),
+      inserted_file AS (
+        INSERT INTO "PaperFile" (
+          id,
+          "paperId",
+          "storageProvider",
+          "objectKey",
+          "contentType",
+          "sizeBytes",
+          "originalFilename",
+          "createdAt",
+          "updatedAt",
+          "isDeleted"
+        )
+        SELECT
+          gen_random_uuid(),
+          p.id,
+          's3',
+          ${objectKey},
+          ${file.mimetype},
+          ${file.size},
+          ${file.originalname},
+          NOW(),
+          NOW(),
+          false
+        FROM inserted_paper p
+        RETURNING
+          id,
+          "paperId",
+          "storageProvider",
+          "objectKey",
+          "contentType",
+          "sizeBytes",
+          "originalFilename",
+          "extractedAt"
+      )
+      SELECT
+        p.id,
+        p."workspaceId",
+        p."uploaderId",
+        p.title,
+        p.abstract,
+        p.metadata,
+        p.source,
+        p.doi,
+        p."processingStatus",
+        p."createdAt",
+        p."updatedAt",
+        p."previewFileKey",
+        p."previewMimeType",
+        p."originalMimeType",
+        f.id AS file_id,
+        f."storageProvider",
+        f."objectKey",
+        f."contentType",
+        f."sizeBytes",
+        f."originalFilename",
+        f."extractedAt"
+      FROM inserted_paper p
+      LEFT JOIN inserted_file f ON f."paperId" = p.id
+    `;
+
+      const createdRow = createdRows[0];
+      if (!createdRow) {
+        throw new Error("Failed to create paper record");
+      }
+
+      const created = {
+        id: createdRow.id,
+        workspaceId: createdRow.workspaceId,
+        uploaderId: createdRow.uploaderId,
+        title: createdRow.title,
+        abstract: createdRow.abstract,
+        metadata: normalizeMetadata(createdRow.metadata),
+        source: createdRow.source,
+        doi: createdRow.doi,
+        processingStatus: createdRow.processingStatus,
+        createdAt: createdRow.createdAt,
+        updatedAt: createdRow.updatedAt,
+        previewFileKey: createdRow.previewFileKey,
+        previewMimeType: createdRow.previewMimeType,
+        originalMimeType: createdRow.originalMimeType,
+        file: createdRow.file_id
+          ? {
+              id: createdRow.file_id,
+              storageProvider: createdRow.storageProvider,
+              objectKey: createdRow.objectKey,
+              contentType: createdRow.contentType,
+              sizeBytes: createdRow.sizeBytes,
+              originalFilename: createdRow.originalFilename,
+              extractedAt: createdRow.extractedAt,
+            }
+          : null,
+      };
+      console.log(
+        `[PaperService] Prisma create: ${Date.now() - createStart}ms`
+      );
+
+      // Dev verification: confirm relation back to user reflects the new paper
+      const verifyStart = Date.now();
+      try {
+        const [{ count }] = await prisma.$queryRaw<[{ count: bigint }]>`
         SELECT COUNT(*)::bigint as count FROM "Paper" WHERE "uploaderId" = ${uploaderId} AND "isDeleted" = false
       `;
-      console.log(
-        "[PaperUpload] User",
-        uploaderId,
-        "now has uploadedPapers count:",
-        Number(count)
-      );
-    } catch (e) {
-      console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
-    }
-    console.log(
-      `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
-    );
-
-    // Queue document extraction for background processing (non-blocking)
-    const queueStart = Date.now();
-    // Fire and forget - don't wait for Redis queue operations
-    queueDocumentExtraction(created.id)
-      .then(() => {
         console.log(
-          `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
+          "[PaperUpload] User",
+          uploaderId,
+          "now has uploadedPapers count:",
+          Number(count)
         );
-      })
-      .catch((error) => {
-        console.error(
-          `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
-          error
-        );
-      });
-    console.log(
-      `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
-    );
+      } catch (e) {
+        console.warn("[PaperUpload] Failed to verify uploadedPapers count:", e);
+      }
+      console.log(
+        `[PaperService] Count verification: ${Date.now() - verifyStart}ms`
+      );
 
-    return created;
+      // Queue document extraction for background processing (non-blocking)
+      const queueStart = Date.now();
+      // Fire and forget - don't wait for Redis queue operations
+      queueDocumentExtraction(created.id)
+        .then(() => {
+          console.log(
+            `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
+          );
+        })
+        .catch((error) => {
+          console.error(
+            `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
+            error
+          );
+        });
+      console.log(
+        `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
+      );
+
+      return created;
+    } catch (error) {
+      console.error("❌ ERROR IN createUploadedPaper:", {
+        error,
+        errorMessage: (error as Error)?.message,
+        errorCode: (error as any)?.code,
+        errorDetail: (error as any)?.detail,
+        errorColumn: (error as any)?.column,
+        errorTable: (error as any)?.table,
+        errorConstraint: (error as any)?.constraint,
+        stack: (error as Error)?.stack,
+      });
+      throw error;
+    }
   },
 
   async countByUser(userId: string) {
@@ -581,7 +730,7 @@ export const paperService = {
     const summaryJson = serializeSummaryPayload(args.payload);
 
     await prisma.$executeRaw`
-      INSERT INTO "AISummary" (id, "paperId", model, summary, "promptHash", "createdAt", "updatedAt")
+      INSERT INTO "AISummary" (id, "paperId", model, summary, "promptHash", "createdAt", "updatedAt", "isDeleted")
       VALUES (
         gen_random_uuid(),
         ${args.paperId},
@@ -589,7 +738,8 @@ export const paperService = {
         ${summaryJson},
         ${args.promptHash},
         NOW(),
-        NOW()
+        NOW(),
+        false
       )
       ON CONFLICT ("paperId", model, "promptHash")
       DO UPDATE SET
@@ -1000,13 +1150,13 @@ export const editorPaperService = {
       INSERT INTO "Paper" (
         id, "workspaceId", "uploaderId", title, "contentHtml", 
         source, "isDraft", "isPublished", "processingStatus", 
-        metadata, "createdAt", "updatedAt"
+        metadata, "createdAt", "updatedAt", "isDeleted"
       ) VALUES (
         gen_random_uuid(), ${input.workspaceId}, ${uploaderId}, 
         ${input.title}, ${sanitizedContent}, 'editor', 
         ${input.isDraft ?? true}, false, 'PROCESSED',
         ${JSON.stringify(metadata)}::jsonb,
-        NOW(), NOW()
+        NOW(), NOW(), false
       )
       RETURNING id, title, "isDraft", "isPublished", "createdAt"
     `;
@@ -1432,22 +1582,103 @@ export const exportService = {
 export async function ensureDevUserAndWorkspace(devEmail?: string) {
   const email =
     devEmail || process.env.DEV_UPLOAD_USER_EMAIL || "dev-uploader@example.com";
-  let user = await prisma.user.findUnique({ where: { email } });
+  let [user] = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      email: string;
+      name: string | null;
+      role: string;
+    }>
+  >`
+    SELECT id, email, name, role
+    FROM "User"
+    WHERE email = ${email}
+    LIMIT 1
+  `;
+
   if (!user) {
-    user = await prisma.user.create({
-      data: { email, name: "Dev Uploader", role: "RESEARCHER" },
-    });
+    const insertedUsers = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string;
+        name: string | null;
+        role: string;
+      }>
+    >`
+      INSERT INTO "User" (id, email, name, role, "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), ${email}, 'Dev Uploader', 'RESEARCHER'::"Role", NOW(), NOW(), false)
+      RETURNING id, email, name, role
+    `;
+    user = insertedUsers[0];
   }
-  let workspace = await prisma.workspace.findFirst({
-    where: { ownerId: user.id },
-  });
+
+  if (!user) {
+    throw new Error("Failed to ensure development user");
+  }
+
+  let [workspace] = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      name: string;
+      ownerId: string;
+    }>
+  >`
+    SELECT id, name, "ownerId"
+    FROM "Workspace"
+    WHERE "ownerId" = ${user.id}
+    ORDER BY "createdAt" ASC
+    LIMIT 1
+  `;
+
   if (!workspace) {
-    workspace = await prisma.workspace.create({
-      data: { name: "Dev Workspace", ownerId: user.id },
-    });
-    await prisma.workspaceMember.create({
-      data: { workspaceId: workspace.id, userId: user.id, role: "RESEARCHER" },
-    });
+    const insertedWorkspaces = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        name: string;
+        ownerId: string;
+      }>
+    >`
+      INSERT INTO "Workspace" (id, name, "ownerId", "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), 'Dev Workspace', ${user.id}, NOW(), NOW(), false)
+      RETURNING id, name, "ownerId"
+    `;
+    workspace = insertedWorkspaces[0];
   }
+
+  if (!workspace) {
+    throw new Error("Failed to ensure development workspace");
+  }
+
+  const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "WorkspaceMember"
+    WHERE "workspaceId" = ${workspace.id}
+      AND "userId" = ${user.id}
+    LIMIT 1
+  `;
+
+  if (!memberRows.length) {
+    await prisma.$executeRaw`
+      INSERT INTO "WorkspaceMember" (
+        id,
+        "workspaceId",
+        "userId",
+        role,
+        "createdAt",
+        "updatedAt",
+        "isDeleted"
+      ) VALUES (
+        gen_random_uuid(),
+        ${workspace.id},
+        ${user.id},
+        'RESEARCHER'::"Role",
+        NOW(),
+        NOW(),
+        false
+      )
+      ON CONFLICT ("workspaceId", "userId") DO NOTHING
+    `;
+  }
+
   return { user, workspace };
 }
