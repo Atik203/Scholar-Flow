@@ -11,6 +11,10 @@ export interface User {
   fieldOfStudy: string | null;
   image: string | null;
   role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripePriceId?: string | null;
+  stripeCurrentPeriodEnd?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   isDeleted?: boolean;

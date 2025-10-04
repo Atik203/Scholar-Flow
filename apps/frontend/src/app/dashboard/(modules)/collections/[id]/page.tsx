@@ -59,6 +59,7 @@ import {
   useGetPaperFileUrlQuery,
   useListPapersQuery,
 } from "@/redux/api/paperApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowLeft,
   BookOpen,
@@ -78,7 +79,6 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
@@ -90,7 +90,7 @@ export default function CollectionDetailPage({
 }) {
   const isProtected = useProtectedRoute();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [invitePermission, setInvitePermission] = useState<"VIEW" | "EDIT">(
@@ -351,7 +351,7 @@ export default function CollectionDetailPage({
             </p>
             {userPermission === "VIEW" && (
               <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="flex items-center text-sm text-blue-800 dark:text-blue-200">
+                <div className="flex items-center text-sm text-blue-800 dark:text-white">
                   <Eye className="h-4 w-4 mr-2" />
                   You have view-only access to this collection. You can browse
                   papers but cannot make changes.
@@ -463,7 +463,7 @@ export default function CollectionDetailPage({
                   </p>
                 </div>
                 <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950/20">
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-white" />
                 </div>
               </div>
             </CardContent>

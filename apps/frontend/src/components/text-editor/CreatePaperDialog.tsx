@@ -31,9 +31,9 @@ import {
 } from "@/redux/api/collectionApi";
 import { useCreateEditorPaperMutation } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, Loader2, Plus, X } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -73,7 +73,7 @@ export function CreatePaperDialog({
   onPaperCreated,
 }: CreatePaperDialogProps) {
   const [createPaper] = useCreateEditorPaperMutation();
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [authors, setAuthors] = useState<string[]>([""]);
 
   // Collection selection state

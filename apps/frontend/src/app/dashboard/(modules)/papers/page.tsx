@@ -159,7 +159,7 @@ export default function PapersPage() {
                   <p className="text-2xl font-bold">{totalPapers}</p>
                 </div>
                 <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950/20">
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-white" />
                 </div>
               </div>
             </CardContent>
@@ -223,7 +223,7 @@ export default function PapersPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                    <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <Plus className="h-4 w-4 text-blue-600 dark:text-white" />
                   </div>
                   Upload New Paper
                 </CardTitle>

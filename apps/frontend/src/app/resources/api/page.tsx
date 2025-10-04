@@ -3,6 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowRight,
   BookOpen,
@@ -13,11 +14,10 @@ import {
   Search,
   Zap,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function APIReferencePage() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const isAuthenticated = !!session;
 
   return (

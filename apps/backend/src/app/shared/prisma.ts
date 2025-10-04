@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { withOptimize } from "@prisma/extension-optimize";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -18,27 +17,16 @@ const createBasePrismaClient = () =>
         ],
   });
 
-const createExtendedClient = (baseClient: PrismaClient) =>
-  baseClient.$extends(
-    withOptimize({
-      apiKey: process.env.OPTIMIZE_API_KEY!,
-    })
-  );
-
-type OptimizePrismaClient = ReturnType<typeof createExtendedClient>;
-
 const globalForPrisma = globalThis as typeof globalThis & {
-  prisma?: OptimizePrismaClient;
-  basePrismaClient?: PrismaClient;
+  prisma?: PrismaClient;
 };
 
-const basePrismaClient =
-  globalForPrisma.basePrismaClient ?? createBasePrismaClient();
+const prismaClient = globalForPrisma.prisma ?? createBasePrismaClient();
 
 // Attach event listeners to base client before extensions
-if (isDev) {
+if (isDev && !globalForPrisma.prisma) {
   // Query performance logging for development using event listeners
-  basePrismaClient.$on("query" as never, (e: any) => {
+  prismaClient.$on("query" as never, (e: any) => {
     const duration = e.duration;
 
     // Log slow queries (>100ms) to help identify optimization opportunities
@@ -55,13 +43,8 @@ if (isDev) {
   });
 }
 
-// Apply extensions to create the final client
-const prismaClient =
-  globalForPrisma.prisma ?? createExtendedClient(basePrismaClient);
-
 if (isDev) {
   globalForPrisma.prisma = prismaClient;
-  globalForPrisma.basePrismaClient = basePrismaClient;
 }
 
 export default prismaClient;

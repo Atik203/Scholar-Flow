@@ -1,9 +1,10 @@
 "use client";
 
-import { makeStore, type AppStore } from "@/redux/store";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { createPersistor, makeStore, type AppStore } from "@/redux/store";
+import { setAppStore } from "@/redux/storeAccess";
+import { ReactNode, useRef } from "react";
 import { Provider } from "react-redux";
-import { persistStore } from "redux-persist";
+import type { Persistor } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 
 interface ReduxProviderProps {
@@ -11,22 +12,14 @@ interface ReduxProviderProps {
 }
 
 export function ReduxProvider({ children }: ReduxProviderProps) {
-  const storeRef = useRef<AppStore | null>(null);
-  const persistorRef = useRef<ReturnType<typeof persistStore> | null>(null);
-  const [isClient, setIsClient] = useState(false);
+  const storeRef = useRef<AppStore | undefined>(undefined);
+  const persistorRef = useRef<Persistor | undefined>(undefined);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
+  // Initialize store once
   if (!storeRef.current) {
     storeRef.current = makeStore();
-    persistorRef.current = persistStore(storeRef.current);
-  }
-
-  // During SSR, render without PersistGate
-  if (!isClient) {
-    return <Provider store={storeRef.current}>{children}</Provider>;
+    persistorRef.current = createPersistor(storeRef.current);
+    setAppStore(storeRef.current);
   }
 
   return (

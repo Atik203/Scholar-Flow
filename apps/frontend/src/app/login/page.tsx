@@ -7,7 +7,9 @@ import {
 } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
-import { getCallbackUrl, handleAuthRedirect } from "@/lib/auth/redirects";
+import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
+import { getCallbackUrl } from "@/lib/auth/redirects";
+import { useAppDispatch } from "@/redux/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -21,7 +23,6 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -42,9 +43,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
 
-  // Auth guard - redirects to dashboard if already authenticated
-  const { isLoading: authLoading } = useAuthRoute();
+  // Check if already authenticated (but don't auto-redirect during login process)
+  // This prevents race conditions between login flow and auth guard
+  const { isLoading: authLoading, isAuthenticated } = useAuthRoute();
+
+  // If already authenticated and NOT in the middle of logging in, let useAuthRoute handle redirect
+  // The isLoading check ensures we don't interfere with active login attempts
 
   const {
     register,
@@ -70,85 +76,50 @@ export default function LoginPage() {
     try {
       const callbackUrl = getCallbackUrl(searchParams);
 
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
+      console.log("🔐 Starting credentials sign-in...");
+      const result = await signInWithCredentials(
+        data.email,
+        data.password,
+        dispatch
+      );
 
-      if (result?.error) {
+      if (!result.success) {
         dismissToast(loadingToast);
-        showAuthErrorToast("Invalid email or password");
+        console.error("❌ Sign-in error:", result.error);
+        showAuthErrorToast(result.error || "Invalid email or password");
         return;
       }
 
-      if (result?.ok) {
-        // Wait for session to be updated
-        const session = await getSession();
-        if (session) {
-          dismissToast(loadingToast);
-          showAuthSuccessToast("Email/Password");
+      console.log("✅ Sign-in successful, credentials stored in Redux");
+      dismissToast(loadingToast);
+      showAuthSuccessToast("Welcome back!");
 
-          // Use smart redirect with user role
-          const redirectUrl = handleAuthRedirect(
-            true,
-            searchParams,
-            "/login",
-            session.user?.role
-          );
-          router.push(redirectUrl);
-        }
-      }
+      // Redirect to callback URL or dashboard
+      const redirectUrl = callbackUrl || "/dashboard";
+      console.log("🚀 Redirecting to:", redirectUrl);
+      router.push(redirectUrl);
     } catch (error) {
       dismissToast(loadingToast);
-      console.error("Sign-in error:", error);
+      console.error("❌ Sign-in error:", error);
       showAuthErrorToast("An unexpected error occurred while signing in");
     } finally {
       setIsLoading(null);
     }
   };
 
-  const handleSocialLogin = async (provider: "google" | "github") => {
+  const handleSocialLogin = (provider: "google" | "github") => {
     setIsLoading(provider);
-    const loadingToast = showLoadingToast(`Signing in with ${provider}...`);
+    showLoadingToast(`Redirecting to ${provider}...`);
 
     try {
       const callbackUrl = getCallbackUrl(searchParams);
+      console.log(`🔐 Starting ${provider} OAuth sign-in...`);
 
-      const result = await signIn(provider, {
-        redirect: false,
-        callbackUrl,
-      });
-
-      if (result?.error) {
-        dismissToast(loadingToast);
-        showAuthErrorToast(`Failed to sign in with ${provider}`);
-        return;
-      }
-
-      if (result?.ok) {
-        // Wait for session to be updated
-        const session = await getSession();
-        dismissToast(loadingToast);
-        showAuthSuccessToast(
-          provider.charAt(0).toUpperCase() + provider.slice(1)
-        );
-
-        // Use smart redirect with user role
-        const redirectUrl = handleAuthRedirect(
-          true,
-          searchParams,
-          "/login",
-          session?.user?.role
-        );
-        router.push(redirectUrl);
-      }
+      // Redirect to OAuth provider (page will navigate away)
+      signInWithOAuth(provider, callbackUrl);
     } catch (error) {
-      dismissToast(loadingToast);
       console.error(`${provider} sign-in error:`, error);
       showAuthErrorToast(`An error occurred while signing in with ${provider}`);
-    } finally {
       setIsLoading(null);
     }
   };

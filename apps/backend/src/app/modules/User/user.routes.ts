@@ -1,10 +1,36 @@
 import express from "express";
+import multer from "multer";
 import { authMiddleware } from "../../middleware/auth";
+import {
+  paperOperationLimiter,
+  paperUploadLimiter,
+} from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { userController } from "./user.controller";
 import { changePasswordSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
+
+// Configure multer for profile picture uploads (memory storage, max 5MB)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only JPEG, PNG, and WebP are allowed"));
+    }
+  },
+});
 
 /**
  * @swagger
@@ -355,5 +381,141 @@ router.post(
  *         $ref: '#/components/responses/ServerError'
  */
 router.delete("/delete-account", authMiddleware, userController.deleteAccount);
+
+/**
+ * @swagger
+ * /api/user/upload-profile-picture:
+ *   post:
+ *     summary: Upload Profile Picture
+ *     description: Upload a new profile picture to S3. Accepts JPEG, PNG, or WebP images up to 5MB. Returns permanent URL with no expiration.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile picture image file (JPEG, PNG, or WebP, max 5MB)
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Profile picture uploaded successfully!"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     imageUrl:
+ *                       type: string
+ *                       example: "https://bucket.s3.region.amazonaws.com/profile-pictures/user-id/uuid.jpg"
+ *       400:
+ *         description: Invalid file type or size
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.post(
+  "/upload-profile-picture",
+  authMiddleware,
+  paperUploadLimiter,
+  upload.single("file") as any,
+  userController.uploadProfilePicture
+);
+
+/**
+ * @swagger
+ * /api/user/analytics:
+ *   get:
+ *     summary: Get User Analytics
+ *     description: Retrieve comprehensive analytics including papers count, collections count, storage usage, AI tokens usage, and charts data.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Analytics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User analytics retrieved successfully!"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     plan:
+ *                       type: string
+ *                       enum: [FREE, PRO]
+ *                       example: "FREE"
+ *                     limits:
+ *                       type: object
+ *                       properties:
+ *                         maxPapers:
+ *                           type: number
+ *                           example: 50
+ *                         maxStorage:
+ *                           type: number
+ *                           example: 1024
+ *                         maxTokens:
+ *                           type: number
+ *                           example: 10000
+ *                         maxCollections:
+ *                           type: number
+ *                           example: 10
+ *                     usage:
+ *                       type: object
+ *                       properties:
+ *                         papers:
+ *                           type: object
+ *                         collections:
+ *                           type: object
+ *                         storage:
+ *                           type: object
+ *                         tokens:
+ *                           type: object
+ *                     charts:
+ *                       type: object
+ *                       properties:
+ *                         papersOverTime:
+ *                           type: array
+ *                         collectionsOverTime:
+ *                           type: array
+ *                         storageOverTime:
+ *                           type: array
+ *                         papersByStatus:
+ *                           type: array
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.get(
+  "/analytics",
+  authMiddleware,
+  paperOperationLimiter,
+  userController.getUserAnalytics
+);
 
 export const userRoutes = router;

@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.1.5-blue)](./docs/Release.md)
+[![Version](https://img.shields.io/badge/version-1.1.8-blue)](./docs/Release.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
@@ -45,7 +45,14 @@ ScholarFlow is a modern research paper management and collaboration platform des
 - **Real-time Feedback**: Loading states, error handling, and success notifications
 - **Accessibility**: WCAG compliant with keyboard navigation support
 
-### 🔧 Admin Dashboard & System Monitoring
+### � Billing & Subscription
+
+- **Stripe Checkout**: Upgrade workspaces through secure hosted checkout with plan-aware metadata
+- **Customer Portal Access**: Manage billing details, cancel, or reactivate subscriptions from Stripe without support tickets
+- **Real-Time Sync**: Webhook-driven role updates keep dashboard permissions aligned with subscription status
+- **Billing Dashboard Entry**: Dedicated navigation item and refreshed auth session to surface plan changes instantly
+
+### �🔧 Admin Dashboard & System Monitoring
 
 - **Real-Time System Metrics**: Live monitoring with 10-second auto-refresh for CPU, memory, storage, and database
 - **Accurate CPU Tracking**: Intelligent CPU usage calculation using idle/total times from Node.js os module
@@ -92,7 +99,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 📁 Project Structure
 
-```
+```text
 Scholar-Flow/
 ├── apps/
 │   ├── frontend/          # Next.js 15 application
@@ -157,8 +164,8 @@ Scholar-Flow/
    ```
 
    The application will be available at:
-   - Frontend: http://localhost:3000
-   - Backend: http://localhost:5000
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Backend: [http://localhost:5000](http://localhost:5000)
 
 ## 🔧 Development Commands
 
@@ -185,8 +192,6 @@ yarn clean              # Clean build artifacts
 yarn reset              # Reset node_modules and rebuild
 ```
 
-## 🌟 Current Features (v1.1.4)
-
 ### Content Management & Editing
 
 - ✅ **Rich Text Editor**: TipTap-based, with advanced formatting, tables, lists, and image upload
@@ -207,7 +212,7 @@ yarn reset              # Reset node_modules and rebuild
 - ✅ **Advanced Search**: Full-text search with comprehensive filters
 - ✅ **PDF Preview**: Secure iframe-based PDF viewer
 
-### Admin & System Monitoring (v1.1.4)
+### Admin & System Monitoring
 
 - ✅ **Real-Time System Metrics**: Live CPU, memory, storage, database monitoring with 10s auto-refresh
 - ✅ **Accurate CPU Tracking**: Intelligent calculation using Node.js os module (idle/total times)
@@ -222,37 +227,12 @@ yarn reset              # Reset node_modules and rebuild
 - ✅ **Responsive UI**: Mobile-first design with modern components
 - ✅ **Lazy Loading**: Code splitting with React.lazy and Suspense boundaries
 
-## 🗺️ Roadmap
-
-### Phase 1 (Current) - Core Features
-
-- [x] Authentication & User Management
-- [x] Paper Upload & Storage
-- [x] Rich Text Editor & Content Management
-- [x] Export to PDF/DOCX
-- [x] Image Upload & Sharing
-- [x] Admin Dashboard & System Monitoring
-- [ ] Collections & Organization (In Progress)
-
-### Phase 2 - AI-Powered Features
-
-- [ ] AI Research Assistant
-- [ ] Smart Recommendations
-- [ ] Paper Summarization
-- [ ] Citation Analysis
-
-### Phase 3 - Advanced Collaboration
-
-- [ ] Real-time Collaboration
-- [ ] Shared Workspaces
-- [ ] Integration Hub (Zotero, Mendeley)
-- [ ] Advanced Analytics
-
 ## 📚 Documentation
 
 - [**API Documentation**](./docs/API.md) - Complete API reference
 - [**UI Design System**](./docs/UI_DESIGN.md) - Component guidelines
 - [**Development Guide**](./docs/DEVELOPMENT.md) - Setup and contribution guide
+
 - [**Release Notes**](./docs/Release.md) - Version history and changes
 - [**Roadmap**](./Roadmap.md) - Feature development timeline
 
@@ -304,8 +284,4 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE.md](./L
 
 ---
 
-<div align="center">
-
-[⭐Star this repository](https://github.com/Atik203/Scholar-Flow) if you find it helpful!
-
-</div>
+⭐ **Star this repository** if you find it helpful!

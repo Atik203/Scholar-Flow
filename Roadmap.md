@@ -1,9 +1,7 @@
 # Scholar-Flow Development Roadmap
 
 Author: Atik
-Last Updated: September 24, 2025
-
-> Full project details: [Google Doc](https://docs.google.com/document/d/10oG-05TTcYJD59hSRSaZbu1y9ygjzwUv26wyUCYi5_w/edit?usp=sharing)
+Last Updated: October 3, 2025
 
 ## Phase 1 – MVP (Weeks 1–6)
 
@@ -45,7 +43,7 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Enhanced dashboard with improved navigation & quick actions
 - [x] Component architecture cleanup & duplicate code removal
 
-### Week 4 – Basic Collections (Author: Atik+Salman) ✅
+### Week 4 – Basic Collections (Author: Atik + Salman) ✅
 
 **Key Features Delivered:**
 
@@ -108,46 +106,35 @@ Goal: Get a working core platform with minimal but functional features.
 
 ### Week 5.5 – Performance Optimization & Production Hardening (Author: Atik) ✅
 
-**Phase 1-4 Complete: Lighthouse Score Achievement**
+- [x] Next.js compiler optimizations (SWC, modularizeImports, code splitting)
+- [x] Font & image optimization (AVIF/WebP, display swap, cache headers)
+- [x] React Query & component optimization (staleTime, memo, useMemo)
+- [x] Redis caching with free tier limits (30MB, 50KB per key)
+- [x] Database indexing (8 composite indexes on Paper, CollectionPaper)
+- [x] PWA implementation (service worker, offline support, manifest.json)
+- [x] Skeleton loading states (Dashboard, PaperCard, Table, Form)
+- [x] Production security headers (CSP, HSTS, X-Frame-Options)
+- [x] SEO enhancements (robots.txt, JSON-LD schema, Open Graph)
+- [x] HTTP caching middleware with ETag support
 
-- [x] **Phase 1 & 2 - Quick Wins & Critical Optimizations** ✅
-  - [x] Next.js compiler optimizations (SWC, modularizeImports, optimizeCss)
-  - [x] Route-based code splitting with dynamic imports
-  - [x] Font loading optimization (display: swap, preload)
-  - [x] Image optimization (AVIF, WebP, cache headers)
-  - [x] React Query optimizations (staleTime, keepUnusedDataFor)
-  - [x] Component-level optimization (React.memo, useMemo, useCallback)
-  - [x] Redis caching with free tier optimization (30MB, 50KB limits)
-  - [x] Database indexes (5 on Paper, 3 on CollectionPaper)
-  - [x] HTTP caching middleware with ETag support
+### Week 6 – Stripe Payment and Analytics System (Author: Atik) ✅
 
-- [x] **Phase 3 - Advanced Optimizations** ✅
-  - [x] PWA implementation with service worker (offline support, caching strategies)
-  - [x] Manifest.json with app shortcuts and icons
-  - [x] Skeleton loading states (PaperCard, Dashboard, Table, Form)
-  - [x] Enhanced security headers (CSP, HSTS, X-Frame-Options)
-  - [x] Progressive loading patterns for better UX
+- [x] Stripe integration with live subscription billing (v1.1.6)
+- [x] Implement webhook handling for subscription events
+- [x] Add support for multiple payment methods (credit card, PayPal, etc.)
+- [x] Manage subscription upgrades/downgrades and proration
+- [x] Subscription plans & premium features (Stripe checkout, dashboard billing UI)
+- [x] Added billing page to dashboard with plan details and real-time status
+- [x] Modern Analytics Dashboard: Improved chart colors, legends, dark mode, progress bars
+- [x] Admin Analytics dashboard with user management and system information
 
-- [x] **Phase 4 - Security & SEO** ✅
-  - [x] Production-grade CSP headers (prevent XSS, whitelist domains)
-  - [x] HSTS with 1-year max-age and preload
-  - [x] X-Frame-Options (DENY) and X-Content-Type-Options (nosniff)
-  - [x] robots.txt with proper crawling rules
-  - [x] Structured data (JSON-LD) for WebApplication schema
-  - [x] Enhanced Open Graph and Twitter Card metadata
-  - [x] PWA meta tags and viewport configuration
+### Week 6 – Annotation & Collaboration
 
-### Week 6 – Annotation & Comments
-
-- [ ] Highlighting & annotations in PDF viewer
-- [ ] Referencing system for academic citations with BibTeX/EndNote export and formatting (APA, MLA, IEEE)
-- [ ] Save annotations/comments (user & paper)
-- [ ] Research comment threads & activity log for user interactions
-- [ ] Research Notes
-
----
-
-## Phase 2 – Advanced Features (Weeks 7–14)
+- [ ] PDF highlighting & annotation
+- [ ] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
+- [ ] Save user/paper comments
+- [ ] Threaded research discussions & activity log
+- [ ] Research notes system
 
 Goal: Collaboration tools, advanced research utilities, improved UI.
 
@@ -177,11 +164,6 @@ Goal: Collaboration tools, advanced research utilities, improved UI.
 
 Goal: Monetization, admin tools, external integrations.
 
-### Week 15-16 – Payment System
-
-- [ ] Stripe & SSLCommerz integration
-- [ ] Subscription plans & premium features
-
 ### Week 17-18 – Admin & Integrations
 
 - [ ] Admin panel & platform analytics
@@ -195,5 +177,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 5.75 Complete – Performance optimization complete with all Lighthouse targets achieved (Performance: 89, Accessibility: 100, Best Practices: 100, SEO: 100) ✅ (Author: Atik)
+Current Status: Week 6 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
 Last Updated: October 1, 2025

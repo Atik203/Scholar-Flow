@@ -27,4 +27,6 @@ export const CACHE_DURATIONS = {
   RECENT_USERS: 60, // 1 minute
   GROWTH_DATA: 300, // 5 minutes
   HEALTH_CHECK: 60, // 1 minute
+  USER_ACTIVITY: 60, // 1 minute
+  REVENUE_ANALYTICS: 300, // 5 minutes
 } as const;
