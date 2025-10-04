@@ -1,29 +1,33 @@
 "use client";
 
-import { USER_ROLES, getRoleDashboardBasePath } from "@/lib/auth/roles";
+import { getRoleDashboardBasePath } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardIndex() {
-  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-
-  const target = useMemo(() => {
-    const role = user?.role || USER_ROLES.RESEARCHER;
-    return getRoleDashboardBasePath(role);
-  }, [user?.role]);
+  const pathname = usePathname();
+  const { session, status } = useAuth();
 
   useEffect(() => {
-    if (isLoading) return;
-
-    if (!isAuthenticated) {
-      router.replace("/login?callbackUrl=/dashboard");
+    if (status !== "unauthenticated") {
       return;
     }
 
-    router.replace(target);
-  }, [isLoading, isAuthenticated, target, router]);
+    router.replace("/login?callbackUrl=/dashboard");
+  }, [router, status]);
+
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user?.role) {
+      return;
+    }
+
+    const target = getRoleDashboardBasePath(session.user.role);
+    if (router && pathname !== target) {
+      router.replace(target);
+    }
+  }, [pathname, router, session?.user?.role, status]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

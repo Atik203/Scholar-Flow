@@ -1,7 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
-import { getCallbackUrl, handleAuthRedirect } from "@/lib/auth/redirects";
+import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
+import { getCallbackUrl } from "@/lib/auth/redirects";
+import { setCredentials } from "@/redux/auth/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import {
@@ -16,7 +19,6 @@ import {
   Sparkles,
   User,
 } from "lucide-react";
-import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -70,6 +72,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
 
   // Auth guard - redirects to dashboard if already authenticated
   const { isLoading: authLoading } = useAuthRoute();
@@ -123,35 +126,38 @@ export default function RegisterPage() {
 
       toast.success("Account created successfully! Welcome to ScholarFlow.");
 
-      // Auto sign in after successful registration
-      const callbackUrl = getCallbackUrl(searchParams);
-      const signInResult = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-        callbackUrl,
-      });
-
-      if (signInResult?.ok) {
-        // Wait for session to be updated
-        const session = await getSession();
-
-        // Use smart redirect with user role
-        const redirectUrl = handleAuthRedirect(
-          true,
-          searchParams,
-          "/login",
-          session?.user?.role
+      // Store credentials from registration response (includes accessToken)
+      if (result.success && result.data?.user && result.data?.accessToken) {
+        dispatch(
+          setCredentials({
+            user: result.data.user,
+            accessToken: result.data.accessToken,
+          })
         );
-        router.push(redirectUrl);
-      } else {
-        // If auto sign-in fails, redirect to login page with callback
+
+        // Redirect after successful registration with token
         const callbackUrl = getCallbackUrl(searchParams);
-        const loginUrl = new URL("/login", window.location.origin);
-        if (callbackUrl !== "/dashboard") {
-          loginUrl.searchParams.set("callbackUrl", callbackUrl);
+        router.push(callbackUrl || "/dashboard");
+      } else {
+        // Fallback: Auto sign in after successful registration if token missing
+        const signInResult = await signInWithCredentials(
+          data.email,
+          data.password,
+          dispatch
+        );
+
+        if (signInResult.success) {
+          const callbackUrl = getCallbackUrl(searchParams);
+          router.push(callbackUrl || "/dashboard");
+        } else {
+          // If auto sign-in fails, redirect to login page with callback
+          const callbackUrl = getCallbackUrl(searchParams);
+          const loginUrl = new URL("/login", window.location.origin);
+          if (callbackUrl !== "/dashboard") {
+            loginUrl.searchParams.set("callbackUrl", callbackUrl);
+          }
+          router.push(loginUrl.toString());
         }
-        router.push(loginUrl.toString());
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -170,7 +176,7 @@ export default function RegisterPage() {
 
     try {
       const callbackUrl = getCallbackUrl(searchParams);
-      await signIn(provider, { callbackUrl });
+      signInWithOAuth(provider, callbackUrl);
     } catch {
       toast.error(`Failed to sign up with ${provider}`);
       setIsLoading(false);

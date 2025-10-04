@@ -11,6 +11,7 @@ import { AsyncAuthRequestHandler } from "../../types/express";
 import { ADMIN_SUCCESS_MESSAGES, CACHE_DURATIONS } from "./admin.constant";
 import { IAdminFilters } from "./admin.interface";
 import { adminService } from "./admin.service";
+import { analyticsService } from "./analytics.service";
 
 class AdminController {
   /**
@@ -178,6 +179,54 @@ class AdminController {
         success: true,
         message: "System metrics retrieved successfully",
         data: metrics,
+      });
+    }
+  );
+
+  /**
+   * Get revenue analytics for admin dashboard
+   * GET /api/admin/analytics/revenue
+   */
+  getRevenueAnalytics: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const timeRange =
+        (req.query.timeRange as "7d" | "30d" | "90d" | "1y") || "30d";
+      const analytics = await analyticsService.getRevenueAnalytics(timeRange);
+
+      // Cache for 5 minutes - revenue data doesn't change frequently
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Revenue analytics retrieved successfully",
+        data: analytics,
+      });
+    }
+  );
+
+  /**
+   * Get top paying customers
+   * GET /api/admin/analytics/top-customers
+   */
+  getTopCustomers: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const customers = await analyticsService.getTopCustomers(limit);
+
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Top customers retrieved successfully",
+        data: customers,
       });
     }
   );

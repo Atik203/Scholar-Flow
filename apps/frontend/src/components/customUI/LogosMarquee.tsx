@@ -16,7 +16,7 @@ import Marquee from "react-fast-marquee";
 
 const companies = [
   { icon: Github, name: "GitHub", color: "text-gray-900 dark:text-gray-100" },
-  { icon: Chrome, name: "Google", color: "text-blue-600 dark:text-blue-400" },
+  { icon: Chrome, name: "Google", color: "text-blue-600 dark:text-white" },
   { icon: Slack, name: "Slack", color: "text-purple-600 dark:text-purple-400" },
   { icon: Figma, name: "Figma", color: "text-pink-600 dark:text-pink-400" },
   {
@@ -30,7 +30,7 @@ const companies = [
     color: "text-green-600 dark:text-green-400",
   },
   { icon: Cloud, name: "AWS", color: "text-yellow-600 dark:text-yellow-400" },
-  { icon: Cpu, name: "Intel", color: "text-blue-700 dark:text-blue-300" },
+  { icon: Cpu, name: "Intel", color: "text-blue-700 dark:text-white" },
   { icon: Zap, name: "Vercel", color: "text-gray-900 dark:text-gray-100" },
   {
     icon: Shield,

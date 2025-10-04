@@ -4,11 +4,11 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Check, Code, Database, Settings, Zap } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function EnterpriseIntegrationsPage() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const isAuthenticated = !!session;
 
   return (

@@ -107,3 +107,39 @@ export const paperOperationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Rate limiting for billing checkout sessions
+export const billingCheckoutLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // limit each IP to 10 checkout attempts per hour
+  message: {
+    success: false,
+    message: "Too many checkout attempts. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting for billing portal access
+export const billingPortalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // limit each IP to 20 portal requests per 15 minutes
+  message: {
+    success: false,
+    message: "Too many portal requests. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiting for subscription reads
+export const billingSubscriptionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 reads per 15 minutes
+  message: {
+    success: false,
+    message: "Too many subscription requests. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

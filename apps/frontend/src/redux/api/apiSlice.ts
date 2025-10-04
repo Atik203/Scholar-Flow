@@ -3,7 +3,7 @@ import {
   fetchBaseQuery,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
-import { getSession } from "next-auth/react";
+import type { RootState } from "../store";
 
 // Enhanced error response interface
 export interface ApiErrorResponse {
@@ -55,20 +55,14 @@ const transformErrorResponse = (
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
-  prepareHeaders: async (headers) => {
-    try {
-      const session = await getSession();
-      const token = (session as { accessToken?: string } | null)?.accessToken;
+  prepareHeaders: (headers, { getState }) => {
+    // Get token from Redux auth state
+    const token = (getState() as RootState).auth.accessToken;
 
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-    } catch (error) {
-      // Silently handle auth errors in production
-      if (process.env.NODE_ENV === "development") {
-        console.error("Auth error:", error);
-      }
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
     }
+
     return headers;
   },
 });

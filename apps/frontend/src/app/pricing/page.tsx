@@ -1,10 +1,13 @@
 "use client";
 import { CardWithVariants } from "@/components/ui";
 import { Button } from "@/components/ui/button";
+import { useCreateCheckoutSessionMutation } from "@/redux/api/billingApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import { motion } from "framer-motion";
 import {
   Check,
   Crown,
+  Loader2,
   MessageCircle,
   Sparkles,
   Star,
@@ -12,13 +15,24 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
+
+// Stripe Price IDs from environment variables
+const PRICE_IDS = {
+  PRO_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY!,
+  PRO_ANNUAL: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL!,
+  TEAM_MONTHLY: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY!,
+  TEAM_ANNUAL: process.env.NEXT_PUBLIC_STRIPE_PRICE_TEAM_ANNUAL!,
+} as const;
 
 const plans = [
   {
     name: "Free",
     description: "Perfect for individual researchers getting started",
     price: { monthly: 0, annual: 0 },
+    priceId: { monthly: null, annual: null },
     icon: Star,
     popular: false,
     features: [
@@ -35,6 +49,10 @@ const plans = [
     name: "Pro",
     description: "Ideal for active researchers and small teams",
     price: { monthly: 29, annual: 290 },
+    priceId: {
+      monthly: PRICE_IDS.PRO_MONTHLY,
+      annual: PRICE_IDS.PRO_ANNUAL,
+    },
     icon: Zap,
     popular: true,
     features: [
@@ -55,6 +73,10 @@ const plans = [
     name: "Team",
     description: "Built for research teams and departments",
     price: { monthly: 89, annual: 890 },
+    priceId: {
+      monthly: PRICE_IDS.TEAM_MONTHLY,
+      annual: PRICE_IDS.TEAM_ANNUAL,
+    },
     icon: Users,
     popular: false,
     features: [
@@ -75,6 +97,7 @@ const plans = [
     name: "Enterprise",
     description: "Custom solutions for large organizations",
     price: { monthly: "Custom", annual: "Custom" },
+    priceId: { monthly: null, annual: null },
     icon: Crown,
     popular: false,
     features: [
@@ -120,6 +143,93 @@ export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
     "monthly"
   );
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
+
+  const handleSubscribe = async (planName: string, priceId: string | null) => {
+    // Handle Free plan
+    if (planName === "Free") {
+      if (!isAuthenticated) {
+        router.push("/login");
+      } else {
+        router.push("/dashboard");
+      }
+      return;
+    }
+
+    // Handle Enterprise plan
+    if (planName === "Enterprise") {
+      router.push("/contact");
+      return;
+    }
+
+    // Require authentication for paid plans
+    if (!isAuthenticated) {
+      toast.error("Please sign in to subscribe");
+      router.push("/login");
+      return;
+    }
+
+    // Check if priceId is valid
+    if (!priceId) {
+      toast.error("Invalid price configuration. Please contact support.");
+      return;
+    }
+
+    // Check if user already has active subscription
+    if (
+      user?.stripeSubscriptionId &&
+      user?.stripeCurrentPeriodEnd &&
+      new Date(user.stripeCurrentPeriodEnd) > new Date()
+    ) {
+      toast.info(
+        "You already have an active subscription. Visit your dashboard to manage it."
+      );
+      router.push("/dashboard/billing");
+      return;
+    }
+
+    setLoadingPlan(planName);
+
+    try {
+      const rawResult = await createCheckoutSession({
+        priceId,
+      }).unwrap();
+
+      const parsedResult = (() => {
+        if (typeof rawResult === "string") {
+          try {
+            return JSON.parse(rawResult);
+          } catch (parseError) {
+            console.error("Failed to parse checkout response", parseError);
+            return null;
+          }
+        }
+        return rawResult;
+      })();
+
+      const checkoutUrl = parsedResult?.data?.url ?? parsedResult?.url ?? null;
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+
+      console.error("No checkout URL in response:", rawResult);
+      toast.error("Failed to create checkout session - no URL returned");
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to create checkout session"
+      );
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -268,7 +378,10 @@ export default function PricingPage() {
                   </ul>
 
                   <Button
-                    asChild={plan.name !== "Enterprise"}
+                    onClick={() =>
+                      handleSubscribe(plan.name, plan.priceId[billingPeriod])
+                    }
+                    disabled={loadingPlan === plan.name}
                     variant={
                       plan.name === "Enterprise"
                         ? "outline"
@@ -284,14 +397,17 @@ export default function PricingPage() {
                           : "border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
                     }`}
                   >
-                    {plan.name === "Enterprise" ? (
+                    {loadingPlan === plan.name ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Loading...
+                      </span>
+                    ) : plan.name === "Enterprise" ? (
                       "Contact Sales"
+                    ) : plan.name === "Free" ? (
+                      "Get Started"
                     ) : (
-                      <Link href="/login">
-                        {plan.name === "Free"
-                          ? "Get Started"
-                          : `Start ${plan.name} Trial`}
-                      </Link>
+                      `Start ${plan.name} Trial`
                     )}
                   </Button>
                 </CardWithVariants>

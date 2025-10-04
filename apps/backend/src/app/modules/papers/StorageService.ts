@@ -85,7 +85,8 @@ export class StorageService {
         Key: params.key,
         Body: params.body,
         ContentType: params.contentType || "application/octet-stream",
-        // Remove ACL as it might not be supported by all S3 configurations
+        // Note: Public read access is controlled via bucket policy for profile-pictures/* and editor-images/*
+        // No ACL needed as bucket uses bucket policy for access control
       };
 
       const command = new PutObjectCommand(putObjectInput);
