@@ -220,6 +220,47 @@ export const collectionSchemas = {
   }),
 };
 
+const aiSummaryFocusAreaSchema = z
+  .string()
+  .trim()
+  .min(2, "Focus areas should contain at least two characters")
+  .max(120, "Focus areas should be shorter than 120 characters");
+
+export const aiSchemas = {
+  generateSummary: z.object({
+    instructions: z
+      .string()
+      .trim()
+      .min(4, "Instructions should contain at least four characters")
+      .max(400, "Instructions should be shorter than 400 characters")
+      .optional(),
+    focusAreas: z.array(aiSummaryFocusAreaSchema).max(5).optional(),
+    tone: z
+      .enum(["academic", "technical", "executive", "casual", "conversational"])
+      .optional(),
+    audience: z
+      .enum(["researcher", "student", "executive", "general"])
+      .optional(),
+    language: z
+      .string()
+      .trim()
+      .min(2, "Language should contain at least two characters")
+      .max(40, "Language should be shorter than 40 characters")
+      .optional(),
+    wordLimit: z
+      .number({ invalid_type_error: "Word limit must be a number" })
+      .int("Word limit must be an integer")
+      .min(80, "Word limit must be at least 80 words")
+      .max(600, "Word limit must be at most 600 words")
+      .optional(),
+    refresh: z.boolean().optional(),
+  }),
+};
+
+export type GenerateSummaryFormInput = z.infer<
+  typeof aiSchemas.generateSummary
+>;
+
 // Utility functions for validation
 export const validateField = <T>(
   schema: z.ZodSchema<T>,

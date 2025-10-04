@@ -4,9 +4,40 @@ applyTo: "apps/frontend/**"
 
 # Frontend Development Instructions
 
-## ✅ Phase 1 Status: Authentication UI Complete
+## ✅ Phase 1 Progress (Week 5.5)
 
-OAuth authentication, login/register pages, and form validation are production-ready.
+- Auth flows, modern dashboard shell, paper/collection/workspace tooling are live.
+- Week 5 AI chat + summarization UI launched (Gemini-first with OpenAI fallback).
+- Week 5.5 introduced role-scoped dashboard routing and admin overview UX refresh.
+
+Keep new UI consistent with these delivered experiences and the standards below.
+
+## 🚀 Advanced Error Handling (September 17, 2025)
+
+### RTK Query Enhancement with Retry Logic
+
+- **Enhanced API Slice**: Use retry configuration and error transformation with `retry(baseQuery, { maxRetries: 3 })`
+- **Error Classification**: Network errors (auto-retry), client errors 4xx (manual fix), server errors 5xx (auto-retry)
+- **Smart Retry Logic**: Auto-retry on network/server errors, skip retry on client errors
+
+### Sonner Toast Integration
+
+- **Use ToastProvider Functions**: Never import `toast` directly from Sonner
+- **Proper Usage**: Use `showErrorToast`, `showSuccessToast` from `@/components/providers/ToastProvider`
+- **Error Toast Best Practices**: Use `showApiErrorToast()` from `@/lib/errorHandling` - respects network error retry logic
+
+### Custom Error Handling Hooks
+
+- **Generic Error Handler**: `useErrorHandler(error, options)` for any error with automatic toast/logging
+- **Query Error Handler**: `useQueryErrorHandler(queryResult, options)` with refetch capability
+- **Mutation Error Handler**: `useMutationErrorHandler(mutationResult, retryFunction, options)` with retry logic
+
+### Error Handling Standards
+
+- **Smart Retry**: Auto-retry on network/server errors, manual retry for client errors
+- **Consistent Messaging**: Use error utilities for consistent user-friendly error messages
+- **Development Logging**: Detailed error logs only in development environment
+- **Toast Integration**: Leverage existing Sonner setup with theme support and positioning
 
 ## Core Development Standards
 

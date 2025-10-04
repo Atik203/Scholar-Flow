@@ -19,6 +19,18 @@ const globalErrorHandler = (
   res: Response,
   _next: NextFunction
 ) => {
+  // Log the full error for debugging
+  console.error("❌ GLOBAL ERROR HANDLER CAUGHT:", {
+    errorType: err?.constructor?.name,
+    message: (err as Error)?.message,
+    code: (err as any)?.code,
+    stack: config.env === "development" ? (err as Error)?.stack : undefined,
+    details: (err as any)?.detail,
+    column: (err as any)?.column,
+    constraint: (err as any)?.constraint,
+    table: (err as any)?.table,
+  });
+
   let statusCode = 500;
   let message = "Something went wrong!";
   let errorSources: TErrorSources = [
