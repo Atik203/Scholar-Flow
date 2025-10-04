@@ -87,7 +87,7 @@ Goal: Get a working core platform with minimal but functional features.
   - Draft/publish workflow with title editing and content persistence
   - Mobile-responsive design with keyboard shortcuts and accessibility support
 
-### Week 5 – AI Summarization (Author: Atik) ✅
+### Week 5 – AI Summarization and Chat (Author: Atik) ✅
 
 - [x] Integrate OpenAI/LLM API for summarization
 - [x] Multi-provider AI service (Gemini 2.5-flash-lite primary, OpenAI secondary)
@@ -136,8 +136,6 @@ Goal: Get a working core platform with minimal but functional features.
 - [ ] Threaded research discussions & activity log
 - [ ] Research notes system
 
-Goal: Collaboration tools, advanced research utilities, improved UI.
-
 ### Week 7-8 – Citation System
 
 - [ ] Parse references & citation relationships
@@ -155,7 +153,7 @@ Goal: Collaboration tools, advanced research utilities, improved UI.
 
 ### Week 13-14 – AI Research Assistant
 
-- [ ] Chat with uploaded papers & multi-document Q&A
+- [ ] Advanced AI summarization & insights
 - [ ] Final polishing & performance optimization
 
 ---
@@ -178,4 +176,4 @@ Goal: Monetization, admin tools, external integrations.
 
 Total Duration: 20 weeks (~5 months)
 Current Status: Week 6 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
-Last Updated: October 1, 2025
+Last Updated: October 4, 2025
