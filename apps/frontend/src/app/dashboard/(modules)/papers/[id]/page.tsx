@@ -6,6 +6,9 @@ import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
+import { PdfAnnotationViewer } from "@/components/annotations/PdfAnnotationViewer";
+import { CommentSection } from "@/components/comments/CommentSection";
+import { NotesPanel } from "@/components/notes/NotesPanel";
 import {
   showErrorToast,
   showSuccessToast,
@@ -62,6 +65,9 @@ import {
   Trash2,
   User,
   X,
+  MessageSquare,
+  StickyNote,
+  Highlighter,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -85,6 +91,7 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const [editYear, setEditYear] = useState<number | "">("");
   const [newAuthor, setNewAuthor] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [activeTab, setActiveTab] = useState<"preview" | "annotations" | "comments" | "notes">("preview");
 
   const {
     data: paper,
@@ -403,13 +410,44 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                 </div>
               </CardHeader>
 
+              {/* Tab Navigation */}
+              <div className="border-b">
+                <nav className="flex space-x-8">
+                  {[
+                    { id: "preview", label: "Preview", icon: Eye },
+                    { id: "annotations", label: "Annotations", icon: Highlighter },
+                    { id: "comments", label: "Comments", icon: MessageSquare },
+                    { id: "notes", label: "Notes", icon: StickyNote },
+                  ].map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                          activeTab === tab.id
+                            ? "border-primary text-primary"
+                            : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+
               <CardContent className="space-y-6 pt-6">
-                {/* Enhanced Authors Section */}
-                <div className="bg-muted/20 p-4 rounded-lg border">
-                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    Authors
-                  </Label>
+                {/* Tab Content */}
+                {activeTab === "preview" && (
+                  <>
+                    {/* Enhanced Authors Section */}
+                    <div className="bg-muted/20 p-4 rounded-lg border">
+                      <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Authors
+                      </Label>
                   {isEditing ? (
                     <div className="space-y-3 mt-3">
                       <div className="flex space-x-2">
@@ -638,6 +676,31 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                   <p className="text-muted-foreground">
                     No file information available
                   </p>
+                )}
+                  </>
+                )}
+
+                {/* Annotations Tab */}
+                {activeTab === "annotations" && fileUrlData?.data?.url && (
+                  <div className="h-[600px] border rounded-lg">
+                    <PdfAnnotationViewer
+                      fileUrl={fileUrlData.data.url}
+                      paperId={paper.id}
+                      className="h-full"
+                    />
+                  </div>
+                )}
+
+                {/* Comments Tab */}
+                {activeTab === "comments" && (
+                  <CommentSection paperId={paper.id} />
+                )}
+
+                {/* Notes Tab */}
+                {activeTab === "notes" && (
+                  <div className="h-[600px] border rounded-lg">
+                    <NotesPanel paperId={paper.id} className="h-full" />
+                  </div>
                 )}
               </CardContent>
             </Card>
