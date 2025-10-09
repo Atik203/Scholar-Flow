@@ -3199,7 +3199,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@napi-rs/canvas@npm:^0.1.71, @napi-rs/canvas@npm:^0.1.77":
+"@napi-rs/canvas@npm:^0.1.80":
   version: 0.1.80
   resolution: "@napi-rs/canvas@npm:0.1.80"
   dependencies:
@@ -5417,6 +5417,7 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
+    "@types/react-pdf": "npm:^7.0.0"
     "@types/recharts": "npm:^2.0.1"
     "@types/uuid": "npm:^11.0.0"
     "@vercel/analytics": "npm:^1.5.0"
@@ -5441,7 +5442,7 @@ __metadata:
     next: "npm:^15.4.6"
     next-auth: "npm:^4.24.5"
     next-themes: "npm:^0.3.0"
-    pdfjs-dist: "npm:^5.4.149"
+    pdfjs-dist: "npm:^5.4.296"
     puppeteer: "npm:^24.22.2"
     radix-ui: "npm:^1.4.3"
     react: "npm:^19.1.0"
@@ -5451,7 +5452,7 @@ __metadata:
     react-hook-form: "npm:^7.48.2"
     react-hotkeys-hook: "npm:^5.1.0"
     react-icons: "npm:^5.5.0"
-    react-pdf: "npm:10.1.0"
+    react-pdf: "npm:^10.2.0"
     react-redux: "npm:^9.2.0"
     recharts: "npm:^3.2.1"
     redux: "npm:^5.0.1"
@@ -7496,6 +7497,15 @@ __metadata:
   peerDependencies:
     "@types/react": ^19.0.0
   checksum: 10c0/34c8dda86c1590b3ef0e7ecd38f9663a66ba2dd69113ba74fb0adc36b83bbfb8c94c1487a2505282a5f7e5e000d2ebf36f4c0fd41b3b672f5178fd1d4f1f8f58
+  languageName: node
+  linkType: hard
+
+"@types/react-pdf@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@types/react-pdf@npm:7.0.0"
+  dependencies:
+    react-pdf: "npm:*"
+  checksum: 10c0/d4336126bf237d2faf6ec561c22db423988c900bd6282f25f30b4d581c7df78b226c53e76ef9f1a442cf4532c237ed8eb7a3227c850576c318905f6f890986da
   languageName: node
   linkType: hard
 
@@ -17004,27 +17014,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pdfjs-dist@npm:5.3.93":
-  version: 5.3.93
-  resolution: "pdfjs-dist@npm:5.3.93"
+"pdfjs-dist@npm:5.4.296, pdfjs-dist@npm:^5.4.296":
+  version: 5.4.296
+  resolution: "pdfjs-dist@npm:5.4.296"
   dependencies:
-    "@napi-rs/canvas": "npm:^0.1.71"
+    "@napi-rs/canvas": "npm:^0.1.80"
   dependenciesMeta:
     "@napi-rs/canvas":
       optional: true
-  checksum: 10c0/4956f1ef76cbf35f77ca2341b5bb83de4bdd95c10bb7b3f2472f51cf302da1f3d2f734a991b4a7935a61528c11f83051ff8ccd1333bf8d5e506a464fc3bd708a
-  languageName: node
-  linkType: hard
-
-"pdfjs-dist@npm:^5.4.149":
-  version: 5.4.149
-  resolution: "pdfjs-dist@npm:5.4.149"
-  dependencies:
-    "@napi-rs/canvas": "npm:^0.1.77"
-  dependenciesMeta:
-    "@napi-rs/canvas":
-      optional: true
-  checksum: 10c0/dad7b494ee8e43121cf6f88f16fb3a94307e81fa9768d049ceec877a22a55ad8d3b742b8120ac5c2b8be1817e462eaabb73da71cb0b063bbc7ded6cde971ddf8
+  checksum: 10c0/a9e438f12771963f7c29934b4d5e58d508fa43954e4e4cbf951b040c6c89891d048e3d9d3799ed9ec6ceade677628a25f88062b300c5425777ce0b522e457532
   languageName: node
   linkType: hard
 
@@ -17888,16 +17886,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-pdf@npm:10.1.0":
-  version: 10.1.0
-  resolution: "react-pdf@npm:10.1.0"
+"react-pdf@npm:*, react-pdf@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "react-pdf@npm:10.2.0"
   dependencies:
     clsx: "npm:^2.0.0"
     dequal: "npm:^2.0.3"
     make-cancellable-promise: "npm:^2.0.0"
     make-event-props: "npm:^2.0.0"
     merge-refs: "npm:^2.0.0"
-    pdfjs-dist: "npm:5.3.93"
+    pdfjs-dist: "npm:5.4.296"
     tiny-invariant: "npm:^1.0.0"
     warning: "npm:^4.0.0"
   peerDependencies:
@@ -17907,7 +17905,7 @@ __metadata:
   peerDependenciesMeta:
     "@types/react":
       optional: true
-  checksum: 10c0/6e0eeb2cc91ff4049945f048a11792efc1cf8cdf564689904262e6a67645d09032c0369b5b2e47173967a0e68030dae7cc92bef368b664996255a258b4fd1139
+  checksum: 10c0/a9138b9c54c41899efc98165b99149bc8089aff98f82030d7810764940066ffde584929f0899c10bd527949c19afdce01a10e10a0e49d8c8131c877361132198
   languageName: node
   linkType: hard
 

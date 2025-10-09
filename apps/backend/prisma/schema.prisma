@@ -107,6 +107,7 @@ model User {
 
   // Token relations
   tokens UserToken[]
+  researchNotes     ResearchNote[]
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -223,6 +224,7 @@ model Paper {
   aiSummaries       AISummary[]
   aiInsightThreads  AIInsightThread[]
   aiInsightMessages AIInsightMessage[]
+  researchNotes     ResearchNote[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -711,4 +713,25 @@ enum MembershipStatus {
   PENDING
   ACCEPTED
   DECLINED
+}
+
+model ResearchNote {
+  id        String   @id @default(uuid())
+  userId    String
+  paperId   String?  // Optional - can be general notes
+  title     String
+  content   String
+  tags      String[] // Array of tags
+  isPrivate Boolean  @default(true)
+
+  user  User  @relation(fields: [userId], references: [id])
+  paper Paper? @relation(fields: [paperId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, isDeleted, updatedAt]) // For user's notes sorted by update
+  @@index([paperId, isDeleted]) // For paper-specific notes
+  @@index([tags]) // For tag-based searches
 }
