@@ -1,14 +1,20 @@
 "use client";
 
 import { Annotation } from "@/redux/api/annotationApi";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, StickyNote, Highlighter, Edit, Trash2, Reply } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { 
+  Highlighter, 
+  MessageSquare, 
+  StickyNote, 
+  Edit, 
+  Trash2, 
+  Calendar,
+  User
+} from "lucide-react";
 
 interface AnnotationListProps {
   annotations: Annotation[];
@@ -53,6 +59,15 @@ export function AnnotationList({
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   // Group annotations by page
   const annotationsByPage = annotations.reduce((acc, annotation) => {
     const page = annotation.anchor.page;
@@ -63,134 +78,136 @@ export function AnnotationList({
     return acc;
   }, {} as Record<number, Annotation[]>);
 
-  // Sort pages
   const sortedPages = Object.keys(annotationsByPage)
     .map(Number)
     .sort((a, b) => a - b);
 
   return (
-    <div className={cn("h-full flex flex-col", className)}>
+    <div className={`flex flex-col h-full ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Annotations</CardTitle>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>{annotations.length} total</span>
-          <Separator orientation="vertical" className="h-4" />
-          <span>Page {currentPage}</span>
-        </div>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          Annotations
+        </CardTitle>
       </CardHeader>
 
-      <ScrollArea className="flex-1 px-4">
-        <div className="space-y-4 pb-4">
-          {sortedPages.map((page) => {
-            const pageAnnotations = annotationsByPage[page];
-            const isCurrentPage = page === currentPage;
-
-            return (
-              <div key={page} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium text-sm">Page {page}</h3>
-                  <Badge variant={isCurrentPage ? "default" : "secondary"}>
-                    {pageAnnotations.length}
-                  </Badge>
-                  {isCurrentPage && (
+      <CardContent className="flex-1 p-0">
+        <ScrollArea className="h-full px-4">
+          {sortedPages.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No annotations yet</p>
+              <p className="text-sm">Select text in the PDF to create annotations</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {sortedPages.map((page) => (
+                <div key={page} className="space-y-2">
+                  <div className="flex items-center gap-2 sticky top-0 bg-background py-2">
                     <Badge variant="outline" className="text-xs">
-                      Current
+                      Page {page}
                     </Badge>
-                  )}
-                </div>
+                    <Separator className="flex-1" />
+                  </div>
 
-                <div className="space-y-2">
-                  {pageAnnotations.map((annotation) => {
+                  {annotationsByPage[page].map((annotation) => {
                     const Icon = getAnnotationIcon(annotation.type);
                     const colorClass = getAnnotationColor(annotation.type);
 
                     return (
-                      <Card
-                        key={annotation.id}
-                        className={cn(
-                          "cursor-pointer transition-all duration-200 hover:shadow-md",
-                          isCurrentPage && "ring-2 ring-primary/20"
-                        )}
+                      <Card 
+                        key={annotation.id} 
+                        className="cursor-pointer hover:shadow-sm transition-shadow"
                         onClick={() => onAnnotationClick(annotation)}
                       >
                         <CardContent className="p-3">
-                          <div className="flex items-start gap-2">
-                            <div className={cn("p-1 rounded", colorClass)}>
-                              <Icon className="h-3 w-3" />
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant="outline" className="text-xs">
+                          <div className="space-y-2">
+                            {/* Header */}
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`p-1 rounded ${colorClass}`}>
+                                  <Icon className="h-3 w-3" />
+                                </div>
+                                <Badge variant="secondary" className="text-xs">
                                   {annotation.type}
                                 </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {annotation.user.name}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatDistanceToNow(new Date(annotation.createdAt), {
-                                    addSuffix: true,
-                                  })}
-                                </span>
                               </div>
-
-                              <p className="text-sm text-foreground line-clamp-3">
-                                {annotation.text}
-                              </p>
-
-                              {annotation.children && annotation.children.length > 0 && (
-                                <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                                  <Reply className="h-3 w-3" />
-                                  <span>{annotation.children.length} replies</span>
-                                </div>
-                              )}
-
-                              <div className="flex items-center gap-1 mt-2">
+                              <div className="flex items-center gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 px-2 text-xs"
+                                  className="h-6 w-6 p-0"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onAnnotationEdit(annotation);
                                   }}
                                 >
-                                  <Edit className="h-3 w-3 mr-1" />
-                                  Edit
+                                  <Edit className="h-3 w-3" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                                  className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onAnnotationDelete(annotation);
                                   }}
                                 >
-                                  <Trash2 className="h-3 w-3 mr-1" />
-                                  Delete
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
                               </div>
                             </div>
+
+                            {/* Selected text preview */}
+                            {annotation.anchor.selectedText && (
+                              <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded border-l-2 border-primary/20">
+                                "{annotation.anchor.selectedText}"
+                              </div>
+                            )}
+
+                            {/* Annotation text */}
+                            <div className="text-sm text-foreground">
+                              {annotation.text}
+                            </div>
+
+                            {/* Footer */}
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <User className="h-3 w-3" />
+                                {annotation.user.name}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {formatDate(annotation.createdAt)}
+                              </div>
+                            </div>
+
+                            {/* Replies */}
+                            {annotation.children && annotation.children.length > 0 && (
+                              <div className="ml-4 space-y-1">
+                                <Separator className="my-2" />
+                                {annotation.children.map((reply) => (
+                                  <div key={reply.id} className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
+                                    <div className="flex items-center gap-1 mb-1">
+                                      <User className="h-3 w-3" />
+                                      {reply.user.name}
+                                    </div>
+                                    <div>{reply.text}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
                     );
                   })}
                 </div>
-              </div>
-            );
-          })}
-
-          {annotations.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No annotations yet</p>
-              <p className="text-xs">Select text in the PDF to create annotations</p>
+              ))}
             </div>
           )}
-        </div>
-      </ScrollArea>
+        </ScrollArea>
+      </CardContent>
     </div>
   );
 }

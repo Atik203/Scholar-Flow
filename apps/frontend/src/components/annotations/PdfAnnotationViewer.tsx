@@ -9,8 +9,9 @@ import { AnnotationToolbar } from "./AnnotationToolbar";
 import { AnnotationLayer } from "./AnnotationLayer";
 import { AnnotationList } from "./AnnotationList";
 import { AnnotationPopup } from "./AnnotationPopup";
-import { useGetPaperAnnotationsQuery } from "@/redux/api/annotationApi";
+import { useGetPaperAnnotationsQuery, useCreateAnnotationMutation } from "@/redux/api/annotationApi";
 import { Annotation, AnnotationAnchor } from "@/redux/api/annotationApi";
+import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -29,13 +30,16 @@ export function PdfAnnotationViewer({
   paperId,
   className = "",
 }: PdfAnnotationViewerProps) {
+  // Debug logging
+  console.log("PdfAnnotationViewer props:", { fileUrl, paperId, className });
+
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [rotation, setRotation] = useState<number>(0);
   const [selectedText, setSelectedText] = useState<string>("");
   const [selection, setSelection] = useState<AnnotationAnchor | null>(null);
-  const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(false);
+  const [isAnnotationPopupOpen, setIsAnnotationPopupOpen] = useState(false);
   const [annotationType, setAnnotationType] = useState<"HIGHLIGHT" | "COMMENT" | "NOTE">("HIGHLIGHT");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [showAnnotationList, setShowAnnotationList] = useState(false);
@@ -49,6 +53,9 @@ export function PdfAnnotationViewer({
     includeReplies: true,
   });
 
+  // Create annotation mutation
+  const [createAnnotation, { isLoading: isCreatingAnnotation }] = useCreateAnnotationMutation();
+
   const annotations = annotationsData?.data || [];
 
   // Filter annotations for current page
@@ -58,16 +65,6 @@ export function PdfAnnotationViewer({
 
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
-  }, []);
-
-  const onPageLoadSuccess = useCallback((page: any) => {
-    // Set up text selection handling
-    const textLayer = page.textLayer;
-    if (textLayer) {
-      textLayer.textDivs.forEach((textDiv: HTMLElement) => {
-        textDiv.addEventListener("mouseup", handleTextSelection);
-      });
-    }
   }, []);
 
   const handleTextSelection = useCallback(() => {
@@ -97,23 +94,43 @@ export function PdfAnnotationViewer({
           selectedText,
         };
         setSelection(anchor);
-        setIsCreatingAnnotation(true);
+        setIsAnnotationPopupOpen(true);
       }
     }
   }, [currentPage, scale]);
 
-  const handleAnnotationCreate = useCallback((text: string) => {
-    if (selection) {
-      // This will be handled by the parent component
-      console.log("Creating annotation:", { selection, text, type: annotationType });
-      setIsCreatingAnnotation(false);
-      setSelection(null);
-      setSelectedText("");
+  const onPageLoadSuccess = useCallback((page: any) => {
+    // Set up text selection handling
+    const textLayer = page.textLayer;
+    if (textLayer) {
+      textLayer.textDivs.forEach((textDiv: HTMLElement) => {
+        textDiv.addEventListener("mouseup", handleTextSelection);
+      });
     }
-  }, [selection, annotationType]);
+  }, [handleTextSelection]);
+
+  const handleAnnotationCreate = useCallback(async (text: string) => {
+    if (selection) {
+      try {
+        await createAnnotation({
+          paperId,
+          type: annotationType,
+          anchor: selection,
+          text: text.trim(),
+        }).unwrap();
+
+        showSuccessToast("Annotation saved successfully");
+        setIsAnnotationPopupOpen(false);
+        setSelection(null);
+        setSelectedText("");
+      } catch (error: any) {
+        showErrorToast(error.data?.message || "Failed to save annotation");
+      }
+    }
+  }, [selection, annotationType, paperId, createAnnotation]);
 
   const handleAnnotationCancel = useCallback(() => {
-    setIsCreatingAnnotation(false);
+    setIsAnnotationPopupOpen(false);
     setSelection(null);
     setSelectedText("");
   }, []);
@@ -276,7 +293,7 @@ export function PdfAnnotationViewer({
       )}
 
       {/* Annotation Creation Popup */}
-      {isCreatingAnnotation && selection && (
+      {isAnnotationPopupOpen && selection && (
         <AnnotationPopup
           selectedText={selectedText}
           annotationType={annotationType}

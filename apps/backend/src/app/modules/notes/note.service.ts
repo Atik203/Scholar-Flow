@@ -107,7 +107,7 @@ export class NoteService {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
+        totalPage: Math.ceil(total / limit),
       },
     };
   }
@@ -231,8 +231,8 @@ export class NoteService {
       userId,
       isDeleted: false,
       OR: [
-        { title: { contains: searchQuery, mode: 'insensitive' } },
-        { content: { contains: searchQuery, mode: 'insensitive' } },
+        { title: { contains: searchQuery, mode: 'insensitive' as any } },
+        { content: { contains: searchQuery, mode: 'insensitive' as any } },
         { tags: { hasSome: [searchQuery] } },
       ],
     };
@@ -270,7 +270,7 @@ export class NoteService {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
+        totalPage: Math.ceil(total / limit),
       },
     };
   }

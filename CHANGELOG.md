@@ -1,7 +1,6 @@
 # Scholar-Flow Release Notes
 
 ## Release 1.2.0 (January 15, 2025) - Annotation & Collaboration Phase 1
-
 ### 🎯 New Features
 
 #### PDF Annotation System
@@ -42,9 +41,13 @@
 #### Frontend Components
 - **PdfAnnotationViewer**: Main PDF viewer with annotation overlay
 - **AnnotationToolbar**: Toolbar for annotation controls and type selection
+- **AnnotationLayer**: Renders annotations as overlays on PDF with hover effects
+- **AnnotationList**: Sidebar list of all annotations grouped by page
 - **CommentSection**: Comments interface with threaded discussions
 - **NotesPanel**: Research notes management interface
 - **Redux Integration**: Complete API integration with RTK Query
+- **Research Annotations Route**: Dedicated annotation interface at `/dashboard/researcher/research/annotations`
+- **Real-time Paper Loading**: Fetches actual user papers from database instead of mock data
 
 ### 🗄️ Database Changes
 - **ResearchNote Model**: New table for research notes with tags and privacy controls

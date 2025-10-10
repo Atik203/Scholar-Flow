@@ -254,7 +254,7 @@ export class AnnotationService {
         paperId: parentAnnotation.paperId,
         userId,
         type: AnnotationType.COMMENT,
-        anchor: parentAnnotation.anchor, // Inherit anchor from parent
+        anchor: parentAnnotation.anchor as any, // Inherit anchor from parent
         text: data.text,
         parentId: annotationId,
         version: 1,
@@ -360,7 +360,7 @@ export class AnnotationService {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
+        totalPage: Math.ceil(total / limit),
       },
     };
   }
