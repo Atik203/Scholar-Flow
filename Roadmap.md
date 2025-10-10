@@ -133,8 +133,8 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] PDF highlighting & annotation
 - [x] Save user/paper comments
 - [x] Research notes system
-- [ ] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
-- [ ] Threaded research discussions & activity log
+- [x] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
+- [x] Threaded research discussions & activity log
 
 ### Week 7-8 – Citation System
 
