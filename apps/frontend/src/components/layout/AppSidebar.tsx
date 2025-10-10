@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/redux/auth/useAuth";
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   BarChart3,
   BookOpen,
   Brain,
@@ -180,6 +181,25 @@ const navigationItems: SidebarItem[] = [
         title: "Research Notes",
         path: "/research/notes",
         icon: MessageSquare,
+        minRole: USER_ROLES.RESEARCHER,
+      },
+    ],
+  },
+  {
+    title: "Collaboration",
+    icon: Users,
+    minRole: USER_ROLES.RESEARCHER,
+    items: [
+      {
+        title: "Discussions",
+        path: "/discussions",
+        icon: MessageSquare,
+        minRole: USER_ROLES.RESEARCHER,
+      },
+      {
+        title: "Activity Log",
+        path: "/activity-log",
+        icon: Activity,
         minRole: USER_ROLES.RESEARCHER,
       },
     ],

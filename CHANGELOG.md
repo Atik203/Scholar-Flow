@@ -1,5 +1,59 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.0 (January 15, 2025) - Citation Management & Collaboration Enhancement
+### 🎯 New Features
+
+#### Citation Export System
+- **Multi-format Support**: Export citations in BibTeX, EndNote, APA, MLA, IEEE, Chicago, and Harvard formats
+- **Batch Export**: Export individual papers or entire collections
+- **Export History**: Track and re-download previous exports
+- **Research Integration**: Seamlessly integrated into the Research workflow
+- **Citation Management**: Comprehensive citation tools with format-specific formatting
+
+#### Threaded Research Discussions
+- **Enhanced Discussion System**: Create discussions for papers, collections, or workspaces
+- **Threaded Conversations**: Nested message replies with conversation hierarchy
+- **Discussion Management**: Pin important discussions, mark as resolved, and categorize with tags
+- **Real-time Collaboration**: Live discussion participation with user attribution
+- **Discussion Guidelines**: Built-in best practices and discussion types
+
+#### Activity Log System
+- **Comprehensive Tracking**: Monitor all workspace activities with detailed logging
+- **Advanced Filtering**: Filter by user, entity type, action, severity, and date range
+- **Activity Export**: Export activity data in JSON or CSV formats
+- **Severity Levels**: INFO, WARNING, ERROR, and CRITICAL activity categorization
+- **Entity-specific Logs**: Track activities for papers, collections, discussions, and annotations
+
+#### UI/UX Improvements
+- **Reorganized Navigation**: Moved citation features to Research section, discussions to Collaboration
+- **Removed Phase 2 Branding**: Integrated features seamlessly into existing workflow
+- **Enhanced Citations Page**: Comprehensive citation management with paper selection and export history
+- **Improved Sidebar**: Cleaner navigation structure with logical feature grouping
+
+### 🔧 Technical Implementation
+
+#### Backend API
+- **Citation Export Service**: Complete citation formatting for 7 academic formats
+- **Discussion Service**: Full CRUD operations for threads and messages with permissions
+- **Activity Log Service**: Comprehensive activity tracking with filtering and export
+- **Database Schema**: New models for CitationExport, DiscussionThread, DiscussionMessage, ActivityLogEntry
+- **Authentication**: Secure endpoints with workspace-based access control
+
+#### Frontend Components
+- **CitationExportDialog**: Export interface with format selection and options
+- **CreateDiscussionDialog**: Discussion creation with entity association
+- **DiscussionThreadCard**: Thread display with message management
+- **ActivityLog**: Activity viewer with advanced filtering and export
+- **Enhanced Citations Page**: Integrated citation management at `/dashboard/research/citations`
+
+#### Database Changes
+- **New Models**: CitationExport, DiscussionThread, DiscussionMessage, ActivityLogEntry
+- **New Enums**: CitationFormat, ActivitySeverity
+- **Enhanced Relationships**: Updated existing models with proper relations
+- **Optimized Indexes**: Performance improvements for all new features
+
+---
+
 ## Release 1.2.0 (January 15, 2025) - Annotation & Collaboration Phase 1
 ### 🎯 New Features
 
