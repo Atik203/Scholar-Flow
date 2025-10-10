@@ -560,6 +560,31 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                     </div>
                   )}
                 </div>
+                  </>
+                )}
+
+                {/* Annotations Tab */}
+                {activeTab === "annotations" && fileUrlData?.data?.url && (
+                  <div className="h-[600px] border rounded-lg">
+                    <PdfAnnotationViewer
+                      fileUrl={fileUrlData.data.url}
+                      paperId={paper.id}
+                      className="h-full"
+                    />
+                  </div>
+                )}
+
+                {/* Comments Tab */}
+                {activeTab === "comments" && (
+                  <CommentSection paperId={paper.id} />
+                )}
+
+                {/* Notes Tab */}
+                {activeTab === "notes" && (
+                  <div className="h-[600px] border rounded-lg">
+                    <NotesPanel paperId={paper.id} className="h-full" />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -676,31 +701,6 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                   <p className="text-muted-foreground">
                     No file information available
                   </p>
-                )}
-                  </>
-                )}
-
-                {/* Annotations Tab */}
-                {activeTab === "annotations" && fileUrlData?.data?.url && (
-                  <div className="h-[600px] border rounded-lg">
-                    <PdfAnnotationViewer
-                      fileUrl={fileUrlData.data.url}
-                      paperId={paper.id}
-                      className="h-full"
-                    />
-                  </div>
-                )}
-
-                {/* Comments Tab */}
-                {activeTab === "comments" && (
-                  <CommentSection paperId={paper.id} />
-                )}
-
-                {/* Notes Tab */}
-                {activeTab === "notes" && (
-                  <div className="h-[600px] border rounded-lg">
-                    <NotesPanel paperId={paper.id} className="h-full" />
-                  </div>
                 )}
               </CardContent>
             </Card>

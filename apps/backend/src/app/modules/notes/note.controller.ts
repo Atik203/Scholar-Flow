@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/auth";
+import { AuthRequest } from "../../middleware/auth";
 import { NoteService } from "./note.service";
 import {
   createNoteSchema,
@@ -7,31 +7,33 @@ import {
   getNotesQuerySchema,
   searchNotesSchema,
 } from "./note.types";
-import { catchAsync } from "../../middleware/routeHandler";
-import { sendSuccessResponse, sendPaginatedResponse } from "../../shared/responseHelpers";
+import catchAsync from "../../shared/catchAsync";
+import { sendSuccessResponse, sendPaginatedResponse } from "../../shared/sendResponse";
 
 export const noteController = {
   /**
    * Create a new note
    */
   create: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const parsed = createNoteSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid note data",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     const note = await NoteService.createNote(userId, parsed.data);
@@ -43,23 +45,25 @@ export const noteController = {
    * Get notes
    */
   getNotes: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const parsed = getNotesQuerySchema.safeParse(req.query);
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid query parameters",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     const result = await NoteService.getNotes(userId, parsed.data);
@@ -76,14 +80,15 @@ export const noteController = {
    * Get note by ID
    */
   getNote: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
@@ -91,15 +96,16 @@ export const noteController = {
     try {
       const note = await NoteService.getNoteById(id, userId);
       if (!note) {
-        return res.status(404).json({
-          success: false,
-          message: "Note not found",
-        });
+      res.status(404).json({
+        success: false,
+        message: "Note not found",
+      });
+      return;
       }
 
       sendSuccessResponse(res, note, "Note retrieved successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -110,32 +116,34 @@ export const noteController = {
    * Update note
    */
   update: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
     const parsed = updateNoteSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid update data",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     try {
       const note = await NoteService.updateNote(id, userId, parsed.data);
       sendSuccessResponse(res, note, "Note updated successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -146,14 +154,15 @@ export const noteController = {
    * Delete note
    */
   delete: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
@@ -162,7 +171,7 @@ export const noteController = {
       await NoteService.deleteNote(id, userId);
       sendSuccessResponse(res, null, "Note deleted successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -173,23 +182,25 @@ export const noteController = {
    * Search notes
    */
   search: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const parsed = searchNotesSchema.safeParse(req.query);
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid search parameters",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     const result = await NoteService.searchNotes(userId, parsed.data);

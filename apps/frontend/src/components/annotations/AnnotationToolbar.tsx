@@ -57,6 +57,8 @@ export function AnnotationToolbar({
     },
   ];
 
+  const selectedAnnotation = annotationTypes.find(t => t.type === selectedType);
+
   return (
     <div className={`flex items-center justify-between p-3 border-t bg-background ${className}`}>
       <div className="flex items-center gap-2">
@@ -65,10 +67,11 @@ export function AnnotationToolbar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
-              {annotationTypes.find(t => t.type === selectedType)?.icon && (
-                <annotationTypes.find(t => t.type === selectedType)!.icon className="h-4 w-4" />
-              )}
-              {annotationTypes.find(t => t.type === selectedType)?.label}
+              {selectedAnnotation?.icon && (() => {
+                const Icon = selectedAnnotation.icon;
+                return <Icon className="h-4 w-4" />;
+              })()}
+              {selectedAnnotation?.label}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">

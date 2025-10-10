@@ -1,8 +1,6 @@
 "use client";
 
 import { Annotation } from "@/redux/api/annotationApi";
-import { cn } from "@/lib/utils";
-import { MessageSquare, StickyNote, Highlighter } from "lucide-react";
 
 interface AnnotationLayerProps {
   annotations: Annotation[];
@@ -17,91 +15,89 @@ export function AnnotationLayer({
   onAnnotationClick,
   className = "",
 }: AnnotationLayerProps) {
-  const getAnnotationIcon = (type: string) => {
-    switch (type) {
+  const getAnnotationStyle = (annotation: Annotation) => {
+    const { coordinates } = annotation.anchor;
+    const baseStyle = {
+      position: "absolute" as const,
+      left: `${coordinates.x}px`,
+      top: `${coordinates.y}px`,
+      width: `${coordinates.width}px`,
+      height: `${coordinates.height}px`,
+      pointerEvents: "auto" as const,
+      cursor: "pointer" as const,
+      zIndex: 10,
+    };
+
+    switch (annotation.type) {
       case "HIGHLIGHT":
-        return Highlighter;
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(255, 255, 0, 0.3)",
+          border: "1px solid rgba(255, 255, 0, 0.6)",
+        };
       case "COMMENT":
-        return MessageSquare;
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(59, 130, 246, 0.2)",
+          border: "1px solid rgba(59, 130, 246, 0.5)",
+        };
       case "NOTE":
-        return StickyNote;
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(34, 197, 94, 0.2)",
+          border: "1px solid rgba(34, 197, 94, 0.5)",
+        };
       default:
-        return MessageSquare;
+        return {
+          ...baseStyle,
+          backgroundColor: "rgba(156, 163, 175, 0.2)",
+          border: "1px solid rgba(156, 163, 175, 0.5)",
+        };
     }
   };
 
-  const getAnnotationColor = (type: string) => {
+  const getAnnotationIcon = (type: string) => {
     switch (type) {
       case "HIGHLIGHT":
-        return "bg-yellow-200/80 border-yellow-400";
+        return "🖍️";
       case "COMMENT":
-        return "bg-blue-200/80 border-blue-400";
+        return "💬";
       case "NOTE":
-        return "bg-green-200/80 border-green-400";
+        return "📝";
       default:
-        return "bg-gray-200/80 border-gray-400";
+        return "📌";
     }
   };
 
   return (
-    <div className={cn("absolute inset-0 pointer-events-none", className)}>
-      {annotations.map((annotation) => {
-        const { coordinates } = annotation.anchor;
-        const Icon = getAnnotationIcon(annotation.type);
-        const colorClass = getAnnotationColor(annotation.type);
-
-        return (
-          <div
-            key={annotation.id}
-            className={cn(
-              "absolute pointer-events-auto cursor-pointer group",
-              colorClass,
-              "border rounded-sm hover:shadow-md transition-all duration-200"
-            )}
-            style={{
-              left: coordinates.x * scale,
-              top: coordinates.y * scale,
-              width: coordinates.width * scale,
-              height: coordinates.height * scale,
-              minHeight: "20px",
-              minWidth: "20px",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAnnotationClick(annotation);
-            }}
-          >
-            {/* Annotation content */}
-            <div className="relative w-full h-full p-1">
-              {/* Icon for small annotations */}
-              {coordinates.width * scale < 50 && (
-                <div className="flex items-center justify-center w-full h-full">
-                  <Icon className="h-3 w-3 text-gray-600" />
-                </div>
-              )}
-
-              {/* Text preview for larger annotations */}
-              {coordinates.width * scale >= 50 && (
-                <div className="text-xs text-gray-700 truncate">
-                  {annotation.text.length > 50
-                    ? `${annotation.text.substring(0, 50)}...`
-                    : annotation.text}
-                </div>
-              )}
-
-              {/* Hover overlay */}
-              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-sm" />
-
-              {/* Reply indicator */}
-              {annotation.children && annotation.children.length > 0 && (
-                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {annotation.children.length}
-                </div>
-              )}
+    <div className={`absolute inset-0 pointer-events-none ${className}`}>
+      {annotations.map((annotation) => (
+        <div
+          key={annotation.id}
+          style={getAnnotationStyle(annotation)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAnnotationClick(annotation);
+          }}
+          className="group hover:opacity-80 transition-opacity"
+          title={`${annotation.type}: ${annotation.text}`}
+        >
+          {/* Annotation icon overlay */}
+          <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+            {getAnnotationIcon(annotation.type)}
+          </div>
+          
+          {/* Annotation text preview on hover */}
+          <div className="absolute top-full left-0 mt-1 bg-white border rounded shadow-lg p-2 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+            <div className="text-xs font-medium text-gray-700 mb-1">
+              {annotation.user.name}
+            </div>
+            <div className="text-xs text-gray-600 line-clamp-3">
+              {annotation.text}
             </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

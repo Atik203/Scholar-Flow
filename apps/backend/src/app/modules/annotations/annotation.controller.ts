@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/auth";
+import { AuthRequest } from "../../middleware/auth";
 import { AnnotationService } from "./annotation.service";
 import {
   createAnnotationSchema,
@@ -7,7 +7,7 @@ import {
   createAnnotationReplySchema,
   getAnnotationsQuerySchema,
 } from "./annotation.types";
-import { catchAsync } from "../../middleware/routeHandler";
+import catchAsync from "../../shared/catchAsync";
 import { sendSuccessResponse, sendPaginatedResponse } from "../../shared/sendResponse";
 
 export const annotationController = {
@@ -15,23 +15,25 @@ export const annotationController = {
    * Create a new annotation
    */
   create: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const parsed = createAnnotationSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid annotation data",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     const annotation = await AnnotationService.createAnnotation(userId, parsed.data);
@@ -49,11 +51,12 @@ export const annotationController = {
     });
 
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid query parameters",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     const annotations = await AnnotationService.getPaperAnnotations(parsed.data);
@@ -65,32 +68,34 @@ export const annotationController = {
    * Update an annotation
    */
   update: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
     const parsed = updateAnnotationSchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid update data",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     try {
       const annotation = await AnnotationService.updateAnnotation(id, userId, parsed.data);
       sendSuccessResponse(res, annotation, "Annotation updated successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -101,14 +106,15 @@ export const annotationController = {
    * Delete an annotation
    */
   delete: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
@@ -117,7 +123,7 @@ export const annotationController = {
       await AnnotationService.deleteAnnotation(id, userId);
       sendSuccessResponse(res, null, "Annotation deleted successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -128,32 +134,34 @@ export const annotationController = {
    * Create a reply to an annotation
    */
   createReply: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const { id } = req.params;
     const parsed = createAnnotationReplySchema.safeParse(req.body);
 
     if (!parsed.success) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid reply data",
         errors: parsed.error.issues,
       });
+      return;
     }
 
     try {
       const reply = await AnnotationService.createAnnotationReply(id, userId, parsed.data);
       sendSuccessResponse(res, reply, "Reply created successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -170,7 +178,7 @@ export const annotationController = {
       const versions = await AnnotationService.getAnnotationVersions(id);
       sendSuccessResponse(res, versions, "Annotation versions retrieved successfully");
     } catch (error: any) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: error.message,
       });
@@ -181,14 +189,15 @@ export const annotationController = {
    * Get user's annotations
    */
   getUserAnnotations: catchAsync(async (req: Request, res: Response) => {
-    const authReq = req as AuthenticatedRequest;
+    const authReq = req as AuthRequest;
     const userId = authReq.user?.id;
 
     if (!userId) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Authentication required",
       });
+      return;
     }
 
     const page = parseInt(req.query.page as string) || 1;
