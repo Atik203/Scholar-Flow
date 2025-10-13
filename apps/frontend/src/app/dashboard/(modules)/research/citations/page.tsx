@@ -49,10 +49,22 @@ export default function CitationsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/dashboard/researcher/research">
+          <Link href="/research">
             <Button variant="outline">
               <Layers className="h-4 w-4 mr-2" />
               Back to Research
+            </Button>
+          </Link>
+          <Link href="/research/citations/formats">
+            <Button variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              View Formats
+            </Button>
+          </Link>
+          <Link href="/research/citations/history">
+            <Button variant="outline">
+              <Calendar className="h-4 w-4 mr-2" />
+              Export History
             </Button>
           </Link>
           <CitationExportDialog
