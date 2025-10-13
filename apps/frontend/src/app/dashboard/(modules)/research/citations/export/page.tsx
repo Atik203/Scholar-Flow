@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
 import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
-import { Download, FileText, Calendar, User, Quote, BookOpen, Layers } from "lucide-react";
+import { Download, FileText, Calendar, User, Quote, BookOpen, Layers, ArrowLeft, Settings } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 
-export default function CitationsPage() {
+export default function CitationExportPage() {
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
-  const { data: exportHistory, isLoading } = useGetCitationExportHistoryQuery({ limit: 20 });
+  const { data: exportHistory, isLoading } = useGetCitationExportHistoryQuery({ limit: 50 });
 
   const handlePaperSelect = (paperId: string) => {
     setSelectedPapers(prev => 
@@ -37,56 +37,42 @@ export default function CitationsPage() {
   ];
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Quote className="h-8 w-8" />
-            Citations & References
-          </h1>
-          <p className="text-muted-foreground">
-            Manage and export citations in various academic formats
-          </p>
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Enhanced Header */}
+      <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" asChild className="hover:bg-white/80">
+            <Link href="/research/citations">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Citations
+            </Link>
+          </Button>
+          <div className="h-6 border-l border-border" />
+          <div>
+            <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <Download className="h-6 w-6" />
+              Citation Export
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Export citations in various academic formats
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
-          <Link href="/research">
-            <Button variant="outline">
-              <Layers className="h-4 w-4 mr-2" />
-              Back to Research
-            </Button>
-          </Link>
-          <Link href="/research/citations/formats">
-            <Button variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              View Formats
-            </Button>
-          </Link>
-          <Link href="/research/citations/history">
-            <Button variant="outline">
-              <Calendar className="h-4 w-4 mr-2" />
-              Export History
-            </Button>
-          </Link>
-          <CitationExportDialog
-            paperIds={selectedPapers}
-            paperTitles={mockPapers.filter(p => selectedPapers.includes(p.id)).map(p => p.title)}
-            trigger={
-              <Button disabled={selectedPapers.length === 0}>
-                <Download className="h-4 w-4 mr-2" />
-                Export Selected ({selectedPapers.length})
-              </Button>
-            }
-          />
+          <Button variant="outline" size="sm">
+            <Settings className="h-4 w-4 mr-2" />
+            Export Settings
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Paper Selection */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Research Papers
+              Select Papers for Export
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -121,119 +107,94 @@ export default function CitationsPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
+        {/* Export Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Quick Actions
+              Export Options
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <CitationExportDialog
-              collectionId="1"
-              collectionName="AI Research Papers"
+              paperIds={selectedPapers}
+              paperTitles={mockPapers.filter(p => selectedPapers.includes(p.id)).map(p => p.title)}
               trigger={
-                <Button variant="outline" className="w-full justify-start">
+                <Button disabled={selectedPapers.length === 0} className="w-full">
                   <Download className="h-4 w-4 mr-2" />
-                  Export Collection
+                  Export Selected ({selectedPapers.length})
                 </Button>
               }
             />
-            <Button variant="outline" className="w-full justify-start">
-              <FileText className="h-4 w-4 mr-2" />
-              Import Citations
-            </Button>
-            <Button variant="outline" className="w-full justify-start">
-              <Calendar className="h-4 w-4 mr-2" />
-              Citation Manager
-            </Button>
+            
+            <div className="border-t pt-3">
+              <h4 className="font-medium text-sm mb-2">Quick Export Collections</h4>
+              {mockCollections.map((collection) => (
+                <CitationExportDialog
+                  key={collection.id}
+                  collectionId={collection.id}
+                  collectionName={collection.name}
+                  trigger={
+                    <Button variant="outline" className="w-full justify-start text-sm">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      {collection.name} ({collection.count})
+                    </Button>
+                  }
+                />
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Export History */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Recent Exports
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Loading export history...
-              </div>
-            ) : exportHistory?.exports.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                No exports yet
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {exportHistory?.exports.map((exportItem) => (
-                  <div key={exportItem.id} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline">{exportItem.format}</Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(exportItem.exportedAt), 'MMM dd, yyyy')}
-                      </span>
-                    </div>
-                    <div className="text-sm">
-                      {exportItem.paper ? (
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          <span className="truncate">{exportItem.paper.title}</span>
-                        </div>
-                      ) : exportItem.collection ? (
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4" />
-                          <span>{exportItem.collection.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">Multiple papers</span>
-                      )}
-                    </div>
+      {/* Export History */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Export History
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-4 text-muted-foreground">
+              Loading export history...
+            </div>
+          ) : exportHistory?.exports.length === 0 ? (
+            <div className="text-center py-4 text-muted-foreground">
+              No exports yet
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {exportHistory?.exports.map((exportItem) => (
+                <div key={exportItem.id} className="p-3 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline">{exportItem.format}</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {format(new Date(exportItem.exportedAt), 'MMM dd, yyyy')}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Collections */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5" />
-              Collections
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {mockCollections.map((collection) => (
-              <div key={collection.id} className="p-3 border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-sm">{collection.name}</h3>
-                    <p className="text-xs text-muted-foreground">{collection.count} papers</p>
+                  <div className="text-sm">
+                    {exportItem.paper ? (
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        <span className="truncate">{exportItem.paper.title}</span>
+                      </div>
+                    ) : exportItem.collection ? (
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="h-4 w-4" />
+                        <span>{exportItem.collection.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Multiple papers</span>
+                    )}
                   </div>
-                  <CitationExportDialog
-                    collectionId={collection.id}
-                    collectionName={collection.name}
-                    trigger={
-                      <Button size="sm" variant="outline">
-                        <Download className="h-3 w-3 mr-1" />
-                        Export
-                      </Button>
-                    }
-                  />
                 </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Citation Formats Info */}
       <Card>

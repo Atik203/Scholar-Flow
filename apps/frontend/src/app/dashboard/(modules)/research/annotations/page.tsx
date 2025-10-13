@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { PdfAnnotationViewer } from "@/components/annotations/PdfAnnotationViewer";
 import { CommentSection } from "@/components/comments/CommentSection";
 import { NotesPanel } from "@/components/notes/NotesPanel";
@@ -24,7 +25,7 @@ import { useState, useEffect, useMemo } from "react";
 
 export default function ResearchAnnotationsPage() {
   const isProtected = useProtectedRoute();
-  const [activeTab, setActiveTab] = useState<"preview" | "annotations" | "comments" | "notes">("annotations");
+  const [activeTab, setActiveTab] = useState<"preview" | "annotations" | "comments" | "notes">("preview");
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
 
   // Fetch user's papers from database
@@ -244,6 +245,7 @@ export default function ResearchAnnotationsPage() {
                   <div className="border-b mt-4">
                     <nav className="flex space-x-8">
                       {[
+                        { id: "preview", label: "Preview", icon: Eye },
                         { id: "annotations", label: "Annotations", icon: Highlighter },
                         { id: "comments", label: "Comments", icon: MessageSquare },
                         { id: "notes", label: "Notes", icon: StickyNote },
@@ -269,6 +271,61 @@ export default function ResearchAnnotationsPage() {
                 </CardHeader>
 
                 <CardContent className="space-y-6 pt-6">
+                  {/* Preview Tab */}
+                  {activeTab === "preview" && (
+                    <>
+                      {isFetchingFileUrl ? (
+                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                            <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                          </div>
+                        </div>
+                      ) : fileUrlError ? (
+                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                          <div className="text-center">
+                            <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2 text-destructive">Failed to Load PDF</h3>
+                            <p className="text-muted-foreground mb-4">
+                              There was an error loading the PDF file for this paper.
+                            </p>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => window.location.reload()}
+                              className="mt-2"
+                            >
+                              Retry
+                            </Button>
+                          </div>
+                        </div>
+                      ) : fileUrlData?.data?.url && selectedPaperId ? (
+                        <div className="h-[600px] border rounded-lg">
+                          <DocumentPreview
+                            fileUrl={fileUrlData.data.url}
+                            fileName={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
+                            mimeType={papers.find(p => p.id === selectedPaperId)?.file?.contentType}
+                            originalFilename={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
+                            className="h-full"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                          <div className="text-center">
+                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">PDF Not Available</h3>
+                            <p className="text-muted-foreground">
+                              The PDF file for this paper is not available for preview.
+                            </p>
+                            <div className="mt-4 text-xs text-muted-foreground">
+                              <p>Paper ID: {selectedPaperId}</p>
+                              <p>File URL Data: {fileUrlData ? "Available" : "Not available"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   {/* Annotations Tab */}
                   {activeTab === "annotations" && (
                     <>
@@ -298,9 +355,11 @@ export default function ResearchAnnotationsPage() {
                         </div>
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
                         <div className="h-[600px] border rounded-lg">
-                          <PdfAnnotationViewer
+                          <DocumentPreview
                             fileUrl={fileUrlData.data.url}
-                            paperId={selectedPaperId}
+                            fileName={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
+                            mimeType={papers.find(p => p.id === selectedPaperId)?.file?.contentType}
+                            originalFilename={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
                             className="h-full"
                           />
                         </div>
