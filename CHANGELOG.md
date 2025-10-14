@@ -54,6 +54,52 @@
 
 ---
 
+## Release 1.3.1 (January 15, 2025) - Code Quality & TypeScript Fixes
+
+### 🔧 Code Updates & Fixes
+
+#### TypeScript Type System Improvements
+- **Fixed CitationExportHistory Interface**: Added missing properties (`downloadedAt`, `fileSize`, `paperCount`) to match actual API response structure
+- **Enhanced DiscussionThread Interface**: Added `author`, `messages`, and `participants` properties for complete type safety
+- **Resolved Type Annotations**: Fixed implicit `any` type errors in array map functions across all components
+- **API Type Consistency**: Synchronized all frontend interfaces with backend API responses
+
+#### Next.js 15 Compatibility
+- **Dynamic Route Params Fix**: Updated discussion detail page to handle Next.js 15's new async params structure
+- **Server/Client Component Separation**: Created proper client component wrapper for React hooks functionality
+- **Build Optimization**: Ensured all dynamic routes work correctly with Next.js 15's new routing system
+
+#### Component Type Safety
+- **DiscussionThreadCard Updates**: Fixed component to use correct `author` property instead of `user` for thread authors
+- **Type Definition Synchronization**: Ensured all components use consistent type definitions from the API
+- **Error Resolution**: Fixed all TypeScript compilation errors across the application
+
+#### Build System Improvements
+- **Production Build Success**: Resolved all build compilation errors
+- **Type Checking Pass**: Achieved zero TypeScript errors across the entire codebase
+- **Bundle Optimization**: Maintained proper code splitting and optimization for all new features
+- **Route Generation**: Successfully generated 166 static pages including all new feature routes
+
+#### Navigation Structure Fixes
+- **Sidebar Navigation Cleanup**: Removed duplicate "Collaboration" section that was conflicting with "Collaborations"
+- **Feature Organization**: Properly moved Discussions and Activity Log to Research section for better UX
+- **Role-based Routing**: Ensured all new features work correctly with existing role-scoped routing system
+
+### 🎯 Technical Achievements
+- ✅ **Zero TypeScript Errors**: Complete type safety across the application
+- ✅ **Successful Production Build**: All 166 routes compiled successfully
+- ✅ **Next.js 15 Compatibility**: Full compatibility with latest Next.js features
+- ✅ **Type System Integrity**: Consistent type definitions throughout the codebase
+- ✅ **Component Reliability**: All components properly typed and error-free
+
+### 📊 Build Statistics
+- **Total Routes**: 166 static pages successfully generated
+- **New Feature Routes**: 9 new routes for citations, discussions, and activity logs
+- **Bundle Size**: Optimized with proper code splitting
+- **Type Safety**: 100% TypeScript coverage with zero errors
+
+---
+
 ## Release 1.2.0 (January 15, 2025) - Annotation & Collaboration Phase 1
 ### 🎯 New Features
 

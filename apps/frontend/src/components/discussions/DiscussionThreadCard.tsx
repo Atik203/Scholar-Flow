@@ -41,6 +41,13 @@ interface DiscussionThread {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    image?: string;
+  };
   user: {
     id: string;
     name?: string;
@@ -67,9 +74,9 @@ interface DiscussionThread {
     id: string;
     content: string;
     createdAt: string;
-    user: {
+    author: {
       id: string;
-      name?: string;
+      name: string;
       firstName?: string;
       lastName?: string;
       image?: string;
@@ -94,14 +101,14 @@ export function DiscussionThreadCard({
 }: DiscussionThreadCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const getUserDisplayName = (user: DiscussionThread['user']) => {
+  const getUserDisplayName = (user: DiscussionThread['author']) => {
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
     return user.name || 'Unknown User';
   };
 
-  const getUserInitials = (user: DiscussionThread['user']) => {
+  const getUserInitials = (user: DiscussionThread['author']) => {
     if (user.firstName && user.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
@@ -194,7 +201,7 @@ export function DiscussionThreadCard({
     }
   };
 
-  const isOwner = currentUserId === thread.user.id;
+  const isOwner = currentUserId === thread.author.id;
 
   return (
     <Card className={`transition-all hover:shadow-md ${thread.isPinned ? 'border-primary' : ''}`}>
@@ -272,12 +279,12 @@ export function DiscussionThreadCard({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Avatar className="h-6 w-6">
-                <AvatarImage src={thread.user.image} />
+                <AvatarImage src={thread.author.image} />
                 <AvatarFallback className="text-xs">
-                  {getUserInitials(thread.user)}
+                  {getUserInitials(thread.author)}
                 </AvatarFallback>
               </Avatar>
-              <span>{getUserDisplayName(thread.user)}</span>
+              <span>{getUserDisplayName(thread.author)}</span>
             </div>
             
             <div className="flex items-center gap-1">
@@ -306,7 +313,7 @@ export function DiscussionThreadCard({
           <div className="mt-3 p-2 bg-muted rounded-md">
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
               <User className="h-3 w-3" />
-              <span>{getUserDisplayName(thread.messages[0].user)}</span>
+              <span>{getUserDisplayName(thread.messages[0].author)}</span>
               <span>•</span>
               <span>{formatDistanceToNow(new Date(thread.messages[0].createdAt), { addSuffix: true })}</span>
             </div>

@@ -370,3 +370,4 @@ The new research module includes these routes:
 - `/dashboard/researcher/research/discussions/[id]` - Discussion detail
 - `/dashboard/researcher/research/activity-log` - Activity tracking
 - `/dashboard/researcher/research/activity-log/export` - Export activity log
+
