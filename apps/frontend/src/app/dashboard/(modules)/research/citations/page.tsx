@@ -2,31 +2,54 @@
 
 import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
+import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   BookOpen,
   Calendar,
   CheckCircle2,
   Download,
-  FileInput,
   FileText,
   Quote,
-  Settings,
-  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export default function CitationsPage() {
   const { user, isAuthenticated } = useProtectedRoute();
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
-  const { data: exportHistory, isLoading } = useGetCitationExportHistoryQuery({
+
+  // Fetch real data from backend
+  const {
+    data: papersData,
+    isLoading: isPapersLoading,
+    error: papersError,
+  } = useListPapersQuery({
+    page: 1,
+    limit: 50,
+  });
+  const {
+    data: collectionsData,
+    isLoading: isCollectionsLoading,
+    error: collectionsError,
+  } = useGetMyCollectionsQuery({
+    page: 1,
+    limit: 10,
+  });
+  const {
+    data: exportHistory,
+    isLoading: isExportHistoryLoading,
+    error: exportHistoryError,
+  } = useGetCitationExportHistoryQuery({
     limit: 10,
   });
 
@@ -34,6 +57,37 @@ export default function CitationsPage() {
     (segment: string) => buildRoleScopedPath(user?.role, segment),
     [user?.role]
   );
+
+  // Transform papers data for UI
+  const papers = useMemo(() => {
+    if (!papersData?.items) return [];
+    return papersData.items.map((paper) => ({
+      id: paper.id,
+      title: paper.title,
+      authors: paper.metadata?.authors || [],
+      year: paper.metadata?.year || new Date(paper.createdAt).getFullYear(),
+    }));
+  }, [papersData]);
+
+  // Transform collections data for UI
+  const collections = useMemo(() => {
+    if (!collectionsData?.result) return [];
+    return collectionsData.result.map((collection) => ({
+      id: collection.id,
+      name: collection.name,
+      count: collection._count?.papers || 0,
+    }));
+  }, [collectionsData]);
+
+  // Handle loading and error states
+  const isLoading =
+    isPapersLoading || isCollectionsLoading || isExportHistoryLoading;
+
+  // Only show error if we actually have an error AND no data loaded
+  const hasError =
+    (papersError && !papersData) ||
+    (collectionsError && !collectionsData) ||
+    (exportHistoryError && !exportHistory);
 
   if (!isAuthenticated) {
     return null;
@@ -46,45 +100,6 @@ export default function CitationsPage() {
         : [...prev, paperId]
     );
   };
-
-  const mockPapers = [
-    {
-      id: "1",
-      title: "Machine Learning in Healthcare: A Comprehensive Review",
-      authors: ["Dr. Smith", "Dr. Johnson"],
-      year: 2024,
-    },
-    {
-      id: "2",
-      title: "Deep Learning Approaches for Natural Language Processing",
-      authors: ["Dr. Brown", "Dr. Davis"],
-      year: 2023,
-    },
-    {
-      id: "3",
-      title: "Blockchain Technology in Supply Chain Management",
-      authors: ["Dr. Wilson", "Dr. Miller"],
-      year: 2024,
-    },
-    {
-      id: "4",
-      title: "Artificial Intelligence Ethics and Bias",
-      authors: ["Dr. Garcia", "Dr. Martinez"],
-      year: 2023,
-    },
-    {
-      id: "5",
-      title: "Quantum Computing: Current State and Future Prospects",
-      authors: ["Dr. Anderson", "Dr. Taylor"],
-      year: 2024,
-    },
-  ];
-
-  const mockCollections = [
-    { id: "1", name: "AI Research Papers", count: 12 },
-    { id: "2", name: "Healthcare Technology", count: 8 },
-    { id: "3", name: "Blockchain Studies", count: 15 },
-  ];
 
   const citationFormats = [
     {
@@ -127,6 +142,16 @@ export default function CitationsPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
+        {/* Error Alert */}
+        {hasError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load some data. Please refresh the page or try again
+              later.
+            </AlertDescription>
+          </Alert>
+        )}
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -153,7 +178,7 @@ export default function CitationsPage() {
             </Button>
             <CitationExportDialog
               paperIds={selectedPapers}
-              paperTitles={mockPapers
+              paperTitles={papers
                 .filter((p) => selectedPapers.includes(p.id))
                 .map((p) => p.title)}
               trigger={
@@ -176,7 +201,7 @@ export default function CitationsPage() {
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockPapers.length}</div>
+              <div className="text-2xl font-bold">{papers.length}</div>
               <p className="text-xs text-muted-foreground">
                 Available for citation
               </p>
@@ -188,7 +213,7 @@ export default function CitationsPage() {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockCollections.length}</div>
+              <div className="text-2xl font-bold">{collections.length}</div>
               <p className="text-xs text-muted-foreground">
                 Organized collections
               </p>
@@ -222,22 +247,41 @@ export default function CitationsPage() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Paper Selection */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Research Papers
-                </CardTitle>
-                <Badge variant="secondary" className="ml-auto">
-                  {selectedPapers.length} of {mockPapers.length} selected
-                </Badge>
+        {/* Paper Selection */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Research Papers
+              </CardTitle>
+              <Badge variant="secondary" className="ml-auto">
+                {selectedPapers.length} of {papers.length} selected
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">
+                    Loading papers...
+                  </p>
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {mockPapers.map((paper) => (
+            ) : papers.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  No papers available
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Upload papers to start creating citations
+                </p>
+              </div>
+            ) : (
+              papers.map((paper) => (
                 <div
                   key={paper.id}
                   className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
@@ -255,7 +299,7 @@ export default function CitationsPage() {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                         <span className="flex items-center gap-1">
                           <Quote className="h-3 w-3" />
-                          {paper.authors.join(", ")}
+                          {paper.authors.join(", ") || "Unknown Author"}
                         </span>
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -271,97 +315,10 @@ export default function CitationsPage() {
                     )}
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions & Collections */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <CitationExportDialog
-                  collectionId="1"
-                  collectionName="AI Research Papers"
-                  trigger={
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      size="sm"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Collection
-                    </Button>
-                  }
-                />
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  size="sm"
-                >
-                  <FileInput className="h-4 w-4 mr-2" />
-                  Import Citations
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  size="sm"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Citation Manager
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Collections */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
-                  My Collections
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {mockCollections.map((collection) => (
-                  <div
-                    key={collection.id}
-                    className="p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm truncate">
-                          {collection.name}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {collection.count} papers
-                        </p>
-                      </div>
-                      <CitationExportDialog
-                        collectionId={collection.id}
-                        collectionName={collection.name}
-                        trigger={
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="shrink-0"
-                          >
-                            <Download className="h-3 w-3" />
-                          </Button>
-                        }
-                      />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Exports */}
@@ -373,7 +330,7 @@ export default function CitationsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {isExportHistoryLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
