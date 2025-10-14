@@ -107,6 +107,13 @@ model User {
 
   // Token relations
   tokens UserToken[]
+  researchNotes     ResearchNote[]
+  
+  // New Phase 2 features
+  citationExports           CitationExport[]
+  discussionThreads          DiscussionThread[]
+  discussionMessages        DiscussionMessage[]
+  activityLogEntries        ActivityLogEntry[]
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -132,6 +139,10 @@ model Workspace {
   collections Collection[]
   papers      Paper[]
   activities  ActivityLog[]
+  
+  // New Phase 2 features
+  discussionThreads  DiscussionThread[]
+  activityLogEntries  ActivityLogEntry[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -223,6 +234,11 @@ model Paper {
   aiSummaries       AISummary[]
   aiInsightThreads  AIInsightThread[]
   aiInsightMessages AIInsightMessage[]
+  researchNotes     ResearchNote[]
+  
+  // New Phase 2 features
+  citationExports    CitationExport[]
+  discussionThreads  DiscussionThread[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -352,6 +368,10 @@ model Collection {
 
   papers  CollectionPaper[]
   members CollectionMember[]
+  
+  // New Phase 2 features
+  citationExports    CitationExport[]
+  discussionThreads  DiscussionThread[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -711,4 +731,146 @@ enum MembershipStatus {
   PENDING
   ACCEPTED
   DECLINED
+}
+
+model ResearchNote {
+  id        String   @id @default(uuid())
+  userId    String
+  paperId   String?  // Optional - can be general notes
+  title     String
+  content   String
+  tags      String[] // Array of tags
+  isPrivate Boolean  @default(true)
+
+  user  User  @relation(fields: [userId], references: [id])
+  paper Paper? @relation(fields: [paperId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, isDeleted, updatedAt]) // For user's notes sorted by update
+  @@index([paperId, isDeleted]) // For paper-specific notes
+  @@index([tags]) // For tag-based searches
+}
+
+// Citation Export System
+model CitationExport {
+  id          String           @id @default(uuid())
+  userId      String
+  paperId     String?
+  collectionId String?
+  format      CitationFormat
+  content     String           // The actual citation content
+  metadata    Json?            @db.JsonB // Additional format-specific metadata
+  exportedAt  DateTime         @default(now())
+
+  user       User       @relation(fields: [userId], references: [id])
+  paper      Paper?     @relation(fields: [paperId], references: [id])
+  collection Collection? @relation(fields: [collectionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, exportedAt]) // For user's export history
+  @@index([paperId, format]) // For paper-specific exports
+  @@index([collectionId, format]) // For collection exports
+}
+
+enum CitationFormat {
+  BIBTEX
+  ENDNOTE
+  APA
+  MLA
+  IEEE
+  CHICAGO
+  HARVARD
+}
+
+// Threaded Research Discussions
+model DiscussionThread {
+  id          String  @id @default(uuid())
+  paperId     String?
+  collectionId String?
+  workspaceId String?
+  userId      String
+  title       String
+  content     String
+  isResolved  Boolean @default(false)
+  isPinned    Boolean @default(false)
+  tags        String[] // Discussion tags for categorization
+
+  paper      Paper?      @relation(fields: [paperId], references: [id])
+  collection Collection? @relation(fields: [collectionId], references: [id])
+  workspace  Workspace?  @relation(fields: [workspaceId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  messages   DiscussionMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([paperId, isDeleted, createdAt]) // For paper discussions
+  @@index([collectionId, isDeleted, createdAt]) // For collection discussions
+  @@index([workspaceId, isDeleted, createdAt]) // For workspace discussions
+  @@index([userId, isDeleted]) // For user's discussions
+  @@index([isResolved, isDeleted]) // For resolved/unresolved filtering
+  @@index([isPinned, isDeleted]) // For pinned discussions
+}
+
+model DiscussionMessage {
+  id          String  @id @default(uuid())
+  threadId    String
+  userId      String
+  content     String
+  parentId    String? // For threaded replies
+  isEdited    Boolean @default(false)
+  editHistory Json?   @db.JsonB // Store edit history
+
+  thread   DiscussionThread    @relation(fields: [threadId], references: [id])
+  user     User               @relation(fields: [userId], references: [id])
+  parent   DiscussionMessage? @relation("MessageThread", fields: [parentId], references: [id])
+  replies  DiscussionMessage[] @relation("MessageThread")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([threadId, createdAt]) // For thread messages sorted by date
+  @@index([userId, isDeleted]) // For user's messages
+  @@index([parentId, isDeleted]) // For message replies
+}
+
+// Enhanced Activity Log
+model ActivityLogEntry {
+  id          String  @id @default(uuid())
+  userId      String?
+  workspaceId String?
+  entity      String  // 'paper', 'collection', 'discussion', 'annotation', etc.
+  entityId    String
+  action      String  // 'created', 'updated', 'deleted', 'shared', 'exported', etc.
+  details     Json?   @db.JsonB // Additional context about the action
+  metadata    Json?   @db.JsonB // Additional metadata like IP, user agent, etc.
+  severity    ActivitySeverity @default(INFO)
+
+  user      User?      @relation(fields: [userId], references: [id])
+  workspace Workspace? @relation(fields: [workspaceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, createdAt]) // For user activity timeline
+  @@index([workspaceId, createdAt]) // For workspace activity
+  @@index([entity, entityId, createdAt]) // For entity-specific activity
+  @@index([action, createdAt]) // For action-based filtering
+  @@index([severity, createdAt]) // For severity-based filtering
+}
+
+enum ActivitySeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
 }
