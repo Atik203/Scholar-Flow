@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
+import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
 import { format } from "date-fns";
 import {
@@ -18,16 +20,57 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function CitationExportPage() {
   const { user } = useProtectedRoute();
   const scopedPath = (segment: string) =>
     buildRoleScopedPath(user?.role, segment);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
-  const { data: exportHistory, isLoading } = useGetCitationExportHistoryQuery({
+  const { data: exportHistory, isLoading: isExportHistoryLoading } =
+    useGetCitationExportHistoryQuery({
+      limit: 50,
+    });
+
+  const {
+    data: papersData,
+    isLoading: isPapersLoading,
+    error: papersError,
+  } = useListPapersQuery({
+    page: 1,
     limit: 50,
   });
+
+  const {
+    data: collectionsData,
+    isLoading: isCollectionsLoading,
+    error: collectionsError,
+  } = useGetMyCollectionsQuery({
+    page: 1,
+    limit: 20,
+  });
+
+  const isLoading =
+    isPapersLoading || isCollectionsLoading || isExportHistoryLoading;
+
+  const papers = useMemo(() => {
+    if (!papersData?.items) return [];
+    return papersData.items.map((paper) => ({
+      id: paper.id,
+      title: paper.title,
+      authors: paper.metadata?.authors || [],
+      year: paper.metadata?.year || new Date(paper.createdAt).getFullYear(),
+    }));
+  }, [papersData]);
+
+  const collections = useMemo(() => {
+    if (!collectionsData?.result) return [];
+    return collectionsData.result.map((collection) => ({
+      id: collection.id,
+      name: collection.name,
+      count: collection._count?.papers || 0,
+    }));
+  }, [collectionsData]);
 
   const handlePaperSelect = (paperId: string) => {
     setSelectedPapers((prev) =>
@@ -36,45 +79,6 @@ export default function CitationExportPage() {
         : [...prev, paperId]
     );
   };
-
-  const mockPapers = [
-    {
-      id: "1",
-      title: "Machine Learning in Healthcare: A Comprehensive Review",
-      authors: ["Dr. Smith", "Dr. Johnson"],
-      year: 2024,
-    },
-    {
-      id: "2",
-      title: "Deep Learning Approaches for Natural Language Processing",
-      authors: ["Dr. Brown", "Dr. Davis"],
-      year: 2023,
-    },
-    {
-      id: "3",
-      title: "Blockchain Technology in Supply Chain Management",
-      authors: ["Dr. Wilson", "Dr. Miller"],
-      year: 2024,
-    },
-    {
-      id: "4",
-      title: "Artificial Intelligence Ethics and Bias",
-      authors: ["Dr. Garcia", "Dr. Martinez"],
-      year: 2023,
-    },
-    {
-      id: "5",
-      title: "Quantum Computing: Current State and Future Prospects",
-      authors: ["Dr. Anderson", "Dr. Taylor"],
-      year: 2024,
-    },
-  ];
-
-  const mockCollections = [
-    { id: "1", name: "AI Research Papers", count: 12 },
-    { id: "2", name: "Healthcare Technology", count: 8 },
-    { id: "3", name: "Blockchain Studies", count: 15 },
-  ];
 
   return (
     <DashboardLayout>
@@ -117,34 +121,60 @@ export default function CitationExportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockPapers.map((paper) => (
-                <div
-                  key={paper.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedPapers.includes(paper.id)
-                      ? "border-primary bg-primary/5"
-                      : "hover:bg-muted"
-                  }`}
-                  onClick={() => handlePaperSelect(paper.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm mb-1">
-                        {paper.title}
-                      </h3>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{paper.authors.join(", ")}</span>
-                        <span>{paper.year}</span>
-                      </div>
-                    </div>
-                    {selectedPapers.includes(paper.id) && (
-                      <Badge variant="secondary" className="ml-2">
-                        Selected
-                      </Badge>
-                    )}
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground">
+                      Preparing paper list...
+                    </p>
                   </div>
                 </div>
-              ))}
+              ) : papers.length === 0 ? (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-muted-foreground/20 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    No papers available for export
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Upload papers or request access to start exporting
+                  </p>
+                </div>
+              ) : (
+                papers.map((paper) => (
+                  <div
+                    key={paper.id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                      selectedPapers.includes(paper.id)
+                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                        : "hover:bg-muted/60"
+                    }`}
+                    onClick={() => handlePaperSelect(paper.id)}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm mb-1.5 line-clamp-2">
+                          {paper.title}
+                        </h3>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                          <span>{paper.authors.join(", ") || "Unknown"}</span>
+                          <span>{paper.year}</span>
+                        </div>
+                      </div>
+                      {selectedPapers.includes(paper.id) && (
+                        <Badge variant="secondary" className="shrink-0">
+                          Selected
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+              {(papersError || collectionsError) && (
+                <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  Failed to load some resources. Please refresh the page.
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -159,7 +189,7 @@ export default function CitationExportPage() {
             <CardContent className="space-y-3">
               <CitationExportDialog
                 paperIds={selectedPapers}
-                paperTitles={mockPapers
+                paperTitles={papers
                   .filter((p) => selectedPapers.includes(p.id))
                   .map((p) => p.title)}
                 trigger={
@@ -177,22 +207,28 @@ export default function CitationExportPage() {
                 <h4 className="font-medium text-sm mb-2">
                   Quick Export Collections
                 </h4>
-                {mockCollections.map((collection) => (
-                  <CitationExportDialog
-                    key={collection.id}
-                    collectionId={collection.id}
-                    collectionName={collection.name}
-                    trigger={
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-sm"
-                      >
-                        <BookOpen className="h-4 w-4 mr-2" />
-                        {collection.name} ({collection.count})
-                      </Button>
-                    }
-                  />
-                ))}
+                {collections.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    No collections available yet.
+                  </p>
+                ) : (
+                  collections.slice(0, 5).map((collection) => (
+                    <CitationExportDialog
+                      key={collection.id}
+                      collectionId={collection.id}
+                      collectionName={collection.name}
+                      trigger={
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-sm"
+                        >
+                          <BookOpen className="h-4 w-4 mr-2" />
+                          {collection.name} ({collection.count})
+                        </Button>
+                      }
+                    />
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

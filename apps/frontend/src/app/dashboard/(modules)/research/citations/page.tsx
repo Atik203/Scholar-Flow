@@ -2,7 +2,6 @@
 
 import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,6 @@ import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
 import { format } from "date-fns";
 import {
-  AlertCircle,
   BookOpen,
   Calendar,
   CheckCircle2,
@@ -79,15 +77,9 @@ export default function CitationsPage() {
     }));
   }, [collectionsData]);
 
-  // Handle loading and error states
+  // Handle loading state
   const isLoading =
     isPapersLoading || isCollectionsLoading || isExportHistoryLoading;
-
-  // Only show error if we actually have an error AND no data loaded
-  const hasError =
-    (papersError && !papersData) ||
-    (collectionsError && !collectionsData) ||
-    (exportHistoryError && !exportHistory);
 
   if (!isAuthenticated) {
     return null;
@@ -142,16 +134,6 @@ export default function CitationsPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        {/* Error Alert */}
-        {hasError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load some data. Please refresh the page or try again
-              later.
-            </AlertDescription>
-          </Alert>
-        )}
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>

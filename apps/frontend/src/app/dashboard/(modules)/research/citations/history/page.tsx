@@ -1,13 +1,21 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
-import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
+import {
+  useDeleteCitationExportMutation,
+  useGetCitationExportHistoryQuery,
+  useLazyDownloadCitationExportQuery,
+} from "@/redux/api/phase2Api";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -38,6 +46,10 @@ export default function CitationHistoryPage() {
     ...(formatFilter && { format: formatFilter }),
   });
 
+  const [deleteExport, { isLoading: isDeleting }] =
+    useDeleteCitationExportMutation();
+  const [downloadExport] = useLazyDownloadCitationExportQuery();
+
   const filteredExports =
     exportHistory?.exports.filter((exportItem) => {
       const matchesSearch =
@@ -51,14 +63,49 @@ export default function CitationHistoryPage() {
       return matchesSearch;
     }) || [];
 
-  const handleDeleteExport = (exportId: string) => {
-    // Implement delete functionality
-    console.log("Delete export:", exportId);
+  const handleDeleteExport = async (exportId: string) => {
+    if (!confirm("Are you sure you want to delete this export?")) {
+      return;
+    }
+
+    try {
+      await deleteExport(exportId).unwrap();
+      showSuccessToast("Export deleted successfully");
+      refetch();
+    } catch (error: any) {
+      console.error("Delete export error:", error);
+      const errorMessage =
+        error?.data?.message || "Failed to delete export. Please try again.";
+      showErrorToast(errorMessage);
+    }
   };
 
-  const handleReDownload = (exportId: string) => {
-    // Implement re-download functionality
-    console.log("Re-download export:", exportId);
+  const handleReDownload = async (exportId: string) => {
+    try {
+      const result = await downloadExport(exportId).unwrap();
+
+      // Create a blob from the content
+      const blob = new Blob([result.content], { type: "text/plain" });
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary download link
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showSuccessToast(`Downloaded ${result.filename}`);
+    } catch (error: any) {
+      console.error("Download export error:", error);
+      const errorMessage =
+        error?.data?.message || "Failed to download export. Please try again.";
+      showErrorToast(errorMessage);
+    }
   };
 
   const formatOptions = [
@@ -240,6 +287,7 @@ export default function CitationHistoryPage() {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDeleteExport(exportItem.id)}
+                        disabled={isDeleting}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
