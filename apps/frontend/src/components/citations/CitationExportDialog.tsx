@@ -1,6 +1,12 @@
 "use client";
 
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -25,18 +31,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { useExportCitationsMutation } from "@/redux/api/phase2Api";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 const citationFormSchema = z.object({
-  format: z.enum(['BIBTEX', 'ENDNOTE', 'APA', 'MLA', 'IEEE', 'CHICAGO', 'HARVARD']),
+  format: z.enum([
+    "BIBTEX",
+    "ENDNOTE",
+    "APA",
+    "MLA",
+    "IEEE",
+    "CHICAGO",
+    "HARVARD",
+  ]),
   includeAbstract: z.boolean(),
   includeKeywords: z.boolean(),
 });
@@ -52,13 +64,41 @@ interface CitationExportDialogProps {
 }
 
 const citationFormats = [
-  { value: 'BIBTEX', label: 'BibTeX', description: 'Standard bibliography format for LaTeX' },
-  { value: 'ENDNOTE', label: 'EndNote', description: 'EndNote reference manager format' },
-  { value: 'APA', label: 'APA', description: 'American Psychological Association style' },
-  { value: 'MLA', label: 'MLA', description: 'Modern Language Association style' },
-  { value: 'IEEE', label: 'IEEE', description: 'Institute of Electrical and Electronics Engineers style' },
-  { value: 'CHICAGO', label: 'Chicago', description: 'Chicago Manual of Style' },
-  { value: 'HARVARD', label: 'Harvard', description: 'Harvard referencing style' },
+  {
+    value: "BIBTEX",
+    label: "BibTeX",
+    description: "Standard bibliography format for LaTeX",
+  },
+  {
+    value: "ENDNOTE",
+    label: "EndNote",
+    description: "EndNote reference manager format",
+  },
+  {
+    value: "APA",
+    label: "APA",
+    description: "American Psychological Association style",
+  },
+  {
+    value: "MLA",
+    label: "MLA",
+    description: "Modern Language Association style",
+  },
+  {
+    value: "IEEE",
+    label: "IEEE",
+    description: "Institute of Electrical and Electronics Engineers style",
+  },
+  {
+    value: "CHICAGO",
+    label: "Chicago",
+    description: "Chicago Manual of Style",
+  },
+  {
+    value: "HARVARD",
+    label: "Harvard",
+    description: "Harvard referencing style",
+  },
 ];
 
 export function CitationExportDialog({
@@ -66,64 +106,56 @@ export function CitationExportDialog({
   collectionId,
   collectionName,
   paperTitles = [],
-  trigger
+  trigger,
 }: CitationExportDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [exportedContent, setExportedContent] = useState<string>("");
   const [exportFormat, setExportFormat] = useState<string>("");
+
+  const [exportCitations, { isLoading: isExporting }] =
+    useExportCitationsMutation();
 
   const form = useForm<CitationFormData>({
     resolver: zodResolver(citationFormSchema),
     defaultValues: {
-      format: 'APA',
+      format: "APA",
       includeAbstract: false,
       includeKeywords: false,
     },
   });
 
   const handleExport = async (data: CitationFormData) => {
-    setIsExporting(true);
     try {
-      const response = await fetch('/api/citations/export', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          ...(paperIds.length > 0 && { paperIds }),
-          ...(collectionId && { collectionId }),
-        }),
-      });
+      const result = await exportCitations({
+        ...data,
+        ...(paperIds.length > 0 && { paperIds }),
+        ...(collectionId && { collectionId }),
+      }).unwrap();
 
-      if (!response.ok) {
-        throw new Error('Failed to export citations');
-      }
-
-      const result = await response.json();
-      setExportedContent(result.data.content);
-      setExportFormat(result.data.format);
-      showSuccessToast(`Successfully exported ${result.data.count} citations in ${result.data.format} format`);
-    } catch (error) {
-      console.error('Citation export error:', error);
-      showErrorToast('Failed to export citations. Please try again.');
-    } finally {
-      setIsExporting(false);
+      setExportedContent(result.content);
+      setExportFormat(result.format);
+      showSuccessToast(
+        `Successfully exported ${result.count} citations in ${result.format} format`
+      );
+    } catch (error: any) {
+      console.error("Citation export error:", error);
+      showErrorToast(
+        error?.data?.message || "Failed to export citations. Please try again."
+      );
     }
   };
 
   const handleDownload = () => {
     if (!exportedContent) return;
 
-    const extension = exportFormat.toLowerCase() === 'bibtex' ? 'bib' : 'txt';
-    const filename = collectionId 
-      ? `${collectionName || 'collection'}-citations.${extension}`
+    const extension = exportFormat.toLowerCase() === "bibtex" ? "bib" : "txt";
+    const filename = collectionId
+      ? `${collectionName || "collection"}-citations.${extension}`
       : `citations.${extension}`;
 
-    const blob = new Blob([exportedContent], { type: 'text/plain' });
+    const blob = new Blob([exportedContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = filename;
     document.body.appendChild(link);
@@ -133,9 +165,10 @@ export function CitationExportDialog({
   };
 
   const getItemCount = () => {
-    if (collectionId) return `${collectionName || 'Collection'}`;
-    if (paperIds.length > 0) return `${paperIds.length} paper${paperIds.length > 1 ? 's' : ''}`;
-    return '0 papers';
+    if (collectionId) return `${collectionName || "Collection"}`;
+    if (paperIds.length > 0)
+      return `${paperIds.length} paper${paperIds.length > 1 ? "s" : ""}`;
+    return "0 papers";
   };
 
   const getItemList = () => {
@@ -184,14 +217,17 @@ export function CitationExportDialog({
 
           {/* Export Form */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleExport)} className="space-y-4">
+            <div className="space-y-4">
               <FormField
                 control={form.control}
                 name="format"
                 render={({ field }: { field: any }) => (
                   <FormItem>
                     <FormLabel>Citation Format</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select citation format" />
@@ -201,7 +237,9 @@ export function CitationExportDialog({
                         {citationFormats.map((format) => (
                           <SelectItem key={format.value} value={format.value}>
                             <div className="flex flex-col">
-                              <span className="font-medium">{format.label}</span>
+                              <span className="font-medium">
+                                {format.label}
+                              </span>
                               <span className="text-xs text-muted-foreground">
                                 {format.description}
                               </span>
@@ -267,7 +305,11 @@ export function CitationExportDialog({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isExporting}>
+                <Button
+                  type="button"
+                  disabled={isExporting}
+                  onClick={form.handleSubmit(handleExport)}
+                >
                   {isExporting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -281,7 +323,7 @@ export function CitationExportDialog({
                   )}
                 </Button>
               </div>
-            </form>
+            </div>
           </Form>
 
           {/* Export Result */}
@@ -299,7 +341,7 @@ export function CitationExportDialog({
                   Download
                 </Button>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm font-medium">Preview:</div>
                 <Textarea
