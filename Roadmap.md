@@ -128,15 +128,18 @@ Goal: Get a working core platform with minimal but functional features.
 - [x] Modern Analytics Dashboard: Improved chart colors, legends, dark mode, progress bars
 - [x] Admin Analytics dashboard with user management and system information
 
-### Week 6 – Annotation & Collaboration
+### Week 6 – Annotation & Collaboration (Author: Atik+Salman) ✅
 
-- [ ] PDF highlighting & annotation
-- [ ] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
-- [ ] Save user/paper comments
-- [ ] Threaded research discussions & activity log
-- [ ] Research notes system
+- [x] PDF highlighting & annotation
+- [x] Save user/paper comments
+- [x] Research notes system
+- [x] Academic citation export (BibTeX/EndNote, APA/MLA/IEEE)
+- [x] Threaded research discussions & activity log
+- [x] Citation export history management with delete/download functions (v1.1.9)
+- [x] Enhanced citation formats page with direct export functionality
+- [x] Citation file management with proper naming and format handling
 
-### Week 7-8 – Citation System
+### Week 7-8 – Citation System (In Progress)
 
 - [ ] Parse references & citation relationships
 - [ ] Citation graph visualization & formatting (APA, MLA, IEEE)
@@ -175,5 +178,5 @@ Goal: Monetization, admin tools, external integrations.
 ---
 
 Total Duration: 20 weeks (~5 months)
-Current Status: Week 6 Complete – Billing & payments launched (Stripe subscriptions live, dashboard billing refresh) ✅ (Author: Atik)
-Last Updated: October 4, 2025
+Current Status: Week 6 Phase 1 Complete – Citation Management Enhanced (v1.1.9) with delete/download functions and format-specific export ✅ (Author: Atik)
+Last Updated: October 15, 2025
