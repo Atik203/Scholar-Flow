@@ -15,10 +15,10 @@ import {
 import { useAuth } from "@/redux/auth/useAuth";
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   BarChart3,
   BookOpen,
   Brain,
-  Building2,
   ChevronRight,
   CreditCard,
   FileText,
@@ -32,7 +32,6 @@ import {
   Search,
   Settings,
   Shield,
-  Star,
   TextCursor,
   Upload,
   Users,
@@ -177,44 +176,50 @@ const navigationItems: SidebarItem[] = [
         minRole: USER_ROLES.RESEARCHER,
       },
       {
-        title: "Research Notes",
-        path: "/research/notes",
+        title: "Discussions",
+        path: "/research/discussions",
         icon: MessageSquare,
         minRole: USER_ROLES.RESEARCHER,
       },
-    ],
-  },
-  {
-    title: "Collaborations",
-    icon: Users,
-    minRole: USER_ROLES.RESEARCHER,
-    items: [
       {
-        title: "My Teams",
-        path: "/collaborations/teams",
-        icon: Users,
-        minRole: USER_ROLES.RESEARCHER,
-      },
-      {
-        title: "Active Projects",
-        path: "/collaborations/projects",
-        icon: Building2,
-        minRole: USER_ROLES.RESEARCHER,
-      },
-      {
-        title: "Shared Projects",
-        path: "/collaborations/projects/shared",
-        icon: Building2,
-        minRole: USER_ROLES.RESEARCHER,
-      },
-      {
-        title: "Invitations",
-        path: "/collaborations/invitations",
-        icon: Star,
+        title: "Activity Log",
+        path: "/research/activity-log",
+        icon: Activity,
         minRole: USER_ROLES.RESEARCHER,
       },
     ],
   },
+  // {
+  //   title: "Collaborations",
+  //   icon: Users,
+  //   minRole: USER_ROLES.RESEARCHER,
+  //   items: [
+  //     {
+  //       title: "My Teams",
+  //       path: "/collaborations/teams",
+  //       icon: Users,
+  //       minRole: USER_ROLES.RESEARCHER,
+  //     },
+  //     {
+  //       title: "Active Projects",
+  //       path: "/collaborations/projects",
+  //       icon: Building2,
+  //       minRole: USER_ROLES.RESEARCHER,
+  //     },
+  //     {
+  //       title: "Shared Projects",
+  //       path: "/collaborations/projects/shared",
+  //       icon: Building2,
+  //       minRole: USER_ROLES.RESEARCHER,
+  //     },
+  //     {
+  //       title: "Invitations",
+  //       path: "/collaborations/invitations",
+  //       icon: Star,
+  //       minRole: USER_ROLES.RESEARCHER,
+  //     },
+  //   ],
+  // },
   {
     title: "AI Insights",
     path: "/ai-insights",
