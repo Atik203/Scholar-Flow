@@ -1,32 +1,39 @@
 import { Router } from "express";
-import { CitationExportService } from "../services/citationExport.service";
+import { z } from "zod";
 import { authMiddleware } from "../middleware/auth";
 import { validateRequest } from "../middleware/validateRequest";
-import { z } from "zod";
+import { CitationExportService } from "../services/citationExport.service";
 
 const router: Router = Router();
 
 // Validation schemas
 const exportCitationsSchema = z.object({
-  body: z.object({
-    paperIds: z.array(z.string().uuid()).optional(),
-    collectionId: z.string().uuid().optional(),
-    format: z.enum(['BIBTEX', 'ENDNOTE', 'APA', 'MLA', 'IEEE', 'CHICAGO', 'HARVARD']),
-    includeAbstract: z.boolean().optional().default(false),
-    includeKeywords: z.boolean().optional().default(false)
-  }).refine(
-    (data) => data.paperIds || data.collectionId,
-    {
-      message: "Either paperIds or collectionId must be provided"
-    }
-  )
+  body: z
+    .object({
+      paperIds: z.array(z.string().uuid()).optional(),
+      collectionId: z.string().uuid().optional(),
+      format: z.enum([
+        "BIBTEX",
+        "ENDNOTE",
+        "APA",
+        "MLA",
+        "IEEE",
+        "CHICAGO",
+        "HARVARD",
+      ]),
+      includeAbstract: z.boolean().optional().default(false),
+      includeKeywords: z.boolean().optional().default(false),
+    })
+    .refine((data) => data.paperIds || data.collectionId, {
+      message: "Either paperIds or collectionId must be provided",
+    }),
 });
 
 const getExportHistorySchema = z.object({
   query: z.object({
     limit: z.string().transform(Number).optional().default("20"),
-    offset: z.string().transform(Number).optional().default("0")
-  })
+    offset: z.string().transform(Number).optional().default("0"),
+  }),
 });
 
 /**
@@ -108,10 +115,10 @@ router.post(
   async (req, res, next) => {
     try {
       const result = await CitationExportService.exportCitations(req, req.body);
-      
+
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       next(error);
@@ -199,15 +206,117 @@ router.get(
         Number(req.query.limit),
         Number(req.query.offset)
       );
-      
+
       res.json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       next(error);
     }
   }
 );
+
+/**
+ * @swagger
+ * /api/citations/{exportId}:
+ *   delete:
+ *     summary: Delete a citation export
+ *     description: Soft delete a citation export from history
+ *     tags: [Citations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exportId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Citation export ID
+ *     responses:
+ *       200:
+ *         description: Export deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Export not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/:exportId", authMiddleware, async (req, res, next) => {
+  try {
+    const result = await CitationExportService.deleteExport(
+      req,
+      req.params.exportId
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * @swagger
+ * /api/citations/{exportId}/download:
+ *   get:
+ *     summary: Download a citation export
+ *     description: Retrieve and download a previously exported citation
+ *     tags: [Citations]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: exportId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Citation export ID
+ *     responses:
+ *       200:
+ *         description: Export content retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     content:
+ *                       type: string
+ *                     format:
+ *                       type: string
+ *                     filename:
+ *                       type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Export not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/:exportId/download", authMiddleware, async (req, res, next) => {
+  try {
+    const result = await CitationExportService.downloadExport(
+      req,
+      req.params.exportId
+    );
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 export { router as citationRoutes };

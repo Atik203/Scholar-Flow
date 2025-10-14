@@ -61,6 +61,17 @@ interface CitationExportDialogProps {
   collectionName?: string;
   paperTitles?: string[];
   trigger?: React.ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
+  papers?: Array<{
+    id: string;
+    title: string;
+    authors: string[];
+    year: number;
+  }>;
+  collections?: Array<{ id: string; name: string; count: number }>;
+  selectedPaperIds?: string[];
+  preSelectedFormat?: CitationFormData["format"];
 }
 
 const citationFormats = [
@@ -107,8 +118,25 @@ export function CitationExportDialog({
   collectionName,
   paperTitles = [],
   trigger,
+  isOpen: externalIsOpen,
+  onClose,
+  papers = [],
+  collections = [],
+  selectedPaperIds = [],
+  preSelectedFormat,
 }: CitationExportDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = externalIsOpen !== undefined;
+  const isOpen = isControlled ? externalIsOpen : internalIsOpen;
+
+  const handleOpenChange = (open: boolean) => {
+    if (isControlled && onClose) {
+      if (!open) onClose();
+    } else {
+      setInternalIsOpen(open);
+    }
+  };
+
   const [exportedContent, setExportedContent] = useState<string>("");
   const [exportFormat, setExportFormat] = useState<string>("");
 
@@ -118,7 +146,7 @@ export function CitationExportDialog({
   const form = useForm<CitationFormData>({
     resolver: zodResolver(citationFormSchema),
     defaultValues: {
-      format: "APA",
+      format: preSelectedFormat || "APA",
       includeAbstract: false,
       includeKeywords: false,
     },
@@ -126,11 +154,27 @@ export function CitationExportDialog({
 
   const handleExport = async (data: CitationFormData) => {
     try {
+      // Validate we have something to export
+      if (paperIds.length === 0 && !collectionId) {
+        showErrorToast("Please select papers or a collection to export");
+        return;
+      }
+
+      console.log("Exporting citations with data:", {
+        format: data.format,
+        paperIds,
+        collectionId,
+        includeAbstract: data.includeAbstract,
+        includeKeywords: data.includeKeywords,
+      });
+
       const result = await exportCitations({
         ...data,
         ...(paperIds.length > 0 && { paperIds }),
         ...(collectionId && { collectionId }),
       }).unwrap();
+
+      console.log("Export successful:", result);
 
       setExportedContent(result.content);
       setExportFormat(result.format);
@@ -139,9 +183,19 @@ export function CitationExportDialog({
       );
     } catch (error: any) {
       console.error("Citation export error:", error);
-      showErrorToast(
-        error?.data?.message || "Failed to export citations. Please try again."
-      );
+      console.error("Error details:", {
+        status: error?.status,
+        data: error?.data,
+        message: error?.message,
+        originalStatus: error?.originalStatus,
+      });
+
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        "Failed to export citations. Please try again.";
+
+      showErrorToast(errorMessage);
     }
   };
 
@@ -183,15 +237,17 @@ export function CitationExportDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export Citations
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export Citations
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -217,7 +273,10 @@ export function CitationExportDialog({
 
           {/* Export Form */}
           <Form {...form}>
-            <div className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleExport)}
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="format"
@@ -301,15 +360,11 @@ export function CitationExportDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => handleOpenChange(false)}
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="button"
-                  disabled={isExporting}
-                  onClick={form.handleSubmit(handleExport)}
-                >
+                <Button type="submit" disabled={isExporting}>
                   {isExporting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -323,7 +378,7 @@ export function CitationExportDialog({
                   )}
                 </Button>
               </div>
-            </div>
+            </form>
           </Form>
 
           {/* Export Result */}

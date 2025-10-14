@@ -1,18 +1,59 @@
 "use client";
 
+import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
+import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
+import { useListPapersQuery } from "@/redux/api/paperApi";
 import { ArrowLeft, BookOpen, Download, FileText, Info } from "lucide-react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 export default function CitationFormatsPage() {
   const { user } = useProtectedRoute();
   const scopedPath = (segment: string) =>
     buildRoleScopedPath(user?.role, segment);
+  const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
+
+  const { data: papersData } = useListPapersQuery({
+    page: 1,
+    limit: 50,
+  });
+
+  const { data: collectionsData } = useGetMyCollectionsQuery({
+    page: 1,
+    limit: 20,
+  });
+
+  const papers = useMemo(() => {
+    if (!papersData?.items) return [];
+    return papersData.items.map((paper) => ({
+      id: paper.id,
+      title: paper.title,
+      authors: paper.metadata?.authors || [],
+      year: paper.metadata?.year || new Date(paper.createdAt).getFullYear(),
+    }));
+  }, [papersData]);
+
+  const collections = useMemo(() => {
+    if (!collectionsData?.result) return [];
+    return collectionsData.result.map((collection) => ({
+      id: collection.id,
+      name: collection.name,
+      count: collection._count?.papers || 0,
+    }));
+  }, [collectionsData]);
+
+  const handleExportClick = (formatId: string) => {
+    setSelectedFormat(formatId.toUpperCase());
+    setIsExportDialogOpen(true);
+  };
 
   const citationFormats = [
     {
@@ -225,14 +266,10 @@ export default function CitationFormatsPage() {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      asChild
+                      onClick={() => handleExportClick(format.id)}
                     >
-                      <Link
-                        href={`/research/citations/export?format=${format.id}`}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Export in {format.name}
-                      </Link>
+                      <Download className="h-4 w-4 mr-2" />
+                      Export in {format.name}
                     </Button>
                   </div>
                 </CardContent>
@@ -292,6 +329,19 @@ export default function CitationFormatsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Citation Export Dialog */}
+      <CitationExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => {
+          setIsExportDialogOpen(false);
+          setSelectedFormat(null);
+        }}
+        papers={papers}
+        collections={collections}
+        selectedPaperIds={selectedPapers}
+        preSelectedFormat={selectedFormat as any}
+      />
     </DashboardLayout>
   );
 }
