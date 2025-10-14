@@ -18,6 +18,9 @@ export interface CitationExportHistory {
   id: string;
   format: string;
   exportedAt: string;
+  downloadedAt?: string;
+  fileSize?: string;
+  paperCount?: number;
   paper?: {
     id: string;
     title: string;
@@ -25,6 +28,7 @@ export interface CitationExportHistory {
   collection?: {
     id: string;
     name: string;
+    paperCount?: number;
   };
 }
 
@@ -37,6 +41,13 @@ export interface DiscussionThread {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  author: {
+    id: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    image?: string;
+  };
   user: {
     id: string;
     name?: string;
@@ -56,6 +67,25 @@ export interface DiscussionThread {
     id: string;
     name: string;
   };
+  messages: Array<{
+    id: string;
+    content: string;
+    createdAt: string;
+    author: {
+      id: string;
+      name: string;
+      firstName?: string;
+      lastName?: string;
+      image?: string;
+    };
+  }>;
+  participants: Array<{
+    id: string;
+    name: string;
+    firstName?: string;
+    lastName?: string;
+    image?: string;
+  }>;
   _count: {
     messages: number;
   };

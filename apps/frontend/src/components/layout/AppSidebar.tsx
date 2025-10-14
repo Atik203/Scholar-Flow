@@ -178,27 +178,14 @@ const navigationItems: SidebarItem[] = [
         minRole: USER_ROLES.RESEARCHER,
       },
       {
-        title: "Research Notes",
-        path: "/research/notes",
-        icon: MessageSquare,
-        minRole: USER_ROLES.RESEARCHER,
-      },
-    ],
-  },
-  {
-    title: "Collaboration",
-    icon: Users,
-    minRole: USER_ROLES.RESEARCHER,
-    items: [
-      {
         title: "Discussions",
-        path: "/discussions",
+        path: "/research/discussions",
         icon: MessageSquare,
         minRole: USER_ROLES.RESEARCHER,
       },
       {
         title: "Activity Log",
-        path: "/activity-log",
+        path: "/research/activity-log",
         icon: Activity,
         minRole: USER_ROLES.RESEARCHER,
       },
