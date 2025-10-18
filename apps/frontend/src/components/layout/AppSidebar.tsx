@@ -15,7 +15,6 @@ import {
 import { useAuth } from "@/redux/auth/useAuth";
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity,
   BarChart3,
   BookOpen,
   Brain,
@@ -25,7 +24,6 @@ import {
   Highlighter,
   Home,
   Layers,
-  MessageSquare,
   Microscope,
   Plus,
   Quote,
@@ -175,18 +173,18 @@ const navigationItems: SidebarItem[] = [
         icon: Highlighter,
         minRole: USER_ROLES.RESEARCHER,
       },
-      {
-        title: "Discussions",
-        path: "/research/discussions",
-        icon: MessageSquare,
-        minRole: USER_ROLES.RESEARCHER,
-      },
-      {
-        title: "Activity Log",
-        path: "/research/activity-log",
-        icon: Activity,
-        minRole: USER_ROLES.RESEARCHER,
-      },
+      // {
+      //   title: "Discussions",
+      //   path: "/research/discussions",
+      //   icon: MessageSquare,
+      //   minRole: USER_ROLES.RESEARCHER,
+      // },
+      // {
+      //   title: "Activity Log",
+      //   path: "/research/activity-log",
+      //   icon: Activity,
+      //   minRole: USER_ROLES.RESEARCHER,
+      // },
     ],
   },
   // {
