@@ -279,5 +279,52 @@ router.get(
   adminController.getTopCustomers
 );
 
+/**
+ * @swagger
+ * /api/admin/analytics/subscribers:
+ *   get:
+ *     summary: Get Subscriber Details
+ *     description: Retrieve detailed list of all subscribers with pagination and filtering
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, TRIALING, CANCELED, EXPIRED, PAST_DUE, all]
+ *         description: Filter by subscription status
+ *       - in: query
+ *         name: planId
+ *         schema:
+ *           type: string
+ *         description: Filter by plan ID
+ *     responses:
+ *       200:
+ *         description: Subscriber details retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/subscribers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSubscriberDetails
+);
+
 const adminRoutes: import("express").Router = router;
 export { adminRoutes };

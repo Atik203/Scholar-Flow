@@ -230,6 +230,44 @@ class AdminController {
       });
     }
   );
+
+  /**
+   * Get subscriber details with pagination
+   * GET /api/admin/analytics/subscribers
+   */
+  getSubscriberDetails: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const status = req.query.status as string | undefined;
+      const planId = req.query.planId as string | undefined;
+
+      const result = await analyticsService.getSubscriberDetails(
+        page,
+        limit,
+        status,
+        planId
+      );
+
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Subscriber details retrieved successfully",
+        data: result.subscribers,
+        meta: {
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          total: result.pagination.total,
+          totalPage: result.pagination.totalPages,
+        },
+      });
+    }
+  );
 }
 
 export const adminController = new AdminController();

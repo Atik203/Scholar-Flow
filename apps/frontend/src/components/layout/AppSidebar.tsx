@@ -252,6 +252,12 @@ const adminFeatures: SidebarLink[] = [
     minRole: USER_ROLES.ADMIN,
   },
   {
+    title: "Subscriptions",
+    path: "/subscriptions",
+    icon: CreditCard,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
     title: "System Settings",
     path: "/settings",
     icon: Settings,
