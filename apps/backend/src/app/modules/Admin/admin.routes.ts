@@ -326,5 +326,223 @@ router.get(
   adminController.getSubscriberDetails
 );
 
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get All Users
+ *     description: Retrieve all users with pagination, search, and filtering capabilities
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name or email
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN, all]
+ *         description: Filter by role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, all]
+ *         description: Filter by account status
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getAllUsers
+);
+
+/**
+ * @swagger
+ * /api/admin/users/stats:
+ *   get:
+ *     summary: Get User Statistics
+ *     description: Retrieve user statistics for dashboard cards
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User statistics retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users/stats",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getUserStats
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/role:
+ *   patch:
+ *     summary: Update User Role
+ *     description: Update a user's role. Cannot change own role.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN]
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       400:
+ *         description: Invalid role
+ *       403:
+ *         description: Cannot change own role
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/role",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.updateUserRole
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/deactivate:
+ *   patch:
+ *     summary: Deactivate User
+ *     description: Soft delete a user account. Cannot deactivate own account.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deactivated successfully
+ *       400:
+ *         description: User already deactivated
+ *       403:
+ *         description: Cannot deactivate own account
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/deactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.deactivateUser
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/reactivate:
+ *   patch:
+ *     summary: Reactivate User
+ *     description: Restore a soft-deleted user account
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User reactivated successfully
+ *       400:
+ *         description: User is already active
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/reactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.reactivateUser
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   delete:
+ *     summary: Permanently Delete User
+ *     description: Hard delete a user account. This action cannot be undone. Cannot delete own account.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User permanently deleted
+ *       403:
+ *         description: Cannot delete own account
+ *       404:
+ *         description: User not found
+ */
+router.delete(
+  "/users/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.permanentlyDeleteUser
+);
+
 const adminRoutes: import("express").Router = router;
 export { adminRoutes };

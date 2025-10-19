@@ -5,6 +5,8 @@ export type TMeta = {
   limit: number;
   total: number;
   totalPage: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
 };
 
 interface IApiResponse<T> {
