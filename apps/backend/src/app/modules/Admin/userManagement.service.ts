@@ -53,7 +53,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -67,7 +67,7 @@ export const userManagementService = {
         WHERE u."isDeleted" = ${!activeStatus}
           AND u.role = ${role}::"Role"
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -90,7 +90,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -104,7 +104,7 @@ export const userManagementService = {
         WHERE u."isDeleted" = false
           AND u.role = ${role}::"Role"
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -127,7 +127,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -140,7 +140,7 @@ export const userManagementService = {
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -163,7 +163,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -176,7 +176,7 @@ export const userManagementService = {
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
           AND u.role = ${role}::"Role"
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -198,7 +198,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -211,7 +211,7 @@ export const userManagementService = {
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -233,7 +233,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -246,7 +246,7 @@ export const userManagementService = {
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
           AND u.role = ${role}::"Role"
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -268,7 +268,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -280,7 +280,7 @@ export const userManagementService = {
         LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -301,7 +301,7 @@ export const userManagementService = {
           u.email,
           u.role::text as role,
           u."emailVerified",
-          u."profileImage",
+          u.image as "profileImage",
           u."createdAt",
           u."updatedAt",
           u."isDeleted",
@@ -313,7 +313,7 @@ export const userManagementService = {
         LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
-        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u."profileImage", u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
+        GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
