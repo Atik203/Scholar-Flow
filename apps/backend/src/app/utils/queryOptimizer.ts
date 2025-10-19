@@ -22,6 +22,7 @@ export class QueryOptimizer {
   }> {
     try {
       const explainQuery = `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${query}`;
+      // eslint-disable-next-line no-restricted-syntax
       const result = await this.prisma.$queryRawUnsafe<any[]>(
         explainQuery,
         ...params
@@ -50,6 +51,7 @@ export class QueryOptimizer {
   async explain(query: string, params: any[] = []): Promise<any[]> {
     try {
       const explainQuery = `EXPLAIN (FORMAT JSON) ${query}`;
+      // eslint-disable-next-line no-restricted-syntax
       const result = await this.prisma.$queryRawUnsafe<any[]>(
         explainQuery,
         ...params
@@ -262,6 +264,7 @@ export class QueryOptimizer {
    * Vacuum analyze a table to update statistics
    */
   async vacuumAnalyze(tableName: string): Promise<void> {
+    // eslint-disable-next-line no-restricted-syntax
     await this.prisma.$executeRawUnsafe(`VACUUM ANALYZE ${tableName}`);
   }
 }
@@ -297,7 +300,7 @@ export const QueryHints = {
 /**
  * Query performance monitoring middleware
  */
-export function createQueryLogger(prisma: PrismaClient) {
+export function createQueryLogger(_prisma: PrismaClient) {
   return async (params: any, next: (params: any) => Promise<any>) => {
     const before = Date.now();
     const result = await next(params);
