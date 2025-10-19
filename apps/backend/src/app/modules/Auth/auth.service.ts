@@ -62,7 +62,7 @@ class AuthService {
       // First check if user exists and is deleted
       const existingUser = await prisma.user.findUnique({
         where: { email: userData.email },
-        select: { id: true, isDeleted: true },
+        select: { id: true, isDeleted: true, role: true },
       });
 
       if (existingUser && existingUser.isDeleted) {
@@ -75,10 +75,10 @@ class AuthService {
       const user = await prisma.user.upsert({
         where: { email: userData.email },
         update: {
+          // Only update profile info, DO NOT update role on subsequent logins
           name: userData.name ?? "",
           image: userData.image ?? "",
-          role: role as any,
-          emailVerified: new Date(), // Mark as verified for OAuth users
+          emailVerified: new Date(), // Keep email verified for OAuth users
         },
         create: {
           id: userId,

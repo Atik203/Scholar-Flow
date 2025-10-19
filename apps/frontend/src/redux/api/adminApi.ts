@@ -93,6 +93,29 @@ export interface TopCustomer {
   currentPlan: string;
 }
 
+export interface SubscriberDetail {
+  subscriptionId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  planName: string;
+  status: string;
+  seats: number;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: Date;
+  totalSpent: number;
+  lastPaymentDate: Date | null;
+}
+
+export interface SubscriberDetailsParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  planId?: string;
+}
+
 export interface RoleDistribution {
   role: string;
   count: number;
@@ -298,6 +321,39 @@ export const adminApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 60,
       transformResponse: (response: { data: TopCustomer[] }) => response.data,
     }),
+
+    // Get subscriber details with pagination
+    getSubscriberDetails: builder.query<
+      {
+        data: SubscriberDetail[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+        };
+      },
+      SubscriberDetailsParams
+    >({
+      query: (params) => ({
+        url: "/admin/analytics/subscribers",
+        params,
+      }),
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 60,
+      transformResponse: (response: {
+        data: SubscriberDetail[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+        };
+      }) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+    }),
   }),
 });
 
@@ -311,4 +367,5 @@ export const {
   useGetSystemMetricsQuery,
   useGetRevenueAnalyticsQuery,
   useGetTopCustomersQuery,
+  useGetSubscriberDetailsQuery,
 } = adminApi;
