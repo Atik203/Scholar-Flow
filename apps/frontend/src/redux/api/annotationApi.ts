@@ -1,5 +1,14 @@
 import { apiSlice } from "./apiSlice";
 
+export type AnnotationType =
+  | "HIGHLIGHT"
+  | "UNDERLINE"
+  | "STRIKETHROUGH"
+  | "AREA"
+  | "COMMENT"
+  | "NOTE"
+  | "INK";
+
 export interface AnnotationAnchor {
   page: number;
   coordinates: {
@@ -13,13 +22,20 @@ export interface AnnotationAnchor {
     end: number;
   };
   selectedText?: string;
+  // For INK/freehand annotations
+  points?: Array<{ x: number; y: number }>;
+  // For viewport transform tracking
+  viewport?: {
+    scale: number;
+    rotation: number;
+  };
 }
 
 export interface Annotation {
   id: string;
   paperId: string;
   userId: string;
-  type: "HIGHLIGHT" | "COMMENT" | "NOTE";
+  type: AnnotationType;
   anchor: AnnotationAnchor;
   text: string;
   version: number;
@@ -57,14 +73,15 @@ export interface AnnotationVersion {
 
 export interface CreateAnnotationRequest {
   paperId: string;
-  type: "HIGHLIGHT" | "COMMENT" | "NOTE";
+  type: AnnotationType;
   anchor: AnnotationAnchor;
   text: string;
   parentId?: string;
 }
 
 export interface UpdateAnnotationRequest {
-  text: string;
+  text?: string;
+  anchor?: AnnotationAnchor;
 }
 
 export interface CreateAnnotationReplyRequest {
@@ -74,7 +91,7 @@ export interface CreateAnnotationReplyRequest {
 export interface GetAnnotationsQuery {
   paperId: string;
   page?: number;
-  type?: "HIGHLIGHT" | "COMMENT" | "NOTE";
+  type?: AnnotationType;
   includeReplies?: boolean;
 }
 
@@ -106,7 +123,7 @@ export const annotationApi = apiSlice.injectEndpoints({
         if (page) params.page = page;
         if (type) params.type = type;
         if (includeReplies) params.includeReplies = includeReplies;
-        
+
         return {
           url: "/annotations/paper/" + paperId,
           params,
@@ -128,7 +145,8 @@ export const annotationApi = apiSlice.injectEndpoints({
         url: "/annotations/user",
         params: { page, limit },
       }),
-      transformResponse: (response: { data: Annotation[]; meta: any }) => response,
+      transformResponse: (response: { data: Annotation[]; meta: any }) =>
+        response,
       providesTags: [{ type: "Annotation", id: "USER" }],
     }),
 
@@ -149,10 +167,7 @@ export const annotationApi = apiSlice.injectEndpoints({
     }),
 
     // Delete annotation
-    deleteAnnotation: builder.mutation<
-      { success: boolean },
-      string
-    >({
+    deleteAnnotation: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
         url: `/annotations/${id}`,
         method: "DELETE",
@@ -180,16 +195,14 @@ export const annotationApi = apiSlice.injectEndpoints({
     }),
 
     // Get annotation versions
-    getAnnotationVersions: builder.query<
-      { data: AnnotationVersion[] },
-      string
-    >({
-      query: (id) => `/annotations/${id}/versions`,
-      transformResponse: (response: { data: AnnotationVersion[] }) => response,
-      providesTags: (result, error, id) => [
-        { type: "Annotation", id },
-      ],
-    }),
+    getAnnotationVersions: builder.query<{ data: AnnotationVersion[] }, string>(
+      {
+        query: (id) => `/annotations/${id}/versions`,
+        transformResponse: (response: { data: AnnotationVersion[] }) =>
+          response,
+        providesTags: (result, error, id) => [{ type: "Annotation", id }],
+      }
+    ),
   }),
 });
 
