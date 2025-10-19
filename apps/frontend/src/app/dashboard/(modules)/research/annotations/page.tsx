@@ -1,54 +1,65 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { DocumentPreview } from "@/components/papers/DocumentPreview";
-import { PdfAnnotationViewer } from "@/components/annotations/PdfAnnotationViewer";
+import { PdfAnnotationViewerEnhanced } from "@/components/annotations/PdfAnnotationViewerEnhanced";
 import { CommentSection } from "@/components/comments/CommentSection";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { NotesPanel } from "@/components/notes/NotesPanel";
+import { DocumentPreview } from "@/components/papers/DocumentPreview";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { useGetPaperFileUrlQuery, useListPapersQuery } from "@/redux/api/paperApi";
-import { 
-  ArrowLeft, 
-  Eye, 
-  MessageSquare, 
-  StickyNote, 
-  Highlighter,
+import {
+  useGetPaperFileUrlQuery,
+  useListPapersQuery,
+} from "@/redux/api/paperApi";
+import {
+  ArrowLeft,
+  Eye,
   FileText,
-  Upload
+  Highlighter,
+  MessageSquare,
+  StickyNote,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ResearchAnnotationsPage() {
   const isProtected = useProtectedRoute();
-  const [activeTab, setActiveTab] = useState<"preview" | "annotations" | "comments" | "notes">("preview");
+  const [activeTab, setActiveTab] = useState<
+    "preview" | "annotations" | "comments" | "notes"
+  >("preview");
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
 
   // Fetch user's papers from database
-  const { 
-    data: papersData, 
-    isLoading: papersLoading, 
-    isError: papersError 
-  } = useListPapersQuery({ 
-    page: 1, 
-    limit: 50 // Get more papers for annotation
+  const {
+    data: papersData,
+    isLoading: papersLoading,
+    isError: papersError,
+  } = useListPapersQuery({
+    page: 1,
+    limit: 50, // Get more papers for annotation
   });
 
   const papers = useMemo(() => papersData?.items || [], [papersData?.items]);
 
   // Hook for signed file URL - fetch when a paper is selected
-  const { data: fileUrlData, isFetching: isFetchingFileUrl, error: fileUrlError } =
-    useGetPaperFileUrlQuery(selectedPaperId!, { skip: !selectedPaperId });
+  const {
+    data: fileUrlData,
+    isFetching: isFetchingFileUrl,
+    error: fileUrlError,
+  } = useGetPaperFileUrlQuery(selectedPaperId!, { skip: !selectedPaperId });
 
   // Auto-select first paper with PDF file if none selected
   useEffect(() => {
     if (!selectedPaperId && papers.length > 0) {
-      const firstPaperWithFile = papers.find(paper => 
-        paper.file && paper.file.originalFilename && paper.processingStatus === 'PROCESSED'
+      const firstPaperWithFile = papers.find(
+        (paper) =>
+          paper.file &&
+          paper.file.originalFilename &&
+          paper.processingStatus === "PROCESSED"
       );
       if (firstPaperWithFile) {
         setSelectedPaperId(firstPaperWithFile.id);
@@ -161,7 +172,7 @@ export default function ResearchAnnotationsPage() {
                     const hasFile = paper.file && paper.file.originalFilename;
                     const authors = paper.metadata?.authors || [];
                     const year = paper.metadata?.year;
-                    
+
                     return (
                       <Card
                         key={paper.id}
@@ -171,7 +182,9 @@ export default function ResearchAnnotationsPage() {
                             : "hover:bg-muted/50"
                         } ${!hasFile ? "opacity-60" : ""}`}
                         onClick={() => hasFile && setSelectedPaperId(paper.id)}
-                        title={!hasFile ? "No PDF file available for annotation" : ""}
+                        title={
+                          !hasFile ? "No PDF file available for annotation" : ""
+                        }
                       >
                         <CardContent className="p-4">
                           <div className="space-y-2">
@@ -216,9 +229,12 @@ export default function ResearchAnnotationsPage() {
               <Card className="shadow-sm border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-16">
                   <Highlighter className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Select a Paper to Annotate</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    Select a Paper to Annotate
+                  </h3>
                   <p className="text-muted-foreground text-center max-w-md">
-                    Choose a paper from the sidebar to start adding annotations, comments, and notes.
+                    Choose a paper from the sidebar to start adding annotations,
+                    comments, and notes.
                   </p>
                 </CardContent>
               </Card>
@@ -228,11 +244,13 @@ export default function ResearchAnnotationsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-lg">
-                        {papers.find(p => p.id === selectedPaperId)?.title}
+                        {papers.find((p) => p.id === selectedPaperId)?.title}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
                         {(() => {
-                          const paper = papers.find(p => p.id === selectedPaperId);
+                          const paper = papers.find(
+                            (p) => p.id === selectedPaperId
+                          );
                           const authors = paper?.metadata?.authors || [];
                           const year = paper?.metadata?.year;
                           return `${authors.slice(0, 2).join(", ")}${authors.length > 2 ? "..." : ""}${year ? ` • ${year}` : ""}`;
@@ -246,8 +264,16 @@ export default function ResearchAnnotationsPage() {
                     <nav className="flex space-x-8">
                       {[
                         { id: "preview", label: "Preview", icon: Eye },
-                        { id: "annotations", label: "Annotations", icon: Highlighter },
-                        { id: "comments", label: "Comments", icon: MessageSquare },
+                        {
+                          id: "annotations",
+                          label: "Annotations",
+                          icon: Highlighter,
+                        },
+                        {
+                          id: "comments",
+                          label: "Comments",
+                          icon: MessageSquare,
+                        },
                         { id: "notes", label: "Notes", icon: StickyNote },
                       ].map((tab) => {
                         const Icon = tab.icon;
@@ -278,19 +304,24 @@ export default function ResearchAnnotationsPage() {
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                            <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                            <p className="text-sm text-muted-foreground">
+                              Loading PDF...
+                            </p>
                           </div>
                         </div>
                       ) : fileUrlError ? (
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2 text-destructive">Failed to Load PDF</h3>
+                            <h3 className="text-lg font-semibold mb-2 text-destructive">
+                              Failed to Load PDF
+                            </h3>
                             <p className="text-muted-foreground mb-4">
-                              There was an error loading the PDF file for this paper.
+                              There was an error loading the PDF file for this
+                              paper.
                             </p>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               onClick={() => window.location.reload()}
                               className="mt-2"
                             >
@@ -302,9 +333,18 @@ export default function ResearchAnnotationsPage() {
                         <div className="h-[600px] border rounded-lg">
                           <DocumentPreview
                             fileUrl={fileUrlData.data.url}
-                            fileName={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
-                            mimeType={papers.find(p => p.id === selectedPaperId)?.file?.contentType}
-                            originalFilename={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
+                            fileName={
+                              papers.find((p) => p.id === selectedPaperId)?.file
+                                ?.originalFilename
+                            }
+                            mimeType={
+                              papers.find((p) => p.id === selectedPaperId)?.file
+                                ?.contentType
+                            }
+                            originalFilename={
+                              papers.find((p) => p.id === selectedPaperId)?.file
+                                ?.originalFilename
+                            }
                             className="h-full"
                           />
                         </div>
@@ -312,13 +352,19 @@ export default function ResearchAnnotationsPage() {
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">PDF Not Available</h3>
+                            <h3 className="text-lg font-semibold mb-2">
+                              PDF Not Available
+                            </h3>
                             <p className="text-muted-foreground">
-                              The PDF file for this paper is not available for preview.
+                              The PDF file for this paper is not available for
+                              preview.
                             </p>
                             <div className="mt-4 text-xs text-muted-foreground">
                               <p>Paper ID: {selectedPaperId}</p>
-                              <p>File URL Data: {fileUrlData ? "Available" : "Not available"}</p>
+                              <p>
+                                File URL Data:{" "}
+                                {fileUrlData ? "Available" : "Not available"}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -333,19 +379,24 @@ export default function ResearchAnnotationsPage() {
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                            <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                            <p className="text-sm text-muted-foreground">
+                              Loading PDF...
+                            </p>
                           </div>
                         </div>
                       ) : fileUrlError ? (
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2 text-destructive">Failed to Load PDF</h3>
+                            <h3 className="text-lg font-semibold mb-2 text-destructive">
+                              Failed to Load PDF
+                            </h3>
                             <p className="text-muted-foreground mb-4">
-                              There was an error loading the PDF file for this paper.
+                              There was an error loading the PDF file for this
+                              paper.
                             </p>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               onClick={() => window.location.reload()}
                               className="mt-2"
                             >
@@ -354,12 +405,10 @@ export default function ResearchAnnotationsPage() {
                           </div>
                         </div>
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
-                        <div className="h-[600px] border rounded-lg">
-                          <DocumentPreview
+                        <div className="h-[600px] border rounded-lg overflow-hidden">
+                          <PdfAnnotationViewerEnhanced
                             fileUrl={fileUrlData.data.url}
-                            fileName={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
-                            mimeType={papers.find(p => p.id === selectedPaperId)?.file?.contentType}
-                            originalFilename={papers.find(p => p.id === selectedPaperId)?.file?.originalFilename}
+                            paperId={selectedPaperId}
                             className="h-full"
                           />
                         </div>
@@ -367,13 +416,19 @@ export default function ResearchAnnotationsPage() {
                         <div className="h-[600px] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">PDF Not Available</h3>
+                            <h3 className="text-lg font-semibold mb-2">
+                              PDF Not Available
+                            </h3>
                             <p className="text-muted-foreground">
-                              The PDF file for this paper is not available for annotation.
+                              The PDF file for this paper is not available for
+                              annotation.
                             </p>
                             <div className="mt-4 text-xs text-muted-foreground">
                               <p>Paper ID: {selectedPaperId}</p>
-                              <p>File URL Data: {fileUrlData ? "Available" : "Not available"}</p>
+                              <p>
+                                File URL Data:{" "}
+                                {fileUrlData ? "Available" : "Not available"}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -384,14 +439,20 @@ export default function ResearchAnnotationsPage() {
                   {/* Comments Tab */}
                   {activeTab === "comments" && (
                     <div className="h-[600px] border rounded-lg">
-                      <CommentSection paperId={selectedPaperId} className="h-full" />
+                      <CommentSection
+                        paperId={selectedPaperId}
+                        className="h-full"
+                      />
                     </div>
                   )}
 
                   {/* Notes Tab */}
                   {activeTab === "notes" && (
                     <div className="h-[600px] border rounded-lg">
-                      <NotesPanel paperId={selectedPaperId} className="h-full" />
+                      <NotesPanel
+                        paperId={selectedPaperId}
+                        className="h-full"
+                      />
                     </div>
                   )}
                 </CardContent>
