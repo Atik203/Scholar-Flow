@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
+import catchAsync from "../../shared/catchAsync";
+import {
+  sendPaginatedResponse,
+  sendSuccessResponse,
+} from "../../shared/sendResponse";
 import { AnnotationService } from "./annotation.service";
 import {
-  createAnnotationSchema,
-  updateAnnotationSchema,
   createAnnotationReplySchema,
+  createAnnotationSchema,
   getAnnotationsQuerySchema,
+  updateAnnotationSchema,
 } from "./annotation.types";
-import catchAsync from "../../shared/catchAsync";
-import { sendSuccessResponse, sendPaginatedResponse } from "../../shared/sendResponse";
 
 export const annotationController = {
   /**
@@ -36,7 +39,10 @@ export const annotationController = {
       return;
     }
 
-    const annotation = await AnnotationService.createAnnotation(userId, parsed.data);
+    const annotation = await AnnotationService.createAnnotation(
+      userId,
+      parsed.data
+    );
 
     sendSuccessResponse(res, annotation, "Annotation created successfully");
   }),
@@ -59,7 +65,9 @@ export const annotationController = {
       return;
     }
 
-    const annotations = await AnnotationService.getPaperAnnotations(parsed.data);
+    const annotations = await AnnotationService.getPaperAnnotations(
+      parsed.data
+    );
 
     sendSuccessResponse(res, annotations, "Annotations retrieved successfully");
   }),
@@ -91,8 +99,21 @@ export const annotationController = {
       return;
     }
 
+    // Ensure either text or anchor is provided
+    if (!parsed.data.text && !parsed.data.anchor) {
+      res.status(400).json({
+        success: false,
+        message: "Either text or anchor must be provided for update",
+      });
+      return;
+    }
+
     try {
-      const annotation = await AnnotationService.updateAnnotation(id, userId, parsed.data);
+      const annotation = await AnnotationService.updateAnnotation(
+        id,
+        userId,
+        parsed.data
+      );
       sendSuccessResponse(res, annotation, "Annotation updated successfully");
     } catch (error: any) {
       res.status(400).json({
@@ -158,7 +179,11 @@ export const annotationController = {
     }
 
     try {
-      const reply = await AnnotationService.createAnnotationReply(id, userId, parsed.data);
+      const reply = await AnnotationService.createAnnotationReply(
+        id,
+        userId,
+        parsed.data
+      );
       sendSuccessResponse(res, reply, "Reply created successfully");
     } catch (error: any) {
       res.status(400).json({
@@ -176,7 +201,11 @@ export const annotationController = {
 
     try {
       const versions = await AnnotationService.getAnnotationVersions(id);
-      sendSuccessResponse(res, versions, "Annotation versions retrieved successfully");
+      sendSuccessResponse(
+        res,
+        versions,
+        "Annotation versions retrieved successfully"
+      );
     } catch (error: any) {
       res.status(400).json({
         success: false,
@@ -203,7 +232,11 @@ export const annotationController = {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
 
-    const result = await AnnotationService.getUserAnnotations(userId, page, limit);
+    const result = await AnnotationService.getUserAnnotations(
+      userId,
+      page,
+      limit
+    );
 
     sendPaginatedResponse(
       res,

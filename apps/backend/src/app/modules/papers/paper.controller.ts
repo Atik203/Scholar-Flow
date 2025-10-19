@@ -492,13 +492,11 @@ export const paperController = {
       console.log(
         `[PaperController] Resetting processing status from ${paper.processingStatus} to UPLOADED for paper: ${parsed.data.id}`
       );
-      await prisma.paper.update({
-        where: { id: parsed.data.id },
-        data: {
-          processingStatus: "UPLOADED",
-          processingError: null,
-        },
-      });
+      await paperService.updateProcessingStatus(
+        parsed.data.id,
+        "UPLOADED",
+        null
+      );
     }
 
     try {
