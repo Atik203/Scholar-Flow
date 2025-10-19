@@ -1060,6 +1060,26 @@ export const paperService = {
       messages: messagesByThread[index],
     }));
   },
+
+  /**
+   * Update paper processing status using $executeRaw
+   * Source: Reset processing status for retry operations
+   */
+  async updateProcessingStatus(
+    paperId: string,
+    status: string,
+    error?: string | null
+  ) {
+    const now = new Date();
+
+    await prisma.$executeRaw`
+      UPDATE "Paper"
+      SET "processingStatus" = ${status}::"PaperProcessingStatus",
+          "processingError" = ${error || null},
+          "updatedAt" = ${now}
+      WHERE id = ${paperId}
+    `;
+  },
 };
 
 // HTML sanitization configuration for rich text editor content

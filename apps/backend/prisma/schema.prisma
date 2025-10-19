@@ -24,9 +24,13 @@ enum CollectionPermission {
 }
 
 enum AnnotationType {
-  HIGHLIGHT
-  COMMENT
-  NOTE
+  HIGHLIGHT // Yellow highlight over text
+  UNDERLINE // Underline text
+  STRIKETHROUGH // Strike through text
+  AREA // Rectangle/area selection
+  COMMENT // Blue comment bubble
+  NOTE // Green sticky note
+  INK // Freehand drawing/ink annotation
 }
 
 enum PaymentProvider {
@@ -106,14 +110,14 @@ model User {
   workspaceInvitesSent      WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
 
   // Token relations
-  tokens UserToken[]
-  researchNotes     ResearchNote[]
-  
+  tokens        UserToken[]
+  researchNotes ResearchNote[]
+
   // New Phase 2 features
-  citationExports           CitationExport[]
-  discussionThreads          DiscussionThread[]
-  discussionMessages        DiscussionMessage[]
-  activityLogEntries        ActivityLogEntry[]
+  citationExports    CitationExport[]
+  discussionThreads  DiscussionThread[]
+  discussionMessages DiscussionMessage[]
+  activityLogEntries ActivityLogEntry[]
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -139,10 +143,10 @@ model Workspace {
   collections Collection[]
   papers      Paper[]
   activities  ActivityLog[]
-  
+
   // New Phase 2 features
   discussionThreads  DiscussionThread[]
-  activityLogEntries  ActivityLogEntry[]
+  activityLogEntries ActivityLogEntry[]
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -235,10 +239,10 @@ model Paper {
   aiInsightThreads  AIInsightThread[]
   aiInsightMessages AIInsightMessage[]
   researchNotes     ResearchNote[]
-  
+
   // New Phase 2 features
-  citationExports    CitationExport[]
-  discussionThreads  DiscussionThread[]
+  citationExports   CitationExport[]
+  discussionThreads DiscussionThread[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
@@ -368,10 +372,10 @@ model Collection {
 
   papers  CollectionPaper[]
   members CollectionMember[]
-  
+
   // New Phase 2 features
-  citationExports    CitationExport[]
-  discussionThreads  DiscussionThread[]
+  citationExports   CitationExport[]
+  discussionThreads DiscussionThread[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -736,13 +740,13 @@ enum MembershipStatus {
 model ResearchNote {
   id        String   @id @default(uuid())
   userId    String
-  paperId   String?  // Optional - can be general notes
+  paperId   String? // Optional - can be general notes
   title     String
   content   String
   tags      String[] // Array of tags
   isPrivate Boolean  @default(true)
 
-  user  User  @relation(fields: [userId], references: [id])
+  user  User   @relation(fields: [userId], references: [id])
   paper Paper? @relation(fields: [paperId], references: [id])
 
   createdAt DateTime @default(now())
@@ -756,17 +760,17 @@ model ResearchNote {
 
 // Citation Export System
 model CitationExport {
-  id          String           @id @default(uuid())
-  userId      String
-  paperId     String?
+  id           String         @id @default(uuid())
+  userId       String
+  paperId      String?
   collectionId String?
-  format      CitationFormat
-  content     String           // The actual citation content
-  metadata    Json?            @db.JsonB // Additional format-specific metadata
-  exportedAt  DateTime         @default(now())
+  format       CitationFormat
+  content      String // The actual citation content
+  metadata     Json?          @db.JsonB // Additional format-specific metadata
+  exportedAt   DateTime       @default(now())
 
-  user       User       @relation(fields: [userId], references: [id])
-  paper      Paper?     @relation(fields: [paperId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  paper      Paper?      @relation(fields: [paperId], references: [id])
   collection Collection? @relation(fields: [collectionId], references: [id])
 
   createdAt DateTime @default(now())
@@ -790,21 +794,21 @@ enum CitationFormat {
 
 // Threaded Research Discussions
 model DiscussionThread {
-  id          String  @id @default(uuid())
-  paperId     String?
+  id           String   @id @default(uuid())
+  paperId      String?
   collectionId String?
-  workspaceId String?
-  userId      String
-  title       String
-  content     String
-  isResolved  Boolean @default(false)
-  isPinned    Boolean @default(false)
-  tags        String[] // Discussion tags for categorization
+  workspaceId  String?
+  userId       String
+  title        String
+  content      String
+  isResolved   Boolean  @default(false)
+  isPinned     Boolean  @default(false)
+  tags         String[] // Discussion tags for categorization
 
-  paper      Paper?      @relation(fields: [paperId], references: [id])
-  collection Collection? @relation(fields: [collectionId], references: [id])
-  workspace  Workspace?  @relation(fields: [workspaceId], references: [id])
-  user       User        @relation(fields: [userId], references: [id])
+  paper      Paper?              @relation(fields: [paperId], references: [id])
+  collection Collection?         @relation(fields: [collectionId], references: [id])
+  workspace  Workspace?          @relation(fields: [workspaceId], references: [id])
+  user       User                @relation(fields: [userId], references: [id])
   messages   DiscussionMessage[]
 
   createdAt DateTime @default(now())
@@ -828,10 +832,10 @@ model DiscussionMessage {
   isEdited    Boolean @default(false)
   editHistory Json?   @db.JsonB // Store edit history
 
-  thread   DiscussionThread    @relation(fields: [threadId], references: [id])
-  user     User               @relation(fields: [userId], references: [id])
-  parent   DiscussionMessage? @relation("MessageThread", fields: [parentId], references: [id])
-  replies  DiscussionMessage[] @relation("MessageThread")
+  thread  DiscussionThread    @relation(fields: [threadId], references: [id])
+  user    User                @relation(fields: [userId], references: [id])
+  parent  DiscussionMessage?  @relation("MessageThread", fields: [parentId], references: [id])
+  replies DiscussionMessage[] @relation("MessageThread")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -844,14 +848,14 @@ model DiscussionMessage {
 
 // Enhanced Activity Log
 model ActivityLogEntry {
-  id          String  @id @default(uuid())
+  id          String           @id @default(uuid())
   userId      String?
   workspaceId String?
-  entity      String  // 'paper', 'collection', 'discussion', 'annotation', etc.
+  entity      String // 'paper', 'collection', 'discussion', 'annotation', etc.
   entityId    String
-  action      String  // 'created', 'updated', 'deleted', 'shared', 'exported', etc.
-  details     Json?   @db.JsonB // Additional context about the action
-  metadata    Json?   @db.JsonB // Additional metadata like IP, user agent, etc.
+  action      String // 'created', 'updated', 'deleted', 'shared', 'exported', etc.
+  details     Json?            @db.JsonB // Additional context about the action
+  metadata    Json?            @db.JsonB // Additional metadata like IP, user agent, etc.
   severity    ActivitySeverity @default(INFO)
 
   user      User?      @relation(fields: [userId], references: [id])
