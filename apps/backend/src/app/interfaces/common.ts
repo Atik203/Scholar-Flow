@@ -1,6 +1,7 @@
 import { Request } from "express";
 
 export interface IAuthUser {
+  userId: string;
   id: string;
   email: string;
   name?: string;
