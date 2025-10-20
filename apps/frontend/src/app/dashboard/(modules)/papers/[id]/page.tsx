@@ -70,7 +70,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use, useState } from "react";
 
 interface PaperDetailPageProps {
@@ -81,6 +81,12 @@ interface PaperDetailPageProps {
 
 export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const resolvedParams = use(params);
+
+  // Validate params
+  if (!resolvedParams?.id) {
+    notFound();
+  }
+
   const router = useRouter();
   const isProtected = useProtectedRoute();
 
@@ -113,10 +119,13 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
 
   // Hook for signed file URL must be declared unconditionally
   // Load file URL when preview is shown OR when on annotations tab
-  const { data: fileUrlData, isFetching: isFetchingFileUrl, error: fileUrlError } =
-    useGetPaperFileUrlQuery(resolvedParams.id, { 
-      skip: !showPreview && activeTab !== "annotations" 
-    });
+  const {
+    data: fileUrlData,
+    isFetching: isFetchingFileUrl,
+    error: fileUrlError,
+  } = useGetPaperFileUrlQuery(resolvedParams.id, {
+    skip: !showPreview && activeTab !== "annotations",
+  });
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
