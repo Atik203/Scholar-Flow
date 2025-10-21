@@ -1,0 +1,282 @@
+% ScholarFlow Project Report - Main Document
+% Author: Md. Atikur Rahaman
+% Date: October 22, 2025
+% Version: 1.1.9
+
+\documentclass[12pt,a4paper]{report}
+
+% ============================================
+% PACKAGES
+% ============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{verbatim}
+
+% ============================================
+% GEOMETRY & LAYOUT
+% ============================================
+\geometry{
+    left=1.5in,
+    right=1in,
+    top=1in,
+    bottom=1in,
+    headheight=15pt
+}
+
+% ============================================
+% COLOR DEFINITIONS
+% ============================================
+\definecolor{primaryblue}{RGB}{59, 130, 246}
+\definecolor{secondarygreen}{RGB}{16, 185, 129}
+\definecolor{accentorange}{RGB}{251, 146, 60}
+\definecolor{darkgray}{RGB}{55, 65, 81}
+\definecolor{lightgray}{RGB}{243, 244, 246}
+\definecolor{codebg}{RGB}{248, 250, 252}
+\definecolor{codeframe}{RGB}{226, 232, 240}
+
+% ============================================
+% HYPERLINKS
+% ============================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryblue,
+    filecolor=primaryblue,
+    urlcolor=primaryblue,
+    citecolor=primaryblue,
+    pdftitle={ScholarFlow Project Report},
+    pdfauthor={Md. Atikur Rahaman},
+    pdfsubject={AI-Powered Research Paper Collaboration Hub},
+    pdfkeywords={ScholarFlow, Research, AI, Collaboration, Paper Management}
+}
+
+% ============================================
+% HEADERS & FOOTERS
+% ============================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textcolor{primaryblue}{\textbf{ScholarFlow}}}
+\fancyhead[R]{\textcolor{darkgray}{\leftmark}}
+\fancyfoot[C]{\textcolor{darkgray}{\thepage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ============================================
+% CHAPTER & SECTION STYLING
+% ============================================
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{primaryblue}}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{primaryblue}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{secondarygreen}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{darkgray}}
+  {\thesubsubsection}{1em}{}
+
+% ============================================
+% TABLE OF CONTENTS STYLING
+% ============================================
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries\color{primaryblue}}
+\renewcommand{\cftchapfont}{\bfseries\color{primaryblue}}
+\renewcommand{\cftsecfont}{\color{darkgray}}
+\renewcommand{\cftsubsecfont}{\color{darkgray}}
+
+% ============================================
+% CODE LISTINGS
+% ============================================
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{codeframe},
+    breaklines=true,
+    breakatwhitespace=true,
+    numbers=left,
+    numberstyle=\tiny\color{darkgray},
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{secondarygreen}\itshape,
+    stringstyle=\color{accentorange},
+    showstringspaces=false,
+    tabsize=2,
+    captionpos=b
+}
+
+% SQL Language Definition
+\lstdefinelanguage{SQL}{
+    keywords={SELECT, FROM, WHERE, AND, OR, INSERT, UPDATE, DELETE, CREATE, TABLE, INDEX, JOIN, LEFT, RIGHT, INNER, OUTER, ON, AS, GROUP, BY, ORDER, LIMIT, OFFSET, COUNT, SUM, AVG, MAX, MIN, DISTINCT, CASE, WHEN, THEN, ELSE, END},
+    sensitive=false,
+    morecomment=[l]{--},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+% ============================================
+% CUSTOM BOXES
+% ============================================
+\newtcolorbox{infobox}[1][]{
+    colback=lightgray,
+    colframe=primaryblue,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=yellow!10,
+    colframe=accentorange,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=green!5,
+    colframe=secondarygreen,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+% ============================================
+% CUSTOM COMMANDS
+% ============================================
+\newcommand{\projectname}{\textbf{\textcolor{primaryblue}{ScholarFlow}}}
+\newcommand{\version}{\texttt{v1.1.9}}
+\newcommand{\feature}[1]{\textcolor{secondarygreen}{\textbf{#1}}}
+\newcommand{\tech}[1]{\textcolor{primaryblue}{\texttt{#1}}}
+\newcommand{\code}[1]{\colorbox{codebg}{\texttt{#1}}}
+
+% ============================================
+% DOCUMENT INFORMATION
+% ============================================
+\title{
+    \vspace{-2cm}
+    {\Huge\textcolor{primaryblue}{\textbf{ScholarFlow}}}\\
+    \vspace{0.5cm}
+    {\Large AI-Powered Research Paper Collaboration Hub}\\
+    \vspace{0.3cm}
+    {\large Project Report}\\
+    \vspace{0.5cm}
+    {\normalsize Version 1.1.9}
+}
+\author{
+    \textbf{Md. Atikur Rahaman}\\
+    \texttt{[ID\_PLACEHOLDER]}\\
+    \textit{Lead Developer \& Architect}\\[0.3cm]
+    \textbf{Salman}\\
+    \texttt{[ID\_PLACEHOLDER]}\\
+    \textit{Backend Developer}\\[0.3cm]
+    \small Development Period: August 2025 - October 2025
+}
+\date{October 22, 2025}
+
+% ============================================
+% BEGIN DOCUMENT
+% ============================================
+\begin{document}
+
+% Title Page
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+% Abstract
+\begin{abstract}
+\noindent
+\projectname{} is a comprehensive, AI-powered research paper collaboration platform designed to revolutionize how researchers, academics, and students manage, organize, and collaborate on research papers. Built with modern web technologies and powered by artificial intelligence, ScholarFlow provides an integrated solution for the entire research paper lifecycle—from upload and organization to AI-assisted insights and team collaboration.
+
+\vspace{0.5cm}
+\noindent
+This report documents the complete development process, architecture, features, and implementation details of \projectname{} \version{}. The platform combines paper management, AI-powered insights, team collaboration, and professional subscription tiers to address core pain points in academic research workflows.
+
+\vspace{0.5cm}
+\noindent
+\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Stripe, Gemini AI, OpenAI, Redis, TypeScript
+
+\vspace{0.3cm}
+\noindent
+\textbf{Repository:} \url{https://github.com/Atik203/Scholar-Flow}
+
+\vspace{0.3cm}
+\noindent
+\textbf{Live Demo:} \url{https://scholar-flow-ai.vercel.app}
+\end{abstract}
+
+\newpage
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
+
+% ============================================
+% CHAPTERS
+% ============================================
+\input{chapters/01-group-details}
+\input{chapters/02-video-demo}
+\input{chapters/03-introduction}
+\input{chapters/04-motivation}
+\input{chapters/05-similar-projects}
+\input{chapters/06-benchmark-analysis}
+\input{chapters/07-feature-list}
+\input{chapters/08-erd}
+\input{chapters/09-database-schema}
+\input{chapters/10-sql-queries}
+\input{chapters/11-screenshots}
+\input{chapters/12-limitations}
+\input{chapters/13-future-work}
+\input{chapters/14-conclusion}
+
+% ============================================
+% APPENDICES
+% ============================================
+\appendix
+\input{appendices/a-tech-stack}
+\input{appendices/b-api-endpoints}
+\input{appendices/c-environment-vars}
+
+% ============================================
+% BIBLIOGRAPHY
+% ============================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
