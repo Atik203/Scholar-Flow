@@ -4,5 +4,20 @@
 \section{Current System Limitations}
 \label{sec:limitations-overview}
 
-% Content from PROJECT_REPORT.md Section 12
-% 7 major limitation categories with workarounds
+The following key limitations exist in the current MVP implementation:
+
+\begin{itemize}
+    \item \textbf{AI Rate Limiting}: 100 API calls/hour per user with 8,000 token context window; 7-9 second summarization latency
+    
+    \item \textbf{File Constraints}: 25MB max upload size, PDF/DOCX only, ~85\% metadata extraction accuracy (scanned PDFs unsupported)
+    
+    \item \textbf{No Real-Time Collaboration}: No live editing, cursor tracking, or document version control
+    
+    \item \textbf{Storage \& Performance}: Redis free tier (30MB cache), 20 max database connections, basic PostgreSQL ILIKE search only
+    
+    \item \textbf{Platform Limitations}: No mobile app, single workspace view, 100 requests/minute rate limiting
+    
+    \item \textbf{Missing Enterprise Features}: No comprehensive audit trail, bulk data export, or public API for integrations
+    
+    \item \textbf{Security \& Privacy}: No end-to-end encryption (trade-off for AI features), limited data retention policies, no PII masking in admin tools
+\end{itemize}
