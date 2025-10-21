@@ -1,0 +1,90 @@
+\chapter{SQL Queries \& Optimization}
+\label{ch:sql-queries}
+
+\section{Query Catalog}
+\label{sec:query-catalog}
+
+This chapter documents the 18 most complex and performance-critical SQL queries in \projectname{}, complete with execution times and optimization strategies.
+
+% ============================================
+% QUERY 1: LIST PAPERS WITH FILTERS
+% ============================================
+\section{List Papers with Advanced Filters}
+\label{sec:query-list-papers}
+
+\subsection{Query}
+
+\begin{lstlisting}[language=SQL, caption={List Papers with Pagination \& Filters}]
+SELECT 
+  p.id,
+  p.title,
+  p.authors,
+  p.abstract,
+  p."publicationYear",
+  p."fileUrl",
+  p."createdAt",
+  u.name as "uploaderName"
+FROM "Paper" p
+JOIN "User" u ON p."uploaderId" = u.id
+WHERE p."workspaceId" = $1
+  AND p."isDeleted" = false
+  AND ($2::text IS NULL OR p.title ILIKE '%' || $2 || '%')
+  AND ($3::int IS NULL OR p."publicationYear" >= $3)
+  AND ($4::int IS NULL OR p."publicationYear" <= $4)
+ORDER BY p."createdAt" DESC
+LIMIT $5 OFFSET $6;
+\end{lstlisting}
+
+\subsection{Parameters}
+\begin{itemize}
+    \item \$1: workspaceId (INT)
+    \item \$2: searchQuery (TEXT, nullable)
+    \item \$3: yearFrom (INT, nullable)
+    \item \$4: yearTo (INT, nullable)
+    \item \$5: limit (INT)
+    \item \$6: offset (INT)
+\end{itemize}
+
+\subsection{Performance}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Dataset Size} & \textbf{Before Optimization} & \textbf{After Optimization} \\
+\midrule
+1,000 papers & 420ms & 65ms \\
+10,000 papers & 1,800ms & 120ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Optimization Strategy}
+\begin{itemize}
+    \item Composite index on (workspaceId, isDeleted)
+    \item GIN index for full-text search
+    \item Pagination with LIMIT/OFFSET
+    \item Conditional filters avoid table scans
+\end{itemize}
+
+% ============================================
+% ADDITIONAL QUERIES
+% ============================================
+
+% NOTE: Add remaining 17 queries from PROJECT_REPORT.md Section 10
+% Each query should include:
+% 1. SQL code
+% 2. Parameter documentation
+% 3. Performance metrics
+% 4. Optimization notes
+
+\section{Full-Text Paper Search}
+\label{sec:query-fulltext-search}
+
+% Query 2 content...
+
+\section{Collection with Papers}
+\label{sec:query-collection-papers}
+
+% Query 3 content...
+
+% Continue with remaining queries...

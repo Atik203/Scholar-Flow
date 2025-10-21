@@ -1,0 +1,159 @@
+\chapter{Group Details}
+\label{ch:group-details}
+
+% ============================================
+% GROUP INFORMATION
+% ============================================
+\section{Group Information}
+\label{sec:group-info}
+
+\begin{infobox}[Project Overview]
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Group Name:} ScholarFlow Development Team
+    \item \textbf{Project Name:} ScholarFlow - AI-Powered Research Paper Collaboration Hub
+    \item \textbf{Project Type:} Research Paper Management and Collaboration Platform
+    \item \textbf{Development Period:} August 2025 - October 2025
+    \item \textbf{Current Version:} \version{}
+    \item \textbf{Project Status:} Phase 1 MVP Complete \checkmark
+\end{itemize}
+\end{infobox}
+
+% ============================================
+% TEAM MEMBERS
+% ============================================
+\section{Team Members}
+\label{sec:team-members}
+
+\begin{table}[H]
+\centering
+\caption{ScholarFlow Development Team}
+\label{tab:team-members}
+\begin{tabular}{@{}lllp{6cm}@{}}
+\toprule
+\textbf{Name} & \textbf{ID} & \textbf{Role} & \textbf{Primary Contributions} \\
+\midrule
+Md. Atikur Rahaman & \texttt{[PLACEHOLDER]} & Lead Developer \& Architect & 
+Full-stack development, Database design, AI Integration, Authentication System, Paper Management, Rich Text Editor \\
+\addlinespace
+Salman & \texttt{[PLACEHOLDER]} & Backend Developer & 
+Collections CRUD, Backend API Development, Database Queries, Testing \\
+\addlinespace
+{[Member 3]} & \texttt{[PLACEHOLDER]} & {[Role]} & 
+{[Contributions]} \\
+\addlinespace
+{[Member 4]} & \texttt{[PLACEHOLDER]} & {[Role]} & 
+{[Contributions]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{warningbox}[Note]
+Please update the Student IDs and add additional team members as needed before final submission.
+\end{warningbox}
+
+% ============================================
+% PROJECT LINKS
+% ============================================
+\section{Project Resources}
+\label{sec:project-links}
+
+\begin{table}[H]
+\centering
+\caption{Important Project Links}
+\label{tab:project-links}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Resource} & \textbf{URL} \\
+\midrule
+GitHub Repository & \url{https://github.com/Atik203/Scholar-Flow} \\
+Live Application & \url{https://scholar-flow-ai.vercel.app} \\
+Backend API & \url{https://scholar-flow-api.vercel.app/api/health} \\
+API Documentation & \url{https://scholar-flow-api.vercel.app/api-docs} \\
+ERD Diagram & \url{https://lucid.app/lucidchart/76e3f9ec-0891-48af-aeed-1a6f9dbd641c} \\
+Schema Diagram & \url{https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================
+% DEVELOPMENT TIMELINE
+% ============================================
+\section{Development Timeline}
+\label{sec:timeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=1.0]
+    % Timeline axis
+    \draw[thick, ->] (0,0) -- (14,0) node[right] {Time};
+    
+    % Weeks
+    \foreach \x/\week in {1/Week 1, 3/Week 2, 5/Week 3, 7/Week 4, 9/Week 5, 11/Week 6} {
+        \draw (\x,0.1) -- (\x,-0.1) node[below, font=\small] {\week};
+    }
+    
+    % Milestones
+    \node[above, text width=2cm, align=center] at (1,0.3) {\small Project Setup};
+    \node[above, text width=2cm, align=center] at (3,0.3) {\small Auth \& Profile};
+    \node[above, text width=2cm, align=center] at (5,0.3) {\small Paper Upload};
+    \node[above, text width=2cm, align=center] at (7,0.3) {\small Collections};
+    \node[above, text width=2cm, align=center] at (9,0.3) {\small AI Features};
+    \node[above, text width=2cm, align=center] at (11,0.3) {\small Billing \& Admin};
+    
+    % Checkmarks
+    \foreach \x in {1,3,5,7,9,11} {
+        \node[text=secondarygreen] at (\x,0.8) {\Large\checkmark};
+    }
+\end{tikzpicture}
+\caption{Phase 1 Development Timeline (6 Weeks)}
+\label{fig:timeline}
+\end{figure}
+
+% ============================================
+% TECHNOLOGY STACK SUMMARY
+% ============================================
+\section{Technology Stack Overview}
+\label{sec:tech-stack-overview}
+
+\subsection{Frontend Technologies}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Framework:} \tech{Next.js 15} with App Router
+    \item \textbf{Language:} \tech{TypeScript} (100\% coverage)
+    \item \textbf{Styling:} \tech{Tailwind CSS} + \tech{ShadCN UI}
+    \item \textbf{State Management:} \tech{Redux Toolkit Query}
+    \item \textbf{Forms:} \tech{React Hook Form} + \tech{Zod} validation
+    \item \textbf{Authentication:} \tech{NextAuth.js}
+\end{itemize}
+
+\subsection{Backend Technologies}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Runtime:} \tech{Node.js} with \tech{Express.js}
+    \item \textbf{Language:} \tech{TypeScript}
+    \item \textbf{Database:} \tech{PostgreSQL} with \tech{Prisma ORM}
+    \item \textbf{Storage:} \tech{AWS S3} for file management
+    \item \textbf{Authentication:} \tech{JWT} + \tech{bcrypt}
+    \item \textbf{Validation:} \tech{Zod} schemas
+\end{itemize}
+
+\subsection{Infrastructure \& DevOps}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Package Manager:} \tech{Yarn Berry (v4)}
+    \item \textbf{Monorepo:} \tech{Turborepo} for build optimization
+    \item \textbf{Caching:} \tech{Redis} for performance
+    \item \textbf{Deployment:} \tech{Vercel} (Frontend) + \tech{Railway} (Backend)
+    \item \textbf{CI/CD:} \tech{GitHub Actions}
+    \item \textbf{Monitoring:} Health checks and performance tracking
+\end{itemize}
+
+\begin{successbox}[Development Status]
+\textbf{Phase 1 MVP: 100\% Complete}
+
+All core features have been successfully implemented, tested, and deployed to production. The platform is currently serving users with a Lighthouse performance score of 93/100.
+\end{successbox}
+
+\vspace{0.5cm}
+\noindent
+For detailed technology stack information, see Appendix~\ref{app:tech-stack}.
