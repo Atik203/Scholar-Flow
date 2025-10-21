@@ -1,90 +1,253 @@
-\chapter{SQL Queries \& Optimization}
-\label{ch:sql-queries}
+\section{Key SQL Queries}\chapter{SQL Queries \& Optimization}
 
-\section{Query Catalog}
+\label{sec:sql-queries}\label{ch:sql-queries}
+
+
+
+This section presents 12 essential SQL queries demonstrating complex database operations including authentication, paper management, collections, AI features, and analytics.\section{Query Catalog}
+
 \label{sec:query-catalog}
+
+\subsection{User Authentication \& Session}
 
 This chapter documents the 18 most complex and performance-critical SQL queries in \projectname{}, complete with execution times and optimization strategies.
 
-% ============================================
-% QUERY 1: LIST PAPERS WITH FILTERS
-% ============================================
-\section{List Papers with Advanced Filters}
-\label{sec:query-list-papers}
+\textbf{Query 1: Create User with Hashed Password}
 
-\subsection{Query}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]% ============================================
 
-\begin{lstlisting}[language=SQL, caption={List Papers with Pagination \& Filters}]
-SELECT 
-  p.id,
-  p.title,
-  p.authors,
-  p.abstract,
-  p."publicationYear",
+INSERT INTO "User" (id, name, email, password, role, "isVerified")% QUERY 1: LIST PAPERS WITH FILTERS
+
+VALUES (gen_random_uuid(), $1, $2, $3, 'RESEARCHER', false)% ============================================
+
+RETURNING id, name, email, role, "createdAt";\section{List Papers with Advanced Filters}
+
+\end{lstlisting}\label{sec:query-list-papers}
+
+
+
+\textbf{Query 2: OAuth Account Linking}\subsection{Query}
+
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+
+INSERT INTO "Account" (id, "userId", provider, "providerAccountId", \begin{lstlisting}[language=SQL, caption={List Papers with Pagination \& Filters}]
+
+                       "accessToken", scope)SELECT 
+
+VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)  p.id,
+
+ON CONFLICT ("provider", "providerAccountId")   p.title,
+
+DO UPDATE SET "accessToken" = EXCLUDED."accessToken"  p.authors,
+
+RETURNING id, "userId", provider;  p.abstract,
+
+\end{lstlisting}  p."publicationYear",
+
   p."fileUrl",
-  p."createdAt",
+
+\subsection{Paper Management}  p."createdAt",
+
   u.name as "uploaderName"
-FROM "Paper" p
-JOIN "User" u ON p."uploaderId" = u.id
-WHERE p."workspaceId" = $1
-  AND p."isDeleted" = false
-  AND ($2::text IS NULL OR p.title ILIKE '%' || $2 || '%')
-  AND ($3::int IS NULL OR p."publicationYear" >= $3)
-  AND ($4::int IS NULL OR p."publicationYear" <= $4)
-ORDER BY p."createdAt" DESC
-LIMIT $5 OFFSET $6;
+
+\textbf{Query 3: List Papers with Advanced Filters}FROM "Paper" p
+
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]JOIN "User" u ON p."uploaderId" = u.id
+
+SELECT p.id, p.title, p.authors, p.abstract, p."createdAt",WHERE p."workspaceId" = $1
+
+       u.name as "uploaderName"  AND p."isDeleted" = false
+
+FROM "Paper" p  AND ($2::text IS NULL OR p.title ILIKE '%' || $2 || '%')
+
+JOIN "User" u ON p."uploaderId" = u.id  AND ($3::int IS NULL OR p."publicationYear" >= $3)
+
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false  AND ($4::int IS NULL OR p."publicationYear" <= $4)
+
+  AND ($2::text IS NULL OR p.title ILIKE '%' || $2 || '%')ORDER BY p."createdAt" DESC
+
+  AND ($3::int IS NULL OR p."publicationYear" >= $3)LIMIT $5 OFFSET $6;
+
+ORDER BY p."createdAt" DESC LIMIT $4 OFFSET $5;\end{lstlisting}
+
 \end{lstlisting}
 
 \subsection{Parameters}
-\begin{itemize}
-    \item \$1: workspaceId (INT)
-    \item \$2: searchQuery (TEXT, nullable)
-    \item \$3: yearFrom (INT, nullable)
-    \item \$4: yearTo (INT, nullable)
-    \item \$5: limit (INT)
-    \item \$6: offset (INT)
-\end{itemize}
 
-\subsection{Performance}
-\begin{table}[H]
-\centering
+\textbf{Query 4: Paper Details with Related Data}\begin{itemize}
+
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]    \item \$1: workspaceId (INT)
+
+SELECT p.*, u.name as "uploaderName", u.email as "uploaderEmail",    \item \$2: searchQuery (TEXT, nullable)
+
+       COUNT(DISTINCT cp."collectionId")::int as "collectionCount",    \item \$3: yearFrom (INT, nullable)
+
+       COUNT(DISTINCT ait.id)::int as "chatThreadCount"    \item \$4: yearTo (INT, nullable)
+
+FROM "Paper" p    \item \$5: limit (INT)
+
+JOIN "User" u ON p."uploaderId" = u.id    \item \$6: offset (INT)
+
+LEFT JOIN "CollectionPaper" cp ON p.id = cp."paperId"\end{itemize}
+
+LEFT JOIN "AIInsightThread" ait ON p.id = ait."paperId"
+
+WHERE p.id = $1 AND p."isDeleted" = false\subsection{Performance}
+
+GROUP BY p.id, u.name, u.email;\begin{table}[H]
+
+\end{lstlisting}\centering
+
 \begin{tabular}{@{}lcc@{}}
-\toprule
+
+\subsection{Collection Operations}\toprule
+
 \textbf{Dataset Size} & \textbf{Before Optimization} & \textbf{After Optimization} \\
-\midrule
-1,000 papers & 420ms & 65ms \\
-10,000 papers & 1,800ms & 120ms \\
-\bottomrule
-\end{tabular}
-\end{table}
 
-\subsection{Optimization Strategy}
-\begin{itemize}
-    \item Composite index on (workspaceId, isDeleted)
-    \item GIN index for full-text search
+\textbf{Query 5: User Collections with Statistics}\midrule
+
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]1,000 papers & 420ms & 65ms \\
+
+SELECT c.id, c.name, c.description, c."isPrivate", c."createdAt",10,000 papers & 1,800ms & 120ms \\
+
+       COUNT(DISTINCT cp."paperId")::int as "paperCount",\bottomrule
+
+       COUNT(DISTINCT cm.id)::int as "memberCount"\end{tabular}
+
+FROM "Collection" c\end{table}
+
+LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId"
+
+LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId"\subsection{Optimization Strategy}
+
+WHERE c."creatorId" = $1 AND c."isDeleted" = false\begin{itemize}
+
+GROUP BY c.id ORDER BY c."createdAt" DESC;    \item Composite index on (workspaceId, isDeleted)
+
+\end{lstlisting}    \item GIN index for full-text search
+
     \item Pagination with LIMIT/OFFSET
-    \item Conditional filters avoid table scans
-\end{itemize}
 
-% ============================================
-% ADDITIONAL QUERIES
-% ============================================
+\textbf{Query 6: Add Papers to Collection (Batch Insert)}    \item Conditional filters avoid table scans
 
-% NOTE: Add remaining 17 queries from PROJECT_REPORT.md Section 10
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]\end{itemize}
+
+INSERT INTO "CollectionPaper" (id, "collectionId", "paperId", 
+
+                               "addedById", "addedAt")% ============================================
+
+SELECT gen_random_uuid(), $1, unnest($2::uuid[]), $3, NOW()% ADDITIONAL QUERIES
+
+ON CONFLICT DO NOTHING% ============================================
+
+RETURNING id, "collectionId", "paperId";
+
+\end{lstlisting}% NOTE: Add remaining 17 queries from PROJECT_REPORT.md Section 10
+
 % Each query should include:
-% 1. SQL code
+
+\subsection{Workspace Collaboration}% 1. SQL code
+
 % 2. Parameter documentation
-% 3. Performance metrics
-% 4. Optimization notes
 
-\section{Full-Text Paper Search}
-\label{sec:query-fulltext-search}
+\textbf{Query 7: Workspace Members with Permissions}% 3. Performance metrics
 
-% Query 2 content...
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]% 4. Optimization notes
 
-\section{Collection with Papers}
-\label{sec:query-collection-papers}
+SELECT wm.id, wm.role, wm."joinedAt",
 
-% Query 3 content...
+       u.id as "userId", u.name, u.email, u.image,\section{Full-Text Paper Search}
 
-% Continue with remaining queries...
+       s."planType" as "subscriptionPlan"\label{sec:query-fulltext-search}
+
+FROM "WorkspaceMember" wm
+
+JOIN "User" u ON wm."userId" = u.id% Query 2 content...
+
+LEFT JOIN "Subscription" s ON u.id = s."userId" 
+
+  AND s.status = 'ACTIVE'\section{Collection with Papers}
+
+WHERE wm."workspaceId" = $1 AND wm.status = 'ACTIVE'\label{sec:query-collection-papers}
+
+ORDER BY wm."joinedAt" ASC;
+
+\end{lstlisting}% Query 3 content...
+
+
+
+\textbf{Query 8: Update Member Role with Permission Check}% Continue with remaining queries...
+
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+UPDATE "WorkspaceMember" wm
+SET role = $3
+FROM "WorkspaceMember" requester
+WHERE wm."workspaceId" = $1 AND wm."userId" = $2
+  AND requester."workspaceId" = $1 AND requester."userId" = $4
+  AND requester.role IN ('OWNER', 'TEAM_LEAD')
+RETURNING wm.id, wm.role, wm."userId";
+\end{lstlisting}
+
+\subsection{AI Features}
+
+\textbf{Query 9: Store AI Summary with Chunks}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+WITH summary_insert AS (
+  INSERT INTO "AISummary" (id, "paperId", "userId", summary, 
+                           model, "createdAt")
+  VALUES (gen_random_uuid(), $1, $2, $3, $4, NOW())
+  RETURNING id
+)
+INSERT INTO "PaperChunk" ("paperId", content, "chunkIndex", 
+                          embedding)
+SELECT $1, unnest($5::text[]), generate_series(0, $6), NULL
+RETURNING id, "chunkIndex";
+\end{lstlisting}
+
+\textbf{Query 10: AI Chat History with Context}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+SELECT m.id, m.role, m.content, m."createdAt", m.tokens,
+       t.id as "threadId", t.title,
+       p.title as "paperTitle", p.abstract
+FROM "AIInsightMessage" m
+JOIN "AIInsightThread" t ON m."threadId" = t.id
+JOIN "Paper" p ON t."paperId" = p.id
+WHERE t.id = $1
+ORDER BY m."createdAt" ASC;
+\end{lstlisting}
+
+\subsection{Admin Analytics}
+
+\textbf{Query 11: System Statistics Dashboard}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+SELECT 
+  (SELECT COUNT(*)::int FROM "User") as "totalUsers",
+  (SELECT COUNT(*)::int FROM "Paper" WHERE "isDeleted" = false) 
+    as "totalPapers",
+  (SELECT COUNT(*)::int FROM "Session" 
+   WHERE expires > NOW()) as "activeSessions",
+  (SELECT COALESCE(SUM(amount), 0) FROM "Payment" 
+   WHERE status = 'COMPLETED') as "totalRevenue";
+\end{lstlisting}
+
+\textbf{Query 12: User Activity Log (Recent Actions)}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+SELECT al.id, al.action, al."entityType", al.metadata, 
+       al."createdAt", u.name as "userName", u.email
+FROM "ActivityLog" al
+JOIN "User" u ON al."userId" = u.id
+WHERE al."workspaceId" = $1
+  AND al."createdAt" >= NOW() - INTERVAL '30 days'
+ORDER BY al."createdAt" DESC LIMIT 50;
+\end{lstlisting}
+
+\subsection{Query Optimization Techniques}
+
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \textbf{Indexing:} Composite indexes on frequently queried columns (\texttt{workspaceId}, \texttt{uploaderId}, \texttt{isDeleted})
+    \item \textbf{Parameterization:} All queries use prepared statements to prevent SQL injection
+    \item \textbf{Pagination:} LIMIT/OFFSET clauses to avoid loading large result sets
+    \item \textbf{Joins:} LEFT JOINs used judiciously to fetch related data in single query
+    \item \textbf{Aggregations:} COUNT/SUM operations with appropriate GROUP BY clauses
+    \item \textbf{Batch Operations:} Using \texttt{unnest()} for bulk inserts
+\end{itemize}

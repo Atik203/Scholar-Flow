@@ -1,200 +1,165 @@
-\chapter{Complete Feature List}
-\label{ch:feature-list}
+\section{Complete Feature List}
+\label{sec:features}
 
-% NOTE: This chapter contains detailed feature documentation
-% It should be expanded with content from PROJECT_REPORT.md Section 7
-% For brevity in this demo, creating structured outline with first few features
+\subsection{User Authentication \& Authorization}
 
-\section{Overview}
-\label{sec:features-overview}
-
-\projectname{} \version{} implements 15 major feature categories, each with comprehensive functionality designed to address specific research workflow needs. This chapter provides detailed documentation of each feature with user workflows, technical implementation details, and usage examples.
-
-% ============================================
-% FEATURE 1: AUTHENTICATION
-% ============================================
-\section{User Authentication System}
-\label{sec:feature-auth}
-
-\subsection{Overview}
-
-Multi-provider authentication system supporting email/password and OAuth (Google, GitHub).
-
-\subsection{Key Capabilities}
-
-\begin{itemize}[leftmargin=*]
-    \item Email/password registration with validation
-    \item Google OAuth 2.0 integration
-    \item GitHub OAuth integration
-    \item JWT-based session management (RS256)
-    \item Email verification system
-    \item Password reset with secure tokens
-    \item Account linking for OAuth providers
-\end{itemize}
-
-\subsection{User Workflow}
-
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Registration:} User navigates to \code{/register}
-    \item \textbf{Validation:} Zod schema validates email, password strength
-    \item \textbf{Email Verification:} System sends verification email
-    \item \textbf{Account Activation:} User clicks link to activate
-    \item \textbf{Login:} JWT token issued (7-day expiry)
-    \item \textbf{Refresh:} Automatic token refresh before expiry
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User visits login page and chooses authentication method (Email/Password or OAuth)
+    \item For OAuth: Redirects to provider (Google/GitHub), returns with authentication token
+    \item Backend validates credentials, generates JWT token with RS256 encryption
+    \item Session stored in database with 30-day expiry, user redirected to dashboard
 \end{enumerate}
 
-\subsection{Technical Implementation}
-
-\begin{lstlisting}[language=JavaScript, caption={Authentication Middleware}]
-// JWT verification with NextAuth
-export const auth = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) throw new ApiError(401, 'Unauthorized');
-  
-  const decoded = await verifyJWT(token);
-  const user = await prisma.$queryRaw`
-    SELECT * FROM "User" WHERE id = ${decoded.userId}`;
-  
-  if (!user) throw new ApiError(401, 'Invalid token');
-  req.user = user;
-  next();
-};
-\end{lstlisting}
-
-\subsection{Screenshots}
+\textbf{Database Tables:} \texttt{User}, \texttt{Account}, \texttt{Session}, \texttt{VerificationToken}
 
 \begin{figure}[H]
 \centering
-\texttt{[PLACEHOLDER - Screenshot: Register Page]}
-\caption{User Registration Form}
-\label{fig:auth-register}
+\includegraphics[width=0.7\textwidth]{images/screenshots/sign_in.png}
+\caption{Authentication Interface}
+\label{fig:auth}
 \end{figure}
 
-% ============================================
-% FEATURE 2: PAPER MANAGEMENT
-% ============================================
-\section{Paper Upload \& Management}
-\label{sec:feature-paper-management}
+\subsection{Paper Upload \& Management}
 
-\subsection{Overview}
-
-Comprehensive paper lifecycle management from upload to deletion.
-
-\subsection{Key Capabilities}
-
-\begin{itemize}[leftmargin=*]
-    \item PDF and DOCX upload (max 25MB)
-    \item Automatic metadata extraction (title, authors, year)
-    \item DOCX to PDF conversion via Gotenberg
-    \item AWS S3 storage with CloudFront CDN
-    \item Paper tagging and categorization
-    \item Full-text search across papers
-    \item Bulk operations (upload, tag, delete)
-\end{itemize}
-
-\subsection{Upload Workflow}
-
-\begin{enumerate}[leftmargin=*]
-    \item User selects file(s) from file picker
-    \item Frontend validates file size and type
-    \item File uploaded to backend with metadata
-    \item Backend generates S3 presigned URL
-    \item File uploaded directly to S3
-    \item If DOCX: Gotenberg converts to PDF
-    \item Metadata extracted and stored in PostgreSQL
-    \item Paper added to user's default workspace
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User drags PDF/DOCX file to upload area (max 25MB)
+    \item Frontend generates presigned S3 URL, uploads directly to AWS S3
+    \item Backend extracts metadata (title, authors, abstract) using PDF parser
+    \item Text chunked into segments for AI processing, stored in \texttt{PaperChunk}
+    \item Paper listed in user's workspace with searchable metadata
 \end{enumerate}
 
-\subsection{Search \& Filtering}
+\textbf{Database Tables:} \texttt{Paper}, \texttt{PaperFile}, \texttt{PaperChunk}
 
-\begin{table}[H]
+\begin{figure}[H]
 \centering
-\caption{Paper Search Filters}
-\label{tab:paper-filters}
-\begin{tabular}{@{}lp{8cm}@{}}
-\toprule
-\textbf{Filter} & \textbf{Description} \\
-\midrule
-Query & Full-text search in title, authors, abstract \\
-Tags & Filter by user-assigned tags \\
-Date Range & Papers published between dates \\
-Workspace & Papers in specific workspace \\
-Collection & Papers in specific collection \\
-Uploader & Papers uploaded by specific user \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=0.75\textwidth]{images/screenshots/paper_upload.png}
+\caption{Paper Upload Interface}
+\label{fig:upload}
+\end{figure}
 
-% ============================================
-% ADDITIONAL FEATURES (Continued...)
-% ============================================
+\subsection{Advanced Search \& Filtering}
 
-\section{Advanced Search \& Filtering}
-\label{sec:feature-search}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User enters search query with optional filters (date range, author, type)
+    \item Backend performs PostgreSQL full-text search using ILIKE operator
+    \item Results ranked by relevance, paginated (20 per page)
+    \item Metadata highlighted in results for quick identification
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.3
+\textbf{SQL Query:}
+\begin{lstlisting}[language=SQL,basicstyle=\tiny\ttfamily]
+SELECT p.id, p.title, p.abstract, p."createdAt"
+FROM "Paper" p
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false
+  AND (p.title ILIKE $2 OR p.abstract ILIKE $2)
+ORDER BY p."createdAt" DESC LIMIT 20;
+\end{lstlisting}
 
-\section{Collection Management}
-\label{sec:feature-collections}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/screenshots/advanced_search.png}
+\caption{Advanced Search Interface}
+\label{fig:search}
+\end{figure}
 
-% Content from PROJECT_REPORT.md Section 7.4
+\subsection{Collection Management}
 
-\section{Rich Text Editor}
-\label{sec:feature-editor}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User creates collection with name, description, privacy settings
+    \item Papers added to collection via multi-select interface
+    \item Collections shared with team members with role-based permissions (VIEW/EDIT)
+    \item Members can view, add papers, or modify based on their role
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.5
+\textbf{Database Tables:} \texttt{Collection}, \texttt{CollectionPaper}, \texttt{CollectionMember}
 
-\section{AI-Powered Features}
-\label{sec:feature-ai}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{images/screenshots/collection_details.png}
+\caption{Collection Management}
+\label{fig:collection}
+\end{figure}
 
-% Content from PROJECT_REPORT.md Section 7.6
+\subsection{AI-Powered Summarization \& Chat}
 
-\section{Workspace Collaboration}
-\label{sec:feature-workspace}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User clicks "Generate Summary" on paper details page
+    \item Backend retrieves paper chunks, sends to Gemini AI API
+    \item AI generates concise summary highlighting key findings
+    \item Summary cached in \texttt{AISummary} table for future access
+    \item User can chat with paper, ask questions about content
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.7
+\textbf{Database Tables:} \texttt{AISummary}, \texttt{AIInsightThread}, \texttt{AIInsightMessage}
 
-\section{Subscription \& Billing}
-\label{sec:feature-billing}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/screenshots/ai_insights.png}
+\caption{AI Summary and Chat Interface}
+\label{fig:ai}
+\end{figure}
 
-% Content from PROJECT_REPORT.md Section 7.8
+\subsection{Workspace Collaboration}
 
-\section{Admin Dashboard \& Analytics}
-\label{sec:feature-admin}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item Team lead creates workspace, invites members via email
+    \item Invited users receive notification, accept invitation
+    \item Members assigned roles: RESEARCHER, PRO\_RESEARCHER, TEAM\_LEAD, or OWNER
+    \item Role determines permissions for paper upload, collection creation, member management
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.9
+\textbf{Database Tables:} \texttt{Workspace}, \texttt{WorkspaceMember}, \texttt{WorkspaceInvitation}
 
-\section{Annotation \& Research Notes}
-\label{sec:feature-annotations}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{images/screenshots/shared_workspace.png}
+\caption{Workspace Collaboration Interface}
+\label{fig:workspace}
+\end{figure}
 
-% Content from PROJECT_REPORT.md Section 7.10
+\subsection{Subscription \& Billing}
 
-\section{Citation Export}
-\label{sec:feature-citations}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User selects subscription plan (FREE, PRO, or INSTITUTIONAL)
+    \item Redirected to Stripe Checkout for payment processing
+    \item Stripe webhook confirms payment, updates user subscription status
+    \item Subscription tracked in \texttt{Subscription} and \texttt{Payment} tables
+    \item Users can manage subscription via Stripe Customer Portal
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.11
+\textbf{Database Tables:} \texttt{Subscription}, \texttt{Payment}, \texttt{UsageEvent}
 
-\section{Document Preview \& Processing}
-\label{sec:feature-document-preview}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{images/screenshots/billing_plan.png}
+\caption{Subscription Plans}
+\label{fig:billing}
+\end{figure}
 
-% Content from PROJECT_REPORT.md Section 7.12
+\subsection{Admin Dashboard \& Analytics}
 
-\section{Progressive Web App (PWA)}
-\label{sec:feature-pwa}
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item Admin users access dashboard at \texttt{/admin} route
+    \item Dashboard displays system metrics: total users, papers, active sessions
+    \item Real-time health monitoring shows CPU, memory, database, storage status
+    \item User management allows role changes, account suspension
+    \item Analytics charts show user growth, paper uploads, revenue trends
+\end{enumerate}
 
-% Content from PROJECT_REPORT.md Section 7.13
+\textbf{Database Tables:} \texttt{User}, \texttt{Paper}, \texttt{Payment}, \texttt{ActivityLog}
 
-\section{Performance Optimization \& Security}
-\label{sec:feature-performance}
-
-% Content from PROJECT_REPORT.md Section 7.14
-
-\section{SEO \& Accessibility}
-\label{sec:feature-seo}
-
-% Content from PROJECT_REPORT.md Section 7.15
-
-% NOTE: Each section above should be expanded with detailed content
-% from the corresponding section in PROJECT_REPORT.md
-% For full implementation, copy the markdown content and convert
-% to LaTeX formatting
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{images/screenshots/admin_overview.png}
+\caption{Admin Dashboard}
+\label{fig:admin}
+\end{figure}
