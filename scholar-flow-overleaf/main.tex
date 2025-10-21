@@ -25,6 +25,7 @@
 \usepackage{longtable}
 \usepackage{multirow}
 \usepackage{array}
+\usepackage{tabularx}
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -42,7 +43,7 @@
 % GEOMETRY & LAYOUT
 % ============================================
 \geometry{
-    left=1.5in,
+    left=1in,
     right=1in,
     top=1in,
     bottom=1in,
@@ -65,10 +66,10 @@
 % ============================================
 \hypersetup{
     colorlinks=true,
-    linkcolor=primaryblue,
-    filecolor=primaryblue,
-    urlcolor=primaryblue,
-    citecolor=primaryblue,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=black,
+    citecolor=black,
     pdftitle={ScholarFlow Project Report},
     pdfauthor={Md. Atikur Rahaman},
     pdfsubject={AI-Powered Research Paper Collaboration Hub},
@@ -80,35 +81,37 @@
 % ============================================
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\textcolor{primaryblue}{\textbf{ScholarFlow}}}
-\fancyhead[R]{\textcolor{darkgray}{\leftmark}}
-\fancyfoot[C]{\textcolor{darkgray}{\thepage}}
+\fancyhead[L]{\textbf{ScholarFlow}}
+\fancyhead[R]{\leftmark}
+\fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.5pt}
 \renewcommand{\footrulewidth}{0pt}
 
 % ============================================
 % CHAPTER & SECTION STYLING (Report class)
 % ============================================
-\titleformat{\chapter}
-  {\normalfont\Huge\bfseries\color{primaryblue}}
-  {\thechapter}{1em}{}
-\titleformat{\section}
-  {\normalfont\Large\bfseries\color{secondarygreen}}
-  {\thesection}{1em}{}
-\titleformat{\subsection}
-  {\normalfont\large\bfseries\color{darkgray}}
-  {\thesubsection}{1em}{}
-\titleformat{\subsubsection}
-  {\normalfont\normalsize\bfseries\color{darkgray}}
-  {\thesubsubsection}{1em}{}
+\iffalse
+	{\titleformat{\chapter}
+    {\normalfont\Huge\bfseries}
+    {\thechapter}{1em}{}
+	\titleformat{\section}
+    {\normalfont\Large\bfseries}
+    {\thesection}{1em}{}
+	\titleformat{\subsection}
+    {\normalfont\large\bfseries}
+    {\thesubsection}{1em}{}
+	\titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries}
+    {\thesubsubsection}{1em}{}
 
 % ============================================
+\fi
 % TABLE OF CONTENTS STYLING
 % ============================================
-\renewcommand{\cfttoctitlefont}{\Huge\bfseries\color{primaryblue}}
-\renewcommand{\cftchapfont}{\bfseries\color{primaryblue}}
-\renewcommand{\cftsecfont}{\color{darkgray}}
-\renewcommand{\cftsubsecfont}{\color{darkgray}}
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{}
+\renewcommand{\cftsubsecfont}{}
 
 % ============================================
 % CODE LISTINGS
@@ -171,10 +174,10 @@
 % ============================================
 % CUSTOM COMMANDS
 % ============================================
-\newcommand{\projectname}{\textbf{\textcolor{primaryblue}{ScholarFlow}}}
+\newcommand{\projectname}{\textbf{ScholarFlow}}
 \newcommand{\version}{\texttt{v1.1.9}}
-\newcommand{\feature}[1]{\textcolor{secondarygreen}{\textbf{#1}}}
-\newcommand{\tech}[1]{\textcolor{primaryblue}{\texttt{#1}}}
+\newcommand{\feature}[1]{\textbf{#1}}
+\newcommand{\tech}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\colorbox{codebg}{\texttt{#1}}}
 
 % ============================================
@@ -189,11 +192,11 @@
     \vspace{0.3cm}
     {\Large\textbf{Database Management System Lab Report}}\\
     \vspace{0.4cm}
-    {\LARGE\textcolor{primaryblue}{\textbf{ScholarFlow}}}\\
+    {\LARGE\textbf{ScholarFlow}}\\
     \vspace{0.3cm}
     {\large AI-Powered Research Paper Collaboration Platform}\\
     \vspace{0.5cm}
-    {\normalsize\textbf{Section: I}}
+  
 }
 \author{
     \begin{tabular}{rl}
@@ -202,8 +205,11 @@
     \textbf{011222081} & Sagor Ahmed \\
     \textbf{0112310302} & Md. Sarowar Alam Sourov \\
     \end{tabular}
+     {\normalsize\textbf{Section: I}}
 }
-\date{October 22, 2025}
+  
+
+
 
 % ============================================
 % BEGIN DOCUMENT
@@ -259,6 +265,7 @@
 % ============================================
 % BIBLIOGRAPHY
 % ============================================
+\nocite{*}
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
