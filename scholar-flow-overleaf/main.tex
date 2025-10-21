@@ -3,7 +3,7 @@
 % Date: October 22, 2025
 % Section: I
 
-\documentclass[12pt,a4paper]{article}
+\documentclass[12pt,a4paper]{report}
 
 % ============================================
 % PACKAGES
@@ -35,6 +35,7 @@
 \usepackage{fontawesome5}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{verbatim}
 
 % ============================================
@@ -86,13 +87,16 @@
 \renewcommand{\footrulewidth}{0pt}
 
 % ============================================
-% SECTION STYLING (Article class)
+% CHAPTER & SECTION STYLING (Report class)
 % ============================================
+\titleformat{\chapter}
+  {\normalfont\Huge\bfseries\color{primaryblue}}
+  {\thechapter}{1em}{}
 \titleformat{\section}
-  {\normalfont\Large\bfseries\color{primaryblue}}
+  {\normalfont\Large\bfseries\color{secondarygreen}}
   {\thesection}{1em}{}
 \titleformat{\subsection}
-  {\normalfont\large\bfseries\color{secondarygreen}}
+  {\normalfont\large\bfseries\color{darkgray}}
   {\thesubsection}{1em}{}
 \titleformat{\subsubsection}
   {\normalfont\normalsize\bfseries\color{darkgray}}
