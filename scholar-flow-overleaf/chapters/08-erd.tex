@@ -130,37 +130,37 @@ PaymentHistory & Transaction records & User, Subscription \\
 \section{Critical Relationships}
 \label{sec:erd-relationships}
 
-\subsection{User → Paper (One-to-Many)}
+\subsection{User \texorpdfstring{$\rightarrow$}{->} Paper (One-to-Many)}
 
 \begin{lstlisting}[language=SQL, caption={User-Paper Relationship}]
 -- A user can upload many papers
-User.id → Paper.uploaderId (FK)
+User.id -> Paper.uploaderId (FK)
 
 -- Indexed for performance
 CREATE INDEX "Paper_uploaderId_workspaceId_idx" 
 ON "Paper"("uploaderId", "workspaceId");
 \end{lstlisting}
 
-\subsection{Workspace → Collection (One-to-Many)}
+\subsection{Workspace \texorpdfstring{$\rightarrow$}{->} Collection (One-to-Many)}
 
 \begin{lstlisting}[language=SQL, caption={Workspace-Collection Relationship}]
 -- A workspace contains many collections
-Workspace.id → Collection.workspaceId (FK)
+Workspace.id -> Collection.workspaceId (FK)
 
 -- With soft delete filtering
 CREATE INDEX "Collection_workspaceId_isDeleted_idx" 
 ON "Collection"("workspaceId", "isDeleted");
 \end{lstlisting}
 
-\subsection{Collection ↔ Paper (Many-to-Many)}
+\subsection{Collection \texorpdfstring{$\leftrightarrow$}{↔} Paper (Many-to-Many)}
 
 \begin{lstlisting}[language=SQL, caption={Collection-Paper Many-to-Many}]
 -- Join table for many-to-many relationship
 CollectionPaper {
-  collectionId: Int (FK → Collection.id)
-  paperId: Int (FK → Paper.id)
+  collectionId: Int (FK -> Collection.id)
+  paperId: Int (FK -> Paper.id)
   addedAt: DateTime
-  addedBy: Int (FK → User.id)
+  addedBy: Int (FK -> User.id)
 }
 \end{lstlisting}
 
@@ -228,7 +228,7 @@ Annotation\_paperId\_userId\_idx & paperId, userId & User annotations on paper \
 \begin{itemize}[leftmargin=*]
     \item All relationships enforced with FK constraints
     \item Cascade delete where appropriate (Sessions, Tokens)
-    \item Restrict delete for critical relationships (User → Paper)
+  \item Restrict delete for critical relationships (User -> Paper)
 \end{itemize}
 
 \subsection{Unique Constraints}
