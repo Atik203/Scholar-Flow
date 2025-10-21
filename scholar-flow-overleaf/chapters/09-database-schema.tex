@@ -4,7 +4,7 @@
 \section{Schema Overview}
 \label{sec:schema-overview}
 
-This chapter provides the complete SQL schema definition for \projectname{}, including all tables, columns, data types, constraints, and indexes.
+This chapter provides the complete SQL schema definition for \projectname{}, including key tables, relationships, data types, constraints, and indexes.
 
 % ============================================
 % SCHEMA DIAGRAM
@@ -22,13 +22,50 @@ This chapter provides the complete SQL schema definition for \projectname{}, inc
 \noindent For detailed schema view: \url{https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b}
 
 % ============================================
+% CORE TABLES OVERVIEW
+% ============================================
+\section{Core Tables Overview}
+\label{sec:schema-tables-overview}
+
+The database consists of 24 interconnected tables organized into functional modules:
+
+\subsection{1. Authentication \& User Management}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \texttt{User}: User profiles with authentication credentials (email, password hash)
+    \item \texttt{Account}: OAuth provider accounts linked to users (Google, GitHub)
+    \item \texttt{Session}: Active user sessions with JWT tokens
+    \item \texttt{VerificationToken}: Email verification and password reset tokens
+\end{itemize}
+
+\subsection{2. Paper Management}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \texttt{Paper}: Research papers with metadata (title, authors, abstract, publication year)
+    \item \texttt{PaperFile}: File storage references (S3 URLs, file sizes, MIME types)
+    \item \texttt{PaperChunk}: Text segments extracted from papers for AI processing
+    \item \texttt{PaperTag}: Custom tags for categorization
+\end{itemize}
+
+\subsection{3. Collections \& Organization}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \texttt{Collection}: User-created collections with privacy settings
+    \item \texttt{CollectionPaper}: Many-to-many relationship between collections and papers
+    \item \texttt{CollectionMember}: Shared collection access with role-based permissions
+\end{itemize}
+
+\subsection{4. AI Features}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \texttt{AISummary}: AI-generated paper summaries
+    \item \texttt{AIInsightThread}: Conversation threads about papers
+    \item \texttt{AIInsightMessage}: Individual messages in AI conversations
+\end{itemize}
+
+% ============================================
 % TABLE DEFINITIONS
 % ============================================
 \section{Core Table Definitions}
 \label{sec:schema-tables}
 
 \subsection{User Table}
-
 \begin{lstlisting}[language=SQL, caption={User Table Schema}]
 CREATE TABLE "User" (
   id SERIAL PRIMARY KEY,
@@ -53,7 +90,6 @@ CREATE INDEX "User_role_idx" ON "User"(role);
 \end{lstlisting}
 
 \subsection{Paper Table}
-
 \begin{lstlisting}[language=SQL, caption={Paper Table Schema}]
 CREATE TABLE "Paper" (
   id SERIAL PRIMARY KEY,
@@ -84,24 +120,25 @@ CREATE INDEX "Paper_title_authors_gin_idx"
   ON "Paper" USING gin(to_tsvector('english', title || ' ' || authors));
 \end{lstlisting}
 
-% NOTE: Additional tables should be added here
-% See apps/backend/prisma/schema.prisma for complete definitions
-% Key tables to include:
-% - Workspace
-% - Collection
-% - AISummary
-% - Subscription
-% - Annotation
-% - CitationExport
-% etc.
+\subsection{Indexing Strategy}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item \textbf{Unique Indexes}: \texttt{User.email}, \texttt{Account.(provider, providerAccountId)}
+    \item \textbf{Foreign Key Indexes}: All foreign key columns for efficient joins
+    \item \textbf{Composite Indexes}: \texttt{(workspaceId, uploaderId)}, \texttt{(collectionId, paperId)}
+    \item \textbf{Full-Text Indexes}: \texttt{Paper.title}, \texttt{Paper.abstract} for search
+    \item \textbf{Timestamp Indexes}: \texttt{createdAt} columns for chronological queries
+\end{itemize}
 
+% ============================================
+% COMPLETE SCHEMA
+% ============================================
 \section{Complete Schema SQL}
 \label{sec:schema-complete-sql}
 
 \begin{infobox}[Full Schema]
 The complete schema includes 24 tables with all relationships. For the full Prisma schema definition, see:
 
-\texttt{apps/backend/prisma/schema.prisma}
+	exttt{apps/backend/prisma/schema.prisma}
 
 Or generate SQL:
 \begin{lstlisting}[language=bash]
