@@ -1,9 +1,9 @@
-% ScholarFlow Project Report - Main Document
-% Author: Md. Atikur Rahaman
+% ScholarFlow - DBMS Lab Report
+% Course: Database Management System Lab
 % Date: October 22, 2025
-% Version: 1.1.9
+% Section: I
 
-\documentclass[12pt,a4paper]{report}
+\documentclass[12pt,a4paper]{article}
 
 % ============================================
 % PACKAGES
@@ -86,11 +86,8 @@
 \renewcommand{\footrulewidth}{0pt}
 
 % ============================================
-% CHAPTER & SECTION STYLING
+% SECTION STYLING (Article class)
 % ============================================
-\titleformat{\chapter}[display]
-  {\normalfont\huge\bfseries\color{primaryblue}}
-  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
 \titleformat{\section}
   {\normalfont\Large\bfseries\color{primaryblue}}
   {\thesection}{1em}{}
@@ -181,22 +178,26 @@
 % ============================================
 \title{
     \vspace{-2cm}
-    {\Huge\textcolor{primaryblue}{\textbf{ScholarFlow}}}\\
-    \vspace{0.5cm}
-    {\Large AI-Powered Research Paper Collaboration Hub}\\
+    \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/logos/logo.png}
+    \end{figure}
     \vspace{0.3cm}
-    {\large Project Report}\\
+    {\Large\textbf{Database Management System Lab Report}}\\
+    \vspace{0.4cm}
+    {\LARGE\textcolor{primaryblue}{\textbf{ScholarFlow}}}\\
+    \vspace{0.3cm}
+    {\large AI-Powered Research Paper Collaboration Platform}\\
     \vspace{0.5cm}
-    {\normalsize Version 1.1.9}
+    {\normalsize\textbf{Section: I}}
 }
 \author{
-    \textbf{Md. Atikur Rahaman}\\
-    \texttt{[ID\_PLACEHOLDER]}\\
-    \textit{Lead Developer \& Architect}\\[0.3cm]
-    \textbf{Salman}\\
-    \texttt{[ID\_PLACEHOLDER]}\\
-    \textit{Backend Developer}\\[0.3cm]
-    \small Development Period: August 2025 - October 2025
+    \begin{tabular}{rl}
+    \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
+    \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
+    \textbf{011222081} & Sagor Ahmed \\
+    \textbf{0112310302} & Md. Sarowar Alam Sourov \\
+    \end{tabular}
 }
 \date{October 22, 2025}
 
@@ -211,18 +212,14 @@
 
 \newpage
 
-% Abstract
+% Abstract/Overview
 \begin{abstract}
 \noindent
-\projectname{} is a comprehensive, AI-powered research paper collaboration platform designed to revolutionize how researchers, academics, and students manage, organize, and collaborate on research papers. Built with modern web technologies and powered by artificial intelligence, ScholarFlow provides an integrated solution for the entire research paper lifecycle—from upload and organization to AI-assisted insights and team collaboration.
+\textbf{Overview:} \projectname{} is an AI-powered research paper collaboration platform that enables researchers, students, and academics to manage, organize, and collaborate on research papers efficiently. The system integrates paper management, AI-powered insights, team collaboration, and subscription management using modern web technologies and database management principles.
 
-\vspace{0.5cm}
+\vspace{0.3cm}
 \noindent
-This report documents the complete development process, architecture, features, and implementation details of \projectname{} \version{}. The platform combines paper management, AI-powered insights, team collaboration, and professional subscription tiers to address core pain points in academic research workflows.
-
-\vspace{0.5cm}
-\noindent
-\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Stripe, Gemini AI, OpenAI, Redis, TypeScript
+\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Stripe, Gemini AI
 
 \vspace{0.3cm}
 \noindent
@@ -239,19 +236,9 @@ This report documents the complete development process, architecture, features, 
 \tableofcontents
 \newpage
 
-% List of Figures
-\listoffigures
-\newpage
-
-% List of Tables
-\listoftables
-\newpage
-
 % ============================================
-% CHAPTERS
+% SECTIONS
 % ============================================
-\input{chapters/01-group-details}
-\input{chapters/02-video-demo}
 \input{chapters/03-introduction}
 \input{chapters/04-motivation}
 \input{chapters/05-similar-projects}
@@ -264,14 +251,6 @@ This report documents the complete development process, architecture, features, 
 \input{chapters/12-limitations}
 \input{chapters/13-future-work}
 \input{chapters/14-conclusion}
-
-% ============================================
-% APPENDICES
-% ============================================
-\appendix
-\input{appendices/a-tech-stack}
-\input{appendices/b-api-endpoints}
-\input{appendices/c-environment-vars}
 
 % ============================================
 % BIBLIOGRAPHY

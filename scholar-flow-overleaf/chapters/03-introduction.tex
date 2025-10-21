@@ -1,238 +1,30 @@
-\chapter{Introduction}
-\label{ch:introduction}
+\section{Introduction}
+\label{sec:introduction}
 
-% ============================================
-% PROJECT OVERVIEW
-% ============================================
-\section{Project Overview}
-\label{sec:project-overview}
+\subsection{Project Overview}
 
-\projectname{} is a comprehensive, AI-powered research paper collaboration platform designed to revolutionize how researchers, academics, and students manage, organize, and collaborate on research papers. In an era where academic research generates vast amounts of papers and data, researchers face significant challenges in organizing their references, collaborating with peers, and extracting meaningful insights from research literature.
+\projectname{} is an AI-powered research paper collaboration platform that enables researchers and students to manage, organize, and collaborate on academic papers efficiently. The system provides intelligent paper management, AI-powered insights, team collaboration features, and citation management.
 
-\vspace{0.5cm}
-\noindent
-The platform addresses these challenges by providing an integrated solution that combines:
+\subsection{Problem Statement}
 
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Intelligent Paper Management:} Upload, organize, and categorize research papers with automatic metadata extraction
-    \item \textbf{AI-Powered Insights:} Leverage Gemini AI and OpenAI for paper summarization, key findings extraction, and interactive Q\&A
-    \item \textbf{Team Collaboration:} Create workspaces, invite colleagues, and manage research collections collaboratively
-    \item \textbf{Professional Features:} Rich text editor, annotation system, citation export, and subscription tiers
-    \item \textbf{Modern Architecture:} Built with cutting-edge technologies ensuring performance, security, and scalability
+Academic researchers face several challenges:
+
+\begin{itemize}[leftmargin=*,topsep=5pt,itemsep=3pt]
+    \item \textbf{Information Overload}: Difficulty tracking and organizing vast numbers of research papers
+    \item \textbf{Collaboration Barriers}: Lack of centralized platforms for team paper management  
+    \item \textbf{Manual Processes}: Time-consuming metadata entry and citation management
+    \item \textbf{Limited AI Integration}: No intelligent assistance for paper analysis
+    \item \textbf{Fragmented Tools}: Using multiple disconnected applications
 \end{itemize}
 
-% ============================================
-% PROBLEM STATEMENT
-% ============================================
-\section{Problem Statement}
-\label{sec:problem-statement}
+\subsection{Solution Approach}
 
-Academic researchers and students face several critical challenges in their daily workflows:
+ScholarFlow provides an integrated solution:
 
-\subsection{Information Overload}
-
-With millions of research papers published annually across various platforms (PubMed, arXiv, IEEE Xplore, etc.), researchers struggle to:
-\begin{itemize}[leftmargin=*]
-    \item Keep track of relevant papers in their field
-    \item Organize papers by topic, project, or research area
-    \item Quickly retrieve specific papers when needed
-    \item Maintain consistent naming and categorization conventions
+\begin{itemize}[leftmargin=*,topsep=5pt,itemsep=3pt]
+    \item \textbf{Centralized Repository}: Secure cloud storage with AWS S3
+    \item \textbf{AI Integration}: Gemini AI for summarization and contextual chat
+    \item \textbf{Team Workspaces}: Role-based access control and collaboration
+    \item \textbf{Automated Workflows}: Metadata extraction and PDF processing
+    \item \textbf{Modern Stack}: Next.js, PostgreSQL, Express.js, Redis
 \end{itemize}
-
-\subsection{Collaboration Barriers}
-
-Research is increasingly collaborative, yet existing tools fall short:
-\begin{itemize}[leftmargin=*]
-    \item Lack of centralized platforms for team paper management
-    \item Difficulty sharing annotated papers with collaborators
-    \item No unified workspace for research teams
-    \item Limited permission controls for sensitive research
-\end{itemize}
-
-\subsection{Inefficient Paper Analysis}
-
-Reading and analyzing research papers is time-consuming:
-\begin{itemize}[leftmargin=*]
-    \item Researchers spend hours identifying key findings
-    \item Difficulty extracting methodology and results quickly
-    \item No intelligent assistance for understanding complex papers
-    \item Manual note-taking and summarization processes
-\end{itemize}
-
-\subsection{Citation Management Complexity}
-
-Proper citation is crucial but challenging:
-\begin{itemize}[leftmargin=*]
-    \item Multiple citation formats required (APA, MLA, IEEE, etc.)
-    \item Manual citation generation is error-prone
-    \item Inconsistent citation styles across documents
-    \item Time-consuming bibliography compilation
-\end{itemize}
-
-% ============================================
-% SOLUTION APPROACH
-% ============================================
-\section{Solution Approach}
-\label{sec:solution-approach}
-
-\projectname{} addresses these challenges through a comprehensive, AI-powered platform with the following core capabilities:
-
-\subsection{Centralized Paper Repository}
-
-\begin{successbox}[Cloud-Based Storage]
-All papers are securely stored in AWS S3 with CloudFront CDN distribution, ensuring:
-\begin{itemize}
-    \item Fast global access (CDN edge caching)
-    \item Automatic metadata extraction (title, authors, year)
-    \item Unlimited storage capacity
-    \item Cross-device synchronization
-\end{itemize}
-\end{successbox}
-
-\subsection{AI-Powered Intelligence}
-
-The platform integrates multiple AI providers for robust paper analysis:
-
-\begin{table}[H]
-\centering
-\caption{AI Provider Integration}
-\label{tab:ai-providers}
-\begin{tabular}{@{}lp{8cm}@{}}
-\toprule
-\textbf{Provider} & \textbf{Capabilities} \\
-\midrule
-Gemini 2.5 Flash Lite & Primary AI for paper summarization, key findings extraction, methodology analysis \\
-\addlinespace
-OpenAI GPT-4o-mini & Fallback provider, chat-based paper Q\&A, follow-up question handling \\
-\addlinespace
-Redis Caching & AI response caching (5-10 min TTL) for performance optimization \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Collaborative Workspace Architecture}
-
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[
-    node distance=2cm,
-    box/.style={rectangle, draw, fill=lightgray, text width=3cm, align=center, rounded corners, minimum height=1cm},
-    arrow/.style={->, >=stealth, thick}
-]
-    % Nodes
-    \node[box, fill=green!10] (user) {User};
-    \node[box, right=of user] (workspace) {Workspace};
-    \node[box, right=of workspace] (collection) {Collection};
-    \node[box, right=of collection] (paper) {Papers};
-    
-    % Arrows
-    \draw[arrow] (user) -- node[above] {creates} (workspace);
-    \draw[arrow] (workspace) -- node[above] {contains} (collection);
-    \draw[arrow] (collection) -- node[above] {organizes} (paper);
-    \draw[arrow, bend left=45] (user) edge node[above] {invites} (workspace);
-\end{tikzpicture}
-\caption{Collaborative Workspace Hierarchy}
-\label{fig:workspace-hierarchy}
-\end{figure}
-
-\subsection{Role-Based Access Control}
-
-The platform implements granular permission management:
-
-\begin{table}[H]
-\centering
-\caption{User Roles and Permissions}
-\label{tab:user-roles}
-\begin{tabular}{@{}lp{9cm}@{}}
-\toprule
-\textbf{Role} & \textbf{Permissions} \\
-\midrule
-RESEARCHER & View papers, create personal collections, add annotations \\
-PRO\_RESEARCHER & All RESEARCHER permissions + AI features, citation export \\
-TEAM\_LEAD & All PRO permissions + invite members, manage collections \\
-ADMIN & All TEAM\_LEAD permissions + workspace management, user roles \\
-OWNER & Full workspace control, billing management, deletion rights \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ============================================
-% KEY FEATURES
-% ============================================
-\section{Key Features}
-\label{sec:key-features}
-
-\subsection{Paper Management}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Multi-format Support:} PDF and DOCX upload with automatic conversion
-    \item \textbf{Metadata Extraction:} Automatic title, author, year detection
-    \item \textbf{Advanced Search:} Full-text search, tag filtering, date ranges
-    \item \textbf{Bulk Operations:} Upload multiple papers, batch tagging
-\end{itemize}
-
-\subsection{AI Capabilities}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Smart Summarization:} AI-generated executive summaries
-    \item \textbf{Key Findings:} Automatic extraction of main results
-    \item \textbf{Interactive Chat:} Ask questions about paper content
-    \item \textbf{Performance Optimized:} Redis caching reduces AI API costs
-\end{itemize}
-
-\subsection{Collaboration Tools}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Workspaces:} Team-based paper organization
-    \item \textbf{Collections:} Shared paper groups with permissions
-    \item \textbf{Invitations:} Email-based team member onboarding
-    \item \textbf{Activity Tracking:} Audit logs for all workspace actions
-\end{itemize}
-
-\subsection{Professional Features}
-\begin{itemize}[leftmargin=*]
-    \item \textbf{Rich Text Editor:} Markdown-compatible note-taking
-    \item \textbf{Annotation System:} PDF highlighting and comments
-    \item \textbf{Citation Export:} 5 formats (BibTeX, EndNote, APA, MLA, IEEE)
-    \item \textbf{Admin Dashboard:} Analytics, user management, system health
-\end{itemize}
-
-% ============================================
-% TECHNICAL FOUNDATION
-% ============================================
-\section{Technical Foundation}
-\label{sec:technical-foundation}
-
-\subsection{Architecture Principles}
-
-\projectname{} is built on modern architectural principles:
-
-\begin{enumerate}[leftmargin=*]
-    \item \textbf{Monorepo Structure:} Turborepo for efficient builds and shared code
-    \item \textbf{API-First Design:} RESTful backend with comprehensive documentation
-    \item \textbf{Type Safety:} 100\% TypeScript across frontend and backend
-    \item \textbf{Performance Focus:} Lighthouse score 93/100, <150ms API response time
-    \item \textbf{Security Hardening:} JWT authentication, CORS policies, input validation
-\end{enumerate}
-
-\subsection{Technology Highlights}
-
-\begin{table}[H]
-\centering
-\caption{Core Technologies}
-\label{tab:core-tech}
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Layer} & \textbf{Technology} & \textbf{Purpose} \\
-\midrule
-Frontend & Next.js 15 & React framework with App Router \\
-Backend & Express.js & Node.js web framework \\
-Database & PostgreSQL & Relational database with Prisma ORM \\
-Storage & AWS S3 & Cloud file storage with CDN \\
-Caching & Redis & Performance optimization \\
-AI & Gemini + OpenAI & Paper analysis and chat \\
-Payment & Stripe & Subscription billing \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\vspace{0.5cm}
-\noindent
-For complete technical details, see Chapter~\ref{ch:feature-list} and Appendix~\ref{app:tech-stack}.
