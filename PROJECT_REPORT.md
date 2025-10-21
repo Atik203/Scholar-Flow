@@ -2462,54 +2462,14 @@ LIMIT 20;
 
 ## 13. Future Work
 
-### Phase 2 Features (Planned: Q1 2026)
-
-- Multi-document summarization (compare multiple papers)
-- Automatic citation extraction from paper text
-- AI-powered literature review generation
-- Semantic search using embeddings (pgvector)
-- Live document editing with cursor tracking (Yjs + WebSocket)
-- Simultaneous multi-user editing with conflict resolution
-- Real-time comments and mentions
-- Version control with change history
-- Document templates for research papers
-- Elasticsearch integration for advanced search operators
-- Citation graph visualization
-- Recommended papers based on reading history
-- Public REST API for third-party integrations
-- Zapier/IFTTT integration for automation
-- Google Scholar integration
-- Semantic Scholar API integration
-- Microsoft Word plugin for citation insertion
-- SAML/OAuth2 for institution SSO
-- Advanced permission management (custom roles)
-- Compliance reporting (FERPA, GDPR)
-
-### Phase 3 Features (Planned: Q2-Q3 2026)
-
-- iOS/Android native apps (React Native)
-- Offline reading with sync
-- Mobile PDF annotation
-- Research impact metrics and h-index calculation
-- Collaboration network visualization
-- Publishing readiness score
-- ResearchGate integration
-- ArXiv submission workflow
-- Plagiarism detection
-- Advanced AI models (GPT-4, Claude 3)
-- Unlimited paper uploads for premium users
-- White-label solutions for institutions
-- Public research profiles
-- Research community forums
-- Research collaboration matching
-
-### Long-Term Vision (Phase 4+)
-
-- Institutional Deployment: Turn-key enterprise solution for universities
-- Global Research Network: Connect researchers across institutions
-- AI Research Assistant: Domain-specific AI trained on paper corpus
-- Blockchain Integration: Immutable research record and verification
-- Metaverse Workspace: Virtual collaborative research environment
+- Real-time collaborative editing with live cursor tracking (Yjs + WebSocket)
+- Advanced AI features: multi-document summarization, literature review generation, semantic search
+- Mobile applications (iOS/Android) with offline reading and PDF annotation
+- Public REST API with third-party integrations (Google Scholar, Semantic Scholar, ResearchGate)
+- Enhanced search: Elasticsearch integration, citation graph visualization, recommendation engine
+- Enterprise features: SAML/SSO, advanced permissions, compliance reporting (FERPA, GDPR)
+- Research analytics: impact metrics, h-index calculation, collaboration network visualization
+- White-label institutional solutions with custom integrations
 
 ---
 
