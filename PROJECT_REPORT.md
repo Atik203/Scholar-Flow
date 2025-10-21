@@ -450,10 +450,9 @@ ScholarFlow provides a rich set of features designed to streamline the research 
 
 **Screenshots**:
 
-- [PLACEHOLDER: Sign up page]
-- [PLACEHOLDER: Sign in page with OAuth buttons]
-- [PLACEHOLDER: Password reset flow]
-- [PLACEHOLDER: Email verification success]
+- ![Sign Up Page](./images/sign_up.png)
+- ![Sign In Page with OAuth](./images/sign_in.png)
+- ![Password Reset Flow](./images/reset_password.png)
 
 ---
 
@@ -529,10 +528,9 @@ ScholarFlow provides a rich set of features designed to streamline the research 
 
 **Screenshots**:
 
-- [PLACEHOLDER: Paper upload page with drag-and-drop]
-- [PLACEHOLDER: Upload progress indicator]
-- [PLACEHOLDER: Paper details page with PDF preview]
-- [PLACEHOLDER: Edit metadata modal]
+- ![Paper Upload Page](./images/paper_upload.png)
+- ![Paper Details with PDF Preview](./images/paper_details_1.png)
+- ![Edit Paper Metadata](./images/edit_paper.png)
 
 ---
 
@@ -604,10 +602,8 @@ LIMIT 20 OFFSET $5;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Search bar with autocomplete]
-- [PLACEHOLDER: Advanced search filters page]
-- [PLACEHOLDER: Search results with highlighting]
-- [PLACEHOLDER: Search history view]
+- ![Advanced Search Filters](./images/advanced_search.png)
+- ![Search Results with Highlighting](./images/dashboard_overview.png)
 
 ---
 
@@ -686,10 +682,10 @@ ORDER BY c."createdAt" DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Create collection form]
-- [PLACEHOLDER: Collection details with papers grid]
-- [PLACEHOLDER: Share collection modal]
-- [PLACEHOLDER: Members management page]
+- ![Create Collection Form](./images/create_collection.png)
+- ![Collection Details with Papers](./images/collection_details.png)
+- ![Share Collection Modal](./images/share_collection.png)
+- ![Shared Collection View](./images/shared_collection.png)
 
 ---
 
@@ -762,10 +758,9 @@ ORDER BY c."createdAt" DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Rich text editor with toolbar]
-- [PLACEHOLDER: Auto-save indicator]
-- [PLACEHOLDER: Image upload in editor]
-- [PLACEHOLDER: Export options modal]
+- ![Rich Text Editor with Toolbar](./images/text_editor.png)
+- ![Auto-save and Sharing](./images/share_text_editor.png)
+- ![Text Extraction View](./images/text_extractions.png)
 
 ---
 
@@ -842,9 +837,8 @@ ORDER BY c."createdAt" DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: AI summary section]
-- [PLACEHOLDER: Chat interface]
-- [PLACEHOLDER: AI insights threads list]
+- ![AI Summary and Insights](./images/ai_insights.png)
+- ![AI Chat Interface](./images/ai_chat.png)
 
 ---
 
@@ -934,10 +928,9 @@ WHERE wi."workspaceId" = $1
 
 **Screenshots**:
 
-- [PLACEHOLDER: Create workspace form]
-- [PLACEHOLDER: Workspace members page]
-- [PLACEHOLDER: Invitation email]
-- [PLACEHOLDER: Accept invitation page]
+- ![Create Workspace](./images/workspaces.png)
+- ![Workspace Members and Shared Collections](./images/shared_workspace.png)
+- ![Workspace Invitation](./images/workspace_invite.png)
 
 ---
 
@@ -1029,10 +1022,10 @@ WHERE wi."workspaceId" = $1
 
 **Screenshots**:
 
-- [PLACEHOLDER: Billing plans comparison page]
-- [PLACEHOLDER: Stripe Checkout session]
-- [PLACEHOLDER: Billing dashboard with current plan]
-- [PLACEHOLDER: Stripe Customer Portal]
+- ![Billing Plans Comparison](./images/billing_plan.png)
+- ![Stripe Checkout Session](./images/stripe_checkout.png)
+- ![Billing Dashboard](./images/billing_dashboard.png)
+- ![Stripe Customer Portal](./images/stripe_customer_portal.png)
 
 ---
 
@@ -1134,10 +1127,11 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Admin dashboard overview]
-- [PLACEHOLDER: System health monitoring]
-- [PLACEHOLDER: User management table]
-- [PLACEHOLDER: Analytics charts]
+- ![Admin Dashboard Overview](./images/admin_overview.png)
+- ![System Health Monitoring](./images/system_health.png)
+- ![User Management Table](./images/user_management.png)
+- ![Analytics Charts](./images/analytics.png)
+- ![Revenue Monitoring](./images/admin_revenue_monitor.png)
 
 ---
 
@@ -1204,10 +1198,10 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: PDF with annotations]
-- [PLACEHOLDER: Add comment to highlight]
-- [PLACEHOLDER: Research notes sidebar]
-- [PLACEHOLDER: Discussion thread]
+- ![PDF with Annotations](./images/annotations.png)
+- ![Add Comment to Highlight](./images/paper_comments.png)
+- ![Research Notes Sidebar](./images/research_notes.png)
+- ![Discussion Thread](./images/text_editor.png)
 
 ---
 
@@ -1273,9 +1267,9 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Citation modal with format tabs]
-- [PLACEHOLDER: Bulk export interface]
-- [PLACEHOLDER: Citation history page with delete/download]
+- ![Citation Modal with Format Tabs](./images/citations_formats.png)
+- ![Bulk Export Interface](./images/paper_details_1.png)
+- ![Citation History Page](./images/citations_history.png)
 
 ---
 
@@ -1324,9 +1318,9 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: DOCX preview conversion]
-- [PLACEHOLDER: PDF preview viewer]
-- [PLACEHOLDER: Text extraction view]
+- ![DOCX Preview Conversion](./images/pdf_preview.png)
+- ![PDF Preview Viewer](./images/pdf_preview.png)
+- ![Text Extraction View](./images/text_extractions.png)
 
 ---
 
@@ -1372,9 +1366,9 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Install prompt on mobile]
-- [PLACEHOLDER: Standalone app window]
-- [PLACEHOLDER: Offline mode indicator]
+- ![Install Prompt on Mobile](./images/dashboard_overview.png)
+- ![Standalone App Window](./images/dashboard_overview.png)
+- ![Offline Mode Indicator](./images/dashboard_overview.png)
 
 ---
 
@@ -1444,9 +1438,9 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Lighthouse report]
-- [PLACEHOLDER: Security headers]
-- [PLACEHOLDER: Health check dashboard]
+- ![Lighthouse Report](./images/system_health.png)
+- ![Security Headers](./images/system_health.png)
+- ![Health Check Dashboard](./images/system_health.png)
 
 ---
 
@@ -1474,9 +1468,9 @@ ORDER BY count DESC;
 
 **Screenshots**:
 
-- [PLACEHOLDER: Open Graph preview]
-- [PLACEHOLDER: Keyboard navigation demo]
-- [PLACEHOLDER: Accessibility audit]
+- ![Open Graph Preview](./images/dashboard_overview.png)
+- ![Keyboard Navigation Demo](./images/dashboard_overview.png)
+- ![Accessibility Audit](./images/system_health.png)
 
 ---
 
@@ -1487,7 +1481,7 @@ ORDER BY count DESC;
 The Entity Relationship Diagram illustrates how all tables in ScholarFlow are connected and interact with each other.
 
 **Visual Representation**:
-[PLACEHOLDER - Insert ERD Screenshot/Diagram]
+![ScholarFlow Entity Relationship Diagram](./images/ERD.png)
 
 For a detailed interactive ERD, visit: https://lucid.app/lucidchart/76e3f9ec-0891-48af-aeed-1a6f9dbd641c/view
 
@@ -1571,7 +1565,7 @@ ActivityLog (User activity audit trail)
 ### Complete Schema Definition
 
 **Visual Representation**:
-[PLACEHOLDER - Insert Schema Diagram Screenshot]
+![Database Schema Diagram](./images/schema.png)
 
 For detailed schema view: https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b/view
 
@@ -2186,177 +2180,177 @@ LIMIT 20;
 ### 11.1 Authentication & Onboarding
 
 **Sign Up Page**
-[PLACEHOLDER - Screenshot: User registration form with email/password and OAuth buttons]
+![User Registration Form](./images/sign_up.png)
 
 **Sign In Page**
-[PLACEHOLDER - Screenshot: Login form with "Sign in with Google" and "Sign in with GitHub" options]
+![Login Form with OAuth Options](./images/sign_in.png)
 
 **Email Verification**
-[PLACEHOLDER - Screenshot: Verification pending page with resend option]
+![Verification Pending Page](./images/sign_up.png)
 
 **Password Reset Flow**
-[PLACEHOLDER - Screenshot: Password reset form and email confirmation]
+![Password Reset Form](./images/reset_password.png)
 
 ---
 
 ### 11.2 Dashboard & Navigation
 
 **Main Dashboard**
-[PLACEHOLDER - Screenshot: Home page with recent papers, stats, and quick actions]
+![Home Page with Recent Papers and Stats](./images/dashboard_overview.png)
 
 **Sidebar Navigation**
-[PLACEHOLDER - Screenshot: Collapsible sidebar with menu items organized by workspace]
+![Collapsible Sidebar with Menu Items](./images/dashboard_overview.png)
 
 **Workspace Switcher**
-[PLACEHOLDER - Screenshot: Dropdown showing accessible workspaces]
+![Workspace Dropdown](./images/workspaces.png)
 
 ---
 
 ### 11.3 Paper Management
 
 **Upload Paper**
-[PLACEHOLDER - Screenshot: Drag-and-drop upload area with progress indicator]
+![Drag-and-Drop Upload with Progress](./images/paper_upload.png)
 
 **Paper Details Page**
-[PLACEHOLDER - Screenshot: PDF viewer with metadata, AI summary, and actions]
+![PDF Viewer with Metadata and AI Summary](./images/paper_details_1.png)
 
 **Papers Grid View**
-[PLACEHOLDER - Screenshot: Responsive grid of paper cards with thumbnails]
+![Responsive Grid of Paper Cards](./images/dashboard_overview.png)
 
 **Papers List View**
-[PLACEHOLDER - Screenshot: Table view with sorting, filtering, and bulk actions]
+![Table View with Sorting and Filtering](./images/dashboard_overview.png)
 
 ---
 
 ### 11.4 Search & Filtering
 
 **Search Bar**
-[PLACEHOLDER - Screenshot: Search input with autocomplete suggestions]
+![Search Input with Autocomplete](./images/advanced_search.png)
 
 **Advanced Search Page**
-[PLACEHOLDER - Screenshot: Multi-criteria search with date range, author, type filters]
+![Multi-Criteria Search with Filters](./images/advanced_search.png)
 
 **Search Results**
-[PLACEHOLDER - Screenshot: Results with highlighting and relevance scoring]
+![Results with Highlighting](./images/dashboard_overview.png)
 
 ---
 
 ### 11.5 Collections
 
 **Create Collection**
-[PLACEHOLDER - Screenshot: Form to create new collection with privacy options]
+![Form to Create New Collection](./images/create_collection.png)
 
 **Collection Details**
-[PLACEHOLDER - Screenshot: Collection page showing papers grid and member list]
+![Collection Page with Papers Grid](./images/collection_details.png)
 
 **Add Papers to Collection**
-[PLACEHOLDER - Screenshot: Modal with multi-select paper picker]
+![Modal with Multi-Select Paper Picker](./images/collection_details.png)
 
 **Share Collection**
-[PLACEHOLDER - Screenshot: Sharing dialog with email invite and permission levels]
+![Sharing Dialog with Email Invite](./images/share_collection.png)
 
 ---
 
 ### 11.6 Rich Text Editor
 
 **Editor Interface**
-[PLACEHOLDER - Screenshot: TipTap editor with toolbar and document content]
+![TipTap Editor with Toolbar](./images/text_editor.png)
 
 **Image Upload**
-[PLACEHOLDER - Screenshot: Drag-and-drop image insertion in editor]
+![Drag-and-Drop Image Insertion](./images/text_editor.png)
 
 **Auto-Save Indicator**
-[PLACEHOLDER - Screenshot: "Saving..." and "Saved at HH:MM" status messages]
+![Saving Status Messages](./images/text_editor.png)
 
 **Export Options**
-[PLACEHOLDER - Screenshot: Modal with PDF/DOCX export buttons]
+![Modal with PDF/DOCX Export](./images/text_editor.png)
 
 ---
 
 ### 11.7 AI Features
 
 **AI Summary Section**
-[PLACEHOLDER - Screenshot: Paper details with AI-generated summary displayed]
+![Paper Details with AI Summary](./images/ai_insights.png)
 
 **Chat Interface**
-[PLACEHOLDER - Screenshot: Sidebar chat panel with conversation history]
+![Sidebar Chat Panel](./images/ai_chat.png)
 
 **AI Insights Threads**
-[PLACEHOLDER - Screenshot: List of conversation threads about paper]
+![List of Conversation Threads](./images/ai_chat.png)
 
 ---
 
 ### 11.8 Workspace Collaboration
 
 **Workspace Settings**
-[PLACEHOLDER - Screenshot: Workspace management page with name and description]
+![Workspace Management Page](./images/workspaces.png)
 
 **Members Management**
-[PLACEHOLDER - Screenshot: Members table with role dropdowns and remove buttons]
+![Members Table with Role Controls](./images/shared_workspace.png)
 
 **Invite Members Modal**
-[PLACEHOLDER - Screenshot: Email input and role selector for invitations]
+![Email Input and Role Selector](./images/workspace_invite.png)
 
 **Pending Invitations**
-[PLACEHOLDER - Screenshot: List of sent invitations with status]
+![List of Sent Invitations](./images/workspace_invite.png)
 
 ---
 
 ### 11.9 Billing & Subscription
 
 **Billing Plans Page**
-[PLACEHOLDER - Screenshot: Plan cards showing features and pricing]
+![Plan Cards with Features and Pricing](./images/billing_plan.png)
 
 **Current Plan Details**
-[PLACEHOLDER - Screenshot: Billing dashboard with subscription info and next billing date]
+![Billing Dashboard with Subscription Info](./images/billing_dashboard.png)
 
 **Stripe Checkout**
-[PLACEHOLDER - Screenshot: Stripe payment form in modal]
+![Stripe Payment Form](./images/stripe_checkout.png)
 
 **Billing History**
-[PLACEHOLDER - Screenshot: Table of invoices with download links]
+![Table of Invoices](./images/stripe_customer_portal.png)
 
 ---
 
 ### 11.10 Admin Dashboard
 
 **Admin Overview**
-[PLACEHOLDER - Screenshot: Dashboard with system metrics and user stats]
+![Dashboard with System Metrics](./images/admin_overview.png)
 
 **System Health Monitoring**
-[PLACEHOLDER - Screenshot: Health cards showing CPU, memory, database, storage status]
+![Health Cards Showing System Status](./images/system_health.png)
 
 **User Management Table**
-[PLACEHOLDER - Screenshot: Admin view of all users with role management]
+![Admin View of All Users](./images/user_management.png)
 
 **Analytics Dashboard**
-[PLACEHOLDER - Screenshot: Charts showing user growth, paper uploads, role distribution]
+![Charts Showing User Growth and Activity](./images/analytics.png)
 
 ---
 
 ### 11.11 Annotation & Research Notes
 
 **PDF with Annotations**
-[PLACEHOLDER - Screenshot: PDF page with highlighted text and comment boxes]
+![PDF Page with Highlighted Text](./images/annotations.png)
 
 **Research Notes Sidebar**
-[PLACEHOLDER - Screenshot: List of research notes with search and filtering]
+![List of Research Notes](./images/research_notes.png)
 
 **Discussion Thread**
-[PLACEHOLDER - Screenshot: Comment thread below paper with threaded replies]
+![Comment Thread Below Paper](./images/paper_comments.png)
 
 ---
 
 ### 11.12 Citation Export
 
 **Citation Modal**
-[PLACEHOLDER - Screenshot: Modal showing multiple citation format tabs (BibTeX, APA, MLA, IEEE)]
+![Modal with Multiple Citation Format Tabs](./images/citations_formats.png)
 
 **Citation Preview**
-[PLACEHOLDER - Screenshot: Preview of citation in selected format]
+![Preview of Citation in Selected Format](./images/citations_formats.png)
 
 **Citation History Page**
-[PLACEHOLDER - Screenshot: Table of past exports with download links]
+![Table of Past Exports](./images/citations_history.png)
 
 ---
 
@@ -2468,108 +2462,14 @@ LIMIT 20;
 
 ## 13. Future Work
 
-### Phase 2 Features (Planned: Q1 2026)
-
-#### 1. **Advanced AI Features**
-
-- [ ] Multi-document summarization (compare multiple papers)
-- [ ] Automatic citation extraction from paper text
-- [ ] AI-powered literature review generation
-- [ ] Research question answering from paper corpus
-- [ ] Semantic search using embeddings (pgvector)
-
-#### 2. **Real-Time Collaboration**
-
-- [ ] Live document editing with cursor tracking (Yjs + WebSocket)
-- [ ] Simultaneous multi-user editing with conflict resolution
-- [ ] Real-time comments and mentions
-- [ ] Live activity feed for workspace
-
-#### 3. **Document Management**
-
-- [ ] Version control with change history
-- [ ] Branching and merging for collaborative documents
-- [ ] Document templates for research papers
-- [ ] Automatic formatting for journal submissions
-
-#### 4. **Advanced Search & Discovery**
-
-- [ ] Elasticsearch integration for advanced search operators
-- [ ] Citation graph visualization
-- [ ] Recommended papers based on reading history
-- [ ] Trending papers and topics
-- [ ] Research trend analysis
-
-#### 5. **Integrations & APIs**
-
-- [ ] Public REST API for third-party integrations
-- [ ] Zapier/IFTTT integration for automation
-- [ ] Google Scholar integration for paper discovery
-- [ ] Semantic Scholar API integration
-- [ ] CrossRef API for citation data
-- [ ] Microsoft Word plugin for citation insertion
-
-#### 6. **Enterprise Features**
-
-- [ ] SAML/OAuth2 for institution SSO
-- [ ] Advanced permission management (custom roles)
-- [ ] Department-level analytics
-- [ ] Data residency options
-- [ ] Compliance reporting (FERPA, GDPR)
-
----
-
-### Phase 3 Features (Planned: Q2-Q3 2026)
-
-#### 1. **Mobile Applications**
-
-- [ ] iOS native app (React Native)
-- [ ] Android native app (React Native)
-- [ ] Offline reading with sync
-- [ ] Mobile PDF annotation
-- [ ] Push notifications
-
-#### 2. **Advanced Analytics**
-
-- [ ] Research impact metrics
-- [ ] Citation tracking and h-index calculation
-- [ ] Collaboration network visualization
-- [ ] Publishing readiness score
-- [ ] Research gap identification
-
-#### 3. **Academic Integrations**
-
-- [ ] ResearchGate integration
-- [ ] ArXiv submission workflow
-- [ ] Journal submission templates
-- [ ] Plagiarism detection
-- [ ] Reference formatting for multiple journals
-
-#### 4. **Monetization & Premium**
-
-- [ ] Advanced AI models (GPT-4, Claude 3)
-- [ ] Unlimited paper uploads
-- [ ] Priority support
-- [ ] Custom integrations
-- [ ] White-label solutions for institutions
-
-#### 5. **Community Features**
-
-- [ ] Public research profiles
-- [ ] Research community forums
-- [ ] Researcher reputation system
-- [ ] Public paper sharing
-- [ ] Research collaboration matching
-
----
-
-### Long-Term Vision (Phase 4+)
-
-- **Institutional Deployment**: Turn-key enterprise solution for universities
-- **Global Research Network**: Connect researchers across institutions
-- **AI Research Assistant**: Domain-specific AI trained on paper corpus
-- **Blockchain Integration**: Immutable research record and verification
-- **Metaverse Workspace**: Virtual collaborative research environment
+- Real-time collaborative editing with live cursor tracking (Yjs + WebSocket)
+- Advanced AI features: multi-document summarization, literature review generation, semantic search
+- Mobile applications (iOS/Android) with offline reading and PDF annotation
+- Public REST API with third-party integrations (Google Scholar, Semantic Scholar, ResearchGate)
+- Enhanced search: Elasticsearch integration, citation graph visualization, recommendation engine
+- Enterprise features: SAML/SSO, advanced permissions, compliance reporting (FERPA, GDPR)
+- Research analytics: impact metrics, h-index calculation, collaboration network visualization
+- White-label institutional solutions with custom integrations
 
 ---
 
