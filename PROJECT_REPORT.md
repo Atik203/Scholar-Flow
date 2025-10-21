@@ -2356,107 +2356,13 @@ LIMIT 20;
 
 ## 12. Limitations
 
-### Current Limitations
-
-#### 1. **AI Model Constraints**
-
-- **Gemini 2.5-flash-lite Rate Limiting**: Limited to 100 API calls per hour per user
-  - Workaround: Queue-based processing for batch summarizations
-  - Planned: Upgrade to higher tier for enterprise users
-
-- **Token Context Window**: Maximum 8,000 tokens per query
-  - Impact: Large papers (> 10,000 words) may require chunking
-  - Workaround: Automatic text summarization before AI processing
-  - Future: Support for longer context windows
-
-- **Latency**: AI summarization takes 7-9 seconds
-  - UX: Progress indicators and skeleton loading states
-  - Future: Parallel processing with multiple models
-
-#### 2. **File Upload Constraints**
-
-- **Maximum File Size**: 25MB per upload
-  - Reason: S3 presigned URL timeout and memory constraints
-  - Workaround: Multipart upload for larger files
-  - Future: Chunked upload with resume capability
-
-- **Supported Formats**: PDF and DOCX only
-  - Note: PPT, Excel, images not supported yet
-  - Reason: Complex parsing requirements
-  - Planned: Phase 2 feature
-
-- **Metadata Extraction Accuracy**: ~85% for PDFs
-  - Limitation: Scanned PDFs (images) cannot be parsed
-  - Workaround: Manual metadata entry
-  - Planned: OCR integration for scanned documents
-
-#### 3. **Storage & Performance**
-
-- **Redis Free Tier Limit**: 30MB cache with 50KB per key
-  - Impact: Limited caching for large datasets
-  - Workaround: Strategic TTL configuration (5-10 min)
-  - Planned: Redis upgrade for production
-
-- **Database Connection Pool**: 20 max connections
-  - Limitation: Concurrent request handling at scale
-  - Planned: Connection pooling optimization
-
-- **Full-Text Search**: PostgreSQL ILIKE only (no advanced search operators)
-  - Limitation: No fuzzy matching or phonetic search
-  - Planned: Elasticsearch integration for advanced search
-
-#### 4. **Collaboration Features**
-
-- **No Real-Time Collaboration**: No live cursor tracking or simultaneous editing
-  - Reason: Requires WebSocket infrastructure
-  - Planned: Phase 2 feature using Yjs + WebSocket
-
-- **No Version Control**: No document versioning or change tracking
-  - Reason: Significant architectural complexity
-  - Planned: Phase 2 with Git-like versioning
-
-- **Limited Commenting**: Comments not threaded within document paragraphs
-  - Limitation: Only top-level discussions
-  - Planned: Inline commenting in Phase 2
-
-#### 5. **Platform & Scalability**
-
-- **Single Workspace Limit**: Users cannot view papers across multiple workspaces simultaneously
-  - Workaround: Manual switching between workspaces
-  - Planned: Cross-workspace search in future versions
-
-- **No Mobile App**: Only web-based interface
-  - Reason: Mobile development requires separate codebase
-  - Planned: React Native app in Phase 3
-
-- **Rate Limiting**: 100 requests/minute per IP
-  - Impact: Bulk operations require delays
-  - Workaround: Batch operations with progress feedback
-
-#### 6. **Admin Features**
-
-- **No Audit Trail**: Limited visibility into all user actions
-  - Planned: Comprehensive audit logging in Phase 2
-  - Current: Activity logs for workspace/collection only
-
-- **No Backup/Export**: No bulk data export for administrators
-  - Planned: Data export functionality in Phase 3
-
-- **No API for Integrations**: Cannot integrate with external tools
-  - Reason: API infrastructure not built yet
-  - Planned: Phase 2 public API
-
-#### 7. **Security & Privacy**
-
-- **No End-to-End Encryption**: Server can access paper content
-  - Trade-off: Enables AI processing and full-text search
-  - Alternative: Client-side encryption disables AI features
-
-- **Limited Data Retention Policies**: No automatic data deletion after period
-  - Planned: GDPR-compliant deletion policies
-
-- **No Data Masking**: PII visible in admin tools
-  - Planned: Role-based data masking
+- **AI Rate Limiting**: 100 API calls/hour per user with 8,000 token context window; 7-9 second summarization latency
+- **File Constraints**: 25MB max upload size, PDF/DOCX only, ~85% metadata extraction accuracy (scanned PDFs unsupported)
+- **No Real-Time Collaboration**: No live editing, cursor tracking, or document version control
+- **Storage & Performance**: Redis free tier (30MB cache), 20 max database connections, basic PostgreSQL ILIKE search only
+- **Platform Limitations**: No mobile app, single workspace view, 100 requests/minute rate limiting
+- **Missing Enterprise Features**: No comprehensive audit trail, bulk data export, or public API for integrations
+- **Security & Privacy**: No end-to-end encryption (trade-off for AI features), limited data retention policies, no PII masking in admin tools
 
 ---
 
