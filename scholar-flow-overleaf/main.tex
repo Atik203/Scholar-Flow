@@ -90,22 +90,7 @@
 % ============================================
 % CHAPTER & SECTION STYLING (Report class)
 % ============================================
-\iffalse
-	{\titleformat{\chapter}
-    {\normalfont\Huge\bfseries}
-    {\thechapter}{1em}{}
-	\titleformat{\section}
-    {\normalfont\Large\bfseries}
-    {\thesection}{1em}{}
-	\titleformat{\subsection}
-    {\normalfont\large\bfseries}
-    {\thesubsection}{1em}{}
-	\titleformat{\subsubsection}
-    {\normalfont\normalsize\bfseries}
-    {\thesubsubsection}{1em}{}
-
-% ============================================
-\fi
+% Using default black headings for academic style.
 % TABLE OF CONTENTS STYLING
 % ============================================
 \renewcommand{\cfttoctitlefont}{\Huge\bfseries}
@@ -230,7 +215,7 @@
 
 \vspace{0.3cm}
 \noindent
-\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Stripe, Gemini AI
+    extbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma (RAW Query), AWS S3, Stripe, Gemini AI
 
 \vspace{0.3cm}
 \noindent
@@ -264,10 +249,7 @@
 \input{chapters/14-conclusion}
 
 % ============================================
-% BIBLIOGRAPHY
+% BIBLIOGRAPHY (removed per report requirements)
 % ============================================
-\nocite{*}
-\bibliographystyle{IEEEtran}
-\bibliography{references}
 
 \end{document}
