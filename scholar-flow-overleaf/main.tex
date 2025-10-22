@@ -3,7 +3,7 @@
 % Date: October 22, 2025
 % Section: I
 
-\documentclass[12pt,a4paper]{report}
+\documentclass[12pt,a4paper,openany]{report}
 
 % ============================================
 % PACKAGES
@@ -175,22 +175,22 @@
     \includegraphics[width=0.3\textwidth]{images/logos/logo.png}
     \end{figure}
     \vspace{0.3cm}
-    {\Large\textbf{Database Management System Lab Report}}\\
-    \vspace{0.4cm}
     {\LARGE\textbf{ScholarFlow}}\\
     \vspace{0.3cm}
     {\large AI-Powered Research Paper Collaboration Platform}\\
     \vspace{0.5cm}
-  
+    {\normalsize\textbf{Team: Phantom Devs}}\\
+    \vspace{0.5cm}
 }
 \author{
+    \textbf{Team Members:}\\[0.5cm]
     \begin{tabular}{rl}
     \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
     \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
-    \textbf{011222081} & Sagor Ahmed \\
+    \textbf{0112220081} & Sagor Ahmed \\
     \textbf{0112310302} & Md. Sarowar Alam Sourov \\
     \end{tabular}
-    \\[0.75cm]
+    \\[1cm]
     {\normalsize\textbf{Section: I}}
 }
   
@@ -211,11 +211,19 @@
 % Abstract/Overview
 \begin{abstract}
 \noindent
-\textbf{Overview:} \projectname{} is an AI-powered research paper collaboration platform that enables researchers, students, and academics to manage, organize, and collaborate on research papers efficiently. The system integrates paper management, AI-powered insights, team collaboration, and subscription management using modern web technologies and database management principles.
+\projectname{} is an AI-powered research paper collaboration platform designed to revolutionize how researchers, students, and academics manage, organize, and collaborate on research papers efficiently. Built with modern web technologies and robust database management principles, the platform provides comprehensive paper management, AI-driven insights, and team collaboration features.
 
 \vspace{0.3cm}
 \noindent
-    \textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma (RAW Query), AWS S3, Stripe, Gemini AI
+The system leverages PostgreSQL with Prisma ORM using RAW Query patterns for optimal performance. Key features include secure paper upload via AWS S3 with automated metadata extraction, advanced full-text search with PostgreSQL GIN indexing, and AI-powered summarization using Gemini 2.5-flash-lite. The platform supports role-based workspace collaboration (OWNER, TEAM\_LEAD, PRO\_RESEARCHER, RESEARCHER), enabling teams to create shared collections, annotate papers, and track research progress through activity logs and notifications.
+
+\vspace{0.3cm}
+\noindent
+\projectname{} implements a three-tier subscription system (FREE, PRO, INSTITUTIONAL) integrated with Stripe. Additional features include TipTap rich text editing, research notes management, citation export in multiple formats (BibTeX, RIS, APA, MLA, IEEE), admin dashboard with real-time system monitoring, and email-based notification system for team collaboration.
+
+\vspace{0.3cm}
+\noindent
+\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma (RAW Query), AWS S3, Stripe, Gemini AI, Redis, Docker
 
 \vspace{0.3cm}
 \noindent
@@ -224,6 +232,10 @@
 \vspace{0.3cm}
 \noindent
 \textbf{Live Demo:} \url{https://scholar-flow-ai.vercel.app}
+
+\vspace{0.3cm}
+\noindent
+\textbf{Demo Video:} \url{https://youtu.be/your-demo-video-id}
 \end{abstract}
 
 \newpage
