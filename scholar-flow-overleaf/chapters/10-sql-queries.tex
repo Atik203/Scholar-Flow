@@ -1,257 +1,158 @@
-\chapter{SQL Queries \& Optimization}
+\chapter{SQL Queries}
 \label{ch:sql-queries}
 
-\section{Query Catalog}
-\label{sec:query-catalog}
+This chapter lists the core parameterized queries used by \projectname{} (via Prisma RAW Query). Each entry includes a brief description and a minimal SQL snippet. Performance charts, parameters, and optimization notes are intentionally omitted per requirements.
 
-This chapter documents the most complex and performance-critical SQL queries in \projectname{}, complete with execution times and optimization strategies.
-
-% ============================================
-% QUERY 1: LIST PAPERS WITH FILTERS
-% ============================================
-\section{List Papers with Advanced Filters}
-\label{sec:query-list-papers}
-
-\subsection{Query Description}
-This query retrieves papers from a workspace with optional search filters including title search, publication year range, and pagination support.
-
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={List Papers with Pagination and Filters}]
-SELECT 
-  p.id,
-  p.title,
-  p.authors,
-  p.abstract,
-  p."publicationYear",
-  p."fileUrl",
-  p."createdAt",
-  u.name as "uploaderName"
+% 1
+\section{List Papers (paginated)}
+Retrieves active papers in a workspace, ordered by recency.
+\begin{lstlisting}[language=SQL]
+SELECT p.id, p.title, p."publicationYear", p."createdAt"
 FROM "Paper" p
-JOIN "User" u ON p."uploaderId" = u.id
-WHERE p."workspaceId" = $1
-  AND p."isDeleted" = false
-  AND ($2::text IS NULL OR p.title ILIKE '%' || $2 || '%')
-  AND ($3::int IS NULL OR p."publicationYear" >= $3)
-  AND ($4::int IS NULL OR p."publicationYear" <= $4)
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false
 ORDER BY p."createdAt" DESC
-LIMIT $5 OFFSET $6;
+LIMIT $2 OFFSET $3;
 \end{lstlisting}
 
-\subsection{Parameters}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item \texttt{\$1}: workspaceId (INT) - Target workspace
-    \item \texttt{\$2}: searchQuery (TEXT, nullable) - Title search term
-    \item \texttt{\$3}: yearFrom (INT, nullable) - Minimum publication year
-    \item \texttt{\$4}: yearTo (INT, nullable) - Maximum publication year
-    \item \texttt{\$5}: limit (INT) - Number of results per page
-    \item \texttt{\$6}: offset (INT) - Pagination offset
-\end{itemize}
-
-\subsection{Performance}
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}lcc@{}}
-	oprule
-	extbf{Dataset Size} & \textbf{Before} & \textbf{After} \\
-\midrule
-1,000 papers & 420ms & 65ms \\
-10,000 papers & 1,800ms & 120ms \\
-50,000 papers & 8,500ms & 320ms \\
-\bottomrule
-\end{tabular}
-\caption{Query Performance Improvements}
-\label{tab:query-performance}
-\end{table}
-
-\subsection{Optimization Strategy}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item Composite index on \texttt{(uploaderId, workspaceId, isDeleted, createdAt)}
-    \item GIN index for full-text search on \texttt{title} and \texttt{abstract}
-    \item Pagination with \texttt{LIMIT/OFFSET} instead of fetching all rows
-    \item Conditional filters using \texttt{IS NULL} checks avoid unnecessary table scans
-\end{itemize}
-
-% ============================================
-% QUERY 2: PAPER DETAILS WITH RELATED DATA
-% ============================================
-\section{Paper Details with Related Data}
-\label{sec:query-paper-details}
-
-\subsection{Query Description}
-Retrieves comprehensive paper information including uploader details, collection membership count, and AI chat thread count.
-
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={Paper Details with Aggregated Statistics}]
-SELECT 
-  p.*, 
-  u.name as "uploaderName", 
-  u.email as "uploaderEmail",
-  COUNT(DISTINCT cp."collectionId")::int as "collectionCount",
-  COUNT(DISTINCT ait.id)::int as "chatThreadCount"
+% 2
+\section{Paper Details with Uploader}
+Gets a single paper with uploader info and lightweight counts.
+\begin{lstlisting}[language=SQL]
+SELECT p.*, u.name AS "uploaderName",
+       COUNT(DISTINCT cp."collectionId")::int AS "collectionCount"
 FROM "Paper" p
 JOIN "User" u ON p."uploaderId" = u.id
-LEFT JOIN "CollectionPaper" cp 
-  ON p.id = cp."paperId" AND cp."isDeleted" = false
-LEFT JOIN "AIInsightThread" ait 
-  ON p.id = ait."paperId"
+LEFT JOIN "CollectionPaper" cp ON cp."paperId" = p.id AND cp."isDeleted" = false
 WHERE p.id = $1 AND p."isDeleted" = false
-GROUP BY p.id, u.name, u.email;
+GROUP BY p.id, u.name;
 \end{lstlisting}
 
-\subsection{Parameters}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item \texttt{\$1}: paperId (INT) - Target paper ID
-\end{itemize}
+% 3
+\section{Search Papers (full-text)}
+Full-text search across title and authors using GIN index.
+\begin{lstlisting}[language=SQL]
+SELECT id, title, authors
+FROM "Paper"
+WHERE "workspaceId" = $1 AND "isDeleted" = false
+  AND to_tsvector('english', title || ' ' || coalesce(authors,'')) @@ plainto_tsquery($2)
+ORDER BY "createdAt" DESC
+LIMIT $3 OFFSET $4;
+\end{lstlisting}
 
-% ============================================
-% QUERY 3: USER COLLECTIONS
-% ============================================
-\section{User Collections with Statistics}
-\label{sec:query-collections}
+% 4
+\section{Recent Papers by User}
+Lists the last N papers uploaded by a user.
+\begin{lstlisting}[language=SQL]
+SELECT id, title, "createdAt"
+FROM "Paper"
+WHERE "uploaderId" = $1 AND "isDeleted" = false
+ORDER BY "createdAt" DESC
+LIMIT $2;
+\end{lstlisting}
 
-\subsection{Query Description}
-Fetches all collections created by a user along with paper count and member count statistics.
+% 5
+\section{Papers in a Collection}
+Retrieves papers that belong to a collection.
+\begin{lstlisting}[language=SQL]
+SELECT p.id, p.title
+FROM "CollectionPaper" cp
+JOIN "Paper" p ON p.id = cp."paperId"
+WHERE cp."collectionId" = $1 AND cp."isDeleted" = false AND p."isDeleted" = false
+ORDER BY cp."addedAt" DESC
+LIMIT $2 OFFSET $3;
+\end{lstlisting}
 
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={User Collections with Aggregated Counts}]
-SELECT 
-  c.id, 
-  c.name, 
-  c.description, 
-  c."isPrivate", 
-  c."createdAt",
-  COUNT(DISTINCT cp."paperId")::int as "paperCount",
-  COUNT(DISTINCT cm.id)::int as "memberCount"
+% 6
+\section{User Collections with Counts}
+Collections created by a user with paper/member aggregates.
+\begin{lstlisting}[language=SQL]
+SELECT c.id, c.name,
+       COUNT(DISTINCT cp."paperId")::int AS "paperCount",
+       COUNT(DISTINCT cm.id)::int AS "memberCount"
 FROM "Collection" c
-LEFT JOIN "CollectionPaper" cp 
-  ON c.id = cp."collectionId" AND cp."isDeleted" = false
-LEFT JOIN "CollectionMember" cm 
-  ON c.id = cm."collectionId" AND cm."isDeleted" = false
+LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId" AND cp."isDeleted" = false
+LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."isDeleted" = false
 WHERE c."creatorId" = $1 AND c."isDeleted" = false
-GROUP BY c.id 
+GROUP BY c.id
 ORDER BY c."createdAt" DESC;
 \end{lstlisting}
 
-\subsection{Parameters}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item \texttt{\$1}: userId (INT) - Collection creator ID
-\end{itemize}
-
-% ============================================
-% QUERY 4: BATCH ADD PAPERS TO COLLECTION
-% ============================================
-\section{Add Papers to Collection (Batch Insert)}
-\label{sec:query-batch-insert}
-
-\subsection{Query Description}
-Efficiently inserts multiple papers into a collection in a single transaction using PostgreSQL's \texttt{unnest} function.
-
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={Batch Insert Papers to Collection}]
-INSERT INTO "CollectionPaper" (
-  id, 
-  "collectionId", 
-  "paperId", 
-  "addedById", 
-  "addedAt"
-)
-SELECT 
-  gen_random_uuid(), 
-  $1, 
-  unnest($2::uuid[]), 
-  $3, 
-  NOW()
-ON CONFLICT ("collectionId", "paperId") 
-DO NOTHING
-RETURNING id, "paperId";
+% 7
+\section{Batch Add Papers to Collection}
+Adds many papers in one round-trip, skipping duplicates.
+\begin{lstlisting}[language=SQL]
+INSERT INTO "CollectionPaper"("collectionId","paperId","addedById","addedAt")
+SELECT $1, unnest($2::int[]), $3, NOW()
+ON CONFLICT ("collectionId","paperId") DO NOTHING;
 \end{lstlisting}
 
-\subsection{Parameters}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item \texttt{\$1}: collectionId (INT) - Target collection
-    \item \texttt{\$2}: paperIds (UUID[]) - Array of paper IDs to add
-    \item \texttt{\$3}: addedById (INT) - User performing the action
-\end{itemize}
+% 8
+\section{Remove Paper from Collection}
+Soft-removes a paper from a collection.
+\begin{lstlisting}[language=SQL]
+UPDATE "CollectionPaper"
+SET "isDeleted" = true, "deletedAt" = NOW()
+WHERE "collectionId" = $1 AND "paperId" = $2;
+\end{lstlisting}
 
-\subsection{Performance Benefits}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item Single round-trip to database instead of N queries
-    \item 10-15x faster than individual \texttt{INSERT} statements
-    \item Atomic transaction ensures data consistency
-    \item \texttt{ON CONFLICT DO NOTHING} prevents duplicate entries
-\end{itemize}
-
-% ============================================
-% QUERY 5: WORKSPACE MEMBERS
-% ============================================
-\section{Workspace Members with Permissions}
-\label{sec:query-workspace-members}
-
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={Workspace Members Query}]
-SELECT 
-  wm.id, 
-  wm.role, 
-  wm."joinedAt",
-  u.id as "userId", 
-  u.name, 
-  u.email, 
-  u.image,
-  s."planType" as "subscriptionPlan"
+% 9
+\section{Workspace Members}
+Lists active members with basic profile info.
+\begin{lstlisting}[language=SQL]
+SELECT wm.id, wm.role, wm."joinedAt",
+       u.id AS "userId", u.name, u.email
 FROM "WorkspaceMember" wm
 JOIN "User" u ON wm."userId" = u.id
-LEFT JOIN "Subscription" s 
-  ON u.id = s."userId" AND s.status = 'ACTIVE'
 WHERE wm."workspaceId" = $1 AND wm.status = 'ACTIVE'
 ORDER BY wm."joinedAt" ASC;
 \end{lstlisting}
 
-% ============================================
-% QUERY 6: UPDATE MEMBER ROLE
-% ============================================
-\section{Update Member Role with Permission Check}
-\label{sec:query-update-role}
-
-\subsection{SQL Query}
-\begin{lstlisting}[language=SQL, caption={Update Role with Authorization}]
+% 10
+\section{Update Member Role (authorized)}
+Updates a member's role if the requester has sufficient role.
+\begin{lstlisting}[language=SQL]
 UPDATE "WorkspaceMember" wm
 SET role = $3
-FROM "WorkspaceMember" requester
+FROM "WorkspaceMember" req
 WHERE wm."workspaceId" = $1 AND wm."userId" = $2
-  AND requester."workspaceId" = $1 AND requester."userId" = $4
-  AND requester.role IN ('OWNER', 'TEAM_LEAD')
-RETURNING wm.id, wm.role, wm."userId";
+  AND req."workspaceId" = $1 AND req."userId" = $4
+  AND req.role IN ('OWNER','TEAM_LEAD')
+RETURNING wm.id, wm.role;
 \end{lstlisting}
 
-% ============================================
-% QUERY SUMMARY
-% ============================================
-\section{Query Performance Summary}
-\label{sec:query-summary}
+% 11
+\section{Top Tags in Workspace}
+Returns the most used tags for discovery.
+\begin{lstlisting}[language=SQL]
+SELECT t.name, COUNT(pt."paperId")::int AS uses
+FROM "Tag" t
+JOIN "PaperTag" pt ON pt."tagId" = t.id
+JOIN "Paper" p ON p.id = pt."paperId"
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false
+GROUP BY t.name
+ORDER BY uses DESC
+LIMIT 20;
+\end{lstlisting}
 
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}lccl@{}}
-	oprule
-	extbf{Query Type} & \textbf{Avg Time} & \textbf{P95 Time} & \textbf{Optimization} \\
-\midrule
-List Papers & 120ms & 180ms & Composite index \\
-Paper Details & 45ms & 85ms & JOIN optimization \\
-User Collections & 65ms & 110ms & Aggregation cache \\
-Batch Insert & 35ms & 70ms & Single transaction \\
-Full-Text Search & 320ms & 450ms & GIN index \\
-\bottomrule
-\end{tabular}
-\caption{Query Performance Summary}
-\label{tab:query-summary}
-\end{table}
+% 12
+\section{Orphan Papers (no collection)}
+Papers not assigned to any collection (for cleanup views).
+\begin{lstlisting}[language=SQL]
+SELECT p.id, p.title
+FROM "Paper" p
+LEFT JOIN "CollectionPaper" cp ON cp."paperId" = p.id AND cp."isDeleted" = false
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false
+  AND cp."paperId" IS NULL
+ORDER BY p."createdAt" DESC;
+\end{lstlisting}
 
-\subsection{General Optimization Principles}
-\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
-    \item \textbf{Indexing}: Composite indexes on frequently filtered columns
-    \item \textbf{Parameterization}: Use parameterized queries to prevent SQL injection
-    \item \textbf{Pagination}: Always use \texttt{LIMIT/OFFSET} for large result sets
-    \item \textbf{Soft Deletes}: Filter \texttt{isDeleted = false} in all queries
-    \item \textbf{Aggregations}: Use \texttt{COUNT DISTINCT} with \texttt{::int} cast for JSON compatibility
-    \item \textbf{Connection Pooling}: Maintain 20 max connections to prevent resource exhaustion
-\end{itemize}
+% 13
+\section{Papers per Year (histogram)}
+Counts papers by publication year for charts.
+\begin{lstlisting}[language=SQL]
+SELECT "publicationYear" AS year, COUNT(*)::int AS count
+FROM "Paper"
+WHERE "workspaceId" = $1 AND "isDeleted" = false AND "publicationYear" IS NOT NULL
+GROUP BY year
+ORDER BY year DESC;
+\end{lstlisting}
