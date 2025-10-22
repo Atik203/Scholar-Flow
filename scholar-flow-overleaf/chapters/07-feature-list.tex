@@ -21,9 +21,9 @@
 \label{fig:auth}
 \end{figure}
 
-\subsection{Paper Annotation \& Highlights}
+\section{Paper Annotation \& Highlights}
 
-    extbf{Workflow:}
+    \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
     \item Open a paper and select text to create a highlight or note
     \item Add a short comment; annotations are stored and scoped to user/workspace
@@ -31,7 +31,7 @@
     \item Annotations appear contextually when revisiting the paper
 \end{enumerate}
 
-    extbf{Database Tables:} \texttt{Annotation}, \texttt{Note}
+    \textbf{Database Tables:} \texttt{Annotation}, \texttt{Note}
 
 \begin{figure}[H]
 \centering
@@ -40,9 +40,9 @@
 \label{fig:annotations}
 \end{figure}
 
-\subsection{Notifications \& Email Invitations}
+\section{Notifications \& Email Invitations}
 
-    extbf{Workflow:}
+    \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
     \item Team lead invites a member to a workspace or shared collection
     \item Email is sent with a secure link; pending invites are tracked
@@ -50,7 +50,7 @@
     \item Users can accept/decline and manage notifications from settings
 \end{enumerate}
 
-	extbf{Database Tables:} \texttt{WorkspaceInvitation}, \texttt{Notification}
+	\textbf{Database Tables:} \texttt{WorkspaceInvitation}, \texttt{Notification}
 
 \begin{figure}[H]
 \centering
@@ -59,7 +59,7 @@
 \label{fig:notifications}
 \end{figure}
 
-\subsection{Paper Upload \& Management}
+\section{Paper Upload \& Management}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -79,7 +79,7 @@
 \label{fig:upload}
 \end{figure}
 
-\subsection{Advanced Search \& Filtering}
+\section{Advanced Search \& Filtering}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -105,7 +105,7 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \label{fig:search}
 \end{figure}
 
-\subsection{Collection Management}
+\section{Collection Management}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -124,7 +124,7 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \label{fig:collection}
 \end{figure}
 
-\subsection{AI-Powered Summarization \& Chat}
+\section{AI-Powered Summarization \& Chat}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -144,7 +144,7 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \label{fig:ai}
 \end{figure}
 
-\subsection{Workspace Collaboration}
+\section{Workspace Collaboration}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -163,7 +163,7 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \label{fig:workspace}
 \end{figure}
 
-\subsection{Subscription \& Billing}
+\section{Subscription \& Billing}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -183,7 +183,7 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \label{fig:billing}
 \end{figure}
 
-\subsection{Admin Dashboard \& Analytics}
+\section{Admin Dashboard \& Analytics}
 
 \textbf{Workflow:}
 \begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
@@ -201,4 +201,105 @@ ORDER BY p."createdAt" DESC LIMIT 20;
 \includegraphics[width=0.85\textwidth]{images/screenshots/admin_overview.png}
 \caption{Admin Dashboard}
 \label{fig:admin}
+\end{figure}
+
+\section{Rich Text Editor with TipTap}
+
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User opens paper and clicks "Edit" to launch TipTap-based editor
+    \item Complete toolbar with formatting: bold, italic, headings, lists, links, images
+    \item Auto-save functionality with debounced updates every 2 seconds
+    \item Image upload to S3 with drag-drop support and resizing capabilities
+    \item Export notes to PDF/DOCX with embedded images and proper styling
+    \item Share edited content via email with permission management
+\end{enumerate}
+
+\textbf{Database Tables:} \texttt{Paper}, \texttt{PaperContent}, \texttt{ActivityLog}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{images/screenshots/text_editor.png}
+\caption{Rich Text Editor Interface}
+\label{fig:editor}
+\end{figure}
+
+\section{Research Notes \& Annotations}
+
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User creates structured research notes linked to papers
+    \item Notes support markdown formatting, tags, and categorization
+    \item Annotation system for highlighting and commenting on paper sections
+    \item Notes are searchable across workspace with full-text indexing
+    \item Export notes as PDF or markdown for external use
+\end{enumerate}
+
+\textbf{Database Tables:} \texttt{Note}, \texttt{Annotation}, \texttt{NoteTag}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/screenshots/research_notes.png}
+\caption{Research Notes Interface}
+\label{fig:notes}
+\end{figure}
+
+\section{Citation Export \& Bibliography Management}
+
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item User selects papers from workspace for citation export
+    \item Choose format: BibTeX, RIS, EndNote, APA, MLA, or IEEE
+    \item System generates formatted citations with complete metadata
+    \item Export history tracked with download/delete functionality
+    \item Direct copy-to-clipboard for quick citation insertion
+\end{enumerate}
+
+\textbf{Database Tables:} \texttt{Paper}, \texttt{CitationExport}, \texttt{ExportHistory}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/screenshots/citations_formats.png}
+\caption{Citation Export Formats}
+\label{fig:citations}
+\end{figure}
+
+\section{Analytics Dashboard \& Insights}
+
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item Dashboard displays workspace metrics: paper count, user activity, AI usage
+    \item Interactive charts show paper uploads over time, collection growth
+    \item Top contributors and most active users highlighted with engagement scores
+    \item Export analytics reports for team performance tracking
+    \item Real-time updates with refresh intervals configurable by user
+\end{enumerate}
+
+\textbf{Database Tables:} \texttt{ActivityLog}, \texttt{UsageEvent}, \texttt{AnalyticsSnapshot}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{images/screenshots/analytics.png}
+\caption{Analytics Dashboard}
+\label{fig:analytics}
+\end{figure}
+
+\section{System Health Monitoring}
+
+\textbf{Workflow:}
+\begin{enumerate}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item Admin dashboard displays real-time system health metrics
+    \item Monitor CPU usage, memory consumption, database connections, storage
+    \item Performance bars show resource utilization with color-coded status
+    \item Automatic polling every 10 seconds with RTK Query caching
+    \item Alert indicators for critical resource thresholds exceeded
+\end{enumerate}
+
+\textbf{Database Tables:} \texttt{SystemMetrics}, \texttt{HealthCheck}, \texttt{PerformanceLog}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{images/screenshots/system_health.png}
+\caption{System Health Monitor}
+\label{fig:health}
 \end{figure}
