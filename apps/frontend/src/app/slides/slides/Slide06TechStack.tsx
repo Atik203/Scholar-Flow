@@ -52,37 +52,37 @@ const TechBadge = ({
   name: string;
   color: string;
 }) => (
-  <div className="bg-white rounded-lg px-3 py-2 border border-slate-200 flex items-center gap-2 hover:shadow-md transition-shadow">
-    <Icon className="w-5 h-5" style={{ color }} />
-    <span className="text-slate-700 text-sm font-medium">{name}</span>
+  <div className="bg-white rounded-lg px-5 py-3 border border-slate-200 flex items-center gap-3 hover:shadow-md transition-shadow">
+    <Icon className="w-8 h-8" style={{ color }} />
+    <span className="text-black text-lg font-semibold">{name}</span>
   </div>
 );
 
 export default function Slide06TechStack() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-50 to-blue-50 p-8 flex flex-col">
+    <div className="w-full h-full bg-gradient-to-br from-slate-50 to-blue-50 p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-          <Layers className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-center gap-4 mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+          <Layers className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">
+        <h1 className="text-4xl font-bold text-black">
           Modern Technology Stack
         </h1>
       </div>
 
       {/* Stack Sections */}
-      <div className="flex-1 flex flex-col gap-4">
+      <div className="flex-1 flex flex-col gap-5">
         {/* Frontend */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <h2 className="text-lg font-bold text-slate-800">🖥️ Frontend</h2>
-            <span className="text-slate-400 text-sm ml-auto">
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-4 h-4 rounded-full bg-blue-500" />
+            <h2 className="text-2xl font-bold text-black">🖥️ Frontend</h2>
+            <span className="text-black text-lg ml-auto font-medium">
               App Router + SSR
             </span>
           </div>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-6 gap-4">
             {frontendStack.map((tech, index) => (
               <TechBadge key={index} {...tech} />
             ))}
@@ -91,21 +91,21 @@ export default function Slide06TechStack() {
 
         {/* Arrow */}
         <div className="flex justify-center">
-          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold">
             ↓
           </div>
         </div>
 
         {/* Backend */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <h2 className="text-lg font-bold text-slate-800">⚙️ Backend API</h2>
-            <span className="text-slate-400 text-sm ml-auto">
-              REST API + Raw SQL
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-4 h-4 rounded-full bg-emerald-500" />
+            <h2 className="text-2xl font-bold text-black">⚙️ Backend API</h2>
+            <span className="text-black text-lg ml-auto font-medium">
+              REST API + SQL
             </span>
           </div>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-6 gap-4">
             {backendStack.map((tech, index) => (
               <TechBadge key={index} {...tech} />
             ))}
@@ -114,21 +114,23 @@ export default function Slide06TechStack() {
 
         {/* Arrow */}
         <div className="flex justify-center">
-          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+          <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-xl font-bold">
             ↓
           </div>
         </div>
 
         {/* Infrastructure */}
-        <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-3 h-3 rounded-full bg-purple-500" />
-            <h2 className="text-lg font-bold text-slate-800">
+        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-4 h-4 rounded-full bg-purple-500" />
+            <h2 className="text-2xl font-bold text-black">
               🗄️ Database & Infrastructure
             </h2>
-            <span className="text-slate-400 text-sm ml-auto">Cloud-Native</span>
+            <span className="text-black text-lg ml-auto font-medium">
+              Cloud-Native
+            </span>
           </div>
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-5 gap-4">
             {infraStack.map((tech, index) => (
               <TechBadge key={index} {...tech} />
             ))}

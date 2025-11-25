@@ -45,23 +45,21 @@ const benefits = [
 
 export default function Slide03Solution() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-          <Lightbulb className="w-6 h-6 text-emerald-600" />
+      <div className="flex items-center gap-4 mb-10">
+        <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <Lightbulb className="w-7 h-7 text-emerald-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
-            Proposed Solution
-          </h1>
-          <p className="text-slate-500">Introducing ScholarFlow</p>
+          <h1 className="text-4xl font-bold text-black">Proposed Solution</h1>
+          <p className="text-black text-lg">Introducing ScholarFlow</p>
         </div>
       </div>
 
       {/* Tagline */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl py-3 px-6 text-center mb-6">
-        <span className="text-white text-xl font-bold">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl py-4 px-8 text-center mb-8">
+        <span className="text-white text-2xl font-bold">
           ONE PLATFORM. ALL RESEARCH. AI-POWERED.
         </span>
       </div>
@@ -80,25 +78,27 @@ export default function Slide03Solution() {
               >
                 <solution.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="font-bold text-slate-800 mb-1">
+              <h3 className="font-bold text-black mb-2 text-lg">
                 {solution.title}
               </h3>
-              <p className="text-slate-500 text-sm">{solution.description}</p>
+              <p className="text-black text-base">{solution.description}</p>
             </div>
           ))}
         </div>
 
         {/* Right - Benefits List */}
         <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6 border border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">🎯</span>
+          <h3 className="text-xl font-bold text-black mb-5 flex items-center gap-2">
+            <span className="text-3xl">🎯</span>
             Solution Approach
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {benefits.map((benefit, index) => (
               <div key={index} className="flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                <span className="text-slate-700">{benefit}</span>
+                <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <span className="text-black text-base leading-relaxed font-medium">
+                  {benefit}
+                </span>
               </div>
             ))}
           </div>

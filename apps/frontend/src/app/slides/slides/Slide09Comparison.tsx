@@ -11,6 +11,9 @@ const features = [
   "Citation Generator",
   "PDF Annotations",
   "Real-time Collaboration",
+  "Analytics Dashboard",
+  "Subscription Billing",
+  "Enterprise Security",
 ];
 
 const products = [
@@ -18,11 +21,11 @@ const products = [
     name: "ScholarFlow",
     color: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white",
   },
-  { name: "Mendeley", color: "bg-orange-100 text-orange-800" },
-  { name: "Zotero", color: "bg-red-100 text-red-800" },
-  { name: "ResearchGate", color: "bg-teal-100 text-teal-800" },
-  { name: "Paperpile", color: "bg-indigo-100 text-indigo-800" },
-  { name: "EndNote", color: "bg-blue-100 text-blue-800" },
+  { name: "Mendeley", color: "bg-orange-100 text-orange-900" },
+  { name: "Zotero", color: "bg-red-100 text-red-900" },
+  { name: "ResearchGate", color: "bg-teal-100 text-teal-900" },
+  { name: "Paperpile", color: "bg-indigo-100 text-indigo-900" },
+  { name: "EndNote", color: "bg-blue-100 text-blue-900" },
 ];
 
 // Feature support matrix: 2 = full, 1 = partial, 0 = no
@@ -36,46 +39,45 @@ const support: number[][] = [
   [2, 2, 2, 1, 2, 2], // Citation Generator
   [2, 2, 2, 0, 2, 1], // PDF Annotations
   [2, 1, 0, 0, 1, 1], // Real-time Collaboration
+  [2, 1, 1, 1, 1, 1], // Analytics Dashboard
+  [2, 2, 0, 0, 2, 2], // Subscription Billing
+  [2, 2, 2, 1, 2, 2], // Enterprise Security
 ];
 
 function SupportIcon({ level }: { level: number }) {
   if (level === 2)
-    return <Check className="w-5 h-5 text-emerald-600" strokeWidth={3} />;
+    return <Check className="w-6 h-6 text-emerald-600" strokeWidth={3} />;
   if (level === 1)
-    return <Minus className="w-5 h-5 text-amber-500" strokeWidth={3} />;
-  return <X className="w-5 h-5 text-red-500" strokeWidth={3} />;
+    return <Minus className="w-6 h-6 text-amber-600" strokeWidth={3} />;
+  return <X className="w-6 h-6 text-red-600" strokeWidth={3} />;
 }
 
 export default function Slide09Comparison() {
   return (
-    <div className="w-full h-full bg-white p-6 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center gap-3 mb-4">
+      <div className="flex items-center justify-center gap-4 mb-6">
         <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
           <Table className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-4xl font-bold text-slate-800">
+        <h1 className="text-4xl font-bold text-black">
           Feature Comparison Matrix
         </h1>
       </div>
 
       {/* Legend */}
-      <div className="flex justify-center gap-8 mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex justify-center gap-10 mb-6">
+        <div className="flex items-center gap-3">
           <Check className="w-7 h-7 text-emerald-600" strokeWidth={3} />
-          <span className="text-base font-bold text-slate-700">
-            Full Support
-          </span>
+          <span className="text-lg font-bold text-black">Full Support</span>
         </div>
-        <div className="flex items-center gap-2">
-          <Minus className="w-7 h-7 text-amber-500" strokeWidth={3} />
-          <span className="text-base font-bold text-slate-700">Partial</span>
+        <div className="flex items-center gap-3">
+          <Minus className="w-7 h-7 text-amber-600" strokeWidth={3} />
+          <span className="text-lg font-bold text-black">Partial</span>
         </div>
-        <div className="flex items-center gap-2">
-          <X className="w-7 h-7 text-red-500" strokeWidth={3} />
-          <span className="text-base font-bold text-slate-700">
-            Not Available
-          </span>
+        <div className="flex items-center gap-3">
+          <X className="w-7 h-7 text-red-600" strokeWidth={3} />
+          <span className="text-lg font-bold text-black">Not Available</span>
         </div>
       </div>
 
@@ -84,7 +86,7 @@ export default function Slide09Comparison() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left p-3 bg-slate-100 border-b-2 border-slate-300 font-bold text-slate-800 text-lg w-[200px]">
+              <th className="text-left p-3 bg-slate-100 border-b-2 border-slate-300 font-bold text-black text-lg w-[200px]">
                 Feature
               </th>
               {products.map((product, i) => (
@@ -107,7 +109,7 @@ export default function Slide09Comparison() {
                 key={fIndex}
                 className={fIndex % 2 === 0 ? "bg-white" : "bg-slate-50/70"}
               >
-                <td className="p-2.5 border-b border-slate-200 font-semibold text-slate-800 text-base">
+                <td className="p-2.5 border-b border-slate-200 font-semibold text-black text-base">
                   {feature}
                 </td>
                 {products.map((_, pIndex) => (
@@ -129,7 +131,7 @@ export default function Slide09Comparison() {
           {/* Score Row */}
           <tfoot>
             <tr className="bg-gradient-to-r from-blue-100 to-indigo-100">
-              <td className="p-2 font-bold text-slate-800 text-sm">
+              <td className="p-2 font-bold text-black text-sm">
                 Features Supported
               </td>
               {products.map((_, pIndex) => {
@@ -139,9 +141,9 @@ export default function Slide09Comparison() {
                 return (
                   <td key={pIndex} className="p-2 text-center">
                     <span
-                      className={`font-bold ${pIndex === 0 ? "text-blue-700 text-lg" : "text-slate-700 text-sm"}`}
+                      className={`font-bold ${pIndex === 0 ? "text-blue-700 text-lg" : "text-black text-sm"}`}
                     >
-                      {fullSupport}/9
+                      {fullSupport}/12
                     </span>
                   </td>
                 );

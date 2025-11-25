@@ -47,22 +47,20 @@ const problems = [
 
 export default function Slide02Problem() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-          <AlertTriangle className="w-6 h-6 text-red-600" />
+      <div className="flex items-center gap-4 mb-10">
+        <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center">
+          <AlertTriangle className="w-7 h-7 text-red-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
-            Problem Statement
-          </h1>
-          <p className="text-slate-500">The Research Management Crisis</p>
+          <h1 className="text-4xl font-bold text-black">Problem Statement</h1>
+          <p className="text-black text-lg">The Research Management Crisis</p>
         </div>
       </div>
 
       {/* Problem Cards Grid */}
-      <div className="flex-1 grid grid-cols-2 gap-4">
+      <div className="flex-1 grid grid-cols-2 gap-6 px-8">
         {problems.map((problem, index) => (
           <div
             key={index}
@@ -78,21 +76,21 @@ export default function Slide02Problem() {
 
               {/* Content */}
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-800 mb-1">
+                <h3 className="text-xl font-bold text-black mb-2">
                   {problem.title}
                 </h3>
-                <p className="text-slate-600 text-sm mb-3">
+                <p className="text-black text-base mb-4">
                   {problem.description}
                 </p>
 
                 {/* Stat Badge */}
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-2xl font-bold bg-gradient-to-r ${problem.color} bg-clip-text text-transparent`}
+                    className={`text-3xl font-bold bg-gradient-to-r ${problem.color} bg-clip-text text-transparent`}
                   >
                     {problem.stat}
                   </span>
-                  <span className="text-slate-500 text-sm">
+                  <span className="text-black text-base font-medium">
                     {problem.statText}
                   </span>
                 </div>

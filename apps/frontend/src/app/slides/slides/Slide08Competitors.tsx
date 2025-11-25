@@ -68,15 +68,13 @@ const competitors = [
 
 export default function Slide08Competitors() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
-          <Building2 className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-center gap-4 mb-10">
+        <div className="w-14 h-14 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
+          <Building2 className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">
-          Market Competitors
-        </h1>
+        <h1 className="text-4xl font-bold text-black">Market Competitors</h1>
       </div>
 
       {/* Competitor Cards */}
@@ -89,43 +87,43 @@ export default function Slide08Competitors() {
             >
               {/* Header */}
               <div
-                className={`bg-gradient-to-br ${comp.color} rounded-lg p-3 mb-3`}
+                className={`bg-gradient-to-br ${comp.color} rounded-lg p-4 mb-4`}
               >
-                <comp.icon className="w-10 h-10 text-white mx-auto mb-1" />
-                <h3 className="text-white font-bold text-center text-base">
+                <comp.icon className="w-12 h-12 text-white mx-auto mb-2" />
+                <h3 className="text-white font-bold text-center text-lg">
                   {comp.name}
                 </h3>
               </div>
 
               {/* Info */}
-              <div className="flex-1 text-sm space-y-2">
+              <div className="flex-1 text-base space-y-2.5">
                 <div>
-                  <span className="text-slate-500">By:</span>
-                  <span className="text-slate-800 ml-1 font-medium">
+                  <span className="text-black font-medium">By:</span>
+                  <span className="text-black ml-1 font-semibold">
                     {comp.company}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Type:</span>
-                  <span className="text-slate-800 ml-1 font-medium">
+                  <span className="text-black font-medium">Type:</span>
+                  <span className="text-black ml-1 font-semibold">
                     {comp.type}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Users:</span>
-                  <span className="text-slate-800 ml-1 font-bold">
+                  <span className="text-black font-medium">Users:</span>
+                  <span className="text-black ml-1 font-bold">
                     {comp.users}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Founded:</span>
-                  <span className="text-slate-800 ml-1 font-medium">
+                  <span className="text-black font-medium">Founded:</span>
+                  <span className="text-black ml-1 font-semibold">
                     {comp.founded}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Pricing:</span>
-                  <span className="text-slate-800 ml-1 font-medium">
+                  <span className="text-black font-medium">Pricing:</span>
+                  <span className="text-black ml-1 font-semibold">
                     {comp.pricing}
                   </span>
                 </div>
@@ -136,13 +134,17 @@ export default function Slide08Competitors() {
                 {/* Strengths */}
                 <div>
                   <span className="text-emerald-600 font-bold">✓ </span>
-                  <span className="text-slate-700">{comp.strengths}</span>
+                  <span className="text-black font-medium">
+                    {comp.strengths}
+                  </span>
                 </div>
 
                 {/* Weaknesses */}
                 <div>
-                  <span className="text-red-500 font-bold">✗ </span>
-                  <span className="text-slate-700">{comp.weaknesses}</span>
+                  <span className="text-red-600 font-bold">✗ </span>
+                  <span className="text-black font-medium">
+                    {comp.weaknesses}
+                  </span>
                 </div>
               </div>
             </div>
@@ -151,14 +153,14 @@ export default function Slide08Competitors() {
       </div>
 
       {/* Summary Bar */}
-      <div className="mt-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
-        <p className="text-slate-700 text-sm text-center">
+      <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+        <p className="text-black text-base text-center font-medium">
           <span className="font-bold text-blue-700">Market Gap:</span> No
           existing solution combines{" "}
-          <span className="font-semibold">AI-first design</span>,{" "}
-          <span className="font-semibold">modern tech stack</span>, and{" "}
-          <span className="font-semibold">affordable team collaboration</span>{" "}
-          in one platform.
+          <span className="font-bold">AI-first design</span>,{" "}
+          <span className="font-bold">modern tech stack</span>, and{" "}
+          <span className="font-bold">affordable team collaboration</span> in
+          one platform.
         </p>
       </div>
     </div>

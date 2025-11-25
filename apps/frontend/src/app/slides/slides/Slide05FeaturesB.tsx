@@ -54,13 +54,13 @@ const features = [
 
 export default function Slide05FeaturesB() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-white via-slate-50 to-indigo-50 p-8 flex flex-col">
+    <div className="w-full h-full bg-gradient-to-br from-white via-slate-50 to-indigo-50 p-16 flex flex-col">
       {/* Header */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-3">
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full text-base font-semibold mb-4">
           <span>🚀</span> Advanced Features
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">
+        <h1 className="text-4xl font-bold text-black">
           Key Features <span className="text-indigo-600">(2/2)</span>
         </h1>
       </div>
@@ -89,12 +89,12 @@ export default function Slide05FeaturesB() {
             </div>
 
             {/* Title */}
-            <h3 className="font-bold text-slate-800 text-lg mb-2">
+            <h3 className="font-bold text-black text-xl mb-3">
               {feature.title}
             </h3>
 
             {/* Description */}
-            <p className="text-slate-600 text-sm leading-relaxed">
+            <p className="text-black text-base leading-relaxed">
               {feature.desc}
             </p>
           </div>
