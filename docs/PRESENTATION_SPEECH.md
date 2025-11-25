@@ -186,97 +186,97 @@
 
 # 🎤 MEMBER 2 SPEECH (2.5 Minutes)
 
-## Slide 8: Competitors (20 seconds)
+## Slide 8: Competitors (22-25 seconds)
 
 ### English:
 
-> "Thank you. Now about existing solutions in market.
+> [Look at audience]
+> "Thank you. Now I will talk about existing solutions in the market.
 >
-> There are five main competitors:
+> Researchers today use tools like Mendeley, Zotero, ResearchGate, Paperpile, and EndNote.
 >
-> - Mendeley by Elsevier
-> - Zotero - open source
-> - ResearchGate - for networking
-> - Paperpile - for Google users
-> - EndNote - very expensive
->
-> All have millions of users but all have problems."
+> [Point to competitor logos]
+> These tools are good for reference management or networking.
+> But each one solves only a specific part of the research process.
+> So researchers must switch between many apps to complete their work."
 
 ### বাংলা:
 
-> "ধন্যবাদ। এখন market এর existing solutions নিয়ে বলি।
+> [দর্শকদের দিকে তাকান]
+> "ধন্যবাদ। এখন আমি market এর existing solutions নিয়ে বলব।
 >
-> পাঁচটা main competitor আছে:
+> আজকে researchers Mendeley, Zotero, ResearchGate, Paperpile, আর EndNote ব্যবহার করে।
 >
-> - Elsevier এর Mendeley
-> - Zotero - open source
-> - ResearchGate - networking এর জন্য
-> - Paperpile - Google users এর জন্য
-> - EndNote - অনেক expensive
->
-> সবার millions of users আছে কিন্তু সবার problems আছে।"
+> [Competitor logos দেখান]
+> এই tools reference management বা networking এর জন্য ভালো।
+> কিন্তু প্রতিটা শুধু research process এর একটা specific part solve করে।
+> তাই researchers কে কাজ শেষ করতে অনেক apps এ switch করতে হয়।"
 
 ---
 
-## Slide 9: Comparison Matrix (30 seconds)
+## Slide 9: Comparison Matrix (32-35 seconds)
 
 ### English:
 
-> "Here is our feature comparison. We compared 12 features.
+> [Gesture toward table/chart]
+> "We compared 12 important features that researchers need every day.
 >
-> Green check means full support. Yellow means partial. Red means no.
+> Green means full support, yellow means partial support, and red means no support.
 >
-> Look at ScholarFlow - we have 12 out of 12 features.
+> As you can see, competitors miss many essential tools such as AI support, real-time collaboration, and research note writing.
 >
-> Most important - no competitor has AI Summarization or AI Chat.
-> Only ScholarFlow has these.
-> We also have Rich Text Editor which others don't have."
+> [Use confident tone]
+> ScholarFlow is the only platform with all 12 features —
+> including AI Summarization, AI Chat, and a built-in Research Editor.
+> This makes ScholarFlow a complete and modern solution."
 
 ### বাংলা:
 
-> "এইখানে আমাদের feature comparison। আমরা ১২টা feature compare করেছি।
+> [Table/chart এর দিকে gesture করুন]
+> "আমরা ১২টা important features compare করেছি যা researchers প্রতিদিন দরকার।
 >
-> Green check মানে full support। Yellow মানে partial। Red মানে নেই।
+> Green মানে full support, yellow মানে partial support, আর red মানে নেই।
 >
-> ScholarFlow দেখুন - আমাদের ১২ এর মধ্যে ১২টা feature আছে।
+> দেখতে পাচ্ছেন, competitors অনেক essential tools miss করে যেমন AI support, real-time collaboration, আর research note writing।
 >
-> সবচেয়ে important - কোনো competitor এ AI Summarization বা AI Chat নেই।
-> শুধু ScholarFlow এ আছে।
-> আমাদের Rich Text Editor ও অন্যদের নেই।"
+> [Confident tone এ বলুন]
+> ScholarFlow একমাত্র platform যেখানে ১২টার ১২টা feature আছে —
+> AI Summarization, AI Chat, আর built-in Research Editor সহ।
+> এটাই ScholarFlow কে complete আর modern solution বানায়।"
 
 ---
 
-## Slide 10: Competitive Advantage (25 seconds)
+## Slide 10: Competitive Advantage (28-30 seconds)
 
 ### English:
 
-> "This chart shows our advantage clearly.
+> [Hand gesture to bar chart]
+> "Here, our advantage becomes very clear.
 >
-> ScholarFlow scores 100 percent.
-> Competitors score only 40 to 50 percent.
+> Competitors offer only 40 to 50 percent of the important features.
+> But ScholarFlow reaches 100 percent feature support.
 >
-> Our unique advantages:
+> Our main strengths are:
+> AI-First Design, Real-time Collaboration, Modern Tech Stack,
+> Fast paper organization, and a Free plan for students and educators.
 >
-> - AI-First Design
-> - Modern Tech Stack
-> - Real-time Collaboration
-> - Generous Free Tier
-> - Built-in Text Editor"
+> [Slight emphasis]
+> We focus directly on real research problems, not just reference storage."
 
 ### বাংলা:
 
-> "এই chart আমাদের advantage clearly দেখাচ্ছে।
+> [Bar chart এ hand gesture করুন]
+> "এখানে আমাদের advantage একদম clear।
 >
-> ScholarFlow ১০০ percent score করেছে।
-> Competitors মাত্র ৪০ থেকে ৫০ percent।
+> Competitors মাত্র ৪০ থেকে ৫০ percent important features offer করে।
+> কিন্তু ScholarFlow ১০০ percent feature support দেয়।
 >
-> আমাদের unique advantages:
+> আমাদের main strengths হলো:
+> AI-First Design, Real-time Collaboration, Modern Tech Stack,
+> Fast paper organization, আর students ও educators এর জন্য Free plan।
 >
-> - AI-First Design
-> - Modern Tech Stack
-> - Real-time Collaboration
-> - Generous Free Tier
-> - Built-in Text Editor"
+> [একটু emphasis দিন]
+> আমরা সরাসরি real research problems এ focus করি, শুধু reference storage না।"
 
 ---
 
@@ -284,27 +284,31 @@
 
 ### English:
 
-> "What problems do competitors have?
+> [Count on fingers]
+> "Competitors have clear gaps:
 >
-> - Mendeley has no AI features.
-> - Zotero has limited collaboration.
-> - ResearchGate is only for networking, not paper management.
-> - Paperpile works only with Google.
-> - EndNote is expensive and old design.
+> Mendeley has no AI features.
+> Zotero collaboration is limited.
+> ResearchGate only focuses on networking.
+> Paperpile works mostly with Google.
+> EndNote is expensive and old design.
 >
-> ScholarFlow fills all these gaps."
+> [Open hands]
+> ScholarFlow fills all these gaps in one platform."
 
 ### বাংলা:
 
-> "Competitors এর কী সমস্যা?
+> [আঙুলে গুনুন]
+> "Competitors এর clear gaps আছে:
 >
-> - Mendeley তে AI feature নেই।
-> - Zotero তে collaboration limited।
-> - ResearchGate শুধু networking এর জন্য, paper management নেই।
-> - Paperpile শুধু Google এ কাজ করে।
-> - EndNote expensive আর পুরনো design।
+> Mendeley তে AI features নেই।
+> Zotero তে collaboration limited।
+> ResearchGate শুধু networking এ focus করে।
+> Paperpile বেশিরভাগ Google এ কাজ করে।
+> EndNote expensive আর পুরনো design।
 >
-> ScholarFlow এই সব gaps fill করে।"
+> [হাত খুলুন]
+> ScholarFlow একটা platform এ এই সব gaps fill করে।"
 
 ---
 
@@ -312,27 +316,33 @@
 
 ### English:
 
-> "Now our technology.
+> [Point as you read]
+> "We use a modern and scalable tech stack.
 >
 > **Frontend:** Next.js 15, TypeScript, Tailwind CSS
 > **Backend:** Express.js, PostgreSQL, Prisma ORM
-> **AI:** Gemini API
+> **AI:** Gemini API + OpenAI API
+> **Cache:** Redis for speed
 > **Storage:** AWS S3
-> **Payments:** Stripe
+> **Payment:** Stripe
 >
-> Everything is in TypeScript for type safety."
+> [Confident tone]
+> This gives high performance, security, and future growth."
 
 ### বাংলা:
 
-> "এখন আমাদের technology।
+> [পড়ার সময় point করুন]
+> "আমরা modern আর scalable tech stack ব্যবহার করি।
 >
 > **Frontend:** Next.js 15, TypeScript, Tailwind CSS
 > **Backend:** Express.js, PostgreSQL, Prisma ORM
-> **AI:** Gemini API
+> **AI:** Gemini API + OpenAI API
+> **Cache:** Speed এর জন্য Redis
 > **Storage:** AWS S3
-> **Payments:** Stripe
+> **Payment:** Stripe
 >
-> সব TypeScript এ লেখা type safety এর জন্য।"
+> [Confident tone এ]
+> এটা high performance, security, আর future growth দেয়।"
 
 ---
 
@@ -340,17 +350,19 @@
 
 ### English:
 
-> "Here are screenshots.
+> [Point left]
+> "Here is our Dashboard. Users can organize all papers easily.
 >
-> On the left is our Dashboard. Users can see all their papers here.
-> On the right is our Rich Text Editor. Users can write notes and export to PDF."
+> [Point right]
+> And here is the Research Editor to write notes and export PDF."
 
 ### বাংলা:
 
-> "এখানে screenshots দেখুন।
+> [বামে point করুন]
+> "এইখানে আমাদের Dashboard। Users সহজে সব papers organize করতে পারে।
 >
-> বামে আমাদের Dashboard। Users সব papers দেখতে পায়।
-> ডানে আমাদের Rich Text Editor। Users notes লিখতে পারে আর PDF export করতে পারে।"
+> [ডানে point করুন]
+> আর এইখানে Research Editor notes লিখতে আর PDF export করতে।"
 
 ---
 
@@ -358,17 +370,17 @@
 
 ### English:
 
-> "More screenshots.
+> "More screens.
 >
-> On the left is PDF Annotations. Users can highlight text and add comments.
-> On the right is AI Chat. Users can ask questions and get answers instantly."
+> Users can highlight and comment directly on PDFs.
+> And with AI Chat, they get instant answers about any paper."
 
 ### বাংলা:
 
-> "আরো screenshots।
+> "আরো screens।
 >
-> বামে PDF Annotations। Users text highlight করতে পারে আর comments দিতে পারে।
-> ডানে AI Chat। Users প্রশ্ন করতে পারে আর instantly answers পায়।"
+> Users সরাসরি PDFs এ highlight আর comment করতে পারে।
+> আর AI Chat দিয়ে যেকোনো paper নিয়ে instant answers পায়।"
 
 ---
 
@@ -376,21 +388,19 @@
 
 ### English:
 
-> "In conclusion, ScholarFlow is a complete solution for researchers.
+> [Smile and eye contact]
+> "To conclude, ScholarFlow is a complete research platform.
 >
-> We have AI features that no competitor has.
-> We use modern technology.
-> We solve real problems that students face every day.
+> We combine AI, collaboration, and smart paper tools in one place.
 >
 > Thank you for listening. Any questions?"
 
 ### বাংলা:
 
-> "শেষ করতে গিয়ে বলি, ScholarFlow researchers এর জন্য complete solution।
+> [হাসুন আর eye contact করুন]
+> "শেষ করতে গিয়ে বলি, ScholarFlow একটা complete research platform।
 >
-> আমাদের AI features আছে যা কোনো competitor এ নেই।
-> আমরা modern technology use করি।
-> আমরা real problems solve করি যা students প্রতিদিন face করে।
+> আমরা AI, collaboration, আর smart paper tools একজায়গায় combine করেছি।
 >
 > ধন্যবাদ। কোনো প্রশ্ন?"
 
