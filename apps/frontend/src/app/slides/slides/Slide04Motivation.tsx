@@ -101,11 +101,11 @@ export default function Slide04Motivation() {
       </div>
 
       {/* Bottom Quote */}
-      <div className="mt-4 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-4">
-        <p className="text-center text-slate-200 italic">
+      <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+        <p className="text-center text-slate-700 italic">
           &quot;Researchers deserve tools that are as intelligent as the work
           they do —
-          <span className="text-blue-400 font-medium">
+          <span className="text-blue-600 font-medium">
             {" "}
             ScholarFlow makes that possible.
           </span>

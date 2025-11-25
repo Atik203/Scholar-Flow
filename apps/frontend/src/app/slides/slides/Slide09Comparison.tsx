@@ -57,10 +57,10 @@ export default function Slide09Comparison() {
     <div className="w-full h-full bg-white p-6 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-          <Table className="w-6 h-6 text-white" />
+        <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+          <Table className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">
+        <h1 className="text-4xl font-bold text-slate-800">
           Feature Comparison Matrix
         </h1>
       </div>
@@ -68,16 +68,18 @@ export default function Slide09Comparison() {
       {/* Legend */}
       <div className="flex justify-center gap-8 mb-4">
         <div className="flex items-center gap-2">
-          <Check className="w-6 h-6 text-emerald-600" strokeWidth={3} />
-          <span className="text-sm font-bold text-slate-700">Full Support</span>
+          <Check className="w-7 h-7 text-emerald-600" strokeWidth={3} />
+          <span className="text-base font-bold text-slate-700">
+            Full Support
+          </span>
         </div>
         <div className="flex items-center gap-2">
-          <Minus className="w-6 h-6 text-amber-500" strokeWidth={3} />
-          <span className="text-sm font-bold text-slate-700">Partial</span>
+          <Minus className="w-7 h-7 text-amber-500" strokeWidth={3} />
+          <span className="text-base font-bold text-slate-700">Partial</span>
         </div>
         <div className="flex items-center gap-2">
-          <X className="w-6 h-6 text-red-500" strokeWidth={3} />
-          <span className="text-sm font-bold text-slate-700">
+          <X className="w-7 h-7 text-red-500" strokeWidth={3} />
+          <span className="text-base font-bold text-slate-700">
             Not Available
           </span>
         </div>
@@ -88,7 +90,7 @@ export default function Slide09Comparison() {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="text-left p-3 bg-slate-100 border-b-2 border-slate-300 font-bold text-slate-800 text-base w-[200px]">
+              <th className="text-left p-3 bg-slate-100 border-b-2 border-slate-300 font-bold text-slate-800 text-lg w-[200px]">
                 Feature
               </th>
               {products.map((product, i) => (
@@ -97,7 +99,7 @@ export default function Slide09Comparison() {
                   className="p-2 bg-slate-100 border-b-2 border-slate-300 text-center"
                 >
                   <span
-                    className={`inline-block px-2 py-1 rounded-lg text-xs font-bold ${product.color}`}
+                    className={`inline-block px-3 py-1.5 rounded-lg text-sm font-bold ${product.color}`}
                   >
                     {product.name}
                   </span>
@@ -111,7 +113,7 @@ export default function Slide09Comparison() {
                 key={fIndex}
                 className={fIndex % 2 === 0 ? "bg-white" : "bg-slate-50/70"}
               >
-                <td className="p-2 border-b border-slate-200 font-semibold text-slate-800 text-sm">
+                <td className="p-2.5 border-b border-slate-200 font-semibold text-slate-800 text-base">
                   {feature}
                 </td>
                 {products.map((_, pIndex) => (
