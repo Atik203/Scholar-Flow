@@ -68,76 +68,78 @@ const competitors = [
 
 export default function Slide08Competitors() {
   return (
-    <div className="w-full h-full bg-white p-6 flex flex-col">
+    <div className="w-full h-full bg-white p-8 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-white" />
+      <div className="flex items-center justify-center gap-3 mb-6">
+        <div className="w-12 h-12 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
+          <Building2 className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800">
+        <h1 className="text-3xl font-bold text-slate-800">
           Market Competitors
         </h1>
       </div>
 
       {/* Competitor Cards */}
-      <div className="flex-1 grid grid-cols-5 gap-3">
-        {competitors.map((comp, index) => (
-          <div
-            key={index}
-            className="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col"
-          >
-            {/* Header */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="grid grid-cols-5 gap-4 w-full max-w-6xl">
+          {competitors.map((comp, index) => (
             <div
-              className={`bg-gradient-to-br ${comp.color} rounded-lg p-3 mb-2`}
+              key={index}
+              className="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col"
             >
-              <comp.icon className="w-8 h-8 text-white mx-auto mb-1" />
-              <h3 className="text-white font-bold text-center text-sm">
-                {comp.name}
-              </h3>
+              {/* Header */}
+              <div
+                className={`bg-gradient-to-br ${comp.color} rounded-lg p-3 mb-2`}
+              >
+                <comp.icon className="w-8 h-8 text-white mx-auto mb-1" />
+                <h3 className="text-white font-bold text-center text-sm">
+                  {comp.name}
+                </h3>
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 text-xs space-y-1.5">
+                <div>
+                  <span className="text-slate-400">By:</span>
+                  <span className="text-slate-700 ml-1">{comp.company}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Type:</span>
+                  <span className="text-slate-700 ml-1">{comp.type}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Users:</span>
+                  <span className="text-slate-700 ml-1 font-semibold">
+                    {comp.users}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Founded:</span>
+                  <span className="text-slate-700 ml-1">{comp.founded}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400">Pricing:</span>
+                  <span className="text-slate-700 ml-1">{comp.pricing}</span>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-slate-200 my-1.5" />
+
+                {/* Strengths */}
+                <div>
+                  <span className="text-emerald-600 font-medium">✓ </span>
+                  <span className="text-slate-600">{comp.strengths}</span>
+                </div>
+
+                {/* Weaknesses */}
+                <div>
+                  <span className="text-red-500 font-medium">✗ </span>
+                  <span className="text-slate-600">{comp.weaknesses}</span>
+                </div>
+              </div>
             </div>
-
-            {/* Info */}
-            <div className="flex-1 text-xs space-y-1.5">
-              <div>
-                <span className="text-slate-400">By:</span>
-                <span className="text-slate-700 ml-1">{comp.company}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Type:</span>
-                <span className="text-slate-700 ml-1">{comp.type}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Users:</span>
-                <span className="text-slate-700 ml-1 font-semibold">
-                  {comp.users}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-400">Founded:</span>
-                <span className="text-slate-700 ml-1">{comp.founded}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Pricing:</span>
-                <span className="text-slate-700 ml-1">{comp.pricing}</span>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-slate-200 my-1.5" />
-
-              {/* Strengths */}
-              <div>
-                <span className="text-emerald-600 font-medium">✓ </span>
-                <span className="text-slate-600">{comp.strengths}</span>
-              </div>
-
-              {/* Weaknesses */}
-              <div>
-                <span className="text-red-500 font-medium">✗ </span>
-                <span className="text-slate-600">{comp.weaknesses}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Summary Bar */}
