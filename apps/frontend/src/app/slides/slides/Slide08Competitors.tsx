@@ -85,56 +85,64 @@ export default function Slide08Competitors() {
           {competitors.map((comp, index) => (
             <div
               key={index}
-              className="bg-slate-50 rounded-xl p-3 border border-slate-200 flex flex-col"
+              className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col"
             >
               {/* Header */}
               <div
-                className={`bg-gradient-to-br ${comp.color} rounded-lg p-3 mb-2`}
+                className={`bg-gradient-to-br ${comp.color} rounded-lg p-3 mb-3`}
               >
-                <comp.icon className="w-8 h-8 text-white mx-auto mb-1" />
-                <h3 className="text-white font-bold text-center text-sm">
+                <comp.icon className="w-10 h-10 text-white mx-auto mb-1" />
+                <h3 className="text-white font-bold text-center text-base">
                   {comp.name}
                 </h3>
               </div>
 
               {/* Info */}
-              <div className="flex-1 text-xs space-y-1.5">
+              <div className="flex-1 text-sm space-y-2">
                 <div>
-                  <span className="text-slate-400">By:</span>
-                  <span className="text-slate-700 ml-1">{comp.company}</span>
+                  <span className="text-slate-500">By:</span>
+                  <span className="text-slate-800 ml-1 font-medium">
+                    {comp.company}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Type:</span>
-                  <span className="text-slate-700 ml-1">{comp.type}</span>
+                  <span className="text-slate-500">Type:</span>
+                  <span className="text-slate-800 ml-1 font-medium">
+                    {comp.type}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Users:</span>
-                  <span className="text-slate-700 ml-1 font-semibold">
+                  <span className="text-slate-500">Users:</span>
+                  <span className="text-slate-800 ml-1 font-bold">
                     {comp.users}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Founded:</span>
-                  <span className="text-slate-700 ml-1">{comp.founded}</span>
+                  <span className="text-slate-500">Founded:</span>
+                  <span className="text-slate-800 ml-1 font-medium">
+                    {comp.founded}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Pricing:</span>
-                  <span className="text-slate-700 ml-1">{comp.pricing}</span>
+                  <span className="text-slate-500">Pricing:</span>
+                  <span className="text-slate-800 ml-1 font-medium">
+                    {comp.pricing}
+                  </span>
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-slate-200 my-1.5" />
+                <div className="border-t border-slate-200 my-2" />
 
                 {/* Strengths */}
                 <div>
-                  <span className="text-emerald-600 font-medium">✓ </span>
-                  <span className="text-slate-600">{comp.strengths}</span>
+                  <span className="text-emerald-600 font-bold">✓ </span>
+                  <span className="text-slate-700">{comp.strengths}</span>
                 </div>
 
                 {/* Weaknesses */}
                 <div>
-                  <span className="text-red-500 font-medium">✗ </span>
-                  <span className="text-slate-600">{comp.weaknesses}</span>
+                  <span className="text-red-500 font-bold">✗ </span>
+                  <span className="text-slate-700">{comp.weaknesses}</span>
                 </div>
               </div>
             </div>
