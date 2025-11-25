@@ -41,15 +41,15 @@ const goals = [
 
 export default function Slide04Motivation() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-          <Target className="w-6 h-6 text-purple-600" />
+      <div className="flex items-center gap-4 mb-10">
+        <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
+          <Target className="w-7 h-7 text-purple-600" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">Motivation</h1>
-          <p className="text-slate-500">Why We Built ScholarFlow</p>
+          <h1 className="text-4xl font-bold text-black">Motivation</h1>
+          <p className="text-black text-lg">Why We Built ScholarFlow</p>
         </div>
       </div>
 
@@ -68,9 +68,11 @@ export default function Slide04Motivation() {
                 >
                   <item.icon className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="font-bold text-slate-800">{item.title}</h3>
+                <h3 className="font-bold text-black text-lg">
+                  {item.title}
+                </h3>
               </div>
-              <p className="text-slate-600 text-sm mb-2">{item.problem}</p>
+              <p className="text-black text-base mb-3">{item.problem}</p>
               <div className="bg-white rounded-lg px-3 py-2 border border-slate-200">
                 <span className="text-sm font-medium text-red-600">
                   ⚠️ {item.impact}
@@ -82,8 +84,8 @@ export default function Slide04Motivation() {
 
         {/* Right - Goals */}
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
-          <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" />
+          <h3 className="text-xl font-bold text-black mb-5 flex items-center gap-2">
+            <Shield className="w-6 h-6 text-blue-600" />
             Solution Goals
           </h3>
           <div className="space-y-3">
@@ -93,7 +95,7 @@ export default function Slide04Motivation() {
                 className="bg-white rounded-lg px-3 py-2.5 border border-slate-200 flex items-center gap-2"
               >
                 <span className="text-lg">{goal.icon}</span>
-                <span className="text-slate-700 text-sm">{goal.text}</span>
+                <span className="text-black text-base font-medium">{goal.text}</span>
               </div>
             ))}
           </div>

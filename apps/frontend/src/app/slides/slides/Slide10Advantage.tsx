@@ -74,33 +74,35 @@ const uniqueAdvantages = [
 
 export default function Slide10Advantage() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-16 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
-          <Crown className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-center gap-4 mb-10">
+        <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
+          <Crown className="w-7 h-7 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="text-4xl font-bold text-black">
             Competitive Advantage
           </h1>
-          <p className="text-slate-500 text-sm">Why ScholarFlow Stands Out</p>
+          <p className="text-black text-lg font-medium">
+            Why ScholarFlow Stands Out
+          </p>
         </div>
       </div>
 
       <div className="flex-1 grid grid-cols-2 gap-8">
         {/* Left: Bar Chart */}
         <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
-          <h3 className="text-base font-bold text-slate-700 mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-blue-600" />
+          <h3 className="text-xl font-bold text-black mb-5 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-blue-600" />
             Feature Score Comparison
           </h3>
           <div className="space-y-4">
             {advantages.map((adv, index) => (
               <div key={index} className="space-y-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600 font-medium">{adv.name}</span>
-                  <span className="text-blue-600 font-bold">
+                <div className="flex justify-between text-base">
+                  <span className="text-black font-semibold">{adv.name}</span>
+                  <span className="text-blue-700 font-bold">
                     {adv.scholarFlow}%
                   </span>
                 </div>
@@ -112,11 +114,11 @@ export default function Slide10Advantage() {
                   />
                   {/* Competitors Average (dashed line marker) */}
                   <div
-                    className="absolute top-0 h-full w-0.5 bg-red-500"
+                    className="absolute top-0 h-full w-0.5 bg-red-600"
                     style={{ left: `${adv.others}%` }}
                   />
                 </div>
-                <div className="text-right text-xs text-red-500 font-medium">
+                <div className="text-right text-sm text-red-700 font-semibold">
                   Avg. Competitors: {adv.others}%
                 </div>
               </div>
@@ -126,11 +128,11 @@ export default function Slide10Advantage() {
 
         {/* Right: Unique Advantages */}
         <div className="space-y-4">
-          <h3 className="text-base font-bold text-slate-700 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-amber-500" />
+          <h3 className="text-lg font-bold text-black flex items-center gap-2">
+            <Zap className="w-6 h-6 text-amber-500" />
             What Sets Us Apart
           </h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {uniqueAdvantages.map((adv, index) => (
               <div
                 key={index}
@@ -139,10 +141,12 @@ export default function Slide10Advantage() {
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">{adv.icon}</span>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-800">
+                    <h4 className="text-base font-bold text-black">
                       {adv.title}
                     </h4>
-                    <p className="text-xs text-slate-600 mt-1">{adv.desc}</p>
+                    <p className="text-sm text-black mt-1 font-medium">
+                      {adv.desc}
+                    </p>
                   </div>
                 </div>
               </div>
