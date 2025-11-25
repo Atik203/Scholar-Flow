@@ -2,18 +2,15 @@ import { cn } from "@/lib/utils";
 import { Check, Minus, Table, X } from "lucide-react";
 
 const features = [
+  "Smart Paper Upload",
   "AI Summarization",
-  "AI Literature Review",
   "AI Chat with Papers",
-  "Real-time Collaboration",
-  "Team Workspaces",
-  "Modern UI/UX",
-  "Open Source",
-  "Affordable Pricing",
   "Rich Text Editor",
-  "API Access",
-  "Browser Extension",
+  "Team Workspaces",
+  "Collections & Tagging",
   "Citation Generator",
+  "PDF Annotations",
+  "Real-time Collaboration",
 ];
 
 const products = [
@@ -30,18 +27,15 @@ const products = [
 
 // Feature support matrix: 2 = full, 1 = partial, 0 = no
 const support: number[][] = [
+  [2, 2, 2, 1, 2, 2], // Smart Paper Upload
   [2, 0, 0, 0, 0, 0], // AI Summarization
-  [2, 0, 0, 0, 0, 0], // AI Literature Review
   [2, 0, 0, 0, 0, 0], // AI Chat with Papers
-  [2, 1, 0, 0, 1, 1], // Real-time Collaboration
-  [2, 1, 0, 0, 1, 2], // Team Workspaces
-  [2, 1, 1, 1, 2, 0], // Modern UI/UX
-  [2, 0, 2, 0, 0, 0], // Open Source
-  [2, 1, 2, 2, 2, 0], // Affordable Pricing
   [2, 1, 0, 0, 0, 0], // Rich Text Editor
-  [2, 1, 2, 1, 1, 0], // API Access
-  [2, 2, 2, 1, 2, 2], // Browser Extension
+  [2, 1, 0, 0, 1, 2], // Team Workspaces
+  [2, 2, 2, 1, 2, 2], // Collections & Tagging
   [2, 2, 2, 1, 2, 2], // Citation Generator
+  [2, 2, 2, 0, 2, 1], // PDF Annotations
+  [2, 1, 0, 0, 1, 1], // Real-time Collaboration
 ];
 
 function SupportIcon({ level }: { level: number }) {
@@ -147,7 +141,7 @@ export default function Slide09Comparison() {
                     <span
                       className={`font-bold ${pIndex === 0 ? "text-blue-700 text-lg" : "text-slate-700 text-sm"}`}
                     >
-                      {fullSupport}/12
+                      {fullSupport}/9
                     </span>
                   </td>
                 );
