@@ -1,7 +1,6 @@
 import { Layers } from "lucide-react";
 import {
   SiAmazons3,
-  SiDocker,
   SiExpress,
   SiJsonwebtokens,
   SiNextdotjs,
@@ -42,7 +41,6 @@ const infraStack = [
   { icon: SiAmazons3, name: "AWS S3", color: "#569A31" },
   { icon: SiVercel, name: "Vercel", color: "#000000" },
   { icon: SiStripe, name: "Stripe", color: "#635BFF" },
-  { icon: SiDocker, name: "Docker", color: "#2496ED" },
 ];
 
 const TechBadge = ({
@@ -130,7 +128,7 @@ export default function Slide06TechStack() {
             </h2>
             <span className="text-slate-400 text-sm ml-auto">Cloud-Native</span>
           </div>
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-5 gap-3">
             {infraStack.map((tech, index) => (
               <TechBadge key={index} {...tech} />
             ))}

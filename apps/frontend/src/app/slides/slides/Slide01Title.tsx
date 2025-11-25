@@ -1,4 +1,5 @@
-import { GraduationCap, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import Image from "next/image";
 
 export default function Slide01Title() {
   return (
@@ -9,10 +10,15 @@ export default function Slide01Title() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-        {/* Logo & Icon */}
+        {/* Logo */}
         <div className="flex items-center justify-center mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <GraduationCap className="w-10 h-10 text-white" />
+          <div className="w-24 h-24 relative">
+            <Image
+              src="/logo.png"
+              alt="ScholarFlow Logo"
+              fill
+              className="object-contain"
+            />
           </div>
         </div>
 
