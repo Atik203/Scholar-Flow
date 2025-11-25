@@ -12,6 +12,7 @@ import { ADMIN_SUCCESS_MESSAGES, CACHE_DURATIONS } from "./admin.constant";
 import { IAdminFilters } from "./admin.interface";
 import { adminService } from "./admin.service";
 import { analyticsService } from "./analytics.service";
+import { userManagementService } from "./userManagement.service";
 
 class AdminController {
   /**
@@ -227,6 +228,198 @@ class AdminController {
         success: true,
         message: "Top customers retrieved successfully",
         data: customers,
+      });
+    }
+  );
+
+  /**
+   * Get subscriber details with pagination
+   * GET /api/admin/analytics/subscribers
+   */
+  getSubscriberDetails: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const status = req.query.status as string | undefined;
+      const planId = req.query.planId as string | undefined;
+
+      const result = await analyticsService.getSubscriberDetails(
+        page,
+        limit,
+        status,
+        planId
+      );
+
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Subscriber details retrieved successfully",
+        data: result.subscribers,
+        meta: {
+          page: result.pagination.page,
+          limit: result.pagination.limit,
+          total: result.pagination.total,
+          totalPage: result.pagination.totalPages,
+        },
+      });
+    }
+  );
+
+  /**
+   * Get all users with pagination and filters
+   * GET /api/admin/users
+   */
+  getAllUsers: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const page = req.query.page ? parseInt(req.query.page as string) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const searchQuery = req.query.search as string | undefined;
+      const role = req.query.role as string | undefined;
+      const status = req.query.status as string | undefined;
+
+      const result = await userManagementService.getAllUsers(
+        page,
+        limit,
+        searchQuery,
+        role,
+        status
+      );
+
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.RECENT_USERS}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.RECENT_USERS}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Users retrieved successfully",
+        data: result.users,
+        meta: {
+          page: result.pagination.currentPage,
+          limit,
+          total: result.pagination.totalCount,
+          totalPage: result.pagination.totalPages,
+          hasNextPage: result.pagination.hasNextPage,
+          hasPreviousPage: result.pagination.hasPreviousPage,
+        },
+      });
+    }
+  );
+
+  /**
+   * Get user statistics
+   * GET /api/admin/users/stats
+   */
+  getUserStats: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const stats = await userManagementService.getUserStats();
+
+      res.set({
+        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
+      });
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "User statistics retrieved successfully",
+        data: stats,
+      });
+    }
+  );
+
+  /**
+   * Update user role
+   * PATCH /api/admin/users/:id/role
+   */
+  updateUserRole: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const { id: userId } = req.params;
+      const { role: newRole } = req.body;
+      const adminId = req.user!.userId;
+
+      const updatedUser = await userManagementService.updateUserRole(
+        userId,
+        newRole,
+        adminId
+      );
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "User role updated successfully",
+        data: updatedUser,
+      });
+    }
+  );
+
+  /**
+   * Deactivate user (soft delete)
+   * PATCH /api/admin/users/:id/deactivate
+   */
+  deactivateUser: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const { id: userId } = req.params;
+      const adminId = req.user!.userId;
+
+      const result = await userManagementService.deactivateUser(
+        userId,
+        adminId
+      );
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: result.message,
+        data: { userId: result.userId },
+      });
+    }
+  );
+
+  /**
+   * Reactivate user
+   * PATCH /api/admin/users/:id/reactivate
+   */
+  reactivateUser: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const { id: userId } = req.params;
+
+      const result = await userManagementService.reactivateUser(userId);
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: result.message,
+        data: { userId: result.userId },
+      });
+    }
+  );
+
+  /**
+   * Permanently delete user (hard delete)
+   * DELETE /api/admin/users/:id
+   */
+  permanentlyDeleteUser: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const { id: userId } = req.params;
+      const adminId = req.user!.userId;
+
+      const result = await userManagementService.permanentlyDeleteUser(
+        userId,
+        adminId
+      );
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: result.message,
+        data: { userId: result.userId },
       });
     }
   );

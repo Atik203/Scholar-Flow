@@ -130,6 +130,7 @@ export const authMiddleware = async (
     }
 
     req.user = {
+      userId: user.id,
       id: user.id,
       email: user.email,
       role: user.role,
@@ -227,6 +228,7 @@ export const optionalAuth = async (
 
     if (user && !user.isDeleted) {
       req.user = {
+        userId: user.id,
         id: user.id,
         email: user.email,
         role: user.role,

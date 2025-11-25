@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Compiler optimizations for production performance
+  devIndicators: false,
   compiler: {
     // Remove console logs in production except errors and warnings
     removeConsole:
@@ -43,6 +44,10 @@ const nextConfig: NextConfig = {
     // Uses beasties (formerly critters) for critical CSS extraction
     optimizeCss: true,
   },
+
+  // Production error handling - hide error overlay in production
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false, // Disable source maps in production for security
 
   // Image optimization configuration
   images: {

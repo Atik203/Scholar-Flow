@@ -1,0 +1,220 @@
+\chapter{SQL Queries}
+\label{ch:sql-queries}
+
+This chapter lists the core complex parameterized queries used by \projectname{} (via Prisma RAW Query). Each entry showcases advanced PostgreSQL features like multi-table JOINs, aggregations, window functions, and analytics. Performance charts and optimization notes are intentionally omitted per requirements.
+
+% 1
+\section{Paper Details with Collection Aggregates}
+Gets a single paper with uploader info and collection membership counts.
+\begin{lstlisting}[language=SQL]
+SELECT p.*, u.name AS "uploaderName",
+       COUNT(DISTINCT cp."collectionId")::int AS "collectionCount"
+FROM "Paper" p
+JOIN "User" u ON p."uploaderId" = u.id
+LEFT JOIN "CollectionPaper" cp ON cp."paperId" = p.id AND cp."isDeleted" = false
+WHERE p.id = $1 AND p."isDeleted" = false
+GROUP BY p.id, u.name;
+\end{lstlisting}
+
+% 2
+\section{Full-Text Search with GIN Index}
+Full-text search across title and authors using PostgreSQL text search vectors.
+\begin{lstlisting}[language=SQL]
+SELECT id, title, authors, abstract
+FROM "Paper"
+WHERE "workspaceId" = $1 AND "isDeleted" = false
+  AND to_tsvector('english', title || ' ' || coalesce(authors,'') || ' ' || coalesce(abstract,''))
+      @@ plainto_tsquery('english', $2)
+ORDER BY ts_rank(to_tsvector('english', title), plainto_tsquery($2)) DESC
+LIMIT $3 OFFSET $4;
+\end{lstlisting}
+
+% 3
+\section{User Collections with Multi-Level Aggregates}
+Collections with paper/member counts and last activity tracking.
+\begin{lstlisting}[language=SQL]
+SELECT c.id, c.name, c."isPublic",
+       COUNT(DISTINCT cp."paperId")::int AS "paperCount",
+       COUNT(DISTINCT cm.id)::int AS "memberCount",
+       MAX(cp."addedAt") AS "lastPaperAdded"
+FROM "Collection" c
+LEFT JOIN "CollectionPaper" cp ON c.id = cp."collectionId" AND cp."isDeleted" = false
+LEFT JOIN "CollectionMember" cm ON c.id = cm."collectionId" AND cm."isDeleted" = false
+WHERE c."creatorId" = $1 AND c."isDeleted" = false
+GROUP BY c.id
+ORDER BY c."createdAt" DESC;
+\end{lstlisting}
+
+% 4
+\section{Batch Insert with Conflict Resolution}
+Adds multiple papers to collection atomically, skipping duplicates.
+\begin{lstlisting}[language=SQL]
+INSERT INTO "CollectionPaper"("collectionId","paperId","addedById","addedAt")
+SELECT $1, unnest($2::int[]), $3, NOW()
+ON CONFLICT ("collectionId","paperId") DO NOTHING
+RETURNING id, "paperId";
+\end{lstlisting}
+
+% 5
+\section{Workspace Members with Role Hierarchy}
+Lists active members with role-based sorting and activity metrics.
+\begin{lstlisting}[language=SQL]
+SELECT wm.id, wm.role, wm."joinedAt",
+       u.id AS "userId", u.name, u.email,
+       COUNT(DISTINCT p.id)::int AS "papersUploaded"
+FROM "WorkspaceMember" wm
+JOIN "User" u ON wm."userId" = u.id
+LEFT JOIN "Paper" p ON p."uploaderId" = u.id AND p."workspaceId" = $1
+WHERE wm."workspaceId" = $1 AND wm.status = 'ACTIVE'
+GROUP BY wm.id, u.id
+ORDER BY
+  CASE wm.role
+    WHEN 'OWNER' THEN 1
+    WHEN 'TEAM_LEAD' THEN 2
+    WHEN 'PRO_RESEARCHER' THEN 3
+    ELSE 4
+  END, wm."joinedAt" ASC;
+\end{lstlisting}
+
+% 6
+\section{Authorized Role Update with Validation}
+Updates member role with permission validation and audit trail.
+\begin{lstlisting}[language=SQL]
+UPDATE "WorkspaceMember" wm
+SET role = $3, "updatedAt" = NOW()
+FROM "WorkspaceMember" req
+WHERE wm."workspaceId" = $1 AND wm."userId" = $2
+  AND req."workspaceId" = $1 AND req."userId" = $4
+  AND req.role IN ('OWNER','TEAM_LEAD')
+  AND wm.role NOT IN ('OWNER')
+RETURNING wm.id, wm.role, wm."updatedAt";
+\end{lstlisting}
+
+% 7
+\section{Tag Analytics with Usage Trends}
+Returns most used tags with paper count and recent activity.
+\begin{lstlisting}[language=SQL]
+SELECT t.name,
+       COUNT(DISTINCT pt."paperId")::int AS "paperCount",
+       COUNT(DISTINCT p."uploaderId")::int AS "uniqueUsers",
+       MAX(p."createdAt") AS "lastUsed"
+FROM "Tag" t
+JOIN "PaperTag" pt ON pt."tagId" = t.id
+JOIN "Paper" p ON p.id = pt."paperId"
+WHERE p."workspaceId" = $1 AND p."isDeleted" = false
+GROUP BY t.id, t.name
+HAVING COUNT(pt."paperId") >= 2
+ORDER BY "paperCount" DESC, "lastUsed" DESC
+LIMIT 20;
+\end{lstlisting}
+
+% 8
+\section{Publication Timeline Histogram}
+Aggregates papers by year with cumulative totals for trend analysis.
+\begin{lstlisting}[language=SQL]
+SELECT "publicationYear" AS year,
+       COUNT(*)::int AS count,
+       SUM(COUNT(*)) OVER (ORDER BY "publicationYear")::int AS cumulative
+FROM "Paper"
+WHERE "workspaceId" = $1 AND "isDeleted" = false
+  AND "publicationYear" IS NOT NULL
+GROUP BY year
+ORDER BY year DESC;
+\end{lstlisting}
+
+% 9
+\section{System Statistics (Admin Dashboard)}
+Comprehensive system health metrics with multiple subqueries.
+\begin{lstlisting}[language=SQL]
+SELECT
+  (SELECT COUNT(*)::int FROM "User" WHERE "isDeleted" = false) AS "totalUsers",
+  (SELECT COUNT(*)::int FROM "User" WHERE "emailVerified" IS NOT NULL) AS "verifiedUsers",
+  (SELECT COUNT(*)::int FROM "Paper" WHERE "isDeleted" = false) AS "totalPapers",
+  (SELECT COUNT(*)::int FROM "Workspace" WHERE "isDeleted" = false) AS "totalWorkspaces",
+  (SELECT COUNT(*)::int FROM "Collection" WHERE "isDeleted" = false) AS "totalCollections",
+  (SELECT COUNT(*)::int FROM "Session" WHERE "expiresAt" > NOW()) AS "activeSessions",
+  (SELECT COALESCE(SUM("storageUsed"),0)::bigint FROM "Paper") AS "totalStorageUsed",
+  (SELECT COUNT(*)::int FROM "Subscription" WHERE status = 'ACTIVE') AS "activeSubscriptions";
+\end{lstlisting}
+
+% 10
+\section{Revenue Analytics with Growth Metrics}
+Calculates MRR, customer lifetime value, and period-over-period growth.
+\begin{lstlisting}[language=SQL]
+SELECT
+  DATE_TRUNC('month', "createdAt") AS month,
+  COUNT(*)::int AS "paymentCount",
+  SUM("amount")::bigint AS "totalRevenue",
+  COUNT(DISTINCT "userId")::int AS "uniqueCustomers",
+  AVG("amount")::numeric(10,2) AS "averagePayment",
+  LAG(SUM("amount")) OVER (ORDER BY DATE_TRUNC('month', "createdAt")) AS "previousMonthRevenue"
+FROM "Payment"
+WHERE "status" = 'COMPLETED'
+  AND "createdAt" >= $1 AND "createdAt" < $2
+GROUP BY month
+ORDER BY month DESC;
+\end{lstlisting}
+
+% 11
+\section{AI Document Processing Pipeline}
+Retrieves paper chunks with content analysis for AI summarization.
+\begin{lstlisting}[language=SQL]
+SELECT pc.id, pc."chunkIndex", pc.content, pc.metadata,
+       p.id AS "paperId", p.title, p.abstract,
+       LENGTH(pc.content) AS "contentLength",
+       COUNT(*) OVER (PARTITION BY pc."paperId") AS "totalChunks"
+FROM "PaperChunk" pc
+JOIN "Paper" p ON p.id = pc."paperId"
+WHERE pc."paperId" = $1 AND p."isDeleted" = false
+ORDER BY pc."chunkIndex" ASC
+LIMIT $2 OFFSET $3;
+\end{lstlisting}
+
+% 12
+\section{User Engagement Metrics with Activity Scoring}
+Tracks multi-dimensional user activity with engagement scoring.
+\begin{lstlisting}[language=SQL]
+SELECT
+  u.id, u.name, u.email, u."createdAt",
+  COUNT(DISTINCT p.id)::int AS "papersUploaded",
+  COUNT(DISTINCT a.id)::int AS "annotationsMade",
+  COUNT(DISTINCT ait.id)::int AS "aiChatsStarted",
+  COUNT(DISTINCT c.id)::int AS "collectionsCreated",
+  MAX(s."expiresAt") AS "lastActive",
+  (COUNT(DISTINCT p.id) * 10 +
+   COUNT(DISTINCT a.id) * 5 +
+   COUNT(DISTINCT ait.id) * 8)::int AS "engagementScore"
+FROM "User" u
+LEFT JOIN "Paper" p ON p."uploaderId" = u.id AND p."isDeleted" = false
+LEFT JOIN "Annotation" a ON a."userId" = u.id AND a."isDeleted" = false
+LEFT JOIN "AIInsightThread" ait ON ait."userId" = u.id AND ait."isDeleted" = false
+LEFT JOIN "Collection" c ON c."creatorId" = u.id AND c."isDeleted" = false
+LEFT JOIN "Session" s ON s."userId" = u.id
+WHERE u."isDeleted" = false AND u."createdAt" >= $1
+GROUP BY u.id
+ORDER BY "engagementScore" DESC, "lastActive" DESC
+LIMIT $2 OFFSET $3;
+\end{lstlisting}
+
+% 13
+\section{Collection Collaboration Analytics}
+Analyzes sharing patterns with role distribution and activity metrics.
+\begin{lstlisting}[language=SQL]
+SELECT
+  c.id, c.name, c."isPublic", c."createdAt",
+  u.name AS "creatorName",
+  COUNT(DISTINCT cm.id)::int AS "memberCount",
+  COUNT(DISTINCT cp."paperId")::int AS "paperCount",
+  COUNT(DISTINCT cm.id) FILTER (WHERE cm.role = 'EDITOR')::int AS "editorCount",
+  COUNT(DISTINCT cm.id) FILTER (WHERE cm.role = 'VIEWER')::int AS "viewerCount",
+  MAX(cp."addedAt") AS "lastPaperAdded",
+  ROUND(AVG(EXTRACT(EPOCH FROM (NOW() - cp."addedAt"))/86400)::numeric, 1) AS "avgPaperAgeDays"
+FROM "Collection" c
+JOIN "User" u ON c."creatorId" = u.id
+LEFT JOIN "CollectionMember" cm ON cm."collectionId" = c.id AND cm."isDeleted" = false
+LEFT JOIN "CollectionPaper" cp ON cp."collectionId" = c.id AND cp."isDeleted" = false
+WHERE c."workspaceId" = $1 AND c."isDeleted" = false
+GROUP BY c.id, u.name
+HAVING COUNT(DISTINCT cp."paperId") > 0
+ORDER BY "memberCount" DESC, "paperCount" DESC;
+\end{lstlisting}

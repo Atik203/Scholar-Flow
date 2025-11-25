@@ -1,23 +1,35 @@
 "use client";
 
-import { Document, Page, pdfjs } from "react-pdf";
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
-import { AnnotationToolbar } from "./AnnotationToolbar";
+import { Button } from "@/components/ui/button";
+import {
+  AnnotationAnchor,
+  AnnotationType,
+  useCreateAnnotationMutation,
+  useGetPaperAnnotationsQuery,
+} from "@/redux/api/annotationApi";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 import { AnnotationLayer } from "./AnnotationLayer";
 import { AnnotationList } from "./AnnotationList";
 import { AnnotationPopup } from "./AnnotationPopup";
-import { useGetPaperAnnotationsQuery, useCreateAnnotationMutation } from "@/redux/api/annotationApi";
-import { Annotation, AnnotationAnchor } from "@/redux/api/annotationApi";
-import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+import { AnnotationToolbar } from "./AnnotationToolbar";
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Configure PDF.js worker - use jsdel pdf workivr CDN which is more reliable
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfAnnotationViewerProps {
   fileUrl: string;
@@ -40,7 +52,8 @@ export function PdfAnnotationViewer({
   const [selectedText, setSelectedText] = useState<string>("");
   const [selection, setSelection] = useState<AnnotationAnchor | null>(null);
   const [isAnnotationPopupOpen, setIsAnnotationPopupOpen] = useState(false);
-  const [annotationType, setAnnotationType] = useState<"HIGHLIGHT" | "COMMENT" | "NOTE">("HIGHLIGHT");
+  const [annotationType, setAnnotationType] =
+    useState<AnnotationType>("HIGHLIGHT");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [showAnnotationList, setShowAnnotationList] = useState(false);
 
@@ -48,13 +61,15 @@ export function PdfAnnotationViewer({
   const textLayerRef = useRef<HTMLDivElement>(null);
 
   // Fetch annotations for this paper
-  const { data: annotationsData, isLoading: annotationsLoading } = useGetPaperAnnotationsQuery({
-    paperId,
-    includeReplies: true,
-  });
+  const { data: annotationsData, isLoading: annotationsLoading } =
+    useGetPaperAnnotationsQuery({
+      paperId,
+      includeReplies: true,
+    });
 
   // Create annotation mutation
-  const [createAnnotation, { isLoading: isCreatingAnnotation }] = useCreateAnnotationMutation();
+  const [createAnnotation, { isLoading: isCreatingAnnotation }] =
+    useCreateAnnotationMutation();
 
   const annotations = annotationsData?.data || [];
 
@@ -63,9 +78,12 @@ export function PdfAnnotationViewer({
     (annotation) => annotation.anchor.page === currentPage
   );
 
-  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-  }, []);
+  const onDocumentLoadSuccess = useCallback(
+    ({ numPages }: { numPages: number }) => {
+      setNumPages(numPages);
+    },
+    []
+  );
 
   const handleTextSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -99,35 +117,41 @@ export function PdfAnnotationViewer({
     }
   }, [currentPage, scale]);
 
-  const onPageLoadSuccess = useCallback((page: any) => {
-    // Set up text selection handling
-    const textLayer = page.textLayer;
-    if (textLayer) {
-      textLayer.textDivs.forEach((textDiv: HTMLElement) => {
-        textDiv.addEventListener("mouseup", handleTextSelection);
-      });
-    }
-  }, [handleTextSelection]);
-
-  const handleAnnotationCreate = useCallback(async (text: string) => {
-    if (selection) {
-      try {
-        await createAnnotation({
-          paperId,
-          type: annotationType,
-          anchor: selection,
-          text: text.trim(),
-        }).unwrap();
-
-        showSuccessToast("Annotation saved successfully");
-        setIsAnnotationPopupOpen(false);
-        setSelection(null);
-        setSelectedText("");
-      } catch (error: any) {
-        showErrorToast(error.data?.message || "Failed to save annotation");
+  const onPageLoadSuccess = useCallback(
+    (page: any) => {
+      // Set up text selection handling
+      const textLayer = page.textLayer;
+      if (textLayer) {
+        textLayer.textDivs.forEach((textDiv: HTMLElement) => {
+          textDiv.addEventListener("mouseup", handleTextSelection);
+        });
       }
-    }
-  }, [selection, annotationType, paperId, createAnnotation]);
+    },
+    [handleTextSelection]
+  );
+
+  const handleAnnotationCreate = useCallback(
+    async (text: string) => {
+      if (selection) {
+        try {
+          await createAnnotation({
+            paperId,
+            type: annotationType,
+            anchor: selection,
+            text: text.trim(),
+          }).unwrap();
+
+          showSuccessToast("Annotation saved successfully");
+          setIsAnnotationPopupOpen(false);
+          setSelection(null);
+          setSelectedText("");
+        } catch (error: any) {
+          showErrorToast(error.data?.message || "Failed to save annotation");
+        }
+      }
+    },
+    [selection, annotationType, paperId, createAnnotation]
+  );
 
   const handleAnnotationCancel = useCallback(() => {
     setIsAnnotationPopupOpen(false);
@@ -192,7 +216,9 @@ export function PdfAnnotationViewer({
             <Button variant="outline" size="sm" onClick={zoomOut}>
               <ZoomOut className="h-4 w-4" />
             </Button>
-            <span className="text-sm font-medium">{Math.round(scale * 100)}%</span>
+            <span className="text-sm font-medium">
+              {Math.round(scale * 100)}%
+            </span>
             <Button variant="outline" size="sm" onClick={zoomIn}>
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -229,14 +255,18 @@ export function PdfAnnotationViewer({
                   <div className="flex items-center justify-center h-96">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                      <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                      <p className="text-sm text-muted-foreground">
+                        Loading PDF...
+                      </p>
                     </div>
                   </div>
                 }
                 error={
                   <div className="flex items-center justify-center h-96">
                     <div className="text-center">
-                      <p className="text-sm text-destructive">Failed to load PDF</p>
+                      <p className="text-sm text-destructive">
+                        Failed to load PDF
+                      </p>
                     </div>
                   </div>
                 }

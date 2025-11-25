@@ -1,14 +1,14 @@
 "use client";
 
+import { PdfAnnotationViewerEnhanced } from "@/components/annotations/PdfAnnotationViewerEnhanced";
+import { CommentSection } from "@/components/comments/CommentSection";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { NotesPanel } from "@/components/notes/NotesPanel";
 import { AiInsightsPanel } from "@/components/papers/AiInsightsPanel";
 import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
-import { PdfAnnotationViewer } from "@/components/annotations/PdfAnnotationViewer";
-import { CommentSection } from "@/components/comments/CommentSection";
-import { NotesPanel } from "@/components/notes/NotesPanel";
 import {
   showErrorToast,
   showSuccessToast,
@@ -59,18 +59,18 @@ import {
   Edit,
   Eye,
   FileText,
+  Highlighter,
   Loader2,
+  MessageSquare,
   Plus,
   Save,
+  StickyNote,
   Trash2,
   User,
   X,
-  MessageSquare,
-  StickyNote,
-  Highlighter,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use, useState } from "react";
 
 interface PaperDetailPageProps {
@@ -81,6 +81,12 @@ interface PaperDetailPageProps {
 
 export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const resolvedParams = use(params);
+
+  // Validate params
+  if (!resolvedParams?.id) {
+    notFound();
+  }
+
   const router = useRouter();
   const isProtected = useProtectedRoute();
 
@@ -91,7 +97,9 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const [editYear, setEditYear] = useState<number | "">("");
   const [newAuthor, setNewAuthor] = useState("");
   const [showPreview, setShowPreview] = useState(false);
-  const [activeTab, setActiveTab] = useState<"preview" | "annotations" | "comments" | "notes">("preview");
+  const [activeTab, setActiveTab] = useState<
+    "preview" | "annotations" | "comments" | "notes"
+  >("preview");
 
   const {
     data: paper,
@@ -110,8 +118,14 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
   const [deletePaper, { isLoading: isDeleting }] = useDeletePaperMutation();
 
   // Hook for signed file URL must be declared unconditionally
-  const { data: fileUrlData, isFetching: isFetchingFileUrl } =
-    useGetPaperFileUrlQuery(resolvedParams.id, { skip: !showPreview });
+  // Load file URL when preview is shown OR when on annotations tab
+  const {
+    data: fileUrlData,
+    isFetching: isFetchingFileUrl,
+    error: fileUrlError,
+  } = useGetPaperFileUrlQuery(resolvedParams.id, {
+    skip: !showPreview && activeTab !== "annotations",
+  });
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
@@ -415,7 +429,11 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                 <nav className="flex space-x-8">
                   {[
                     { id: "preview", label: "Preview", icon: Eye },
-                    { id: "annotations", label: "Annotations", icon: Highlighter },
+                    {
+                      id: "annotations",
+                      label: "Annotations",
+                      icon: Highlighter,
+                    },
                     { id: "comments", label: "Comments", icon: MessageSquare },
                     { id: "notes", label: "Notes", icon: StickyNote },
                   ].map((tab) => {
@@ -448,130 +466,179 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
                         <User className="h-4 w-4" />
                         Authors
                       </Label>
-                  {isEditing ? (
-                    <div className="space-y-3 mt-3">
-                      <div className="flex space-x-2">
-                        <Input
-                          value={newAuthor}
-                          onChange={(e) => setNewAuthor(e.target.value)}
-                          placeholder="Add author name..."
-                          className="flex-1"
-                          onKeyPress={(e) =>
-                            e.key === "Enter" &&
-                            (e.preventDefault(), addAuthor())
-                          }
-                        />
-                        <Button
-                          type="button"
-                          onClick={addAuthor}
-                          size="sm"
-                          variant="secondary"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add
-                        </Button>
-                      </div>
-                      {editAuthors.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {editAuthors.map((author, index) => (
-                            <Badge
-                              key={index}
+                      {isEditing ? (
+                        <div className="space-y-3 mt-3">
+                          <div className="flex space-x-2">
+                            <Input
+                              value={newAuthor}
+                              onChange={(e) => setNewAuthor(e.target.value)}
+                              placeholder="Add author name..."
+                              className="flex-1"
+                              onKeyPress={(e) =>
+                                e.key === "Enter" &&
+                                (e.preventDefault(), addAuthor())
+                              }
+                            />
+                            <Button
+                              type="button"
+                              onClick={addAuthor}
+                              size="sm"
                               variant="secondary"
-                              className="text-sm py-1 px-3"
                             >
-                              <User className="mr-1 h-3 w-3" />
-                              {author}
-                              <button
-                                type="button"
-                                onClick={() => removeAuthor(index)}
-                                className="ml-2 hover:text-destructive transition-colors"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+                          {editAuthors.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {editAuthors.map((author, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="secondary"
+                                  className="text-sm py-1 px-3"
+                                >
+                                  <User className="mr-1 h-3 w-3" />
+                                  {author}
+                                  <button
+                                    type="button"
+                                    onClick={() => removeAuthor(index)}
+                                    className="ml-2 hover:text-destructive transition-colors"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-muted-foreground text-sm italic">
+                              No authors added yet
+                            </p>
+                          )}
                         </div>
                       ) : (
-                        <p className="text-muted-foreground text-sm italic">
-                          No authors added yet
-                        </p>
+                        <div className="mt-3">
+                          {paper.metadata?.authors &&
+                          paper.metadata.authors.length > 0 ? (
+                            <div className="flex flex-wrap gap-2">
+                              {paper.metadata.authors.map((author, index) => (
+                                <Badge
+                                  key={index}
+                                  variant="outline"
+                                  className="text-sm py-1 px-3 bg-background"
+                                >
+                                  <User className="mr-1 h-3 w-3" />
+                                  {author}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-muted-foreground text-sm italic">
+                              No authors specified
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="mt-3">
-                      {paper.metadata?.authors &&
-                      paper.metadata.authors.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {paper.metadata.authors.map((author, index) => (
+
+                    {/* Enhanced Publication Year Section */}
+                    <div className="bg-muted/20 p-4 rounded-lg border">
+                      <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        Publication Year
+                      </Label>
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          min="1900"
+                          max={new Date().getFullYear() + 1}
+                          value={editYear}
+                          onChange={(e) =>
+                            setEditYear(
+                              e.target.value ? parseInt(e.target.value) : ""
+                            )
+                          }
+                          className="mt-3"
+                          placeholder="e.g. 2024"
+                        />
+                      ) : (
+                        <div className="mt-3">
+                          {paper.metadata?.year ? (
                             <Badge
-                              key={index}
                               variant="outline"
                               className="text-sm py-1 px-3 bg-background"
                             >
-                              <User className="mr-1 h-3 w-3" />
-                              {author}
+                              <Calendar className="mr-1 h-3 w-3" />
+                              {paper.metadata.year}
                             </Badge>
-                          ))}
+                          ) : (
+                            <span className="text-muted-foreground text-sm italic">
+                              Not specified
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <p className="text-muted-foreground text-sm italic">
-                          No authors specified
-                        </p>
                       )}
                     </div>
-                  )}
-                </div>
-
-                {/* Enhanced Publication Year Section */}
-                <div className="bg-muted/20 p-4 rounded-lg border">
-                  <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Publication Year
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      type="number"
-                      min="1900"
-                      max={new Date().getFullYear() + 1}
-                      value={editYear}
-                      onChange={(e) =>
-                        setEditYear(
-                          e.target.value ? parseInt(e.target.value) : ""
-                        )
-                      }
-                      className="mt-3"
-                      placeholder="e.g. 2024"
-                    />
-                  ) : (
-                    <div className="mt-3">
-                      {paper.metadata?.year ? (
-                        <Badge
-                          variant="outline"
-                          className="text-sm py-1 px-3 bg-background"
-                        >
-                          <Calendar className="mr-1 h-3 w-3" />
-                          {paper.metadata.year}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-sm italic">
-                          Not specified
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
                   </>
                 )}
 
                 {/* Annotations Tab */}
-                {activeTab === "annotations" && fileUrlData?.data?.url && (
-                  <div className="h-[600px] border rounded-lg">
-                    <PdfAnnotationViewer
-                      fileUrl={fileUrlData.data.url}
-                      paperId={paper.id}
-                      className="h-full"
-                    />
-                  </div>
+                {activeTab === "annotations" && (
+                  <>
+                    {isFetchingFileUrl ? (
+                      <div className="h-[600px] border rounded-lg flex items-center justify-center bg-muted/10">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-muted-foreground">
+                            Loading PDF for annotations...
+                          </p>
+                        </div>
+                      </div>
+                    ) : fileUrlError ? (
+                      <div className="h-[600px] border rounded-lg flex items-center justify-center bg-muted/10">
+                        <div className="text-center">
+                          <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold mb-2 text-destructive">
+                            Failed to Load PDF
+                          </h3>
+                          <p className="text-muted-foreground mb-4">
+                            There was an error loading the PDF file for
+                            annotations.
+                          </p>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.location.reload()}
+                            className="mt-2"
+                          >
+                            Retry
+                          </Button>
+                        </div>
+                      </div>
+                    ) : !fileUrlData?.data?.url ? (
+                      <div className="h-[600px] border rounded-lg flex items-center justify-center bg-muted/10">
+                        <div className="text-center">
+                          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold mb-2">
+                            PDF Not Available
+                          </h3>
+                          <p className="text-muted-foreground mb-4">
+                            The PDF file for this paper is not available for
+                            annotation.
+                          </p>
+                          <div className="mt-4 text-xs text-muted-foreground">
+                            <p>Paper ID: {paper.id}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-[600px] border rounded-lg overflow-hidden bg-background">
+                        <PdfAnnotationViewerEnhanced
+                          fileUrl={fileUrlData.data.url}
+                          paperId={paper.id}
+                          className="h-full"
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {/* Comments Tab */}

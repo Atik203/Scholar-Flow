@@ -5299,6 +5299,7 @@ __metadata:
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.21"
     "@types/html-docx-js": "npm:^0"
+    "@types/http-status": "npm:^1.1.2"
     "@types/jest": "npm:^29.5.8"
     "@types/jsonwebtoken": "npm:^9.0.5"
     "@types/morgan": "npm:^1.9.9"
@@ -5324,6 +5325,7 @@ __metadata:
     express-rate-limit: "npm:^7.1.5"
     helmet: "npm:^7.1.0"
     html-docx-js: "npm:^0.3.1"
+    http-status: "npm:^2.1.0"
     jest: "npm:^29.7.0"
     jsonwebtoken: "npm:^9.0.2"
     langchain: "npm:^0.0.212"
@@ -7242,6 +7244,15 @@ __metadata:
   version: 2.0.5
   resolution: "@types/http-errors@npm:2.0.5"
   checksum: 10c0/00f8140fbc504f47356512bd88e1910c2f07e04233d99c88c854b3600ce0523c8cd0ba7d1897667243282eb44c59abb9245959e2428b9de004f93937f52f7c15
+  languageName: node
+  linkType: hard
+
+"@types/http-status@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@types/http-status@npm:1.1.2"
+  dependencies:
+    http-status: "npm:*"
+  checksum: 10c0/dd72c7eb78ae0638b1f47895015edc82e8435c685a319f06f49040f95dc5e2885b21418246b154f4692086b62ecde3a80dfb5016f875d1d6de2102ca00f260eb
   languageName: node
   linkType: hard
 
@@ -12573,6 +12584,13 @@ __metadata:
     agent-base: "npm:^7.1.0"
     debug: "npm:^4.3.4"
   checksum: 10c0/4207b06a4580fb85dd6dff521f0abf6db517489e70863dca1a0291daa7f2d3d2d6015a57bd702af068ea5cf9f1f6ff72314f5f5b4228d299c0904135d2aef921
+  languageName: node
+  linkType: hard
+
+"http-status@npm:*, http-status@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "http-status@npm:2.1.0"
+  checksum: 10c0/1580ba46fc8bf1c777beec55a4f7c0aecdeb8d42fea8761d2040327183bb398947664cde15cf76256aa036d5ccccf7c6bea971e5ec20daa474bc40ef3e578f5d
   languageName: node
   linkType: hard
 

@@ -1,0 +1,13 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+ScholarFlow demonstrates how a focused database design, pragmatic web architecture, and lightweight AI assistance can meaningfully improve literature workflows. The platform lets researchers upload PDFs, extract metadata, search efficiently, and collaborate in shared workspaces. On the backend, PostgreSQL with parameterized Prisma (RAW Query) delivers secure, predictable performance; composite indexes and pagination keep hot paths fast, while soft delete preserves integrity. The UI emphasizes clarity and speed for core tasks like finding, organizing, and discussing papers. Together, these choices create a reliable foundation for a research hub that is easy to extend—whether adding richer collections, smarter search, or team features. The result is a production-ready MVP that already provides value and a clear path for iterative growth.
+
+\section*{Key takeaways}
+\begin{itemize}[leftmargin=*,topsep=3pt,itemsep=2pt]
+    \item Clean relational model with enforced FKs, unique composites, and soft delete.
+    \item Parameterized Prisma (RAW Query) for secure, consistent data access.
+    \item Composite indexes and pagination on hot endpoints for predictable latency.
+    \item Workspaces and collections enable structured, team-friendly organization.
+    \item Minimal, extensible architecture that is ready for Phase 2 enhancements.
+\end{itemize}

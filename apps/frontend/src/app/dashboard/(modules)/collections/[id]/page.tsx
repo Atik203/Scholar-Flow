@@ -80,7 +80,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use, useState } from "react";
 
 export default function CollectionDetailPage({
@@ -102,6 +102,11 @@ export default function CollectionDetailPage({
   const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
 
   const resolvedParams = use(params);
+
+  // Validate params
+  if (!resolvedParams?.id) {
+    notFound();
+  }
 
   const {
     data: collection,
