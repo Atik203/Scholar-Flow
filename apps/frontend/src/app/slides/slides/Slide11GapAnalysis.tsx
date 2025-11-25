@@ -64,10 +64,10 @@ export default function Slide11GapAnalysis() {
     <div className="w-full h-full bg-white p-5 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-500 rounded-xl flex items-center justify-center">
-          <Search className="w-5 h-5 text-white" />
+        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-rose-500 rounded-xl flex items-center justify-center">
+          <Search className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-800">
+        <h1 className="text-3xl font-bold text-slate-800">
           Market Gap Analysis
         </h1>
       </div>
@@ -77,37 +77,39 @@ export default function Slide11GapAnalysis() {
         {gaps.map((gap, index) => (
           <div
             key={index}
-            className="bg-slate-50 rounded-xl p-3 border border-slate-200"
+            className="bg-slate-50 rounded-xl p-4 border border-slate-200"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                <h3 className="text-sm font-bold text-slate-800">{gap.gap}</h3>
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <h3 className="text-base font-bold text-slate-800">
+                  {gap.gap}
+                </h3>
               </div>
               <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium ${gap.impactColor}`}
+                className={`text-sm px-2 py-0.5 rounded-full font-medium ${gap.impactColor}`}
               >
                 {gap.impact}
               </span>
             </div>
 
-            <p className="text-xs text-slate-500 mb-2">{gap.description}</p>
+            <p className="text-sm text-slate-500 mb-2">{gap.description}</p>
 
-            <div className="text-xs mb-2">
+            <div className="text-sm mb-2">
               <span className="text-slate-400">Affected: </span>
               <span className="text-slate-600">
                 {gap.affectedProducts.join(", ")}
               </span>
             </div>
 
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-2 border border-blue-100">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-2.5 border border-blue-100">
               <div className="flex items-center gap-1.5">
-                <span className="text-emerald-600">✓</span>
-                <span className="text-xs font-medium text-blue-700">
+                <span className="text-emerald-600 text-base">✓</span>
+                <span className="text-sm font-medium text-blue-700">
                   ScholarFlow:
                 </span>
               </div>
-              <p className="text-xs text-slate-700 ml-4">
+              <p className="text-sm text-slate-700 ml-5">
                 {gap.scholarFlowSolution}
               </p>
             </div>
@@ -116,24 +118,24 @@ export default function Slide11GapAnalysis() {
       </div>
 
       {/* Summary */}
-      <div className="mt-3 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-3 text-white">
+      <div className="mt-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
         <div className="flex items-center justify-center gap-6 text-sm">
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-400">6</div>
-            <div className="text-slate-400 text-xs">Critical Gaps</div>
+            <div className="text-2xl font-bold text-red-600">6</div>
+            <div className="text-slate-500 text-xs">Critical Gaps</div>
           </div>
-          <div className="h-8 w-px bg-slate-600" />
+          <div className="h-8 w-px bg-slate-300" />
           <div className="text-center">
-            <div className="text-2xl font-bold text-amber-400">0</div>
-            <div className="text-slate-400 text-xs">Existing AI Solutions</div>
+            <div className="text-2xl font-bold text-amber-600">0</div>
+            <div className="text-slate-500 text-xs">Existing AI Solutions</div>
           </div>
-          <div className="h-8 w-px bg-slate-600" />
+          <div className="h-8 w-px bg-slate-300" />
           <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-400">1</div>
-            <div className="text-slate-400 text-xs">Platform Solving All</div>
+            <div className="text-2xl font-bold text-emerald-600">1</div>
+            <div className="text-slate-500 text-xs">Platform Solving All</div>
           </div>
-          <div className="h-8 w-px bg-slate-600" />
-          <div className="font-medium text-blue-400">= ScholarFlow 🚀</div>
+          <div className="h-8 w-px bg-slate-300" />
+          <div className="font-medium text-blue-600">= ScholarFlow 🚀</div>
         </div>
       </div>
     </div>
