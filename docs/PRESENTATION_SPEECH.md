@@ -28,11 +28,11 @@
 
 ## Slide 1: Title (15 seconds)
 
-### English:
+### English
 
 > "Good morning everyone. We are Team Phantom Devs. Today we will present our project called **ScholarFlow**. It is an AI-Powered Research Paper Collaboration Hub. This project is for our System Analysis and Design Laboratory course."
 
-### বাংলা:
+### বাংলা
 
 > "সবাইকে শুভ সকাল। আমরা টিম ফ্যান্টম ডেভস। আজকে আমরা আমাদের প্রজেক্ট **ScholarFlow** প্রেজেন্ট করব। এটা একটা AI-Powered Research Paper Collaboration Hub। এই প্রজেক্টটা আমাদের System Analysis and Design Laboratory কোর্সের জন্য।"
 
@@ -40,7 +40,7 @@
 
 ## Slide 2: Problem Statement (25 seconds)
 
-### English:
+### English
 
 > "Let me explain the problem. Researchers face many problems every day.
 >
@@ -49,7 +49,7 @@
 > Third, working with team members is very difficult.
 > And there is no single platform that solves all these problems."
 
-### বাংলা:
+### বাংলা
 
 > "আমি সমস্যাটা বলি। রিসার্চাররা প্রতিদিন অনেক সমস্যায় পড়েন।
 >
@@ -62,7 +62,7 @@
 
 ## Slide 3: Proposed Solution (20 seconds)
 
-### English:
+### English
 
 > "So what is our solution? ScholarFlow is one platform for everything.
 >
@@ -70,7 +70,7 @@
 > Our AI helps to understand papers quickly.
 > No need to use many different apps."
 
-### বাংলা:
+### বাংলা
 
 > "তাহলে আমাদের সমাধান কী? ScholarFlow একটাই platform সব কিছুর জন্য।
 >
@@ -82,7 +82,7 @@
 
 ## Slide 4: Motivation (25 seconds)
 
-### English:
+### English
 
 > "Why did we build this? Because we are students. We understand this problem.
 >
@@ -92,7 +92,7 @@
 >
 > ScholarFlow solves all these problems in one place."
 
-### বাংলা:
+### বাংলা
 
 > "আমরা এটা কেন বানালাম? কারণ আমরা স্টুডেন্ট। আমরা এই সমস্যা বুঝি।
 >
@@ -106,7 +106,7 @@
 
 ## Slide 5: Project Scope (25 seconds)
 
-### English:
+### English
 
 > "What does ScholarFlow provide? Five main things.
 >
@@ -116,7 +116,7 @@
 > Four - Affordable pricing with free option.
 > Five - Team collaboration with access control."
 
-### বাংলা:
+### বাংলা
 
 > "ScholarFlow কী দেয়? পাঁচটা main জিনিস।
 >
@@ -130,7 +130,7 @@
 
 ## Slide 6: Features Part 1 (25 seconds)
 
-### English:
+### English
 
 > "Now our key features.
 >
@@ -141,7 +141,7 @@
 > **Collections** - Organize papers into folders.
 > **Team Workspaces** - Work together with your team."
 
-### বাংলা:
+### বাংলা
 
 > "এখন আমাদের key features।
 >
@@ -156,7 +156,7 @@
 
 ## Slide 7: Features Part 2 (25 seconds)
 
-### English:
+### English
 
 > "More features.
 >
@@ -169,7 +169,7 @@
 >
 > Now my teammate will continue."
 
-### বাংলা:
+### বাংলা
 
 > "আরো features।
 >
@@ -186,29 +186,35 @@
 
 # 🎤 MEMBER 2 SPEECH (2.5 Minutes)
 
+---
+
 ## Slide 8: Competitors (22-25 seconds)
 
-### English:
+### English
 
-> [Look at audience]
+> **`🎯 CUE:`** `👀 Look at audience`
+
 > "Thank you. Now I will talk about existing solutions in the market.
 >
-> Researchers today use tools like Mendeley, Zotero, ResearchGate, Paperpile, and EndNote.
->
-> [Point to competitor logos]
-> These tools are good for reference management or networking.
+> Researchers today use tools like Mendeley, Zotero, ResearchGate, Paperpile, and EndNote."
+
+> **`🎯 CUE:`** `👉 Point to competitor logos`
+
+> "These tools are good for reference management or networking.
 > But each one solves only a specific part of the research process.
 > So researchers must switch between many apps to complete their work."
 
-### বাংলা:
+### বাংলা
 
-> [দর্শকদের দিকে তাকান]
+> **`🎯 CUE:`** `👀 দর্শকদের দিকে তাকান`
+
 > "ধন্যবাদ। এখন আমি market এর existing solutions নিয়ে বলব।
 >
-> আজকে researchers Mendeley, Zotero, ResearchGate, Paperpile, আর EndNote ব্যবহার করে।
->
-> [Competitor logos দেখান]
-> এই tools reference management বা networking এর জন্য ভালো।
+> আজকে researchers Mendeley, Zotero, ResearchGate, Paperpile, আর EndNote ব্যবহার করে।"
+
+> **`🎯 CUE:`** `👉 Competitor logos দেখান`
+
+> "এই tools reference management বা networking এর জন্য ভালো।
 > কিন্তু প্রতিটা শুধু research process এর একটা specific part solve করে।
 > তাই researchers কে কাজ শেষ করতে অনেক apps এ switch করতে হয়।"
 
@@ -216,31 +222,35 @@
 
 ## Slide 9: Comparison Matrix (32-35 seconds)
 
-### English:
+### English
 
-> [Gesture toward table/chart]
+> **`🎯 CUE:`** `✋ Gesture toward table/chart`
+
 > "We compared 12 important features that researchers need every day.
 >
 > Green means full support, yellow means partial support, and red means no support.
 >
-> As you can see, competitors miss many essential tools such as AI support, real-time collaboration, and research note writing.
->
-> [Use confident tone]
-> ScholarFlow is the only platform with all 12 features —
+> As you can see, competitors miss many essential tools such as AI support, real-time collaboration, and research note writing."
+
+> **`🎯 CUE:`** `💪 Use confident tone`
+
+> "ScholarFlow is the only platform with all 12 features —
 > including AI Summarization, AI Chat, and a built-in Research Editor.
 > This makes ScholarFlow a complete and modern solution."
 
-### বাংলা:
+### বাংলা
 
-> [Table/chart এর দিকে gesture করুন]
+> **`🎯 CUE:`** `✋ Table/chart এর দিকে gesture করুন`
+
 > "আমরা ১২টা important features compare করেছি যা researchers প্রতিদিন দরকার।
 >
 > Green মানে full support, yellow মানে partial support, আর red মানে নেই।
 >
-> দেখতে পাচ্ছেন, competitors অনেক essential tools miss করে যেমন AI support, real-time collaboration, আর research note writing।
->
-> [Confident tone এ বলুন]
-> ScholarFlow একমাত্র platform যেখানে ১২টার ১২টা feature আছে —
+> দেখতে পাচ্ছেন, competitors অনেক essential tools miss করে যেমন AI support, real-time collaboration, আর research note writing।"
+
+> **`🎯 CUE:`** `💪 Confident tone এ বলুন`
+
+> "ScholarFlow একমাত্র platform যেখানে ১২টার ১২টা feature আছে —
 > AI Summarization, AI Chat, আর built-in Research Editor সহ।
 > এটাই ScholarFlow কে complete আর modern solution বানায়।"
 
@@ -248,9 +258,10 @@
 
 ## Slide 10: Competitive Advantage (28-30 seconds)
 
-### English:
+### English
 
-> [Hand gesture to bar chart]
+> **`🎯 CUE:`** `📊 Hand gesture to bar chart`
+
 > "Here, our advantage becomes very clear.
 >
 > Competitors offer only 40 to 50 percent of the important features.
@@ -258,14 +269,16 @@
 >
 > Our main strengths are:
 > AI-First Design, Real-time Collaboration, Modern Tech Stack,
-> Fast paper organization, and a Free plan for students and educators.
->
-> [Slight emphasis]
-> We focus directly on real research problems, not just reference storage."
+> Fast paper organization, and a Free plan for students and educators."
 
-### বাংলা:
+> **`🎯 CUE:`** `⚡ Slight emphasis`
 
-> [Bar chart এ hand gesture করুন]
+> "We focus directly on real research problems, not just reference storage."
+
+### বাংলা
+
+> **`🎯 CUE:`** `📊 Bar chart এ hand gesture করুন`
+
 > "এখানে আমাদের advantage একদম clear।
 >
 > Competitors মাত্র ৪০ থেকে ৫০ percent important features offer করে।
@@ -273,50 +286,56 @@
 >
 > আমাদের main strengths হলো:
 > AI-First Design, Real-time Collaboration, Modern Tech Stack,
-> Fast paper organization, আর students ও educators এর জন্য Free plan।
->
-> [একটু emphasis দিন]
-> আমরা সরাসরি real research problems এ focus করি, শুধু reference storage না।"
+> Fast paper organization, আর students ও educators এর জন্য Free plan।"
+
+> **`🎯 CUE:`** `⚡ একটু emphasis দিন`
+
+> "আমরা সরাসরি real research problems এ focus করি, শুধু reference storage না।"
 
 ---
 
 ## Slide 11: Gap Analysis (25 seconds)
 
-### English:
+### English
 
-> [Count on fingers]
+> **`🎯 CUE:`** `🖐️ Count on fingers`
+
 > "Competitors have clear gaps:
 >
 > Mendeley has no AI features.
 > Zotero collaboration is limited.
 > ResearchGate only focuses on networking.
 > Paperpile works mostly with Google.
-> EndNote is expensive and old design.
->
-> [Open hands]
-> ScholarFlow fills all these gaps in one platform."
+> EndNote is expensive and old design."
 
-### বাংলা:
+> **`🎯 CUE:`** `🤲 Open hands`
 
-> [আঙুলে গুনুন]
+> "ScholarFlow fills all these gaps in one platform."
+
+### বাংলা
+
+> **`🎯 CUE:`** `🖐️ আঙুলে গুনুন`
+
 > "Competitors এর clear gaps আছে:
 >
 > Mendeley তে AI features নেই।
 > Zotero তে collaboration limited।
 > ResearchGate শুধু networking এ focus করে।
 > Paperpile বেশিরভাগ Google এ কাজ করে।
-> EndNote expensive আর পুরনো design।
->
-> [হাত খুলুন]
-> ScholarFlow একটা platform এ এই সব gaps fill করে।"
+> EndNote expensive আর পুরনো design।"
+
+> **`🎯 CUE:`** `🤲 হাত খুলুন`
+
+> "ScholarFlow একটা platform এ এই সব gaps fill করে।"
 
 ---
 
 ## Slide 12: Tech Stack (20 seconds)
 
-### English:
+### English
 
-> [Point as you read]
+> **`🎯 CUE:`** `👉 Point as you read`
+
 > "We use a modern and scalable tech stack.
 >
 > **Frontend:** Next.js 15, TypeScript, Tailwind CSS
@@ -324,14 +343,16 @@
 > **AI:** Gemini API + OpenAI API
 > **Cache:** Redis for speed
 > **Storage:** AWS S3
-> **Payment:** Stripe
->
-> [Confident tone]
-> This gives high performance, security, and future growth."
+> **Payment:** Stripe"
 
-### বাংলা:
+> **`🎯 CUE:`** `💪 Confident tone`
 
-> [পড়ার সময় point করুন]
+> "This gives high performance, security, and future growth."
+
+### বাংলা
+
+> **`🎯 CUE:`** `👉 পড়ার সময় point করুন`
+
 > "আমরা modern আর scalable tech stack ব্যবহার করি।
 >
 > **Frontend:** Next.js 15, TypeScript, Tailwind CSS
@@ -339,43 +360,48 @@
 > **AI:** Gemini API + OpenAI API
 > **Cache:** Speed এর জন্য Redis
 > **Storage:** AWS S3
-> **Payment:** Stripe
->
-> [Confident tone এ]
-> এটা high performance, security, আর future growth দেয়।"
+> **Payment:** Stripe"
+
+> **`🎯 CUE:`** `💪 Confident tone এ`
+
+> "এটা high performance, security, আর future growth দেয়।"
 
 ---
 
 ## Slide 13: UI/UX Part 1 (15 seconds)
 
-### English:
+### English
 
-> [Point left]
-> "Here is our Dashboard. Users can organize all papers easily.
->
-> [Point right]
-> And here is the Research Editor to write notes and export PDF."
+> **`🎯 CUE:`** `👈 Point left`
 
-### বাংলা:
+> "Here is our Dashboard. Users can organize all papers easily."
 
-> [বামে point করুন]
-> "এইখানে আমাদের Dashboard। Users সহজে সব papers organize করতে পারে।
->
-> [ডানে point করুন]
-> আর এইখানে Research Editor notes লিখতে আর PDF export করতে।"
+> **`🎯 CUE:`** `👉 Point right`
+
+> "And here is the Research Editor to write notes and export PDF."
+
+### বাংলা
+
+> **`🎯 CUE:`** `👈 বামে point করুন`
+
+> "এইখানে আমাদের Dashboard। Users সহজে সব papers organize করতে পারে।"
+
+> **`🎯 CUE:`** `👉 ডানে point করুন`
+
+> "আর এইখানে Research Editor notes লিখতে আর PDF export করতে।"
 
 ---
 
 ## Slide 14: UI/UX Part 2 (15 seconds)
 
-### English:
+### English
 
 > "More screens.
 >
 > Users can highlight and comment directly on PDFs.
 > And with AI Chat, they get instant answers about any paper."
 
-### বাংলা:
+### বাংলা
 
 > "আরো screens।
 >
@@ -386,18 +412,20 @@
 
 ## Slide 15: Conclusion (15 seconds)
 
-### English:
+### English
 
-> [Smile and eye contact]
+> **`🎯 CUE:`** `😊 Smile and eye contact`
+
 > "To conclude, ScholarFlow is a complete research platform.
 >
 > We combine AI, collaboration, and smart paper tools in one place.
 >
 > Thank you for listening. Any questions?"
 
-### বাংলা:
+### বাংলা
 
-> [হাসুন আর eye contact করুন]
+> **`🎯 CUE:`** `😊 হাসুন আর eye contact করুন`
+
 > "শেষ করতে গিয়ে বলি, ScholarFlow একটা complete research platform।
 >
 > আমরা AI, collaboration, আর smart paper tools একজায়গায় combine করেছি।
@@ -428,6 +456,23 @@
 | 14           | UI/UX 2      | 0:15     |
 | 15           | Conclusion   | 0:15     |
 | **Total**    |              | **5:00** |
+
+---
+
+# 🎭 Cue Legend
+
+| Emoji | Meaning               |
+| ----- | --------------------- |
+| 👀    | Look at audience      |
+| 👉    | Point to screen/right |
+| 👈    | Point left            |
+| ✋    | Gesture toward visual |
+| 💪    | Confident/strong tone |
+| ⚡    | Add emphasis          |
+| 📊    | Reference chart/graph |
+| 🖐️    | Count on fingers      |
+| 🤲    | Open hands gesture    |
+| 😊    | Smile                 |
 
 ---
 
