@@ -93,6 +93,66 @@ export interface TopCustomer {
   currentPlan: string;
 }
 
+export interface SubscriberDetail {
+  subscriptionId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  planName: string;
+  status: string;
+  seats: number;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: Date;
+  totalSpent: number;
+  lastPaymentDate: Date | null;
+}
+
+export interface SubscriberDetailsParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  planId?: string;
+}
+
+export interface UserManagementUser {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  emailVerified: boolean;
+  profileImage: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
+  paperCount: number;
+  subscriptionStatus: string | null;
+  planName: string | null;
+}
+
+export interface UserStats {
+  totalUsers: number;
+  activeUsers: number;
+  proUsers: number;
+  adminUsers: number;
+  deletedUsers: number;
+  verifiedUsers: number;
+}
+
+export interface GetUsersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  status?: string;
+}
+
+export interface UpdateUserRoleRequest {
+  userId: string;
+  role: string;
+}
+
 export interface RoleDistribution {
   role: string;
   count: number;
@@ -298,6 +358,124 @@ export const adminApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 60,
       transformResponse: (response: { data: TopCustomer[] }) => response.data,
     }),
+
+    // Get subscriber details with pagination
+    getSubscriberDetails: builder.query<
+      {
+        data: SubscriberDetail[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+        };
+      },
+      SubscriberDetailsParams
+    >({
+      query: (params) => ({
+        url: "/admin/analytics/subscribers",
+        params,
+      }),
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 60,
+      transformResponse: (response: {
+        data: SubscriberDetail[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+        };
+      }) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+    }),
+
+    // Get all users with pagination and filters
+    getAllUsers: builder.query<
+      {
+        data: UserManagementUser[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+      },
+      GetUsersParams
+    >({
+      query: (params) => ({
+        url: "/admin/users",
+        params,
+      }),
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 30,
+      transformResponse: (response: {
+        data: UserManagementUser[];
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+      }) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+    }),
+
+    // Get user statistics
+    getUserStats: builder.query<UserStats, void>({
+      query: () => "/admin/users/stats",
+      providesTags: ["Admin"],
+      keepUnusedDataFor: 60,
+      transformResponse: (response: { data: UserStats }) => response.data,
+    }),
+
+    // Update user role
+    updateUserRole: builder.mutation<
+      { id: string; name: string | null; email: string; role: string },
+      UpdateUserRoleRequest
+    >({
+      query: ({ userId, role }) => ({
+        url: `/admin/users/${userId}/role`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: ["Admin"],
+    }),
+
+    // Deactivate user
+    deactivateUser: builder.mutation<{ userId: string }, string>({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/deactivate`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Admin"],
+    }),
+
+    // Reactivate user
+    reactivateUser: builder.mutation<{ userId: string }, string>({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/reactivate`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Admin"],
+    }),
+
+    // Permanently delete user
+    permanentlyDeleteUser: builder.mutation<{ userId: string }, string>({
+      query: (userId) => ({
+        url: `/admin/users/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Admin"],
+    }),
   }),
 });
 
@@ -311,4 +489,11 @@ export const {
   useGetSystemMetricsQuery,
   useGetRevenueAnalyticsQuery,
   useGetTopCustomersQuery,
+  useGetSubscriberDetailsQuery,
+  useGetAllUsersQuery,
+  useGetUserStatsQuery,
+  useUpdateUserRoleMutation,
+  useDeactivateUserMutation,
+  useReactivateUserMutation,
+  usePermanentlyDeleteUserMutation,
 } = adminApi;

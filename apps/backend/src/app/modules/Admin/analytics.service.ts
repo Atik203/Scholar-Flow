@@ -37,7 +37,7 @@ export const analyticsService = {
       FROM "Subscription" s
       JOIN "Plan" p ON s."planId" = p.id
       WHERE s."isDeleted" = false 
-        AND s.status IN ('ACTIVE', 'TRIALING')
+        AND s.status = 'ACTIVE'
       GROUP BY p.name
       ORDER BY count DESC
     `;
@@ -253,5 +253,263 @@ export const analyticsService = {
       subscriptionStatus: c.subscriptionStatus,
       currentPlan: c.planName,
     }));
+  },
+
+  /**
+   * Get all subscribers with details and pagination
+   * Uses separate queries for different filter combinations to avoid $queryRawUnsafe
+   */
+  async getSubscriberDetails(
+    page: number = 1,
+    limit: number = 20,
+    status?: string,
+    planId?: string
+  ) {
+    const offset = (page - 1) * limit;
+    const hasStatusFilter = status && status !== "all";
+    const hasPlanFilter = !!planId;
+
+    // Determine which query variant to use based on filters
+    let countResult: Array<{ count: bigint }>;
+    let subscribers: Array<{
+      subscriptionId: string;
+      userId: string;
+      userName: string;
+      userEmail: string;
+      planName: string;
+      status: string;
+      seats: number;
+      currentPeriodStart: Date | null;
+      currentPeriodEnd: Date | null;
+      cancelAtPeriodEnd: boolean;
+      createdAt: Date;
+      totalSpent: string;
+      lastPaymentDate: Date | null;
+    }>;
+
+    if (hasStatusFilter && hasPlanFilter) {
+      // Both status and plan filter
+      countResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count
+        FROM "Subscription" s
+        WHERE s."isDeleted" = false
+          AND s.status = ${status}::"SubscriptionStatus"
+          AND s."planId" = ${planId}
+      `;
+
+      subscribers = await prisma.$queryRaw`
+        SELECT 
+          s.id as "subscriptionId",
+          u.id as "userId",
+          u.name as "userName",
+          u.email as "userEmail",
+          p.name as "planName",
+          s.status::text,
+          s.seats,
+          s."currentPeriodStart",
+          s."currentPeriodEnd",
+          s."cancelAtPeriodEnd",
+          s."createdAt",
+          COALESCE(
+            (
+              SELECT SUM(pay."amountCents")::numeric / 100
+              FROM "Payment" pay
+              WHERE pay."userId" = u.id 
+                AND pay.status = 'SUCCEEDED'
+                AND pay."isDeleted" = false
+            ), 
+            0
+          ) as "totalSpent",
+          (
+            SELECT MAX(pay."createdAt")
+            FROM "Payment" pay
+            WHERE pay."subscriptionId" = s.id 
+              AND pay.status = 'SUCCEEDED'
+              AND pay."isDeleted" = false
+          ) as "lastPaymentDate"
+        FROM "Subscription" s
+        JOIN "User" u ON s."userId" = u.id
+        JOIN "Plan" p ON s."planId" = p.id
+        WHERE s."isDeleted" = false
+          AND u."isDeleted" = false
+          AND s.status = ${status}::"SubscriptionStatus"
+          AND s."planId" = ${planId}
+        ORDER BY s."createdAt" DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else if (hasStatusFilter) {
+      // Only status filter
+      countResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count
+        FROM "Subscription" s
+        WHERE s."isDeleted" = false
+          AND s.status = ${status}::"SubscriptionStatus"
+      `;
+
+      subscribers = await prisma.$queryRaw`
+        SELECT 
+          s.id as "subscriptionId",
+          u.id as "userId",
+          u.name as "userName",
+          u.email as "userEmail",
+          p.name as "planName",
+          s.status::text,
+          s.seats,
+          s."currentPeriodStart",
+          s."currentPeriodEnd",
+          s."cancelAtPeriodEnd",
+          s."createdAt",
+          COALESCE(
+            (
+              SELECT SUM(pay."amountCents")::numeric / 100
+              FROM "Payment" pay
+              WHERE pay."userId" = u.id 
+                AND pay.status = 'SUCCEEDED'
+                AND pay."isDeleted" = false
+            ), 
+            0
+          ) as "totalSpent",
+          (
+            SELECT MAX(pay."createdAt")
+            FROM "Payment" pay
+            WHERE pay."subscriptionId" = s.id 
+              AND pay.status = 'SUCCEEDED'
+              AND pay."isDeleted" = false
+          ) as "lastPaymentDate"
+        FROM "Subscription" s
+        JOIN "User" u ON s."userId" = u.id
+        JOIN "Plan" p ON s."planId" = p.id
+        WHERE s."isDeleted" = false
+          AND u."isDeleted" = false
+          AND s.status = ${status}::"SubscriptionStatus"
+        ORDER BY s."createdAt" DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else if (hasPlanFilter) {
+      // Only plan filter
+      countResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count
+        FROM "Subscription" s
+        WHERE s."isDeleted" = false
+          AND s."planId" = ${planId}
+      `;
+
+      subscribers = await prisma.$queryRaw`
+        SELECT 
+          s.id as "subscriptionId",
+          u.id as "userId",
+          u.name as "userName",
+          u.email as "userEmail",
+          p.name as "planName",
+          s.status::text,
+          s.seats,
+          s."currentPeriodStart",
+          s."currentPeriodEnd",
+          s."cancelAtPeriodEnd",
+          s."createdAt",
+          COALESCE(
+            (
+              SELECT SUM(pay."amountCents")::numeric / 100
+              FROM "Payment" pay
+              WHERE pay."userId" = u.id 
+                AND pay.status = 'SUCCEEDED'
+                AND pay."isDeleted" = false
+            ), 
+            0
+          ) as "totalSpent",
+          (
+            SELECT MAX(pay."createdAt")
+            FROM "Payment" pay
+            WHERE pay."subscriptionId" = s.id 
+              AND pay.status = 'SUCCEEDED'
+              AND pay."isDeleted" = false
+          ) as "lastPaymentDate"
+        FROM "Subscription" s
+        JOIN "User" u ON s."userId" = u.id
+        JOIN "Plan" p ON s."planId" = p.id
+        WHERE s."isDeleted" = false
+          AND u."isDeleted" = false
+          AND s."planId" = ${planId}
+        ORDER BY s."createdAt" DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    } else {
+      // No filters
+      countResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count
+        FROM "Subscription" s
+        WHERE s."isDeleted" = false
+      `;
+
+      subscribers = await prisma.$queryRaw`
+        SELECT 
+          s.id as "subscriptionId",
+          u.id as "userId",
+          u.name as "userName",
+          u.email as "userEmail",
+          p.name as "planName",
+          s.status::text,
+          s.seats,
+          s."currentPeriodStart",
+          s."currentPeriodEnd",
+          s."cancelAtPeriodEnd",
+          s."createdAt",
+          COALESCE(
+            (
+              SELECT SUM(pay."amountCents")::numeric / 100
+              FROM "Payment" pay
+              WHERE pay."userId" = u.id 
+                AND pay.status = 'SUCCEEDED'
+                AND pay."isDeleted" = false
+            ), 
+            0
+          ) as "totalSpent",
+          (
+            SELECT MAX(pay."createdAt")
+            FROM "Payment" pay
+            WHERE pay."subscriptionId" = s.id 
+              AND pay.status = 'SUCCEEDED'
+              AND pay."isDeleted" = false
+          ) as "lastPaymentDate"
+        FROM "Subscription" s
+        JOIN "User" u ON s."userId" = u.id
+        JOIN "Plan" p ON s."planId" = p.id
+        WHERE s."isDeleted" = false
+          AND u."isDeleted" = false
+        ORDER BY s."createdAt" DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `;
+    }
+
+    const total = Number(countResult[0]?.count || 0);
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      subscribers: subscribers.map((s) => ({
+        subscriptionId: s.subscriptionId,
+        userId: s.userId,
+        userName: s.userName,
+        userEmail: s.userEmail,
+        planName: s.planName,
+        status: s.status,
+        seats: s.seats,
+        currentPeriodStart: s.currentPeriodStart,
+        currentPeriodEnd: s.currentPeriodEnd,
+        cancelAtPeriodEnd: s.cancelAtPeriodEnd,
+        createdAt: s.createdAt,
+        totalSpent: parseFloat(s.totalSpent),
+        lastPaymentDate: s.lastPaymentDate,
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
   },
 };

@@ -44,6 +44,15 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "ScholarFlow Team" }],
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/logo.png", type: "image/png" },
+      { url: "/logo.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/logo.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/logo.png",
+  },
   openGraph: {
     title: "ScholarFlow - AI-Powered Research Paper Hub",
     description:
@@ -52,6 +61,9 @@ export const metadata: Metadata = {
     siteName: "ScholarFlow",
     url: "https://scholarflow.com",
     locale: "en_US",
+    images: [
+      { url: "/logo.png", width: 1200, height: 630, alt: "ScholarFlow Logo" },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -60,6 +72,7 @@ export const metadata: Metadata = {
       "Organize, annotate, and collaborate on research papers with AI assistance",
     site: "@scholarflow",
     creator: "@scholarflow",
+    images: ["/logo.png"],
   },
   robots: {
     index: true,

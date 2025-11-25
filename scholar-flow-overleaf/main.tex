@@ -1,0 +1,267 @@
+% ScholarFlow - DBMS Lab Report
+% Course: Database Management System Lab
+% Date: October 22, 2025
+% Section: I
+
+\documentclass[12pt,a4paper,openany]{report}
+
+% ============================================
+% PACKAGES
+% ============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{verbatim}
+
+% ============================================
+% GEOMETRY & LAYOUT
+% ============================================
+\geometry{
+    left=1in,
+    right=1in,
+    top=1in,
+    bottom=1in,
+    headheight=15pt
+}
+
+% ============================================
+% COLOR DEFINITIONS
+% ============================================
+\definecolor{primaryblue}{RGB}{59, 130, 246}
+\definecolor{secondarygreen}{RGB}{16, 185, 129}
+\definecolor{accentorange}{RGB}{251, 146, 60}
+\definecolor{darkgray}{RGB}{55, 65, 81}
+\definecolor{lightgray}{RGB}{243, 244, 246}
+\definecolor{codebg}{RGB}{248, 250, 252}
+\definecolor{codeframe}{RGB}{226, 232, 240}
+
+% ============================================
+% HYPERLINKS
+% ============================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=black,
+    citecolor=black,
+    pdftitle={ScholarFlow Project Report},
+    pdfauthor={Md. Atikur Rahaman},
+    pdfsubject={AI-Powered Research Paper Collaboration Hub},
+    pdfkeywords={ScholarFlow, Research, AI, Collaboration, Paper Management}
+}
+
+% ============================================
+% HEADERS & FOOTERS
+% ============================================
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{ScholarFlow}}
+\fancyhead[R]{\leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ============================================
+% CHAPTER & SECTION STYLING (Report class)
+% ============================================
+% Using default black headings for academic style.
+% TABLE OF CONTENTS STYLING
+% ============================================
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{}
+\renewcommand{\cftsubsecfont}{}
+
+% ============================================
+% CODE LISTINGS
+% ============================================
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    frameround=tttt,
+    rulecolor=\color{codeframe},
+    breaklines=true,
+    breakatwhitespace=true,
+    numbers=left,
+    numberstyle=\tiny\color{darkgray},
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{secondarygreen}\itshape,
+    stringstyle=\color{accentorange},
+    showstringspaces=false,
+    tabsize=2,
+    captionpos=b
+}
+
+% SQL Language Definition
+\lstdefinelanguage{SQL}{
+    keywords={SELECT, FROM, WHERE, AND, OR, INSERT, UPDATE, DELETE, CREATE, TABLE, INDEX, JOIN, LEFT, RIGHT, INNER, OUTER, ON, AS, GROUP, BY, ORDER, LIMIT, OFFSET, COUNT, SUM, AVG, MAX, MIN, DISTINCT, CASE, WHEN, THEN, ELSE, END},
+    sensitive=false,
+    morecomment=[l]{--},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+% ============================================
+% CUSTOM BOXES
+% ============================================
+\newtcolorbox{infobox}[1][]{
+    colback=lightgray,
+    colframe=primaryblue,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=yellow!10,
+    colframe=accentorange,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=green!5,
+    colframe=secondarygreen,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+% ============================================
+% CUSTOM COMMANDS
+% ============================================
+\newcommand{\projectname}{\textbf{ScholarFlow}}
+\newcommand{\version}{\texttt{v1.1.9}}
+\newcommand{\feature}[1]{\textbf{#1}}
+\newcommand{\tech}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\colorbox{codebg}{\texttt{#1}}}
+
+% ============================================
+% DOCUMENT INFORMATION
+% ============================================
+\title{
+    \vspace{-2cm}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/logos/logo.png}
+    \end{figure}
+    \vspace{0.3cm}
+    {\LARGE\textbf{ScholarFlow}}\\
+    \vspace{0.3cm}
+    {\large AI-Powered Research Paper Collaboration Platform}\\
+    \vspace{0.5cm}
+    {\normalsize\textbf{Team: Phantom Devs}}\\
+    \vspace{0.5cm}
+}
+\author{
+    \textbf{Team Members:}\\[0.5cm]
+    \begin{tabular}{rl}
+    \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
+    \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
+    \textbf{0112220081} & Sagor Ahmed \\
+    \textbf{0112310302} & Md. Sarowar Alam Sourov \\
+    \end{tabular}
+    \\[1cm]
+    {\normalsize\textbf{Section: I}}
+}
+  
+
+
+
+% ============================================
+% BEGIN DOCUMENT
+% ============================================
+\begin{document}
+
+% Title Page
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+% Abstract/Overview
+\begin{abstract}
+\noindent
+\projectname{} is an AI-powered research paper collaboration platform designed to revolutionize how researchers, students, and academics manage, organize, and collaborate on research papers efficiently. Built with modern web technologies and robust database management principles, the platform provides comprehensive paper management, AI-driven insights, and team collaboration features.
+
+\vspace{0.3cm}
+\noindent
+The system leverages PostgreSQL with Prisma ORM using RAW Query patterns for optimal performance. Key features include secure paper upload via AWS S3 with automated metadata extraction, advanced full-text search with PostgreSQL GIN indexing, and AI-powered summarization using Gemini 2.5-flash-lite. The platform supports role-based workspace collaboration (OWNER, TEAM\_LEAD, PRO\_RESEARCHER, RESEARCHER), enabling teams to create shared collections, annotate papers, and track research progress through activity logs and notifications.
+
+\vspace{0.3cm}
+\noindent
+\projectname{} implements a three-tier subscription system (FREE, PRO, INSTITUTIONAL) integrated with Stripe. Additional features include TipTap rich text editing, research notes management, citation export in multiple formats (BibTeX, RIS, APA, MLA, IEEE), admin dashboard with real-time system monitoring, and email-based notification system for team collaboration.
+
+\vspace{0.3cm}
+\noindent
+\textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma (RAW Query), AWS S3, Stripe, Gemini AI, Redis, Docker
+
+\vspace{0.3cm}
+\noindent
+\textbf{Repository:} \url{https://github.com/Atik203/Scholar-Flow}
+
+\vspace{0.3cm}
+\noindent
+\textbf{Live Demo:} \url{https://scholar-flow-ai.vercel.app}
+
+\vspace{0.3cm}
+\noindent
+\textbf{Demo Video:} \url{https://youtu.be/your-demo-video-id}
+\end{abstract}
+
+\newpage
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% ============================================
+% SECTIONS
+% ============================================
+\input{chapters/03-introduction}
+\input{chapters/04-motivation}
+\input{chapters/05-similar-projects}
+\input{chapters/06-benchmark-analysis}
+\input{chapters/07-feature-list}
+\input{chapters/08-erd}
+\input{chapters/09-database-schema}
+\input{chapters/10-sql-queries}
+\input{chapters/11-screenshots}
+\input{chapters/12-limitations}
+\input{chapters/13-future-work}
+\input{chapters/14-conclusion}
+
+% ============================================
+% BIBLIOGRAPHY (removed per report requirements)
+% ============================================
+
+\end{document}
