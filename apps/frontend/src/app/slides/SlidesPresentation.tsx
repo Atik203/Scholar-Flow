@@ -24,6 +24,8 @@ import Slide08Competitors from "./slides/Slide08Competitors";
 import Slide09Comparison from "./slides/Slide09Comparison";
 import Slide10Advantage from "./slides/Slide10Advantage";
 import Slide11GapAnalysis from "./slides/Slide11GapAnalysis";
+import Slide12ScreenshotsA from "./slides/Slide12ScreenshotsA";
+import Slide12ScreenshotsB from "./slides/Slide12ScreenshotsB";
 import Slide15Conclusion from "./slides/Slide15Conclusion";
 
 const slides = [
@@ -35,11 +37,13 @@ const slides = [
   { id: 6, title: "Features (1/2)", component: Slide05FeaturesA },
   { id: 7, title: "Features (2/2)", component: Slide05FeaturesB },
   { id: 8, title: "Tech Stack", component: Slide06TechStack },
-  { id: 9, title: "Competitors", component: Slide08Competitors },
-  { id: 10, title: "Comparison", component: Slide09Comparison },
-  { id: 11, title: "Competitive Advantage", component: Slide10Advantage },
-  { id: 12, title: "Gap Analysis", component: Slide11GapAnalysis },
-  { id: 13, title: "Conclusion", component: Slide15Conclusion },
+  { id: 9, title: "UI/UX (1/2)", component: Slide12ScreenshotsA },
+  { id: 10, title: "UI/UX (2/2)", component: Slide12ScreenshotsB },
+  { id: 11, title: "Competitors", component: Slide08Competitors },
+  { id: 12, title: "Comparison", component: Slide09Comparison },
+  { id: 13, title: "Competitive Advantage", component: Slide10Advantage },
+  { id: 14, title: "Gap Analysis", component: Slide11GapAnalysis },
+  { id: 15, title: "Conclusion", component: Slide15Conclusion },
 ];
 
 export default function SlidesPresentation() {
@@ -70,6 +74,22 @@ export default function SlidesPresentation() {
       console.error("Fullscreen error:", err);
     }
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
+        setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Listen for fullscreen change events
   useEffect(() => {

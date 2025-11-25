@@ -106,14 +106,14 @@ export default function Slide03Solution() {
       </div>
 
       {/* Vision Statement */}
-      <div className="mt-4 bg-slate-800 rounded-xl p-4">
-        <p className="text-slate-200 text-center">
-          <span className="text-blue-400 font-bold">Vision:</span> Transform how
+      <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
+        <p className="text-slate-700 text-center">
+          <span className="text-blue-600 font-bold">Vision:</span> Transform how
           researchers
-          <span className="text-emerald-400 font-medium"> discover</span>,
-          <span className="text-orange-400 font-medium"> organize</span>,
-          <span className="text-purple-400 font-medium"> collaborate</span>, and
-          <span className="text-pink-400 font-medium">
+          <span className="text-emerald-600 font-medium"> discover</span>,
+          <span className="text-orange-600 font-medium"> organize</span>,
+          <span className="text-purple-600 font-medium"> collaborate</span>, and
+          <span className="text-pink-600 font-medium">
             {" "}
             extract insights
           </span>{" "}
