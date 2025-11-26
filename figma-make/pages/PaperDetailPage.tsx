@@ -34,9 +34,13 @@ import {
 
 interface PaperDetailPageProps {
   onNavigate?: (path: string) => void;
+  onShowToast?: (message: string, type: "error" | "success" | "info") => void;
 }
 
-export function PaperDetailPage({ onNavigate }: PaperDetailPageProps) {
+export function PaperDetailPage({
+  onNavigate,
+  onShowToast,
+}: PaperDetailPageProps) {
   const [isDark, setIsDark] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
