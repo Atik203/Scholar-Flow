@@ -10,6 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0"
   }
 }
