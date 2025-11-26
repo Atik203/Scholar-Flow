@@ -6,10 +6,10 @@ This folder contains React components formatted for Figma Make AI. Copy the enti
 
 ```
 figma-make/
-├── App.tsx                    # Main app entry (switch pages here)
+├── App.tsx                    # Main app entry with role routing & toasts
 ├── README.md                  # This file
 ├── styles/
-│   └── globals.css            # Global CSS with design tokens
+│   └── globals.css            # Global CSS with design tokens & sidebar vars
 ├── guidelines/
 │   └── design-system.md       # Design system reference
 ├── components/
@@ -22,9 +22,11 @@ figma-make/
 │   │   ├── badge.tsx
 │   │   └── index.ts
 │   ├── layout/
-│   │   ├── Navbar.tsx
-│   │   ├── Footer.tsx
-│   │   ├── PageContainer.tsx
+│   │   ├── Navbar.tsx         # Site navigation bar
+│   │   ├── Footer.tsx         # Site footer
+│   │   ├── PageContainer.tsx  # Page wrapper with Navbar/Footer
+│   │   ├── AppSidebar.tsx     # Dashboard sidebar with collapsible sections
+│   │   ├── DashboardLayout.tsx # Dashboard layout with UserMenu & ThemeToggle
 │   │   └── index.ts
 │   └── sections/
 │       ├── Hero.tsx
@@ -34,9 +36,9 @@ figma-make/
 │       ├── CTA.tsx
 │       └── index.ts
 └── pages/
-    ├── LoginPage.tsx          # Auth login page
-    ├── RegisterPage.tsx       # User registration page
-    ├── DashboardPage.tsx      # Main dashboard with stats
+    ├── LoginPage.tsx          # Auth login with role detection & Navbar/Footer
+    ├── RegisterPage.tsx       # Registration with role detection & Navbar/Footer
+    ├── DashboardPage.tsx      # Role-based dashboard (4 variants)
     ├── PaperDetailPage.tsx    # Individual paper view
     └── index.ts
 ```
@@ -57,15 +59,61 @@ figma-make/
 
 ## Switching Between Pages
 
-In `App.tsx`, you can switch between different page layouts:
+In `App.tsx`, you can switch between different page layouts by changing the `currentPath` state:
 
-1. **Landing Page (Default)**: Full marketing page with Hero, Features, HowItWorks, Testimonials, and CTA
-2. **Login Page**: Authentication page with OAuth buttons and email form
-3. **Register Page**: User registration with form validation
-4. **Dashboard Page**: Main app dashboard with stats, papers, and collections
-5. **Paper Detail Page**: Individual paper view with AI summary
+1. **Landing Page** (`/`): Full marketing page with Hero, Features, HowItWorks, Testimonials, and CTA
+2. **Login Page** (`/login`): Authentication with Navbar/Footer, OAuth buttons, email-based role detection
+3. **Register Page** (`/register`): User registration with Navbar/Footer, form validation, role detection
+4. **Dashboard Pages**:
+   - `/dashboard/researcher` - Standard researcher dashboard
+   - `/dashboard/pro-researcher` - Pro researcher dashboard
+   - `/dashboard/team-lead` - Team lead dashboard with team overview
+   - `/dashboard/admin` - Admin dashboard with system alerts
+5. **Paper Detail Page** (`/paper/[id]`): Individual paper view with AI summary
 
-To switch pages, uncomment the desired import and JSX in `App.tsx`.
+## Role-Based Dashboard System
+
+The dashboard system supports **4 user roles** with different views:
+
+| Role             | Email Pattern            | Dashboard Path              | Special Features                           |
+| ---------------- | ------------------------ | --------------------------- | ------------------------------------------ |
+| `researcher`     | Default                  | `/dashboard/researcher`     | Papers, Collections, AI Summaries          |
+| `pro_researcher` | `pro@...`                | `/dashboard/pro-researcher` | + Advanced Analytics                       |
+| `team_lead`      | `lead@...` or `team@...` | `/dashboard/team-lead`      | + Team Overview, Project Management        |
+| `admin`          | `admin@...`              | `/dashboard/admin`          | + User Management, System Settings, Alerts |
+
+### Role Detection from Email
+
+When logging in or registering, the email prefix determines which dashboard:
+
+- `admin@example.com` → Admin Dashboard
+- `lead@example.com` or `team@example.com` → Team Lead Dashboard
+- `pro@example.com` → Pro Researcher Dashboard
+- Any other email → Researcher Dashboard
+
+## Dashboard Components
+
+### AppSidebar
+
+- Collapsible navigation sections (Papers, Collections, Workspaces, Research)
+- WorkspaceSwitcher dropdown
+- Role-based navigation items (Admin features only visible to admins)
+- Light/dark mode compatible with CSS variables
+
+### DashboardLayout
+
+- **UserMenu**: Dropdown on avatar click with Profile, Settings, Log out
+- **ThemeToggle**: Switch between light/dark mode
+- **Breadcrumbs**: Auto-generated from current path
+- **MobileNav**: Hamburger menu with Sheet sidebar for mobile
+
+### Toast Notifications
+
+Built-in toast system with three types:
+
+- `error` (red) - Validation errors, failures
+- `success` (green) - Successful actions
+- `info` (blue) - General information
 
 ## Design System
 
