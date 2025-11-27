@@ -2,7 +2,9 @@
 export { DashboardPage } from "./DashboardPage";
 export { LoginPage } from "./LoginPage";
 export { PaperDetailPage } from "./PaperDetailPage";
+export { ProfilePage } from "./ProfilePage";
 export { RegisterPage } from "./RegisterPage";
+export { SettingsPage } from "./SettingsPage";
 
 // Main pages
 export { FAQPage } from "./FAQPage";
