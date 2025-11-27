@@ -6,21 +6,7 @@
  * This file serves as the entry point for Figma Make to render all components.
  * Features full navigation between pages without actual routing.
  *
- * PAGES AVAILABLE:
- * 1. / - Home/Landing page with all sections
- * 2. /login - Authentication login page
- * 3. /register - User registration page
- * 4. /dashboard/researcher - Researcher dashboard
- * 5. /dashboard/pro-researcher - Pro Researcher dashboard
- * 6. /dashboard/team-lead - Team Lead dashboard
- * 7. /dashboard/admin - Admin dashboard
- * 8. /paper/:id - Individual paper view with AI summary
- *
- * ROLE DETECTION:
- * - Email starting with "admin" → Admin dashboard
- * - Email starting with "lead" or "team" → Team Lead dashboard
- * - Email starting with "pro" → Pro Researcher dashboard
- * - Any other email → Researcher dashboard
+ * See routes.tsx for complete list of available pages and routing configuration.
  */
 
 import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
@@ -36,19 +22,45 @@ import { Hero } from "./components/sections/Hero";
 import { HowItWorks } from "./components/sections/HowItWorks";
 import { Testimonials } from "./components/sections/Testimonials";
 
-// Full Page Components
-import { DashboardPage } from "./pages/DashboardPage";
-import { LoginPage } from "./pages/LoginPage";
-import { PaperDetailPage } from "./pages/PaperDetailPage";
-import { RegisterPage } from "./pages/RegisterPage";
+// Import all pages from routes
+import {
+  // Company
+  AboutPage,
+  AIInsightsPage,
+  APIPage,
+  CareersPage,
+  CollaboratePage,
+  CollectionsPage,
+  CommunityPage,
+  ContactPage,
+  // Dashboard
+  DashboardPage,
+  // Resources
+  DocsPage,
+  // Enterprise
+  EnterprisePage,
+  FAQPage,
+  // Route helpers
+  getRoleFromPath,
+  IntegrationsPage,
+  isDashboardRoute,
+  isPaperRoute,
+  isProductsRoute,
+  // Auth
+  LoginPage,
+  PaperDetailPage,
+  // Products
+  PapersPage,
+  PressPage,
+  // Main
+  PricingPage,
+  RegisterPage,
+  SupportPage,
+  TeamsPage,
+  TutorialsPage,
+} from "./routes";
 
 import "./styles/globals.css";
-
-// Role types
-type UserRole = "researcher" | "pro_researcher" | "team_lead" | "admin";
-
-// Page types for navigation
-type PageType = string;
 
 // Toast types
 interface Toast {
@@ -109,7 +121,7 @@ function ToastContainer({
 }
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageType>("/");
+  const [currentPage, setCurrentPage] = useState<string>("/");
   const [toasts, setToasts] = useState<Toast[]>([]);
   let toastId = 0;
 
@@ -135,23 +147,15 @@ export default function App() {
   // Navigation handler - simulates routing without actual router
   const handleNavigate = useCallback((path: string) => {
     console.log("Navigating to:", path);
-    setCurrentPage(path as PageType);
+    setCurrentPage(path);
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Determine role from dashboard path
-  const getRoleFromPath = (path: string): UserRole => {
-    if (path.includes("/admin")) return "admin";
-    if (path.includes("/team-lead")) return "team_lead";
-    if (path.includes("/pro-researcher")) return "pro_researcher";
-    return "researcher";
-  };
-
   // Render the current page based on state
   const renderPage = () => {
     // Dashboard routes
-    if (currentPage.startsWith("/dashboard")) {
+    if (isDashboardRoute(currentPage)) {
       const role = getRoleFromPath(currentPage);
       return (
         <DashboardPage
@@ -163,10 +167,74 @@ export default function App() {
     }
 
     // Paper detail route
-    if (currentPage.startsWith("/paper")) {
+    if (isPaperRoute(currentPage)) {
       return (
         <PaperDetailPage onNavigate={handleNavigate} onShowToast={showToast} />
       );
+    }
+
+    // Products routes
+    if (isProductsRoute(currentPage)) {
+      switch (currentPage) {
+        case "/products/papers":
+          return <PapersPage onNavigate={handleNavigate} />;
+        case "/products/collections":
+          return <CollectionsPage onNavigate={handleNavigate} />;
+        case "/products/collaborate":
+          return <CollaboratePage onNavigate={handleNavigate} />;
+        case "/products/ai-insights":
+          return <AIInsightsPage onNavigate={handleNavigate} />;
+        default:
+          return <PapersPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Resources routes
+    if (currentPage.startsWith("/resources")) {
+      switch (currentPage) {
+        case "/resources/docs":
+          return <DocsPage onNavigate={handleNavigate} />;
+        case "/resources/tutorials":
+          return <TutorialsPage onNavigate={handleNavigate} />;
+        case "/resources/api":
+          return <APIPage onNavigate={handleNavigate} />;
+        case "/resources/community":
+          return <CommunityPage onNavigate={handleNavigate} />;
+        default:
+          return <DocsPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Company routes
+    if (currentPage.startsWith("/company")) {
+      switch (currentPage) {
+        case "/company/about":
+          return <AboutPage onNavigate={handleNavigate} />;
+        case "/company/careers":
+          return <CareersPage onNavigate={handleNavigate} />;
+        case "/company/contact":
+          return <ContactPage onNavigate={handleNavigate} />;
+        case "/company/press":
+          return <PressPage onNavigate={handleNavigate} />;
+        default:
+          return <AboutPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Enterprise routes
+    if (currentPage.startsWith("/enterprise")) {
+      switch (currentPage) {
+        case "/enterprise":
+          return <EnterprisePage onNavigate={handleNavigate} />;
+        case "/enterprise/teams":
+          return <TeamsPage onNavigate={handleNavigate} />;
+        case "/enterprise/integrations":
+          return <IntegrationsPage onNavigate={handleNavigate} />;
+        case "/enterprise/support":
+          return <SupportPage onNavigate={handleNavigate} />;
+        default:
+          return <EnterprisePage onNavigate={handleNavigate} />;
+      }
     }
 
     switch (currentPage) {
@@ -178,6 +246,10 @@ export default function App() {
         return (
           <RegisterPage onNavigate={handleNavigate} onShowToast={showToast} />
         );
+      case "/pricing":
+        return <PricingPage onNavigate={handleNavigate} />;
+      case "/faq":
+        return <FAQPage onNavigate={handleNavigate} />;
       case "/":
       default:
         // Landing page with all sections

@@ -260,7 +260,7 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
                       onClick={() => handleSocialLogin("google")}
                       disabled={isLoading}
                       variant="outline"
-                      className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-hover-glow"
                       size="lg"
                     >
                       <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -288,7 +288,7 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
                       onClick={() => handleSocialLogin("github")}
                       disabled={isLoading}
                       variant="outline"
-                      className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-hover-glow"
                       size="lg"
                     >
                       <Github className="h-5 w-5 mr-3" />
@@ -518,7 +518,8 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-primary to-[var(--chart-1)] hover:from-primary/90 hover:to-[var(--chart-1)]/90 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+                      variant="gradient"
+                      className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
                       size="lg"
                     >
                       {isLoading ? (
