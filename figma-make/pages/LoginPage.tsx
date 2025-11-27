@@ -157,7 +157,7 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                   onClick={() => handleSocialLogin("google")}
                   disabled={isLoading !== null}
                   variant="outline"
-                  className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-hover-glow"
                   size="lg"
                 >
                   {isLoading === "google" ? (
@@ -189,7 +189,7 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                   onClick={() => handleSocialLogin("github")}
                   disabled={isLoading !== null}
                   variant="outline"
-                  className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-hover-glow"
                   size="lg"
                 >
                   {isLoading === "github" ? (
@@ -283,7 +283,8 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                 <Button
                   type="submit"
                   disabled={isLoading !== null}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-primary to-[var(--chart-1)] hover:from-primary/90 hover:to-[var(--chart-1)]/90 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+                  variant="gradient"
+                  className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
                   size="lg"
                 >
                   {isLoading === "credentials" ? (

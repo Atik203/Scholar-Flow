@@ -340,7 +340,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           <Button
             size="sm"
             variant="gradient"
-            className="shadow-xl hover:shadow-2xl transition-all duration-300 text-xs sm:text-sm px-3 sm:px-4"
+            className="shadow-xl hover:shadow-2xl transition-all duration-300 text-xs sm:text-sm px-3 sm:px-4 btn-hover-glow btn-shine"
             onClick={() => handleNavigation("/login")}
           >
             Get Started
