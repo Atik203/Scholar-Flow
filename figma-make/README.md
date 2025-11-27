@@ -4,9 +4,10 @@ This folder contains React components formatted for Figma Make AI. Copy the enti
 
 ## Folder Structure
 
-```
+```plaintext
 figma-make/
 ├── App.tsx                    # Main app entry with role routing & toasts
+├── routes.tsx                 # Centralized route configuration
 ├── README.md                  # This file
 ├── styles/
 │   └── globals.css            # Global CSS with design tokens & sidebar vars
@@ -18,13 +19,32 @@ figma-make/
 │   ├── ui/                    # ShadCN-style components
 │   │   ├── button.tsx
 │   │   ├── card.tsx
+│   │   ├── card-variants.tsx  # CVA-based card variant system
 │   │   ├── input.tsx
 │   │   ├── badge.tsx
+│   │   ├── avatar.tsx
+│   │   ├── separator.tsx
+│   │   ├── tabs.tsx
+│   │   ├── switch.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── label.tsx
+│   │   ├── textarea.tsx
+│   │   ├── select.tsx
+│   │   ├── progress.tsx
+│   │   ├── skeleton.tsx
+│   │   ├── tooltip.tsx
+│   │   ├── cards/             # Specialized card components
+│   │   │   ├── PricingCard.tsx
+│   │   │   ├── StatCard.tsx
+│   │   │   ├── FeatureCard.tsx
+│   │   │   ├── TestimonialCard.tsx
+│   │   │   ├── ProfileCard.tsx
+│   │   │   └── index.ts
 │   │   └── index.ts
 │   ├── layout/
 │   │   ├── Navbar.tsx         # Site navigation bar
 │   │   ├── Footer.tsx         # Site footer
-│   │   ├── PageContainer.tsx  # Page wrapper with Navbar/Footer
+│   │   ├── PageContainer.tsx  # Page wrapper with Navbar/Footer + Section/Container
 │   │   ├── AppSidebar.tsx     # Dashboard sidebar with collapsible sections
 │   │   ├── DashboardLayout.tsx # Dashboard layout with UserMenu & ThemeToggle
 │   │   └── index.ts
@@ -36,10 +56,25 @@ figma-make/
 │       ├── CTA.tsx
 │       └── index.ts
 └── pages/
-    ├── LoginPage.tsx          # Auth login with role detection & Navbar/Footer
-    ├── RegisterPage.tsx       # Registration with role detection & Navbar/Footer
+    ├── LoginPage.tsx          # Auth login with role detection
+    ├── RegisterPage.tsx       # Registration with role detection
     ├── DashboardPage.tsx      # Role-based dashboard (4 variants)
     ├── PaperDetailPage.tsx    # Individual paper view
+    ├── PricingPage.tsx        # Pricing plans display
+    ├── FAQPage.tsx            # Frequently asked questions
+    ├── PapersPage.tsx         # Paper library display
+    ├── CollectionsPage.tsx    # Collections management
+    ├── SearchPage.tsx         # Search functionality
+    ├── APIDocsPage.tsx        # API documentation
+    ├── IntegrationsPage.tsx   # Third-party integrations
+    ├── BlogPage.tsx           # Blog articles
+    ├── HelpCenterPage.tsx     # Help and support
+    ├── AboutPage.tsx          # About us
+    ├── CareersPage.tsx        # Job listings
+    ├── ContactPage.tsx        # Contact form
+    ├── PrivacyPage.tsx        # Privacy policy
+    ├── TermsPage.tsx          # Terms of service
+    ├── EnterprisePage.tsx     # Enterprise features
     └── index.ts
 ```
 
@@ -59,17 +94,50 @@ figma-make/
 
 ## Switching Between Pages
 
-In `App.tsx`, you can switch between different page layouts by changing the `currentPath` state:
+In `App.tsx`, you can switch between different page layouts by changing the `currentPath` state. Routes are defined in `routes.tsx` for easy management.
+
+### Main Routes
 
 1. **Landing Page** (`/`): Full marketing page with Hero, Features, HowItWorks, Testimonials, and CTA
-2. **Login Page** (`/login`): Authentication with Navbar/Footer, OAuth buttons, email-based role detection
-3. **Register Page** (`/register`): User registration with Navbar/Footer, form validation, role detection
-4. **Dashboard Pages**:
-   - `/dashboard/researcher` - Standard researcher dashboard
-   - `/dashboard/pro-researcher` - Pro researcher dashboard
-   - `/dashboard/team-lead` - Team lead dashboard with team overview
-   - `/dashboard/admin` - Admin dashboard with system alerts
-5. **Paper Detail Page** (`/paper/[id]`): Individual paper view with AI summary
+2. **Login Page** (`/login`): Authentication with OAuth buttons, email-based role detection
+3. **Register Page** (`/register`): User registration with form validation, role detection
+
+### Products Routes
+
+- `/pricing` - Pricing plans with features comparison
+- `/papers` - Paper library with search and filters
+- `/collections` - Collections management interface
+- `/search` - Advanced search functionality
+
+### Resources Routes
+
+- `/api-docs` - API documentation
+- `/integrations` - Third-party integrations
+- `/blog` - Blog articles and updates
+- `/help-center` - Help and support center
+
+### Company Routes
+
+- `/about` - About ScholarFlow
+- `/careers` - Career opportunities
+- `/contact` - Contact form and information
+- `/privacy` - Privacy policy
+- `/terms` - Terms of service
+
+### Enterprise Routes
+
+- `/enterprise` - Enterprise features and pricing
+
+### Dashboard Routes
+
+- `/dashboard/researcher` - Standard researcher dashboard
+- `/dashboard/pro-researcher` - Pro researcher dashboard
+- `/dashboard/team-lead` - Team lead dashboard with team overview
+- `/dashboard/admin` - Admin dashboard with system alerts
+
+### Paper Routes
+
+- `/paper/[id]` - Individual paper view with AI summary
 
 ## Role-Based Dashboard System
 

@@ -373,11 +373,13 @@ export function DashboardPage({
           {quickActions.map((action) => (
             <Card
               key={action.title}
-              className="p-4 cursor-pointer hover:shadow-md transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-300"
               onClick={() => onNavigate?.(action.href)}
             >
               <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-lg ${action.color} text-white`}>
+                <div
+                  className={`p-2 rounded-lg ${action.color} text-white transition-transform group-hover:scale-110`}
+                >
                   <action.icon className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
