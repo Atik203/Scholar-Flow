@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useState } from "react";
 
 // Landing Page Components
+import { AuthenticatedNavbar } from "./components/layout/AuthenticatedNavbar";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
 import { CTA } from "./components/sections/CTA";
@@ -46,6 +47,8 @@ import {
   isDashboardRoute,
   isPaperRoute,
   isProductsRoute,
+  isProfileRoute,
+  isSettingsRoute,
   // Auth
   LoginPage,
   PaperDetailPage,
@@ -54,7 +57,10 @@ import {
   PressPage,
   // Main
   PricingPage,
+  // User
+  ProfilePage,
   RegisterPage,
+  SettingsPage,
   SupportPage,
   TeamsPage,
   TutorialsPage,
@@ -170,6 +176,28 @@ export default function App() {
     if (isPaperRoute(currentPage)) {
       return (
         <PaperDetailPage onNavigate={handleNavigate} onShowToast={showToast} />
+      );
+    }
+
+    // Profile route
+    if (isProfileRoute(currentPage)) {
+      return (
+        <>
+          <AuthenticatedNavbar onNavigate={handleNavigate} />
+          <ProfilePage onNavigate={handleNavigate} onShowToast={showToast} />
+          <Footer onNavigate={handleNavigate} />
+        </>
+      );
+    }
+
+    // Settings route
+    if (isSettingsRoute(currentPage)) {
+      return (
+        <>
+          <AuthenticatedNavbar onNavigate={handleNavigate} />
+          <SettingsPage onNavigate={handleNavigate} onShowToast={showToast} />
+          <Footer onNavigate={handleNavigate} />
+        </>
       );
     }
 

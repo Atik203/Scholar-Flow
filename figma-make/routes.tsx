@@ -26,6 +26,10 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PaperDetailPage } from "./pages/PaperDetailPage";
 
+// User Pages
+import { ProfilePage } from "./pages/ProfilePage";
+import { SettingsPage } from "./pages/SettingsPage";
+
 // Products Pages
 import {
   AIInsightsPage,
@@ -130,6 +134,22 @@ export const routes: Record<string, RouteConfig[]> = {
       component: PaperDetailPage as ComponentType<PageProps>,
       auth: true,
       title: "Paper Details",
+    },
+  ],
+
+  // User Routes
+  user: [
+    {
+      path: "/profile",
+      component: ProfilePage as ComponentType<PageProps>,
+      auth: true,
+      title: "Profile",
+    },
+    {
+      path: "/settings",
+      component: SettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Settings",
     },
   ],
 
@@ -281,6 +301,8 @@ export const isPaperRoute = (path: string): boolean =>
   path.startsWith("/paper");
 export const isAuthRoute = (path: string): boolean =>
   path === "/login" || path === "/register";
+export const isProfileRoute = (path: string): boolean => path === "/profile";
+export const isSettingsRoute = (path: string): boolean => path === "/settings";
 
 // Export page components for direct imports
 export {
@@ -309,7 +331,10 @@ export {
   PressPage,
   // Main
   PricingPage,
+  // User
+  ProfilePage,
   RegisterPage,
+  SettingsPage,
   SupportPage,
   TeamsPage,
   TutorialsPage,
