@@ -1,6 +1,7 @@
 "use client";
 import {
   ChevronRight,
+  LayoutDashboard,
   LogOut,
   Menu,
   Moon,
@@ -9,6 +10,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { AppSidebar } from "./AppSidebar";
@@ -82,8 +84,8 @@ function Avatar({
   );
 }
 
-// User Menu Dropdown
-function UserMenu({
+// User Menu Dropdown - Matches frontend/src/components/customUI/UserMenu.tsx
+export function UserMenu({
   user,
   onNavigate,
   onSignOut,
@@ -93,75 +95,155 @@ function UserMenu({
   onSignOut?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const initials = user.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    // Simulate sign out delay
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    setIsSigningOut(false);
+    setIsOpen(false);
+    onSignOut?.();
+  };
+
+  // Get dashboard path based on role
+  const getDashboardPath = () => {
+    switch (user.role) {
+      case "admin":
+        return "/dashboard/admin";
+      case "team_lead":
+        return "/dashboard/team-lead";
+      case "pro_researcher":
+        return "/dashboard/pro-researcher";
+      default:
+        return "/dashboard/researcher";
+    }
+  };
 
   return (
     <div className="relative">
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative h-8 w-8 rounded-full p-0"
+        className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
       >
-        <Avatar src={user.image} name={user.name} size="md" />
+        <div className="h-9 w-9 aspect-square rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300 overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0">
+          {user.image ? (
+            <img
+              src={user.image}
+              alt={user.name}
+              className="h-full w-full object-cover rounded-full"
+            />
+          ) : (
+            <span className="text-primary font-semibold text-sm">
+              {initials}
+            </span>
+          )}
+        </div>
       </Button>
 
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setIsOpen(false)}
+            />
 
-          {/* Dropdown */}
-          <div className="absolute right-0 top-full mt-2 w-56 bg-popover border border-border rounded-lg shadow-lg z-50">
-            {/* User Info */}
-            <div className="px-4 py-3 border-b border-border">
-              <p className="text-sm font-medium">{user.name}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
-                {roleDisplayNames[user.role]}
-              </span>
-            </div>
+            {/* Dropdown */}
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-full mt-2 w-72 min-w-[18rem] bg-popover dark:bg-gray-800 border border-border dark:border-gray-700 rounded-lg shadow-xl z-50"
+            >
+              {/* User Info */}
+              <div className="flex items-center justify-start gap-3 p-3 border-b border-border dark:border-gray-700">
+                <div className="h-10 w-10 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0 ring-2 ring-primary/20">
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="h-full w-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-primary font-semibold text-sm">
+                      {initials}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none dark:text-white">
+                    {user.name}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground dark:text-gray-400">
+                    {user.email}
+                  </p>
+                  <p className="text-xs leading-none text-primary font-medium">
+                    {roleDisplayNames[user.role]}
+                  </p>
+                </div>
+              </div>
 
-            {/* Menu Items */}
-            <div className="p-1">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onNavigate?.("/profile");
-                }}
-                className="w-full px-3 py-2 text-left text-sm rounded hover:bg-muted flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                Profile
-              </button>
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onNavigate?.("/settings");
-                }}
-                className="w-full px-3 py-2 text-left text-sm rounded hover:bg-muted flex items-center gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
-            </div>
+              {/* Menu Items */}
+              <div className="p-1">
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onNavigate?.(getDashboardPath());
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </button>
 
-            <div className="border-t border-border p-1">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  onSignOut?.();
-                }}
-                className="w-full px-3 py-2 text-left text-sm rounded hover:bg-muted flex items-center gap-2 text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-                Log out
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onNavigate?.("/profile");
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150"
+                >
+                  <User className="h-4 w-4" />
+                  <span>Profile</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    onNavigate?.("/settings");
+                  }}
+                  className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Settings</span>
+                </button>
+              </div>
+
+              <div className="border-t border-border dark:border-gray-700 p-1">
+                <button
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150 text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 disabled:opacity-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>{isSigningOut ? "Signing out..." : "Log out"}</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
