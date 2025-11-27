@@ -109,7 +109,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             <Button
               size="lg"
               variant="gradient"
-              className="shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="shadow-xl hover:shadow-2xl transition-all duration-300 btn-hover-glow btn-shine"
               onClick={handleGetStarted}
             >
               Get Started
@@ -118,7 +118,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             <Button
               size="lg"
               variant="outline"
-              className="backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300"
+              className="backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 btn-hover-glow"
               onClick={handleHowItWorks}
             >
               How it Works

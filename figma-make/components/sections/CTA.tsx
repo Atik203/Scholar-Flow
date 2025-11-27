@@ -60,13 +60,13 @@ export const CTA: React.FC<CTAProps> = ({ onNavigate }) => {
           >
             <button
               onClick={() => onNavigate?.("/login")}
-              className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-[var(--chart-1)] hover:from-primary/90 hover:to-[var(--chart-1)]/90"
+              className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-semibold text-white shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-[var(--chart-1)] hover:from-primary/90 hover:to-[var(--chart-1)]/90 btn-hover-glow btn-shine"
             >
               Get Started →
             </button>
             <button
               onClick={() => onNavigate?.("/faq")}
-              className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-semibold border border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 bg-background text-foreground"
+              className="inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-semibold border border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 bg-background text-foreground btn-hover-glow"
             >
               FAQs
             </button>
