@@ -324,44 +324,61 @@ function MobileNav({
   return (
     <>
       <Button
-        variant="ghost"
+        variant="outline"
         size="icon"
-        className="lg:hidden"
+        className="lg:hidden h-9 w-9 border-border bg-background hover:bg-accent dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
         onClick={() => setIsOpen(true)}
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5 text-foreground dark:text-white" />
         <span className="sr-only">Toggle navigation menu</span>
       </Button>
 
+      {/* Mobile Sidebar - Rendered with highest z-index to ensure visibility */}
       {isOpen && (
-        <>
+        <div className="fixed inset-0" style={{ zIndex: 9999 }}>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40 bg-black/50"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Sidebar */}
-          <div className="fixed left-0 top-0 z-50 h-full w-72 bg-sidebar">
-            <div className="absolute right-2 top-2">
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="absolute left-0 top-0 h-full w-[280px] sm:w-[320px] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 shadow-2xl"
+          >
+            {/* Close Button */}
+            <div className="absolute right-3 top-3 z-10">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
+                className="h-8 w-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </Button>
             </div>
-            <AppSidebar
-              userRole={user.role}
-              currentPath={currentPath}
-              onNavigate={(path) => {
-                setIsOpen(false);
-                onNavigate?.(path);
-              }}
-            />
-          </div>
-        </>
+
+            {/* Sidebar Content with proper styling */}
+            <div className="h-full overflow-hidden">
+              <AppSidebar
+                userRole={user.role}
+                currentPath={currentPath}
+                onNavigate={(path) => {
+                  setIsOpen(false);
+                  onNavigate?.(path);
+                }}
+              />
+            </div>
+          </motion.div>
+        </div>
       )}
     </>
   );
@@ -375,13 +392,13 @@ export function DashboardLayout({
   onSignOut,
 }: DashboardLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Mobile & Tablet Layout - Hidden sidebar, hamburger menu */}
       <div className="lg:hidden">
         <div className="flex flex-col min-h-screen">
-          <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="flex w-full items-center justify-between px-4">
-              <div className="flex items-center gap-4">
+          <header className="sticky top-0 z-30 flex h-14 sm:h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
+            <div className="flex w-full items-center justify-between px-3 sm:px-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <MobileNav
                   user={user}
                   currentPath={currentPath}
@@ -389,7 +406,7 @@ export function DashboardLayout({
                 />
                 <Breadcrumbs currentPath={currentPath} />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <ThemeToggle />
                 <UserMenu
                   user={user}
@@ -400,7 +417,9 @@ export function DashboardLayout({
             </div>
           </header>
           <main className="flex-1 overflow-auto">
-            <div className="flex flex-col gap-6 p-4 md:p-6">{children}</div>
+            <div className="flex flex-col gap-4 sm:gap-6 p-3 sm:p-4 md:p-6">
+              {children}
+            </div>
           </main>
         </div>
       </div>
@@ -408,7 +427,7 @@ export function DashboardLayout({
       {/* Desktop Layout - Fixed Sidebar with Scrollable Content */}
       <div className="hidden lg:flex min-h-screen">
         {/* Fixed Sidebar */}
-        <aside className="fixed left-0 top-0 z-30 h-screen w-64 bg-sidebar border-r border-sidebar-border">
+        <aside className="fixed left-0 top-0 z-30 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
           <AppSidebar
             userRole={user.role}
             currentPath={currentPath}
@@ -418,7 +437,7 @@ export function DashboardLayout({
 
         {/* Main Content - Offset by sidebar width */}
         <div className="flex-1 ml-64 flex flex-col min-h-screen">
-          <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
             <div className="flex w-full items-center justify-between px-6">
               <div className="flex items-center gap-2">
                 <Breadcrumbs currentPath={currentPath} />
@@ -433,7 +452,7 @@ export function DashboardLayout({
               </div>
             </div>
           </header>
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950">
             <div className="flex flex-col gap-6 p-6">{children}</div>
           </main>
         </div>
