@@ -4,20 +4,29 @@ import {
   ArrowLeft,
   Bot,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   Edit,
   Eye,
   FileText,
   Highlighter,
   MessageCircle,
   MessageSquare,
+  MousePointer2,
+  Pencil,
   Plus,
+  RotateCcw,
   Save,
   Send,
   Sparkles,
+  Square,
   StickyNote,
   Trash2,
+  Type,
   User,
   X,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -313,7 +322,7 @@ export function PaperDetailsPage({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowDeleteDialog(true)}
-                  className="inline-flex items-center px-4 py-2 bg-destructive text-destructive-foreground rounded-lg"
+                  className="inline-flex items-center px-4 py-2 bg-destructive text-white rounded-lg"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
@@ -532,23 +541,272 @@ export function PaperDetailsPage({
                 )}
 
                 {activeTab === "annotations" && (
-                  <div className="h-[500px] border rounded-lg flex items-center justify-center bg-muted/10">
-                    <div className="text-center">
-                      <Highlighter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">
-                        PDF Annotations
-                      </h3>
-                      <p className="text-muted-foreground mb-4 max-w-sm">
-                        Highlight text, add notes, and annotate directly on the
-                        PDF document.
-                      </p>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-                      >
-                        Open Annotation Tool
-                      </motion.button>
+                  <div className="flex flex-col h-[600px] border rounded-lg overflow-hidden bg-background">
+                    {/* Annotation Toolbar */}
+                    <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        {/* Tool Selection */}
+                        <div className="flex items-center border rounded-lg overflow-hidden bg-background">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-r bg-primary/10"
+                            title="Select"
+                          >
+                            <MousePointer2 className="h-4 w-4 text-primary" />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-r"
+                            title="Highlight"
+                          >
+                            <Highlighter className="h-4 w-4 text-yellow-500" />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-r"
+                            title="Underline"
+                          >
+                            <Type className="h-4 w-4 text-blue-500" />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-r"
+                            title="Draw"
+                          >
+                            <Pencil className="h-4 w-4 text-green-500" />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted"
+                            title="Area Selection"
+                          >
+                            <Square className="h-4 w-4 text-purple-500" />
+                          </motion.button>
+                        </div>
+
+                        {/* Zoom Controls */}
+                        <div className="flex items-center border rounded-lg overflow-hidden bg-background ml-2">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-r"
+                            title="Zoom Out"
+                          >
+                            <ZoomOut className="h-4 w-4" />
+                          </motion.button>
+                          <span className="px-3 py-2 text-sm font-medium">
+                            120%
+                          </span>
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 hover:bg-muted border-l"
+                            title="Zoom In"
+                          >
+                            <ZoomIn className="h-4 w-4" />
+                          </motion.button>
+                        </div>
+
+                        {/* Rotate */}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          className="p-2 border rounded-lg hover:bg-muted bg-background"
+                          title="Rotate"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </motion.button>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {/* Page Navigation */}
+                        <div className="flex items-center gap-1 text-sm">
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="p-1.5 hover:bg-muted rounded-lg"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </motion.button>
+                          <span className="px-2 py-1 bg-muted rounded text-xs font-medium">
+                            1 / 12
+                          </span>
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="p-1.5 hover:bg-muted rounded-lg"
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </motion.button>
+                        </div>
+
+                        {/* Toggle Annotations List */}
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm"
+                        >
+                          Show List
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* PDF Viewer Area */}
+                    <div className="flex-1 flex">
+                      {/* Main PDF View */}
+                      <div className="flex-1 overflow-auto bg-muted/20 p-6">
+                        <div className="flex justify-center">
+                          <div
+                            className="relative bg-white shadow-2xl"
+                            style={{ width: "595px", height: "842px" }}
+                          >
+                            {/* Simulated PDF Page */}
+                            <div className="p-8 text-sm text-gray-700 space-y-4">
+                              <h1 className="text-xl font-bold text-center mb-6">
+                                {dummyPaper.title}
+                              </h1>
+                              <p className="text-center text-gray-500 text-xs mb-4">
+                                {dummyPaper.metadata.authors.join(", ")}
+                              </p>
+
+                              {/* Demo Highlight Annotation */}
+                              <div className="relative">
+                                <span className="bg-yellow-200 px-1">
+                                  The Transformer model
+                                </span>
+                                <span>
+                                  {" "}
+                                  introduces a novel architecture based entirely
+                                  on attention mechanisms.
+                                </span>
+                                <div className="absolute -right-2 -top-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+                                  <span className="text-[10px] font-bold text-yellow-800">
+                                    1
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p>
+                                This paper proposes a new simple network
+                                architecture, the Transformer, based solely on
+                                attention mechanisms, dispensing with recurrence
+                                and convolutions entirely.
+                              </p>
+
+                              {/* Demo Underline Annotation */}
+                              <div className="relative">
+                                <span className="border-b-2 border-blue-500">
+                                  Self-attention
+                                </span>
+                                <span>
+                                  , sometimes called intra-attention, is an
+                                  attention mechanism relating different
+                                  positions of a single sequence.
+                                </span>
+                                <div className="absolute -right-2 -top-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+                                  <span className="text-[10px] font-bold text-blue-800">
+                                    2
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p>
+                                The model achieves state-of-the-art performance
+                                on machine translation tasks while being more
+                                parallelizable and requiring significantly less
+                                time to train.
+                              </p>
+
+                              <p className="text-gray-500 text-xs mt-8">
+                                Page 1 of 12
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Annotations Sidebar */}
+                      <div className="w-72 border-l bg-card overflow-y-auto">
+                        <div className="p-4 border-b">
+                          <h4 className="font-semibold flex items-center gap-2">
+                            <Highlighter className="h-4 w-4" />
+                            Annotations
+                            <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                              2
+                            </span>
+                          </h4>
+                        </div>
+                        <div className="divide-y">
+                          {/* Annotation Item 1 */}
+                          <div className="p-3 hover:bg-muted/50 cursor-pointer">
+                            <div className="flex items-start gap-2">
+                              <div className="w-3 h-3 bg-yellow-400 rounded-full mt-1 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  Highlight
+                                </p>
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  "The Transformer model"
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs text-muted-foreground">
+                                    Page 1
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    • 2 min ago
+                                  </span>
+                                </div>
+                              </div>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                className="p-1 hover:bg-destructive/10 text-destructive rounded"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </motion.button>
+                            </div>
+                          </div>
+                          {/* Annotation Item 2 */}
+                          <div className="p-3 hover:bg-muted/50 cursor-pointer">
+                            <div className="flex items-start gap-2">
+                              <div className="w-3 h-3 bg-blue-400 rounded-full mt-1 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  Underline
+                                </p>
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  "Self-attention"
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-xs text-muted-foreground">
+                                    Page 1
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    • 5 min ago
+                                  </span>
+                                </div>
+                              </div>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                className="p-1 hover:bg-destructive/10 text-destructive rounded"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </motion.button>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Add Note Input */}
+                        <div className="p-3 border-t">
+                          <textarea
+                            placeholder="Add a note to selected text..."
+                            rows={2}
+                            className="w-full px-3 py-2 border rounded-lg bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full mt-2 py-2 bg-primary text-primary-foreground rounded-lg text-sm"
+                          >
+                            Add Note
+                          </motion.button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
