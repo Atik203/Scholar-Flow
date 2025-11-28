@@ -28,14 +28,26 @@ import {
   // Company
   AboutPage,
   AIInsightsPage,
+  AnnotationsPage,
   APIPage,
   CareersPage,
+  CitationsPage,
   CollaboratePage,
   CollectionsPage,
   CommunityPage,
   ContactPage,
+  CreateCollectionPage,
+  CreateWorkspacePage,
+  // Dashboard Module - Collections
+  DashboardCollectionsPage,
   // Dashboard
   DashboardPage,
+  // Dashboard Module - Papers
+  DashboardPapersPage,
+  // Dashboard Module - Research
+  DashboardResearchPage,
+  // Dashboard Module - Workspaces
+  DashboardWorkspacesPage,
   // Resources
   DocsPage,
   // Enterprise
@@ -44,26 +56,36 @@ import {
   // Route helpers
   getRoleFromPath,
   IntegrationsPage,
+  isCollectionsRoute,
   isDashboardRoute,
   isPaperRoute,
+  isPapersRoute,
   isProductsRoute,
   isProfileRoute,
+  isResearchRoute,
   isSettingsRoute,
+  isWorkspacesRoute,
   // Auth
   LoginPage,
   PaperDetailPage,
   // Products
   PapersPage,
+  PdfExtractionPage,
   PressPage,
   // Main
   PricingPage,
   // User
   ProfilePage,
   RegisterPage,
+  SearchPapersPage,
   SettingsPage,
+  SharedCollectionsPage,
+  SharedWorkspacesPage,
   SupportPage,
   TeamsPage,
+  TextEditorPage,
   TutorialsPage,
+  UploadPaperPage,
 } from "./routes";
 
 import "./styles/globals.css";
@@ -170,6 +192,66 @@ export default function App() {
           onShowToast={showToast}
         />
       );
+    }
+
+    // Papers module routes (dashboard)
+    if (isPapersRoute(currentPage)) {
+      switch (currentPage) {
+        case "/papers":
+          return <DashboardPapersPage onNavigate={handleNavigate} />;
+        case "/papers/upload":
+          return <UploadPaperPage onNavigate={handleNavigate} />;
+        case "/papers/search":
+          return <SearchPapersPage onNavigate={handleNavigate} />;
+        default:
+          return <DashboardPapersPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Collections module routes (dashboard)
+    if (isCollectionsRoute(currentPage)) {
+      switch (currentPage) {
+        case "/collections":
+          return <DashboardCollectionsPage onNavigate={handleNavigate} />;
+        case "/collections/create":
+          return <CreateCollectionPage onNavigate={handleNavigate} />;
+        case "/collections/shared":
+          return <SharedCollectionsPage onNavigate={handleNavigate} />;
+        default:
+          return <DashboardCollectionsPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Workspaces module routes (dashboard)
+    if (isWorkspacesRoute(currentPage)) {
+      switch (currentPage) {
+        case "/workspaces":
+          return <DashboardWorkspacesPage onNavigate={handleNavigate} />;
+        case "/workspaces/create":
+          return <CreateWorkspacePage onNavigate={handleNavigate} />;
+        case "/workspaces/shared":
+          return <SharedWorkspacesPage onNavigate={handleNavigate} />;
+        default:
+          return <DashboardWorkspacesPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Research module routes (dashboard)
+    if (isResearchRoute(currentPage)) {
+      switch (currentPage) {
+        case "/research":
+          return <DashboardResearchPage onNavigate={handleNavigate} />;
+        case "/research/pdf-extraction":
+          return <PdfExtractionPage onNavigate={handleNavigate} />;
+        case "/research/editor":
+          return <TextEditorPage onNavigate={handleNavigate} />;
+        case "/research/citations":
+          return <CitationsPage onNavigate={handleNavigate} />;
+        case "/research/annotations":
+          return <AnnotationsPage onNavigate={handleNavigate} />;
+        default:
+          return <DashboardResearchPage onNavigate={handleNavigate} />;
+      }
     }
 
     // Paper detail route
