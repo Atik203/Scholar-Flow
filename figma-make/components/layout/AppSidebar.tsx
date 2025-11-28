@@ -54,10 +54,10 @@ const hasRoleAccess = (userRole: UserRole, minRole?: UserRole): boolean => {
 };
 
 // Navigation items matching original frontend
-const navigationItems: SidebarItem[] = [
+const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
   {
     title: "Dashboard",
-    path: "/dashboard",
+    path: userRole === "admin" ? "/dashboard/admin" : "/dashboard",
     icon: Home,
   },
   {
@@ -132,19 +132,19 @@ const adminFeatures: SidebarItem[] = [
   },
   {
     title: "User Management",
-    path: "/users",
+    path: "/admin/users",
     icon: Users,
     minRole: "admin",
   },
   {
     title: "Subscriptions",
-    path: "/subscriptions",
+    path: "/admin/subscriptions",
     icon: CreditCard,
     minRole: "admin",
   },
   {
     title: "System Settings",
-    path: "/settings",
+    path: "/admin/settings",
     icon: Settings,
     minRole: "admin",
   },
@@ -351,20 +351,20 @@ export function AppSidebar({
             Navigation
           </h3>
           <nav className="space-y-1">
-            {navigationItems.map((item) => {
+            {getNavigationItems(userRole).map((item) => {
               const sectionActive = item.items
                 ? item.items.some((subItem) =>
                     currentPath?.startsWith(subItem.path)
                   )
                 : currentPath === item.path ||
-                  currentPath?.startsWith(`${item.path}/`);
+                  (currentPath?.startsWith(`${item.path}/`) ?? false);
 
               if (item.items?.length) {
                 return (
                   <CollapsibleSection
                     key={item.title}
                     item={item}
-                    isActive={sectionActive}
+                    isActive={sectionActive ?? false}
                     currentPath={currentPath}
                     onNavigate={onNavigate}
                   />

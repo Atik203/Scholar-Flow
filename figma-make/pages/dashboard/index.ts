@@ -36,3 +36,11 @@ export {
 export { AIInsightsPage } from "./AIInsightsPage";
 export { AnalyticsPage } from "./AnalyticsPage";
 export { BillingPage } from "./BillingPage";
+
+// Admin Dashboard Pages
+export {
+  AdminOverviewPage,
+  SubscriptionsPage,
+  SystemSettingsPage,
+  UserManagementPage,
+} from "./admin";
