@@ -8,13 +8,21 @@ export { ResearchPage } from "./ResearchPage";
 export { WorkspacesPage } from "./WorkspacesPage";
 
 // Papers Subpages
-export { SearchPapersPage, UploadPaperPage } from "./papers";
+export { PaperDetailsPage, SearchPapersPage, UploadPaperPage } from "./papers";
 
 // Collections Subpages
-export { CreateCollectionPage, SharedCollectionsPage } from "./collections";
+export {
+  CollectionDetailsPage,
+  CreateCollectionPage,
+  SharedCollectionsPage,
+} from "./collections";
 
 // Workspaces Subpages
-export { CreateWorkspacePage, SharedWorkspacesPage } from "./workspaces";
+export {
+  CreateWorkspacePage,
+  SharedWorkspacesPage,
+  WorkspaceDetailsPage,
+} from "./workspaces";
 
 // Research Subpages
 export {
@@ -23,3 +31,8 @@ export {
   PdfExtractionPage,
   TextEditorPage,
 } from "./research";
+
+// Other Dashboard Pages
+export { AIInsightsPage } from "./AIInsightsPage";
+export { AnalyticsPage } from "./AnalyticsPage";
+export { BillingPage } from "./BillingPage";
