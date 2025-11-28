@@ -586,7 +586,7 @@ export function PapersPage({ onNavigate }: PapersPageProps) {
                     <PaperRow
                       key={paper.id}
                       paper={paper}
-                      onView={() => console.log("View", paper.id)}
+                      onView={() => onNavigate?.(`/papers/${paper.id}`)}
                       onProcess={() => console.log("Process", paper.id)}
                       onDelete={() => console.log("Delete", paper.id)}
                     />
