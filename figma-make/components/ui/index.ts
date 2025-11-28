@@ -43,3 +43,100 @@ export {
   TooltipProvider,
   TooltipTrigger,
 } from "./tooltip";
+
+// Alert & Feedback Components
+export { Alert, AlertDescription, AlertTitle } from "./alert";
+
+// Overlay Components
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogTitle,
+} from "./dialog";
+
+export {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+
+export { Popover, PopoverContent, PopoverTrigger } from "./popover";
+
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./sheet";
+
+// Modal Components
+export {
+  AlertModal,
+  ConfirmModal,
+  FormModal,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from "./modal";
+
+// Navigation Components
+export {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+} from "./breadcrumb";
+
+// Layout Components
+export {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "./collapsible";
+export { ScrollArea, ScrollBar } from "./scroll-area";
+
+// Data Display Components
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./table";
+
+// Input Components
+export { ButtonGroup } from "./button-group";
+export { Slider } from "./slider";
+
+// Loading Components
+export { LoadingSpinner } from "./loading-spinner";
+export {
+  ContentLoader,
+  LoadingSkeleton,
+  ProgressBar,
+  Shimmer,
+} from "./loading-states";
