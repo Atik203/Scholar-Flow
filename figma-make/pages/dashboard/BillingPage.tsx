@@ -371,6 +371,38 @@ export function BillingPage({ onNavigate }: BillingPageProps) {
                 View Full Analytics
               </motion.button>
             </div>
+
+            {/* Account Overview */}
+            <div className="rounded-xl border bg-card p-6">
+              <h4 className="font-semibold mb-4">Account Overview</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Linked to your ScholarFlow profile
+              </p>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="font-medium">{defaultUser.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Account ID</span>
+                  <span className="font-mono text-xs">usr_abc123xyz</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Role</span>
+                  <span className="px-2 py-0.5 bg-muted rounded text-xs font-medium uppercase tracking-wide">
+                    {defaultUser.role.replace("_", " ")}
+                  </span>
+                </div>
+                {hasActiveSubscription && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Stripe customer
+                    </span>
+                    <span className="font-mono text-xs">cus_Ox7...j9K</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

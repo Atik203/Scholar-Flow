@@ -8,9 +8,11 @@ import {
   Eye,
   FileText,
   Highlighter,
+  MessageCircle,
   MessageSquare,
   Plus,
   Save,
+  Send,
   Sparkles,
   StickyNote,
   Trash2,
@@ -117,6 +119,50 @@ const dummyAISummary = {
     "This architecture became the foundation for models like BERT, GPT, and other large language models, fundamentally changing NLP and beyond.",
 };
 
+// AI Chat dummy data
+const dummyChatMessages = [
+  {
+    id: "msg-1",
+    role: "user" as const,
+    content: "What is the main contribution of this paper?",
+    timestamp: "2024-01-20T10:30:00Z",
+  },
+  {
+    id: "msg-2",
+    role: "assistant" as const,
+    content:
+      "The main contribution of this paper is the introduction of the Transformer architecture, which relies entirely on self-attention mechanisms for sequence transduction tasks. Key innovations include:\n\n1. **Self-Attention Mechanism**: The model uses self-attention to draw global dependencies between input and output, without using recurrence or convolution.\n\n2. **Multi-Head Attention**: This allows the model to jointly attend to information from different representation subspaces at different positions.\n\n3. **Positional Encoding**: Since the model contains no recurrence, positional encodings are added to give the model information about the relative positions of tokens.\n\n4. **Parallel Processing**: Unlike RNNs, Transformers can process all positions simultaneously, enabling much faster training.",
+    timestamp: "2024-01-20T10:30:15Z",
+  },
+  {
+    id: "msg-3",
+    role: "user" as const,
+    content: "How does the attention mechanism work in simple terms?",
+    timestamp: "2024-01-20T10:32:00Z",
+  },
+  {
+    id: "msg-4",
+    role: "assistant" as const,
+    content:
+      'In simple terms, the attention mechanism works like a smart spotlight:\n\n**Query, Key, Value (Q, K, V)**:\n- Imagine you\'re in a library looking for relevant information\n- The Query is your question\n- Keys are like book titles/indices\n- Values are the actual book contents\n\n**How it works**:\n1. Compare your question (Query) with all book titles (Keys)\n2. Calculate "relevance scores" for each book\n3. Use these scores to weight the actual contents (Values)\n4. Combine weighted contents to get your answer\n\nThe Transformer does this for every word in a sentence, allowing each word to "look at" all other words and decide which ones are most relevant for understanding the current context.',
+    timestamp: "2024-01-20T10:32:20Z",
+  },
+];
+
+const AI_MODELS = [
+  {
+    value: "gemini-2.5-flash-lite",
+    label: "Gemini 2.5 Flash Lite (Free)",
+    description: "Fast and free",
+  },
+  {
+    value: "gpt-4o-mini",
+    label: "GPT-4o Mini",
+    description: "Quick responses",
+  },
+  { value: "gpt-4o", label: "GPT-4o (Premium)", description: "Best quality" },
+];
+
 // ============================================================================
 // Tab Types
 // ============================================================================
@@ -145,6 +191,17 @@ export function PaperDetailsPage({
   const [newComment, setNewComment] = useState("");
   const [newNote, setNewNote] = useState("");
   const [showAISummary, setShowAISummary] = useState(true);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash-lite");
+  const [chatMessages, setChatMessages] = useState<
+    Array<{
+      id: string;
+      role: "user" | "assistant";
+      content: string;
+      timestamp: string | Date;
+    }>
+  >(dummyChatMessages);
 
   const tabs = [
     { id: "preview" as const, label: "Preview", icon: Eye },
@@ -163,6 +220,15 @@ export function PaperDetailsPage({
       year: "numeric",
       month: "long",
       day: "numeric",
+    });
+  };
+
+  const formatTime = (dateInput: string | Date) => {
+    const date =
+      typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -649,16 +715,206 @@ export function PaperDetailsPage({
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        onClick={() => setShowAIChat(!showAIChat)}
                         className="w-full py-2 bg-primary/10 text-primary rounded-lg text-sm inline-flex items-center justify-center gap-2"
                       >
-                        <Bot className="h-4 w-4" />
-                        Chat with AI
+                        <MessageCircle className="h-4 w-4" />
+                        {showAIChat ? "Hide Chat" : "Chat with AI"}
                       </motion.button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
+
+            {/* AI Chat Panel */}
+            <AnimatePresence>
+              {showAIChat && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="rounded-xl border bg-card shadow-sm overflow-hidden"
+                >
+                  <div className="p-4 border-b bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-purple-500" />
+                        AI Chat
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <select className="text-xs bg-background border rounded-md px-2 py-1">
+                          <option>GPT-4o-mini</option>
+                          <option>GPT-3.5-turbo</option>
+                          <option>GPT-4o</option>
+                          <option>Gemini 2.5 Flash Lite</option>
+                        </select>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => setChatMessages([])}
+                          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
+                          title="New Chat"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Messages */}
+                  <div className="h-80 overflow-y-auto p-4 space-y-4">
+                    {chatMessages.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center">
+                        <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
+                          <Bot className="h-8 w-8 text-purple-500" />
+                        </div>
+                        <h4 className="font-medium mb-2">
+                          Ask about this paper
+                        </h4>
+                        <p className="text-sm text-muted-foreground max-w-[200px]">
+                          I can help you understand the content, methodology,
+                          and key findings.
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                          {[
+                            "Summarize key findings",
+                            "Explain methodology",
+                            "List limitations",
+                          ].map((suggestion) => (
+                            <motion.button
+                              key={suggestion}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => {
+                                setChatInput(suggestion);
+                              }}
+                              className="text-xs px-3 py-1.5 bg-muted rounded-full hover:bg-muted/80"
+                            >
+                              {suggestion}
+                            </motion.button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      chatMessages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={cn(
+                            "flex gap-3",
+                            message.role === "user" ? "flex-row-reverse" : ""
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+                              message.role === "user"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-purple-100 dark:bg-purple-900/30"
+                            )}
+                          >
+                            {message.role === "user" ? (
+                              <User className="h-4 w-4" />
+                            ) : (
+                              <Bot className="h-4 w-4 text-purple-500" />
+                            )}
+                          </div>
+                          <div
+                            className={cn(
+                              "flex-1 rounded-lg p-3 max-w-[85%]",
+                              message.role === "user"
+                                ? "bg-primary text-primary-foreground ml-auto"
+                                : "bg-muted"
+                            )}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">
+                              {message.content}
+                            </p>
+                            <span className="text-xs opacity-60 mt-1 block">
+                              {formatTime(message.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Chat Input */}
+                  <div className="p-4 border-t bg-muted/20">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && chatInput.trim()) {
+                            const newMessage = {
+                              id: `user-${Date.now()}`,
+                              role: "user" as const,
+                              content: chatInput,
+                              timestamp: new Date(),
+                            };
+                            setChatMessages([...chatMessages, newMessage]);
+                            setChatInput("");
+                            // Simulate AI response after a short delay
+                            setTimeout(() => {
+                              const aiResponse = {
+                                id: `ai-${Date.now()}`,
+                                role: "assistant" as const,
+                                content:
+                                  "I'm analyzing your question about the paper. In a production environment, this would provide detailed insights based on the paper's content using advanced AI models.",
+                                timestamp: new Date(),
+                              };
+                              setChatMessages((prev) => [...prev, aiResponse]);
+                            }, 1000);
+                          }
+                        }}
+                        placeholder="Ask a question about this paper..."
+                        className="flex-1 px-3 py-2 bg-background border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                      />
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          if (chatInput.trim()) {
+                            const newMessage = {
+                              id: `user-${Date.now()}`,
+                              role: "user" as const,
+                              content: chatInput,
+                              timestamp: new Date(),
+                            };
+                            setChatMessages([...chatMessages, newMessage]);
+                            setChatInput("");
+                            setTimeout(() => {
+                              const aiResponse = {
+                                id: `ai-${Date.now()}`,
+                                role: "assistant" as const,
+                                content:
+                                  "I'm analyzing your question about the paper. In a production environment, this would provide detailed insights based on the paper's content using advanced AI models.",
+                                timestamp: new Date(),
+                              };
+                              setChatMessages((prev) => [...prev, aiResponse]);
+                            }, 1000);
+                          }
+                        }}
+                        disabled={!chatInput.trim()}
+                        className={cn(
+                          "p-2 rounded-lg transition-colors",
+                          chatInput.trim()
+                            ? "bg-purple-500 text-white hover:bg-purple-600"
+                            : "bg-muted text-muted-foreground cursor-not-allowed"
+                        )}
+                      >
+                        <Send className="h-4 w-4" />
+                      </motion.button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      AI responses are based on paper content analysis
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* File Information */}
             <div className="rounded-xl border bg-card shadow-sm">
@@ -752,7 +1008,7 @@ export function PaperDetailsPage({
                       setShowDeleteDialog(false);
                       onNavigate?.("/papers");
                     }}
-                    className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                   >
                     Delete
                   </button>
