@@ -8,9 +8,12 @@ import {
   CreditCard,
   FileText,
   Highlighter,
+  History,
   Home,
   Layers,
+  MessageSquare,
   Microscope,
+  Notebook,
   Plus,
   Quote,
   Search,
@@ -119,6 +122,15 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
     title: "Billing",
     path: "/billing",
     icon: CreditCard,
+  },
+  {
+    title: "Activity & Community",
+    icon: MessageSquare,
+    items: [
+      { title: "Activity Log", path: "/activity-log", icon: History },
+      { title: "Discussions", path: "/discussions", icon: MessageSquare },
+      { title: "Knowledge Pages", path: "/pages", icon: Notebook },
+    ],
   },
 ];
 
