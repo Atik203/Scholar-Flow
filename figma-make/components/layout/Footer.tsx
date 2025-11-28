@@ -1,11 +1,45 @@
 "use client";
-import { Github, Heart, Shield, Twitter } from "lucide-react";
+import {
+  AlertCircle,
+  ChevronUp,
+  Github,
+  Heart,
+  Key,
+  Loader,
+  Mail,
+  MoreHorizontal,
+  Shield,
+  Twitter,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 
 interface FooterProps {
   onNavigate?: (path: string) => void;
 }
 
 export function Footer({ onNavigate }: FooterProps) {
+  const [isQuickNavOpen, setIsQuickNavOpen] = useState(false);
+
+  const quickNavSections = [
+    {
+      heading: "Auth",
+      links: [
+        { label: "Forgot Password", href: "/forgot-password", icon: Key },
+        { label: "Reset Password", href: "/reset-password", icon: Key },
+        { label: "Verify Email", href: "/verify-email", icon: Mail },
+      ],
+    },
+    {
+      heading: "Utility",
+      links: [
+        { label: "404 Page", href: "/not-found", icon: AlertCircle },
+        { label: "Error Page", href: "/error", icon: AlertCircle },
+        { label: "Loading", href: "/loading", icon: Loader },
+      ],
+    },
+  ];
+
   const sections = [
     {
       heading: "Product",
@@ -113,13 +147,86 @@ export function Footer({ onNavigate }: FooterProps) {
           <p className="text-gray-400">
             © {new Date().getFullYear()} ScholarFlow. All rights reserved.
           </p>
-          <p className="flex items-center gap-1.5 text-gray-400">
-            Built with <Heart className="h-3.5 w-3.5 text-primary" /> for
-            researchers.
-            <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium border border-primary/30">
-              Phase 1 MVP
-            </span>
-          </p>
+          <div className="flex items-center gap-3">
+            {/* Quick Navigation Button */}
+            <div className="relative">
+              <button
+                onClick={() => setIsQuickNavOpen(!isQuickNavOpen)}
+                className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-800/50 border border-gray-700 hover:border-gray-600 hover:bg-gray-800 transition-all duration-200 text-gray-400 hover:text-gray-300"
+                title="More pages"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="text-[10px]">More</span>
+                <ChevronUp
+                  className={`h-3 w-3 transition-transform duration-200 ${
+                    isQuickNavOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Quick Navigation Modal */}
+              {isQuickNavOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsQuickNavOpen(false)}
+                  />
+                  {/* Modal */}
+                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700 bg-gray-800/50">
+                      <span className="text-[11px] font-medium text-gray-300">
+                        Quick Navigation
+                      </span>
+                      <button
+                        onClick={() => setIsQuickNavOpen(false)}
+                        className="p-0.5 rounded hover:bg-gray-700 transition-colors"
+                      >
+                        <X className="h-3 w-3 text-gray-400" />
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {quickNavSections.map((section, idx) => (
+                        <div key={section.heading}>
+                          {idx > 0 && (
+                            <div className="border-t border-gray-700/50" />
+                          )}
+                          <div className="px-3 py-1.5 bg-gray-800/30">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
+                              {section.heading}
+                            </span>
+                          </div>
+                          <div className="py-1">
+                            {section.links.map((link) => {
+                              const Icon = link.icon;
+                              return (
+                                <button
+                                  key={link.href}
+                                  onClick={() => {
+                                    onNavigate?.(link.href);
+                                    setIsQuickNavOpen(false);
+                                  }}
+                                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-gray-400 hover:text-white hover:bg-gray-800 transition-colors text-left"
+                                >
+                                  <Icon className="h-3 w-3 text-gray-500" />
+                                  {link.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <p className="flex items-center gap-1.5 text-gray-400">
+              Built with <Heart className="h-3.5 w-3.5 text-primary" /> for
+              researchers.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

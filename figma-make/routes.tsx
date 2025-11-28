@@ -23,8 +23,20 @@
 import type { ComponentType } from "react";
 
 // Auth Pages
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { VerifyEmailPage } from "./pages/VerifyEmailPage";
+
+// Utility Pages
+import { ErrorPage } from "./pages/ErrorPage";
+import { LoadingPage } from "./pages/LoadingPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+
+// Marketing Pages
+import { FeaturesPage } from "./pages/FeaturesPage";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
 
 // Dashboard Pages
 import { DashboardPage } from "./pages/DashboardPage";
@@ -150,6 +162,54 @@ export const routes: Record<string, RouteConfig[]> = {
       path: "/register",
       component: RegisterPage as ComponentType<PageProps>,
       title: "Register",
+    },
+    {
+      path: "/forgot-password",
+      component: ForgotPasswordPage as ComponentType<PageProps>,
+      title: "Forgot Password",
+    },
+    {
+      path: "/reset-password",
+      component: ResetPasswordPage as ComponentType<PageProps>,
+      title: "Reset Password",
+    },
+    {
+      path: "/verify-email",
+      component: VerifyEmailPage as ComponentType<PageProps>,
+      title: "Verify Email",
+    },
+  ],
+
+  // Utility Routes
+  utility: [
+    {
+      path: "/not-found",
+      component: NotFoundPage as ComponentType<PageProps>,
+      title: "Page Not Found",
+    },
+    {
+      path: "/error",
+      component: ErrorPage as ComponentType<PageProps>,
+      title: "Error",
+    },
+    {
+      path: "/loading",
+      component: LoadingPage as ComponentType<PageProps>,
+      title: "Loading",
+    },
+  ],
+
+  // Marketing Routes
+  marketing: [
+    {
+      path: "/features",
+      component: FeaturesPage as ComponentType<PageProps>,
+      title: "Features",
+    },
+    {
+      path: "/how-it-works",
+      component: HowItWorksPage as ComponentType<PageProps>,
+      title: "How It Works",
     },
   ],
 
@@ -537,7 +597,15 @@ export const isResearchRoute = (path: string): boolean =>
 export const isPaperRoute = (path: string): boolean =>
   path.startsWith("/paper");
 export const isAuthRoute = (path: string): boolean =>
-  path === "/login" || path === "/register";
+  path === "/login" ||
+  path === "/register" ||
+  path === "/forgot-password" ||
+  path === "/reset-password" ||
+  path === "/verify-email";
+export const isMarketingRoute = (path: string): boolean =>
+  path === "/features" || path === "/how-it-works";
+export const isUtilityRoute = (path: string): boolean =>
+  path === "/not-found" || path === "/error" || path === "/loading";
 export const isProfileRoute = (path: string): boolean => path === "/profile";
 export const isSettingsRoute = (path: string): boolean => path === "/settings";
 export const isAIInsightsRoute = (path: string): boolean =>
@@ -584,10 +652,19 @@ export {
   DocsPage,
   // Enterprise
   EnterprisePage,
+  // Utility Pages
+  ErrorPage,
   FAQPage,
+  // Marketing Pages
+  FeaturesPage,
+  // Auth Pages
+  ForgotPasswordPage,
+  HowItWorksPage,
   IntegrationsPage,
+  LoadingPage,
   // Auth
   LoginPage,
+  NotFoundPage,
   PaperDetailPage,
   PaperDetailsPage,
   // Products
@@ -599,6 +676,7 @@ export {
   // User
   ProfilePage,
   RegisterPage,
+  ResetPasswordPage,
   SearchPapersPage,
   SettingsPage,
   SharedCollectionsPage,
@@ -611,5 +689,6 @@ export {
   TutorialsPage,
   UploadPaperPage,
   UserManagementPage,
+  VerifyEmailPage,
   WorkspaceDetailsPage,
 };
