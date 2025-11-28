@@ -667,7 +667,7 @@ export function WorkspaceDetailsPage({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowDeleteDialog(true)}
-                  className="inline-flex items-center px-4 py-2 bg-destructive text-destructive-foreground rounded-lg"
+                  className="inline-flex items-center px-4 py-2 bg-destructive text-white rounded-lg"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Workspace
@@ -943,7 +943,7 @@ export function WorkspaceDetailsPage({
                     className={cn(
                       "px-4 py-2 rounded-lg",
                       deleteConfirmText === dummyWorkspace.name
-                        ? "bg-destructive text-destructive-foreground"
+                        ? "bg-destructive text-white"
                         : "bg-muted text-muted-foreground cursor-not-allowed"
                     )}
                   >

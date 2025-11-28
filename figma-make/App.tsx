@@ -27,6 +27,8 @@ import { Testimonials } from "./components/sections/Testimonials";
 import {
   // Company
   AboutPage,
+  // Admin Pages
+  AdminOverviewPage,
   AIInsightsPage,
   AnalyticsPage,
   AnnotationsPage,
@@ -61,6 +63,7 @@ import {
   // Route helpers
   getRoleFromPath,
   IntegrationsPage,
+  isAdminRoute,
   isAIInsightsRoute,
   isAnalyticsRoute,
   isBillingRoute,
@@ -90,11 +93,14 @@ import {
   SettingsPage,
   SharedCollectionsPage,
   SharedWorkspacesPage,
+  SubscriptionsPage,
   SupportPage,
+  SystemSettingsPage,
   TeamsPage,
   TextEditorPage,
   TutorialsPage,
   UploadPaperPage,
+  UserManagementPage,
   WorkspaceDetailsPage,
 } from "./routes";
 
@@ -217,6 +223,22 @@ export default function App() {
     // Billing route
     if (isBillingRoute(currentPage)) {
       return <BillingPage onNavigate={handleNavigate} />;
+    }
+
+    // Admin routes
+    if (isAdminRoute(currentPage)) {
+      switch (currentPage) {
+        case "/admin-overview":
+          return <AdminOverviewPage onNavigate={handleNavigate} />;
+        case "/admin/users":
+          return <UserManagementPage onNavigate={handleNavigate} />;
+        case "/admin/subscriptions":
+          return <SubscriptionsPage onNavigate={handleNavigate} />;
+        case "/admin/settings":
+          return <SystemSettingsPage onNavigate={handleNavigate} />;
+        default:
+          return <AdminOverviewPage onNavigate={handleNavigate} />;
+      }
     }
 
     // Papers module routes (dashboard)

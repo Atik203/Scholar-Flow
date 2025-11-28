@@ -462,7 +462,7 @@ export function WorkspacesPage({ onNavigate }: WorkspacesPageProps) {
                   <WorkspaceCard
                     key={workspace.id}
                     workspace={workspace}
-                    onView={() => console.log("View", workspace.id)}
+                    onView={() => onNavigate?.(`/workspaces/${workspace.id}`)}
                     onEdit={() => console.log("Edit", workspace.id)}
                     onDelete={() => console.log("Delete", workspace.id)}
                   />
