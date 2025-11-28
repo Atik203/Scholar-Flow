@@ -9,6 +9,10 @@
  * Route Categories:
  * - Auth Routes: /login, /register
  * - Dashboard Routes: /dashboard/*
+ * - Papers Routes: /papers/*
+ * - Collections Routes: /collections/*
+ * - Workspaces Routes: /workspaces/*
+ * - Research Routes: /research/*
  * - Products Routes: /products/*
  * - Resources Routes: /resources/*
  * - Company Routes: /company/*
@@ -29,6 +33,36 @@ import { PaperDetailPage } from "./pages/PaperDetailPage";
 // User Pages
 import { ProfilePage } from "./pages/ProfilePage";
 import { SettingsPage } from "./pages/SettingsPage";
+
+// Dashboard Module Pages - Papers
+import {
+  PapersPage as DashboardPapersPage,
+  SearchPapersPage,
+  UploadPaperPage,
+} from "./pages/dashboard/papers";
+
+// Dashboard Module Pages - Collections
+import {
+  CreateCollectionPage,
+  CollectionsPage as DashboardCollectionsPage,
+  SharedCollectionsPage,
+} from "./pages/dashboard/collections";
+
+// Dashboard Module Pages - Workspaces
+import {
+  CreateWorkspacePage,
+  WorkspacesPage as DashboardWorkspacesPage,
+  SharedWorkspacesPage,
+} from "./pages/dashboard/workspaces";
+
+// Dashboard Module Pages - Research
+import {
+  AnnotationsPage,
+  CitationsPage,
+  ResearchPage as DashboardResearchPage,
+  PdfExtractionPage,
+  TextEditorPage,
+} from "./pages/dashboard/research";
 
 // Products Pages
 import {
@@ -106,6 +140,13 @@ export const routes: Record<string, RouteConfig[]> = {
   // Dashboard Routes
   dashboard: [
     {
+      path: "/dashboard",
+      component: DashboardPage as ComponentType<PageProps>,
+      auth: true,
+      exact: true,
+      title: "Dashboard",
+    },
+    {
       path: "/dashboard/researcher",
       component: DashboardPage as ComponentType<PageProps>,
       auth: true,
@@ -134,6 +175,110 @@ export const routes: Record<string, RouteConfig[]> = {
       component: PaperDetailPage as ComponentType<PageProps>,
       auth: true,
       title: "Paper Details",
+    },
+  ],
+
+  // Papers Routes (Dashboard Module)
+  papers: [
+    {
+      path: "/papers",
+      component: DashboardPapersPage as ComponentType<PageProps>,
+      auth: true,
+      exact: true,
+      title: "All Papers",
+    },
+    {
+      path: "/papers/upload",
+      component: UploadPaperPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Upload Paper",
+    },
+    {
+      path: "/papers/search",
+      component: SearchPapersPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Search Papers",
+    },
+  ],
+
+  // Collections Routes (Dashboard Module)
+  collections: [
+    {
+      path: "/collections",
+      component: DashboardCollectionsPage as ComponentType<PageProps>,
+      auth: true,
+      exact: true,
+      title: "My Collections",
+    },
+    {
+      path: "/collections/create",
+      component: CreateCollectionPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Create Collection",
+    },
+    {
+      path: "/collections/shared",
+      component: SharedCollectionsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Shared Collections",
+    },
+  ],
+
+  // Workspaces Routes (Dashboard Module)
+  workspaces: [
+    {
+      path: "/workspaces",
+      component: DashboardWorkspacesPage as ComponentType<PageProps>,
+      auth: true,
+      exact: true,
+      title: "My Workspaces",
+    },
+    {
+      path: "/workspaces/create",
+      component: CreateWorkspacePage as ComponentType<PageProps>,
+      auth: true,
+      title: "Create Workspace",
+    },
+    {
+      path: "/workspaces/shared",
+      component: SharedWorkspacesPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Shared Workspaces",
+    },
+  ],
+
+  // Research Routes (Dashboard Module)
+  research: [
+    {
+      path: "/research",
+      component: DashboardResearchPage as ComponentType<PageProps>,
+      auth: true,
+      exact: true,
+      title: "Research Tools",
+    },
+    {
+      path: "/research/pdf-extraction",
+      component: PdfExtractionPage as ComponentType<PageProps>,
+      auth: true,
+      title: "PDF Text Extraction",
+    },
+    {
+      path: "/research/editor",
+      component: TextEditorPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Text Editor",
+    },
+    {
+      path: "/research/citations",
+      component: CitationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Citations",
+    },
+    {
+      path: "/research/annotations",
+      component: AnnotationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Annotations",
     },
   ],
 
@@ -297,6 +442,14 @@ export const isEnterpriseRoute = (path: string): boolean =>
   path.startsWith("/enterprise");
 export const isDashboardRoute = (path: string): boolean =>
   path.startsWith("/dashboard");
+export const isPapersRoute = (path: string): boolean =>
+  path.startsWith("/papers");
+export const isCollectionsRoute = (path: string): boolean =>
+  path.startsWith("/collections");
+export const isWorkspacesRoute = (path: string): boolean =>
+  path.startsWith("/workspaces");
+export const isResearchRoute = (path: string): boolean =>
+  path.startsWith("/research");
 export const isPaperRoute = (path: string): boolean =>
   path.startsWith("/paper");
 export const isAuthRoute = (path: string): boolean =>
@@ -309,14 +462,26 @@ export {
   // Company
   AboutPage,
   AIInsightsPage,
+  AnnotationsPage,
   APIPage,
   CareersPage,
+  CitationsPage,
   CollaboratePage,
   CollectionsPage,
   CommunityPage,
   ContactPage,
+  CreateCollectionPage,
+  CreateWorkspacePage,
+  // Dashboard Module - Collections
+  DashboardCollectionsPage,
   // Dashboard
   DashboardPage,
+  // Dashboard Module - Papers
+  DashboardPapersPage,
+  // Dashboard Module - Research
+  DashboardResearchPage,
+  // Dashboard Module - Workspaces
+  DashboardWorkspacesPage,
   // Resources
   DocsPage,
   // Enterprise
@@ -328,14 +493,20 @@ export {
   PaperDetailPage,
   // Products
   PapersPage,
+  PdfExtractionPage,
   PressPage,
   // Main
   PricingPage,
   // User
   ProfilePage,
   RegisterPage,
+  SearchPapersPage,
   SettingsPage,
+  SharedCollectionsPage,
+  SharedWorkspacesPage,
   SupportPage,
   TeamsPage,
+  TextEditorPage,
   TutorialsPage,
+  UploadPaperPage,
 };

@@ -31,3 +31,29 @@ export {
   SupportPage,
   TeamsPage,
 } from "./enterprise";
+
+// Dashboard module pages (with role-based views)
+export {
+  AnnotationsPage,
+  CitationsPage,
+  // Collections subpages
+  CreateCollectionPage,
+  // Workspaces subpages
+  CreateWorkspacePage,
+  CollectionsPage as DashboardCollectionsPage,
+  // Main pages
+  PapersPage as DashboardPapersPage,
+  ResearchPage as DashboardResearchPage,
+  WorkspacesPage as DashboardWorkspacesPage,
+  // Research subpages
+  PdfExtractionPage,
+  SearchPapersPage,
+  SharedCollectionsPage,
+  SharedWorkspacesPage,
+  TextEditorPage,
+  // Papers subpages
+  UploadPaperPage,
+} from "./dashboard";
+
+// Dashboard Router (for navigation demo)
+export { DashboardRouter } from "../DashboardRouter";
