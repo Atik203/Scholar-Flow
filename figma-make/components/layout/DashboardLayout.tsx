@@ -11,7 +11,8 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../ui/button";
 import { AppSidebar } from "./AppSidebar";
 
@@ -309,7 +310,7 @@ function Breadcrumbs({ currentPath }: { currentPath?: string }) {
   );
 }
 
-// Mobile Navigation
+// Mobile Navigation - Uses Portal to escape stacking context
 function MobileNav({
   user,
   currentPath,
@@ -320,22 +321,32 @@ function MobileNav({
   onNavigate?: (path: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="icon"
-        className="lg:hidden h-9 w-9 border-border bg-background hover:bg-accent dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
-        onClick={() => setIsOpen(true)}
-      >
-        <Menu className="h-5 w-5 text-foreground dark:text-white" />
-        <span className="sr-only">Toggle navigation menu</span>
-      </Button>
+  // Ensure we only render portal after mount (client-side)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-      {/* Mobile Sidebar - Rendered with highest z-index to ensure visibility */}
+  // Prevent body scroll when sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const sidebarContent = (
+    <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0" style={{ zIndex: 9999 }}>
+        <div
+          className="fixed inset-0"
+          style={{ zIndex: 99999, isolation: "isolate" }}
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -380,6 +391,23 @@ function MobileNav({
           </motion.div>
         </div>
       )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="icon"
+        className="lg:hidden h-9 w-9 border-border bg-background hover:bg-accent dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+        onClick={() => setIsOpen(true)}
+      >
+        <Menu className="h-5 w-5 text-foreground dark:text-white" />
+        <span className="sr-only">Toggle navigation menu</span>
+      </Button>
+
+      {/* Render sidebar via portal to escape stacking context */}
+      {mounted && createPortal(sidebarContent, document.body)}
     </>
   );
 }
