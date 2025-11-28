@@ -6,6 +6,20 @@ export { ProfilePage } from "./ProfilePage";
 export { RegisterPage } from "./RegisterPage";
 export { SettingsPage } from "./SettingsPage";
 
+// Auth pages
+export { ForgotPasswordPage } from "./ForgotPasswordPage";
+export { ResetPasswordPage } from "./ResetPasswordPage";
+export { VerifyEmailPage } from "./VerifyEmailPage";
+
+// Utility pages
+export { ErrorPage } from "./ErrorPage";
+export { LoadingPage } from "./LoadingPage";
+export { NotFoundPage } from "./NotFoundPage";
+
+// Marketing pages
+export { FeaturesPage } from "./FeaturesPage";
+export { HowItWorksPage } from "./HowItWorksPage";
+
 // Main pages
 export { FAQPage } from "./FAQPage";
 export { PricingPage } from "./PricingPage";

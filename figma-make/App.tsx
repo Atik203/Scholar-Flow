@@ -59,25 +59,37 @@ import {
   DocsPage,
   // Enterprise
   EnterprisePage,
+  // Utility Pages
+  ErrorPage,
   FAQPage,
+  // Marketing Pages
+  FeaturesPage,
+  // Auth Pages
+  ForgotPasswordPage,
   // Route helpers
   getRoleFromPath,
+  HowItWorksPage,
   IntegrationsPage,
   isAdminRoute,
   isAIInsightsRoute,
   isAnalyticsRoute,
+  isAuthRoute,
   isBillingRoute,
   isCollectionsRoute,
   isDashboardRoute,
+  isMarketingRoute,
   isPaperRoute,
   isPapersRoute,
   isProductsRoute,
   isProfileRoute,
   isResearchRoute,
   isSettingsRoute,
+  isUtilityRoute,
   isWorkspacesRoute,
+  LoadingPage,
   // Auth
   LoginPage,
+  NotFoundPage,
   PaperDetailPage,
   PaperDetailsPage,
   // Products
@@ -89,6 +101,7 @@ import {
   // User
   ProfilePage,
   RegisterPage,
+  ResetPasswordPage,
   SearchPapersPage,
   SettingsPage,
   SharedCollectionsPage,
@@ -101,6 +114,7 @@ import {
   TutorialsPage,
   UploadPaperPage,
   UserManagementPage,
+  VerifyEmailPage,
   WorkspaceDetailsPage,
 } from "./routes";
 
@@ -406,15 +420,117 @@ export default function App() {
       }
     }
 
+    // Auth routes (forgot password, reset password, verify email)
+    if (isAuthRoute(currentPage)) {
+      switch (currentPage) {
+        case "/login":
+          return (
+            <LoginPage onNavigate={handleNavigate} onShowToast={showToast} />
+          );
+        case "/register":
+          return (
+            <RegisterPage onNavigate={handleNavigate} onShowToast={showToast} />
+          );
+        case "/forgot-password":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <ForgotPasswordPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        case "/reset-password":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <ResetPasswordPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        case "/verify-email":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <VerifyEmailPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        default:
+          return (
+            <LoginPage onNavigate={handleNavigate} onShowToast={showToast} />
+          );
+      }
+    }
+
+    // Utility routes (404, error, loading)
+    if (isUtilityRoute(currentPage)) {
+      switch (currentPage) {
+        case "/not-found":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <NotFoundPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        case "/error":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <ErrorPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        case "/loading":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <LoadingPage />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        default:
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <NotFoundPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+      }
+    }
+
+    // Marketing routes (features, how-it-works)
+    if (isMarketingRoute(currentPage)) {
+      switch (currentPage) {
+        case "/features":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <FeaturesPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        case "/how-it-works":
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <HowItWorksPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+        default:
+          return (
+            <>
+              <Navbar onNavigate={handleNavigate} />
+              <FeaturesPage onNavigate={handleNavigate} />
+              <Footer onNavigate={handleNavigate} />
+            </>
+          );
+      }
+    }
+
     switch (currentPage) {
-      case "/login":
-        return (
-          <LoginPage onNavigate={handleNavigate} onShowToast={showToast} />
-        );
-      case "/register":
-        return (
-          <RegisterPage onNavigate={handleNavigate} onShowToast={showToast} />
-        );
       case "/pricing":
         return <PricingPage onNavigate={handleNavigate} />;
       case "/faq":
