@@ -1,236 +1,145 @@
-# ScholarFlow - Figma Make Structure
+# ScholarFlow - Figma Make UI Components
 
-This folder contains React components formatted for Figma Make AI. Copy the entire folder structure into Figma Make to generate Figma designs from the React code.
+A complete standalone React UI component library for ScholarFlow, built for Figma Make AI.
 
-## Folder Structure
+## Page Name List
 
-```plaintext
-figma-make/
-├── App.tsx                    # Main app entry with role routing & toasts
-├── routes.tsx                 # Centralized route configuration
-├── README.md                  # This file
-├── styles/
-│   └── globals.css            # Global CSS with design tokens & sidebar vars
-├── guidelines/
-│   └── design-system.md       # Design system reference
-├── components/
-│   ├── figma/
-│   │   └── ImageWithFallback.tsx
-│   ├── ui/                    # ShadCN-style components
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── card-variants.tsx  # CVA-based card variant system
-│   │   ├── input.tsx
-│   │   ├── badge.tsx
-│   │   ├── avatar.tsx
-│   │   ├── separator.tsx
-│   │   ├── tabs.tsx
-│   │   ├── switch.tsx
-│   │   ├── checkbox.tsx
-│   │   ├── label.tsx
-│   │   ├── textarea.tsx
-│   │   ├── select.tsx
-│   │   ├── progress.tsx
-│   │   ├── skeleton.tsx
-│   │   ├── tooltip.tsx
-│   │   ├── cards/             # Specialized card components
-│   │   │   ├── PricingCard.tsx
-│   │   │   ├── StatCard.tsx
-│   │   │   ├── FeatureCard.tsx
-│   │   │   ├── TestimonialCard.tsx
-│   │   │   ├── ProfileCard.tsx
-│   │   │   └── index.ts
-│   │   └── index.ts
-│   ├── layout/
-│   │   ├── Navbar.tsx         # Site navigation bar
-│   │   ├── Footer.tsx         # Site footer
-│   │   ├── PageContainer.tsx  # Page wrapper with Navbar/Footer + Section/Container
-│   │   ├── AppSidebar.tsx     # Dashboard sidebar with collapsible sections
-│   │   ├── DashboardLayout.tsx # Dashboard layout with UserMenu & ThemeToggle
-│   │   └── index.ts
-│   └── sections/
-│       ├── Hero.tsx
-│       ├── Features.tsx
-│       ├── HowItWorks.tsx
-│       ├── Testimonials.tsx
-│       ├── CTA.tsx
-│       └── index.ts
-└── pages/
-    ├── LoginPage.tsx          # Auth login with role detection
-    ├── RegisterPage.tsx       # Registration with role detection
-    ├── DashboardPage.tsx      # Role-based dashboard (4 variants)
-    ├── PaperDetailPage.tsx    # Individual paper view
-    ├── PricingPage.tsx        # Pricing plans display
-    ├── FAQPage.tsx            # Frequently asked questions
-    ├── PapersPage.tsx         # Paper library display
-    ├── CollectionsPage.tsx    # Collections management
-    ├── SearchPage.tsx         # Search functionality
-    ├── APIDocsPage.tsx        # API documentation
-    ├── IntegrationsPage.tsx   # Third-party integrations
-    ├── BlogPage.tsx           # Blog articles
-    ├── HelpCenterPage.tsx     # Help and support
-    ├── AboutPage.tsx          # About us
-    ├── CareersPage.tsx        # Job listings
-    ├── ContactPage.tsx        # Contact form
-    ├── PrivacyPage.tsx        # Privacy policy
-    ├── TermsPage.tsx          # Terms of service
-    ├── EnterprisePage.tsx     # Enterprise features
-    └── index.ts
-```
+### Auth Pages (1-5)
 
-## How to Use in Figma Make
+| #   | Page               | Path               | Description                  |
+| --- | ------------------ | ------------------ | ---------------------------- |
+| 1   | LoginPage          | `/login`           | User login form              |
+| 2   | RegisterPage       | `/register`        | User registration form       |
+| 3   | ForgotPasswordPage | `/forgot-password` | Password recovery email form |
+| 4   | ResetPasswordPage  | `/reset-password`  | New password creation form   |
+| 5   | VerifyEmailPage    | `/verify-email`    | Email verification page      |
 
-### Method 1: Full Folder Import
+### Dashboard Pages (6-10)
 
-1. Create the same folder structure in Figma Make
-2. Copy each file's content into the corresponding file
-3. Figma Make will render the React components as Figma designs
+| #   | Page          | Path                        | Description                 |
+| --- | ------------- | --------------------------- | --------------------------- |
+| 6   | DashboardPage | `/dashboard`                | Main dashboard (role-based) |
+| 7   | DashboardPage | `/dashboard/researcher`     | Researcher dashboard        |
+| 8   | DashboardPage | `/dashboard/pro-researcher` | Pro Researcher dashboard    |
+| 9   | DashboardPage | `/dashboard/team-lead`      | Team Lead dashboard         |
+| 10  | DashboardPage | `/dashboard/admin`          | Admin dashboard             |
 
-### Method 2: Individual Components
+### Dashboard Module - Papers (11-15)
 
-1. Copy just the component you need (e.g., `Hero.tsx`)
-2. Paste into Figma Make
-3. It will render that specific component
+| #   | Page                | Path             | Description       |
+| --- | ------------------- | ---------------- | ----------------- |
+| 11  | DashboardPapersPage | `/papers`        | All papers list   |
+| 12  | UploadPaperPage     | `/papers/upload` | Upload new paper  |
+| 13  | SearchPapersPage    | `/papers/search` | Search papers     |
+| 14  | PaperDetailsPage    | `/papers/:id`    | Paper details     |
+| 15  | PaperDetailPage     | `/paper`         | Paper detail view |
 
-## Switching Between Pages
+### Dashboard Module - Collections (16-19)
 
-In `App.tsx`, you can switch between different page layouts by changing the `currentPath` state. Routes are defined in `routes.tsx` for easy management.
+| #   | Page                     | Path                  | Description           |
+| --- | ------------------------ | --------------------- | --------------------- |
+| 16  | DashboardCollectionsPage | `/collections`        | My collections        |
+| 17  | CreateCollectionPage     | `/collections/create` | Create new collection |
+| 18  | SharedCollectionsPage    | `/collections/shared` | Shared collections    |
+| 19  | CollectionDetailsPage    | `/collections/:id`    | Collection details    |
 
-### Main Routes
+### Dashboard Module - Workspaces (20-23)
 
-1. **Landing Page** (`/`): Full marketing page with Hero, Features, HowItWorks, Testimonials, and CTA
-2. **Login Page** (`/login`): Authentication with OAuth buttons, email-based role detection
-3. **Register Page** (`/register`): User registration with form validation, role detection
+| #   | Page                    | Path                 | Description          |
+| --- | ----------------------- | -------------------- | -------------------- |
+| 20  | DashboardWorkspacesPage | `/workspaces`        | My workspaces        |
+| 21  | CreateWorkspacePage     | `/workspaces/create` | Create new workspace |
+| 22  | SharedWorkspacesPage    | `/workspaces/shared` | Shared workspaces    |
+| 23  | WorkspaceDetailsPage    | `/workspaces/:id`    | Workspace details    |
 
-### Products Routes
+### Dashboard Module - Research (24-28)
 
-- `/pricing` - Pricing plans with features comparison
-- `/papers` - Paper library with search and filters
-- `/collections` - Collections management interface
-- `/search` - Advanced search functionality
+| #   | Page                  | Path                       | Description       |
+| --- | --------------------- | -------------------------- | ----------------- |
+| 24  | DashboardResearchPage | `/research`                | Research tools    |
+| 25  | PdfExtractionPage     | `/research/pdf-extraction` | PDF extraction    |
+| 26  | TextEditorPage        | `/research/editor`         | Text editor       |
+| 27  | CitationsPage         | `/research/citations`      | Citations manager |
+| 28  | AnnotationsPage       | `/research/annotations`    | Annotations       |
 
-### Resources Routes
+### Dashboard Additional Pages (29-33)
 
-- `/api-docs` - API documentation
-- `/integrations` - Third-party integrations
-- `/blog` - Blog articles and updates
-- `/help-center` - Help and support center
+| #   | Page                    | Path           | Description            |
+| --- | ----------------------- | -------------- | ---------------------- |
+| 29  | DashboardAIInsightsPage | `/ai-insights` | AI insights            |
+| 30  | AnalyticsPage           | `/analytics`   | Analytics dashboard    |
+| 31  | BillingPage             | `/billing`     | Billing & subscription |
+| 32  | ProfilePage             | `/profile`     | User profile           |
+| 33  | SettingsPage            | `/settings`    | User settings          |
 
-### Company Routes
+### Admin Pages (34-37)
 
-- `/about` - About ScholarFlow
-- `/careers` - Career opportunities
-- `/contact` - Contact form and information
-- `/privacy` - Privacy policy
-- `/terms` - Terms of service
+| #   | Page               | Path                   | Description             |
+| --- | ------------------ | ---------------------- | ----------------------- |
+| 34  | AdminOverviewPage  | `/admin-overview`      | Admin overview          |
+| 35  | UserManagementPage | `/admin/users`         | User management         |
+| 36  | SubscriptionsPage  | `/admin/subscriptions` | Subscription management |
+| 37  | SystemSettingsPage | `/admin/settings`      | System settings         |
 
-### Enterprise Routes
+### Products Pages (38-41)
 
-- `/enterprise` - Enterprise features and pricing
+| #   | Page            | Path                    | Description              |
+| --- | --------------- | ----------------------- | ------------------------ |
+| 38  | PapersPage      | `/products/papers`      | Papers product page      |
+| 39  | CollectionsPage | `/products/collections` | Collections product page |
+| 40  | CollaboratePage | `/products/collaborate` | Collaborate product page |
+| 41  | AIInsightsPage  | `/products/ai-insights` | AI Insights product page |
 
-### Dashboard Routes
+### Resources Pages (42-45)
 
-- `/dashboard/researcher` - Standard researcher dashboard
-- `/dashboard/pro-researcher` - Pro researcher dashboard
-- `/dashboard/team-lead` - Team lead dashboard with team overview
-- `/dashboard/admin` - Admin dashboard with system alerts
+| #   | Page          | Path                   | Description   |
+| --- | ------------- | ---------------------- | ------------- |
+| 42  | DocsPage      | `/resources/docs`      | Documentation |
+| 43  | TutorialsPage | `/resources/tutorials` | Tutorials     |
+| 44  | APIPage       | `/resources/api`       | API reference |
+| 45  | CommunityPage | `/resources/community` | Community     |
 
-### Paper Routes
+### Company Pages (46-49)
 
-- `/paper/[id]` - Individual paper view with AI summary
+| #   | Page        | Path               | Description |
+| --- | ----------- | ------------------ | ----------- |
+| 46  | AboutPage   | `/company/about`   | About us    |
+| 47  | CareersPage | `/company/careers` | Careers     |
+| 48  | ContactPage | `/company/contact` | Contact us  |
+| 49  | PressPage   | `/company/press`   | Press       |
 
-## Role-Based Dashboard System
+### Enterprise Pages (50-53)
 
-The dashboard system supports **4 user roles** with different views:
+| #   | Page             | Path                       | Description        |
+| --- | ---------------- | -------------------------- | ------------------ |
+| 50  | EnterprisePage   | `/enterprise`              | Enterprise landing |
+| 51  | TeamsPage        | `/enterprise/teams`        | Teams              |
+| 52  | IntegrationsPage | `/enterprise/integrations` | Integrations       |
+| 53  | SupportPage      | `/enterprise/support`      | Support            |
 
-| Role             | Email Pattern            | Dashboard Path              | Special Features                           |
-| ---------------- | ------------------------ | --------------------------- | ------------------------------------------ |
-| `researcher`     | Default                  | `/dashboard/researcher`     | Papers, Collections, AI Summaries          |
-| `pro_researcher` | `pro@...`                | `/dashboard/pro-researcher` | + Advanced Analytics                       |
-| `team_lead`      | `lead@...` or `team@...` | `/dashboard/team-lead`      | + Team Overview, Project Management        |
-| `admin`          | `admin@...`              | `/dashboard/admin`          | + User Management, System Settings, Alerts |
+### Marketing Pages (54-55)
 
-### Role Detection from Email
+| #   | Page           | Path            | Description       |
+| --- | -------------- | --------------- | ----------------- |
+| 54  | FeaturesPage   | `/features`     | Features showcase |
+| 55  | HowItWorksPage | `/how-it-works` | How it works      |
 
-When logging in or registering, the email prefix determines which dashboard:
+### Main Pages (56-58)
 
-- `admin@example.com` → Admin Dashboard
-- `lead@example.com` or `team@example.com` → Team Lead Dashboard
-- `pro@example.com` → Pro Researcher Dashboard
-- Any other email → Researcher Dashboard
+| #   | Page         | Path       | Description                                      |
+| --- | ------------ | ---------- | ------------------------------------------------ |
+| 56  | PricingPage  | `/pricing` | Pricing plans                                    |
+| 57  | FAQPage      | `/faq`     | FAQ                                              |
+| 58  | Landing Page | `/`        | Home page with Hero, Features, Testimonials, CTA |
 
-## Dashboard Components
+### Utility Pages (59-61)
 
-### AppSidebar
+| #   | Page         | Path         | Description   |
+| --- | ------------ | ------------ | ------------- |
+| 59  | NotFoundPage | `/not-found` | 404 page      |
+| 60  | ErrorPage    | `/error`     | Error page    |
+| 61  | LoadingPage  | `/loading`   | Loading state |
 
-- Collapsible navigation sections (Papers, Collections, Workspaces, Research)
-- WorkspaceSwitcher dropdown
-- Role-based navigation items (Admin features only visible to admins)
-- Light/dark mode compatible with CSS variables
+---
 
-### DashboardLayout
-
-- **UserMenu**: Dropdown on avatar click with Profile, Settings, Log out
-- **ThemeToggle**: Switch between light/dark mode
-- **Breadcrumbs**: Auto-generated from current path
-- **MobileNav**: Hamburger menu with Sheet sidebar for mobile
-
-### Toast Notifications
-
-Built-in toast system with three types:
-
-- `error` (red) - Validation errors, failures
-- `success` (green) - Successful actions
-- `info` (blue) - General information
-
-## Design System
-
-### Colors (OKLCH format in CSS, Hex for reference)
-
-- **Primary**: `#6366F1` (Indigo)
-- **Accent/Chart-1**: `#F97316` (Orange)
-- **Chart-2**: `#22C55E` (Green)
-- **Chart-3**: `#3B82F6` (Blue)
-- **Chart-4**: `#8B5CF6` (Purple)
-- **Chart-5**: `#F43F5E` (Rose)
-- **Success**: `#22C55E`
-- **Warning**: `#F59E0B`
-- **Destructive**: `#EF4444`
-
-### Signature Gradient
-
-```css
-bg-gradient-to-r from-primary to-chart-1
-/* #6366F1 → #F97316 */
-```
-
-### Typography
-
-- **Font Family**: Inter, system-ui
-- **Headings**: Bold, tight tracking (-0.02em to -0.05em)
-- **Body**: Regular weight, relaxed leading
-
-### Spacing Scale
-
-- `xs`: 4px
-- `sm`: 8px
-- `md`: 16px
-- `lg`: 24px
-- `xl`: 32px
-- `2xl`: 48px
-- `3xl`: 64px
-
-### Components Used
-
-- **Icons**: Lucide React
-- **Animations**: Framer Motion (`motion/react`)
-- **Styling**: Tailwind CSS
-- **UI Base**: ShadCN-style components with CVA variants
-
-## Notes
-
-- All components are self-contained (no external `@/lib/utils` imports)
-- Each component includes its own `cn()` utility function
-- CSS variables are defined in `globals.css`
-- All pages support dark mode (uses CSS variables)
-- Responsive breakpoints: `sm:640px`, `md:768px`, `lg:1024px`, `xl:1280px`
+**Total: 61 pages/routes** across auth, dashboard, admin, products, resources, company, enterprise, marketing, and utility categories.
