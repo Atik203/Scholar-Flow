@@ -506,7 +506,9 @@ export function CollectionsPage({ onNavigate }: CollectionsPageProps) {
                       <CollectionCard
                         key={collection.id}
                         collection={collection}
-                        onView={() => console.log("View", collection.id)}
+                        onView={() =>
+                          onNavigate?.(`/collections/${collection.id}`)
+                        }
                         onEdit={() => console.log("Edit", collection.id)}
                       />
                     ))}

@@ -299,7 +299,7 @@ export function CollectionDetailsPage({
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowDeleteDialog(true)}
-              className="inline-flex items-center px-4 py-2 bg-destructive text-destructive-foreground rounded-lg"
+              className="inline-flex items-center px-4 py-2 bg-destructive text-white rounded-lg"
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
@@ -847,7 +847,7 @@ export function CollectionDetailsPage({
                       setShowDeleteDialog(false);
                       onNavigate?.("/collections");
                     }}
-                    className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg"
+                    className="px-4 py-2 bg-destructive text-white rounded-lg"
                   >
                     Delete
                   </button>

@@ -72,6 +72,14 @@ import { AIInsightsPage as DashboardAIInsightsPage } from "./pages/dashboard/AII
 import { AnalyticsPage } from "./pages/dashboard/AnalyticsPage";
 import { BillingPage } from "./pages/dashboard/BillingPage";
 
+// Dashboard Admin Pages
+import {
+  AdminOverviewPage,
+  SubscriptionsPage,
+  SystemSettingsPage,
+  UserManagementPage,
+} from "./pages/dashboard/admin";
+
 // Products Pages
 import {
   AIInsightsPage,
@@ -330,6 +338,34 @@ export const routes: Record<string, RouteConfig[]> = {
     },
   ],
 
+  // Admin Routes
+  admin: [
+    {
+      path: "/admin-overview",
+      component: AdminOverviewPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Admin Overview",
+    },
+    {
+      path: "/admin/users",
+      component: UserManagementPage as ComponentType<PageProps>,
+      auth: true,
+      title: "User Management",
+    },
+    {
+      path: "/admin/subscriptions",
+      component: SubscriptionsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Subscriptions",
+    },
+    {
+      path: "/admin/settings",
+      component: SystemSettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "System Settings",
+    },
+  ],
+
   // User Routes
   user: [
     {
@@ -509,11 +545,15 @@ export const isAIInsightsRoute = (path: string): boolean =>
 export const isAnalyticsRoute = (path: string): boolean =>
   path === "/analytics";
 export const isBillingRoute = (path: string): boolean => path === "/billing";
+export const isAdminRoute = (path: string): boolean =>
+  path === "/admin-overview" || path.startsWith("/admin/");
 
 // Export page components for direct imports
 export {
   // Company
   AboutPage,
+  // Admin Pages
+  AdminOverviewPage,
   AIInsightsPage,
   AnalyticsPage,
   AnnotationsPage,
@@ -563,10 +603,13 @@ export {
   SettingsPage,
   SharedCollectionsPage,
   SharedWorkspacesPage,
+  SubscriptionsPage,
   SupportPage,
+  SystemSettingsPage,
   TeamsPage,
   TextEditorPage,
   TutorialsPage,
   UploadPaperPage,
+  UserManagementPage,
   WorkspaceDetailsPage,
 };
