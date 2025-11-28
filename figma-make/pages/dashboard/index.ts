@@ -33,9 +33,12 @@ export {
 } from "./research";
 
 // Other Dashboard Pages
+export { ActivityLogPage } from "./ActivityLogPage";
 export { AIInsightsPage } from "./AIInsightsPage";
 export { AnalyticsPage } from "./AnalyticsPage";
 export { BillingPage } from "./BillingPage";
+export { DiscussionsPage } from "./DiscussionsPage";
+export { KnowledgePagesPage } from "./KnowledgePagesPage";
 
 // Admin Dashboard Pages
 export {

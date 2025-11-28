@@ -62,84 +62,87 @@ A complete standalone React UI component library for ScholarFlow, built for Figm
 | 27  | CitationsPage         | `/research/citations`      | Citations manager |
 | 28  | AnnotationsPage       | `/research/annotations`    | Annotations       |
 
-### Dashboard Additional Pages (29-33)
+### Dashboard Additional Pages (29-36)
 
-| #   | Page                    | Path           | Description            |
-| --- | ----------------------- | -------------- | ---------------------- |
-| 29  | DashboardAIInsightsPage | `/ai-insights` | AI insights            |
-| 30  | AnalyticsPage           | `/analytics`   | Analytics dashboard    |
-| 31  | BillingPage             | `/billing`     | Billing & subscription |
-| 32  | ProfilePage             | `/profile`     | User profile           |
-| 33  | SettingsPage            | `/settings`    | User settings          |
+| #   | Page                    | Path            | Description                                        |
+| --- | ----------------------- | --------------- | -------------------------------------------------- |
+| 29  | DashboardAIInsightsPage | `/ai-insights`  | AI insights                                        |
+| 30  | AnalyticsPage           | `/analytics`    | Analytics dashboard                                |
+| 31  | BillingPage             | `/billing`      | Billing & subscription                             |
+| 32  | ProfilePage             | `/profile`      | User profile                                       |
+| 33  | SettingsPage            | `/settings`     | User settings                                      |
+| 34  | ActivityLogPage         | `/activity-log` | System activity tracking with filters & pagination |
+| 35  | DiscussionsPage         | `/discussions`  | Research discussions and collaboration threads     |
+| 36  | KnowledgePagesPage      | `/pages`        | Researcher curated knowledge pages and tools       |
 
-### Admin Pages (34-37)
+### Admin Pages (37-40)
 
 | #   | Page               | Path                   | Description             |
 | --- | ------------------ | ---------------------- | ----------------------- |
-| 34  | AdminOverviewPage  | `/admin-overview`      | Admin overview          |
-| 35  | UserManagementPage | `/admin/users`         | User management         |
-| 36  | SubscriptionsPage  | `/admin/subscriptions` | Subscription management |
-| 37  | SystemSettingsPage | `/admin/settings`      | System settings         |
+| 37  | AdminOverviewPage  | `/admin-overview`      | Admin overview          |
+| 38  | UserManagementPage | `/admin/users`         | User management         |
+| 39  | SubscriptionsPage  | `/admin/subscriptions` | Subscription management |
+| 40  | SystemSettingsPage | `/admin/settings`      | System settings         |
 
-### Products Pages (38-41)
+### Products Pages (41-44)
 
 | #   | Page            | Path                    | Description              |
 | --- | --------------- | ----------------------- | ------------------------ |
-| 38  | PapersPage      | `/products/papers`      | Papers product page      |
-| 39  | CollectionsPage | `/products/collections` | Collections product page |
-| 40  | CollaboratePage | `/products/collaborate` | Collaborate product page |
-| 41  | AIInsightsPage  | `/products/ai-insights` | AI Insights product page |
+| 41  | PapersPage      | `/products/papers`      | Papers product page      |
+| 42  | CollectionsPage | `/products/collections` | Collections product page |
+| 43  | CollaboratePage | `/products/collaborate` | Collaborate product page |
+| 44  | AIInsightsPage  | `/products/ai-insights` | AI Insights product page |
 
-### Resources Pages (42-45)
+### Resources Pages (45-48)
 
 | #   | Page          | Path                   | Description   |
 | --- | ------------- | ---------------------- | ------------- |
-| 42  | DocsPage      | `/resources/docs`      | Documentation |
-| 43  | TutorialsPage | `/resources/tutorials` | Tutorials     |
-| 44  | APIPage       | `/resources/api`       | API reference |
-| 45  | CommunityPage | `/resources/community` | Community     |
+| 45  | DocsPage      | `/resources/docs`      | Documentation |
+| 46  | TutorialsPage | `/resources/tutorials` | Tutorials     |
+| 47  | APIPage       | `/resources/api`       | API reference |
+| 48  | CommunityPage | `/resources/community` | Community     |
 
-### Company Pages (46-49)
+### Company Pages (49-52)
 
 | #   | Page        | Path               | Description |
 | --- | ----------- | ------------------ | ----------- |
-| 46  | AboutPage   | `/company/about`   | About us    |
-| 47  | CareersPage | `/company/careers` | Careers     |
-| 48  | ContactPage | `/company/contact` | Contact us  |
-| 49  | PressPage   | `/company/press`   | Press       |
+| 49  | AboutPage   | `/company/about`   | About us    |
+| 50  | CareersPage | `/company/careers` | Careers     |
+| 51  | ContactPage | `/company/contact` | Contact us  |
+| 52  | PressPage   | `/company/press`   | Press       |
 
-### Enterprise Pages (50-53)
+### Enterprise Pages (53-56)
 
 | #   | Page             | Path                       | Description        |
 | --- | ---------------- | -------------------------- | ------------------ |
-| 50  | EnterprisePage   | `/enterprise`              | Enterprise landing |
-| 51  | TeamsPage        | `/enterprise/teams`        | Teams              |
-| 52  | IntegrationsPage | `/enterprise/integrations` | Integrations       |
-| 53  | SupportPage      | `/enterprise/support`      | Support            |
+| 53  | EnterprisePage   | `/enterprise`              | Enterprise landing |
+| 54  | TeamsPage        | `/enterprise/teams`        | Teams              |
+| 55  | IntegrationsPage | `/enterprise/integrations` | Integrations       |
+| 56  | SupportPage      | `/enterprise/support`      | Support            |
 
-### Marketing Pages (54-55)
+### Marketing Pages (57-58)
 
 | #   | Page           | Path            | Description       |
 | --- | -------------- | --------------- | ----------------- |
-| 54  | FeaturesPage   | `/features`     | Features showcase |
-| 55  | HowItWorksPage | `/how-it-works` | How it works      |
+| 57  | FeaturesPage   | `/features`     | Features showcase |
+| 58  | HowItWorksPage | `/how-it-works` | How it works      |
 
-### Main Pages (56-58)
+### Main Pages (59-61)
 
 | #   | Page         | Path       | Description                                      |
 | --- | ------------ | ---------- | ------------------------------------------------ |
-| 56  | PricingPage  | `/pricing` | Pricing plans                                    |
-| 57  | FAQPage      | `/faq`     | FAQ                                              |
-| 58  | Landing Page | `/`        | Home page with Hero, Features, Testimonials, CTA |
+| 59  | PricingPage  | `/pricing` | Pricing plans                                    |
+| 60  | FAQPage      | `/faq`     | FAQ                                              |
+| 61  | Landing Page | `/`        | Home page with Hero, Features, Testimonials, CTA |
 
-### Utility Pages (59-61)
+### Utility Pages (62-64)
 
 | #   | Page         | Path         | Description   |
 | --- | ------------ | ------------ | ------------- |
-| 59  | NotFoundPage | `/not-found` | 404 page      |
-| 60  | ErrorPage    | `/error`     | Error page    |
-| 61  | LoadingPage  | `/loading`   | Loading state |
+| 62  | NotFoundPage | `/not-found` | 404 page      |
+| 63  | ErrorPage    | `/error`     | Error page    |
+| 64  | LoadingPage  | `/loading`   | Loading state |
 
 ---
 
-**Total: 61 pages/routes** across auth, dashboard, admin, products, resources, company, enterprise, marketing, and utility categories.
+**Total: 64 pages/routes** across auth, dashboard, admin, products, resources, company, enterprise, marketing, and utility categories.
