@@ -37,12 +37,14 @@ import { SettingsPage } from "./pages/SettingsPage";
 // Dashboard Module Pages - Papers
 import {
   PapersPage as DashboardPapersPage,
+  PaperDetailsPage,
   SearchPapersPage,
   UploadPaperPage,
 } from "./pages/dashboard/papers";
 
 // Dashboard Module Pages - Collections
 import {
+  CollectionDetailsPage,
   CreateCollectionPage,
   CollectionsPage as DashboardCollectionsPage,
   SharedCollectionsPage,
@@ -53,6 +55,7 @@ import {
   CreateWorkspacePage,
   WorkspacesPage as DashboardWorkspacesPage,
   SharedWorkspacesPage,
+  WorkspaceDetailsPage,
 } from "./pages/dashboard/workspaces";
 
 // Dashboard Module Pages - Research
@@ -63,6 +66,11 @@ import {
   PdfExtractionPage,
   TextEditorPage,
 } from "./pages/dashboard/research";
+
+// Dashboard Additional Pages
+import { AIInsightsPage as DashboardAIInsightsPage } from "./pages/dashboard/AIInsightsPage";
+import { AnalyticsPage } from "./pages/dashboard/AnalyticsPage";
+import { BillingPage } from "./pages/dashboard/BillingPage";
 
 // Products Pages
 import {
@@ -199,6 +207,12 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Search Papers",
     },
+    {
+      path: "/papers/:id",
+      component: PaperDetailsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Paper Details",
+    },
   ],
 
   // Collections Routes (Dashboard Module)
@@ -222,6 +236,12 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Shared Collections",
     },
+    {
+      path: "/collections/:id",
+      component: CollectionDetailsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Collection Details",
+    },
   ],
 
   // Workspaces Routes (Dashboard Module)
@@ -244,6 +264,12 @@ export const routes: Record<string, RouteConfig[]> = {
       component: SharedWorkspacesPage as ComponentType<PageProps>,
       auth: true,
       title: "Shared Workspaces",
+    },
+    {
+      path: "/workspaces/:id",
+      component: WorkspaceDetailsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Workspace Details",
     },
   ],
 
@@ -279,6 +305,28 @@ export const routes: Record<string, RouteConfig[]> = {
       component: AnnotationsPage as ComponentType<PageProps>,
       auth: true,
       title: "Annotations",
+    },
+  ],
+
+  // Dashboard Additional Routes
+  dashboardPages: [
+    {
+      path: "/ai-insights",
+      component: DashboardAIInsightsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "AI Insights",
+    },
+    {
+      path: "/analytics",
+      component: AnalyticsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Analytics",
+    },
+    {
+      path: "/billing",
+      component: BillingPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Billing",
     },
   ],
 
@@ -456,22 +504,32 @@ export const isAuthRoute = (path: string): boolean =>
   path === "/login" || path === "/register";
 export const isProfileRoute = (path: string): boolean => path === "/profile";
 export const isSettingsRoute = (path: string): boolean => path === "/settings";
+export const isAIInsightsRoute = (path: string): boolean =>
+  path === "/ai-insights";
+export const isAnalyticsRoute = (path: string): boolean =>
+  path === "/analytics";
+export const isBillingRoute = (path: string): boolean => path === "/billing";
 
 // Export page components for direct imports
 export {
   // Company
   AboutPage,
   AIInsightsPage,
+  AnalyticsPage,
   AnnotationsPage,
   APIPage,
+  BillingPage,
   CareersPage,
   CitationsPage,
   CollaboratePage,
+  CollectionDetailsPage,
   CollectionsPage,
   CommunityPage,
   ContactPage,
   CreateCollectionPage,
   CreateWorkspacePage,
+  // Dashboard Additional Pages
+  DashboardAIInsightsPage,
   // Dashboard Module - Collections
   DashboardCollectionsPage,
   // Dashboard
@@ -491,6 +549,7 @@ export {
   // Auth
   LoginPage,
   PaperDetailPage,
+  PaperDetailsPage,
   // Products
   PapersPage,
   PdfExtractionPage,
@@ -509,4 +568,5 @@ export {
   TextEditorPage,
   TutorialsPage,
   UploadPaperPage,
+  WorkspaceDetailsPage,
 };

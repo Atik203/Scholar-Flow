@@ -28,16 +28,21 @@ import {
   // Company
   AboutPage,
   AIInsightsPage,
+  AnalyticsPage,
   AnnotationsPage,
   APIPage,
+  BillingPage,
   CareersPage,
   CitationsPage,
   CollaboratePage,
+  CollectionDetailsPage,
   CollectionsPage,
   CommunityPage,
   ContactPage,
   CreateCollectionPage,
   CreateWorkspacePage,
+  // Dashboard Additional Pages
+  DashboardAIInsightsPage,
   // Dashboard Module - Collections
   DashboardCollectionsPage,
   // Dashboard
@@ -56,6 +61,9 @@ import {
   // Route helpers
   getRoleFromPath,
   IntegrationsPage,
+  isAIInsightsRoute,
+  isAnalyticsRoute,
+  isBillingRoute,
   isCollectionsRoute,
   isDashboardRoute,
   isPaperRoute,
@@ -68,6 +76,7 @@ import {
   // Auth
   LoginPage,
   PaperDetailPage,
+  PaperDetailsPage,
   // Products
   PapersPage,
   PdfExtractionPage,
@@ -86,6 +95,7 @@ import {
   TextEditorPage,
   TutorialsPage,
   UploadPaperPage,
+  WorkspaceDetailsPage,
 } from "./routes";
 
 import "./styles/globals.css";
@@ -194,6 +204,21 @@ export default function App() {
       );
     }
 
+    // AI Insights route
+    if (isAIInsightsRoute(currentPage)) {
+      return <DashboardAIInsightsPage onNavigate={handleNavigate} />;
+    }
+
+    // Analytics route
+    if (isAnalyticsRoute(currentPage)) {
+      return <AnalyticsPage onNavigate={handleNavigate} />;
+    }
+
+    // Billing route
+    if (isBillingRoute(currentPage)) {
+      return <BillingPage onNavigate={handleNavigate} />;
+    }
+
     // Papers module routes (dashboard)
     if (isPapersRoute(currentPage)) {
       switch (currentPage) {
@@ -204,6 +229,10 @@ export default function App() {
         case "/papers/search":
           return <SearchPapersPage onNavigate={handleNavigate} />;
         default:
+          // Handle /papers/:id pattern for paper details
+          if (currentPage.startsWith("/papers/")) {
+            return <PaperDetailsPage onNavigate={handleNavigate} />;
+          }
           return <DashboardPapersPage onNavigate={handleNavigate} />;
       }
     }
@@ -218,6 +247,10 @@ export default function App() {
         case "/collections/shared":
           return <SharedCollectionsPage onNavigate={handleNavigate} />;
         default:
+          // Handle /collections/:id pattern for collection details
+          if (currentPage.startsWith("/collections/")) {
+            return <CollectionDetailsPage onNavigate={handleNavigate} />;
+          }
           return <DashboardCollectionsPage onNavigate={handleNavigate} />;
       }
     }
@@ -232,6 +265,10 @@ export default function App() {
         case "/workspaces/shared":
           return <SharedWorkspacesPage onNavigate={handleNavigate} />;
         default:
+          // Handle /workspaces/:id pattern for workspace details
+          if (currentPage.startsWith("/workspaces/")) {
+            return <WorkspaceDetailsPage onNavigate={handleNavigate} />;
+          }
           return <DashboardWorkspacesPage onNavigate={handleNavigate} />;
       }
     }
