@@ -27,6 +27,8 @@ import { Testimonials } from "./components/sections/Testimonials";
 import {
   // Company
   AboutPage,
+  // Additional Dashboard Pages
+  ActivityLogPage,
   // Admin Pages
   AdminOverviewPage,
   AIInsightsPage,
@@ -55,6 +57,7 @@ import {
   DashboardResearchPage,
   // Dashboard Module - Workspaces
   DashboardWorkspacesPage,
+  DiscussionsPage,
   // Resources
   DocsPage,
   // Enterprise
@@ -70,6 +73,7 @@ import {
   getRoleFromPath,
   HowItWorksPage,
   IntegrationsPage,
+  isActivityCommunityRoute,
   isAdminRoute,
   isAIInsightsRoute,
   isAnalyticsRoute,
@@ -86,6 +90,7 @@ import {
   isSettingsRoute,
   isUtilityRoute,
   isWorkspacesRoute,
+  KnowledgePagesPage,
   LoadingPage,
   // Auth
   LoginPage,
@@ -237,6 +242,20 @@ export default function App() {
     // Billing route
     if (isBillingRoute(currentPage)) {
       return <BillingPage onNavigate={handleNavigate} />;
+    }
+
+    // Activity & Community routes (Activity Log, Discussions, Knowledge Pages)
+    if (isActivityCommunityRoute(currentPage)) {
+      switch (currentPage) {
+        case "/activity-log":
+          return <ActivityLogPage onNavigate={handleNavigate} />;
+        case "/discussions":
+          return <DiscussionsPage onNavigate={handleNavigate} />;
+        case "/pages":
+          return <KnowledgePagesPage onNavigate={handleNavigate} />;
+        default:
+          return <ActivityLogPage onNavigate={handleNavigate} />;
+      }
     }
 
     // Admin routes

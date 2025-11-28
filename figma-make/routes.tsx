@@ -80,9 +80,12 @@ import {
 } from "./pages/dashboard/research";
 
 // Dashboard Additional Pages
+import { ActivityLogPage } from "./pages/dashboard/ActivityLogPage";
 import { AIInsightsPage as DashboardAIInsightsPage } from "./pages/dashboard/AIInsightsPage";
 import { AnalyticsPage } from "./pages/dashboard/AnalyticsPage";
 import { BillingPage } from "./pages/dashboard/BillingPage";
+import { DiscussionsPage } from "./pages/dashboard/DiscussionsPage";
+import { KnowledgePagesPage } from "./pages/dashboard/KnowledgePagesPage";
 
 // Dashboard Admin Pages
 import {
@@ -396,6 +399,24 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Billing",
     },
+    {
+      path: "/activity-log",
+      component: ActivityLogPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Activity Log",
+    },
+    {
+      path: "/discussions",
+      component: DiscussionsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Discussions",
+    },
+    {
+      path: "/pages",
+      component: KnowledgePagesPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Knowledge Pages",
+    },
   ],
 
   // Admin Routes
@@ -613,6 +634,16 @@ export const isAIInsightsRoute = (path: string): boolean =>
 export const isAnalyticsRoute = (path: string): boolean =>
   path === "/analytics";
 export const isBillingRoute = (path: string): boolean => path === "/billing";
+export const isActivityLogRoute = (path: string): boolean =>
+  path === "/activity-log";
+export const isDiscussionsRoute = (path: string): boolean =>
+  path === "/discussions";
+export const isKnowledgePagesRoute = (path: string): boolean =>
+  path === "/pages";
+export const isActivityCommunityRoute = (path: string): boolean =>
+  isActivityLogRoute(path) ||
+  isDiscussionsRoute(path) ||
+  isKnowledgePagesRoute(path);
 export const isAdminRoute = (path: string): boolean =>
   path === "/admin-overview" || path.startsWith("/admin/");
 
@@ -620,6 +651,8 @@ export const isAdminRoute = (path: string): boolean =>
 export {
   // Company
   AboutPage,
+  // Additional Dashboard Pages
+  ActivityLogPage,
   // Admin Pages
   AdminOverviewPage,
   AIInsightsPage,
@@ -648,6 +681,7 @@ export {
   DashboardResearchPage,
   // Dashboard Module - Workspaces
   DashboardWorkspacesPage,
+  DiscussionsPage,
   // Resources
   DocsPage,
   // Enterprise
@@ -661,6 +695,7 @@ export {
   ForgotPasswordPage,
   HowItWorksPage,
   IntegrationsPage,
+  KnowledgePagesPage,
   LoadingPage,
   // Auth
   LoginPage,
