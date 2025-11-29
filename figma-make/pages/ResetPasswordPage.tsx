@@ -199,7 +199,7 @@ export function ResetPasswordPage({
             >
               <div className="mb-8">
                 <img
-                  src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
+                  src="https://images.unsplash.com/photo-1614064641938-3bbee52942c7?w=400&h=300&fit=crop&auto=format"
                   alt="Password reset success"
                   className="mx-auto rounded-2xl shadow-2xl w-[400px] h-[300px] object-cover"
                 />
@@ -389,7 +389,7 @@ export function ResetPasswordPage({
           >
             <div className="mb-8">
               <img
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
+                src="https://images.unsplash.com/photo-1633265486064-086b219458ec?w=400&h=300&fit=crop&auto=format"
                 alt="Password security"
                 className="mx-auto rounded-2xl shadow-2xl w-[400px] h-[300px] object-cover"
               />
