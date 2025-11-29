@@ -6,3 +6,5 @@
  */
 
 export { DiscoverPage } from "./DiscoverPage";
+export { RecommendationsPage } from "./RecommendationsPage";
+export { TrendingPage } from "./TrendingPage";
