@@ -73,187 +73,204 @@ const hasRoleAccess = (userRole: UserRole, minRole?: UserRole): boolean => {
   return roleHierarchy[userRole] >= roleHierarchy[minRole];
 };
 
-// Navigation items matching original frontend
-const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
-  {
-    title: "Dashboard",
-    path: userRole === "admin" ? "/dashboard/admin" : "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Papers",
-    icon: FileText,
-    items: [
-      { title: "All Papers", path: "/papers", icon: FileText },
-      { title: "Upload Paper", path: "/papers/upload", icon: Upload },
-      { title: "Search Papers", path: "/papers/search", icon: Search },
-      { title: "Import Papers", path: "/papers/import", icon: Download },
-    ],
-  },
-  {
-    title: "Collections",
-    icon: BookOpen,
-    items: [
-      { title: "My Collections", path: "/collections", icon: BookOpen },
-      { title: "Create Collection", path: "/collections/create", icon: Plus },
-      { title: "Shared Collections", path: "/collections/shared", icon: Users },
-    ],
-  },
-  {
-    title: "Workspaces",
-    icon: Layers,
-    items: [
-      { title: "My Workspaces", path: "/workspaces", icon: Layers },
-      { title: "Create Workspace", path: "/workspaces/create", icon: Plus },
-      { title: "Shared Workspaces", path: "/workspaces/shared", icon: Users },
-    ],
-  },
-  {
-    title: "Research",
-    icon: Microscope,
-    items: [
-      {
-        title: "PDF Text Extraction",
-        path: "/research/pdf-extraction",
-        icon: FileText,
-      },
-      { title: "Text Editor", path: "/research/editor", icon: FileText },
-      { title: "Citations", path: "/research/citations", icon: Quote },
-      {
-        title: "Annotations",
-        path: "/research/annotations",
-        icon: Highlighter,
-      },
-      {
-        title: "Citation Graph",
-        path: "/research/citation-graph",
-        icon: Network,
-        minRole: "pro_researcher" as UserRole,
-      },
-      {
-        title: "Research Map",
-        path: "/research/map",
-        icon: Map,
-        minRole: "pro_researcher" as UserRole,
-      },
-      { title: "Research Notes", path: "/research-notes", icon: FileText },
-    ],
-  },
-  {
-    title: "Discover",
-    path: "/discover",
-    icon: Compass,
-  },
-  {
-    title: "AI Insights",
-    path: "/ai-insights",
-    icon: Brain,
-  },
-  {
-    title: "Analytics",
-    icon: BarChart3,
-    items: [
-      { title: "Overview", path: "/analytics", icon: BarChart3 },
-      {
-        title: "Personal Analytics",
-        path: "/analytics/personal",
-        icon: BarChart3,
-      },
-      {
-        title: "Workspace Analytics",
-        path: "/analytics/workspace",
-        icon: BarChart3,
-        minRole: "team_lead" as UserRole,
-      },
-      {
-        title: "Usage Reports",
-        path: "/analytics/usage",
-        icon: BarChart3,
-        minRole: "pro_researcher" as UserRole,
-      },
-      {
-        title: "Export Analytics",
-        path: "/analytics/export",
-        icon: Download,
-        minRole: "pro_researcher" as UserRole,
-      },
-    ],
-  },
-  {
-    title: "Notifications",
-    icon: Bell,
-    items: [
-      { title: "Notifications", path: "/notifications", icon: Bell },
-      {
-        title: "Notification Center",
-        path: "/notifications/center",
-        icon: Bell,
-      },
-      {
-        title: "Notification History",
-        path: "/notifications/history",
-        icon: History,
-      },
-      { title: "Settings", path: "/notifications/settings", icon: Settings },
-    ],
-  },
-  {
-    title: "Team",
-    icon: Users,
-    minRole: "team_lead",
-    items: [
-      { title: "Team Members", path: "/team", icon: Users },
-      { title: "Invitations", path: "/team/invitations", icon: UserCheck },
-      { title: "Team Activity", path: "/team/activity", icon: History },
-      { title: "Team Settings", path: "/team/settings", icon: Settings },
-    ],
-  },
-  {
-    title: "Security",
-    icon: Shield,
-    items: [
-      { title: "Security Dashboard", path: "/security", icon: Shield },
-      { title: "Two-Factor Auth", path: "/security/2fa", icon: Lock },
-      { title: "Active Sessions", path: "/security/sessions", icon: Globe },
-      { title: "Privacy Settings", path: "/privacy", icon: Lock },
-    ],
-  },
-  {
-    title: "Billing",
-    path: "/billing",
-    icon: CreditCard,
-  },
-  {
-    title: "Activity",
-    icon: History,
-    items: [
-      { title: "Activity Log", path: "/activity-log", icon: History },
-      { title: "Recent Activity", path: "/recent-activity", icon: History },
-      { title: "Discussions", path: "/discussions", icon: MessageSquare },
-      { title: "Search History", path: "/search/history", icon: Search },
-    ],
-  },
-  {
-    title: "Help",
-    icon: HelpCircle,
-    items: [
-      { title: "Help Center", path: "/help", icon: HelpCircle },
-      {
-        title: "Keyboard Shortcuts",
-        path: "/help/shortcuts",
-        icon: HelpCircle,
-      },
-    ],
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    items: [
-      { title: "General Settings", path: "/settings", icon: Settings },
-      { title: "Export Data", path: "/settings/export", icon: Download },
-    ],
-  },
-];
+// Primary navigation items (multi-item menus) - Core features with submenus
+const getPrimaryNavigationItems = (userRole: UserRole): SidebarItem[] =>
+  [
+    {
+      title: "Papers",
+      icon: FileText,
+      items: [
+        { title: "All Papers", path: "/papers", icon: FileText },
+        { title: "Upload Paper", path: "/papers/upload", icon: Upload },
+        { title: "Search Papers", path: "/papers/search", icon: Search },
+        { title: "Import Papers", path: "/papers/import", icon: Download },
+      ],
+    },
+    {
+      title: "Collections",
+      icon: BookOpen,
+      items: [
+        { title: "My Collections", path: "/collections", icon: BookOpen },
+        { title: "Create Collection", path: "/collections/create", icon: Plus },
+        {
+          title: "Shared Collections",
+          path: "/collections/shared",
+          icon: Users,
+        },
+      ],
+    },
+    {
+      title: "Workspaces",
+      icon: Layers,
+      items: [
+        { title: "My Workspaces", path: "/workspaces", icon: Layers },
+        { title: "Create Workspace", path: "/workspaces/create", icon: Plus },
+        {
+          title: "Browse Templates",
+          path: "/workspaces/templates",
+          icon: Globe,
+        },
+      ],
+    },
+    {
+      title: "Research",
+      icon: Microscope,
+      items: [
+        { title: "Research Hub", path: "/research", icon: Microscope },
+        {
+          title: "PDF Text Extraction",
+          path: "/research/pdf-extraction",
+          icon: FileText,
+        },
+        { title: "Text Editor", path: "/research/editor", icon: FileText },
+        { title: "Citations", path: "/research/citations", icon: Quote },
+        {
+          title: "Annotations",
+          path: "/research/annotations",
+          icon: Highlighter,
+        },
+        {
+          title: "Citation Graph",
+          path: "/research/citation-graph",
+          icon: Network,
+          minRole: "pro_researcher" as UserRole,
+        },
+        {
+          title: "Research Map",
+          path: "/research/map",
+          icon: Map,
+          minRole: "pro_researcher" as UserRole,
+        },
+        { title: "Research Notes", path: "/research-notes", icon: FileText },
+      ],
+    },
+    {
+      title: "Discover",
+      icon: Compass,
+      items: [
+        { title: "Explore", path: "/discover", icon: Compass },
+        { title: "Trending", path: "/discover/trending", icon: BarChart3 },
+        {
+          title: "Recommendations",
+          path: "/discover/recommendations",
+          icon: Brain,
+        },
+      ],
+    },
+    {
+      title: "Analytics",
+      icon: BarChart3,
+      items: [
+        { title: "Overview", path: "/analytics", icon: BarChart3 },
+        {
+          title: "Personal Analytics",
+          path: "/analytics/personal",
+          icon: BarChart3,
+        },
+        {
+          title: "Workspace Analytics",
+          path: "/analytics/workspace",
+          icon: BarChart3,
+          minRole: "team_lead" as UserRole,
+        },
+        {
+          title: "Usage Reports",
+          path: "/analytics/usage",
+          icon: BarChart3,
+          minRole: "pro_researcher" as UserRole,
+        },
+        {
+          title: "Export Analytics",
+          path: "/analytics/export",
+          icon: Download,
+          minRole: "pro_researcher" as UserRole,
+        },
+      ],
+    },
+    {
+      title: "Notifications",
+      icon: Bell,
+      items: [
+        { title: "Notifications", path: "/notifications", icon: Bell },
+        {
+          title: "Notification Center",
+          path: "/notifications/center",
+          icon: Bell,
+        },
+        {
+          title: "Notification History",
+          path: "/notifications/history",
+          icon: History,
+        },
+        { title: "Settings", path: "/notifications/settings", icon: Settings },
+      ],
+    },
+    {
+      title: "Team",
+      icon: Users,
+      minRole: "team_lead" as UserRole,
+      items: [
+        { title: "Team Members", path: "/team", icon: Users },
+        { title: "Invitations", path: "/team/invitations", icon: UserCheck },
+        { title: "Team Activity", path: "/team/activity", icon: History },
+        { title: "Team Settings", path: "/team/settings", icon: Settings },
+      ],
+    },
+    {
+      title: "Security",
+      icon: Shield,
+      items: [
+        { title: "Security Dashboard", path: "/security", icon: Shield },
+        { title: "Two-Factor Auth", path: "/security/2fa", icon: Lock },
+        { title: "Active Sessions", path: "/security/sessions", icon: Globe },
+        { title: "Privacy Settings", path: "/privacy", icon: Lock },
+      ],
+    },
+    {
+      title: "Activity",
+      icon: History,
+      items: [
+        { title: "Activity Log", path: "/activity-log", icon: History },
+        { title: "Recent Activity", path: "/recent-activity", icon: History },
+        { title: "Discussions", path: "/discussions", icon: MessageSquare },
+        { title: "Search History", path: "/search/history", icon: Search },
+      ],
+    },
+    {
+      title: "Help & Settings",
+      icon: Settings,
+      items: [
+        { title: "General Settings", path: "/settings", icon: Settings },
+        { title: "Export Data", path: "/settings/export", icon: Download },
+        { title: "Help Center", path: "/help", icon: HelpCircle },
+        {
+          title: "Keyboard Shortcuts",
+          path: "/help/shortcuts",
+          icon: HelpCircle,
+        },
+      ],
+    },
+  ].filter((item) => hasRoleAccess(userRole, item.minRole));
+
+// Quick access items (single-item menus) - shown at the top
+const getQuickAccessItems = (userRole: UserRole): SidebarItem[] =>
+  [
+    {
+      title: "Dashboard",
+      path: userRole === "admin" ? "/dashboard/admin" : "/dashboard",
+      icon: Home,
+    },
+    {
+      title: "AI Insights",
+      path: "/ai-insights",
+      icon: Brain,
+    },
+    {
+      title: "Billing",
+      path: "/billing",
+      icon: CreditCard,
+    },
+  ].filter((item) => hasRoleAccess(userRole, item.minRole));
 
 // Admin-only features
 const adminFeatures: SidebarItem[] = [
@@ -325,42 +342,52 @@ const adminFeatures: SidebarItem[] = [
   },
 ];
 
-// Collapsible section component
+// Collapsible section component with role filtering for sub-items
 function CollapsibleSection({
   item,
   isActive,
   currentPath,
   onNavigate,
+  userRole,
 }: {
   item: SidebarItem;
   isActive: boolean;
   currentPath?: string;
   onNavigate?: (path: string) => void;
+  userRole: UserRole;
 }) {
   const [isOpen, setIsOpen] = useState(isActive);
+
+  // Filter sub-items based on role access
+  const visibleSubItems = item.items?.filter((subItem) =>
+    hasRoleAccess(userRole, subItem.minRole)
+  );
+
+  // Don't render if no visible sub-items
+  if (!visibleSubItems || visibleSubItems.length === 0) return null;
 
   return (
     <div>
       <Button
         variant="ghost"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full justify-start px-2 py-2 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
+        className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
           isActive
             ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
             : ""
         }`}
       >
-        <item.icon className="mr-2 h-4 w-4" />
-        <span>{item.title}</span>
+        <item.icon className="mr-3 h-4 w-4" />
+        <span className="flex-1 text-left">{item.title}</span>
         {isOpen ? (
-          <ChevronDown className="ml-auto h-4 w-4" />
+          <ChevronDown className="h-4 w-4 opacity-60" />
         ) : (
-          <ChevronRight className="ml-auto h-4 w-4" />
+          <ChevronRight className="h-4 w-4 opacity-60" />
         )}
       </Button>
-      {isOpen && item.items && (
-        <div className="pl-6 space-y-1 mt-1">
-          {item.items.map((subItem) => {
+      {isOpen && (
+        <div className="pl-7 space-y-0.5 mt-1 border-l-2 border-gray-200 dark:border-gray-700 ml-5">
+          {visibleSubItems.map((subItem) => {
             const isSubActive = currentPath?.startsWith(subItem.path);
             return (
               <Button
@@ -368,13 +395,13 @@ function CollapsibleSection({
                 variant="ghost"
                 size="sm"
                 onClick={() => onNavigate?.(subItem.path)}
-                className={`w-full justify-start px-2 py-1 h-auto font-normal text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
+                className={`w-full justify-start px-3 py-1.5 h-auto font-normal text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
                   isSubActive
                     ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
                     : ""
                 }`}
               >
-                <subItem.icon className="mr-2 h-3 w-3" />
+                <subItem.icon className="mr-2.5 h-3.5 w-3.5" />
                 <span className="text-sm">{subItem.title}</span>
               </Button>
             );
@@ -485,19 +512,19 @@ export function AppSidebar({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto p-2">
+      <div className="flex-1 overflow-auto p-3">
         {/* Workspace Switcher */}
-        <div className="mb-6">
+        <div className="mb-4">
           <WorkspaceSwitcher onNavigate={onNavigate} />
         </div>
 
         {/* Admin Features (if applicable) */}
         {visibleAdminFeatures.length > 0 && (
-          <div className="mb-6">
-            <h3 className="px-2 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          <div className="mb-4">
+            <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
               Administration
             </h3>
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {visibleAdminFeatures.map((item) => {
                 const isActive = currentPath === item.path;
                 return (
@@ -505,59 +532,104 @@ export function AppSidebar({
                     key={item.title}
                     variant="ghost"
                     onClick={() => item.path && onNavigate?.(item.path)}
-                    className={`w-full justify-start px-2 py-2 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
+                    className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
                       isActive
                         ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
                         : ""
                     }`}
                   >
-                    <item.icon className="mr-2 h-4 w-4" />
+                    <item.icon className="mr-3 h-4 w-4" />
                     <span>{item.title}</span>
                   </Button>
                 );
               })}
             </nav>
+            <div className="my-3 border-t border-gray-200 dark:border-gray-700" />
           </div>
         )}
 
-        {/* Main Navigation */}
-        <div className="mb-6">
-          <h3 className="px-2 mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            Navigation
+        {/* Quick Access - Single item menus at top */}
+        <div className="mb-4">
+          <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Quick Access
           </h3>
-          <nav className="space-y-1">
-            {getNavigationItems(userRole).map((item) => {
-              const sectionActive = item.items
-                ? item.items.some((subItem) =>
-                    currentPath?.startsWith(subItem.path)
-                  )
-                : currentPath === item.path ||
-                  (currentPath?.startsWith(`${item.path}/`) ?? false);
-
-              if (item.items?.length) {
-                return (
-                  <CollapsibleSection
-                    key={item.title}
-                    item={item}
-                    isActive={sectionActive ?? false}
-                    currentPath={currentPath}
-                    onNavigate={onNavigate}
-                  />
-                );
-              }
-
+          <nav className="space-y-0.5">
+            {getQuickAccessItems(userRole).map((item) => {
+              const isActive =
+                currentPath === item.path ||
+                (currentPath?.startsWith(`${item.path}/`) ?? false);
               return (
                 <Button
                   key={item.title}
                   variant="ghost"
                   onClick={() => item.path && onNavigate?.(item.path)}
-                  className={`w-full justify-start px-2 py-2 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
+                  className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
+                    isActive
+                      ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
+                      : ""
+                  }`}
+                >
+                  <item.icon className="mr-3 h-4 w-4" />
+                  <span>{item.title}</span>
+                  {item.badge && (
+                    <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                      {item.badge}
+                    </span>
+                  )}
+                </Button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Separator */}
+        <div className="my-3 border-t border-gray-200 dark:border-gray-700" />
+
+        {/* Main Navigation - Multi-item menus */}
+        <div className="mb-4">
+          <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Features
+          </h3>
+          <nav className="space-y-0.5">
+            {getPrimaryNavigationItems(userRole).map((item) => {
+              // Filter sub-items for role access
+              const visibleSubItems = item.items?.filter((subItem) =>
+                hasRoleAccess(userRole, subItem.minRole)
+              );
+
+              const sectionActive = visibleSubItems
+                ? visibleSubItems.some((subItem) =>
+                    currentPath?.startsWith(subItem.path)
+                  )
+                : currentPath === item.path ||
+                  (currentPath?.startsWith(`${item.path}/`) ?? false);
+
+              if (visibleSubItems && visibleSubItems.length > 0) {
+                return (
+                  <CollapsibleSection
+                    key={item.title}
+                    item={{ ...item, items: visibleSubItems }}
+                    isActive={sectionActive ?? false}
+                    currentPath={currentPath}
+                    onNavigate={onNavigate}
+                    userRole={userRole}
+                  />
+                );
+              }
+
+              // Single item without sub-items
+              return (
+                <Button
+                  key={item.title}
+                  variant="ghost"
+                  onClick={() => item.path && onNavigate?.(item.path)}
+                  className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white ${
                     sectionActive
                       ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
                       : ""
                   }`}
                 >
-                  <item.icon className="mr-2 h-4 w-4" />
+                  <item.icon className="mr-3 h-4 w-4" />
                   <span>{item.title}</span>
                   {item.badge && (
                     <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">

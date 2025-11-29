@@ -455,7 +455,7 @@ export function DashboardLayout({
       {/* Desktop Layout - Fixed Sidebar with Scrollable Content */}
       <div className="hidden lg:flex min-h-screen">
         {/* Fixed Sidebar */}
-        <aside className="fixed left-0 top-0 z-30 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+        <aside className="fixed left-0 top-0 z-30 h-screen w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
           <AppSidebar
             userRole={user.role}
             currentPath={currentPath}
@@ -464,7 +464,7 @@ export function DashboardLayout({
         </aside>
 
         {/* Main Content - Offset by sidebar width */}
-        <div className="flex-1 ml-64 flex flex-col min-h-screen">
+        <div className="flex-1 ml-72 flex flex-col min-h-screen">
           <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60">
             <div className="flex w-full items-center justify-between px-6">
               <div className="flex items-center gap-2">
