@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -30,6 +31,7 @@ const defaultUser = {
 
 interface UserManagementPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -202,7 +204,14 @@ const StatsCard = ({
 // ============================================================================
 // User Management Page Component
 // ============================================================================
-export function UserManagementPage({ onNavigate }: UserManagementPageProps) {
+export function UserManagementPage({
+  onNavigate,
+  role: propRole,
+}: UserManagementPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -264,7 +273,7 @@ export function UserManagementPage({ onNavigate }: UserManagementPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/admin/users"
     >

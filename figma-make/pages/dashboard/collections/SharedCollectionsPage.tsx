@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -25,6 +26,7 @@ const defaultUser = {
 
 interface SharedCollectionsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -97,7 +99,12 @@ const dummySentInvites = [
 // ============================================================================
 export function SharedCollectionsPage({
   onNavigate,
+  role: propRole,
 }: SharedCollectionsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [activeTab, setActiveTab] = useState<"shared" | "received" | "sent">(
     "shared"
   );
@@ -117,7 +124,7 @@ export function SharedCollectionsPage({
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/collections/shared"
     >

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -36,6 +37,7 @@ const defaultUser = {
 interface WorkspaceDetailsPageProps {
   onNavigate?: (path: string) => void;
   workspaceId?: string;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -148,7 +150,12 @@ type TabType = "overview" | "collections" | "papers" | "members" | "settings";
 export function WorkspaceDetailsPage({
   onNavigate,
   workspaceId,
+  role: propRole,
 }: WorkspaceDetailsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -213,7 +220,7 @@ export function WorkspaceDetailsPage({
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/workspaces/details"
     >

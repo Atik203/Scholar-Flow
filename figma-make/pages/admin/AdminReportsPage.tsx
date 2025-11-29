@@ -1,0 +1,640 @@
+"use client";
+
+import { motion } from "framer-motion";
+import {
+  AlertCircle,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  LineChart,
+  Mail,
+  Pause,
+  PieChart,
+  Play,
+  Plus,
+  RefreshCw,
+  Search,
+  Settings,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import React, { useState } from "react";
+
+import { useRole, type UserRole } from "../../components/context";
+import { DashboardLayout } from "../../components/layout/DashboardLayout";
+
+interface AdminReportsPageProps {
+  onNavigate: (path: string) => void;
+  role?: UserRole;
+}
+
+interface Report {
+  id: string;
+  name: string;
+  description: string;
+  type: "usage" | "financial" | "user" | "content" | "system";
+  lastGenerated: string;
+  frequency: "daily" | "weekly" | "monthly" | "on-demand";
+  status: "ready" | "generating" | "scheduled" | "failed";
+  format: "pdf" | "csv" | "xlsx" | "json";
+  size?: string;
+}
+
+interface ScheduledReport {
+  id: string;
+  reportId: string;
+  reportName: string;
+  schedule: string;
+  nextRun: string;
+  recipients: string[];
+  enabled: boolean;
+}
+
+const mockReports: Report[] = [
+  {
+    id: "1",
+    name: "Monthly User Activity Report",
+    description:
+      "Comprehensive overview of user engagement, logins, and feature usage",
+    type: "usage",
+    lastGenerated: "2 hours ago",
+    frequency: "monthly",
+    status: "ready",
+    format: "pdf",
+    size: "2.4 MB",
+  },
+  {
+    id: "2",
+    name: "Revenue & Subscription Analysis",
+    description:
+      "Financial metrics including MRR, churn, and subscription trends",
+    type: "financial",
+    lastGenerated: "1 day ago",
+    frequency: "weekly",
+    status: "ready",
+    format: "xlsx",
+    size: "1.8 MB",
+  },
+  {
+    id: "3",
+    name: "New User Registrations",
+    description: "Daily breakdown of new signups with source attribution",
+    type: "user",
+    lastGenerated: "Just now",
+    frequency: "daily",
+    status: "generating",
+    format: "csv",
+  },
+  {
+    id: "4",
+    name: "Content Upload Statistics",
+    description: "Paper uploads, storage usage, and processing metrics",
+    type: "content",
+    lastGenerated: "3 hours ago",
+    frequency: "weekly",
+    status: "ready",
+    format: "pdf",
+    size: "3.1 MB",
+  },
+  {
+    id: "5",
+    name: "System Performance Report",
+    description: "Server health, API response times, and error rates",
+    type: "system",
+    lastGenerated: "Failed",
+    frequency: "daily",
+    status: "failed",
+    format: "json",
+  },
+  {
+    id: "6",
+    name: "AI Feature Usage Report",
+    description: "AI summaries, recommendations, and insights usage",
+    type: "usage",
+    lastGenerated: "5 hours ago",
+    frequency: "monthly",
+    status: "ready",
+    format: "pdf",
+    size: "1.2 MB",
+  },
+];
+
+const mockScheduledReports: ScheduledReport[] = [
+  {
+    id: "s1",
+    reportId: "1",
+    reportName: "Monthly User Activity Report",
+    schedule: "1st of every month at 6:00 AM",
+    nextRun: "Dec 1, 2025",
+    recipients: ["admin@scholarflow.com", "team@scholarflow.com"],
+    enabled: true,
+  },
+  {
+    id: "s2",
+    reportId: "2",
+    reportName: "Revenue & Subscription Analysis",
+    schedule: "Every Monday at 9:00 AM",
+    nextRun: "Dec 2, 2025",
+    recipients: ["finance@scholarflow.com"],
+    enabled: true,
+  },
+  {
+    id: "s3",
+    reportId: "3",
+    reportName: "New User Registrations",
+    schedule: "Daily at 7:00 AM",
+    nextRun: "Tomorrow",
+    recipients: ["growth@scholarflow.com"],
+    enabled: false,
+  },
+];
+
+const reportTypeConfig: Record<
+  string,
+  { icon: React.ReactNode; color: string; label: string }
+> = {
+  usage: {
+    icon: <BarChart3 className="h-4 w-4" />,
+    color: "text-blue-500 bg-blue-100 dark:bg-blue-900/30",
+    label: "Usage",
+  },
+  financial: {
+    icon: <LineChart className="h-4 w-4" />,
+    color: "text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30",
+    label: "Financial",
+  },
+  user: {
+    icon: <Users className="h-4 w-4" />,
+    color: "text-purple-500 bg-purple-100 dark:bg-purple-900/30",
+    label: "User",
+  },
+  content: {
+    icon: <FileText className="h-4 w-4" />,
+    color: "text-amber-500 bg-amber-100 dark:bg-amber-900/30",
+    label: "Content",
+  },
+  system: {
+    icon: <Settings className="h-4 w-4" />,
+    color: "text-slate-500 bg-slate-100 dark:bg-slate-900/30",
+    label: "System",
+  },
+};
+
+const statusConfig: Record<
+  string,
+  { icon: React.ReactNode; color: string; label: string }
+> = {
+  ready: {
+    icon: <CheckCircle className="h-4 w-4" />,
+    color: "text-emerald-500",
+    label: "Ready",
+  },
+  generating: {
+    icon: <RefreshCw className="h-4 w-4 animate-spin" />,
+    color: "text-blue-500",
+    label: "Generating",
+  },
+  scheduled: {
+    icon: <Clock className="h-4 w-4" />,
+    color: "text-amber-500",
+    label: "Scheduled",
+  },
+  failed: {
+    icon: <AlertCircle className="h-4 w-4" />,
+    color: "text-red-500",
+    label: "Failed",
+  },
+};
+
+type TabType = "all" | "scheduled" | "custom";
+
+const defaultUser = {
+  name: "Admin User",
+  email: "admin@scholarflow.com",
+  role: "admin" as const,
+};
+
+export function AdminReportsPage({
+  onNavigate,
+  role: propRole,
+}: AdminReportsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
+  const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+
+  const filteredReports = mockReports.filter((report) => {
+    const matchesSearch =
+      report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = typeFilter === "all" || report.type === typeFilter;
+    return matchesSearch && matchesType;
+  });
+
+  const stats = [
+    {
+      label: "Total Reports",
+      value: mockReports.length,
+      change: "+2",
+      trend: "up",
+      icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      label: "Generated This Month",
+      value: 24,
+      change: "+8",
+      trend: "up",
+      icon: <BarChart3 className="h-5 w-5" />,
+    },
+    {
+      label: "Scheduled Reports",
+      value: mockScheduledReports.filter((r) => r.enabled).length,
+      change: "0",
+      trend: "neutral",
+      icon: <Calendar className="h-5 w-5" />,
+    },
+    {
+      label: "Failed Reports",
+      value: mockReports.filter((r) => r.status === "failed").length,
+      change: "-1",
+      trend: "down",
+      icon: <AlertCircle className="h-5 w-5" />,
+    },
+  ];
+
+  return (
+    <DashboardLayout user={user} onNavigate={onNavigate}>
+      <div className="p-6 lg:p-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/25">
+              <FileSpreadsheet className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                Reports
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                Generate, schedule, and export system reports
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white
+                     hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/25"
+          >
+            <Plus className="h-4 w-4" />
+            Create Report
+          </button>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-700">
+                  {stat.icon}
+                </div>
+                <div
+                  className={`flex items-center gap-1 text-sm font-medium
+                  ${stat.trend === "up" ? "text-emerald-500" : stat.trend === "down" ? "text-red-500" : "text-slate-500"}`}
+                >
+                  {stat.trend === "up" && <TrendingUp className="h-3 w-3" />}
+                  {stat.trend === "down" && (
+                    <TrendingDown className="h-3 w-3" />
+                  )}
+                  {stat.change}
+                </div>
+              </div>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {stat.value}
+              </p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {stat.label}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-2 mb-6"
+        >
+          {(["all", "scheduled", "custom"] as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors
+                ${
+                  activeTab === tab
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+            >
+              {tab === "all"
+                ? "All Reports"
+                : tab === "scheduled"
+                  ? "Scheduled"
+                  : "Custom Reports"}
+            </button>
+          ))}
+        </motion.div>
+
+        {/* Search and Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="flex flex-col sm:flex-row gap-4 mb-6"
+        >
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search reports..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                       bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="relative">
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="appearance-none pl-4 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700
+                       bg-white dark:bg-slate-800 text-slate-900 dark:text-white
+                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="all">All Types</option>
+              <option value="usage">Usage</option>
+              <option value="financial">Financial</option>
+              <option value="user">User</option>
+              <option value="content">Content</option>
+              <option value="system">System</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          </div>
+        </motion.div>
+
+        {/* Reports List or Scheduled */}
+        {activeTab === "scheduled" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-4"
+          >
+            {mockScheduledReports.map((scheduled, index) => (
+              <motion.div
+                key={scheduled.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + index * 0.05 }}
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`p-2 rounded-xl ${scheduled.enabled ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-slate-100 dark:bg-slate-700"}`}
+                    >
+                      <Calendar
+                        className={`h-5 w-5 ${scheduled.enabled ? "text-emerald-500" : "text-slate-400"}`}
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
+                        {scheduled.reportName}
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {scheduled.schedule}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        Next run: {scheduled.nextRun}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {scheduled.recipients.length} recipient(s)
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        className={`p-2 rounded-lg transition-colors ${
+                          scheduled.enabled
+                            ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                            : "bg-slate-100 dark:bg-slate-700 text-slate-400"
+                        }`}
+                      >
+                        {scheduled.enabled ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-slate-700">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Report
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Type
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Frequency
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Status
+                    </th>
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Last Generated
+                    </th>
+                    <th className="text-right p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredReports.map((report, index) => {
+                    const typeConf = reportTypeConfig[report.type];
+                    const statusConf = statusConfig[report.status];
+                    return (
+                      <motion.tr
+                        key={report.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + index * 0.05 }}
+                        className="border-b border-slate-100 dark:border-slate-700/50 last:border-0
+                                 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div>
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {report.name}
+                            </p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md truncate">
+                              {report.description}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${typeConf.color}`}
+                          >
+                            {typeConf.icon}
+                            {typeConf.label}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm text-slate-600 dark:text-slate-400 capitalize">
+                            {report.frequency}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 text-sm ${statusConf.color}`}
+                          >
+                            {statusConf.icon}
+                            {statusConf.label}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              {report.lastGenerated}
+                            </p>
+                            {report.size && (
+                              <p className="text-xs text-slate-400">
+                                {report.size}
+                              </p>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {report.status === "ready" && (
+                              <button className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors">
+                                <Download className="h-4 w-4" />
+                              </button>
+                            )}
+                            <button className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                              <RefreshCw className="h-4 w-4" />
+                            </button>
+                            <button className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                              <Mail className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Quick Export Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 
+                   border border-indigo-200 dark:border-indigo-800"
+        >
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
+            Quick Export
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "User Data", icon: <Users className="h-5 w-5" /> },
+              {
+                label: "Financial Summary",
+                icon: <LineChart className="h-5 w-5" />,
+              },
+              {
+                label: "Content Stats",
+                icon: <PieChart className="h-5 w-5" />,
+              },
+              { label: "Full Backup", icon: <Download className="h-5 w-5" /> },
+            ].map((item) => (
+              <button
+                key={item.label}
+                className="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-slate-800 
+                         border border-slate-200 dark:border-slate-700
+                         hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
+                  {item.icon}
+                </div>
+                <span className="font-medium text-slate-900 dark:text-white">
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+export default AdminReportsPage;

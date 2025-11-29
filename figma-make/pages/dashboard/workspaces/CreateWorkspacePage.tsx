@@ -3,6 +3,7 @@
 import { ArrowLeft, Building2 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -17,6 +18,7 @@ const defaultUser = {
 
 interface CreateWorkspacePageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -29,7 +31,14 @@ function cn(...classes: (string | undefined | null | false)[]): string {
 // ============================================================================
 // Create Workspace Page Component
 // ============================================================================
-export function CreateWorkspacePage({ onNavigate }: CreateWorkspacePageProps) {
+export function CreateWorkspacePage({
+  onNavigate,
+  role: propRole,
+}: CreateWorkspacePageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -45,7 +54,7 @@ export function CreateWorkspacePage({ onNavigate }: CreateWorkspacePageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/workspaces/create"
     >

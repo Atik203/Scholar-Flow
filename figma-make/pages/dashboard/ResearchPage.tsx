@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -28,6 +29,7 @@ const defaultUser = {
 
 interface ResearchPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -251,10 +253,17 @@ const FeatureHighlight: React.FC<FeatureHighlightProps> = ({
 // ============================================================================
 // Research Page Component
 // ============================================================================
-export function ResearchPage({ onNavigate }: ResearchPageProps) {
+export function ResearchPage({
+  onNavigate,
+  role: propRole,
+}: ResearchPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/research"
     >

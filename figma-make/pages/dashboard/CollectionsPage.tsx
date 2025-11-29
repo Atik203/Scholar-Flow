@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -32,6 +33,7 @@ const defaultUser = {
 
 interface CollectionsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -314,7 +316,14 @@ const CollectionCard: React.FC<CollectionCardProps> = ({
 // ============================================================================
 // Collections Page Component
 // ============================================================================
-export function CollectionsPage({ onNavigate }: CollectionsPageProps) {
+export function CollectionsPage({
+  onNavigate,
+  role: propRole,
+}: CollectionsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("all");
   const [activeTab, setActiveTab] = useState<
@@ -349,7 +358,7 @@ export function CollectionsPage({ onNavigate }: CollectionsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/collections"
     >

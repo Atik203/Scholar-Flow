@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { Label } from "../../../components/ui/label";
 import { Switch } from "../../../components/ui/switch";
@@ -34,6 +35,7 @@ const defaultUser = {
 
 interface SystemSettingsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -207,7 +209,14 @@ const SettingsSection = ({
 // ============================================================================
 // System Settings Page Component
 // ============================================================================
-export function SystemSettingsPage({ onNavigate }: SystemSettingsPageProps) {
+export function SystemSettingsPage({
+  onNavigate,
+  role: propRole,
+}: SystemSettingsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [activeTab, setActiveTab] = useState<
     "general" | "security" | "notifications" | "database" | "ai"
   >("general");
@@ -247,7 +256,7 @@ export function SystemSettingsPage({ onNavigate }: SystemSettingsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/admin/settings"
     >

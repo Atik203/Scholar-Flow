@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -40,6 +41,7 @@ const defaultUser = {
 
 interface TextEditorPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -106,7 +108,14 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({
 // ============================================================================
 // Text Editor Page Component
 // ============================================================================
-export function TextEditorPage({ onNavigate }: TextEditorPageProps) {
+export function TextEditorPage({
+  onNavigate,
+  role: propRole,
+}: TextEditorPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [selectedDocId, setSelectedDocId] = useState<string | null>("doc-1");
   const [content, setContent] = useState(
     `# Research Paper Draft
@@ -165,7 +174,7 @@ Our findings demonstrate the effectiveness of modern transformer-based models in
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/research/editor"
     >
