@@ -202,17 +202,19 @@ export function TeamSettingsPage({
     label: string;
     description?: string;
   }) => (
-    <div className="flex items-start justify-between gap-4 py-4 border-b border-white/5 last:border-0">
+    <div className="flex items-start justify-between gap-4 py-4 border-b border-gray-100 dark:border-white/5 last:border-0">
       <div>
-        <p className="text-white font-medium">{label}</p>
+        <p className="text-gray-900 dark:text-white font-medium">{label}</p>
         {description && (
-          <p className="text-gray-400 text-sm mt-1">{description}</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+            {description}
+          </p>
         )}
       </div>
       <button
         onClick={() => onChange(!enabled)}
         className={`relative w-12 h-6 rounded-full transition-colors ${
-          enabled ? "bg-purple-500" : "bg-gray-600"
+          enabled ? "bg-purple-500" : "bg-gray-300 dark:bg-gray-600"
         }`}
       >
         <motion.div
@@ -226,7 +228,7 @@ export function TeamSettingsPage({
 
   return (
     <DashboardLayout user={user} onNavigate={onNavigate}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 p-6">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <motion.div
@@ -236,13 +238,13 @@ export function TeamSettingsPage({
           >
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-900 dark:text-white flex items-center gap-3">
                   <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
-                    <Settings className="h-6 w-6" />
+                    <Settings className="h-6 w-6 text-gray-900 dark:text-white" />
                   </div>
                   Team Settings
                 </h1>
-                <p className="text-gray-400 mt-2">
+                <p className="text-gray-600 dark:text-gray-600 dark:text-gray-400 mt-2">
                   Manage your team's configuration and permissions
                 </p>
               </div>
@@ -252,7 +254,7 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center gap-2 text-green-400 text-sm"
+                    className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Changes saved
@@ -261,7 +263,7 @@ export function TeamSettingsPage({
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 text-white font-medium rounded-lg shadow-lg shadow-purple-500/25 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-50 text-gray-900 dark:text-white font-medium rounded-lg shadow-lg shadow-purple-500/25 transition-all"
                 >
                   {saving ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
@@ -281,7 +283,7 @@ export function TeamSettingsPage({
               animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-2">
+              <div className="bg-white dark:bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-200 dark:border-white/10 p-2 shadow-sm">
                 {tabs.map((tab) => (
                   <button
                     key={tab.id}
@@ -289,11 +291,11 @@ export function TeamSettingsPage({
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       activeTab === tab.id
                         ? tab.id === "danger"
-                          ? "bg-red-500/20 text-red-400"
-                          : "bg-purple-500/20 text-purple-400"
+                          ? "bg-red-500/20 text-red-600 dark:text-red-400"
+                          : "bg-purple-500/20 text-purple-600 dark:text-purple-400"
                         : tab.id === "danger"
-                          ? "text-red-400/60 hover:bg-red-500/10"
-                          : "text-gray-400 hover:bg-white/5"
+                          ? "text-red-500/60 dark:text-red-400/60 hover:bg-red-500/10"
+                          : "text-gray-600 dark:text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white dark:bg-white/5"
                     }`}
                   >
                     <tab.icon className="h-5 w-5" />
@@ -322,24 +324,24 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6"
+                    className="bg-white dark:bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-gray-200 dark:border-white/10 p-6 shadow-sm"
                   >
-                    <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-purple-400" />
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-900 dark:text-white mb-6 flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-purple-500 dark:text-purple-400" />
                       General Settings
                     </h2>
 
                     <div className="space-y-6">
                       {/* Team Logo */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 dark:text-gray-300 mb-2">
                           Team Logo
                         </label>
                         <div className="flex items-center gap-4">
                           <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                            <Building className="h-8 w-8 text-white" />
+                            <Building className="h-8 w-8 text-gray-900 dark:text-white" />
                           </div>
-                          <button className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
+                          <button className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-gray-900 dark:text-white rounded-lg transition-colors">
                             <Upload className="h-4 w-4" />
                             Upload Logo
                           </button>
@@ -348,7 +350,7 @@ export function TeamSettingsPage({
 
                       {/* Team Name */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 dark:text-gray-300 mb-2">
                           Team Name
                         </label>
                         <input
@@ -357,13 +359,13 @@ export function TeamSettingsPage({
                           onChange={(e) =>
                             updateSetting("general", "name", e.target.value)
                           }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-3 bg-gray-50 dark:bg-white dark:bg-white/5 border border-gray-200 dark:border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         />
                       </div>
 
                       {/* Description */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-700 dark:text-gray-300 mb-2">
                           Description
                         </label>
                         <textarea
@@ -376,13 +378,13 @@ export function TeamSettingsPage({
                             )
                           }
                           rows={3}
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
+                          className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
                         />
                       </div>
 
                       {/* Visibility */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Visibility
                         </label>
                         <div className="grid grid-cols-3 gap-3">
@@ -421,17 +423,17 @@ export function TeamSettingsPage({
                               className={`p-4 rounded-lg border text-left transition-all ${
                                 settings.general.visibility === option.value
                                   ? "bg-purple-500/20 border-purple-500/50"
-                                  : "bg-white/5 border-white/10 hover:border-white/20"
+                                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-white/20"
                               }`}
                             >
                               <option.icon
                                 className={`h-5 w-5 mb-2 ${
                                   settings.general.visibility === option.value
                                     ? "text-purple-400"
-                                    : "text-gray-400"
+                                    : "text-gray-600 dark:text-gray-400"
                                 }`}
                               />
-                              <p className="text-white font-medium text-sm">
+                              <p className="text-gray-900 dark:text-white font-medium text-sm">
                                 {option.label}
                               </p>
                               <p className="text-gray-500 text-xs mt-1">
@@ -444,7 +446,7 @@ export function TeamSettingsPage({
 
                       {/* Default Role */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Default Role for New Members
                         </label>
                         <select
@@ -456,7 +458,7 @@ export function TeamSettingsPage({
                               e.target.value
                             )
                           }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         >
                           <option value="researcher">Researcher</option>
                           <option value="pro_researcher">Pro Researcher</option>
@@ -467,7 +469,7 @@ export function TeamSettingsPage({
                       {/* Timezone */}
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Timezone
                           </label>
                           <select
@@ -479,7 +481,7 @@ export function TeamSettingsPage({
                                 e.target.value
                               )
                             }
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                            className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                           >
                             <option value="America/New_York">
                               Eastern Time (ET)
@@ -492,7 +494,7 @@ export function TeamSettingsPage({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Language
                           </label>
                           <select
@@ -504,7 +506,7 @@ export function TeamSettingsPage({
                                 e.target.value
                               )
                             }
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                            className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                           >
                             <option value="en">English</option>
                             <option value="es">Spanish</option>
@@ -525,9 +527,9 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6"
+                    className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-6"
                   >
-                    <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                       <Shield className="h-5 w-5 text-purple-400" />
                       Member Permissions
                     </h2>
@@ -600,8 +602,8 @@ export function TeamSettingsPage({
                         description="Members can permanently delete papers they uploaded"
                       />
 
-                      <div className="pt-4 mt-4 border-t border-white/10">
-                        <h3 className="text-white font-medium mb-4">
+                      <div className="pt-4 mt-4 border-t border-gray-200 dark:border-white/10">
+                        <h3 className="text-gray-900 dark:text-white font-medium mb-4">
                           Approval Workflows
                         </h3>
                         <ToggleSwitch
@@ -644,9 +646,9 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6"
+                    className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-6"
                   >
-                    <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                       <Bell className="h-5 w-5 text-purple-400" />
                       Team Notifications
                     </h2>
@@ -715,9 +717,9 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6"
+                    className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-6"
                   >
-                    <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                       <Lock className="h-5 w-5 text-purple-400" />
                       Security Settings
                     </h2>
@@ -734,7 +736,7 @@ export function TeamSettingsPage({
 
                       {/* Session Timeout */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Session Timeout (hours)
                         </label>
                         <select
@@ -746,7 +748,7 @@ export function TeamSettingsPage({
                               parseInt(e.target.value)
                             )
                           }
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         >
                           <option value={1}>1 hour</option>
                           <option value={8}>8 hours</option>
@@ -758,7 +760,7 @@ export function TeamSettingsPage({
 
                       {/* Password Policy */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Password Policy
                         </label>
                         <div className="grid grid-cols-3 gap-3">
@@ -795,10 +797,10 @@ export function TeamSettingsPage({
                                 settings.security.passwordPolicy ===
                                 policy.value
                                   ? "bg-purple-500/20 border-purple-500/50"
-                                  : "bg-white/5 border-white/10 hover:border-white/20"
+                                  : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-white/20"
                               }`}
                             >
-                              <p className="text-white font-medium text-sm">
+                              <p className="text-gray-900 dark:text-white font-medium text-sm">
                                 {policy.label}
                               </p>
                               <p className="text-gray-500 text-xs mt-1">
@@ -811,7 +813,7 @@ export function TeamSettingsPage({
 
                       {/* Allowed Domains */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Allowed Email Domains
                         </label>
                         <p className="text-gray-500 text-sm mb-3">
@@ -823,7 +825,7 @@ export function TeamSettingsPage({
                             value={newDomain}
                             onChange={(e) => setNewDomain(e.target.value)}
                             placeholder="example.edu"
-                            className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                            className="flex-1 px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                           />
                           <button
                             onClick={addDomain}
@@ -836,12 +838,12 @@ export function TeamSettingsPage({
                           {settings.security.allowedDomains.map((domain) => (
                             <span
                               key={domain}
-                              className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-sm text-white"
+                              className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-white/10 rounded-full text-sm text-gray-900 dark:text-white"
                             >
                               @{domain}
                               <button
                                 onClick={() => removeDomain(domain)}
-                                className="text-gray-400 hover:text-red-400 transition-colors"
+                                className="text-gray-600 dark:text-gray-400 hover:text-red-400 transition-colors"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </button>
@@ -865,23 +867,27 @@ export function TeamSettingsPage({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-6"
+                    className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-6"
                   >
-                    <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                       <Link className="h-5 w-5 text-purple-400" />
                       Integrations
                     </h2>
 
                     <div className="space-y-6">
                       {/* Slack */}
-                      <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="p-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 rounded-lg bg-[#4A154B] flex items-center justify-center">
-                            <span className="text-white font-bold">#</span>
+                            <span className="text-gray-900 dark:text-white font-bold">
+                              #
+                            </span>
                           </div>
                           <div>
-                            <h3 className="text-white font-medium">Slack</h3>
-                            <p className="text-gray-400 text-sm">
+                            <h3 className="text-gray-900 dark:text-white font-medium">
+                              Slack
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
                               Send notifications to a Slack channel
                             </p>
                           </div>
@@ -897,19 +903,23 @@ export function TeamSettingsPage({
                             )
                           }
                           placeholder="https://hooks.slack.com/services/..."
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         />
                       </div>
 
                       {/* Discord */}
-                      <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="p-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 rounded-lg bg-[#5865F2] flex items-center justify-center">
-                            <span className="text-white font-bold">D</span>
+                            <span className="text-gray-900 dark:text-white font-bold">
+                              D
+                            </span>
                           </div>
                           <div>
-                            <h3 className="text-white font-medium">Discord</h3>
-                            <p className="text-gray-400 text-sm">
+                            <h3 className="text-gray-900 dark:text-white font-medium">
+                              Discord
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
                               Send notifications to a Discord channel
                             </p>
                           </div>
@@ -925,21 +935,21 @@ export function TeamSettingsPage({
                             )
                           }
                           placeholder="https://discord.com/api/webhooks/..."
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         />
                       </div>
 
                       {/* Custom Webhook */}
-                      <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <div className="p-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-10 h-10 rounded-lg bg-gray-600 flex items-center justify-center">
-                            <Link className="h-5 w-5 text-white" />
+                            <Link className="h-5 w-5 text-gray-900 dark:text-white" />
                           </div>
                           <div>
-                            <h3 className="text-white font-medium">
+                            <h3 className="text-gray-900 dark:text-white font-medium">
                               Custom Webhook
                             </h3>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-gray-600 dark:text-gray-400 text-sm">
                               Send notifications to any webhook URL
                             </p>
                           </div>
@@ -955,7 +965,7 @@ export function TeamSettingsPage({
                             )
                           }
                           placeholder="https://your-server.com/webhook"
-                          className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                          className="w-full px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                         />
                       </div>
                     </div>
@@ -977,11 +987,11 @@ export function TeamSettingsPage({
                     </h2>
 
                     <div className="space-y-4">
-                      <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                        <h3 className="text-white font-medium mb-2">
+                      <div className="p-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10">
+                        <h3 className="text-gray-900 dark:text-white font-medium mb-2">
                           Archive Team
                         </h3>
-                        <p className="text-gray-400 text-sm mb-4">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                           Archive this team to hide it from all members. You can
                           restore it later.
                         </p>
@@ -990,11 +1000,11 @@ export function TeamSettingsPage({
                         </button>
                       </div>
 
-                      <div className="p-4 bg-white/5 rounded-lg border border-red-500/30">
-                        <h3 className="text-white font-medium mb-2">
+                      <div className="p-4 bg-white dark:bg-white/5 rounded-lg border border-red-500/30">
+                        <h3 className="text-gray-900 dark:text-white font-medium mb-2">
                           Delete Team
                         </h3>
-                        <p className="text-gray-400 text-sm mb-4">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
                           Permanently delete this team and all its data. This
                           action cannot be undone.
                         </p>
@@ -1033,15 +1043,15 @@ export function TeamSettingsPage({
                     <div className="p-3 bg-red-500/20 rounded-full">
                       <AlertTriangle className="h-6 w-6 text-red-400" />
                     </div>
-                    <h3 className="text-xl font-semibold text-white">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                       Delete Team?
                     </h3>
                   </div>
-                  <p className="text-gray-400 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
                     This will permanently delete the team "
                     {settings.general.name}" and all associated data including:
                   </p>
-                  <ul className="text-gray-400 text-sm mb-6 space-y-2">
+                  <ul className="text-gray-600 dark:text-gray-400 text-sm mb-6 space-y-2">
                     <li className="flex items-center gap-2">
                       <Trash2 className="h-4 w-4 text-red-400" />
                       All papers and collections
@@ -1058,7 +1068,7 @@ export function TeamSettingsPage({
                   <div className="flex gap-3">
                     <button
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                      className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-white rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -1067,7 +1077,7 @@ export function TeamSettingsPage({
                         setShowDeleteConfirm(false);
                         onNavigate?.("/dashboard");
                       }}
-                      className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                      className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-gray-900 dark:text-white rounded-lg transition-colors"
                     >
                       Delete Permanently
                     </button>
