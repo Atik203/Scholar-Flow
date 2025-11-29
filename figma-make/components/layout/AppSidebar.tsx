@@ -1,25 +1,36 @@
 "use client";
 import {
   BarChart3,
+  Bell,
   BookOpen,
   Brain,
   ChevronDown,
   ChevronRight,
+  Compass,
   CreditCard,
+  Download,
   FileText,
+  Globe,
+  HelpCircle,
   Highlighter,
   History,
   Home,
+  Key,
   Layers,
+  Lock,
+  Map,
   MessageSquare,
   Microscope,
+  Network,
   Plus,
   Quote,
   Search,
   Settings,
   Shield,
   Upload,
+  UserCheck,
   Users,
+  Webhook,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
@@ -33,11 +44,18 @@ interface AppSidebarProps {
   onNavigate?: (path: string) => void;
 }
 
+interface SubItem {
+  title: string;
+  path: string;
+  icon: React.ElementType;
+  minRole?: UserRole;
+}
+
 interface SidebarItem {
   title: string;
   icon: React.ElementType;
   path?: string;
-  items?: { title: string; path: string; icon: React.ElementType }[];
+  items?: SubItem[];
   minRole?: UserRole;
   badge?: string;
 }
@@ -69,6 +87,7 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
       { title: "All Papers", path: "/papers", icon: FileText },
       { title: "Upload Paper", path: "/papers/upload", icon: Upload },
       { title: "Search Papers", path: "/papers/search", icon: Search },
+      { title: "Import Papers", path: "/papers/import", icon: Download },
     ],
   },
   {
@@ -105,7 +124,25 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
         path: "/research/annotations",
         icon: Highlighter,
       },
+      {
+        title: "Citation Graph",
+        path: "/research/citation-graph",
+        icon: Network,
+        minRole: "pro_researcher" as UserRole,
+      },
+      {
+        title: "Research Map",
+        path: "/research/map",
+        icon: Map,
+        minRole: "pro_researcher" as UserRole,
+      },
+      { title: "Research Notes", path: "/research-notes", icon: FileText },
     ],
+  },
+  {
+    title: "Discover",
+    path: "/discover",
+    icon: Compass,
   },
   {
     title: "AI Insights",
@@ -114,8 +151,72 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
   },
   {
     title: "Analytics",
-    path: "/analytics",
     icon: BarChart3,
+    items: [
+      { title: "Overview", path: "/analytics", icon: BarChart3 },
+      {
+        title: "Personal Analytics",
+        path: "/analytics/personal",
+        icon: BarChart3,
+      },
+      {
+        title: "Workspace Analytics",
+        path: "/analytics/workspace",
+        icon: BarChart3,
+        minRole: "team_lead" as UserRole,
+      },
+      {
+        title: "Usage Reports",
+        path: "/analytics/usage",
+        icon: BarChart3,
+        minRole: "pro_researcher" as UserRole,
+      },
+      {
+        title: "Export Analytics",
+        path: "/analytics/export",
+        icon: Download,
+        minRole: "pro_researcher" as UserRole,
+      },
+    ],
+  },
+  {
+    title: "Notifications",
+    icon: Bell,
+    items: [
+      { title: "Notifications", path: "/notifications", icon: Bell },
+      {
+        title: "Notification Center",
+        path: "/notifications/center",
+        icon: Bell,
+      },
+      {
+        title: "Notification History",
+        path: "/notifications/history",
+        icon: History,
+      },
+      { title: "Settings", path: "/notifications/settings", icon: Settings },
+    ],
+  },
+  {
+    title: "Team",
+    icon: Users,
+    minRole: "team_lead",
+    items: [
+      { title: "Team Members", path: "/team", icon: Users },
+      { title: "Invitations", path: "/team/invitations", icon: UserCheck },
+      { title: "Team Activity", path: "/team/activity", icon: History },
+      { title: "Team Settings", path: "/team/settings", icon: Settings },
+    ],
+  },
+  {
+    title: "Security",
+    icon: Shield,
+    items: [
+      { title: "Security Dashboard", path: "/security", icon: Shield },
+      { title: "Two-Factor Auth", path: "/security/2fa", icon: Lock },
+      { title: "Active Sessions", path: "/security/sessions", icon: Globe },
+      { title: "Privacy Settings", path: "/privacy", icon: Lock },
+    ],
   },
   {
     title: "Billing",
@@ -127,7 +228,29 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
     icon: History,
     items: [
       { title: "Activity Log", path: "/activity-log", icon: History },
+      { title: "Recent Activity", path: "/recent-activity", icon: History },
       { title: "Discussions", path: "/discussions", icon: MessageSquare },
+      { title: "Search History", path: "/search/history", icon: Search },
+    ],
+  },
+  {
+    title: "Help",
+    icon: HelpCircle,
+    items: [
+      { title: "Help Center", path: "/help", icon: HelpCircle },
+      {
+        title: "Keyboard Shortcuts",
+        path: "/help/shortcuts",
+        icon: HelpCircle,
+      },
+    ],
+  },
+  {
+    title: "Settings",
+    icon: Settings,
+    items: [
+      { title: "General Settings", path: "/settings", icon: Settings },
+      { title: "Export Data", path: "/settings/export", icon: Download },
     ],
   },
 ];
@@ -150,6 +273,48 @@ const adminFeatures: SidebarItem[] = [
     title: "Subscriptions",
     path: "/admin/subscriptions",
     icon: CreditCard,
+    minRole: "admin",
+  },
+  {
+    title: "Plans",
+    path: "/admin/plans",
+    icon: CreditCard,
+    minRole: "admin",
+  },
+  {
+    title: "Payments",
+    path: "/admin/payments",
+    icon: CreditCard,
+    minRole: "admin",
+  },
+  {
+    title: "Reports",
+    path: "/admin/reports",
+    icon: BarChart3,
+    minRole: "admin",
+  },
+  {
+    title: "Audit Log",
+    path: "/admin/audit",
+    icon: History,
+    minRole: "admin",
+  },
+  {
+    title: "Webhooks",
+    path: "/admin/webhooks",
+    icon: Webhook,
+    minRole: "admin",
+  },
+  {
+    title: "API Keys",
+    path: "/admin/api-keys",
+    icon: Key,
+    minRole: "admin",
+  },
+  {
+    title: "Content Moderation",
+    path: "/admin/moderation",
+    icon: Shield,
     minRole: "admin",
   },
   {

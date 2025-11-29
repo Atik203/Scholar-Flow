@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -45,6 +46,7 @@ const defaultUser = {
 interface PaperDetailsPageProps {
   onNavigate?: (path: string) => void;
   paperId?: string;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -183,7 +185,12 @@ type TabType = "preview" | "annotations" | "comments" | "notes";
 export function PaperDetailsPage({
   onNavigate,
   paperId,
+  role: propRole,
 }: PaperDetailsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [activeTab, setActiveTab] = useState<TabType>("preview");
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(dummyPaper.title);
@@ -281,7 +288,7 @@ export function PaperDetailsPage({
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/papers/details"
     >

@@ -202,20 +202,33 @@ const getQuickActionsForRole = (role: UserRole) => {
   if (role === "admin") {
     return [
       {
+        title: "Admin Overview",
+        description: "System dashboard",
+        icon: Users,
+        href: "/admin-overview",
+        color: "bg-red-500 hover:bg-red-600",
+      },
+      {
         title: "User Management",
         description: "Manage platform users",
         icon: Users,
-        href: "/users",
+        href: "/admin/users",
         color: "bg-blue-500 hover:bg-blue-600",
       },
       {
         title: "System Settings",
         description: "Configure platform",
         icon: Zap,
-        href: "/settings",
+        href: "/admin/settings",
         color: "bg-green-500 hover:bg-green-600",
       },
-      ...baseActions.slice(0, 2),
+      {
+        title: "View Reports",
+        description: "System reports",
+        icon: FileText,
+        href: "/admin/reports",
+        color: "bg-purple-500 hover:bg-purple-600",
+      },
     ];
   }
 
@@ -228,8 +241,42 @@ const getQuickActionsForRole = (role: UserRole) => {
         href: "/team",
         color: "bg-cyan-500 hover:bg-cyan-600",
       },
-      ...baseActions,
-    ].slice(0, 4);
+      {
+        title: "Invitations",
+        description: "Manage invites",
+        icon: Users,
+        href: "/team/invitations",
+        color: "bg-blue-500 hover:bg-blue-600",
+      },
+      {
+        title: "Workspace Analytics",
+        description: "Team insights",
+        icon: TrendingUp,
+        href: "/analytics/workspace",
+        color: "bg-purple-500 hover:bg-purple-600",
+      },
+      ...baseActions.slice(0, 1),
+    ];
+  }
+
+  if (role === "pro_researcher") {
+    return [
+      ...baseActions.slice(0, 2),
+      {
+        title: "Citation Graph",
+        description: "Visualize citations",
+        icon: TrendingUp,
+        href: "/research/citation-graph",
+        color: "bg-indigo-500 hover:bg-indigo-600",
+      },
+      {
+        title: "Analytics",
+        description: "Research insights",
+        icon: Lightbulb,
+        href: "/analytics/personal",
+        color: "bg-pink-500 hover:bg-pink-600",
+      },
+    ];
   }
 
   return baseActions;
@@ -492,9 +539,21 @@ export function DashboardPage({
                 <AlertCircle className="h-5 w-5 text-red-600" />
               </div>
               <h2 className="text-lg font-semibold">Admin Alerts</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
+                onClick={() => onNavigate?.("/admin-overview")}
+              >
+                Admin Overview
+                <ArrowUpRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
             <div className="space-y-3">
-              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+              <div
+                className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 cursor-pointer hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
+                onClick={() => onNavigate?.("/admin/users")}
+              >
                 <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                   3 users pending approval
                 </p>
@@ -502,7 +561,10 @@ export function DashboardPage({
                   Review and approve new user registrations
                 </p>
               </div>
-              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <div
+                className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                onClick={() => onNavigate?.("/admin/settings")}
+              >
                 <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
                   System update available
                 </p>
@@ -510,6 +572,36 @@ export function DashboardPage({
                   Version 2.1.0 is ready to deploy
                 </p>
               </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/admin/reports")}
+              >
+                Reports
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/admin/audit")}
+              >
+                Audit Log
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/admin/plans")}
+              >
+                Plans
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/admin/payments")}
+              >
+                Payments
+              </Button>
             </div>
           </Card>
         </motion.div>
@@ -527,21 +619,109 @@ export function DashboardPage({
                 <Users className="h-5 w-5 text-cyan-600" />
               </div>
               <h2 className="text-lg font-semibold">Team Overview</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto"
+                onClick={() => onNavigate?.("/team")}
+              >
+                Manage Team
+                <ArrowUpRight className="h-4 w-4 ml-1" />
+              </Button>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="text-center p-4 rounded-lg bg-muted/50">
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/team")}
+              >
                 <p className="text-2xl font-bold">12</p>
                 <p className="text-sm text-muted-foreground">Team Members</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-muted/50">
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/team/activity")}
+              >
                 <p className="text-2xl font-bold">8</p>
                 <p className="text-sm text-muted-foreground">Active Today</p>
               </div>
-              <div className="text-center p-4 rounded-lg bg-muted/50">
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/analytics/workspace")}
+              >
                 <p className="text-2xl font-bold">23</p>
                 <p className="text-sm text-muted-foreground">
                   Papers This Week
                 </p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/team/invitations")}
+              >
+                Invitations
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/team/activity")}
+              >
+                Activity
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onNavigate?.("/team/settings")}
+              >
+                Settings
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {role === "pro_researcher" && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <Card className="p-6 border-purple-200 dark:border-purple-900">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                <Brain className="h-5 w-5 text-purple-600" />
+              </div>
+              <h2 className="text-lg font-semibold">Pro Research Tools</h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/research/citation-graph")}
+              >
+                <TrendingUp className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                <p className="text-sm font-medium">Citation Graph</p>
+              </div>
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/research/map")}
+              >
+                <Lightbulb className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                <p className="text-sm font-medium">Research Map</p>
+              </div>
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/analytics/personal")}
+              >
+                <TrendingUp className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                <p className="text-sm font-medium">Analytics</p>
+              </div>
+              <div
+                className="text-center p-4 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                onClick={() => onNavigate?.("/analytics/usage")}
+              >
+                <Clock className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                <p className="text-sm font-medium">Usage Reports</p>
               </div>
             </div>
           </Card>

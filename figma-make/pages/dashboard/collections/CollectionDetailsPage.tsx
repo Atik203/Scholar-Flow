@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -35,6 +36,7 @@ const defaultUser = {
 interface CollectionDetailsPageProps {
   onNavigate?: (path: string) => void;
   collectionId?: string;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -158,7 +160,12 @@ const dummyAvailablePapers = [
 export function CollectionDetailsPage({
   onNavigate,
   collectionId,
+  role: propRole,
 }: CollectionDetailsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showAddPapersDialog, setShowAddPapersDialog] = useState(false);
@@ -258,7 +265,7 @@ export function CollectionDetailsPage({
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/collections/details"
     >

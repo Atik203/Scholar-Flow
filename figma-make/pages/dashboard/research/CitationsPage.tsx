@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -26,6 +27,7 @@ const defaultUser = {
 
 interface CitationsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -140,7 +142,14 @@ const dummyExportHistory = [
 // ============================================================================
 // Citations Page Component
 // ============================================================================
-export function CitationsPage({ onNavigate }: CitationsPageProps) {
+export function CitationsPage({
+  onNavigate,
+  role: propRole,
+}: CitationsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [selectedPaperIds, setSelectedPaperIds] = useState<string[]>([]);
   const [selectedFormat, setSelectedFormat] = useState("BibTeX");
   const [showExportDialog, setShowExportDialog] = useState(false);
@@ -182,7 +191,7 @@ export function CitationsPage({ onNavigate }: CitationsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/research/citations"
     >

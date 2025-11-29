@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -28,6 +29,7 @@ const defaultUser = {
 
 interface SubscriptionsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -294,12 +296,19 @@ const StatusBadge = ({ status }: { status: string }) => {
 // ============================================================================
 // Subscriptions Page Component
 // ============================================================================
-export function SubscriptionsPage({ onNavigate }: SubscriptionsPageProps) {
+export function SubscriptionsPage({
+  onNavigate,
+  role: propRole,
+}: SubscriptionsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [timeRange, setTimeRange] = useState("30d");
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/admin/subscriptions"
     >

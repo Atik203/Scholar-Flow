@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -24,6 +25,7 @@ const defaultUser = {
 
 interface AnnotationsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -147,7 +149,14 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 // ============================================================================
 // Annotations Page Component
 // ============================================================================
-export function AnnotationsPage({ onNavigate }: AnnotationsPageProps) {
+export function AnnotationsPage({
+  onNavigate,
+  role: propRole,
+}: AnnotationsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(
     "paper-1"
   );
@@ -159,7 +168,7 @@ export function AnnotationsPage({ onNavigate }: AnnotationsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/research/annotations"
     >

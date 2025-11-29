@@ -1,147 +1,532 @@
 # ScholarFlow - Figma Make UI Components
 
-A complete standalone React UI component library for ScholarFlow, built for Figma Make AI.
+**Complete React UI Components for Figma Make AI**
 
-## Page Name List
-
-### Auth Pages (1-5)
-
-| #   | Page               | Path               | Description                  |
-| --- | ------------------ | ------------------ | ---------------------------- |
-| 1   | LoginPage          | `/login`           | User login form              |
-| 2   | RegisterPage       | `/register`        | User registration form       |
-| 3   | ForgotPasswordPage | `/forgot-password` | Password recovery email form |
-| 4   | ResetPasswordPage  | `/reset-password`  | New password creation form   |
-| 5   | VerifyEmailPage    | `/verify-email`    | Email verification page      |
-
-### Dashboard Pages (6-10)
-
-| #   | Page          | Path                        | Description                 |
-| --- | ------------- | --------------------------- | --------------------------- |
-| 6   | DashboardPage | `/dashboard`                | Main dashboard (role-based) |
-| 7   | DashboardPage | `/dashboard/researcher`     | Researcher dashboard        |
-| 8   | DashboardPage | `/dashboard/pro-researcher` | Pro Researcher dashboard    |
-| 9   | DashboardPage | `/dashboard/team-lead`      | Team Lead dashboard         |
-| 10  | DashboardPage | `/dashboard/admin`          | Admin dashboard             |
-
-### Dashboard Module - Papers (11-15)
-
-| #   | Page                | Path             | Description       |
-| --- | ------------------- | ---------------- | ----------------- |
-| 11  | DashboardPapersPage | `/papers`        | All papers list   |
-| 12  | UploadPaperPage     | `/papers/upload` | Upload new paper  |
-| 13  | SearchPapersPage    | `/papers/search` | Search papers     |
-| 14  | PaperDetailsPage    | `/papers/:id`    | Paper details     |
-| 15  | PaperDetailPage     | `/paper`         | Paper detail view |
-
-### Dashboard Module - Collections (16-19)
-
-| #   | Page                     | Path                  | Description           |
-| --- | ------------------------ | --------------------- | --------------------- |
-| 16  | DashboardCollectionsPage | `/collections`        | My collections        |
-| 17  | CreateCollectionPage     | `/collections/create` | Create new collection |
-| 18  | SharedCollectionsPage    | `/collections/shared` | Shared collections    |
-| 19  | CollectionDetailsPage    | `/collections/:id`    | Collection details    |
-
-### Dashboard Module - Workspaces (20-23)
-
-| #   | Page                    | Path                 | Description          |
-| --- | ----------------------- | -------------------- | -------------------- |
-| 20  | DashboardWorkspacesPage | `/workspaces`        | My workspaces        |
-| 21  | CreateWorkspacePage     | `/workspaces/create` | Create new workspace |
-| 22  | SharedWorkspacesPage    | `/workspaces/shared` | Shared workspaces    |
-| 23  | WorkspaceDetailsPage    | `/workspaces/:id`    | Workspace details    |
-
-### Dashboard Module - Research (24-28)
-
-| #   | Page                  | Path                       | Description       |
-| --- | --------------------- | -------------------------- | ----------------- |
-| 24  | DashboardResearchPage | `/research`                | Research tools    |
-| 25  | PdfExtractionPage     | `/research/pdf-extraction` | PDF extraction    |
-| 26  | TextEditorPage        | `/research/editor`         | Text editor       |
-| 27  | CitationsPage         | `/research/citations`      | Citations manager |
-| 28  | AnnotationsPage       | `/research/annotations`    | Annotations       |
-
-### Dashboard Additional Pages (29-36)
-
-| #   | Page                    | Path            | Description                                        |
-| --- | ----------------------- | --------------- | -------------------------------------------------- |
-| 29  | DashboardAIInsightsPage | `/ai-insights`  | AI insights                                        |
-| 30  | AnalyticsPage           | `/analytics`    | Analytics dashboard                                |
-| 31  | BillingPage             | `/billing`      | Billing & subscription                             |
-| 32  | ProfilePage             | `/profile`      | User profile                                       |
-| 33  | SettingsPage            | `/settings`     | User settings                                      |
-| 34  | ActivityLogPage         | `/activity-log` | System activity tracking with filters & pagination |
-| 35  | DiscussionsPage         | `/discussions`  | Research discussions and collaboration threads     |
-
-### Admin Pages (37-40)
-
-| #   | Page               | Path                   | Description             |
-| --- | ------------------ | ---------------------- | ----------------------- |
-| 36  | AdminOverviewPage  | `/admin-overview`      | Admin overview          |
-| 37  | UserManagementPage | `/admin/users`         | User management         |
-| 38  | SubscriptionsPage  | `/admin/subscriptions` | Subscription management |
-| 39  | SystemSettingsPage | `/admin/settings`      | System settings         |
-
-### Products Pages (41-44)
-
-| #   | Page            | Path                    | Description              |
-| --- | --------------- | ----------------------- | ------------------------ |
-| 40  | PapersPage      | `/products/papers`      | Papers product page      |
-| 41  | CollectionsPage | `/products/collections` | Collections product page |
-| 42  | CollaboratePage | `/products/collaborate` | Collaborate product page |
-| 43  | AIInsightsPage  | `/products/ai-insights` | AI Insights product page |
-
-### Resources Pages (45-48)
-
-| #   | Page          | Path                   | Description   |
-| --- | ------------- | ---------------------- | ------------- |
-| 44  | DocsPage      | `/resources/docs`      | Documentation |
-| 45  | TutorialsPage | `/resources/tutorials` | Tutorials     |
-| 46  | APIPage       | `/resources/api`       | API reference |
-| 47  | CommunityPage | `/resources/community` | Community     |
-
-### Company Pages (49-52)
-
-| #   | Page        | Path               | Description |
-| --- | ----------- | ------------------ | ----------- |
-| 48  | AboutPage   | `/company/about`   | About us    |
-| 49  | CareersPage | `/company/careers` | Careers     |
-| 50  | ContactPage | `/company/contact` | Contact us  |
-| 51  | PressPage   | `/company/press`   | Press       |
-
-### Enterprise Pages (53-56)
-
-| #   | Page             | Path                       | Description        |
-| --- | ---------------- | -------------------------- | ------------------ |
-| 52  | EnterprisePage   | `/enterprise`              | Enterprise landing |
-| 53  | TeamsPage        | `/enterprise/teams`        | Teams              |
-| 54  | IntegrationsPage | `/enterprise/integrations` | Integrations       |
-| 55  | SupportPage      | `/enterprise/support`      | Support            |
-
-### Marketing Pages (57-58)
-
-| #   | Page           | Path            | Description       |
-| --- | -------------- | --------------- | ----------------- |
-| 56  | FeaturesPage   | `/features`     | Features showcase |
-| 57  | HowItWorksPage | `/how-it-works` | How it works      |
-
-### Main Pages (59-61)
-
-| #   | Page         | Path       | Description                                      |
-| --- | ------------ | ---------- | ------------------------------------------------ |
-| 58  | PricingPage  | `/pricing` | Pricing plans                                    |
-| 59  | FAQPage      | `/faq`     | FAQ                                              |
-| 60  | Landing Page | `/`        | Home page with Hero, Features, Testimonials, CTA |
-
-### Utility Pages (62-64)
-
-| #   | Page         | Path         | Description   |
-| --- | ------------ | ------------ | ------------- |
-| 61  | NotFoundPage | `/not-found` | 404 page      |
-| 62  | ErrorPage    | `/error`     | Error page    |
-| 63  | LoadingPage  | `/loading`   | Loading state |
+All 99 pages are fully implemented and navigable. Just paste this into Figma Make and it works!
 
 ---
 
-**Total: 63 pages/routes** across auth, dashboard, admin, products, resources, company, enterprise, marketing, and utility categories.
+## 🚀 Quick Start
+
+1. Copy the entire `figma-make` folder
+2. Paste into Figma Make AI
+3. All components and navigation work automatically
+
+---
+
+## 📁 Folder Structure
+
+```
+figma-make/
+├── App.tsx                    # Main entry point - handles all routing
+├── routes.tsx                 # Route definitions and helpers
+├── DashboardRouter.tsx        # Dashboard routing logic
+├── PAGE_LIST.md               # Complete page reference (99 pages)
+│
+├── components/
+│   ├── index.ts               # Component barrel exports
+│   │
+│   ├── context/               # React Context providers
+│   │   ├── index.ts
+│   │   └── RoleContext.tsx    # Role persistence (researcher/admin/etc.)
+│   │
+│   ├── layout/                # Layout components
+│   │   ├── index.ts
+│   │   ├── AppSidebar.tsx     # Role-based sidebar navigation
+│   │   ├── AuthenticatedNavbar.tsx
+│   │   ├── DashboardLayout.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Navbar.tsx
+│   │   └── PageContainer.tsx
+│   │
+│   ├── sections/              # Landing page sections
+│   │   ├── CTA.tsx
+│   │   ├── Features.tsx
+│   │   ├── Hero.tsx
+│   │   ├── HowItWorks.tsx
+│   │   └── Testimonials.tsx
+│   │
+│   ├── form/                  # Form components
+│   │   └── ScholarFlowForm.tsx
+│   │
+│   ├── figma/                 # Figma-specific components
+│   │
+│   └── ui/                    # ShadCN-based UI primitives
+│       ├── index.ts
+│       ├── alert.tsx
+│       ├── avatar.tsx
+│       ├── badge.tsx
+│       ├── breadcrumb.tsx
+│       ├── button.tsx
+│       ├── button-group.tsx
+│       ├── card.tsx
+│       ├── card-variants.tsx
+│       ├── checkbox.tsx
+│       ├── collapsible.tsx
+│       ├── dialog.tsx
+│       ├── dropdown-menu.tsx
+│       ├── input.tsx
+│       ├── label.tsx
+│       ├── loading-spinner.tsx
+│       ├── loading-states.tsx
+│       ├── popover.tsx
+│       ├── progress.tsx
+│       ├── scroll-area.tsx
+│       ├── select.tsx
+│       ├── separator.tsx
+│       ├── sheet.tsx
+│       ├── skeleton.tsx
+│       ├── slider.tsx
+│       ├── switch.tsx
+│       ├── table.tsx
+│       ├── tabs.tsx
+│       ├── textarea.tsx
+│       ├── tooltip.tsx
+│       ├── cards/             # Card variants
+│       └── modal/             # Modal components
+│
+├── pages/
+│   ├── index.ts               # Page barrel exports
+│   │
+│   │── Auth & Onboarding
+│   ├── LoginPage.tsx
+│   ├── RegisterPage.tsx
+│   ├── ForgotPasswordPage.tsx
+│   ├── ResetPasswordPage.tsx
+│   ├── VerifyEmailPage.tsx
+│   ├── OnboardingPage.tsx
+│   │
+│   │── Main Pages
+│   ├── DashboardPage.tsx
+│   ├── PaperDetailPage.tsx
+│   ├── ProfilePage.tsx
+│   ├── SettingsPage.tsx
+│   ├── PricingPage.tsx
+│   ├── FAQPage.tsx
+│   │
+│   │── Marketing Pages
+│   ├── FeaturesPage.tsx
+│   ├── HowItWorksPage.tsx
+│   │
+│   │── Utility Pages
+│   ├── ErrorPage.tsx
+│   ├── LoadingPage.tsx
+│   ├── NotFoundPage.tsx
+│   │
+│   ├── admin/                 # Admin pages (Phase 4-7)
+│   │   ├── index.ts
+│   │   ├── AdminAPIKeysPage.tsx
+│   │   ├── AdminAuditLogPage.tsx
+│   │   ├── AdminContentModerationPage.tsx
+│   │   ├── AdminPaymentsPage.tsx
+│   │   ├── AdminPlansPage.tsx
+│   │   ├── AdminReportsPage.tsx
+│   │   └── AdminWebhooksPage.tsx
+│   │
+│   ├── analytics/             # Analytics pages
+│   │   ├── index.ts
+│   │   ├── ExportAnalyticsPage.tsx
+│   │   ├── PersonalAnalyticsPage.tsx
+│   │   ├── UsageReportsPage.tsx
+│   │   └── WorkspaceAnalyticsPage.tsx
+│   │
+│   ├── company/               # Company pages
+│   │   ├── index.ts
+│   │   ├── AboutPage.tsx
+│   │   ├── CareersPage.tsx
+│   │   ├── ContactPage.tsx
+│   │   └── PressPage.tsx
+│   │
+│   ├── dashboard/             # Dashboard module pages
+│   │   ├── index.ts
+│   │   ├── ActivityLogPage.tsx
+│   │   ├── AIInsightsPage.tsx
+│   │   ├── AnalyticsPage.tsx
+│   │   ├── BillingPage.tsx
+│   │   ├── CollectionsPage.tsx
+│   │   ├── DiscussionsPage.tsx
+│   │   ├── EnhancedDashboardPage.tsx
+│   │   ├── GlobalSearchPage.tsx
+│   │   ├── HelpCenterPage.tsx
+│   │   ├── KeyboardShortcutsPage.tsx
+│   │   ├── NotificationsPage.tsx
+│   │   ├── PapersPage.tsx
+│   │   ├── RecentActivityPage.tsx
+│   │   ├── ResearchNotesPage.tsx
+│   │   ├── ResearchPage.tsx
+│   │   ├── TeamMembersPage.tsx
+│   │   ├── WorkspacesPage.tsx
+│   │   │
+│   │   ├── admin/             # Admin dashboard pages
+│   │   │   ├── index.ts
+│   │   │   ├── AdminOverviewPage.tsx
+│   │   │   ├── SubscriptionsPage.tsx
+│   │   │   ├── SystemSettingsPage.tsx
+│   │   │   └── UserManagementPage.tsx
+│   │   │
+│   │   ├── collections/       # Collections module
+│   │   │   ├── index.ts
+│   │   │   ├── CollectionDetailsPage.tsx
+│   │   │   ├── CreateCollectionPage.tsx
+│   │   │   └── SharedCollectionsPage.tsx
+│   │   │
+│   │   ├── papers/            # Papers module
+│   │   │   ├── index.ts
+│   │   │   ├── PaperDetailsPage.tsx
+│   │   │   ├── SearchPapersPage.tsx
+│   │   │   └── UploadPaperPage.tsx
+│   │   │
+│   │   ├── research/          # Research module
+│   │   │   ├── index.ts
+│   │   │   ├── AnnotationsPage.tsx
+│   │   │   ├── CitationsPage.tsx
+│   │   │   ├── PdfExtractionPage.tsx
+│   │   │   └── TextEditorPage.tsx
+│   │   │
+│   │   └── workspaces/        # Workspaces module
+│   │       ├── index.ts
+│   │       ├── CreateWorkspacePage.tsx
+│   │       ├── SharedWorkspacesPage.tsx
+│   │       └── WorkspaceDetailsPage.tsx
+│   │
+│   ├── discover/              # Discover page
+│   │   ├── index.ts
+│   │   └── DiscoverPage.tsx
+│   │
+│   ├── enterprise/            # Enterprise pages
+│   │   ├── index.ts
+│   │   ├── EnterprisePage.tsx
+│   │   ├── IntegrationsPage.tsx
+│   │   ├── SupportPage.tsx
+│   │   └── TeamsPage.tsx
+│   │
+│   ├── invitations/           # Invitation pages
+│   │   ├── index.ts
+│   │   └── InvitationResponsePage.tsx
+│   │
+│   ├── notifications/         # Notification pages
+│   │   ├── index.ts
+│   │   ├── NotificationCenterPage.tsx
+│   │   ├── NotificationHistoryPage.tsx
+│   │   └── NotificationSettingsPage.tsx
+│   │
+│   ├── onboarding/            # Onboarding flow
+│   │   ├── index.ts
+│   │   ├── OnboardingRolePage.tsx
+│   │   └── OnboardingWorkspacePage.tsx
+│   │
+│   ├── papers/                # Paper management
+│   │   ├── index.ts
+│   │   ├── ImportPapersPage.tsx
+│   │   └── PaperRelationsPage.tsx
+│   │
+│   ├── products/              # Product pages
+│   │   ├── index.ts
+│   │   ├── AIInsightsPage.tsx
+│   │   ├── CollaboratePage.tsx
+│   │   ├── CollectionsPage.tsx
+│   │   └── PapersPage.tsx
+│   │
+│   ├── research/              # Research tools
+│   │   ├── index.ts
+│   │   ├── CitationGraphPage.tsx
+│   │   └── ResearchMapPage.tsx
+│   │
+│   ├── resources/             # Resource pages
+│   │   ├── index.ts
+│   │   ├── APIPage.tsx
+│   │   ├── CommunityPage.tsx
+│   │   ├── DocsPage.tsx
+│   │   └── TutorialsPage.tsx
+│   │
+│   ├── search/                # Search pages
+│   │   ├── index.ts
+│   │   └── SearchHistoryPage.tsx
+│   │
+│   ├── security/              # Security pages
+│   │   ├── index.ts
+│   │   ├── ActiveSessionsPage.tsx
+│   │   ├── PrivacySettingsPage.tsx
+│   │   ├── SecurityDashboardPage.tsx
+│   │   └── TwoFactorSetupPage.tsx
+│   │
+│   ├── settings/              # Settings pages
+│   │   ├── index.ts
+│   │   └── ExportDataPage.tsx
+│   │
+│   └── team/                  # Team pages
+│       ├── index.ts
+│       ├── CollaboratorProfilePage.tsx
+│       ├── TeamActivityPage.tsx
+│       ├── TeamInvitationsPage.tsx
+│       └── TeamSettingsPage.tsx
+│
+├── styles/
+│   └── globals.css            # Tailwind + custom styles
+│
+└── guidelines/                # Design guidelines & docs
+```
+
+---
+
+## 🎯 All 99 Pages
+
+### Auth & Onboarding (8 pages)
+
+| Page                    | Path                    | Access      |
+| ----------------------- | ----------------------- | ----------- |
+| LoginPage               | `/login`                | Public      |
+| RegisterPage            | `/register`             | Public      |
+| ForgotPasswordPage      | `/forgot-password`      | Public      |
+| ResetPasswordPage       | `/reset-password`       | Email link  |
+| VerifyEmailPage         | `/verify-email`         | Email link  |
+| OnboardingPage          | `/onboarding`           | After login |
+| OnboardingRolePage      | `/onboarding/role`      | Onboarding  |
+| OnboardingWorkspacePage | `/onboarding/workspace` | Onboarding  |
+
+### Dashboard (4 pages)
+
+| Page                  | Path                  | Access  |
+| --------------------- | --------------------- | ------- |
+| DashboardPage         | `/dashboard`          | Sidebar |
+| EnhancedDashboardPage | `/dashboard-enhanced` | Sidebar |
+| RecentActivityPage    | `/recent-activity`    | Sidebar |
+| ActivityLogPage       | `/activity-log`       | Sidebar |
+
+### Papers (7 pages)
+
+| Page               | Path                    | Access        |
+| ------------------ | ----------------------- | ------------- |
+| PapersPage         | `/papers`               | Sidebar       |
+| UploadPaperPage    | `/papers/upload`        | Sidebar       |
+| SearchPapersPage   | `/papers/search`        | Sidebar       |
+| PaperDetailsPage   | `/papers/:id`           | Click paper   |
+| PaperDetailPage    | `/paper/:id`            | Paper card    |
+| ImportPapersPage   | `/papers/import`        | Sidebar       |
+| PaperRelationsPage | `/papers/:id/relations` | Paper details |
+
+### Collections (4 pages)
+
+| Page                  | Path                  | Access  |
+| --------------------- | --------------------- | ------- |
+| CollectionsPage       | `/collections`        | Sidebar |
+| CreateCollectionPage  | `/collections/create` | Button  |
+| SharedCollectionsPage | `/collections/shared` | Sidebar |
+| CollectionDetailsPage | `/collections/:id`    | Click   |
+
+### Workspaces (4 pages)
+
+| Page                 | Path                 | Access  |
+| -------------------- | -------------------- | ------- |
+| WorkspacesPage       | `/workspaces`        | Sidebar |
+| CreateWorkspacePage  | `/workspaces/create` | Button  |
+| SharedWorkspacesPage | `/workspaces/shared` | Sidebar |
+| WorkspaceDetailsPage | `/workspaces/:id`    | Click   |
+
+### Research (8 pages)
+
+| Page              | Path                       | Access  |
+| ----------------- | -------------------------- | ------- |
+| ResearchPage      | `/research`                | Sidebar |
+| PdfExtractionPage | `/research/pdf-extraction` | Sidebar |
+| TextEditorPage    | `/research/editor`         | Sidebar |
+| CitationsPage     | `/research/citations`      | Sidebar |
+| AnnotationsPage   | `/research/annotations`    | Sidebar |
+| CitationGraphPage | `/research/citation-graph` | Pro+    |
+| ResearchMapPage   | `/research/map`            | Pro+    |
+| ResearchNotesPage | `/research-notes`          | Sidebar |
+
+### Notifications (4 pages)
+
+| Page                     | Path                      | Access  |
+| ------------------------ | ------------------------- | ------- |
+| NotificationsPage        | `/notifications`          | Sidebar |
+| NotificationCenterPage   | `/notifications/center`   | Sidebar |
+| NotificationHistoryPage  | `/notifications/history`  | Sidebar |
+| NotificationSettingsPage | `/notifications/settings` | Sidebar |
+
+### Team (6 pages) - Team Lead+
+
+| Page                    | Path                 | Access     |
+| ----------------------- | -------------------- | ---------- |
+| TeamMembersPage         | `/team`              | Sidebar    |
+| TeamInvitationsPage     | `/team/invitations`  | Sidebar    |
+| TeamActivityPage        | `/team/activity`     | Sidebar    |
+| TeamSettingsPage        | `/team/settings`     | Sidebar    |
+| CollaboratorProfilePage | `/collaborator/:id`  | Click name |
+| InvitationResponsePage  | `/invitation/:token` | Email      |
+
+### Security (4 pages)
+
+| Page                  | Path                 | Access  |
+| --------------------- | -------------------- | ------- |
+| SecurityDashboardPage | `/security`          | Sidebar |
+| TwoFactorSetupPage    | `/security/2fa`      | Sidebar |
+| ActiveSessionsPage    | `/security/sessions` | Sidebar |
+| PrivacySettingsPage   | `/privacy`           | Sidebar |
+
+### Analytics (5 pages)
+
+| Page                   | Path                   | Access     |
+| ---------------------- | ---------------------- | ---------- |
+| AnalyticsPage          | `/analytics`           | Sidebar    |
+| PersonalAnalyticsPage  | `/analytics/personal`  | Sidebar    |
+| WorkspaceAnalyticsPage | `/analytics/workspace` | Team Lead+ |
+| UsageReportsPage       | `/analytics/usage`     | Pro+       |
+| ExportAnalyticsPage    | `/analytics/export`    | Pro+       |
+
+### Search & Discovery (3 pages)
+
+| Page              | Path              | Access       |
+| ----------------- | ----------------- | ------------ |
+| GlobalSearchPage  | `/search`         | Header/Cmd+K |
+| SearchHistoryPage | `/search/history` | Search menu  |
+| DiscoverPage      | `/discover`       | Sidebar      |
+
+### Help & Settings (5 pages)
+
+| Page                  | Path               | Access    |
+| --------------------- | ------------------ | --------- |
+| HelpCenterPage        | `/help`            | Sidebar   |
+| KeyboardShortcutsPage | `/help/shortcuts`  | Sidebar   |
+| ProfilePage           | `/profile`         | User menu |
+| SettingsPage          | `/settings`        | User menu |
+| BillingPage           | `/billing`         | Sidebar   |
+| ExportDataPage        | `/settings/export` | Settings  |
+
+### AI & Insights (2 pages)
+
+| Page            | Path           | Access        |
+| --------------- | -------------- | ------------- |
+| AIInsightsPage  | `/ai-insights` | Sidebar       |
+| DiscussionsPage | `/discussions` | Paper details |
+
+### Admin (11 pages) - Admin Only
+
+| Page                       | Path                   | Access  |
+| -------------------------- | ---------------------- | ------- |
+| AdminOverviewPage          | `/admin-overview`      | Sidebar |
+| UserManagementPage         | `/admin/users`         | Sidebar |
+| SubscriptionsPage          | `/admin/subscriptions` | Sidebar |
+| SystemSettingsPage         | `/admin/settings`      | Sidebar |
+| AdminReportsPage           | `/admin/reports`       | Sidebar |
+| AdminAuditLogPage          | `/admin/audit`         | Sidebar |
+| AdminPlansPage             | `/admin/plans`         | Sidebar |
+| AdminPaymentsPage          | `/admin/payments`      | Sidebar |
+| AdminWebhooksPage          | `/admin/webhooks`      | Sidebar |
+| AdminAPIKeysPage           | `/admin/api-keys`      | Sidebar |
+| AdminContentModerationPage | `/admin/moderation`    | Sidebar |
+
+### Marketing/Public (4 pages)
+
+| Page           | Path            | Access        |
+| -------------- | --------------- | ------------- |
+| FeaturesPage   | `/features`     | Public navbar |
+| HowItWorksPage | `/how-it-works` | Public navbar |
+| PricingPage    | `/pricing`      | Public navbar |
+| FAQPage        | `/faq`          | Public navbar |
+
+### Products (4 pages)
+
+| Page                   | Path                    | Access |
+| ---------------------- | ----------------------- | ------ |
+| PapersProductPage      | `/products/papers`      | Footer |
+| CollectionsProductPage | `/products/collections` | Footer |
+| CollaborateProductPage | `/products/collaborate` | Footer |
+| AIInsightsProductPage  | `/products/ai-insights` | Footer |
+
+### Resources (4 pages)
+
+| Page          | Path                   | Access |
+| ------------- | ---------------------- | ------ |
+| DocsPage      | `/resources/docs`      | Footer |
+| TutorialsPage | `/resources/tutorials` | Footer |
+| APIPage       | `/resources/api`       | Footer |
+| CommunityPage | `/resources/community` | Footer |
+
+### Company (4 pages)
+
+| Page        | Path               | Access |
+| ----------- | ------------------ | ------ |
+| AboutPage   | `/company/about`   | Footer |
+| CareersPage | `/company/careers` | Footer |
+| ContactPage | `/company/contact` | Footer |
+| PressPage   | `/company/press`   | Footer |
+
+### Enterprise (4 pages)
+
+| Page             | Path                       | Access        |
+| ---------------- | -------------------------- | ------------- |
+| EnterprisePage   | `/enterprise`              | Public navbar |
+| TeamsPage        | `/enterprise/teams`        | Enterprise    |
+| IntegrationsPage | `/enterprise/integrations` | Enterprise    |
+| SupportPage      | `/enterprise/support`      | Enterprise    |
+
+### Utility (3 pages)
+
+| Page         | Path         | Access        |
+| ------------ | ------------ | ------------- |
+| NotFoundPage | `/not-found` | 404           |
+| ErrorPage    | `/error`     | Error         |
+| LoadingPage  | `/loading`   | Loading state |
+
+---
+
+## 🔐 Role-Based Access
+
+### Roles
+
+- **Researcher** - Basic access
+- **Pro Researcher** - + Citation Graph, Research Map, Usage Reports
+- **Team Lead** - + Team Management, Workspace Analytics
+- **Admin** - Full access including Admin panel
+
+### Role Persistence
+
+The `RoleContext` ensures role persists when navigating between pages:
+
+- Login as admin → navigate to `/papers` → still shows admin layout
+- Role only changes when explicitly visiting `/dashboard/admin`, `/dashboard/researcher`, etc.
+
+---
+
+## 🎨 Design System
+
+- **Framework**: React + TypeScript
+- **Styling**: Tailwind CSS
+- **Components**: ShadCN UI (customized)
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Forms**: React Hook Form + Zod
+
+---
+
+## 📱 Navigation
+
+### Sidebar Navigation
+
+All authenticated pages use `DashboardLayout` with `AppSidebar`:
+
+- Role-based menu items
+- Collapsible sections
+- Active state highlighting
+- Quick actions
+
+### Navigation Handler
+
+```tsx
+// All pages accept onNavigate prop
+interface PageProps {
+  onNavigate: (path: string) => void;
+}
+
+// Usage in any page
+<Button onClick={() => onNavigate("/papers")}>Go to Papers</Button>;
+```
+
+---
+
+## ✅ All 99 Pages Complete
+
+**Last Updated:** November 30, 2025  
+**Author:** Md. Atikur Rahaman (GitHub: Atik203)

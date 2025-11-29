@@ -3,6 +3,7 @@
 import { ArrowLeft, BookOpen, Building2, Check, Upload, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -17,6 +18,7 @@ const defaultUser = {
 
 interface UploadPaperPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -44,7 +46,14 @@ const dummyCollections = [
 // ============================================================================
 // Upload Paper Page Component
 // ============================================================================
-export function UploadPaperPage({ onNavigate }: UploadPaperPageProps) {
+export function UploadPaperPage({
+  onNavigate,
+  role: propRole,
+}: UploadPaperPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [authors, setAuthors] = useState<string[]>([]);
@@ -137,7 +146,7 @@ export function UploadPaperPage({ onNavigate }: UploadPaperPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/papers/upload"
     >

@@ -38,7 +38,14 @@ export { AIInsightsPage } from "./AIInsightsPage";
 export { AnalyticsPage } from "./AnalyticsPage";
 export { BillingPage } from "./BillingPage";
 export { DiscussionsPage } from "./DiscussionsPage";
-export { KnowledgePagesPage } from "./KnowledgePagesPage";
+export { EnhancedDashboardPage } from "./EnhancedDashboardPage";
+export { GlobalSearchPage } from "./GlobalSearchPage";
+export { HelpCenterPage } from "./HelpCenterPage";
+export { KeyboardShortcutsPage } from "./KeyboardShortcutsPage";
+export { NotificationsPage } from "./NotificationsPage";
+export { RecentActivityPage } from "./RecentActivityPage";
+export { ResearchNotesPage } from "./ResearchNotesPage";
+export { TeamMembersPage } from "./TeamMembersPage";
 
 // Admin Dashboard Pages
 export {
