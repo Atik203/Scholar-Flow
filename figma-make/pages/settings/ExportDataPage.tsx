@@ -472,7 +472,7 @@ export function ExportDataPage({
                     Email when ready
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    We'll notify you at {mockUser.email}
+                    We'll notify you at {user.email}
                   </p>
                 </div>
               </div>

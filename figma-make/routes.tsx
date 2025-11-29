@@ -143,6 +143,8 @@ import { AdminPaymentsPage } from "./pages/admin/AdminPaymentsPage";
 
 // Phase 4 - Discovery Pages
 import { DiscoverPage } from "./pages/discover/DiscoverPage";
+import { RecommendationsPage } from "./pages/discover/RecommendationsPage";
+import { TrendingPage } from "./pages/discover/TrendingPage";
 
 // Phase 5 - Onboarding Extended
 import { OnboardingRolePage } from "./pages/onboarding/OnboardingRolePage";
@@ -711,6 +713,18 @@ export const routes: Record<string, RouteConfig[]> = {
       component: DiscoverPage as ComponentType<PageProps>,
       auth: true,
       title: "Discover",
+    },
+    {
+      path: "/discover/trending",
+      component: TrendingPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Trending Research",
+    },
+    {
+      path: "/discover/recommendations",
+      component: RecommendationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "AI Recommendations",
     },
   ],
 
