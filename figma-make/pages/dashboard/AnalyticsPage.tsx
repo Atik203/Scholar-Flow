@@ -12,6 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -26,6 +27,7 @@ const defaultUser = {
 
 interface AnalyticsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -139,18 +141,25 @@ const STATUS_COLORS: Record<string, string> = {
 // ============================================================================
 // Analytics Page Component
 // ============================================================================
-export function AnalyticsPage({ onNavigate }: AnalyticsPageProps) {
+export function AnalyticsPage({
+  onNavigate,
+  role: propRole,
+}: AnalyticsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   // For demo purposes, we can simulate different access levels
   const hasStandardAccess = true;
   const hasPremiumAccess =
-    defaultUser.role === "pro_researcher" ||
-    defaultUser.role === "team_lead" ||
-    defaultUser.role === "admin";
+    user.role === "pro_researcher" ||
+    user.role === "team_lead" ||
+    user.role === "admin";
 
   if (!hasStandardAccess) {
     return (
       <DashboardLayout
-        user={defaultUser}
+        user={user}
         onNavigate={onNavigate}
         currentPath="/analytics"
       >
@@ -173,7 +182,7 @@ export function AnalyticsPage({ onNavigate }: AnalyticsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/analytics"
     >

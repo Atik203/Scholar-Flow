@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -27,11 +28,12 @@ const defaultUser = {
   name: "Demo Researcher",
   email: "demo@scholarflow.com",
   image: undefined,
-  role: "researcher" as const,
+  role: "researcher" as UserRole,
 };
 
 interface PapersPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole; // Optional role prop for backwards compatibility
 }
 
 // ============================================================================
@@ -386,7 +388,17 @@ const PaperRow: React.FC<PaperRowProps> = ({
 // ============================================================================
 // Papers Page Component
 // ============================================================================
-export function PapersPage({ onNavigate }: PapersPageProps) {
+export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
+  // Use role from context, fallback to prop, then default
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+
+  // Create user with correct role
+  const user = {
+    ...defaultUser,
+    role: effectiveRole,
+  };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(
     dummyWorkspaces[0].id
@@ -415,11 +427,7 @@ export function PapersPage({ onNavigate }: PapersPageProps) {
   );
 
   return (
-    <DashboardLayout
-      user={defaultUser}
-      onNavigate={onNavigate}
-      currentPath="/papers"
-    >
+    <DashboardLayout user={user} onNavigate={onNavigate} currentPath="/papers">
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

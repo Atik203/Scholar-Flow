@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useMemo, useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -26,6 +27,7 @@ const defaultUser = {
 
 interface SearchPapersPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -148,7 +150,14 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 // ============================================================================
 // Search Papers Page Component
 // ============================================================================
-export function SearchPapersPage({ onNavigate }: SearchPapersPageProps) {
+export function SearchPapersPage({
+  onNavigate,
+  role: propRole,
+}: SearchPapersPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -195,7 +204,7 @@ export function SearchPapersPage({ onNavigate }: SearchPapersPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/papers/search"
     >

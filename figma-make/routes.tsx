@@ -85,6 +85,17 @@ import { AIInsightsPage as DashboardAIInsightsPage } from "./pages/dashboard/AII
 import { AnalyticsPage } from "./pages/dashboard/AnalyticsPage";
 import { BillingPage } from "./pages/dashboard/BillingPage";
 import { DiscussionsPage } from "./pages/dashboard/DiscussionsPage";
+import { EnhancedDashboardPage } from "./pages/dashboard/EnhancedDashboardPage";
+import { GlobalSearchPage } from "./pages/dashboard/GlobalSearchPage";
+import { HelpCenterPage } from "./pages/dashboard/HelpCenterPage";
+import { KeyboardShortcutsPage } from "./pages/dashboard/KeyboardShortcutsPage";
+import { NotificationsPage } from "./pages/dashboard/NotificationsPage";
+import { RecentActivityPage } from "./pages/dashboard/RecentActivityPage";
+import { ResearchNotesPage } from "./pages/dashboard/ResearchNotesPage";
+import { TeamMembersPage } from "./pages/dashboard/TeamMembersPage";
+
+// Onboarding
+import { OnboardingPage } from "./pages/OnboardingPage";
 
 // Dashboard Admin Pages
 import {
@@ -93,6 +104,76 @@ import {
   SystemSettingsPage,
   UserManagementPage,
 } from "./pages/dashboard/admin";
+
+// Admin Enhanced Pages
+import { AdminAuditLogPage } from "./pages/admin/AdminAuditLogPage";
+import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
+
+// Analytics Pages
+import { ExportAnalyticsPage } from "./pages/analytics/ExportAnalyticsPage";
+import { PersonalAnalyticsPage } from "./pages/analytics/PersonalAnalyticsPage";
+import { UsageReportsPage } from "./pages/analytics/UsageReportsPage";
+import { WorkspaceAnalyticsPage } from "./pages/analytics/WorkspaceAnalyticsPage";
+
+// Import/Export Pages
+import { ImportPapersPage } from "./pages/papers/ImportPapersPage";
+import { PaperRelationsPage } from "./pages/papers/PaperRelationsPage";
+import { ExportDataPage } from "./pages/settings/ExportDataPage";
+
+// Security Pages
+import { ActiveSessionsPage } from "./pages/security/ActiveSessionsPage";
+import { SecurityDashboardPage } from "./pages/security/SecurityDashboardPage";
+import { TwoFactorSetupPage } from "./pages/security/TwoFactorSetupPage";
+
+// Research Enhanced Pages
+import { CitationGraphPage } from "./pages/research/CitationGraphPage";
+import { ResearchMapPage } from "./pages/research/ResearchMapPage";
+
+// Phase 4 - Notifications Pages
+import { NotificationSettingsPage } from "./pages/notifications/NotificationSettingsPage";
+
+// Phase 4 - Team Pages
+import { TeamInvitationsPage } from "./pages/team/TeamInvitationsPage";
+
+// Phase 4 - Admin Pages
+import { AdminPlansPage } from "./pages/admin/AdminPlansPage";
+
+// Phase 5 - Admin Payments
+import { AdminPaymentsPage } from "./pages/admin/AdminPaymentsPage";
+
+// Phase 4 - Discovery Pages
+import { DiscoverPage } from "./pages/discover/DiscoverPage";
+
+// Phase 5 - Onboarding Extended
+import { OnboardingRolePage } from "./pages/onboarding/OnboardingRolePage";
+import { OnboardingWorkspacePage } from "./pages/onboarding/OnboardingWorkspacePage";
+
+// Phase 5 - Notification Center
+import { NotificationCenterPage } from "./pages/notifications/NotificationCenterPage";
+
+// Phase 8 - Notification History
+import { NotificationHistoryPage } from "./pages/notifications/NotificationHistoryPage";
+
+// Phase 6 - Invitation Response
+import { InvitationResponsePage } from "./pages/invitations/InvitationResponsePage";
+
+// Phase 6 - Team Extended
+import { TeamActivityPage } from "./pages/team/TeamActivityPage";
+import { TeamSettingsPage } from "./pages/team/TeamSettingsPage";
+
+// Phase 8 - Collaborator Profile
+import { CollaboratorProfilePage } from "./pages/team/CollaboratorProfilePage";
+
+// Phase 6 - Search History
+import { SearchHistoryPage } from "./pages/search/SearchHistoryPage";
+
+// Phase 7 - Admin Enhanced Pages
+import { AdminAPIKeysPage } from "./pages/admin/AdminAPIKeysPage";
+import { AdminContentModerationPage } from "./pages/admin/AdminContentModerationPage";
+import { AdminWebhooksPage } from "./pages/admin/AdminWebhooksPage";
+
+// Phase 7 - Privacy Settings
+import { PrivacySettingsPage } from "./pages/security/PrivacySettingsPage";
 
 // Products Pages
 import {
@@ -283,6 +364,12 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Paper Details",
     },
+    {
+      path: "/papers/:id/relations",
+      component: PaperRelationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Paper Relations",
+    },
   ],
 
   // Collections Routes (Dashboard Module)
@@ -376,6 +463,18 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Annotations",
     },
+    {
+      path: "/research/citation-graph",
+      component: CitationGraphPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Citation Graph",
+    },
+    {
+      path: "/research/map",
+      component: ResearchMapPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Research Map",
+    },
   ],
 
   // Dashboard Additional Routes
@@ -410,6 +509,228 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Discussions",
     },
+    {
+      path: "/notifications",
+      component: NotificationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Notifications",
+    },
+    {
+      path: "/team",
+      component: TeamMembersPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Team Members",
+    },
+    {
+      path: "/research-notes",
+      component: ResearchNotesPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Research Notes",
+    },
+    {
+      path: "/dashboard-enhanced",
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Enhanced Dashboard",
+    },
+    {
+      path: "/search",
+      component: GlobalSearchPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Global Search",
+    },
+    {
+      path: "/help/shortcuts",
+      component: KeyboardShortcutsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Keyboard Shortcuts",
+    },
+    {
+      path: "/help",
+      component: HelpCenterPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Help Center",
+    },
+    {
+      path: "/recent-activity",
+      component: RecentActivityPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Recent Activity",
+    },
+  ],
+
+  // Analytics Routes
+  analytics: [
+    {
+      path: "/analytics/personal",
+      component: PersonalAnalyticsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Personal Analytics",
+    },
+    {
+      path: "/analytics/workspace",
+      component: WorkspaceAnalyticsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Workspace Analytics",
+    },
+    {
+      path: "/analytics/usage",
+      component: UsageReportsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Usage Reports",
+    },
+    {
+      path: "/analytics/export",
+      component: ExportAnalyticsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Export Analytics",
+    },
+  ],
+
+  // Security Routes
+  security: [
+    {
+      path: "/security",
+      component: SecurityDashboardPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Security Dashboard",
+    },
+    {
+      path: "/security/2fa",
+      component: TwoFactorSetupPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Two-Factor Authentication Setup",
+    },
+    {
+      path: "/security/sessions",
+      component: ActiveSessionsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Active Sessions",
+    },
+    {
+      path: "/privacy",
+      component: PrivacySettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Privacy Settings",
+    },
+  ],
+
+  // Import Routes
+  import: [
+    {
+      path: "/papers/import",
+      component: ImportPapersPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Import Papers",
+    },
+  ],
+
+  // Export Routes
+  export: [
+    {
+      path: "/settings/export",
+      component: ExportDataPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Export Data",
+    },
+  ],
+
+  // Notifications Routes
+  notifications: [
+    {
+      path: "/notifications/settings",
+      component: NotificationSettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Notification Settings",
+    },
+    {
+      path: "/notifications/center",
+      component: NotificationCenterPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Notification Center",
+    },
+    {
+      path: "/notifications/history",
+      component: NotificationHistoryPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Notification History",
+    },
+  ],
+
+  // Team Routes
+  team: [
+    {
+      path: "/team/invitations",
+      component: TeamInvitationsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Team Invitations",
+    },
+    {
+      path: "/team/activity",
+      component: TeamActivityPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Team Activity",
+    },
+    {
+      path: "/team/settings",
+      component: TeamSettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Team Settings",
+    },
+    {
+      path: "/collaborator/:id",
+      component: CollaboratorProfilePage as ComponentType<PageProps>,
+      auth: true,
+      title: "Collaborator Profile",
+    },
+  ],
+
+  // Invitation Routes
+  invitation: [
+    {
+      path: "/invitation/:token",
+      component: InvitationResponsePage as ComponentType<PageProps>,
+      title: "Invitation",
+    },
+  ],
+
+  // Search Routes
+  search: [
+    {
+      path: "/search/history",
+      component: SearchHistoryPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Search History",
+    },
+  ],
+
+  // Discover Routes
+  discover: [
+    {
+      path: "/discover",
+      component: DiscoverPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Discover",
+    },
+  ],
+
+  // Onboarding Routes
+  onboarding: [
+    {
+      path: "/onboarding",
+      component: OnboardingPage as ComponentType<PageProps>,
+      title: "Welcome to ScholarFlow",
+    },
+    {
+      path: "/onboarding/role",
+      component: OnboardingRolePage as ComponentType<PageProps>,
+      title: "Choose Your Role",
+    },
+    {
+      path: "/onboarding/workspace",
+      component: OnboardingWorkspacePage as ComponentType<PageProps>,
+      title: "Create Workspace",
+    },
   ],
 
   // Admin Routes
@@ -437,6 +758,48 @@ export const routes: Record<string, RouteConfig[]> = {
       component: SystemSettingsPage as ComponentType<PageProps>,
       auth: true,
       title: "System Settings",
+    },
+    {
+      path: "/admin/reports",
+      component: AdminReportsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Admin Reports",
+    },
+    {
+      path: "/admin/audit",
+      component: AdminAuditLogPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Audit Log",
+    },
+    {
+      path: "/admin/plans",
+      component: AdminPlansPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Admin Plans",
+    },
+    {
+      path: "/admin/payments",
+      component: AdminPaymentsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Payments",
+    },
+    {
+      path: "/admin/webhooks",
+      component: AdminWebhooksPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Webhooks",
+    },
+    {
+      path: "/admin/api-keys",
+      component: AdminAPIKeysPage as ComponentType<PageProps>,
+      auth: true,
+      title: "API Keys",
+    },
+    {
+      path: "/admin/moderation",
+      component: AdminContentModerationPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Content Moderation",
     },
   ],
 
@@ -631,27 +994,128 @@ export const isActivityLogRoute = (path: string): boolean =>
   path === "/activity-log";
 export const isDiscussionsRoute = (path: string): boolean =>
   path === "/discussions";
+export const isNotificationsRoute = (path: string): boolean =>
+  path === "/notifications";
+export const isTeamRoute = (path: string): boolean => path === "/team";
+export const isResearchNotesRoute = (path: string): boolean =>
+  path === "/research-notes";
+export const isSearchRoute = (path: string): boolean => path === "/search";
+export const isOnboardingRoute = (path: string): boolean =>
+  path === "/onboarding";
+export const isHelpRoute = (path: string): boolean =>
+  path === "/help" || path.startsWith("/help/");
+export const isRecentActivityRoute = (path: string): boolean =>
+  path === "/recent-activity";
+export const isPersonalAnalyticsRoute = (path: string): boolean =>
+  path === "/analytics/personal";
+export const isWorkspaceAnalyticsRoute = (path: string): boolean =>
+  path === "/analytics/workspace" || path.startsWith("/analytics/workspace/");
+export const isSecurityRoute = (path: string): boolean =>
+  path === "/security" || path.startsWith("/security/");
+export const isTwoFactorRoute = (path: string): boolean =>
+  path === "/security/2fa";
+export const isActiveSessionsRoute = (path: string): boolean =>
+  path === "/security/sessions";
+export const isImportRoute = (path: string): boolean =>
+  path === "/papers/import";
+export const isExportRoute = (path: string): boolean =>
+  path === "/settings/export";
+export const isCitationGraphRoute = (path: string): boolean =>
+  path === "/research/citation-graph";
+export const isAdminReportsRoute = (path: string): boolean =>
+  path === "/admin/reports";
+export const isAdminAuditRoute = (path: string): boolean =>
+  path === "/admin/audit";
 export const isActivityRoute = (path: string): boolean =>
   isActivityLogRoute(path) || isDiscussionsRoute(path);
 export const isAdminRoute = (path: string): boolean =>
   path === "/admin-overview" || path.startsWith("/admin/");
 
+// Phase 4 Route Helpers
+export const isNotificationSettingsRoute = (path: string): boolean =>
+  path === "/notifications/settings";
+export const isTeamInvitationsRoute = (path: string): boolean =>
+  path === "/team/invitations";
+export const isAdminPlansRoute = (path: string): boolean =>
+  path === "/admin/plans";
+export const isDiscoverRoute = (path: string): boolean => path === "/discover";
+
+// Phase 5 Route Helpers
+export const isOnboardingRoleRoute = (path: string): boolean =>
+  path === "/onboarding/role";
+export const isOnboardingWorkspaceRoute = (path: string): boolean =>
+  path === "/onboarding/workspace";
+export const isAdminPaymentsRoute = (path: string): boolean =>
+  path === "/admin/payments";
+export const isNotificationCenterRoute = (path: string): boolean =>
+  path === "/notifications/center";
+
+// Phase 6 Route Helpers
+export const isInvitationRoute = (path: string): boolean =>
+  path.startsWith("/invitation/");
+export const isTeamActivityRoute = (path: string): boolean =>
+  path === "/team/activity";
+export const isTeamSettingsRoute = (path: string): boolean =>
+  path === "/team/settings";
+export const isSearchHistoryRoute = (path: string): boolean =>
+  path === "/search/history";
+
+// Phase 7 Route Helpers
+export const isAdminWebhooksRoute = (path: string): boolean =>
+  path === "/admin/webhooks";
+export const isAdminAPIKeysRoute = (path: string): boolean =>
+  path === "/admin/api-keys";
+export const isAdminContentModerationRoute = (path: string): boolean =>
+  path === "/admin/moderation";
+export const isPrivacySettingsRoute = (path: string): boolean =>
+  path === "/privacy";
+
+// Phase 8 Route Helpers
+export const isUsageReportsRoute = (path: string): boolean =>
+  path === "/analytics/usage";
+export const isPaperRelationsRoute = (path: string): boolean =>
+  path.startsWith("/papers/") && path.endsWith("/relations");
+export const isResearchMapRoute = (path: string): boolean =>
+  path === "/research/map";
+export const isNotificationHistoryRoute = (path: string): boolean =>
+  path === "/notifications/history";
+export const isCollaboratorProfileRoute = (path: string): boolean =>
+  path.startsWith("/collaborator/");
+export const isExportAnalyticsRoute = (path: string): boolean =>
+  path === "/analytics/export";
+
 // Export page components for direct imports
 export {
   // Company
   AboutPage,
+  ActiveSessionsPage,
   // Additional Dashboard Pages
   ActivityLogPage,
+  // Phase 7 - Admin API Keys
+  AdminAPIKeysPage,
+  AdminAuditLogPage,
+  // Phase 7 - Admin Content Moderation
+  AdminContentModerationPage,
   // Admin Pages
   AdminOverviewPage,
+  // Phase 5 - Admin Payments
+  AdminPaymentsPage,
+  // Phase 4 - Admin Plans
+  AdminPlansPage,
+  AdminReportsPage,
+  // Phase 7 - Admin Webhooks
+  AdminWebhooksPage,
   AIInsightsPage,
   AnalyticsPage,
   AnnotationsPage,
   APIPage,
   BillingPage,
   CareersPage,
+  CitationGraphPage,
   CitationsPage,
   CollaboratePage,
+  // Phase 8 - Collaborator Profile
+  CollaboratorProfilePage,
   CollectionDetailsPage,
   CollectionsPage,
   CommunityPage,
@@ -670,48 +1134,101 @@ export {
   DashboardResearchPage,
   // Dashboard Module - Workspaces
   DashboardWorkspacesPage,
+  // Phase 4 - Discover
+  DiscoverPage,
   DiscussionsPage,
   // Resources
   DocsPage,
+  // New Pages
+  EnhancedDashboardPage,
   // Enterprise
   EnterprisePage,
   // Utility Pages
   ErrorPage,
+  // Phase 8 - Export Analytics
+  ExportAnalyticsPage,
+  ExportDataPage,
   FAQPage,
   // Marketing Pages
   FeaturesPage,
   // Auth Pages
   ForgotPasswordPage,
+  GlobalSearchPage,
+  // Help & Utilities
+  HelpCenterPage,
   HowItWorksPage,
+  // Import Pages
+  ImportPapersPage,
   IntegrationsPage,
+  // Phase 6 - Invitation Response
+  InvitationResponsePage,
+  KeyboardShortcutsPage,
   LoadingPage,
   // Auth
   LoginPage,
   NotFoundPage,
+  // Phase 5 - Notification Center
+  NotificationCenterPage,
+  // Phase 8 - Notification History
+  NotificationHistoryPage,
+  // Phase 4 - Notification Settings
+  NotificationSettingsPage,
+  NotificationsPage,
+  OnboardingPage,
+  // Phase 5 - Onboarding Extended
+  OnboardingRolePage,
+  OnboardingWorkspacePage,
   PaperDetailPage,
   PaperDetailsPage,
+  // Phase 8 - Paper Relations
+  PaperRelationsPage,
   // Products
   PapersPage,
   PdfExtractionPage,
+  // Analytics Pages
+  PersonalAnalyticsPage,
   PressPage,
   // Main
   PricingPage,
+  // Phase 7 - Privacy Settings
+  PrivacySettingsPage,
   // User
   ProfilePage,
+  RecentActivityPage,
   RegisterPage,
+  // Phase 8 - Research Map
+  ResearchMapPage,
+  ResearchNotesPage,
   ResetPasswordPage,
+  // Phase 6 - Search History
+  SearchHistoryPage,
   SearchPapersPage,
+  // Security Pages
+  SecurityDashboardPage,
   SettingsPage,
   SharedCollectionsPage,
   SharedWorkspacesPage,
   SubscriptionsPage,
   SupportPage,
   SystemSettingsPage,
+  // Phase 6 - Team Extended
+  TeamActivityPage,
+  // Phase 4 - Team Invitations
+  TeamInvitationsPage,
+  TeamMembersPage,
+  // Phase 6 - Team Settings
+  TeamSettingsPage,
   TeamsPage,
   TextEditorPage,
   TutorialsPage,
+  // 2FA
+  TwoFactorSetupPage,
   UploadPaperPage,
+  // Phase 8 - Usage Reports
+  UsageReportsPage,
   UserManagementPage,
   VerifyEmailPage,
+  // Phase 3 Pages
+  WorkspaceAnalyticsPage,
   WorkspaceDetailsPage,
 };

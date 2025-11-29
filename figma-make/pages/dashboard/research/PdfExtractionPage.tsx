@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useMemo, useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -29,6 +30,7 @@ const defaultUser = {
 
 interface PdfExtractionPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -172,7 +174,14 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 // ============================================================================
 // PDF Extraction Page Component
 // ============================================================================
-export function PdfExtractionPage({ onNavigate }: PdfExtractionPageProps) {
+export function PdfExtractionPage({
+  onNavigate,
+  role: propRole,
+}: PdfExtractionPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState("");
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -221,7 +230,7 @@ export function PdfExtractionPage({ onNavigate }: PdfExtractionPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/research/pdf-extraction"
     >

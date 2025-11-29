@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -24,6 +25,7 @@ const defaultUser = {
 
 interface CreateCollectionPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -67,7 +69,12 @@ const dummyPapers = [
 // ============================================================================
 export function CreateCollectionPage({
   onNavigate,
+  role: propRole,
 }: CreateCollectionPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -95,7 +102,7 @@ export function CreateCollectionPage({
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/collections/create"
     >

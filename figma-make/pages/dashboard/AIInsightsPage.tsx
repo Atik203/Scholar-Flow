@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -24,6 +25,7 @@ const defaultUser = {
 
 interface AIInsightsPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -116,7 +118,14 @@ const features = [
 // ============================================================================
 // AI Insights Page Component
 // ============================================================================
-export function AIInsightsPage({ onNavigate }: AIInsightsPageProps) {
+export function AIInsightsPage({
+  onNavigate,
+  role: propRole,
+}: AIInsightsPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredPapers = dummyPapers.filter(
@@ -175,7 +184,7 @@ export function AIInsightsPage({ onNavigate }: AIInsightsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/ai-insights"
     >

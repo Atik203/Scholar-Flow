@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -25,6 +26,7 @@ const defaultUser = {
 
 interface BillingPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -128,11 +130,15 @@ const dummyInvoices = [
 // ============================================================================
 // Billing Page Component
 // ============================================================================
-export function BillingPage({ onNavigate }: BillingPageProps) {
+export function BillingPage({ onNavigate, role: propRole }: BillingPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [isLoading, setIsLoading] = useState(false);
 
   // For demo, simulate different user roles
-  const userRole = defaultUser.role.toUpperCase() as keyof typeof PLAN_DISPLAY;
+  const userRole = effectiveRole.toUpperCase() as keyof typeof PLAN_DISPLAY;
   const planDisplay = PLAN_DISPLAY[userRole] || PLAN_DISPLAY.RESEARCHER;
   const Icon = planDisplay.icon;
 
@@ -174,11 +180,7 @@ export function BillingPage({ onNavigate }: BillingPageProps) {
     : STATUS_META.FREE;
 
   return (
-    <DashboardLayout
-      user={defaultUser}
-      onNavigate={onNavigate}
-      currentPath="/billing"
-    >
+    <DashboardLayout user={user} onNavigate={onNavigate} currentPath="/billing">
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="space-y-2">

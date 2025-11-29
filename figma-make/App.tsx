@@ -13,6 +13,9 @@ import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useState } from "react";
 
+// Role Context Provider
+import { RoleProvider } from "./components/context";
+
 // Landing Page Components
 import { AuthenticatedNavbar } from "./components/layout/AuthenticatedNavbar";
 import { Footer } from "./components/layout/Footer";
@@ -27,18 +30,34 @@ import { Testimonials } from "./components/sections/Testimonials";
 import {
   // Company
   AboutPage,
+  ActiveSessionsPage,
   // Additional Dashboard Pages
   ActivityLogPage,
+  // Phase 7 - Admin API Keys
+  AdminAPIKeysPage,
+  AdminAuditLogPage,
+  // Phase 7 - Admin Content Moderation
+  AdminContentModerationPage,
   // Admin Pages
   AdminOverviewPage,
+  // Phase 5 - Admin Payments
+  AdminPaymentsPage,
+  // Phase 4 - Admin Plans
+  AdminPlansPage,
+  AdminReportsPage,
+  // Phase 7 - Admin Webhooks
+  AdminWebhooksPage,
   AIInsightsPage,
   AnalyticsPage,
   AnnotationsPage,
   APIPage,
   BillingPage,
   CareersPage,
+  CitationGraphPage,
   CitationsPage,
   CollaboratePage,
+  // Phase 8 - Collaborator Profile
+  CollaboratorProfilePage,
   CollectionDetailsPage,
   CollectionsPage,
   CommunityPage,
@@ -57,13 +76,20 @@ import {
   DashboardResearchPage,
   // Dashboard Module - Workspaces
   DashboardWorkspacesPage,
+  // Phase 4 - Discover
+  DiscoverPage,
   DiscussionsPage,
   // Resources
   DocsPage,
+  // New Pages
+  EnhancedDashboardPage,
   // Enterprise
   EnterprisePage,
   // Utility Pages
   ErrorPage,
+  // Phase 8 - Export Analytics
+  ExportAnalyticsPage,
+  ExportDataPage,
   FAQPage,
   // Marketing Pages
   FeaturesPage,
@@ -71,54 +97,141 @@ import {
   ForgotPasswordPage,
   // Route helpers
   getRoleFromPath,
+  GlobalSearchPage,
+  HelpCenterPage,
   HowItWorksPage,
+  // Import Pages
+  ImportPapersPage,
   IntegrationsPage,
+  // Phase 6 - Invitation Response
+  InvitationResponsePage,
+  isActiveSessionsRoute,
   isActivityRoute,
   isAdminRoute,
   isAIInsightsRoute,
   isAnalyticsRoute,
   isAuthRoute,
   isBillingRoute,
+  isCitationGraphRoute,
+  // Phase 8 - Collaborator Profile Route Helper
+  isCollaboratorProfileRoute,
   isCollectionsRoute,
   isDashboardRoute,
+  isDiscoverRoute,
+  // Phase 8 - Export Analytics Route Helper
+  isExportAnalyticsRoute,
+  isExportRoute,
+  isHelpRoute,
+  // Phase 6 - Invitation Route Helper
+  isInvitationRoute,
   isMarketingRoute,
+  // Phase 5 - Notification Center
+  isNotificationCenterRoute,
+  // Phase 8 - Notification History Route Helper
+  isNotificationHistoryRoute,
+  isNotificationSettingsRoute,
+  isNotificationsRoute,
+  // Phase 5 - Onboarding Extended
+  isOnboardingRoleRoute,
+  isOnboardingRoute,
+  isOnboardingWorkspaceRoute,
+  // Phase 8 - Paper Relations Route Helper
+  isPaperRelationsRoute,
   isPaperRoute,
   isPapersRoute,
+  isPersonalAnalyticsRoute,
+  isPrivacySettingsRoute,
   isProductsRoute,
   isProfileRoute,
+  isRecentActivityRoute,
+  // Phase 8 - Research Map Route Helper
+  isResearchMapRoute,
+  isResearchNotesRoute,
   isResearchRoute,
+  // Phase 6 - Search History Route Helper
+  isSearchHistoryRoute,
+  isSearchRoute,
+  isSecurityRoute,
   isSettingsRoute,
+  // Phase 6 - Team Extended Route Helpers
+  isTeamActivityRoute,
+  isTeamInvitationsRoute,
+  isTeamRoute,
+  isTeamSettingsRoute,
+  isTwoFactorRoute,
+  // Phase 8 - Usage Reports Route Helper
+  isUsageReportsRoute,
   isUtilityRoute,
+  isWorkspaceAnalyticsRoute,
   isWorkspacesRoute,
+  KeyboardShortcutsPage,
   LoadingPage,
   // Auth
   LoginPage,
   NotFoundPage,
+  // Phase 5 - Notification Center
+  NotificationCenterPage,
+  // Phase 8 - Notification History
+  NotificationHistoryPage,
+  // Phase 4 - Notification Settings
+  NotificationSettingsPage,
+  NotificationsPage,
+  OnboardingPage,
+  // Phase 5 - Onboarding Extended
+  OnboardingRolePage,
+  OnboardingWorkspacePage,
   PaperDetailPage,
   PaperDetailsPage,
+  // Phase 8 - Paper Relations
+  PaperRelationsPage,
   // Products
   PapersPage,
   PdfExtractionPage,
+  // Analytics Pages
+  PersonalAnalyticsPage,
   PressPage,
   // Main
   PricingPage,
+  // Phase 7 - Privacy Settings
+  PrivacySettingsPage,
   // User
   ProfilePage,
+  RecentActivityPage,
   RegisterPage,
+  // Phase 8 - Research Map
+  ResearchMapPage,
+  ResearchNotesPage,
   ResetPasswordPage,
+  // Phase 6 - Search History
+  SearchHistoryPage,
   SearchPapersPage,
+  // Security Pages
+  SecurityDashboardPage,
   SettingsPage,
   SharedCollectionsPage,
   SharedWorkspacesPage,
   SubscriptionsPage,
   SupportPage,
   SystemSettingsPage,
+  // Phase 6 - Team Activity
+  TeamActivityPage,
+  // Phase 4 - Team Invitations
+  TeamInvitationsPage,
+  TeamMembersPage,
+  // Phase 6 - Team Settings
+  TeamSettingsPage,
   TeamsPage,
   TextEditorPage,
   TutorialsPage,
+  // 2FA
+  TwoFactorSetupPage,
   UploadPaperPage,
+  // Phase 8 - Usage Reports
+  UsageReportsPage,
   UserManagementPage,
   VerifyEmailPage,
+  // Phase 3 Pages
+  WorkspaceAnalyticsPage,
   WorkspaceDetailsPage,
 } from "./routes";
 
@@ -210,30 +323,53 @@ export default function App() {
   }, []);
 
   // Navigation handler - simulates routing without actual router
+  // IMPORTANT: Role is persisted across navigation. Only update role when:
+  // 1. Explicitly navigating to a role-specific dashboard route (e.g., /dashboard/admin)
+  // 2. Navigating to admin routes (automatically sets admin role)
+  // 3. Navigating to public/auth routes (resets to researcher)
   const handleNavigate = useCallback((path: string) => {
     console.log("Navigating to:", path);
     setCurrentPage(path);
-    // Update role when navigating to dashboard routes
-    if (path.startsWith("/dashboard")) {
+
+    // Only update role for explicit role-specific dashboard routes
+    if (
+      path === "/dashboard/admin" ||
+      path === "/dashboard/team-lead" ||
+      path === "/dashboard/pro-researcher" ||
+      path === "/dashboard/researcher"
+    ) {
       const role = getRoleFromPath(path);
       setCurrentRole(role);
     }
-    // Also update role when navigating to admin routes
+
+    // Admin routes always require admin role
     if (path.startsWith("/admin") || path === "/admin-overview") {
       setCurrentRole("admin");
     }
+
+    // Reset to researcher when going to public/auth routes
+    if (
+      isAuthRoute(path) ||
+      isMarketingRoute(path) ||
+      path === "/" ||
+      path === "/pricing" ||
+      path === "/faq"
+    ) {
+      setCurrentRole("researcher");
+    }
+
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // Render the current page based on state
   const renderPage = () => {
-    // Dashboard routes
+    // Dashboard routes - use currentRole state instead of extracting from path
+    // This ensures role persists when navigating to /dashboard without role suffix
     if (isDashboardRoute(currentPage)) {
-      const role = getRoleFromPath(currentPage);
       return (
         <DashboardPage
-          role={role}
+          role={currentRole}
           onNavigate={handleNavigate}
           onShowToast={showToast}
         />
@@ -250,9 +386,129 @@ export default function App() {
       return <AnalyticsPage onNavigate={handleNavigate} />;
     }
 
+    // Personal Analytics route
+    if (isPersonalAnalyticsRoute(currentPage)) {
+      return <PersonalAnalyticsPage onNavigate={handleNavigate} />;
+    }
+
+    // Workspace Analytics route
+    if (isWorkspaceAnalyticsRoute(currentPage)) {
+      return <WorkspaceAnalyticsPage onNavigate={handleNavigate} />;
+    }
+
+    // Citation Graph route (Research)
+    if (isCitationGraphRoute(currentPage)) {
+      return <CitationGraphPage onNavigate={handleNavigate} />;
+    }
+
+    // Active Sessions route (Security)
+    if (isActiveSessionsRoute(currentPage)) {
+      return <ActiveSessionsPage onNavigate={handleNavigate} />;
+    }
+
+    // Export Data route (Settings)
+    if (isExportRoute(currentPage)) {
+      return <ExportDataPage onNavigate={handleNavigate} />;
+    }
+
     // Billing route
     if (isBillingRoute(currentPage)) {
       return <BillingPage onNavigate={handleNavigate} />;
+    }
+
+    // Notifications route
+    if (isNotificationsRoute(currentPage)) {
+      return <NotificationsPage onNavigate={handleNavigate} />;
+    }
+
+    // Notification Settings route (Phase 4)
+    if (isNotificationSettingsRoute(currentPage)) {
+      return <NotificationSettingsPage onNavigate={handleNavigate} />;
+    }
+
+    // Team Invitations route (Phase 4)
+    if (isTeamInvitationsRoute(currentPage)) {
+      return <TeamInvitationsPage onNavigate={handleNavigate} />;
+    }
+
+    // Discover route (Phase 4)
+    if (isDiscoverRoute(currentPage)) {
+      return <DiscoverPage onNavigate={handleNavigate} />;
+    }
+
+    // Team Members route
+    if (isTeamRoute(currentPage)) {
+      return <TeamMembersPage onNavigate={handleNavigate} />;
+    }
+
+    // Research Notes route
+    if (isResearchNotesRoute(currentPage)) {
+      return <ResearchNotesPage onNavigate={handleNavigate} />;
+    }
+
+    // Global Search route
+    if (isSearchRoute(currentPage)) {
+      return <GlobalSearchPage onNavigate={handleNavigate} />;
+    }
+
+    // Enhanced Dashboard route
+    if (currentPage === "/enhanced-dashboard") {
+      return <EnhancedDashboardPage onNavigate={handleNavigate} />;
+    }
+
+    // Onboarding route
+    if (isOnboardingRoute(currentPage)) {
+      return <OnboardingPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 5 - Onboarding Extended routes
+    if (isOnboardingRoleRoute(currentPage)) {
+      return <OnboardingRolePage onNavigate={handleNavigate} />;
+    }
+
+    if (isOnboardingWorkspaceRoute(currentPage)) {
+      return <OnboardingWorkspacePage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 5 - Notification Center route
+    if (isNotificationCenterRoute(currentPage)) {
+      return <NotificationCenterPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 6 - Invitation Response route
+    if (isInvitationRoute(currentPage)) {
+      return <InvitationResponsePage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 6 - Team Activity route
+    if (isTeamActivityRoute(currentPage)) {
+      return <TeamActivityPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 6 - Team Settings route
+    if (isTeamSettingsRoute(currentPage)) {
+      return <TeamSettingsPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 6 - Search History route
+    if (isSearchHistoryRoute(currentPage)) {
+      return <SearchHistoryPage onNavigate={handleNavigate} />;
+    }
+
+    // Help routes (Help Center, Keyboard Shortcuts)
+    if (isHelpRoute(currentPage)) {
+      switch (currentPage) {
+        case "/help/shortcuts":
+          return <KeyboardShortcutsPage onNavigate={handleNavigate} />;
+        case "/help":
+        default:
+          return <HelpCenterPage onNavigate={handleNavigate} />;
+      }
+    }
+
+    // Recent Activity route
+    if (isRecentActivityRoute(currentPage)) {
+      return <RecentActivityPage onNavigate={handleNavigate} />;
     }
 
     // Activity routes (Activity Log, Discussions)
@@ -284,9 +540,58 @@ export default function App() {
           return <SubscriptionsPage onNavigate={handleNavigate} />;
         case "/admin/settings":
           return <SystemSettingsPage onNavigate={handleNavigate} />;
+        case "/admin/reports":
+          return <AdminReportsPage onNavigate={handleNavigate} />;
+        case "/admin/audit":
+          return <AdminAuditLogPage onNavigate={handleNavigate} />;
+        case "/admin/plans":
+          return <AdminPlansPage onNavigate={handleNavigate} />;
+        case "/admin/payments":
+          return <AdminPaymentsPage onNavigate={handleNavigate} />;
+        case "/admin/webhooks":
+          return <AdminWebhooksPage onNavigate={handleNavigate} />;
+        case "/admin/api-keys":
+          return <AdminAPIKeysPage onNavigate={handleNavigate} />;
+        case "/admin/moderation":
+          return <AdminContentModerationPage onNavigate={handleNavigate} />;
         default:
           return <AdminOverviewPage onNavigate={handleNavigate} />;
       }
+    }
+
+    // Privacy settings route
+    if (isPrivacySettingsRoute(currentPage)) {
+      return <PrivacySettingsPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Usage Reports route
+    if (isUsageReportsRoute(currentPage)) {
+      return <UsageReportsPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Paper Relations route
+    if (isPaperRelationsRoute(currentPage)) {
+      return <PaperRelationsPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Research Map route
+    if (isResearchMapRoute(currentPage)) {
+      return <ResearchMapPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Notification History route
+    if (isNotificationHistoryRoute(currentPage)) {
+      return <NotificationHistoryPage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Collaborator Profile route
+    if (isCollaboratorProfileRoute(currentPage)) {
+      return <CollaboratorProfilePage onNavigate={handleNavigate} />;
+    }
+
+    // Phase 8 - Export Analytics route
+    if (isExportAnalyticsRoute(currentPage)) {
+      return <ExportAnalyticsPage onNavigate={handleNavigate} />;
     }
 
     // Papers module routes (dashboard)
@@ -298,6 +603,8 @@ export default function App() {
           return <UploadPaperPage onNavigate={handleNavigate} />;
         case "/papers/search":
           return <SearchPapersPage onNavigate={handleNavigate} />;
+        case "/papers/import":
+          return <ImportPapersPage onNavigate={handleNavigate} />;
         default:
           // Handle /papers/:id pattern for paper details
           if (currentPage.startsWith("/papers/")) {
@@ -388,6 +695,14 @@ export default function App() {
           <Footer onNavigate={handleNavigate} />
         </>
       );
+    }
+
+    // Security routes
+    if (isSecurityRoute(currentPage)) {
+      if (isTwoFactorRoute(currentPage)) {
+        return <TwoFactorSetupPage onNavigate={handleNavigate} />;
+      }
+      return <SecurityDashboardPage onNavigate={handleNavigate} />;
     }
 
     // Products routes
@@ -589,21 +904,23 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentPage}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3 }}
-        >
-          {renderPage()}
-        </motion.div>
-      </AnimatePresence>
+    <RoleProvider role={currentRole} onRoleChange={setCurrentRole}>
+      <div className="min-h-screen bg-background text-foreground antialiased">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
 
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-    </div>
+        {/* Toast Container */}
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+      </div>
+    </RoleProvider>
   );
 }
