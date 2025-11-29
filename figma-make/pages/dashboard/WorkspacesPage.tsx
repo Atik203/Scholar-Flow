@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -32,6 +33,7 @@ const defaultUser = {
 
 interface WorkspacesPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -330,7 +332,14 @@ const CreateWorkspaceModal: React.FC<CreateModalProps> = ({
 // ============================================================================
 // Workspaces Page Component
 // ============================================================================
-export function WorkspacesPage({ onNavigate }: WorkspacesPageProps) {
+export function WorkspacesPage({
+  onNavigate,
+  role: propRole,
+}: WorkspacesPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "owned" | "shared">("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -350,7 +359,7 @@ export function WorkspacesPage({ onNavigate }: WorkspacesPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/workspaces"
     >

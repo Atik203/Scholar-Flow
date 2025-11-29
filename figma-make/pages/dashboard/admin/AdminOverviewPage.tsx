@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { motion } from "motion/react";
+import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
@@ -30,6 +31,7 @@ const defaultUser = {
 
 interface AdminOverviewPageProps {
   onNavigate?: (path: string) => void;
+  role?: UserRole;
 }
 
 // ============================================================================
@@ -126,20 +128,52 @@ const adminActions = [
     hoverColor: "hover:bg-gray-600",
   },
   {
-    title: "Security Center",
-    description: "Monitor security events and manage access",
+    title: "Subscriptions",
+    description: "Manage user subscriptions and plans",
     icon: Shield,
-    path: "/admin/system",
-    color: "bg-red-500",
-    hoverColor: "hover:bg-red-600",
+    path: "/admin/subscriptions",
+    color: "bg-green-500",
+    hoverColor: "hover:bg-green-600",
   },
   {
-    title: "Analytics Dashboard",
+    title: "Reports",
     description: "View detailed platform analytics and reports",
     icon: Activity,
-    path: "/analytics",
+    path: "/admin/reports",
     color: "bg-purple-500",
     hoverColor: "hover:bg-purple-600",
+  },
+  {
+    title: "Audit Log",
+    description: "Review all system activities and events",
+    icon: FileText,
+    path: "/admin/audit",
+    color: "bg-orange-500",
+    hoverColor: "hover:bg-orange-600",
+  },
+  {
+    title: "Manage Plans",
+    description: "Configure subscription plans and pricing",
+    icon: TrendingUp,
+    path: "/admin/plans",
+    color: "bg-cyan-500",
+    hoverColor: "hover:bg-cyan-600",
+  },
+  {
+    title: "Payments",
+    description: "Review payment history and refunds",
+    icon: Download,
+    path: "/admin/payments",
+    color: "bg-emerald-500",
+    hoverColor: "hover:bg-emerald-600",
+  },
+  {
+    title: "Content Moderation",
+    description: "Review flagged content and take action",
+    icon: AlertCircle,
+    path: "/admin/moderation",
+    color: "bg-red-500",
+    hoverColor: "hover:bg-red-600",
   },
 ];
 
@@ -251,7 +285,14 @@ const HealthStatus = ({ status }: { status: string }) => {
 // ============================================================================
 // Admin Overview Page Component
 // ============================================================================
-export function AdminOverviewPage({ onNavigate }: AdminOverviewPageProps) {
+export function AdminOverviewPage({
+  onNavigate,
+  role: propRole,
+}: AdminOverviewPageProps) {
+  const { role: contextRole } = useRole();
+  const effectiveRole = propRole ?? contextRole;
+  const user = { ...defaultUser, role: effectiveRole };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -263,7 +304,7 @@ export function AdminOverviewPage({ onNavigate }: AdminOverviewPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/admin-overview"
     >
@@ -521,6 +562,54 @@ export function AdminOverviewPage({ onNavigate }: AdminOverviewPageProps) {
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">Pending</p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Developer Tools */}
+        <div className="rounded-xl border bg-card">
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-semibold">Developer Tools</h2>
+            <p className="text-muted-foreground text-sm">
+              Integrations and API management
+            </p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onNavigate?.("/admin/webhooks")}
+                className="p-4 border rounded-xl text-left hover:shadow-lg transition-all flex items-center gap-4"
+              >
+                <div className="p-3 rounded-lg bg-indigo-500 text-white">
+                  <Server className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Webhooks</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Configure webhook endpoints and view logs
+                  </p>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-muted-foreground ml-auto" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onNavigate?.("/admin/api-keys")}
+                className="p-4 border rounded-xl text-left hover:shadow-lg transition-all flex items-center gap-4"
+              >
+                <div className="p-3 rounded-lg bg-teal-500 text-white">
+                  <Shield className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">API Keys</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage API keys for integrations
+                  </p>
+                </div>
+                <ArrowUpRight className="h-5 w-5 text-muted-foreground ml-auto" />
+              </motion.button>
             </div>
           </div>
         </div>
