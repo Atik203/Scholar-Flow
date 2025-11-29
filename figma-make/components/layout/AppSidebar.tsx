@@ -13,7 +13,6 @@ import {
   Layers,
   MessageSquare,
   Microscope,
-  Notebook,
   Plus,
   Quote,
   Search,
@@ -124,12 +123,11 @@ const getNavigationItems = (userRole: UserRole): SidebarItem[] => [
     icon: CreditCard,
   },
   {
-    title: "Activity & Community",
-    icon: MessageSquare,
+    title: "Activity",
+    icon: History,
     items: [
       { title: "Activity Log", path: "/activity-log", icon: History },
       { title: "Discussions", path: "/discussions", icon: MessageSquare },
-      { title: "Knowledge Pages", path: "/pages", icon: Notebook },
     ],
   },
 ];

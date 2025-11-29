@@ -2,13 +2,18 @@
 
 import {
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
   Filter,
   Hash,
+  Heart,
   MessageSquare,
   MoreHorizontal,
   Pin,
   Plus,
+  Reply,
   Search,
+  Send,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -30,6 +35,7 @@ const defaultUser = {
 // ============================================================================
 interface DiscussionsPageProps {
   onNavigate?: (path: string) => void;
+  role?: "researcher" | "pro_researcher" | "team_lead" | "admin";
 }
 
 interface DiscussionThread {
@@ -57,6 +63,70 @@ interface DiscussionThread {
     createdAt: string;
   };
 }
+
+interface Reply {
+  id: string;
+  discussionId: string;
+  author: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  content: string;
+  createdAt: string;
+  likes: number;
+}
+
+// ============================================================================
+// Sample Replies Data
+// ============================================================================
+const sampleReplies: Reply[] = [
+  {
+    id: "r1",
+    discussionId: "1",
+    author: { id: "2", name: "Prof. John Smith" },
+    content:
+      "I recommend using the PRISMA framework for systematic reviews. It provides clear guidelines for inclusion/exclusion criteria and helps ensure reproducibility.",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    likes: 5,
+  },
+  {
+    id: "r2",
+    discussionId: "1",
+    author: { id: "3", name: "Dr. Emily Watson" },
+    content:
+      "Building on John's point, I'd also suggest using Covidence or Rayyan for screening - they make the process much more efficient.",
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    likes: 3,
+  },
+  {
+    id: "r3",
+    discussionId: "1",
+    author: { id: "4", name: "Michael Lee" },
+    content:
+      "Don't forget about inter-rater reliability! Having two reviewers independently screen articles is crucial for reducing bias.",
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    likes: 2,
+  },
+  {
+    id: "r4",
+    discussionId: "2",
+    author: { id: "5", name: "Dr. Alex Kim" },
+    content:
+      "Linear attention variants like Performer and Linformer show promising results for long sequences. The trade-off is usually between speed and accuracy.",
+    createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    likes: 4,
+  },
+  {
+    id: "r5",
+    discussionId: "2",
+    author: { id: "6", name: "Sarah Williams" },
+    content:
+      "Check out the Flash Attention paper - it achieves significant speedups while maintaining exact attention computation.",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+    likes: 7,
+  },
+];
 
 // ============================================================================
 // Sample Data
@@ -185,12 +255,22 @@ const formatTimeAgo = (dateString: string) => {
 // ============================================================================
 // Discussions Page Component
 // ============================================================================
-export function DiscussionsPage({ onNavigate }: DiscussionsPageProps) {
+export function DiscussionsPage({ onNavigate, role }: DiscussionsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [pinnedFilter, setPinnedFilter] = useState<string>("");
   const [tagFilter, setTagFilter] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [expandedDiscussion, setExpandedDiscussion] = useState<string | null>(
+    null
+  );
+  const [replyContent, setReplyContent] = useState("");
+
+  // Create user with the correct role
+  const user = {
+    ...defaultUser,
+    role: role || defaultUser.role,
+  };
 
   // Filter discussions
   const filteredDiscussions = sampleDiscussions.filter((discussion) => {
@@ -228,7 +308,7 @@ export function DiscussionsPage({ onNavigate }: DiscussionsPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/discussions"
     >
@@ -399,22 +479,131 @@ export function DiscussionsPage({ onNavigate }: DiscussionsPageProps) {
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-3 border-t">
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedDiscussion(
+                          expandedDiscussion === discussion.id
+                            ? null
+                            : discussion.id
+                        );
+                      }}
+                      className="flex items-center gap-1 hover:text-primary transition-colors"
+                    >
                       <MessageSquare className="h-4 w-4" />
                       {discussion.repliesCount} replies
-                    </span>
+                      {expandedDiscussion === discussion.id ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </button>
                     <span>Updated {formatTimeAgo(discussion.updatedAt)}</span>
                   </div>
 
-                  {discussion.lastReply && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Last reply:</span>
-                      <span className="font-medium">
-                        {discussion.lastReply.author}
-                      </span>
-                    </div>
-                  )}
+                  {discussion.lastReply &&
+                    expandedDiscussion !== discussion.id && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">
+                          Last reply:
+                        </span>
+                        <span className="font-medium">
+                          {discussion.lastReply.author}
+                        </span>
+                      </div>
+                    )}
                 </div>
+
+                {/* Expandable Replies Section */}
+                {expandedDiscussion === discussion.id && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 pt-4 border-t space-y-4"
+                  >
+                    {/* Replies List */}
+                    <div className="space-y-3">
+                      {sampleReplies
+                        .filter((reply) => reply.discussionId === discussion.id)
+                        .map((reply) => (
+                          <div
+                            key={reply.id}
+                            className="flex gap-3 p-3 rounded-lg bg-muted/50"
+                          >
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <span className="text-xs font-medium text-primary">
+                                {reply.author.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">
+                                  {reply.author.name}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(reply.createdAt)}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {reply.content}
+                              </p>
+                              <div className="flex items-center gap-3 mt-2">
+                                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                                  <Heart className="h-3 w-3" />
+                                  {reply.likes}
+                                </button>
+                                <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+                                  <Reply className="h-3 w-3" />
+                                  Reply
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+
+                    {/* Reply Input */}
+                    <div className="flex gap-3">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-primary">
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)}
+                        </span>
+                      </div>
+                      <div className="flex-1 flex gap-2">
+                        <input
+                          type="text"
+                          placeholder="Write a reply..."
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          className="flex-1 h-9 px-3 rounded-lg border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (replyContent.trim()) {
+                              console.log("Sending reply:", replyContent);
+                              setReplyContent("");
+                            }
+                          }}
+                          disabled={!replyContent.trim()}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             ))
           )}
