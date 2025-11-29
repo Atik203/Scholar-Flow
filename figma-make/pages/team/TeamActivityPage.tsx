@@ -293,7 +293,7 @@ export function TeamActivityPage({
       case "member_join":
         return "text-emerald-400 bg-emerald-500/20";
       case "member_leave":
-        return "text-gray-400 bg-gray-500/20";
+        return "text-gray-600 dark:text-gray-400 bg-gray-500/20";
       case "member_role_change":
         return "text-cyan-400 bg-cyan-500/20";
       case "comment_add":
@@ -305,7 +305,7 @@ export function TeamActivityPage({
       case "ai_insight":
         return "text-violet-400 bg-violet-500/20";
       default:
-        return "text-gray-400 bg-gray-500/20";
+        return "text-gray-600 dark:text-gray-400 bg-gray-500/20";
     }
   };
 
@@ -315,35 +315,35 @@ export function TeamActivityPage({
         return (
           <>
             uploaded{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "paper_view":
         return (
           <>
             viewed{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "paper_edit":
         return (
           <>
             edited{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "paper_delete":
         return (
           <>
             deleted{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "paper_share":
         return (
           <>
             shared{" "}
-            <span className="text-white font-medium">{activity.target}</span>{" "}
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>{" "}
             with {(activity.metadata?.sharedWith as string) || "team"}
           </>
         );
@@ -351,28 +351,28 @@ export function TeamActivityPage({
         return (
           <>
             created collection{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "collection_edit":
         return (
           <>
             updated collection{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "collection_share":
         return (
           <>
             shared collection{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "member_join":
         return (
           <>
             joined the team (invited by{" "}
-            <span className="text-white font-medium">
+            <span className="text-gray-900 dark:text-white font-medium">
               {(activity.metadata?.invitedBy as string) || "Admin"}
             </span>
             )
@@ -384,7 +384,7 @@ export function TeamActivityPage({
         return (
           <>
             changed{" "}
-            <span className="text-white font-medium">{activity.target}'s</span>{" "}
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}'s</span>{" "}
             role from {(activity.metadata?.oldRole as string) || "Member"} to{" "}
             <span className="text-purple-400">
               {(activity.metadata?.newRole as string) || "Admin"}
@@ -395,7 +395,7 @@ export function TeamActivityPage({
         return (
           <>
             commented on{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "annotation_add":
@@ -403,14 +403,14 @@ export function TeamActivityPage({
           <>
             added {(activity.metadata?.annotationCount as number) || 1}{" "}
             annotation(s) to{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       case "export":
         return (
           <>
             exported{" "}
-            <span className="text-white font-medium">{activity.target}</span> as{" "}
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span> as{" "}
             {(activity.metadata?.format as string) || "PDF"}
           </>
         );
@@ -418,7 +418,7 @@ export function TeamActivityPage({
         return (
           <>
             generated AI insight:{" "}
-            <span className="text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
           </>
         );
       default:
@@ -473,7 +473,7 @@ export function TeamActivityPage({
 
   return (
     <DashboardLayout user={user} onNavigate={onNavigate}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-gray-50 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
@@ -483,20 +483,20 @@ export function TeamActivityPage({
           >
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                   <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl">
                     <Activity className="h-6 w-6" />
                   </div>
                   Team Activity
                 </h1>
-                <p className="text-gray-400 mt-2">
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
                   Monitor your team's research activities and collaboration
                 </p>
               </div>
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 text-white rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 disabled:opacity-50 text-gray-900 dark:text-white rounded-lg transition-colors"
               >
                 <RefreshCw
                   className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -547,7 +547,7 @@ export function TeamActivityPage({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-5"
+                className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-5"
               >
                 <div className="flex items-start justify-between">
                   <div
@@ -589,8 +589,8 @@ export function TeamActivityPage({
                   )}
                 </div>
                 <div className="mt-4">
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{stat.label}</p>
                   <p className="text-gray-500 text-xs mt-0.5">
                     {stat.subValue}
                   </p>
@@ -606,8 +606,8 @@ export function TeamActivityPage({
               animate={{ opacity: 1, x: 0 }}
               className="lg:col-span-1"
             >
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10 p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 p-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Users className="h-5 w-5 text-purple-400" />
                   Team Members
                 </h3>
@@ -617,15 +617,15 @@ export function TeamActivityPage({
                     className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                       selectedMember === null
                         ? "bg-purple-500/20 border border-purple-500/30"
-                        : "hover:bg-white/5"
+                        : "hover:bg-white dark:bg-white/5"
                     }`}
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-white" />
+                      <Users className="h-5 w-5 text-gray-900 dark:text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-white font-medium">All Members</p>
-                      <p className="text-gray-400 text-xs">
+                      <p className="text-gray-900 dark:text-white font-medium">All Members</p>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs">
                         {mockMembers.length} total
                       </p>
                     </div>
@@ -637,11 +637,11 @@ export function TeamActivityPage({
                       className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
                         selectedMember === member.id
                           ? "bg-purple-500/20 border border-purple-500/30"
-                          : "hover:bg-white/5"
+                          : "hover:bg-white dark:bg-white/5"
                       }`}
                     >
                       <div className="relative">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-medium">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-gray-900 dark:text-white font-medium">
                           {member.name.charAt(0)}
                         </div>
                         <div
@@ -651,10 +651,10 @@ export function TeamActivityPage({
                         />
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="text-white font-medium text-sm truncate">
+                        <p className="text-gray-900 dark:text-white font-medium text-sm truncate">
                           {member.name}
                         </p>
-                        <p className="text-gray-400 text-xs">{member.role}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">{member.role}</p>
                       </div>
                     </button>
                   ))}
@@ -668,25 +668,25 @@ export function TeamActivityPage({
               animate={{ opacity: 1, y: 0 }}
               className="lg:col-span-3"
             >
-              <div className="bg-white/5 backdrop-blur-xl rounded-xl border border-white/10">
+              <div className="bg-white dark:bg-white/5 backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10">
                 {/* Filters */}
-                <div className="p-4 border-b border-white/10">
+                <div className="p-4 border-b border-gray-200 dark:border-white/10">
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="relative flex-1 min-w-[200px]">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600 dark:text-gray-400" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search activities..."
-                        className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                       />
                     </div>
                     <div className="relative">
                       <select
                         value={selectedType}
                         onChange={(e) => setSelectedType(e.target.value)}
-                        className="appearance-none px-4 py-2 pr-10 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        className="appearance-none px-4 py-2 pr-10 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                       >
                         {activityTypes.map((type) => (
                           <option key={type.value} value={type.value}>
@@ -694,20 +694,20 @@ export function TeamActivityPage({
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600 dark:text-gray-400 pointer-events-none" />
                     </div>
                     <div className="relative">
                       <select
                         value={timeRange}
                         onChange={(e) => setTimeRange(e.target.value)}
-                        className="appearance-none px-4 py-2 pr-10 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        className="appearance-none px-4 py-2 pr-10 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                       >
                         <option value="24h">Last 24 Hours</option>
                         <option value="7d">Last 7 Days</option>
                         <option value="30d">Last 30 Days</option>
                         <option value="all">All Time</option>
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600 dark:text-gray-400 pointer-events-none" />
                     </div>
                   </div>
                 </div>
@@ -718,7 +718,7 @@ export function TeamActivityPage({
                     {filteredActivities.length === 0 ? (
                       <div className="py-12 text-center">
                         <Activity className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                        <p className="text-gray-400">No activities found</p>
+                        <p className="text-gray-600 dark:text-gray-400">No activities found</p>
                         <p className="text-gray-500 text-sm">
                           Try adjusting your filters
                         </p>
@@ -735,11 +735,11 @@ export function TeamActivityPage({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ delay: index * 0.05 }}
-                            className="p-4 hover:bg-white/5 transition-colors group"
+                            className="p-4 hover:bg-white dark:bg-white/5 transition-colors group"
                           >
                             <div className="flex items-start gap-4">
                               <div className="relative">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-medium">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-gray-900 dark:text-white font-medium">
                                   {activity.user.name.charAt(0)}
                                 </div>
                                 <div
@@ -749,8 +749,8 @@ export function TeamActivityPage({
                                 </div>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-gray-300 text-sm">
-                                  <span className="text-white font-medium">
+                                <p className="text-gray-700 dark:text-gray-300 text-sm">
+                                  <span className="text-gray-900 dark:text-white font-medium">
                                     {activity.user.name}
                                   </span>{" "}
                                   {getActivityDescription(activity)}
@@ -769,7 +769,7 @@ export function TeamActivityPage({
                                     ).map((change, i) => (
                                       <span
                                         key={i}
-                                        className="inline-flex items-center px-2 py-0.5 bg-white/5 rounded text-xs text-gray-400"
+                                        className="inline-flex items-center px-2 py-0.5 bg-white dark:bg-white/5 rounded text-xs text-gray-600 dark:text-gray-400"
                                       >
                                         <CheckCircle className="h-3 w-3 mr-1 text-green-400" />
                                         {change}
@@ -801,7 +801,7 @@ export function TeamActivityPage({
                                   )}
                                 </div>
                               </div>
-                              <button className="p-1 text-gray-500 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button className="p-1 text-gray-500 hover:text-gray-900 dark:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                 <MoreHorizontal className="h-4 w-4" />
                               </button>
                             </div>
@@ -814,7 +814,7 @@ export function TeamActivityPage({
 
                 {/* Load More */}
                 {filteredActivities.length > 0 && (
-                  <div className="p-4 border-t border-white/10 text-center">
+                  <div className="p-4 border-t border-gray-200 dark:border-white/10 text-center">
                     <button className="text-purple-400 hover:text-purple-300 text-sm font-medium">
                       Load More Activities
                     </button>
