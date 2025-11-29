@@ -85,7 +85,6 @@ import { AIInsightsPage as DashboardAIInsightsPage } from "./pages/dashboard/AII
 import { AnalyticsPage } from "./pages/dashboard/AnalyticsPage";
 import { BillingPage } from "./pages/dashboard/BillingPage";
 import { DiscussionsPage } from "./pages/dashboard/DiscussionsPage";
-import { KnowledgePagesPage } from "./pages/dashboard/KnowledgePagesPage";
 
 // Dashboard Admin Pages
 import {
@@ -411,12 +410,6 @@ export const routes: Record<string, RouteConfig[]> = {
       auth: true,
       title: "Discussions",
     },
-    {
-      path: "/pages",
-      component: KnowledgePagesPage as ComponentType<PageProps>,
-      auth: true,
-      title: "Knowledge Pages",
-    },
   ],
 
   // Admin Routes
@@ -638,12 +631,8 @@ export const isActivityLogRoute = (path: string): boolean =>
   path === "/activity-log";
 export const isDiscussionsRoute = (path: string): boolean =>
   path === "/discussions";
-export const isKnowledgePagesRoute = (path: string): boolean =>
-  path === "/pages";
-export const isActivityCommunityRoute = (path: string): boolean =>
-  isActivityLogRoute(path) ||
-  isDiscussionsRoute(path) ||
-  isKnowledgePagesRoute(path);
+export const isActivityRoute = (path: string): boolean =>
+  isActivityLogRoute(path) || isDiscussionsRoute(path);
 export const isAdminRoute = (path: string): boolean =>
   path === "/admin-overview" || path.startsWith("/admin/");
 
@@ -695,7 +684,6 @@ export {
   ForgotPasswordPage,
   HowItWorksPage,
   IntegrationsPage,
-  KnowledgePagesPage,
   LoadingPage,
   // Auth
   LoginPage,

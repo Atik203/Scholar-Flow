@@ -39,6 +39,7 @@ const defaultUser = {
 // ============================================================================
 interface ActivityLogPageProps {
   onNavigate?: (path: string) => void;
+  role?: "researcher" | "pro_researcher" | "team_lead" | "admin";
 }
 
 interface ActivityLogEntry {
@@ -240,7 +241,7 @@ const formatTimeAgo = (dateString: string) => {
 // ============================================================================
 // Activity Log Page Component
 // ============================================================================
-export function ActivityLogPage({ onNavigate }: ActivityLogPageProps) {
+export function ActivityLogPage({ onNavigate, role }: ActivityLogPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [entityFilter, setEntityFilter] = useState<string>("");
@@ -248,6 +249,12 @@ export function ActivityLogPage({ onNavigate }: ActivityLogPageProps) {
   const [actionFilter, setActionFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Create user with the correct role
+  const user = {
+    ...defaultUser,
+    role: role || defaultUser.role,
+  };
 
   // Filter activities
   const filteredActivities = sampleActivities.filter((activity) => {
@@ -292,7 +299,7 @@ export function ActivityLogPage({ onNavigate }: ActivityLogPageProps) {
 
   return (
     <DashboardLayout
-      user={defaultUser}
+      user={user}
       onNavigate={onNavigate}
       currentPath="/activity-log"
     >
