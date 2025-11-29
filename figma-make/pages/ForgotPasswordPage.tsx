@@ -165,7 +165,7 @@ export function ForgotPasswordPage({ onNavigate }: ForgotPasswordPageProps) {
             >
               <div className="mb-8">
                 <img
-                  src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
+                  src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=300&fit=crop&auto=format"
                   alt="Email security"
                   className="mx-auto rounded-2xl shadow-2xl w-[400px] h-[300px] object-cover"
                 />
@@ -309,7 +309,7 @@ export function ForgotPasswordPage({ onNavigate }: ForgotPasswordPageProps) {
           >
             <div className="mb-8">
               <img
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop&auto=format"
+                src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&h=300&fit=crop&auto=format"
                 alt="Password recovery"
                 className="mx-auto rounded-2xl shadow-2xl w-[400px] h-[300px] object-cover"
               />

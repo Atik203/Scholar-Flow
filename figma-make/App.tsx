@@ -73,7 +73,7 @@ import {
   getRoleFromPath,
   HowItWorksPage,
   IntegrationsPage,
-  isActivityCommunityRoute,
+  isActivityRoute,
   isAdminRoute,
   isAIInsightsRoute,
   isAnalyticsRoute,
@@ -90,7 +90,6 @@ import {
   isSettingsRoute,
   isUtilityRoute,
   isWorkspacesRoute,
-  KnowledgePagesPage,
   LoadingPage,
   // Auth
   LoginPage,
@@ -185,6 +184,9 @@ function ToastContainer({
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>("/");
+  const [currentRole, setCurrentRole] = useState<
+    "researcher" | "pro_researcher" | "team_lead" | "admin"
+  >("researcher");
   const [toasts, setToasts] = useState<Toast[]>([]);
   let toastId = 0;
 
@@ -211,6 +213,15 @@ export default function App() {
   const handleNavigate = useCallback((path: string) => {
     console.log("Navigating to:", path);
     setCurrentPage(path);
+    // Update role when navigating to dashboard routes
+    if (path.startsWith("/dashboard")) {
+      const role = getRoleFromPath(path);
+      setCurrentRole(role);
+    }
+    // Also update role when navigating to admin routes
+    if (path.startsWith("/admin") || path === "/admin-overview") {
+      setCurrentRole("admin");
+    }
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -244,17 +255,21 @@ export default function App() {
       return <BillingPage onNavigate={handleNavigate} />;
     }
 
-    // Activity & Community routes (Activity Log, Discussions, Knowledge Pages)
-    if (isActivityCommunityRoute(currentPage)) {
+    // Activity routes (Activity Log, Discussions)
+    if (isActivityRoute(currentPage)) {
       switch (currentPage) {
         case "/activity-log":
-          return <ActivityLogPage onNavigate={handleNavigate} />;
+          return (
+            <ActivityLogPage onNavigate={handleNavigate} role={currentRole} />
+          );
         case "/discussions":
-          return <DiscussionsPage onNavigate={handleNavigate} />;
-        case "/pages":
-          return <KnowledgePagesPage onNavigate={handleNavigate} />;
+          return (
+            <DiscussionsPage onNavigate={handleNavigate} role={currentRole} />
+          );
         default:
-          return <ActivityLogPage onNavigate={handleNavigate} />;
+          return (
+            <ActivityLogPage onNavigate={handleNavigate} role={currentRole} />
+          );
       }
     }
 
