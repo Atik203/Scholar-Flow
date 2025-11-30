@@ -5,9 +5,11 @@ import {
   ArrowLeft,
   Award,
   BookOpen,
+  Brain,
   Clock,
   Download,
   Eye,
+  FileSpreadsheet,
   FileText,
   FileUp,
   Filter,
@@ -16,12 +18,14 @@ import {
   PieChart,
   RefreshCcw,
   Share2,
+  Sparkles,
   Star,
   Target,
   TrendingDown,
   TrendingUp,
   UserPlus,
   Users,
+  X,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -260,6 +264,145 @@ const mockRecentActivity = [
   },
 ];
 
+// Workspace Goals
+interface WorkspaceGoal {
+  id: string;
+  name: string;
+  current: number;
+  target: number;
+  unit: string;
+  deadline: string;
+  status: "on-track" | "at-risk" | "completed";
+}
+
+const mockWorkspaceGoals: WorkspaceGoal[] = [
+  {
+    id: "g1",
+    name: "Papers Published",
+    current: 12,
+    target: 20,
+    unit: "papers",
+    deadline: "Dec 2025",
+    status: "on-track",
+  },
+  {
+    id: "g2",
+    name: "Peer Reviews",
+    current: 45,
+    target: 50,
+    unit: "reviews",
+    deadline: "Nov 2025",
+    status: "on-track",
+  },
+  {
+    id: "g3",
+    name: "Active Collaborations",
+    current: 8,
+    target: 15,
+    unit: "projects",
+    deadline: "Dec 2025",
+    status: "at-risk",
+  },
+  {
+    id: "g4",
+    name: "Citation Count",
+    current: 156,
+    target: 150,
+    unit: "citations",
+    deadline: "Dec 2025",
+    status: "completed",
+  },
+];
+
+// AI Productivity Insights
+interface AIInsight {
+  id: string;
+  title: string;
+  description: string;
+  impact: "high" | "medium" | "low";
+  category: "productivity" | "collaboration" | "quality" | "growth";
+  action?: string;
+}
+
+const mockAIInsights: AIInsight[] = [
+  {
+    id: "i1",
+    title: "Peak Collaboration Window",
+    description:
+      "Team is most active Tuesday-Thursday between 10 AM and 2 PM. Consider scheduling important discussions during this time.",
+    impact: "high",
+    category: "productivity",
+    action: "Schedule Meeting",
+  },
+  {
+    id: "i2",
+    title: "Underutilized Collection",
+    description:
+      "'Computer Vision Basics' hasn't been accessed in 3 weeks. Consider archiving or promoting it.",
+    impact: "medium",
+    category: "quality",
+    action: "View Collection",
+  },
+  {
+    id: "i3",
+    title: "Rising Star Contributor",
+    description:
+      "Michael Torres has increased output by 40% this month. Consider recognizing their contributions.",
+    impact: "medium",
+    category: "growth",
+    action: "Send Recognition",
+  },
+  {
+    id: "i4",
+    title: "Cross-Team Opportunity",
+    description:
+      "Your NLP papers overlap 75% with 'ML Research Lab'. Consider collaboration opportunities.",
+    impact: "high",
+    category: "collaboration",
+    action: "Explore Connections",
+  },
+];
+
+// Export formats
+interface ExportFormat {
+  id: string;
+  name: string;
+  extension: string;
+  icon: React.ReactNode;
+  description: string;
+}
+
+const exportFormats: ExportFormat[] = [
+  {
+    id: "pdf",
+    name: "PDF Report",
+    extension: ".pdf",
+    icon: <FileText className="h-5 w-5" />,
+    description: "Comprehensive visual report",
+  },
+  {
+    id: "xlsx",
+    name: "Excel Spreadsheet",
+    extension: ".xlsx",
+    icon: <FileSpreadsheet className="h-5 w-5" />,
+    description: "Detailed data tables",
+  },
+  {
+    id: "csv",
+    name: "CSV Data",
+    extension: ".csv",
+    icon: <FileText className="h-5 w-5" />,
+    description: "Raw data export",
+  },
+  {
+    id: "json",
+    name: "JSON",
+    extension: ".json",
+    icon: <FileText className="h-5 w-5" />,
+    description: "API-compatible format",
+  },
+];
+
 type DateRange = "7d" | "30d" | "90d" | "1y";
 type ViewMode = "overview" | "members" | "papers" | "activity";
 
@@ -274,6 +417,22 @@ export function WorkspaceAnalyticsPage({
   const [dateRange, setDateRange] = useState<DateRange>("30d");
   const [viewMode, setViewMode] = useState<ViewMode>("overview");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedExportFormat, setSelectedExportFormat] = useState<
+    string | null
+  >(null);
+  const [showAIInsights, setShowAIInsights] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = (format: string) => {
+    setSelectedExportFormat(format);
+    setIsExporting(true);
+    setTimeout(() => {
+      setIsExporting(false);
+      setShowExportModal(false);
+      // Show success message
+    }, 1500);
+  };
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -359,7 +518,10 @@ export function WorkspaceAnalyticsPage({
                 </button>
 
                 <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  <Download className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                  <Download
+                    className="h-5 w-5 text-gray-600 dark:text-gray-300"
+                    onClick={() => setShowExportModal(true)}
+                  />
                 </button>
 
                 <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
@@ -881,7 +1043,285 @@ export function WorkspaceAnalyticsPage({
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Goal Tracking Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                  <Target className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Workspace Goals
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Track progress toward team objectives
+                  </p>
+                </div>
+              </div>
+              <button className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline">
+                + Add Goal
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {mockWorkspaceGoals.map((goal, index) => {
+                const progress = Math.min(
+                  (goal.current / goal.target) * 100,
+                  100
+                );
+                return (
+                  <motion.div
+                    key={goal.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 + index * 0.1 }}
+                    className={`p-4 rounded-xl border ${
+                      goal.status === "completed"
+                        ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20"
+                        : goal.status === "at-risk"
+                          ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20"
+                          : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900 dark:text-white text-sm">
+                        {goal.name}
+                      </h4>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          goal.status === "completed"
+                            ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400"
+                            : goal.status === "at-risk"
+                              ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400"
+                              : "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400"
+                        }`}
+                      >
+                        {goal.status === "completed"
+                          ? "✓ Done"
+                          : goal.status === "at-risk"
+                            ? "⚠ At Risk"
+                            : "On Track"}
+                      </span>
+                    </div>
+                    <div className="flex items-end gap-1 mb-2">
+                      <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {goal.current}
+                      </span>
+                      <span className="text-sm text-gray-500 mb-1">
+                        / {goal.target} {goal.unit}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden mb-2">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ delay: 0.8 + index * 0.1, duration: 0.8 }}
+                        className={`h-full rounded-full ${
+                          goal.status === "completed"
+                            ? "bg-gradient-to-r from-emerald-400 to-emerald-600"
+                            : goal.status === "at-risk"
+                              ? "bg-gradient-to-r from-amber-400 to-amber-600"
+                              : "bg-gradient-to-r from-blue-400 to-blue-600"
+                        }`}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Deadline: {goal.deadline}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* AI Productivity Insights */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="mt-8"
+          >
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                    <Brain className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      AI Productivity Insights
+                      <Sparkles className="h-4 w-4 text-purple-500" />
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Personalized recommendations for your workspace
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAIInsights(!showAIInsights)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    showAIInsights
+                      ? "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                  }`}
+                >
+                  {showAIInsights ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {showAIInsights && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="divide-y divide-gray-100 dark:divide-gray-700"
+                  >
+                    {mockAIInsights.map((insight, index) => (
+                      <motion.div
+                        key={insight.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                        className="p-5 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                              insight.impact === "high"
+                                ? "bg-purple-500"
+                                : insight.impact === "medium"
+                                  ? "bg-blue-500"
+                                  : "bg-gray-400"
+                            }`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white">
+                                {insight.title}
+                              </h4>
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  insight.category === "productivity"
+                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700"
+                                    : insight.category === "collaboration"
+                                      ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700"
+                                      : insight.category === "quality"
+                                        ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700"
+                                        : "bg-purple-100 dark:bg-purple-900/30 text-purple-700"
+                                }`}
+                              >
+                                {insight.category}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {insight.description}
+                            </p>
+                          </div>
+                          {insight.action && (
+                            <button className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm flex-shrink-0">
+                              {insight.action}
+                            </button>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </div>
+
+        {/* Export Modal */}
+        <AnimatePresence>
+          {showExportModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowExportModal(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl"
+              >
+                <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                      <Download className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Export Report
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        Choose your preferred format
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowExportModal(false)}
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+
+                <div className="p-6 space-y-3">
+                  {exportFormats.map((format) => (
+                    <button
+                      key={format.id}
+                      onClick={() => handleExport(format.id)}
+                      disabled={isExporting}
+                      className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                        selectedExportFormat === format.id && isExporting
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                          : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      }`}
+                    >
+                      <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                        {format.icon}
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {format.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {format.description}
+                        </p>
+                      </div>
+                      {selectedExportFormat === format.id && isExporting ? (
+                        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span className="text-sm text-gray-400">
+                          {format.extension}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-2xl">
+                  <p className="text-xs text-gray-500 text-center">
+                    Export will include data from the last {dateRange} period
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </DashboardLayout>
   );
