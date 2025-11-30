@@ -1,18 +1,34 @@
 "use client";
 
+/**
+ * PricingPage - Subscription Plans
+ *
+ * Enhanced with:
+ * - Interactive feature comparison table
+ * - Usage calculator
+ * - Testimonials carousel
+ * - FAQ accordion
+ */
+
 import {
   ArrowRight,
+  Calculator,
   Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Crown,
   HelpCircle,
   MessageCircle,
+  Minus,
+  Quote,
   Rocket,
   Sparkles,
   Star,
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
@@ -25,6 +41,150 @@ interface PricingPageProps {
 
 export function PricingPage({ onNavigate }: PricingPageProps) {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calculatorValues, setCalculatorValues] = useState({
+    papers: 50,
+    teamSize: 3,
+    aiAnalysis: true,
+    collaboration: true,
+  });
+
+  // Calculate recommended plan based on usage
+  const getRecommendedPlan = () => {
+    const { papers, teamSize, aiAnalysis, collaboration } = calculatorValues;
+    if (papers <= 10 && teamSize <= 1) return "Free";
+    if (papers <= 100 && teamSize <= 5) return "Pro";
+    if (teamSize > 5 || (collaboration && papers > 100)) return "Team";
+    return "Enterprise";
+  };
+
+  // Calculate estimated monthly cost
+  const getEstimatedCost = () => {
+    const recommended = getRecommendedPlan();
+    const plan = plans.find((p) => p.name === recommended);
+    if (!plan || plan.monthlyPrice === null) return "Custom";
+    return `$${isAnnual ? plan.annualPrice : plan.monthlyPrice}`;
+  };
+
+  // Testimonials data
+  const testimonials = [
+    {
+      quote:
+        "ScholarFlow has revolutionized how our team collaborates on research. The AI insights save us hours every week.",
+      author: "Dr. Sarah Chen",
+      title: "Associate Professor",
+      institution: "MIT",
+      avatar:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop",
+      rating: 5,
+    },
+    {
+      quote:
+        "The semantic search is incredibly powerful. I can find relevant papers in seconds instead of hours.",
+      author: "Prof. James Miller",
+      title: "Department Head",
+      institution: "Stanford University",
+      avatar:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop",
+      rating: 5,
+    },
+    {
+      quote:
+        "Best investment for our research department. The Team plan's analytics help us track productivity.",
+      author: "Dr. Emily Watson",
+      title: "Research Director",
+      institution: "Oxford University",
+      avatar:
+        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop",
+      rating: 5,
+    },
+    {
+      quote:
+        "Moving from spreadsheets to ScholarFlow was the best decision. Our paper management is now effortless.",
+      author: "Dr. Michael Park",
+      title: "Senior Researcher",
+      institution: "Harvard University",
+      avatar:
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop",
+      rating: 5,
+    },
+  ];
+
+  // Feature comparison data
+  const comparisonFeatures = [
+    {
+      feature: "Paper Storage",
+      free: "10 papers",
+      pro: "Unlimited",
+      team: "Unlimited",
+      enterprise: "Unlimited",
+    },
+    {
+      feature: "AI Summaries",
+      free: "Basic",
+      pro: "Advanced",
+      team: "Advanced",
+      enterprise: "Custom Models",
+    },
+    {
+      feature: "Team Members",
+      free: "1",
+      pro: "Up to 5",
+      team: "Unlimited",
+      enterprise: "Unlimited",
+    },
+    {
+      feature: "Semantic Search",
+      free: false,
+      pro: true,
+      team: true,
+      enterprise: true,
+    },
+    {
+      feature: "API Access",
+      free: false,
+      pro: true,
+      team: true,
+      enterprise: true,
+    },
+    {
+      feature: "SSO Integration",
+      free: false,
+      pro: false,
+      team: true,
+      enterprise: true,
+    },
+    {
+      feature: "Custom Workflows",
+      free: false,
+      pro: false,
+      team: true,
+      enterprise: true,
+    },
+    {
+      feature: "Priority Support",
+      free: false,
+      pro: true,
+      team: true,
+      enterprise: true,
+    },
+    {
+      feature: "Dedicated Account Manager",
+      free: false,
+      pro: false,
+      team: false,
+      enterprise: true,
+    },
+    {
+      feature: "On-premise Deployment",
+      free: false,
+      pro: false,
+      team: false,
+      enterprise: true,
+    },
+  ];
 
   const plans = [
     {
@@ -308,7 +468,153 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
           </div>
         </section>
 
-        {/* Feature Comparison */}
+        {/* Usage Calculator */}
+        <section className="py-16 bg-gradient-to-b from-muted/20 to-background">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-8"
+            >
+              <Button
+                onClick={() => setShowCalculator(!showCalculator)}
+                variant="outline"
+                className="gap-2 btn-hover-glow"
+              >
+                <Calculator className="h-4 w-4" />
+                {showCalculator ? "Hide" : "Open"} Usage Calculator
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${showCalculator ? "rotate-180" : ""}`}
+                />
+              </Button>
+            </motion.div>
+
+            <AnimatePresence>
+              {showCalculator && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-8 max-w-3xl mx-auto">
+                    <h3 className="text-xl font-semibold mb-6 text-center">
+                      Find Your Perfect Plan
+                    </h3>
+
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Papers per month:{" "}
+                          <span className="text-primary">
+                            {calculatorValues.papers}
+                          </span>
+                        </label>
+                        <input
+                          type="range"
+                          min="5"
+                          max="500"
+                          value={calculatorValues.papers}
+                          onChange={(e) =>
+                            setCalculatorValues((prev) => ({
+                              ...prev,
+                              papers: parseInt(e.target.value),
+                            }))
+                          }
+                          className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>5</span>
+                          <span>500+</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Team size:{" "}
+                          <span className="text-primary">
+                            {calculatorValues.teamSize}
+                          </span>
+                        </label>
+                        <input
+                          type="range"
+                          min="1"
+                          max="50"
+                          value={calculatorValues.teamSize}
+                          onChange={(e) =>
+                            setCalculatorValues((prev) => ({
+                              ...prev,
+                              teamSize: parseInt(e.target.value),
+                            }))
+                          }
+                          className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>1</span>
+                          <span>50+</span>
+                        </div>
+                      </div>
+
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={calculatorValues.aiAnalysis}
+                          onChange={(e) =>
+                            setCalculatorValues((prev) => ({
+                              ...prev,
+                              aiAnalysis: e.target.checked,
+                            }))
+                          }
+                          className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
+                        />
+                        <span className="text-sm">
+                          Need advanced AI analysis?
+                        </span>
+                      </label>
+
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={calculatorValues.collaboration}
+                          onChange={(e) =>
+                            setCalculatorValues((prev) => ({
+                              ...prev,
+                              collaboration: e.target.checked,
+                            }))
+                          }
+                          className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
+                        />
+                        <span className="text-sm">
+                          Need team collaboration?
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="mt-8 p-4 bg-gradient-to-r from-primary/10 to-chart-1/10 rounded-xl border border-primary/20 text-center">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        Recommended Plan
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        {getRecommendedPlan()}
+                      </p>
+                      <p className="text-lg text-muted-foreground">
+                        Estimated:{" "}
+                        <span className="font-semibold text-foreground">
+                          {getEstimatedCost()}
+                        </span>
+                        /month
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </section>
+
+        {/* Feature Comparison Table */}
         <section className="py-24 bg-gradient-to-b from-background to-muted/20">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -327,6 +633,89 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
             </motion.div>
 
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-4 font-semibold">Feature</th>
+                      <th className="p-4 text-center font-semibold">Free</th>
+                      <th className="p-4 text-center font-semibold bg-primary/5">
+                        <div className="flex flex-col items-center">
+                          <span>Pro</span>
+                          <span className="text-xs text-primary font-normal">
+                            Popular
+                          </span>
+                        </div>
+                      </th>
+                      <th className="p-4 text-center font-semibold">Team</th>
+                      <th className="p-4 text-center font-semibold">
+                        Enterprise
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {comparisonFeatures.map((item, index) => (
+                      <motion.tr
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-border/50 hover:bg-muted/30 transition-colors"
+                      >
+                        <td className="p-4 font-medium">{item.feature}</td>
+                        <td className="p-4 text-center">
+                          {typeof item.free === "boolean" ? (
+                            item.free ? (
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                            ) : (
+                              <Minus className="h-5 w-5 text-muted-foreground mx-auto" />
+                            )
+                          ) : (
+                            <span className="text-sm">{item.free}</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-center bg-primary/5">
+                          {typeof item.pro === "boolean" ? (
+                            item.pro ? (
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                            ) : (
+                              <Minus className="h-5 w-5 text-muted-foreground mx-auto" />
+                            )
+                          ) : (
+                            <span className="text-sm font-medium">
+                              {item.pro}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          {typeof item.team === "boolean" ? (
+                            item.team ? (
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                            ) : (
+                              <Minus className="h-5 w-5 text-muted-foreground mx-auto" />
+                            )
+                          ) : (
+                            <span className="text-sm">{item.team}</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          {typeof item.enterprise === "boolean" ? (
+                            item.enterprise ? (
+                              <Check className="h-5 w-5 text-green-500 mx-auto" />
+                            ) : (
+                              <Minus className="h-5 w-5 text-muted-foreground mx-auto" />
+                            )
+                          ) : (
+                            <span className="text-sm">{item.enterprise}</span>
+                          )}
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
               <div className="p-8">
                 <div className="grid gap-6">
                   <div className="text-center p-6 rounded-xl bg-gradient-to-r from-primary/10 to-chart-1/10 border border-primary/20">
@@ -351,7 +740,114 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
           </div>
         </section>
 
-        {/* FAQs */}
+        {/* Testimonials Carousel */}
+        <section className="py-24 bg-gradient-to-b from-muted/20 to-background">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-4">
+                Trusted by Researchers Worldwide
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                See what our customers have to say
+              </p>
+            </motion.div>
+
+            <div className="relative max-w-4xl mx-auto">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentTestimonialIndex}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-8 md:p-12"
+                >
+                  <Quote className="h-12 w-12 text-primary/20 mb-6" />
+
+                  <p className="text-xl md:text-2xl text-foreground leading-relaxed mb-8">
+                    "{testimonials[currentTestimonialIndex].quote}"
+                  </p>
+
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={testimonials[currentTestimonialIndex].avatar}
+                      alt={testimonials[currentTestimonialIndex].author}
+                      className="h-14 w-14 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold">
+                        {testimonials[currentTestimonialIndex].author}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {testimonials[currentTestimonialIndex].title},{" "}
+                        {testimonials[currentTestimonialIndex].institution}
+                      </p>
+                    </div>
+                    <div className="ml-auto flex gap-1">
+                      {[
+                        ...Array(testimonials[currentTestimonialIndex].rating),
+                      ].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="h-5 w-5 fill-yellow-500 text-yellow-500"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Navigation */}
+              <div className="flex justify-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setCurrentTestimonialIndex((prev) =>
+                      prev === 0 ? testimonials.length - 1 : prev - 1
+                    )
+                  }
+                  className="rounded-full"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex gap-2 items-center">
+                  {testimonials.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentTestimonialIndex(index)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        index === currentTestimonialIndex
+                          ? "w-6 bg-primary"
+                          : "w-2 bg-muted-foreground/30"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setCurrentTestimonialIndex((prev) =>
+                      prev === testimonials.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  className="rounded-full"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQs Accordion */}
         <section className="py-24">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -370,7 +866,7 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
             </motion.div>
 
             <div className="max-w-3xl mx-auto">
-              <div className="grid gap-6">
+              <div className="space-y-4">
                 {faqs.map((faq, index) => (
                   <motion.div
                     key={index}
@@ -378,19 +874,43 @@ export function PricingPage({ onNavigate }: PricingPageProps) {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ delay: index * 0.1, duration: 0.6 }}
-                    className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500"
+                    className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 overflow-hidden"
                   >
-                    <div className="flex items-start gap-3">
-                      <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                      <div>
-                        <h3 className="text-lg font-semibold mb-3">
+                    <button
+                      onClick={() =>
+                        setOpenFaqIndex(openFaqIndex === index ? null : index)
+                      }
+                      className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <HelpCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                        <h3 className="text-lg font-semibold pr-4">
                           {faq.question}
                         </h3>
-                        <p className="text-muted-foreground leading-relaxed">
-                          {faq.answer}
-                        </p>
                       </div>
-                    </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-muted-foreground shrink-0 transition-transform duration-300 ${
+                          openFaqIndex === index ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    <AnimatePresence>
+                      {openFaqIndex === index && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-6 pb-6 pl-14">
+                            <p className="text-muted-foreground leading-relaxed">
+                              {faq.answer}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
                 ))}
               </div>

@@ -3,26 +3,41 @@
 /**
  * SettingsPage - User Settings Management
  * Matches frontend/src/app/settings/page.tsx
+ *
+ * Enhanced with:
+ * - Live preview for UI settings
+ * - Settings search/filter
+ * - Import/export settings
+ * - AI-recommended settings
  */
 
 import {
   Bell,
   Database,
+  Download,
   Eye,
+  Filter,
   Globe,
+  GraduationCap,
+  HelpCircle,
   Loader2,
   Lock,
   Monitor,
   Moon,
   Palette,
+  Search,
   Settings as SettingsIcon,
   Shield,
+  Sparkles,
   Sun,
   Trash2,
+  Upload,
   Users,
+  Wand2,
+  X,
 } from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -66,6 +81,145 @@ const hasPermission = (role: string, permission: string) => {
   return false;
 };
 
+// AI-recommended settings based on user behavior
+const aiRecommendations = [
+  {
+    id: "1",
+    title: "Enable Dark Mode",
+    description:
+      "Based on your late-night research sessions, dark mode could reduce eye strain",
+    setting: "appearance",
+    icon: Moon,
+    action: "Enable",
+    priority: "high",
+  },
+  {
+    id: "2",
+    title: "Turn on Smart Suggestions",
+    description:
+      "AI can help you discover related papers based on your reading history",
+    setting: "general",
+    icon: Sparkles,
+    action: "Enable",
+    priority: "medium",
+  },
+  {
+    id: "3",
+    title: "Enable Email Digest",
+    description: "Get a weekly summary instead of individual notifications",
+    setting: "notifications",
+    icon: Bell,
+    action: "Configure",
+    priority: "low",
+  },
+];
+
+// All settings for search functionality
+const allSettings = [
+  {
+    id: "language",
+    name: "Language",
+    tab: "general",
+    keywords: ["language", "locale", "region"],
+  },
+  {
+    id: "timezone",
+    name: "Timezone",
+    tab: "general",
+    keywords: ["timezone", "time", "zone"],
+  },
+  {
+    id: "autosave",
+    name: "Auto-save drafts",
+    tab: "general",
+    keywords: ["autosave", "save", "draft", "automatic"],
+  },
+  {
+    id: "suggestions",
+    name: "Smart suggestions",
+    tab: "general",
+    keywords: ["smart", "suggestions", "ai", "recommendations"],
+  },
+  {
+    id: "email",
+    name: "Email notifications",
+    tab: "notifications",
+    keywords: ["email", "mail", "notification"],
+  },
+  {
+    id: "push",
+    name: "Push notifications",
+    tab: "notifications",
+    keywords: ["push", "browser", "notification"],
+  },
+  {
+    id: "papers",
+    name: "New papers in collections",
+    tab: "notifications",
+    keywords: ["papers", "collection", "new"],
+  },
+  {
+    id: "collab",
+    name: "Collaboration invites",
+    tab: "notifications",
+    keywords: ["collaboration", "invite", "team"],
+  },
+  {
+    id: "comments",
+    name: "Comments and mentions",
+    tab: "notifications",
+    keywords: ["comments", "mentions", "tag"],
+  },
+  {
+    id: "profile",
+    name: "Public profile",
+    tab: "privacy",
+    keywords: ["profile", "public", "visibility"],
+  },
+  {
+    id: "research",
+    name: "Research visibility",
+    tab: "privacy",
+    keywords: ["research", "visibility", "public"],
+  },
+  {
+    id: "collections",
+    name: "Public collections",
+    tab: "privacy",
+    keywords: ["collections", "public", "share"],
+  },
+  {
+    id: "2fa",
+    name: "Two-factor authentication",
+    tab: "privacy",
+    keywords: ["2fa", "two-factor", "security", "authentication"],
+  },
+  {
+    id: "theme",
+    name: "Theme",
+    tab: "appearance",
+    keywords: ["theme", "dark", "light", "mode", "appearance"],
+  },
+  {
+    id: "fontsize",
+    name: "Font size",
+    tab: "appearance",
+    keywords: ["font", "size", "text", "display"],
+  },
+  {
+    id: "compact",
+    name: "Compact mode",
+    tab: "appearance",
+    keywords: ["compact", "mode", "density"],
+  },
+  {
+    id: "animations",
+    name: "Animations",
+    tab: "appearance",
+    keywords: ["animations", "motion", "transitions"],
+  },
+];
+
 // Custom Tabs implementation for this page
 function SettingsTabs({
   activeTab,
@@ -100,6 +254,14 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
   const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showAiRecommendations, setShowAiRecommendations] = useState(true);
+  const [dismissedRecommendations, setDismissedRecommendations] = useState<
+    string[]
+  >([]);
 
   const [notifications, setNotifications] = useState({
     email: true,
@@ -126,6 +288,22 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
 
   const userRole = mockUser.role;
   const userPlan = mockUser.plan;
+
+  // Filter settings based on search
+  const filteredSettings = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return allSettings.filter(
+      (setting) =>
+        setting.name.toLowerCase().includes(query) ||
+        setting.keywords.some((k) => k.includes(query))
+    );
+  }, [searchQuery]);
+
+  // Active recommendations (not dismissed)
+  const activeRecommendations = aiRecommendations.filter(
+    (rec) => !dismissedRecommendations.includes(rec.id)
+  );
 
   const handleNotificationChange = (key: string, value: boolean) => {
     setNotifications((prev) => ({ ...prev, [key]: value }));
@@ -160,6 +338,35 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
     setShowDeleteDialog(false);
     onShowToast?.("Account deleted successfully", "success");
     onNavigate("/");
+  };
+
+  const handleExportSettings = async () => {
+    setIsExporting(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsExporting(false);
+    onShowToast?.("Settings exported successfully", "success");
+  };
+
+  const handleImportSettings = async () => {
+    setIsImporting(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsImporting(false);
+    onShowToast?.("Settings imported successfully", "success");
+  };
+
+  const handleDismissRecommendation = (id: string) => {
+    setDismissedRecommendations([...dismissedRecommendations, id]);
+  };
+
+  const handleApplyRecommendation = (rec: (typeof aiRecommendations)[0]) => {
+    setActiveTab(rec.setting);
+    setDismissedRecommendations([...dismissedRecommendations, rec.id]);
+    onShowToast?.(`Applied recommendation: ${rec.title}`, "success");
+  };
+
+  const handleSearchResultClick = (setting: (typeof allSettings)[0]) => {
+    setActiveTab(setting.tab);
+    setSearchQuery("");
   };
 
   const tabs = [
@@ -207,6 +414,256 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
             </Badge>
           </div>
         </motion.div>
+
+        {/* Settings Search */}
+        <motion.div
+          className="mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.05 }}
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search settings... (e.g., 'theme', 'notifications', 'privacy')"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+
+            {/* Search Results Dropdown */}
+            <AnimatePresence>
+              {filteredSettings.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute z-50 top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 overflow-hidden"
+                >
+                  {filteredSettings.map((setting) => (
+                    <button
+                      key={setting.id}
+                      onClick={() => handleSearchResultClick(setting)}
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
+                    >
+                      <Filter className="h-4 w-4 text-gray-400" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {setting.name}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                          {setting.tab} settings
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* Import/Export Settings */}
+        <motion.div
+          className="mb-6 flex flex-wrap gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.08 }}
+        >
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportSettings}
+            disabled={isExporting}
+            className="btn-hover-glow"
+          >
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            Export Settings
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleImportSettings}
+            disabled={isImporting}
+            className="btn-hover-glow"
+          >
+            {isImporting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4 mr-2" />
+            )}
+            Import Settings
+          </Button>
+          <Button
+            variant={showPreview ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowPreview(!showPreview)}
+            className="btn-hover-glow"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            {showPreview ? "Hide Preview" : "Live Preview"}
+          </Button>
+        </motion.div>
+
+        {/* AI Recommendations */}
+        <AnimatePresence>
+          {showAiRecommendations && activeRecommendations.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6"
+            >
+              <Card className="bg-gradient-to-br from-primary/5 to-chart-1/5 border-primary/20 dark:from-primary/10 dark:to-chart-1/10">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Wand2 className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-base dark:text-white">
+                          AI-Recommended Settings
+                        </CardTitle>
+                        <CardDescription className="text-xs dark:text-gray-400">
+                          Personalized suggestions based on your usage
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAiRecommendations(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="grid gap-3">
+                    {activeRecommendations.map((rec, index) => (
+                      <motion.div
+                        key={rec.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="flex items-center justify-between p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-primary/10"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                              rec.priority === "high"
+                                ? "bg-green-500/10"
+                                : rec.priority === "medium"
+                                  ? "bg-blue-500/10"
+                                  : "bg-gray-500/10"
+                            }`}
+                          >
+                            <rec.icon
+                              className={`h-5 w-5 ${
+                                rec.priority === "high"
+                                  ? "text-green-500"
+                                  : rec.priority === "medium"
+                                    ? "text-blue-500"
+                                    : "text-gray-500"
+                              }`}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm text-gray-900 dark:text-white">
+                              {rec.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {rec.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDismissRecommendation(rec.id)}
+                          >
+                            Dismiss
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleApplyRecommendation(rec)}
+                          >
+                            {rec.action}
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Live Preview Panel */}
+        <AnimatePresence>
+          {showPreview && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6"
+            >
+              <Card className="border-2 border-dashed border-primary/30 dark:bg-gray-800 dark:border-primary/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-base dark:text-white">
+                      Live Preview
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className={`p-4 rounded-lg border ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span className="font-bold text-primary">SC</span>
+                      </div>
+                      <div>
+                        <p className="font-medium">Sample Content Preview</p>
+                        <p className="text-sm opacity-70">
+                          See how your settings affect the interface
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant={theme === "dark" ? "outline" : "default"}>
+                        Theme: {theme}
+                      </Badge>
+                      <Badge variant="outline">
+                        Notifications: {notifications.email ? "On" : "Off"}
+                      </Badge>
+                      <Badge variant="outline">
+                        Profile: {privacy.profileVisible ? "Public" : "Private"}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Tabs */}
         <motion.div
@@ -641,6 +1098,58 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
                     <p className="text-gray-900 dark:text-white font-mono text-sm">
                       {mockUser.id}
                     </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Help & Support */}
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle className="dark:text-white flex items-center gap-2">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                    Help & Support
+                  </CardTitle>
+                  <CardDescription className="dark:text-gray-400">
+                    Get help and learn how to use ScholarFlow
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="dark:text-white">
+                        Revisit Onboarding
+                      </Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Review the getting started guide and setup your
+                        preferences again
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onNavigate("/onboarding")}
+                      className="flex items-center gap-2"
+                    >
+                      <GraduationCap className="h-4 w-4" />
+                      Start Tour
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="dark:text-white">Help Center</Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Browse documentation, tutorials, and FAQs
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onNavigate("/dashboard/help-center")}
+                      className="flex items-center gap-2"
+                    >
+                      <HelpCircle className="h-4 w-4" />
+                      Open Help
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

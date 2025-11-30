@@ -1,18 +1,37 @@
 "use client";
+
+/**
+ * RegisterPage - User Registration
+ *
+ * Enhanced with:
+ * - Progressive multi-step form with step indicator
+ * - Field validation animations with real-time feedback
+ * - Institution autocomplete suggestions
+ * - Research field suggestions with popular options
+ */
+
 import {
   ArrowLeft,
   ArrowRight,
+  Beaker,
+  BookOpen,
+  Building2,
+  Check,
   CheckCircle,
+  ChevronRight,
   Eye,
   EyeOff,
   Github,
+  GraduationCap,
+  Loader2,
   Mail,
   Shield,
   Sparkles,
   User,
+  X,
 } from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
 import { Button } from "../components/ui/button";
@@ -34,6 +53,101 @@ const benefits = [
   "Mobile app access",
 ];
 
+// Institution suggestions for autocomplete
+const institutionSuggestions = [
+  "Massachusetts Institute of Technology (MIT)",
+  "Stanford University",
+  "Harvard University",
+  "University of Oxford",
+  "University of Cambridge",
+  "California Institute of Technology (Caltech)",
+  "ETH Zurich",
+  "University of Chicago",
+  "Imperial College London",
+  "Princeton University",
+  "Yale University",
+  "Columbia University",
+  "University of Pennsylvania",
+  "Johns Hopkins University",
+  "University of California, Berkeley",
+  "Cornell University",
+  "Duke University",
+  "Northwestern University",
+  "University of Michigan",
+  "Carnegie Mellon University",
+];
+
+// Research field suggestions with categories
+const researchFieldSuggestions = [
+  {
+    category: "Sciences",
+    fields: [
+      "Biology",
+      "Chemistry",
+      "Physics",
+      "Mathematics",
+      "Environmental Science",
+    ],
+  },
+  {
+    category: "Computer Science",
+    fields: [
+      "Machine Learning",
+      "Artificial Intelligence",
+      "Data Science",
+      "Cybersecurity",
+      "Software Engineering",
+    ],
+  },
+  {
+    category: "Engineering",
+    fields: [
+      "Mechanical Engineering",
+      "Electrical Engineering",
+      "Civil Engineering",
+      "Biomedical Engineering",
+      "Aerospace Engineering",
+    ],
+  },
+  {
+    category: "Social Sciences",
+    fields: [
+      "Psychology",
+      "Sociology",
+      "Economics",
+      "Political Science",
+      "Anthropology",
+    ],
+  },
+  {
+    category: "Humanities",
+    fields: [
+      "History",
+      "Philosophy",
+      "Literature",
+      "Linguistics",
+      "Art History",
+    ],
+  },
+  {
+    category: "Medical",
+    fields: [
+      "Medicine",
+      "Neuroscience",
+      "Pharmacology",
+      "Public Health",
+      "Genetics",
+    ],
+  },
+];
+
+// Multi-step form configuration
+const formSteps = [
+  { id: 1, title: "Personal Info", description: "Your basic details" },
+  { id: 2, title: "Academic Profile", description: "Your research background" },
+  { id: 3, title: "Security", description: "Secure your account" },
+];
+
 // Role email patterns for demo
 const roleEmailPatterns: Record<string, UserRole> = {
   "researcher@example.com": "researcher",
@@ -47,6 +161,9 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Multi-step form state
+  const [currentStep, setCurrentStep] = useState(1);
+
   // Form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -57,6 +174,123 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
+
+  // Autocomplete state
+  const [showInstitutionSuggestions, setShowInstitutionSuggestions] =
+    useState(false);
+  const [showFieldSuggestions, setShowFieldSuggestions] = useState(false);
+  const [filteredInstitutions, setFilteredInstitutions] = useState<string[]>(
+    []
+  );
+  const institutionRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+
+  // Field validation state
+  const [fieldValidation, setFieldValidation] = useState<
+    Record<string, { valid: boolean; message: string }>
+  >({});
+
+  // Filter institutions based on input
+  useEffect(() => {
+    if (institution.length > 0) {
+      const filtered = institutionSuggestions.filter((inst) =>
+        inst.toLowerCase().includes(institution.toLowerCase())
+      );
+      setFilteredInstitutions(filtered);
+      setShowInstitutionSuggestions(filtered.length > 0);
+    } else {
+      setShowInstitutionSuggestions(false);
+    }
+  }, [institution]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        institutionRef.current &&
+        !institutionRef.current.contains(e.target as Node)
+      ) {
+        setShowInstitutionSuggestions(false);
+      }
+      if (fieldRef.current && !fieldRef.current.contains(e.target as Node)) {
+        setShowFieldSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Real-time field validation
+  const validateField = (field: string, value: string) => {
+    let validation = { valid: true, message: "" };
+
+    switch (field) {
+      case "firstName":
+        if (value.length === 0)
+          validation = { valid: false, message: "Required" };
+        else if (value.length < 2)
+          validation = { valid: false, message: "Too short" };
+        else validation = { valid: true, message: "Looks good!" };
+        break;
+      case "lastName":
+        if (value.length === 0)
+          validation = { valid: false, message: "Required" };
+        else if (value.length < 2)
+          validation = { valid: false, message: "Too short" };
+        else validation = { valid: true, message: "Looks good!" };
+        break;
+      case "email":
+        if (value.length === 0)
+          validation = { valid: false, message: "Required" };
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          validation = { valid: false, message: "Invalid email" };
+        else validation = { valid: true, message: "Valid email" };
+        break;
+      case "password":
+        if (value.length === 0)
+          validation = { valid: false, message: "Required" };
+        else if (value.length < 8)
+          validation = { valid: false, message: "Min 8 characters" };
+        else validation = { valid: true, message: "Strong password!" };
+        break;
+      case "confirmPassword":
+        if (value !== password)
+          validation = { valid: false, message: "Doesn't match" };
+        else if (value.length > 0)
+          validation = { valid: true, message: "Passwords match!" };
+        break;
+    }
+
+    setFieldValidation((prev) => ({ ...prev, [field]: validation }));
+  };
+
+  // Step navigation
+  const canProceedToStep = (step: number): boolean => {
+    switch (step) {
+      case 2:
+        return (
+          firstName.length >= 2 &&
+          lastName.length >= 2 &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        );
+      case 3:
+        return true; // Academic info is optional
+      default:
+        return true;
+    }
+  };
+
+  const nextStep = () => {
+    if (currentStep < 3 && canProceedToStep(currentStep + 1)) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   // Determine role from email
   const determineRole = (email: string): UserRole | null => {
@@ -138,20 +372,8 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
         "success"
       );
 
-      // Navigate to role-specific dashboard
-      switch (role) {
-        case "admin":
-          onNavigate?.("/dashboard/admin");
-          break;
-        case "team_lead":
-          onNavigate?.("/dashboard/team-lead");
-          break;
-        case "pro_researcher":
-          onNavigate?.("/dashboard/pro-researcher");
-          break;
-        default:
-          onNavigate?.("/dashboard/researcher");
-      }
+      // Navigate to onboarding for new users
+      onNavigate?.("/onboarding");
     }, 1500);
   };
 
@@ -161,7 +383,8 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
 
     setTimeout(() => {
       setIsLoading(false);
-      onNavigate?.("/dashboard/researcher");
+      // Navigate to onboarding for new users
+      onNavigate?.("/onboarding");
     }, 1500);
   };
 
@@ -308,232 +531,601 @@ export function RegisterPage({ onNavigate, onShowToast }: RegisterPageProps) {
                     </div>
                   </div>
 
-                  {/* Registration Form */}
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          First name
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-                            placeholder="John"
-                            className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Last name
-                        </label>
-                        <input
-                          value={lastName}
-                          onChange={(e) => setLastName(e.target.value)}
-                          placeholder="Doe"
-                          className="w-full px-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Email address
-                      </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="john.doe@university.edu"
-                          className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Try: admin@..., lead@..., pro@..., or any email for
-                        researcher
-                      </p>
-                    </div>
-
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Institution{" "}
-                          <span className="text-muted-foreground">
-                            (optional)
-                          </span>
-                        </label>
-                        <input
-                          value={institution}
-                          onChange={(e) => setInstitution(e.target.value)}
-                          placeholder="Stanford University"
-                          className="w-full px-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Field of study{" "}
-                          <span className="text-muted-foreground">
-                            (optional)
-                          </span>
-                        </label>
-                        <input
-                          value={fieldOfStudy}
-                          onChange={(e) => setFieldOfStudy(e.target.value)}
-                          placeholder="Computer Science"
-                          className="w-full px-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Create a strong password"
-                          className="w-full pr-12 pl-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-
-                      {password && (
-                        <div className="mt-2 space-y-2">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={`h-full transition-all duration-300 ${
-                                  passwordStrength.strength <= 2
-                                    ? "bg-red-500"
-                                    : passwordStrength.strength <= 3
-                                      ? "bg-yellow-500"
-                                      : passwordStrength.strength <= 4
-                                        ? "bg-green-500"
-                                        : "bg-green-600"
-                                }`}
-                                style={{
-                                  width: `${(passwordStrength.strength / 5) * 100}%`,
-                                }}
-                              />
+                  {/* Step Indicator */}
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between">
+                      {formSteps.map((step, index) => (
+                        <div key={step.id} className="flex items-center">
+                          <motion.div
+                            initial={{ scale: 0.8 }}
+                            animate={{
+                              scale: currentStep >= step.id ? 1 : 0.8,
+                              backgroundColor:
+                                currentStep >= step.id
+                                  ? "hsl(var(--primary))"
+                                  : "transparent",
+                            }}
+                            className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
+                              currentStep >= step.id
+                                ? "border-primary text-primary-foreground"
+                                : "border-muted-foreground/30 text-muted-foreground"
+                            }`}
+                          >
+                            {currentStep > step.id ? (
+                              <Check className="h-5 w-5" />
+                            ) : (
+                              <span className="text-sm font-semibold">
+                                {step.id}
+                              </span>
+                            )}
+                          </motion.div>
+                          {index < formSteps.length - 1 && (
+                            <div className="hidden sm:flex mx-2 w-12 lg:w-20">
+                              <motion.div className="h-0.5 w-full bg-muted-foreground/20 rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{
+                                    width:
+                                      currentStep > step.id ? "100%" : "0%",
+                                  }}
+                                  className="h-full bg-primary"
+                                  transition={{ duration: 0.3 }}
+                                />
+                              </motion.div>
                             </div>
-                            <span
-                              className={`text-xs ${passwordStrength.color}`}
-                            >
-                              {passwordStrength.text}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Confirm password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm your password"
-                          className="w-full pr-12 pl-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
                           )}
-                        </button>
-                      </div>
+                        </div>
+                      ))}
                     </div>
-
-                    <div className="space-y-3">
-                      <label className="flex items-start gap-3 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={acceptTerms}
-                          onChange={(e) => setAcceptTerms(e.target.checked)}
-                          className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50 mt-0.5"
-                        />
-                        <span>
-                          I agree to the{" "}
-                          <button
-                            type="button"
-                            onClick={() => onNavigate?.("/terms")}
-                            className="text-primary hover:text-primary/80 transition-colors"
+                    <div className="flex justify-between mt-2">
+                      {formSteps.map((step) => (
+                        <div key={step.id} className="text-center flex-1">
+                          <p
+                            className={`text-xs font-medium ${currentStep >= step.id ? "text-foreground" : "text-muted-foreground"}`}
                           >
-                            Terms of Service
-                          </button>{" "}
-                          and{" "}
-                          <button
-                            type="button"
-                            onClick={() => onNavigate?.("/privacy")}
-                            className="text-primary hover:text-primary/80 transition-colors"
-                          >
-                            Privacy Policy
-                          </button>
-                        </span>
-                      </label>
-
-                      <label className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <input
-                          type="checkbox"
-                          checked={newsletter}
-                          onChange={(e) => setNewsletter(e.target.checked)}
-                          className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
-                        />
-                        <span>
-                          Send me updates about new features and research
-                          insights
-                        </span>
-                      </label>
+                            {step.title}
+                          </p>
+                        </div>
+                      ))}
                     </div>
+                  </div>
 
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      variant="gradient"
-                      className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
-                      size="lg"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent mr-2" />
-                          Creating account...
-                        </>
-                      ) : (
-                        <>
-                          Create account
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </>
+                  {/* Multi-Step Registration Form */}
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <AnimatePresence mode="wait">
+                      {/* Step 1: Personal Info */}
+                      {currentStep === 1 && (
+                        <motion.div
+                          key="step1"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                          className="space-y-4"
+                        >
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                First name
+                              </label>
+                              <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <input
+                                  value={firstName}
+                                  onChange={(e) => {
+                                    setFirstName(e.target.value);
+                                    validateField("firstName", e.target.value);
+                                  }}
+                                  placeholder="John"
+                                  className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-background focus:outline-none focus:ring-2 transition-all ${
+                                    fieldValidation.firstName?.valid === false
+                                      ? "border-red-500 focus:ring-red-500/50"
+                                      : fieldValidation.firstName?.valid
+                                        ? "border-green-500 focus:ring-green-500/50"
+                                        : "border-border focus:ring-primary/50"
+                                  }`}
+                                />
+                                <AnimatePresence>
+                                  {fieldValidation.firstName && (
+                                    <motion.div
+                                      initial={{ opacity: 0, scale: 0.5 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.5 }}
+                                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                                    >
+                                      {fieldValidation.firstName.valid ? (
+                                        <Check className="h-4 w-4 text-green-500" />
+                                      ) : (
+                                        <X className="h-4 w-4 text-red-500" />
+                                      )}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                              {fieldValidation.firstName && (
+                                <motion.p
+                                  initial={{ opacity: 0, y: -5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className={`text-xs mt-1 ${fieldValidation.firstName.valid ? "text-green-500" : "text-red-500"}`}
+                                >
+                                  {fieldValidation.firstName.message}
+                                </motion.p>
+                              )}
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium mb-2">
+                                Last name
+                              </label>
+                              <div className="relative">
+                                <input
+                                  value={lastName}
+                                  onChange={(e) => {
+                                    setLastName(e.target.value);
+                                    validateField("lastName", e.target.value);
+                                  }}
+                                  placeholder="Doe"
+                                  className={`w-full px-4 pr-10 py-3 border rounded-xl bg-background focus:outline-none focus:ring-2 transition-all ${
+                                    fieldValidation.lastName?.valid === false
+                                      ? "border-red-500 focus:ring-red-500/50"
+                                      : fieldValidation.lastName?.valid
+                                        ? "border-green-500 focus:ring-green-500/50"
+                                        : "border-border focus:ring-primary/50"
+                                  }`}
+                                />
+                                <AnimatePresence>
+                                  {fieldValidation.lastName && (
+                                    <motion.div
+                                      initial={{ opacity: 0, scale: 0.5 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.5 }}
+                                      className="absolute right-3 top-1/2 -translate-y-1/2"
+                                    >
+                                      {fieldValidation.lastName.valid ? (
+                                        <Check className="h-4 w-4 text-green-500" />
+                                      ) : (
+                                        <X className="h-4 w-4 text-red-500" />
+                                      )}
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                              {fieldValidation.lastName && (
+                                <motion.p
+                                  initial={{ opacity: 0, y: -5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className={`text-xs mt-1 ${fieldValidation.lastName.valid ? "text-green-500" : "text-red-500"}`}
+                                >
+                                  {fieldValidation.lastName.message}
+                                </motion.p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Email address
+                            </label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => {
+                                  setEmail(e.target.value);
+                                  validateField("email", e.target.value);
+                                }}
+                                placeholder="john.doe@university.edu"
+                                className={`w-full pl-10 pr-10 py-3 border rounded-xl bg-background focus:outline-none focus:ring-2 transition-all ${
+                                  fieldValidation.email?.valid === false
+                                    ? "border-red-500 focus:ring-red-500/50"
+                                    : fieldValidation.email?.valid
+                                      ? "border-green-500 focus:ring-green-500/50"
+                                      : "border-border focus:ring-primary/50"
+                                }`}
+                              />
+                              <AnimatePresence>
+                                {fieldValidation.email && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.5 }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                                  >
+                                    {fieldValidation.email.valid ? (
+                                      <Check className="h-4 w-4 text-green-500" />
+                                    ) : (
+                                      <X className="h-4 w-4 text-red-500" />
+                                    )}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                            {fieldValidation.email && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`text-xs mt-1 ${fieldValidation.email.valid ? "text-green-500" : "text-red-500"}`}
+                              >
+                                {fieldValidation.email.message}
+                              </motion.p>
+                            )}
+                          </div>
+
+                          <div className="flex justify-end pt-4">
+                            <Button
+                              type="button"
+                              onClick={nextStep}
+                              disabled={!canProceedToStep(2)}
+                              variant="gradient"
+                              className="px-6 btn-hover-glow"
+                            >
+                              Next Step
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
+                        </motion.div>
                       )}
-                    </Button>
+
+                      {/* Step 2: Academic Profile */}
+                      {currentStep === 2 && (
+                        <motion.div
+                          key="step2"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                          className="space-y-4"
+                        >
+                          {/* Institution with Autocomplete */}
+                          <div ref={institutionRef} className="relative">
+                            <label className="block text-sm font-medium mb-2">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-muted-foreground" />
+                                Institution{" "}
+                                <span className="text-muted-foreground">
+                                  (optional)
+                                </span>
+                              </div>
+                            </label>
+                            <input
+                              value={institution}
+                              onChange={(e) => setInstitution(e.target.value)}
+                              onFocus={() =>
+                                institution.length > 0 &&
+                                setShowInstitutionSuggestions(true)
+                              }
+                              placeholder="Start typing your institution..."
+                              className="w-full px-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                            />
+                            <AnimatePresence>
+                              {showInstitutionSuggestions &&
+                                filteredInstitutions.length > 0 && (
+                                  <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="absolute z-50 w-full mt-1 bg-background border border-border rounded-xl shadow-lg max-h-48 overflow-y-auto"
+                                  >
+                                    {filteredInstitutions
+                                      .slice(0, 5)
+                                      .map((inst, index) => (
+                                        <button
+                                          key={index}
+                                          type="button"
+                                          onClick={() => {
+                                            setInstitution(inst);
+                                            setShowInstitutionSuggestions(
+                                              false
+                                            );
+                                          }}
+                                          className="w-full px-4 py-2 text-left text-sm hover:bg-muted/50 transition-colors flex items-center gap-2"
+                                        >
+                                          <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                          {inst}
+                                        </button>
+                                      ))}
+                                  </motion.div>
+                                )}
+                            </AnimatePresence>
+                          </div>
+
+                          {/* Research Field with Suggestions */}
+                          <div ref={fieldRef} className="relative">
+                            <label className="block text-sm font-medium mb-2">
+                              <div className="flex items-center gap-2">
+                                <Beaker className="h-4 w-4 text-muted-foreground" />
+                                Field of study{" "}
+                                <span className="text-muted-foreground">
+                                  (optional)
+                                </span>
+                              </div>
+                            </label>
+                            <input
+                              value={fieldOfStudy}
+                              onChange={(e) => setFieldOfStudy(e.target.value)}
+                              onFocus={() => setShowFieldSuggestions(true)}
+                              placeholder="e.g., Machine Learning, Biology..."
+                              className="w-full px-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                            />
+                            <AnimatePresence>
+                              {showFieldSuggestions && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  className="absolute z-50 w-full mt-1 bg-background border border-border rounded-xl shadow-lg max-h-64 overflow-y-auto"
+                                >
+                                  <div className="p-2">
+                                    <p className="text-xs text-muted-foreground px-2 py-1">
+                                      Popular research fields:
+                                    </p>
+                                    {researchFieldSuggestions.map(
+                                      (category) => (
+                                        <div
+                                          key={category.category}
+                                          className="mt-2"
+                                        >
+                                          <p className="text-xs font-medium text-primary px-2 py-1 flex items-center gap-1">
+                                            <BookOpen className="h-3 w-3" />
+                                            {category.category}
+                                          </p>
+                                          <div className="flex flex-wrap gap-1 px-2">
+                                            {category.fields.map((field) => (
+                                              <button
+                                                key={field}
+                                                type="button"
+                                                onClick={() => {
+                                                  setFieldOfStudy(field);
+                                                  setShowFieldSuggestions(
+                                                    false
+                                                  );
+                                                }}
+                                                className="px-2 py-1 text-xs bg-muted hover:bg-muted/80 rounded-md transition-colors"
+                                              >
+                                                {field}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+
+                          <div className="flex justify-between pt-4">
+                            <Button
+                              type="button"
+                              onClick={prevStep}
+                              variant="outline"
+                              className="px-6"
+                            >
+                              <ArrowLeft className="h-4 w-4 mr-1" />
+                              Back
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={nextStep}
+                              variant="gradient"
+                              className="px-6 btn-hover-glow"
+                            >
+                              Next Step
+                              <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Step 3: Security */}
+                      {currentStep === 3 && (
+                        <motion.div
+                          key="step3"
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -20 }}
+                          transition={{ duration: 0.2 }}
+                          className="space-y-4"
+                        >
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Password
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => {
+                                  setPassword(e.target.value);
+                                  validateField("password", e.target.value);
+                                }}
+                                placeholder="Create a strong password"
+                                className={`w-full pr-12 pl-4 py-3 border rounded-xl bg-background focus:outline-none focus:ring-2 transition-all ${
+                                  fieldValidation.password?.valid === false
+                                    ? "border-red-500 focus:ring-red-500/50"
+                                    : fieldValidation.password?.valid
+                                      ? "border-green-500 focus:ring-green-500/50"
+                                      : "border-border focus:ring-primary/50"
+                                }`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+
+                            {password && (
+                              <div className="mt-2 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                                    <motion.div
+                                      initial={{ width: 0 }}
+                                      animate={{
+                                        width: `${(passwordStrength.strength / 5) * 100}%`,
+                                      }}
+                                      className={`h-full transition-colors ${
+                                        passwordStrength.strength <= 2
+                                          ? "bg-red-500"
+                                          : passwordStrength.strength <= 3
+                                            ? "bg-yellow-500"
+                                            : passwordStrength.strength <= 4
+                                              ? "bg-green-500"
+                                              : "bg-green-600"
+                                      }`}
+                                    />
+                                  </div>
+                                  <span
+                                    className={`text-xs ${passwordStrength.color}`}
+                                  >
+                                    {passwordStrength.text}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium mb-2">
+                              Confirm password
+                            </label>
+                            <div className="relative">
+                              <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={confirmPassword}
+                                onChange={(e) => {
+                                  setConfirmPassword(e.target.value);
+                                  validateField(
+                                    "confirmPassword",
+                                    e.target.value
+                                  );
+                                }}
+                                placeholder="Confirm your password"
+                                className={`w-full pr-12 pl-4 py-3 border rounded-xl bg-background focus:outline-none focus:ring-2 transition-all ${
+                                  fieldValidation.confirmPassword?.valid ===
+                                  false
+                                    ? "border-red-500 focus:ring-red-500/50"
+                                    : fieldValidation.confirmPassword?.valid
+                                      ? "border-green-500 focus:ring-green-500/50"
+                                      : "border-border focus:ring-primary/50"
+                                }`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setShowConfirmPassword(!showConfirmPassword)
+                                }
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                {showConfirmPassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                            {fieldValidation.confirmPassword && (
+                              <motion.p
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`text-xs mt-1 ${fieldValidation.confirmPassword.valid ? "text-green-500" : "text-red-500"}`}
+                              >
+                                {fieldValidation.confirmPassword.message}
+                              </motion.p>
+                            )}
+                          </div>
+
+                          <div className="space-y-3">
+                            <label className="flex items-start gap-3 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={acceptTerms}
+                                onChange={(e) =>
+                                  setAcceptTerms(e.target.checked)
+                                }
+                                className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50 mt-0.5"
+                              />
+                              <span>
+                                I agree to the{" "}
+                                <button
+                                  type="button"
+                                  onClick={() => onNavigate?.("/terms")}
+                                  className="text-primary hover:text-primary/80 transition-colors"
+                                >
+                                  Terms of Service
+                                </button>{" "}
+                                and{" "}
+                                <button
+                                  type="button"
+                                  onClick={() => onNavigate?.("/privacy")}
+                                  className="text-primary hover:text-primary/80 transition-colors"
+                                >
+                                  Privacy Policy
+                                </button>
+                              </span>
+                            </label>
+
+                            <label className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <input
+                                type="checkbox"
+                                checked={newsletter}
+                                onChange={(e) =>
+                                  setNewsletter(e.target.checked)
+                                }
+                                className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
+                              />
+                              <span>
+                                Send me updates about new features and research
+                                insights
+                              </span>
+                            </label>
+                          </div>
+
+                          <div className="flex justify-between pt-4">
+                            <Button
+                              type="button"
+                              onClick={prevStep}
+                              variant="outline"
+                              className="px-6"
+                            >
+                              <ArrowLeft className="h-4 w-4 mr-1" />
+                              Back
+                            </Button>
+                            <Button
+                              type="submit"
+                              disabled={
+                                isLoading ||
+                                !acceptTerms ||
+                                password !== confirmPassword ||
+                                password.length < 8
+                              }
+                              variant="gradient"
+                              className="px-6 btn-hover-glow btn-shine"
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                  Creating...
+                                </>
+                              ) : (
+                                <>
+                                  Create account
+                                  <ArrowRight className="h-4 w-4 ml-2" />
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </form>
 
                   {/* Footer */}
