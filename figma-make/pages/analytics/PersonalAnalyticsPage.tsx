@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUp,
+  Award,
   BarChart3,
   BookOpen,
   ChevronDown,
@@ -11,13 +12,18 @@ import {
   Download,
   Eye,
   Flame,
+  Medal,
   MessageSquare,
   PenTool,
+  Play,
   Share2,
+  Sparkles,
   Star,
   Target,
+  Timer,
   TrendingDown,
   TrendingUp,
+  Trophy,
   Zap,
 } from "lucide-react";
 import { useState } from "react";
@@ -142,6 +148,125 @@ const mockProductivityHours = [
   { hour: "10PM", value: 15 },
 ];
 
+// Reading time tracking data
+interface ReadingTimeData {
+  today: number; // minutes
+  thisWeek: number;
+  thisMonth: number;
+  weeklyGoal: number;
+  dailyAverage: number;
+  weeklyData: { day: string; minutes: number }[];
+}
+
+const mockReadingTime: ReadingTimeData = {
+  today: 47,
+  thisWeek: 285,
+  thisMonth: 1240,
+  weeklyGoal: 420, // 7 hours
+  dailyAverage: 41,
+  weeklyData: [
+    { day: "Mon", minutes: 45 },
+    { day: "Tue", minutes: 32 },
+    { day: "Wed", minutes: 68 },
+    { day: "Thu", minutes: 25 },
+    { day: "Fri", minutes: 55 },
+    { day: "Sat", minutes: 13 },
+    { day: "Sun", minutes: 47 },
+  ],
+};
+
+// Achievement badges
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: "trophy" | "medal" | "star" | "award" | "flame" | "zap";
+  color: string;
+  earnedAt?: string;
+  progress?: number;
+  isUnlocked: boolean;
+  rarity: "common" | "rare" | "epic" | "legendary";
+}
+
+const mockAchievements: Achievement[] = [
+  {
+    id: "a1",
+    name: "Paper Pioneer",
+    description: "Read your first 10 papers",
+    icon: "trophy",
+    color: "from-amber-400 to-amber-600",
+    earnedAt: "2024-01-10",
+    isUnlocked: true,
+    rarity: "common",
+  },
+  {
+    id: "a2",
+    name: "Annotation Master",
+    description: "Create 100 annotations",
+    icon: "medal",
+    color: "from-emerald-400 to-emerald-600",
+    earnedAt: "2024-01-15",
+    isUnlocked: true,
+    rarity: "rare",
+  },
+  {
+    id: "a3",
+    name: "Streak Champion",
+    description: "Maintain a 14-day reading streak",
+    icon: "flame",
+    color: "from-orange-400 to-red-500",
+    earnedAt: "2024-01-08",
+    isUnlocked: true,
+    rarity: "rare",
+  },
+  {
+    id: "a4",
+    name: "Knowledge Sharer",
+    description: "Participate in 50 discussions",
+    icon: "star",
+    color: "from-blue-400 to-indigo-600",
+    progress: 46,
+    isUnlocked: false,
+    rarity: "epic",
+  },
+  {
+    id: "a5",
+    name: "Deep Diver",
+    description: "Read papers for 100 hours total",
+    icon: "zap",
+    color: "from-purple-400 to-pink-500",
+    progress: 78,
+    isUnlocked: false,
+    rarity: "legendary",
+  },
+  {
+    id: "a6",
+    name: "Speed Reader",
+    description: "Read 5 papers in a single day",
+    icon: "award",
+    color: "from-cyan-400 to-teal-500",
+    progress: 80,
+    isUnlocked: false,
+    rarity: "epic",
+  },
+];
+
+const achievementIcons: Record<Achievement["icon"], React.ReactNode> = {
+  trophy: <Trophy className="h-5 w-5" />,
+  medal: <Medal className="h-5 w-5" />,
+  star: <Star className="h-5 w-5" />,
+  award: <Award className="h-5 w-5" />,
+  flame: <Flame className="h-5 w-5" />,
+  zap: <Zap className="h-5 w-5" />,
+};
+
+const rarityColors: Record<Achievement["rarity"], string> = {
+  common: "border-slate-300 dark:border-slate-600",
+  rare: "border-blue-400 dark:border-blue-500",
+  epic: "border-purple-400 dark:border-purple-500",
+  legendary: "border-amber-400 dark:border-amber-500",
+};
+
 const defaultUser = {
   name: "John Researcher",
   email: "john@research.edu",
@@ -157,6 +282,27 @@ export function PersonalAnalyticsPage({
   const user = { ...defaultUser, role: effectiveRole };
 
   const [dateRange, setDateRange] = useState("month");
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
+  const [isReadingActive, setIsReadingActive] = useState(false);
+  const [currentReadingTime, setCurrentReadingTime] = useState(0);
+
+  // Format minutes to hours and minutes
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
+    return `${mins}m`;
+  };
+
+  // Calculate weekly goal progress
+  const weeklyProgress =
+    (mockReadingTime.thisWeek / mockReadingTime.weeklyGoal) * 100;
+
+  // Count achievements
+  const unlockedAchievements = mockAchievements.filter((a) => a.isUnlocked);
+  const lockedAchievements = mockAchievements.filter((a) => !a.isUnlocked);
 
   const stats = [
     {
@@ -303,6 +449,231 @@ export function PersonalAnalyticsPage({
             </motion.div>
           ))}
         </motion.div>
+
+        {/* Reading Time Tracker & Achievement Badges */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          {/* Reading Time Tracker */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 text-white">
+                  <Timer className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    Reading Time
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Track your daily reading progress
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsReadingActive(!isReadingActive)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
+                  isReadingActive
+                    ? "bg-red-100 dark:bg-red-900/30 text-red-600 hover:bg-red-200"
+                    : "bg-gradient-to-r from-cyan-500 to-teal-500 text-white hover:from-cyan-600 hover:to-teal-600 shadow-lg shadow-cyan-500/25"
+                }`}
+              >
+                {isReadingActive ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    Stop
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Start Session
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Today's Reading */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="text-center p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {formatTime(mockReadingTime.today)}
+                </p>
+                <p className="text-xs text-slate-500">Today</p>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {formatTime(mockReadingTime.thisWeek)}
+                </p>
+                <p className="text-xs text-slate-500">This Week</p>
+              </div>
+              <div className="text-center p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                  {formatTime(mockReadingTime.thisMonth)}
+                </p>
+                <p className="text-xs text-slate-500">This Month</p>
+              </div>
+            </div>
+
+            {/* Weekly Goal Progress */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Weekly Goal
+                </span>
+                <span className="text-sm text-slate-500">
+                  {formatTime(mockReadingTime.thisWeek)} /{" "}
+                  {formatTime(mockReadingTime.weeklyGoal)}
+                </span>
+              </div>
+              <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(weeklyProgress, 100)}%` }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-teal-500"
+                />
+              </div>
+            </div>
+
+            {/* Weekly Chart */}
+            <div className="flex items-end gap-2 h-20">
+              {mockReadingTime.weeklyData.map((day, index) => {
+                const maxMinutes = Math.max(
+                  ...mockReadingTime.weeklyData.map((d) => d.minutes)
+                );
+                const height = (day.minutes / maxMinutes) * 100;
+                return (
+                  <div
+                    key={day.day}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${height}%` }}
+                      transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
+                      className="w-full bg-gradient-to-t from-cyan-400 to-teal-300 rounded-t-md min-h-[4px]"
+                      title={`${day.minutes} min`}
+                    />
+                    <span className="text-xs text-slate-500">{day.day}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          {/* Achievement Badges */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+                  <Trophy className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    Achievements
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    {unlockedAchievements.length} of {mockAchievements.length}{" "}
+                    unlocked
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAllAchievements(!showAllAchievements)}
+                className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                {showAllAchievements ? "Show Less" : "View All"}
+              </button>
+            </div>
+
+            {/* Achievement Progress Bar */}
+            <div className="mb-6">
+              <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{
+                    width: `${(unlockedAchievements.length / mockAchievements.length) * 100}%`,
+                  }}
+                  transition={{ delay: 0.3, duration: 0.8 }}
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500"
+                />
+              </div>
+            </div>
+
+            {/* Achievement Grid */}
+            <div className="grid grid-cols-3 gap-3">
+              {(showAllAchievements
+                ? mockAchievements
+                : mockAchievements.slice(0, 6)
+              ).map((achievement, index) => (
+                <motion.div
+                  key={achievement.id}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 + index * 0.05 }}
+                  className={`relative p-3 rounded-xl border-2 ${rarityColors[achievement.rarity]} ${
+                    achievement.isUnlocked
+                      ? "bg-white dark:bg-slate-700"
+                      : "bg-slate-50 dark:bg-slate-800 opacity-60"
+                  }`}
+                >
+                  <div
+                    className={`w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                      achievement.isUnlocked
+                        ? `bg-gradient-to-br ${achievement.color} text-white`
+                        : "bg-slate-200 dark:bg-slate-600 text-slate-400"
+                    }`}
+                  >
+                    {achievementIcons[achievement.icon]}
+                  </div>
+                  <p className="text-xs font-medium text-center text-slate-900 dark:text-white truncate">
+                    {achievement.name}
+                  </p>
+                  {!achievement.isUnlocked && achievement.progress && (
+                    <div className="mt-2">
+                      <div className="h-1 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full"
+                          style={{ width: `${achievement.progress}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] text-center text-slate-400 mt-1">
+                        {achievement.progress}%
+                      </p>
+                    </div>
+                  )}
+                  {achievement.isUnlocked && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <Sparkles className="h-3 w-3 text-white" />
+                    </div>
+                  )}
+                  {/* Rarity indicator */}
+                  <div
+                    className={`absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      achievement.rarity === "legendary"
+                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                        : achievement.rarity === "epic"
+                          ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+                          : achievement.rarity === "rare"
+                            ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                            : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                    }`}
+                  >
+                    {achievement.rarity}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6 mb-8">

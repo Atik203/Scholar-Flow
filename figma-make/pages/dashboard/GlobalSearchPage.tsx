@@ -15,10 +15,12 @@
 
 import {
   ArrowRight,
+  Bookmark,
   BookOpen,
   Bot,
   Brain,
   Calendar,
+  Check,
   ChevronDown,
   FileText,
   Filter,
@@ -28,14 +30,18 @@ import {
   Loader2,
   MessageSquare,
   Plus,
+  Save,
   Search,
   Send,
+  Sliders,
   Sparkles,
   Star,
+  Tag,
   TrendingUp,
   User,
   Users,
   X,
+  Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
@@ -261,6 +267,491 @@ const searchSuggestions = [
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
 }
+
+// ============================================================================
+// Advanced Filters Modal Component
+// ============================================================================
+interface AdvancedFiltersState {
+  citationMin: number;
+  citationMax: number;
+  yearFrom: number;
+  yearTo: number;
+  authors: string[];
+  tags: string[];
+  relevanceThreshold: number;
+  includeAIContent: boolean;
+}
+
+const AdvancedFiltersModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  filters: AdvancedFiltersState;
+  onApply: (filters: AdvancedFiltersState) => void;
+}> = ({ isOpen, onClose, filters, onApply }) => {
+  const [localFilters, setLocalFilters] =
+    useState<AdvancedFiltersState>(filters);
+  const [authorInput, setAuthorInput] = useState("");
+  const [tagInput, setTagInput] = useState("");
+
+  const addAuthor = () => {
+    if (
+      authorInput.trim() &&
+      !localFilters.authors.includes(authorInput.trim())
+    ) {
+      setLocalFilters((prev) => ({
+        ...prev,
+        authors: [...prev.authors, authorInput.trim()],
+      }));
+      setAuthorInput("");
+    }
+  };
+
+  const removeAuthor = (author: string) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      authors: prev.authors.filter((a) => a !== author),
+    }));
+  };
+
+  const addTag = () => {
+    if (tagInput.trim() && !localFilters.tags.includes(tagInput.trim())) {
+      setLocalFilters((prev) => ({
+        ...prev,
+        tags: [...prev.tags, tagInput.trim()],
+      }));
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl bg-background border rounded-2xl shadow-2xl overflow-hidden"
+          >
+            <div className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl">
+                    <Sliders className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">Advanced Filters</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Fine-tune your search with precise controls
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-muted rounded-lg"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-6">
+              {/* Citation Range */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Citation Count Range
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-muted-foreground">
+                      Minimum
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={localFilters.citationMin}
+                      onChange={(e) =>
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          citationMin: parseInt(e.target.value) || 0,
+                        }))
+                      }
+                      className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">
+                      Maximum
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={localFilters.citationMax}
+                      onChange={(e) =>
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          citationMax: parseInt(e.target.value) || 10000,
+                        }))
+                      }
+                      className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Year Range */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Publication Year
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-xs text-muted-foreground">From</span>
+                    <input
+                      type="number"
+                      min={1900}
+                      max={2025}
+                      value={localFilters.yearFrom}
+                      onChange={(e) =>
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          yearFrom: parseInt(e.target.value) || 2000,
+                        }))
+                      }
+                      className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground">To</span>
+                    <input
+                      type="number"
+                      min={1900}
+                      max={2025}
+                      value={localFilters.yearTo}
+                      onChange={(e) =>
+                        setLocalFilters((prev) => ({
+                          ...prev,
+                          yearTo: parseInt(e.target.value) || 2025,
+                        }))
+                      }
+                      className="w-full mt-1 px-3 py-2 border rounded-lg bg-background"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Relevance Threshold Slider */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Minimum Relevance Score: {localFilters.relevanceThreshold}%
+                </label>
+                <div className="relative">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all"
+                      style={{ width: `${localFilters.relevanceThreshold}%` }}
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={localFilters.relevanceThreshold}
+                    onChange={(e) =>
+                      setLocalFilters((prev) => ({
+                        ...prev,
+                        relevanceThreshold: parseInt(e.target.value),
+                      }))
+                    }
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Authors */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Filter by Authors
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    placeholder="Add author name..."
+                    value={authorInput}
+                    onChange={(e) => setAuthorInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addAuthor()}
+                    className="flex-1 px-3 py-2 border rounded-lg bg-background text-sm"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={addAuthor}
+                    className="px-3 py-2 bg-primary text-primary-foreground rounded-lg"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </motion.button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {localFilters.authors.map((author) => (
+                    <span
+                      key={author}
+                      className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm"
+                    >
+                      <User className="h-3 w-3" />
+                      {author}
+                      <button onClick={() => removeAuthor(author)}>
+                        <X className="h-3 w-3 ml-1 hover:text-red-500" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="text-sm font-medium mb-3 block">
+                  Filter by Tags
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    placeholder="Add tag..."
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addTag()}
+                    className="flex-1 px-3 py-2 border rounded-lg bg-background text-sm"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={addTag}
+                    className="px-3 py-2 bg-primary text-primary-foreground rounded-lg"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </motion.button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {localFilters.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-sm"
+                    >
+                      <Tag className="h-3 w-3" />
+                      {tag}
+                      <button onClick={() => removeTag(tag)}>
+                        <X className="h-3 w-3 ml-1 hover:text-red-500" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Include AI Content Toggle */}
+              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Sparkles className="h-5 w-5 text-purple-500" />
+                  <div>
+                    <p className="font-medium">Include AI-Generated Content</p>
+                    <p className="text-sm text-muted-foreground">
+                      Show AI threads and AI-assisted annotations
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      includeAIContent: !prev.includeAIContent,
+                    }))
+                  }
+                  className={cn(
+                    "w-12 h-6 rounded-full transition-colors relative",
+                    localFilters.includeAIContent
+                      ? "bg-purple-500"
+                      : "bg-muted-foreground/30"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "absolute top-1 w-4 h-4 bg-white rounded-full transition-all",
+                      localFilters.includeAIContent ? "left-7" : "left-1"
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 border-t flex justify-end gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onClose}
+                className="px-4 py-2 border rounded-xl hover:bg-muted"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  onApply(localFilters);
+                  onClose();
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl flex items-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                Apply Filters
+              </motion.button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// ============================================================================
+// Save Search Modal Component
+// ============================================================================
+const SaveSearchModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  query: string;
+  onSave: (name: string) => void;
+}> = ({ isOpen, onClose, query, onSave }) => {
+  const [name, setName] = useState("");
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md bg-background border rounded-2xl shadow-2xl p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl">
+                <Bookmark className="h-5 w-5 text-white" />
+              </div>
+              <h3 className="text-lg font-semibold">Save Search</h3>
+            </div>
+
+            <p className="text-sm text-muted-foreground mb-4">
+              Save this search to quickly access it later
+            </p>
+
+            <div className="p-3 bg-muted/50 rounded-lg mb-4">
+              <p className="text-sm font-medium text-muted-foreground">
+                Query:
+              </p>
+              <p className="text-sm">{query}</p>
+            </div>
+
+            <input
+              type="text"
+              placeholder="Give your search a name..."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 border rounded-xl bg-background mb-4"
+            />
+
+            <div className="flex justify-end gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onClose}
+                className="px-4 py-2 border rounded-xl hover:bg-muted"
+              >
+                Cancel
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  if (name.trim()) {
+                    onSave(name.trim());
+                    setName("");
+                    onClose();
+                  }
+                }}
+                disabled={!name.trim()}
+                className="px-6 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl flex items-center gap-2 disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                Save
+              </motion.button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// ============================================================================
+// AI Search Suggestions Component
+// ============================================================================
+const AISearchSuggestions: React.FC<{
+  query: string;
+  onSelect: (suggestion: string) => void;
+}> = ({ query, onSelect }) => {
+  const suggestions = [
+    `papers citing "${query}"`,
+    `methodology comparison for ${query}`,
+    `recent advances in ${query}`,
+    `${query} applications in healthcare`,
+  ];
+
+  if (!query.trim()) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="absolute left-0 right-0 top-full mt-2 bg-background border rounded-xl shadow-lg p-3 z-40"
+    >
+      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+        <Zap className="h-3 w-3 text-purple-500" />
+        AI-powered suggestions
+      </p>
+      <div className="space-y-1">
+        {suggestions.map((suggestion, i) => (
+          <button
+            key={i}
+            onClick={() => onSelect(suggestion)}
+            className="w-full p-2 text-left text-sm rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+          >
+            <Sparkles className="h-3 w-3 text-purple-500" />
+            {suggestion}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
 
 // ============================================================================
 // Deep Research Panel Component
@@ -513,12 +1004,27 @@ export function GlobalSearchPage({
   );
   const [showDeepResearch, setShowDeepResearch] = useState(false);
   const [semanticMode, setSemanticMode] = useState(true);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showSaveSearch, setShowSaveSearch] = useState(false);
+  const [showAISuggestions, setShowAISuggestions] = useState(false);
+  const [mySavedSearches, setMySavedSearches] = useState(savedSearches);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFiltersState>({
+    citationMin: 0,
+    citationMax: 10000,
+    yearFrom: 2000,
+    yearTo: 2025,
+    authors: [],
+    tags: [],
+    relevanceThreshold: 50,
+    includeAIContent: true,
+  });
 
   const handleSearch = () => {
     if (!query.trim()) return;
 
     setIsSearching(true);
     setHasSearched(true);
+    setShowAISuggestions(false);
 
     // Simulate search
     setTimeout(() => {
@@ -637,6 +1143,30 @@ export function GlobalSearchPage({
                   </button>
                 </span>
               )}
+
+              {/* Advanced Filters Button */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowAdvancedFilters(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-sm hover:bg-muted transition-colors"
+              >
+                <Sliders className="h-4 w-4" />
+                Advanced
+              </motion.button>
+
+              {/* Save Search Button */}
+              {query.trim() && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowSaveSearch(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-yellow-400 text-yellow-600 dark:text-yellow-400 rounded-lg text-sm hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  Save
+                </motion.button>
+              )}
             </div>
 
             {/* Deep Research Button */}
@@ -655,6 +1185,18 @@ export function GlobalSearchPage({
               )}
             </motion.button>
           </div>
+
+          {/* AI Suggestions Dropdown */}
+          {showAISuggestions && semanticMode && (
+            <AISearchSuggestions
+              query={query}
+              onSelect={(suggestion) => {
+                setQuery(suggestion);
+                setShowAISuggestions(false);
+                handleSearch();
+              }}
+            />
+          )}
 
           {/* Expanded Filters */}
           <AnimatePresence>
@@ -921,6 +1463,35 @@ export function GlobalSearchPage({
             />
           )}
         </AnimatePresence>
+
+        {/* Advanced Filters Modal */}
+        <AdvancedFiltersModal
+          isOpen={showAdvancedFilters}
+          onClose={() => setShowAdvancedFilters(false)}
+          filters={advancedFilters}
+          onApply={(filters) => {
+            setAdvancedFilters(filters);
+            handleSearch();
+          }}
+        />
+
+        {/* Save Search Modal */}
+        <SaveSearchModal
+          isOpen={showSaveSearch}
+          onClose={() => setShowSaveSearch(false)}
+          query={query}
+          onSave={(name) => {
+            setMySavedSearches((prev) => [
+              ...prev,
+              {
+                id: `ss${Date.now()}`,
+                query,
+                name,
+                filters: { type: typeFilter },
+              },
+            ]);
+          }}
+        />
       </div>
     </DashboardLayout>
   );

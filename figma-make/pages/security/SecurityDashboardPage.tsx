@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   AlertTriangle,
+  Brain,
   Check,
   CheckCircle,
   ChevronRight,
@@ -14,13 +15,16 @@ import {
   History,
   Key,
   Laptop,
+  Lightbulb,
   LogOut,
   Monitor,
+  RefreshCw,
   Settings,
   Shield,
   ShieldAlert,
   ShieldCheck,
   Smartphone,
+  Sparkles,
   Tablet,
   User,
 } from "lucide-react";
@@ -69,6 +73,89 @@ interface SecurityCheck {
   status: "good" | "warning" | "critical";
   action?: string;
 }
+
+// AI Security Recommendation type
+interface AISecurityRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  priority: "high" | "medium" | "low";
+  category: "password" | "session" | "access" | "privacy" | "compliance";
+  impact: string;
+  effort: "quick" | "moderate" | "significant";
+  action: string;
+  actionPath?: string;
+  isAIGenerated: boolean;
+}
+
+// Mock AI Security Recommendations
+const mockAIRecommendations: AISecurityRecommendation[] = [
+  {
+    id: "ai-1",
+    title: "Enable Biometric Authentication",
+    description:
+      "Add fingerprint or Face ID login for faster, more secure access on supported devices.",
+    priority: "high",
+    category: "access",
+    impact: "Reduces login time by 70% while enhancing security",
+    effort: "quick",
+    action: "Enable Now",
+    actionPath: "/security/biometrics",
+    isAIGenerated: true,
+  },
+  {
+    id: "ai-2",
+    title: "Review Inactive API Keys",
+    description:
+      "3 API keys haven't been used in over 60 days. Consider revoking unused keys.",
+    priority: "high",
+    category: "access",
+    impact: "Reduces potential attack surface by 40%",
+    effort: "quick",
+    action: "Review Keys",
+    actionPath: "/security/api-keys",
+    isAIGenerated: true,
+  },
+  {
+    id: "ai-3",
+    title: "Update Password Age",
+    description:
+      "Your password is 8 months old. Consider updating it for better security.",
+    priority: "medium",
+    category: "password",
+    impact: "Mitigates risk from potential data breaches",
+    effort: "quick",
+    action: "Change Password",
+    actionPath: "/settings",
+    isAIGenerated: true,
+  },
+  {
+    id: "ai-4",
+    title: "Enable Login Notifications",
+    description:
+      "Get real-time alerts when someone signs into your account from a new device.",
+    priority: "medium",
+    category: "session",
+    impact: "Instant awareness of unauthorized access attempts",
+    effort: "quick",
+    action: "Enable",
+    actionPath: "/settings/notifications",
+    isAIGenerated: true,
+  },
+  {
+    id: "ai-5",
+    title: "Review Third-Party Access",
+    description:
+      "5 third-party apps have access to your account. Review and revoke unused permissions.",
+    priority: "low",
+    category: "privacy",
+    impact: "Limits data exposure to third parties",
+    effort: "moderate",
+    action: "Review Apps",
+    actionPath: "/security/connected-apps",
+    isAIGenerated: true,
+  },
+];
 
 const mockSecurityEvents: SecurityEvent[] = [
   {
@@ -247,6 +334,24 @@ export function SecurityDashboardPage({
     null
   );
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [showAIRecommendations, setShowAIRecommendations] = useState(true);
+  const [isRefreshingAI, setIsRefreshingAI] = useState(false);
+  const [dismissedRecommendations, setDismissedRecommendations] = useState<
+    string[]
+  >([]);
+
+  const visibleRecommendations = mockAIRecommendations.filter(
+    (r) => !dismissedRecommendations.includes(r.id)
+  );
+
+  const handleRefreshAI = () => {
+    setIsRefreshingAI(true);
+    setTimeout(() => setIsRefreshingAI(false), 1500);
+  };
+
+  const handleDismissRecommendation = (id: string) => {
+    setDismissedRecommendations((prev) => [...prev, id]);
+  };
 
   const securityScore = 85;
   const goodChecks = mockSecurityChecks.filter(
@@ -486,6 +591,164 @@ export function SecurityDashboardPage({
               <ChevronRight className="h-4 w-4 text-slate-400 ml-auto group-hover:translate-x-1 transition-transform" />
             </motion.button>
           ))}
+        </motion.div>
+
+        {/* AI Security Recommendations */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28 }}
+          className="mb-8"
+        >
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* Header */}
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
+                  <Brain className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                    AI Security Recommendations
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                      {visibleRecommendations.length} suggestions
+                    </span>
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Personalized recommendations based on your security profile
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRefreshAI}
+                  disabled={isRefreshingAI}
+                  className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isRefreshingAI ? "animate-spin" : ""}`}
+                  />
+                </button>
+                <button
+                  onClick={() =>
+                    setShowAIRecommendations(!showAIRecommendations)
+                  }
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    showAIRecommendations
+                      ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  {showAIRecommendations ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            {/* Recommendations List */}
+            <AnimatePresence>
+              {showAIRecommendations && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="divide-y divide-slate-100 dark:divide-slate-700"
+                >
+                  {visibleRecommendations.length > 0 ? (
+                    visibleRecommendations.map((rec, index) => (
+                      <motion.div
+                        key={rec.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Priority Indicator */}
+                          <div
+                            className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                              rec.priority === "high"
+                                ? "bg-red-500"
+                                : rec.priority === "medium"
+                                  ? "bg-amber-500"
+                                  : "bg-emerald-500"
+                            }`}
+                          />
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-slate-900 dark:text-white">
+                                {rec.title}
+                              </h4>
+                              {rec.isAIGenerated && (
+                                <Sparkles className="h-3.5 w-3.5 text-purple-500" />
+                              )}
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                  rec.effort === "quick"
+                                    ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                                    : rec.effort === "moderate"
+                                      ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+                                      : "bg-slate-100 dark:bg-slate-700 text-slate-600"
+                                }`}
+                              >
+                                {rec.effort === "quick"
+                                  ? "⚡ Quick Fix"
+                                  : rec.effort === "moderate"
+                                    ? "⏱ 5 min"
+                                    : "🔧 Setup Required"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                              {rec.description}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                              <Lightbulb className="h-3 w-3" />
+                              <span className="italic">{rec.impact}</span>
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                              onClick={() =>
+                                handleDismissRecommendation(rec.id)
+                              }
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                              title="Dismiss"
+                            >
+                              <span className="sr-only">Dismiss</span>✕
+                            </button>
+                            <button
+                              onClick={() =>
+                                rec.actionPath && onNavigate(rec.actionPath)
+                              }
+                              className="px-3 py-1.5 rounded-lg text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all shadow-sm hover:shadow-md"
+                            >
+                              {rec.action}
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                        <ShieldCheck className="h-6 w-6 text-emerald-500" />
+                      </div>
+                      <h4 className="font-medium text-slate-900 dark:text-white mb-1">
+                        All Caught Up!
+                      </h4>
+                      <p className="text-sm text-slate-500">
+                        No new security recommendations at this time.
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* Active Sessions & Recent Activity */}

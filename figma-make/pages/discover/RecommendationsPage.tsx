@@ -14,12 +14,14 @@
 import {
   Bookmark,
   Brain,
+  Check,
   Clock,
   Eye,
   FileText,
   Heart,
   Lightbulb,
   RefreshCw,
+  Sliders,
   Sparkles,
   Star,
   Target,
@@ -303,6 +305,281 @@ const getReasonIcon = (reason: RecommendedPaper["reasonIcon"]) => {
   };
   return icons[reason] || icons.similar;
 };
+
+// Preferences Tuning Interface
+interface PreferenceTuning {
+  novelty: number;
+  citationWeight: number;
+  recency: number;
+  topicMatch: number;
+  authorMatch: number;
+  excludeRead: boolean;
+  onlyOpenAccess: boolean;
+}
+
+// Preferences Tuning Modal
+function PreferencesTuningModal({
+  isOpen,
+  onClose,
+  preferences,
+  onSave,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  preferences: PreferenceTuning;
+  onSave: (prefs: PreferenceTuning) => void;
+}) {
+  const [localPrefs, setLocalPrefs] = useState<PreferenceTuning>(preferences);
+
+  if (!isOpen) return null;
+
+  const sliders = [
+    {
+      key: "novelty" as const,
+      label: "Novelty vs. Reliability",
+      leftLabel: "Established",
+      rightLabel: "Cutting-edge",
+      color: "purple",
+    },
+    {
+      key: "citationWeight" as const,
+      label: "Citation Impact",
+      leftLabel: "Any",
+      rightLabel: "Highly cited",
+      color: "amber",
+    },
+    {
+      key: "recency" as const,
+      label: "Publication Recency",
+      leftLabel: "Classic",
+      rightLabel: "Recent",
+      color: "blue",
+    },
+    {
+      key: "topicMatch" as const,
+      label: "Topic Similarity",
+      leftLabel: "Broader",
+      rightLabel: "Exact match",
+      color: "green",
+    },
+    {
+      key: "authorMatch" as const,
+      label: "Author Familiarity",
+      leftLabel: "New authors",
+      rightLabel: "Known authors",
+      color: "orange",
+    },
+  ];
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/50 z-50"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-xl">
+                <Sliders className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Tune Recommendations
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Adjust how papers are selected for you
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="p-5 space-y-6 max-h-[60vh] overflow-y-auto">
+            {/* Sliders */}
+            {sliders.map((slider) => (
+              <div key={slider.key} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    {slider.label}
+                  </label>
+                  <span
+                    className={`text-sm font-medium text-${slider.color}-600 dark:text-${slider.color}-400`}
+                  >
+                    {localPrefs[slider.key]}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={localPrefs[slider.key]}
+                  onChange={(e) =>
+                    setLocalPrefs({
+                      ...localPrefs,
+                      [slider.key]: parseInt(e.target.value),
+                    })
+                  }
+                  className={`w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-${slider.color}-500`}
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                  <span>{slider.leftLabel}</span>
+                  <span>{slider.rightLabel}</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Toggle Options */}
+            <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                Additional Filters
+              </h3>
+
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Exclude papers I've already read
+                </span>
+                <div
+                  onClick={() =>
+                    setLocalPrefs({
+                      ...localPrefs,
+                      excludeRead: !localPrefs.excludeRead,
+                    })
+                  }
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    localPrefs.excludeRead
+                      ? "bg-purple-500"
+                      : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      localPrefs.excludeRead ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Only show open access papers
+                </span>
+                <div
+                  onClick={() =>
+                    setLocalPrefs({
+                      ...localPrefs,
+                      onlyOpenAccess: !localPrefs.onlyOpenAccess,
+                    })
+                  }
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    localPrefs.onlyOpenAccess
+                      ? "bg-purple-500"
+                      : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      localPrefs.onlyOpenAccess
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </label>
+            </div>
+
+            {/* Reset & Preset buttons */}
+            <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() =>
+                  setLocalPrefs({
+                    novelty: 60,
+                    citationWeight: 50,
+                    recency: 70,
+                    topicMatch: 80,
+                    authorMatch: 40,
+                    excludeRead: true,
+                    onlyOpenAccess: false,
+                  })
+                }
+                className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                Reset to Default
+              </button>
+              <button
+                onClick={() =>
+                  setLocalPrefs({
+                    novelty: 90,
+                    citationWeight: 20,
+                    recency: 95,
+                    topicMatch: 50,
+                    authorMatch: 20,
+                    excludeRead: true,
+                    onlyOpenAccess: false,
+                  })
+                }
+                className="px-3 py-1.5 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+              >
+                🔥 Cutting Edge
+              </button>
+              <button
+                onClick={() =>
+                  setLocalPrefs({
+                    novelty: 30,
+                    citationWeight: 90,
+                    recency: 40,
+                    topicMatch: 90,
+                    authorMatch: 70,
+                    excludeRead: false,
+                    onlyOpenAccess: false,
+                  })
+                }
+                className="px-3 py-1.5 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+              >
+                📚 Classic Reads
+              </button>
+            </div>
+          </div>
+
+          <div className="p-5 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                onSave(localPrefs);
+                onClose();
+              }}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg font-medium flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Apply Preferences
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </>
+  );
+}
 
 export function RecommendationsPage({
   onNavigate,

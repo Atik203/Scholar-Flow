@@ -24,9 +24,14 @@ import {
   Heart,
   RefreshCw,
   Search,
+  Settings2,
+  Sliders,
   Sparkles,
   Star,
+  ThumbsDown,
+  ThumbsUp,
   TrendingUp,
+  X,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -480,6 +485,364 @@ function ResearchAreaPill({
   );
 }
 
+// Personalization Controls Modal
+interface PersonalizationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  preferences: PersonalizationPreferences;
+  onSave: (prefs: PersonalizationPreferences) => void;
+}
+
+interface PersonalizationPreferences {
+  recency: number;
+  citations: number;
+  relevance: number;
+  diversity: number;
+  excludeRead: boolean;
+  preferOpenAccess: boolean;
+}
+
+function PersonalizationModal({
+  isOpen,
+  onClose,
+  preferences,
+  onSave,
+}: PersonalizationModalProps) {
+  const [prefs, setPrefs] = useState<PersonalizationPreferences>(preferences);
+
+  const handleSave = () => {
+    onSave(prefs);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-black/50 z-50"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-lg"
+      >
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700">
+          <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                <Settings2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Personalization Settings
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Fine-tune your recommendations
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+          </div>
+
+          <div className="p-5 space-y-6">
+            {/* Preference Sliders */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                Recommendation Weights
+              </h3>
+
+              {/* Recency */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    Recency Priority
+                  </label>
+                  <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                    {prefs.recency}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={prefs.recency}
+                  onChange={(e) =>
+                    setPrefs({ ...prefs, recency: parseInt(e.target.value) })
+                  }
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Prefer newer papers over older ones
+                </p>
+              </div>
+
+              {/* Citations */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    Citation Impact
+                  </label>
+                  <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    {prefs.citations}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={prefs.citations}
+                  onChange={(e) =>
+                    setPrefs({ ...prefs, citations: parseInt(e.target.value) })
+                  }
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Favor highly cited papers
+                </p>
+              </div>
+
+              {/* Relevance */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    Topic Relevance
+                  </label>
+                  <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                    {prefs.relevance}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={prefs.relevance}
+                  onChange={(e) =>
+                    setPrefs({ ...prefs, relevance: parseInt(e.target.value) })
+                  }
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-green-500"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Match your research interests closely
+                </p>
+              </div>
+
+              {/* Diversity */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    Topic Diversity
+                  </label>
+                  <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                    {prefs.diversity}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={prefs.diversity}
+                  onChange={(e) =>
+                    setPrefs({ ...prefs, diversity: parseInt(e.target.value) })
+                  }
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Include papers from adjacent fields
+                </p>
+              </div>
+            </div>
+
+            {/* Toggle Options */}
+            <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                Additional Options
+              </h3>
+
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Exclude papers I've already read
+                </span>
+                <div
+                  onClick={() =>
+                    setPrefs({ ...prefs, excludeRead: !prefs.excludeRead })
+                  }
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    prefs.excludeRead
+                      ? "bg-purple-500"
+                      : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      prefs.excludeRead ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Prefer open access papers
+                </span>
+                <div
+                  onClick={() =>
+                    setPrefs({
+                      ...prefs,
+                      preferOpenAccess: !prefs.preferOpenAccess,
+                    })
+                  }
+                  className={`relative w-11 h-6 rounded-full transition-colors ${
+                    prefs.preferOpenAccess
+                      ? "bg-purple-500"
+                      : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      prefs.preferOpenAccess ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="p-5 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleSave}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium"
+            >
+              Save Preferences
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    </>
+  );
+}
+
+// Library-based Recommendation Card
+function LibraryBasedCard({
+  basePaper,
+  recommendations,
+  onView,
+}: {
+  basePaper: { title: string; savedDate: string };
+  recommendations: { id: string; title: string; relevance: number }[];
+  onView: (id: string) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4"
+    >
+      <div className="flex items-start gap-3 mb-4">
+        <div className="p-2 bg-white dark:bg-gray-800 rounded-lg">
+          <BookmarkCheck className="h-4 w-4 text-blue-500" />
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+            Because you saved
+          </p>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+            {basePaper.title}
+          </h4>
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            {basePaper.savedDate}
+          </p>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {recommendations.map((rec) => (
+          <motion.button
+            key={rec.id}
+            whileHover={{ x: 4 }}
+            onClick={() => onView(rec.id)}
+            className="w-full text-left p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700 dark:text-gray-300 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                {rec.title}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">
+                  {rec.relevance}% match
+                </span>
+                <ArrowRight className="h-3 w-3 text-gray-400 group-hover:text-blue-500" />
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// Feedback button component for paper recommendations
+function FeedbackButtons({
+  paperId,
+  onFeedback,
+}: {
+  paperId: string;
+  onFeedback: (paperId: string, type: "like" | "dislike") => void;
+}) {
+  const [feedback, setFeedback] = useState<"like" | "dislike" | null>(null);
+
+  const handleFeedback = (type: "like" | "dislike") => {
+    setFeedback(type);
+    onFeedback(paperId, type);
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => handleFeedback("like")}
+        className={`p-1.5 rounded-lg transition-colors ${
+          feedback === "like"
+            ? "bg-green-100 dark:bg-green-900/50 text-green-600"
+            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400"
+        }`}
+      >
+        <ThumbsUp className="h-3.5 w-3.5" />
+      </motion.button>
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => handleFeedback("dislike")}
+        className={`p-1.5 rounded-lg transition-colors ${
+          feedback === "dislike"
+            ? "bg-red-100 dark:bg-red-900/50 text-red-600"
+            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400"
+        }`}
+      >
+        <ThumbsDown className="h-3.5 w-3.5" />
+      </motion.button>
+    </div>
+  );
+}
+
 export function DiscoverPage({
   onNavigate,
   role: propRole,
@@ -495,6 +858,60 @@ export function DiscoverPage({
     "all"
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showPersonalization, setShowPersonalization] = useState(false);
+  const [preferences, setPreferences] = useState<PersonalizationPreferences>({
+    recency: 70,
+    citations: 50,
+    relevance: 85,
+    diversity: 40,
+    excludeRead: true,
+    preferOpenAccess: false,
+  });
+
+  // Mock library-based recommendations
+  const libraryRecommendations = [
+    {
+      basePaper: {
+        title: "Attention Is All You Need",
+        savedDate: "2 days ago",
+      },
+      recommendations: [
+        {
+          id: "lr1",
+          title: "Sparse Attention: A New Paradigm for Efficient Transformers",
+          relevance: 94,
+        },
+        {
+          id: "lr2",
+          title: "FlashAttention: Fast and Memory-Efficient Exact Attention",
+          relevance: 91,
+        },
+        {
+          id: "lr3",
+          title: "Multi-Query Attention for Efficient Inference",
+          relevance: 88,
+        },
+      ],
+    },
+    {
+      basePaper: {
+        title: "BERT: Pre-training of Deep Bidirectional Transformers",
+        savedDate: "1 week ago",
+      },
+      recommendations: [
+        {
+          id: "lr4",
+          title: "RoBERTa: A Robustly Optimized BERT Pretraining Approach",
+          relevance: 96,
+        },
+        {
+          id: "lr5",
+          title: "ALBERT: A Lite BERT for Self-supervised Learning",
+          relevance: 92,
+        },
+      ],
+    },
+  ];
 
   const defaultUser = {
     name: "Dr. Sarah Chen",
@@ -525,6 +942,11 @@ export function DiscoverPage({
     setTimeout(() => {
       setIsRefreshing(false);
     }, 2000);
+  };
+
+  const handleFeedback = (paperId: string, type: "like" | "dislike") => {
+    console.log(`Feedback for ${paperId}: ${type}`);
+    // In real app, would send to backend to improve recommendations
   };
 
   // Filter recommendations
@@ -564,18 +986,29 @@ export function DiscoverPage({
                   AI-powered paper recommendations tailored to your research
                 </p>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-                Refresh Recommendations
-              </motion.button>
+              <div className="flex items-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowPersonalization(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Sliders className="h-5 w-5" />
+                  Personalize
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-purple-600 disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-5 w-5 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </motion.button>
+              </div>
             </div>
           </motion.div>
 
@@ -707,10 +1140,30 @@ export function DiscoverPage({
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="sticky top-24"
+                className="sticky top-24 space-y-6"
               >
+                {/* Library-based Recommendations */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center gap-2 mb-4">
+                    <BookmarkCheck className="h-5 w-5 text-blue-500" />
+                    <h2 className="font-semibold text-gray-900 dark:text-white">
+                      Based on Your Library
+                    </h2>
+                  </div>
+                  <div className="space-y-4">
+                    {libraryRecommendations.map((item, index) => (
+                      <LibraryBasedCard
+                        key={index}
+                        basePaper={item.basePaper}
+                        recommendations={item.recommendations}
+                        onView={(id) => onNavigate(`/papers/${id}`)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
                 {/* Trending Topics */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                   <div className="flex items-center gap-2 mb-4">
                     <Flame className="h-5 w-5 text-orange-500" />
                     <h2 className="font-semibold text-gray-900 dark:text-white">
@@ -757,7 +1210,7 @@ export function DiscoverPage({
                 </div>
 
                 {/* Quick Stats */}
-                <div className="mt-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-4">
                     Your Discovery Stats
                   </h3>
@@ -791,6 +1244,18 @@ export function DiscoverPage({
               </motion.div>
             </div>
           </div>
+
+          {/* Personalization Modal */}
+          <AnimatePresence>
+            {showPersonalization && (
+              <PersonalizationModal
+                isOpen={showPersonalization}
+                onClose={() => setShowPersonalization(false)}
+                preferences={preferences}
+                onSave={(prefs) => setPreferences(prefs)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </DashboardLayout>
