@@ -1,22 +1,40 @@
 "use client";
 
+/**
+ * AdminAuditLogPage - System Audit Logs Management
+ *
+ * Enhanced with:
+ * - Real-time data refresh indicators
+ * - Advanced filtering with saved views
+ * - Bulk actions with confirmation
+ * - Export functionality
+ * - AI-powered insights panel
+ */
+
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
+  BookmarkPlus,
+  Brain,
+  Check,
+  CheckCircle,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Database,
   Download,
   Eye,
+  FileSpreadsheet,
   FileText,
   Globe,
   Key,
+  Lightbulb,
   Lock,
   LogIn,
   LogOut,
   RefreshCw,
+  Save,
   Search,
   Server,
   Settings,
@@ -28,8 +46,9 @@ import {
   UserMinus,
   UserPlus,
   X,
+  Zap,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
@@ -255,6 +274,80 @@ const actionIconMap: Record<string, React.ReactNode> = {
   "security.2fa_enabled": <Shield className="h-4 w-4" />,
 };
 
+// Saved filter views
+const savedViews = [
+  {
+    id: "security-events",
+    name: "Security Events",
+    filters: { category: "security", severity: "all" },
+    icon: Shield,
+  },
+  {
+    id: "failed-logins",
+    name: "Failed Logins",
+    filters: { category: "auth", severity: "error" },
+    icon: AlertTriangle,
+  },
+  {
+    id: "admin-actions",
+    name: "Admin Actions",
+    filters: { category: "admin", severity: "all" },
+    icon: UserCheck,
+  },
+  {
+    id: "critical-only",
+    name: "Critical Only",
+    filters: { category: "all", severity: "critical" },
+    icon: Zap,
+  },
+];
+
+// AI Insights data
+const aiInsights = [
+  {
+    id: "1",
+    type: "warning",
+    title: "Unusual Login Pattern Detected",
+    description:
+      "5 failed login attempts from IP 192.168.1.45 in the last hour",
+    action: "Review security logs",
+    priority: "high",
+  },
+  {
+    id: "2",
+    type: "info",
+    title: "Peak Activity Period",
+    description: "User activity is 40% higher than usual between 2-4 PM",
+    action: "Consider scaling resources",
+    priority: "low",
+  },
+  {
+    id: "3",
+    type: "success",
+    title: "Security Compliance",
+    description: "All admin actions properly logged with 2FA verification",
+    action: null,
+    priority: "low",
+  },
+];
+
+// Export formats
+const exportFormats = [
+  {
+    id: "csv",
+    label: "CSV",
+    icon: FileSpreadsheet,
+    description: "Spreadsheet format",
+  },
+  { id: "json", label: "JSON", icon: FileText, description: "Raw data format" },
+  {
+    id: "pdf",
+    label: "PDF Report",
+    icon: Download,
+    description: "Formatted report",
+  },
+];
+
 const defaultUser = {
   name: "Admin User",
   email: "admin@scholarflow.com",
@@ -274,6 +367,89 @@ export function AdminAuditLogPage({
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [dateRange, setDateRange] = useState("today");
   const [selectedEntry, setSelectedEntry] = useState<AuditEntry | null>(null);
+
+  // New state for enhanced features
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [showSavedViews, setShowSavedViews] = useState(false);
+  const [activeView, setActiveView] = useState<string | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
+  const [showAIInsights, setShowAIInsights] = useState(true);
+  const [selectedLogs, setSelectedLogs] = useState<string[]>([]);
+  const [showBulkActions, setShowBulkActions] = useState(false);
+  const [bulkActionConfirm, setBulkActionConfirm] = useState<string | null>(
+    null
+  );
+  const [saveViewModal, setSaveViewModal] = useState(false);
+  const [newViewName, setNewViewName] = useState("");
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        handleRefresh();
+      }, 30000); // Refresh every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh]);
+
+  // Handle refresh
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      setLastRefresh(new Date());
+    }, 1000);
+  };
+
+  // Handle export
+  const handleExport = (format: string) => {
+    setExporting(format);
+    setTimeout(() => {
+      setExporting(null);
+      setShowExportMenu(false);
+    }, 2000);
+  };
+
+  // Handle bulk action
+  const handleBulkAction = (action: string) => {
+    setBulkActionConfirm(action);
+  };
+
+  const executeBulkAction = () => {
+    // Simulate bulk action
+    setTimeout(() => {
+      setSelectedLogs([]);
+      setBulkActionConfirm(null);
+      setShowBulkActions(false);
+    }, 500);
+  };
+
+  // Apply saved view
+  const applyView = (view: (typeof savedViews)[0]) => {
+    setCategoryFilter(view.filters.category);
+    setSeverityFilter(view.filters.severity);
+    setActiveView(view.id);
+    setShowSavedViews(false);
+  };
+
+  // Toggle log selection
+  const toggleLogSelection = (id: string) => {
+    setSelectedLogs((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  // Select all logs
+  const toggleSelectAll = () => {
+    if (selectedLogs.length === filteredLogs.length) {
+      setSelectedLogs([]);
+    } else {
+      setSelectedLogs(filteredLogs.map((log) => log.id));
+    }
+  };
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredLogs = mockAuditLogs.filter((log) => {
@@ -328,22 +504,287 @@ export function AdminAuditLogPage({
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800
+            {/* Real-time refresh indicator */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <div
+                className={`w-2 h-2 rounded-full ${autoRefresh ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`}
+              />
+              <span className="text-xs text-slate-600 dark:text-slate-400">
+                {autoRefresh ? "Live" : "Paused"}
+              </span>
+              <button
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className="text-xs text-primary hover:underline"
+              >
+                {autoRefresh ? "Pause" : "Resume"}
+              </button>
+            </div>
+
+            {/* Last refresh time */}
+            <span className="text-xs text-slate-500 hidden sm:block">
+              Updated {lastRefresh.toLocaleTimeString()}
+            </span>
+
+            {/* Saved Views Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowSavedViews(!showSavedViews)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800
                            text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </button>
-            <button
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800
+              >
+                <BookmarkPlus className="h-4 w-4" />
+                <span className="hidden sm:inline">Views</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              <AnimatePresence>
+                {showSavedViews && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl 
+                             border border-slate-200 dark:border-slate-700 shadow-xl z-20 p-2"
+                  >
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400 px-3 py-2">
+                      Saved Views
+                    </div>
+                    {savedViews.map((view) => {
+                      const Icon = view.icon;
+                      return (
+                        <button
+                          key={view.id}
+                          onClick={() => applyView(view)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                            activeView === view.id
+                              ? "bg-primary/10 text-primary"
+                              : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="text-sm">{view.name}</span>
+                          {activeView === view.id && (
+                            <CheckCircle className="h-4 w-4 ml-auto" />
+                          )}
+                        </button>
+                      );
+                    })}
+                    <div className="border-t border-slate-200 dark:border-slate-700 mt-2 pt-2">
+                      <button
+                        onClick={() => {
+                          setShowSavedViews(false);
+                          setSaveViewModal(true);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-primary hover:bg-primary/10"
+                      >
+                        <Save className="h-4 w-4" />
+                        Save Current View
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Export Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800
                            text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+
+              <AnimatePresence>
+                {showExportMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl 
+                             border border-slate-200 dark:border-slate-700 shadow-xl z-20 p-2"
+                  >
+                    {exportFormats.map((format) => {
+                      const Icon = format.icon;
+                      return (
+                        <button
+                          key={format.id}
+                          onClick={() => handleExport(format.id)}
+                          disabled={exporting !== null}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg 
+                                   hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          <Icon className="h-4 w-4 text-slate-500" />
+                          <div className="flex-1 text-left">
+                            <div className="text-sm text-slate-700 dark:text-slate-300">
+                              {format.label}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {format.description}
+                            </div>
+                          </div>
+                          {exporting === format.id && (
+                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Refresh Button */}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800
+                           text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors
+                           disabled:opacity-50"
             >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              <span className="hidden sm:inline">
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </span>
             </button>
           </div>
         </motion.div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showAIInsights && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-6"
+            >
+              <div
+                className="bg-gradient-to-r from-violet-500/10 to-purple-500/10 dark:from-violet-500/5 dark:to-purple-500/5 
+                            rounded-2xl border border-violet-200 dark:border-violet-800 p-5"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-violet-100 dark:bg-violet-900/50">
+                      <Brain className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
+                        AI-Powered Insights
+                      </h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Smart analysis of your audit logs
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowAIInsights(false)}
+                    className="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <X className="h-4 w-4 text-slate-400" />
+                  </button>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  {aiInsights.map((insight) => (
+                    <motion.div
+                      key={insight.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`p-4 rounded-xl border ${
+                        insight.type === "warning"
+                          ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+                          : insight.type === "success"
+                            ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
+                            : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`p-1.5 rounded-lg ${
+                            insight.type === "warning"
+                              ? "bg-amber-100 dark:bg-amber-900/50"
+                              : insight.type === "success"
+                                ? "bg-emerald-100 dark:bg-emerald-900/50"
+                                : "bg-blue-100 dark:bg-blue-900/50"
+                          }`}
+                        >
+                          {insight.type === "warning" ? (
+                            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          ) : insight.type === "success" ? (
+                            <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <Lightbulb className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm text-slate-900 dark:text-white">
+                            {insight.title}
+                          </h4>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                            {insight.description}
+                          </p>
+                          {insight.action && (
+                            <button className="mt-2 text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                              {insight.action}
+                              <ChevronRight className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bulk Actions Bar */}
+        <AnimatePresence>
+          {selectedLogs.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-primary" />
+                <span className="font-medium text-slate-900 dark:text-white">
+                  {selectedLogs.length} log{selectedLogs.length > 1 ? "s" : ""}{" "}
+                  selected
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleBulkAction("export")}
+                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 
+                           dark:border-slate-700 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Export Selected
+                </button>
+                <button
+                  onClick={() => handleBulkAction("archive")}
+                  className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 
+                           dark:border-slate-700 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Archive
+                </button>
+                <button
+                  onClick={() => setSelectedLogs([])}
+                  className="px-3 py-1.5 rounded-lg text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                >
+                  Clear Selection
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Quick Stats */}
         <motion.div
@@ -458,6 +899,27 @@ export function AdminAuditLogPage({
           transition={{ delay: 0.3 }}
           className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
         >
+          {/* Table Header with Select All */}
+          <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 flex items-center gap-4">
+            <button
+              onClick={toggleSelectAll}
+              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                selectedLogs.length === filteredLogs.length &&
+                filteredLogs.length > 0
+                  ? "bg-primary border-primary text-white"
+                  : "border-slate-300 dark:border-slate-600 hover:border-primary"
+              }`}
+            >
+              {selectedLogs.length === filteredLogs.length &&
+                filteredLogs.length > 0 && <Check className="h-3 w-3" />}
+            </button>
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              {selectedLogs.length > 0
+                ? `${selectedLogs.length} selected`
+                : "Select all"}
+            </span>
+          </div>
+
           <div className="divide-y divide-slate-100 dark:divide-slate-700">
             {filteredLogs.map((log, index) => {
               const catConfig = categoryConfig[log.category];
@@ -465,6 +927,7 @@ export function AdminAuditLogPage({
               const actionIcon = actionIconMap[log.action] || (
                 <Activity className="h-4 w-4" />
               );
+              const isSelected = selectedLogs.includes(log.id);
 
               return (
                 <motion.div
@@ -472,12 +935,31 @@ export function AdminAuditLogPage({
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + index * 0.03 }}
-                  onClick={() => setSelectedEntry(log)}
-                  className="p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                  className={`p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors ${
+                    isSelected ? "bg-primary/5" : ""
+                  }`}
                 >
                   <div className="flex items-start gap-4">
+                    {/* Selection Checkbox */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLogSelection(log.id);
+                      }}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0 mt-1 ${
+                        isSelected
+                          ? "bg-primary border-primary text-white"
+                          : "border-slate-300 dark:border-slate-600 hover:border-primary"
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3 w-3" />}
+                    </button>
+
                     {/* Severity Indicator */}
-                    <div className="flex flex-col items-center gap-1 w-16 flex-shrink-0">
+                    <div
+                      onClick={() => setSelectedEntry(log)}
+                      className="flex flex-col items-center gap-1 w-16 flex-shrink-0"
+                    >
                       <span className="text-xs font-medium text-slate-500">
                         {formatTime(log.timestamp)}
                       </span>
@@ -491,13 +973,17 @@ export function AdminAuditLogPage({
 
                     {/* Icon */}
                     <div
+                      onClick={() => setSelectedEntry(log)}
                       className={`p-2.5 rounded-xl ${catConfig.color} flex-shrink-0`}
                     >
                       {actionIcon}
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
+                    <div
+                      onClick={() => setSelectedEntry(log)}
+                      className="flex-1 min-w-0"
+                    >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-medium text-slate-900 dark:text-white">
                           {log.action.replace(".", " → ").replace(/_/g, " ")}
@@ -712,6 +1198,150 @@ export function AdminAuditLogPage({
                       {new Date(selectedEntry.timestamp).toLocaleString()}
                     </p>
                   </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bulk Action Confirmation Modal */}
+        <AnimatePresence>
+          {bulkActionConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setBulkActionConfirm(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/30">
+                    <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                      Confirm{" "}
+                      {bulkActionConfirm === "export" ? "Export" : "Archive"}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">
+                      This action will affect {selectedLogs.length} log entries
+                    </p>
+                  </div>
+                </div>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                  {bulkActionConfirm === "export"
+                    ? "The selected logs will be exported to your downloads folder."
+                    : "The selected logs will be archived and removed from the main view."}
+                </p>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setBulkActionConfirm(null)}
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                             text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={executeBulkAction}
+                    className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
+                  >
+                    {bulkActionConfirm === "export" ? "Export" : "Archive"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Save View Modal */}
+        <AnimatePresence>
+          {saveViewModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setSaveViewModal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 rounded-full bg-primary/10">
+                    <BookmarkPlus className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                      Save Current View
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">
+                      Save your current filters as a quick-access view
+                    </p>
+                  </div>
+                </div>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    View Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newViewName}
+                    onChange={(e) => setNewViewName(e.target.value)}
+                    placeholder="e.g., Security Alerts"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 
+                             bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white
+                             focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900 mb-6">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    Current Filters:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-400">
+                      Category: {categoryFilter}
+                    </span>
+                    <span className="px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-400">
+                      Severity: {severityFilter}
+                    </span>
+                    <span className="px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-400">
+                      Date: {dateRange}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setSaveViewModal(false);
+                      setNewViewName("");
+                    }}
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                             text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // In a real app, save the view
+                      setSaveViewModal(false);
+                      setNewViewName("");
+                    }}
+                    disabled={!newViewName.trim()}
+                    className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    Save View
+                  </button>
                 </div>
               </motion.div>
             </motion.div>
