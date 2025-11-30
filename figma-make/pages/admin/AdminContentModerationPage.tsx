@@ -15,31 +15,37 @@
  * @version 1.0.0 - Phase 7
  */
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   AlertTriangle,
   Ban,
+  Bookmark,
   CheckCircle,
   Clock,
+  Download,
   ExternalLink,
   Eye,
+  FileJson,
+  FileSpreadsheet,
   FileText,
   Flag,
   Gavel,
+  Lightbulb,
   Mail,
   MessageSquare,
   RefreshCw,
   Search,
   Settings,
   Shield,
+  Sparkles,
   ThumbsUp,
   Trash2,
   User,
   X,
   XCircle,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
@@ -334,6 +340,69 @@ export function AdminContentModerationPage({
     null
   );
 
+  // Enhanced features state
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showSavedViews, setShowSavedViews] = useState(false);
+  const [showAIInsights, setShowAIInsights] = useState(false);
+  const [savedViews] = useState([
+    { id: "1", name: "Critical Priority", filters: { priority: "critical" } },
+    { id: "2", name: "Pending Review", filters: { status: "pending" } },
+    { id: "3", name: "Copyright Issues", filters: { type: "paper" } },
+  ]);
+  const [aiInsights] = useState([
+    {
+      id: "1",
+      type: "alert",
+      title: "Spike in Reports",
+      description: "45% increase in flagged content in the last 24 hours",
+      action: "View Trend",
+    },
+    {
+      id: "2",
+      type: "pattern",
+      title: "Pattern Detected",
+      description:
+        "3 reports from same IP range may indicate coordinated abuse",
+      action: "Investigate",
+    },
+    {
+      id: "3",
+      type: "suggestion",
+      title: "Auto-Moderation Candidate",
+      description: "5 similar spam comments could be auto-removed",
+      action: "Configure Rule",
+    },
+  ]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    const interval = setInterval(() => {
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAutoRefresh]);
+
+  // Bulk actions
+  const handleSelectAll = () => {
+    if (selectedItems.length === filteredContent.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(filteredContent.map((c) => c.id));
+    }
+  };
+
+  const handleBulkDismiss = () => {
+    setSelectedItems([]);
+  };
+
+  const handleExport = (format: "csv" | "json" | "pdf") => {
+    setShowExportMenu(false);
+  };
+
   // Filter content
   const filteredContent = useMemo(() => {
     return flaggedContent.filter((content) => {
@@ -487,22 +556,131 @@ export function AdminContentModerationPage({
             className="flex flex-col md:flex-row md:items-center justify-between gap-4"
           >
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-                Content Moderation
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                  Content Moderation
+                </h1>
+                {/* Real-time indicator */}
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ opacity: isAutoRefresh ? [1, 0.5, 1] : 1 }}
+                    transition={{
+                      duration: 2,
+                      repeat: isAutoRefresh ? Infinity : 0,
+                    }}
+                    className={`h-2 w-2 rounded-full ${isAutoRefresh ? "bg-green-500" : "bg-gray-400"}`}
+                  />
+                  <span className="text-xs text-gray-500">
+                    {isAutoRefresh ? "Live" : "Paused"} •{" "}
+                    {lastRefresh.toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Review and manage flagged content and user reports
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors"
+            <div className="flex items-center gap-2">
+              {/* Auto-refresh toggle */}
+              <button
+                onClick={() => setIsAutoRefresh(!isAutoRefresh)}
+                className={`p-2 rounded-lg transition-colors ${isAutoRefresh ? "bg-green-100 dark:bg-green-900/30 text-green-600" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}
               >
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </motion.button>
+                <RefreshCw
+                  className={`h-4 w-4 ${isAutoRefresh ? "animate-spin" : ""}`}
+                  style={{ animationDuration: "3s" }}
+                />
+              </button>
+
+              {/* Saved Views */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowSavedViews(!showSavedViews)}
+                  className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  <span className="text-sm">Views</span>
+                </button>
+                <AnimatePresence>
+                  {showSavedViews && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50"
+                    >
+                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-xs font-medium text-gray-500 px-2">
+                          Saved Views
+                        </p>
+                      </div>
+                      {savedViews.map((view) => (
+                        <button
+                          key={view.id}
+                          onClick={() => setShowSavedViews(false)}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
+                          <Bookmark className="h-4 w-4 text-red-500" />
+                          <span className="text-sm">{view.name}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Export */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="text-sm">Export</span>
+                </button>
+                <AnimatePresence>
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-44 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50"
+                    >
+                      <button
+                        onClick={() => handleExport("csv")}
+                        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileSpreadsheet className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">CSV</span>
+                      </button>
+                      <button
+                        onClick={() => handleExport("json")}
+                        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileJson className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm">JSON</span>
+                      </button>
+                      <button
+                        onClick={() => handleExport("pdf")}
+                        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileText className="h-4 w-4 text-red-500" />
+                        <span className="text-sm">PDF</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* AI Insights */}
+              <button
+                onClick={() => setShowAIInsights(!showAIInsights)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg ${showAIInsights ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"}`}
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm">AI Insights</span>
+              </button>
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -513,6 +691,87 @@ export function AdminContentModerationPage({
               </motion.button>
             </div>
           </motion.div>
+
+          {/* AI Insights Panel */}
+          <AnimatePresence>
+            {showAIInsights && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                      AI Moderation Insights
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {aiInsights.map((insight) => (
+                      <motion.div
+                        key={insight.id}
+                        whileHover={{ scale: 1.02 }}
+                        className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-purple-100 dark:border-purple-800"
+                      >
+                        <div className="flex items-start gap-2">
+                          <Lightbulb className="h-4 w-4 mt-0.5 text-purple-500" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {insight.title}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {insight.description}
+                            </p>
+                            <button className="text-xs text-purple-600 font-medium mt-2 hover:underline">
+                              {insight.action} →
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Bulk Actions Bar */}
+          <AnimatePresence>
+            {selectedItems.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center justify-between bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3"
+              >
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {selectedItems.length} item
+                  {selectedItems.length > 1 ? "s" : ""} selected
+                </span>
+                <div className="flex items-center gap-2">
+                  <button className="flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-600 rounded-lg text-sm font-medium">
+                    <ThumbsUp className="h-4 w-4" />
+                    Approve All
+                  </button>
+                  <button
+                    onClick={handleBulkDismiss}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 rounded-lg text-sm font-medium"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Dismiss All
+                  </button>
+                  <button
+                    onClick={() => setSelectedItems([])}
+                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg"
+                  >
+                    <X className="h-4 w-4 text-red-600" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Stats Cards */}
           <motion.div
