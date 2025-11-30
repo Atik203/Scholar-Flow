@@ -12,7 +12,7 @@ import {
   TextCursor,
   Users,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import React from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
