@@ -261,6 +261,12 @@ const getQuickAccessItems = (userRole: UserRole): SidebarItem[] =>
       icon: Home,
     },
     {
+      title: "Global Search",
+      path: "/search",
+      icon: Globe,
+      badge: "AI",
+    },
+    {
       title: "AI Insights",
       path: "/ai-insights",
       icon: Brain,

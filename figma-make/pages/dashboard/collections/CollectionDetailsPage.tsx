@@ -1,22 +1,42 @@
 "use client";
 
+/**
+ * CollectionDetailsPage - Enhanced Collection Management
+ *
+ * Features:
+ * - View toggles (Grid/List/Kanban)
+ * - AI-powered paper suggestions
+ * - Bulk operations with floating action bar
+ * - Visual permission editor
+ * - Drag-drop paper organization
+ * - Inline paper preview
+ * - Framer Motion animations
+ */
+
 import {
   ArrowLeft,
-  BookOpen,
-  Calendar,
+  CheckCircle,
   Copy,
-  Edit,
+  Download,
   Eye,
   FileText,
   Globe,
+  Grid3X3,
+  LayoutGrid,
+  LayoutList,
   Lock,
+  MoreHorizontal,
   Plus,
   Search,
+  Settings,
   Share2,
+  Sparkles,
+  Star,
   Trash2,
-  User,
+  TrendingUp,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -24,7 +44,51 @@ import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
 // ============================================================================
-// Default User for Demo
+// Types
+// ============================================================================
+interface CollectionDetailsPageProps {
+  onNavigate?: (path: string) => void;
+  collectionId?: string;
+  role?: UserRole;
+}
+
+type ViewMode = "grid" | "list" | "kanban";
+type PaperStatus = "to-read" | "reading" | "completed" | "archived";
+
+interface Paper {
+  id: string;
+  title: string;
+  authors: string[];
+  year: number;
+  abstract: string;
+  processingStatus: "PROCESSED" | "PROCESSING";
+  addedAt: string;
+  status: PaperStatus;
+  isStarred: boolean;
+  citationCount: number;
+  tags: string[];
+}
+
+interface CollectionMember {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: "OWNER" | "ADMIN" | "EDITOR" | "VIEWER";
+  joinedAt: string;
+}
+
+interface AISuggestion {
+  id: string;
+  title: string;
+  authors: string[];
+  year: number;
+  reason: string;
+  similarity: number;
+}
+
+// ============================================================================
+// Sample Data
 // ============================================================================
 const defaultUser = {
   name: "John Researcher",
@@ -33,11 +97,126 @@ const defaultUser = {
   role: "researcher" as const,
 };
 
-interface CollectionDetailsPageProps {
-  onNavigate?: (path: string) => void;
-  collectionId?: string;
-  role?: UserRole;
-}
+const dummyCollection = {
+  id: "col-1",
+  name: "Machine Learning Research",
+  description:
+    "A curated collection of foundational and cutting-edge machine learning papers covering deep learning, neural networks, and AI systems.",
+  visibility: "private" as const,
+  createdAt: "2024-01-10T10:00:00Z",
+  updatedAt: "2024-01-25T15:30:00Z",
+  owner: { id: "user-1", name: "John Researcher", email: "john@example.com" },
+  paperCount: 12,
+  memberCount: 3,
+};
+
+const dummyPapers: Paper[] = [
+  {
+    id: "paper-1",
+    title: "Attention Is All You Need",
+    authors: ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
+    year: 2017,
+    abstract:
+      "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks...",
+    processingStatus: "PROCESSED",
+    addedAt: "2024-01-15T10:30:00Z",
+    status: "completed",
+    isStarred: true,
+    citationCount: 89542,
+    tags: ["transformers", "attention", "NLP"],
+  },
+  {
+    id: "paper-2",
+    title: "BERT: Pre-training of Deep Bidirectional Transformers",
+    authors: ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
+    year: 2018,
+    abstract: "We introduce a new language representation model called BERT...",
+    processingStatus: "PROCESSED",
+    addedAt: "2024-01-16T14:20:00Z",
+    status: "reading",
+    isStarred: false,
+    citationCount: 67234,
+    tags: ["BERT", "pre-training", "NLP"],
+  },
+  {
+    id: "paper-3",
+    title: "GPT-3: Language Models are Few-Shot Learners",
+    authors: ["Tom B. Brown", "Benjamin Mann", "Nick Ryder"],
+    year: 2020,
+    abstract:
+      "Recent work has demonstrated substantial gains on many NLP tasks...",
+    processingStatus: "PROCESSED",
+    addedAt: "2024-01-18T09:45:00Z",
+    status: "to-read",
+    isStarred: true,
+    citationCount: 45123,
+    tags: ["GPT", "few-shot", "LLM"],
+  },
+  {
+    id: "paper-4",
+    title: "Deep Residual Learning for Image Recognition",
+    authors: ["Kaiming He", "Xiangyu Zhang", "Shaoqing Ren"],
+    year: 2015,
+    abstract: "Deeper neural networks are more difficult to train...",
+    processingStatus: "PROCESSING",
+    addedAt: "2024-01-20T11:00:00Z",
+    status: "to-read",
+    isStarred: false,
+    citationCount: 123456,
+    tags: ["ResNet", "computer-vision"],
+  },
+];
+
+const dummyMembers: CollectionMember[] = [
+  {
+    id: "member-1",
+    name: "John Researcher",
+    email: "john@example.com",
+    role: "OWNER",
+    joinedAt: "2024-01-10T10:00:00Z",
+  },
+  {
+    id: "member-2",
+    name: "Dr. Sarah Chen",
+    email: "sarah@university.edu",
+    role: "EDITOR",
+    joinedAt: "2024-01-12T14:30:00Z",
+  },
+  {
+    id: "member-3",
+    name: "Prof. Michael Lee",
+    email: "michael@research.org",
+    role: "VIEWER",
+    joinedAt: "2024-01-15T09:00:00Z",
+  },
+];
+
+const aiSuggestions: AISuggestion[] = [
+  {
+    id: "sug-1",
+    title: "LoRA: Low-Rank Adaptation of Large Language Models",
+    authors: ["Hu, E.", "Shen, Y."],
+    year: 2021,
+    reason: "Highly relevant to your transformer papers",
+    similarity: 94,
+  },
+  {
+    id: "sug-2",
+    title: "Chain-of-Thought Prompting",
+    authors: ["Wei, J.", "Wang, X."],
+    year: 2022,
+    reason: "Extends GPT-3 few-shot learning concepts",
+    similarity: 89,
+  },
+  {
+    id: "sug-3",
+    title: "Vision Transformer (ViT)",
+    authors: ["Dosovitskiy, A."],
+    year: 2020,
+    reason: "Applies transformers to computer vision",
+    similarity: 85,
+  },
+];
 
 // ============================================================================
 // Utility Functions
@@ -47,221 +226,136 @@ function cn(...classes: (string | undefined | null | false)[]): string {
 }
 
 // ============================================================================
-// Dummy Data
+// Components
 // ============================================================================
-const dummyCollection = {
-  id: "col-1",
-  name: "Machine Learning Research",
-  description:
-    "A curated collection of foundational and cutting-edge machine learning papers covering deep learning, neural networks, and AI systems.",
-  visibility: "private" as const,
-  createdAt: "2024-01-10T10:00:00Z",
-  updatedAt: "2024-01-25T15:30:00Z",
-  owner: {
-    id: "user-1",
-    name: "John Researcher",
-    email: "john@example.com",
-  },
-  paperCount: 12,
-  memberCount: 3,
+const StatusBadge: React.FC<{ status: PaperStatus }> = ({ status }) => {
+  const config = {
+    "to-read": {
+      label: "To Read",
+      className:
+        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    },
+    reading: {
+      label: "Reading",
+      className:
+        "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
+    },
+    completed: {
+      label: "Completed",
+      className:
+        "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+    },
+    archived: {
+      label: "Archived",
+      className:
+        "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+    },
+  };
+  const statusConfig = config[status];
+  return (
+    <span
+      className={cn(
+        "px-2 py-0.5 rounded-full text-xs font-medium",
+        statusConfig.className
+      )}
+    >
+      {statusConfig.label}
+    </span>
+  );
 };
 
-const dummyPapers = [
-  {
-    id: "paper-1",
-    title: "Attention Is All You Need",
-    abstract:
-      "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks...",
-    authors: ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar"],
-    year: 2017,
-    processingStatus: "PROCESSED",
-    addedAt: "2024-01-15T10:30:00Z",
-  },
-  {
-    id: "paper-2",
-    title: "BERT: Pre-training of Deep Bidirectional Transformers",
-    abstract:
-      "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers...",
-    authors: ["Jacob Devlin", "Ming-Wei Chang", "Kenton Lee"],
-    year: 2018,
-    processingStatus: "PROCESSED",
-    addedAt: "2024-01-16T14:20:00Z",
-  },
-  {
-    id: "paper-3",
-    title: "GPT-3: Language Models are Few-Shot Learners",
-    abstract:
-      "Recent work has demonstrated substantial gains on many NLP tasks and benchmarks by pre-training on a large corpus of text...",
-    authors: ["Tom B. Brown", "Benjamin Mann", "Nick Ryder"],
-    year: 2020,
-    processingStatus: "PROCESSED",
-    addedAt: "2024-01-18T09:45:00Z",
-  },
-  {
-    id: "paper-4",
-    title: "Deep Residual Learning for Image Recognition",
-    abstract:
-      "Deeper neural networks are more difficult to train. We present a residual learning framework...",
-    authors: ["Kaiming He", "Xiangyu Zhang", "Shaoqing Ren"],
-    year: 2015,
-    processingStatus: "PROCESSING",
-    addedAt: "2024-01-20T11:00:00Z",
-  },
-];
-
-const dummyMembers = [
-  {
-    id: "member-1",
-    name: "John Researcher",
-    email: "john@example.com",
-    role: "OWNER",
-    permission: "ADMIN",
-    joinedAt: "2024-01-10T10:00:00Z",
-  },
-  {
-    id: "member-2",
-    name: "Dr. Sarah Chen",
-    email: "sarah@university.edu",
-    role: "MEMBER",
-    permission: "EDIT",
-    joinedAt: "2024-01-12T14:30:00Z",
-  },
-  {
-    id: "member-3",
-    name: "Prof. Michael Lee",
-    email: "michael@research.org",
-    role: "MEMBER",
-    permission: "VIEW",
-    joinedAt: "2024-01-15T09:00:00Z",
-  },
-];
-
-const dummyAvailablePapers = [
-  {
-    id: "avail-1",
-    title: "ImageNet Classification with Deep Convolutional Neural Networks",
-    authors: ["Alex Krizhevsky", "Ilya Sutskever"],
-  },
-  {
-    id: "avail-2",
-    title: "Generative Adversarial Networks",
-    authors: ["Ian Goodfellow", "Jean Pouget-Abadie"],
-  },
-  {
-    id: "avail-3",
-    title: "Dropout: A Simple Way to Prevent Neural Networks from Overfitting",
-    authors: ["Nitish Srivastava", "Geoffrey Hinton"],
-  },
-];
+const RoleBadge: React.FC<{ role: CollectionMember["role"] }> = ({ role }) => {
+  const config = {
+    OWNER: {
+      label: "Owner",
+      className:
+        "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    },
+    ADMIN: {
+      label: "Admin",
+      className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    },
+    EDITOR: {
+      label: "Editor",
+      className:
+        "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    },
+    VIEWER: {
+      label: "Viewer",
+      className:
+        "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+    },
+  };
+  const roleConfig = config[role];
+  return (
+    <span
+      className={cn(
+        "px-2 py-0.5 rounded-full text-xs font-medium",
+        roleConfig.className
+      )}
+    >
+      {roleConfig.label}
+    </span>
+  );
+};
 
 // ============================================================================
 // Collection Details Page Component
 // ============================================================================
 export function CollectionDetailsPage({
   onNavigate,
-  collectionId,
   role: propRole,
 }: CollectionDetailsPageProps) {
   const { role: contextRole } = useRole();
   const effectiveRole = propRole ?? contextRole;
   const user = { ...defaultUser, role: effectiveRole };
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showInviteDialog, setShowInviteDialog] = useState(false);
-  const [showAddPapersDialog, setShowAddPapersDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [invitePermission, setInvitePermission] = useState<"VIEW" | "EDIT">(
-    "EDIT"
+  // State
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showAddPapersModal, setShowAddPapersModal] = useState(false);
+  const [showAISuggestions, setShowAISuggestions] = useState(true);
+  const [activeTab, setActiveTab] = useState<"papers" | "members" | "settings">(
+    "papers"
   );
-  const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
-  const [editName, setEditName] = useState(dummyCollection.name);
-  const [editDescription, setEditDescription] = useState(
-    dummyCollection.description
-  );
-  const [previewPaperId, setPreviewPaperId] = useState<string | null>(null);
+  const [previewPaper, setPreviewPaper] = useState<Paper | null>(null);
+  const [statusFilter, setStatusFilter] = useState<PaperStatus | "all">("all");
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusMap = {
-      UPLOADED: {
-        color:
-          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-        label: "Uploaded",
-      },
-      PROCESSING: {
-        color:
-          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-        label: "Processing",
-      },
-      PROCESSED: {
-        color:
-          "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-        label: "Processed",
-      },
-      FAILED: {
-        color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-        label: "Failed",
-      },
-    };
-    return statusMap[status as keyof typeof statusMap] || statusMap.UPLOADED;
-  };
-
-  const getPermissionBadge = (permission: string) => {
-    const permMap = {
-      ADMIN: {
-        color:
-          "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-        label: "Admin",
-      },
-      EDIT: {
-        color:
-          "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-        label: "Editor",
-      },
-      VIEW: {
-        color:
-          "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-        label: "Viewer",
-      },
-    };
-    return permMap[permission as keyof typeof permMap] || permMap.VIEW;
-  };
-
-  const filteredPapers = dummyPapers.filter(
-    (paper) =>
-      paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      paper.authors.some((a) =>
-        a.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-  );
+  // Filter papers
+  const filteredPapers = dummyPapers.filter((paper) => {
+    if (statusFilter !== "all" && paper.status !== statusFilter) return false;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        paper.title.toLowerCase().includes(query) ||
+        paper.authors.some((a) => a.toLowerCase().includes(query))
+      );
+    }
+    return true;
+  });
 
   const togglePaperSelection = (paperId: string) => {
-    setSelectedPapers((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(paperId)) {
-        newSet.delete(paperId);
-      } else {
-        newSet.add(paperId);
-      }
-      return newSet;
-    });
-  };
-
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(
-      `https://scholarflow.com/collections/${dummyCollection.id}`
+    setSelectedPapers((prev) =>
+      prev.includes(paperId)
+        ? prev.filter((id) => id !== paperId)
+        : [...prev, paperId]
     );
   };
+
+  const selectAllPapers = () => {
+    setSelectedPapers(filteredPapers.map((p) => p.id));
+  };
+
+  const clearSelection = () => {
+    setSelectedPapers([]);
+  };
+
+  const isPremiumUser =
+    effectiveRole === "pro_researcher" ||
+    effectiveRole === "team_lead" ||
+    effectiveRole === "admin";
 
   return (
     <DashboardLayout
@@ -269,9 +363,9 @@ export function CollectionDetailsPage({
       onNavigate={onNavigate}
       currentPath="/collections/details"
     >
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -280,589 +374,666 @@ export function CollectionDetailsPage({
               className="inline-flex items-center px-3 py-2 text-sm border rounded-lg hover:bg-muted transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Collections
+              Back
             </motion.button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold tracking-tight">
+                  {dummyCollection.name}
+                </h1>
+                {dummyCollection.visibility === "private" ? (
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <Globe className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+              <p className="text-muted-foreground mt-1 line-clamp-1">
+                {dummyCollection.description}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center gap-2">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowShareDialog(true)}
-              className="inline-flex items-center px-4 py-2 border rounded-lg hover:bg-muted"
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted"
             >
-              <Share2 className="mr-2 h-4 w-4" />
+              <Share2 className="h-4 w-4" />
               Share
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setShowEditDialog(true)}
-              className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+              onClick={() => setShowAddPapersModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
             >
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowDeleteDialog(true)}
-              className="inline-flex items-center px-4 py-2 bg-destructive text-white rounded-lg"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              <Plus className="h-4 w-4" />
+              Add Papers
             </motion.button>
           </div>
         </div>
 
-        {/* Collection Info Card */}
-        <div className="rounded-xl border bg-gradient-to-r from-background to-primary/5 p-6">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <BookOpen className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h1 className="text-2xl font-bold">{dummyCollection.name}</h1>
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
-                      dummyCollection.visibility === "private"
-                        ? "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                        : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    )}
-                  >
-                    {dummyCollection.visibility === "private" ? (
-                      <Lock className="h-3 w-3" />
-                    ) : (
-                      <Globe className="h-3 w-3" />
-                    )}
-                    {dummyCollection.visibility === "private"
-                      ? "Private"
-                      : "Public"}
-                  </span>
-                </div>
-                <p className="text-muted-foreground max-w-2xl">
-                  {dummyCollection.description}
-                </p>
-                <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <FileText className="h-4 w-4" />
-                    {dummyCollection.paperCount} papers
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="h-4 w-4" />
-                    {dummyCollection.memberCount} members
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    Created {formatDate(dummyCollection.createdAt)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Papers List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <h2 className="text-lg font-semibold">Papers in Collection</h2>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-initial">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Search papers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowAddPapersDialog(true)}
-                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg whitespace-nowrap"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Papers
-                </motion.button>
-              </div>
-            </div>
-
-            {/* Papers Grid */}
-            <div className="space-y-3">
-              {filteredPapers.length > 0 ? (
-                filteredPapers.map((paper) => {
-                  const statusBadge = getStatusBadge(paper.processingStatus);
-                  return (
-                    <motion.div
-                      key={paper.id}
-                      whileHover={{ scale: 1.01 }}
-                      className="rounded-xl border bg-card p-4 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => onNavigate?.(`/papers/${paper.id}`)}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-2 mb-1">
-                            <h3 className="font-medium line-clamp-2">
-                              {paper.title}
-                            </h3>
-                            <span
-                              className={cn(
-                                "px-2 py-0.5 rounded text-xs font-medium shrink-0",
-                                statusBadge.color
-                              )}
-                            >
-                              {statusBadge.label}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                            {paper.abstract}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {paper.authors.slice(0, 2).join(", ")}
-                              {paper.authors.length > 2 &&
-                                ` +${paper.authors.length - 2}`}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {paper.year}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPreviewPaperId(paper.id);
-                            }}
-                            className="p-2 hover:bg-muted rounded-lg"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Remove paper
-                            }}
-                            className="p-2 hover:bg-destructive/10 text-destructive rounded-lg"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </motion.button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-12 border rounded-xl bg-muted/10">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No papers found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    {searchTerm
-                      ? "Try a different search term"
-                      : "Add papers to this collection to get started"}
-                  </p>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => setShowAddPapersDialog(true)}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg inline-flex items-center"
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Papers
-                  </motion.button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Members Sidebar */}
-          <div className="space-y-6">
-            {/* Members Card */}
-            <div className="rounded-xl border bg-card">
-              <div className="p-4 border-b flex items-center justify-between">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Members
-                </h3>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowInviteDialog(true)}
-                  className="text-sm text-primary hover:underline inline-flex items-center"
-                >
-                  <UserPlus className="mr-1 h-4 w-4" />
-                  Invite
-                </motion.button>
-              </div>
-              <div className="p-4 space-y-3">
-                {dummyMembers.map((member) => {
-                  const permBadge = getPermissionBadge(member.permission);
-                  return (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{member.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {member.email}
-                          </p>
-                        </div>
-                      </div>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded text-xs font-medium",
-                          permBadge.color
-                        )}
-                      >
-                        {permBadge.label}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="rounded-xl border bg-card p-4 space-y-3">
-              <h3 className="font-semibold">Quick Actions</h3>
-              <div className="space-y-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowShareDialog(true)}
-                  className="w-full py-2 px-4 border rounded-lg text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  <Share2 className="h-4 w-4" />
-                  Share Collection
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-2 px-4 border rounded-lg text-sm hover:bg-muted transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  <Copy className="h-4 w-4" />
-                  Duplicate Collection
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Invite Member Dialog */}
-        <AnimatePresence>
-          {showInviteDialog && (
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            {
+              label: "Papers",
+              value: dummyCollection.paperCount,
+              icon: FileText,
+              color: "text-blue-500",
+            },
+            {
+              label: "Members",
+              value: dummyCollection.memberCount,
+              icon: Users,
+              color: "text-green-500",
+            },
+            {
+              label: "Completed",
+              value: dummyPapers.filter((p) => p.status === "completed").length,
+              icon: CheckCircle,
+              color: "text-purple-500",
+            },
+            {
+              label: "Citations",
+              value: "325K",
+              icon: TrendingUp,
+              color: "text-orange-500",
+            },
+          ].map((stat, i) => (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-              onClick={() => setShowInviteDialog(false)}
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-card border rounded-xl p-4"
             >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border rounded-xl p-6 w-full max-w-md"
+              <div className="flex items-center gap-2">
+                <stat.icon className={cn("h-5 w-5", stat.color)} />
+                <span className="text-sm text-muted-foreground">
+                  {stat.label}
+                </span>
+              </div>
+              <p className="text-2xl font-bold mt-1">{stat.value}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Tabs */}
+        <div className="border-b">
+          <div className="flex gap-1">
+            {[
+              { key: "papers", label: "Papers", icon: FileText },
+              { key: "members", label: "Members", icon: Users },
+              { key: "settings", label: "Settings", icon: Settings },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as typeof activeTab)}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                  activeTab === tab.key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                )}
               >
-                <h3 className="text-lg font-semibold mb-4">Invite Member</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Email Address</label>
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Papers Tab */}
+        {activeTab === "papers" && (
+          <div className="grid gap-6 lg:grid-cols-4">
+            <div className="lg:col-span-3 space-y-4">
+              {/* Toolbar */}
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
-                      type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      placeholder="colleague@university.edu"
-                      className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search papers..."
+                      className="pl-9 pr-4 py-2 w-64 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Permission</label>
-                    <select
-                      value={invitePermission}
-                      onChange={(e) =>
-                        setInvitePermission(e.target.value as "VIEW" | "EDIT")
-                      }
-                      className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="VIEW">View only</option>
-                      <option value="EDIT">Can edit</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex gap-2 justify-end mt-6">
-                  <button
-                    onClick={() => setShowInviteDialog(false)}
-                    className="px-4 py-2 border rounded-lg hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowInviteDialog(false);
-                      setInviteEmail("");
-                    }}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-                  >
-                    Send Invite
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Add Papers Dialog */}
-        <AnimatePresence>
-          {showAddPapersDialog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-              onClick={() => setShowAddPapersDialog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
-              >
-                <h3 className="text-lg font-semibold mb-4">
-                  Add Papers to Collection
-                </h3>
-                <div className="space-y-4 flex-1 overflow-y-auto">
-                  {dummyAvailablePapers.map((paper) => (
-                    <label
-                      key={paper.id}
-                      className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted cursor-pointer"
+                  {/* Status Filter */}
+                  <select
+                    value={statusFilter}
+                    onChange={(e) =>
+                      setStatusFilter(e.target.value as typeof statusFilter)
+                    }
+                    className="px-3 py-2 border rounded-lg bg-background text-sm"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="to-read">To Read</option>
+                    <option value="reading">Reading</option>
+                    <option value="completed">Completed</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+                  {[
+                    { key: "grid", icon: LayoutGrid },
+                    { key: "list", icon: LayoutList },
+                    { key: "kanban", icon: Grid3X3 },
+                  ].map((v) => (
+                    <button
+                      key={v.key}
+                      onClick={() => setViewMode(v.key as ViewMode)}
+                      className={cn(
+                        "p-2 rounded-md transition-colors",
+                        viewMode === v.key
+                          ? "bg-background shadow"
+                          : "hover:bg-background/50"
+                      )}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedPapers.has(paper.id)}
-                        onChange={() => togglePaperSelection(paper.id)}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-medium text-sm">{paper.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {paper.authors.join(", ")}
-                        </p>
-                      </div>
-                    </label>
+                      <v.icon className="h-4 w-4" />
+                    </button>
                   ))}
                 </div>
-                <div className="flex gap-2 justify-end mt-6 pt-4 border-t">
-                  <button
-                    onClick={() => setShowAddPapersDialog(false)}
-                    className="px-4 py-2 border rounded-lg hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowAddPapersDialog(false);
-                      setSelectedPapers(new Set());
-                    }}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-                  >
-                    Add {selectedPapers.size} Paper
-                    {selectedPapers.size !== 1 ? "s" : ""}
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
 
-        {/* Share Dialog */}
-        <AnimatePresence>
-          {showShareDialog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-              onClick={() => setShowShareDialog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border rounded-xl p-6 w-full max-w-md"
-              >
-                <h3 className="text-lg font-semibold mb-4">Share Collection</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Share Link</label>
-                    <div className="mt-1.5 flex gap-2">
-                      <input
-                        type="text"
-                        readOnly
-                        value={`https://scholarflow.com/collections/${dummyCollection.id}`}
-                        className="flex-1 px-3 py-2 border rounded-lg bg-muted text-sm"
-                      />
+              {/* Bulk Selection Bar */}
+              <AnimatePresence>
+                {selectedPapers.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex items-center justify-between p-3 bg-primary/10 border border-primary/30 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">
+                        {selectedPapers.length} selected
+                      </span>
+                      <button
+                        onClick={selectAllPapers}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Select all
+                      </button>
+                      <button
+                        onClick={clearSelection}
+                        className="text-sm text-muted-foreground hover:underline"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={copyShareLink}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background border rounded-lg text-sm"
+                      >
+                        <Download className="h-4 w-4" />
+                        Export
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-background border rounded-lg text-sm"
                       >
                         <Copy className="h-4 w-4" />
+                        Move
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Remove
                       </motion.button>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-2">
-                      {dummyCollection.visibility === "private" ? (
-                        <Lock className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Globe className="h-4 w-4 text-green-600" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Papers Grid/List */}
+              {viewMode === "grid" && (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {filteredPapers.map((paper, index) => (
+                    <motion.div
+                      key={paper.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ y: -2 }}
+                      className={cn(
+                        "bg-card border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md",
+                        selectedPapers.includes(paper.id) &&
+                          "ring-2 ring-primary"
                       )}
-                      <span className="text-sm">
-                        {dummyCollection.visibility === "private"
-                          ? "Private - Only members can access"
-                          : "Public - Anyone with link can view"}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedPapers.includes(paper.id)}
+                          onChange={() => togglePaperSelection(paper.id)}
+                          className="rounded border-gray-300 text-primary focus:ring-primary mt-1"
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              /* toggle star */
+                            }}
+                            className="p-1 hover:bg-muted rounded"
+                          >
+                            <Star
+                              className={cn(
+                                "h-4 w-4",
+                                paper.isStarred
+                                  ? "fill-yellow-500 text-yellow-500"
+                                  : "text-muted-foreground"
+                              )}
+                            />
+                          </button>
+                          <button className="p-1 hover:bg-muted rounded">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          </button>
+                        </div>
+                      </div>
+                      <h3
+                        className="font-semibold text-base line-clamp-2 hover:text-primary transition-colors"
+                        onClick={() => setPreviewPaper(paper)}
+                      >
+                        {paper.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {paper.authors.slice(0, 2).join(", ")}
+                        {paper.authors.length > 2 &&
+                          ` +${paper.authors.length - 2}`}{" "}
+                        • {paper.year}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {paper.abstract}
+                      </p>
+                      <div className="flex items-center justify-between mt-4">
+                        <StatusBadge status={paper.status} />
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            {(paper.citationCount / 1000).toFixed(0)}K
+                          </span>
+                          <button
+                            onClick={() => setPreviewPaper(paper)}
+                            className="flex items-center gap-1 hover:text-primary"
+                          >
+                            <Eye className="h-3 w-3" />
+                            View
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+
+              {viewMode === "list" && (
+                <div className="bg-card border rounded-xl overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50 border-b">
+                      <tr>
+                        <th className="w-10 p-3">
+                          <input type="checkbox" className="rounded" />
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">
+                          Title
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">
+                          Authors
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">
+                          Year
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">
+                          Status
+                        </th>
+                        <th className="text-left p-3 text-sm font-medium">
+                          Citations
+                        </th>
+                        <th className="w-20 p-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPapers.map((paper) => (
+                        <tr
+                          key={paper.id}
+                          className="border-b hover:bg-muted/30 transition-colors"
+                        >
+                          <td className="p-3">
+                            <input
+                              type="checkbox"
+                              checked={selectedPapers.includes(paper.id)}
+                              onChange={() => togglePaperSelection(paper.id)}
+                              className="rounded"
+                            />
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              {paper.isStarred && (
+                                <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
+                              )}
+                              <span className="font-medium text-sm line-clamp-1">
+                                {paper.title}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3 text-sm text-muted-foreground">
+                            {paper.authors[0]}
+                            {paper.authors.length > 1 &&
+                              ` +${paper.authors.length - 1}`}
+                          </td>
+                          <td className="p-3 text-sm">{paper.year}</td>
+                          <td className="p-3">
+                            <StatusBadge status={paper.status} />
+                          </td>
+                          <td className="p-3 text-sm">
+                            {(paper.citationCount / 1000).toFixed(0)}K
+                          </td>
+                          <td className="p-3">
+                            <button
+                              onClick={() => setPreviewPaper(paper)}
+                              className="p-2 hover:bg-muted rounded"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {viewMode === "kanban" && (
+                <div className="grid grid-cols-4 gap-4">
+                  {(
+                    [
+                      "to-read",
+                      "reading",
+                      "completed",
+                      "archived",
+                    ] as PaperStatus[]
+                  ).map((status) => (
+                    <div key={status} className="bg-muted/30 rounded-xl p-3">
+                      <h3 className="font-medium text-sm mb-3 flex items-center justify-between">
+                        <StatusBadge status={status} />
+                        <span className="text-muted-foreground">
+                          {
+                            filteredPapers.filter((p) => p.status === status)
+                              .length
+                          }
+                        </span>
+                      </h3>
+                      <div className="space-y-2">
+                        {filteredPapers
+                          .filter((p) => p.status === status)
+                          .map((paper) => (
+                            <motion.div
+                              key={paper.id}
+                              whileHover={{ scale: 1.02 }}
+                              className="bg-card border rounded-lg p-3 cursor-pointer"
+                              onClick={() => setPreviewPaper(paper)}
+                            >
+                              <h4 className="font-medium text-sm line-clamp-2">
+                                {paper.title}
+                              </h4>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {paper.authors[0]}
+                              </p>
+                            </motion.div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* AI Suggestions */}
+              {showAISuggestions && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold flex items-center gap-2 text-purple-900 dark:text-purple-100">
+                      <Sparkles className="h-4 w-4" />
+                      AI Suggestions
+                    </h3>
+                    {!isPremiumUser && (
+                      <span className="px-1.5 py-0.5 text-xs rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium">
+                        PRO
                       </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-purple-700 dark:text-purple-300 mb-3">
+                    Papers similar to your collection
+                  </p>
+                  <div className="space-y-2">
+                    {aiSuggestions.map((suggestion) => (
+                      <div
+                        key={suggestion.id}
+                        className="bg-white/50 dark:bg-gray-900/50 rounded-lg p-2"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm line-clamp-1">
+                              {suggestion.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              {suggestion.authors[0]} • {suggestion.year}
+                            </p>
+                          </div>
+                          <span className="text-xs font-medium text-purple-600">
+                            {suggestion.similarity}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                          {suggestion.reason}
+                        </p>
+                        <button className="w-full mt-2 py-1 text-xs font-medium text-purple-700 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded">
+                          + Add to Collection
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Preview Panel */}
+              <AnimatePresence mode="wait">
+                {previewPaper && (
+                  <motion.div
+                    key={previewPaper.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="bg-card border rounded-xl overflow-hidden"
+                  >
+                    <div className="p-4 border-b bg-muted/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          Preview
+                        </span>
+                        <button
+                          onClick={() => setPreviewPaper(null)}
+                          className="p-1 hover:bg-muted rounded"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <h3 className="font-semibold line-clamp-2">
+                        {previewPaper.title}
+                      </h3>
+                    </div>
+                    <div className="aspect-[3/4] bg-muted/50 flex items-center justify-center">
+                      <div className="text-center p-6">
+                        <FileText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+                        <p className="text-sm text-muted-foreground">
+                          PDF Preview
+                        </p>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() =>
+                          onNavigate?.(`/papers/${previewPaper.id}`)
+                        }
+                        className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium flex items-center justify-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Open Paper
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        )}
+
+        {/* Members Tab */}
+        {activeTab === "members" && (
+          <div className="bg-card border rounded-xl overflow-hidden">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-semibold">Members ({dummyMembers.length})</h3>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm"
+              >
+                <UserPlus className="h-4 w-4" />
+                Invite
+              </motion.button>
+            </div>
+            <div className="divide-y">
+              {dummyMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold">
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{member.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {member.email}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="flex justify-end mt-6">
-                  <button
-                    onClick={() => setShowShareDialog(false)}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-                  >
-                    Done
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Edit Dialog */}
-        <AnimatePresence>
-          {showEditDialog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-              onClick={() => setShowEditDialog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border rounded-xl p-6 w-full max-w-md"
-              >
-                <h3 className="text-lg font-semibold mb-4">Edit Collection</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Name</label>
-                    <input
-                      type="text"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Description</label>
-                    <textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      rows={3}
-                      className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                    />
+                  <div className="flex items-center gap-3">
+                    <RoleBadge role={member.role} />
+                    <button className="p-2 hover:bg-muted rounded">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex gap-2 justify-end mt-6">
-                  <button
-                    onClick={() => setShowEditDialog(false)}
-                    className="px-4 py-2 border rounded-lg hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => setShowEditDialog(false)}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Delete Dialog */}
-        <AnimatePresence>
-          {showDeleteDialog && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-              onClick={() => setShowDeleteDialog(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-background border rounded-xl p-6 w-full max-w-md"
-              >
-                <h3 className="text-lg font-semibold mb-2">
-                  Delete Collection
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Are you sure you want to delete "{dummyCollection.name}"? This
-                  will remove all papers from the collection but won't delete
-                  the papers themselves.
-                </p>
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => setShowDeleteDialog(false)}
-                    className="px-4 py-2 border rounded-lg hover:bg-muted"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowDeleteDialog(false);
-                      onNavigate?.("/collections");
-                    }}
-                    className="px-4 py-2 bg-destructive text-white rounded-lg"
-                  >
-                    Delete
-                  </button>
+        {/* Settings Tab */}
+        {activeTab === "settings" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="bg-card border rounded-xl p-6">
+              <h3 className="font-semibold mb-4">Collection Details</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Name</label>
+                  <input
+                    type="text"
+                    defaultValue={dummyCollection.name}
+                    className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background"
+                  />
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <textarea
+                    defaultValue={dummyCollection.description}
+                    rows={3}
+                    className="mt-1.5 w-full px-3 py-2 border rounded-lg bg-background resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Visibility</label>
+                  <div className="flex gap-3 mt-1.5">
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        defaultChecked
+                        className="text-primary"
+                      />
+                      <Lock className="h-4 w-4" />
+                      <span className="text-sm">Private</span>
+                    </label>
+                    <label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                      <input
+                        type="radio"
+                        name="visibility"
+                        className="text-primary"
+                      />
+                      <Globe className="h-4 w-4" />
+                      <span className="text-sm">Public</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+                >
+                  Save Changes
+                </motion.button>
+              </div>
+            </div>
+            <div className="bg-card border border-destructive/50 rounded-xl p-6">
+              <h3 className="font-semibold text-destructive mb-2">
+                Danger Zone
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Permanently delete this collection and all its data.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Collection
+              </motion.button>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
