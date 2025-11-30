@@ -15,27 +15,34 @@
  * @version 1.0.0 - Phase 7
  */
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
   BarChart3,
+  Bookmark,
   Calendar,
   CheckCircle,
   Clock,
   Copy,
   Database,
+  Download,
   Eye,
   EyeOff,
+  FileJson,
+  FileSpreadsheet,
   FileText,
   Globe,
   Info,
   Key,
+  Lightbulb,
   Lock,
   Plus,
   RefreshCw,
   Search,
   Settings,
   Shield,
+  Sparkles,
   Trash2,
   Unlock,
   Users,
@@ -43,8 +50,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
@@ -277,6 +283,71 @@ export function AdminAPIKeysPage({
   const [newKeyRateLimit, setNewKeyRateLimit] = useState(1000);
   const [newKeyExpiry, setNewKeyExpiry] = useState<string>("");
 
+  // Enhanced features state
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showSavedViews, setShowSavedViews] = useState(false);
+  const [showAIInsights, setShowAIInsights] = useState(false);
+  const [savedViews] = useState([
+    { id: "1", name: "Active Production Keys", filters: { status: "active" } },
+    { id: "2", name: "Expiring Soon", filters: { status: "active" } },
+    { id: "3", name: "High Usage Keys", filters: { status: "all" } },
+  ]);
+  const [aiInsights] = useState([
+    {
+      id: "1",
+      type: "warning",
+      title: "Key Rotation Recommended",
+      description: "2 API keys haven't been rotated in over 90 days",
+      action: "Review Keys",
+    },
+    {
+      id: "2",
+      type: "optimization",
+      title: "Unused Scopes Detected",
+      description:
+        "Production Integration has 2 scopes that haven't been used in 30 days",
+      action: "Optimize",
+    },
+    {
+      id: "3",
+      type: "security",
+      title: "Rate Limit Alert",
+      description: "CI/CD Pipeline key is approaching 80% of rate limit",
+      action: "Increase Limit",
+    },
+  ]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    const interval = setInterval(() => {
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAutoRefresh]);
+
+  // Bulk actions
+  const handleSelectAll = () => {
+    if (selectedKeys.length === filteredKeys.length) {
+      setSelectedKeys([]);
+    } else {
+      setSelectedKeys(filteredKeys.map((k) => k.id));
+    }
+  };
+
+  const handleBulkRevoke = () => {
+    // Handle bulk revoke
+    setSelectedKeys([]);
+  };
+
+  const handleExport = (format: "csv" | "json" | "pdf") => {
+    // Handle export
+    setShowExportMenu(false);
+  };
+
   // Filter API keys
   const filteredKeys = useMemo(() => {
     return apiKeys.filter((key) => {
@@ -377,23 +448,241 @@ export function AdminAPIKeysPage({
             className="flex flex-col md:flex-row md:items-center justify-between gap-4"
           >
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                API Key Management
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                  API Key Management
+                </h1>
+                {/* Real-time refresh indicator */}
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ opacity: isAutoRefresh ? [1, 0.5, 1] : 1 }}
+                    transition={{
+                      duration: 2,
+                      repeat: isAutoRefresh ? Infinity : 0,
+                    }}
+                    className={`h-2 w-2 rounded-full ${isAutoRefresh ? "bg-green-500" : "bg-gray-400"}`}
+                  />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {isAutoRefresh ? "Live" : "Paused"} • Updated{" "}
+                    {lastRefresh.toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Create, manage, and monitor API keys for integrations
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all"
-            >
-              <Plus className="h-5 w-5" />
-              Create API Key
-            </motion.button>
+            <div className="flex items-center gap-2">
+              {/* Auto-refresh toggle */}
+              <button
+                onClick={() => setIsAutoRefresh(!isAutoRefresh)}
+                className={`p-2 rounded-lg transition-colors ${isAutoRefresh ? "bg-green-100 dark:bg-green-900/30 text-green-600" : "bg-gray-100 dark:bg-gray-800 text-gray-500"}`}
+                title={
+                  isAutoRefresh ? "Pause auto-refresh" : "Enable auto-refresh"
+                }
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isAutoRefresh ? "animate-spin" : ""}`}
+                  style={{ animationDuration: "3s" }}
+                />
+              </button>
+
+              {/* Saved Views */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowSavedViews(!showSavedViews)}
+                  className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Bookmark className="h-4 w-4" />
+                  <span className="text-sm">Views</span>
+                </button>
+                <AnimatePresence>
+                  {showSavedViews && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                    >
+                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2">
+                          Saved Views
+                        </p>
+                      </div>
+                      {savedViews.map((view) => (
+                        <button
+                          key={view.id}
+                          onClick={() => {
+                            setStatusFilter(view.filters.status);
+                            setShowSavedViews(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <Bookmark className="h-4 w-4 text-orange-500" />
+                          <span className="text-sm">{view.name}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Export Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="text-sm">Export</span>
+                </button>
+                <AnimatePresence>
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                    >
+                      <button
+                        onClick={() => handleExport("csv")}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <FileSpreadsheet className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">Export as CSV</span>
+                      </button>
+                      <button
+                        onClick={() => handleExport("json")}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <FileJson className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm">Export as JSON</span>
+                      </button>
+                      <button
+                        onClick={() => handleExport("pdf")}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        <FileText className="h-4 w-4 text-red-500" />
+                        <span className="text-sm">Export as PDF</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* AI Insights Toggle */}
+              <button
+                onClick={() => setShowAIInsights(!showAIInsights)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${showAIInsights ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
+              >
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm">AI Insights</span>
+              </button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-medium shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 transition-all"
+              >
+                <Plus className="h-5 w-5" />
+                Create API Key
+              </motion.button>
+            </div>
           </motion.div>
+
+          {/* AI Insights Panel */}
+          <AnimatePresence>
+            {showAIInsights && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                      AI-Powered Insights
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {aiInsights.map((insight) => (
+                      <motion.div
+                        key={insight.id}
+                        whileHover={{ scale: 1.02 }}
+                        className={`p-3 rounded-lg bg-white dark:bg-gray-800 border ${
+                          insight.type === "warning"
+                            ? "border-amber-200 dark:border-amber-800"
+                            : insight.type === "security"
+                              ? "border-red-200 dark:border-red-800"
+                              : "border-blue-200 dark:border-blue-800"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <Lightbulb
+                            className={`h-4 w-4 mt-0.5 ${
+                              insight.type === "warning"
+                                ? "text-amber-500"
+                                : insight.type === "security"
+                                  ? "text-red-500"
+                                  : "text-blue-500"
+                            }`}
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              {insight.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {insight.description}
+                            </p>
+                            <button className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-2 hover:underline">
+                              {insight.action} →
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Bulk Actions Bar */}
+          <AnimatePresence>
+            {selectedKeys.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex items-center justify-between bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                    {selectedKeys.length} key
+                    {selectedKeys.length > 1 ? "s" : ""} selected
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleBulkRevoke}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Revoke Selected
+                  </button>
+                  <button
+                    onClick={() => setSelectedKeys([])}
+                    className="p-1.5 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg transition-colors"
+                  >
+                    <X className="h-4 w-4 text-orange-600" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Stats Cards */}
           <motion.div

@@ -1,14 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
   BarChart3,
+  Brain,
   Calendar,
   CheckCircle,
   ChevronDown,
   Clock,
   Download,
+  FileJson,
   FileSpreadsheet,
   FileText,
   GripVertical,
@@ -28,7 +30,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
@@ -327,6 +329,66 @@ export function AdminReportsPage({
   const [builderWidgets, setBuilderWidgets] = useState<ReportWidget[]>([]);
   const [reportTitle, setReportTitle] = useState("Untitled Report");
 
+  // Enhanced features state
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [savedViews, setSavedViews] = useState([
+    { id: "1", name: "Active Reports", filter: "active" },
+    { id: "2", name: "Financial Reports", filter: "financial" },
+    { id: "3", name: "This Month", filter: "monthly" },
+  ]);
+  const [selectedReports, setSelectedReports] = useState<string[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [aiInsights] = useState([
+    {
+      type: "recommendation",
+      message: "Schedule your most accessed reports for automatic delivery",
+      icon: TrendingUp,
+    },
+    {
+      type: "alert",
+      message: "2 reports failed generation - check data sources",
+      icon: Sparkles,
+    },
+    {
+      type: "info",
+      message: "Report generation time improved 18% with caching",
+      icon: Brain,
+    },
+  ]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    const interval = setInterval(() => {
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAutoRefresh]);
+
+  // Bulk selection handlers
+  const toggleReportSelection = (reportId: string) => {
+    setSelectedReports((prev) =>
+      prev.includes(reportId)
+        ? prev.filter((id) => id !== reportId)
+        : [...prev, reportId]
+    );
+  };
+
+  const toggleAllReports = () => {
+    setSelectedReports((prev) =>
+      prev.length === filteredReports.length
+        ? []
+        : filteredReports.map((r) => r.id)
+    );
+  };
+
+  // Export handlers
+  const handleExport = (format: string) => {
+    console.log(`Exporting reports as ${format}`);
+    setShowExportMenu(false);
+  };
+
   // Add widget to builder
   const addWidgetToBuilder = (widget: ReportWidget) => {
     setBuilderWidgets((prev) => [
@@ -418,6 +480,154 @@ export function AdminReportsPage({
             <Plus className="h-4 w-4" />
             Create Report
           </button>
+        </motion.div>
+
+        {/* Enhanced Toolbar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="flex flex-wrap items-center gap-3 mb-6"
+        >
+          {/* Live Refresh Indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+            <motion.div
+              animate={isAutoRefresh ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+              className={`h-2 w-2 rounded-full ${isAutoRefresh ? "bg-green-500" : "bg-gray-400"}`}
+            />
+            <span className="text-xs text-slate-600 dark:text-slate-400">
+              {isAutoRefresh ? "Live" : "Paused"}
+            </span>
+            <button
+              onClick={() => setIsAutoRefresh(!isAutoRefresh)}
+              className="text-xs text-indigo-500 hover:text-indigo-600"
+            >
+              {isAutoRefresh ? "Pause" : "Resume"}
+            </button>
+          </div>
+
+          {/* Saved Views */}
+          <div className="flex items-center gap-1">
+            {savedViews.map((view) => (
+              <button
+                key={view.id}
+                className="px-3 py-1.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                {view.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Bulk Actions */}
+          {selectedReports.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800"
+            >
+              <span className="text-xs text-indigo-600 dark:text-indigo-400">
+                {selectedReports.length} selected
+              </span>
+              <button className="text-xs text-green-600 hover:text-green-700">
+                Generate
+              </button>
+              <button className="text-xs text-blue-600 hover:text-blue-700">
+                Schedule
+              </button>
+              <button className="text-xs text-red-600 hover:text-red-700">
+                Delete
+              </button>
+            </motion.div>
+          )}
+
+          {/* Export Menu */}
+          <div className="relative ml-auto">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              Export
+            </button>
+            <AnimatePresence>
+              {showExportMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-1 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg z-50"
+                >
+                  <button
+                    onClick={() => handleExport("csv")}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
+                  </button>
+                  <button
+                    onClick={() => handleExport("json")}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <FileJson className="h-3.5 w-3.5" /> JSON
+                  </button>
+                  <button
+                    onClick={() => handleExport("pdf")}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-slate-50 dark:hover:bg-slate-700"
+                  >
+                    <FileText className="h-3.5 w-3.5" /> PDF
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Last Refresh */}
+          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+            <RefreshCw className="h-3 w-3" />
+            {lastRefresh.toLocaleTimeString()}
+          </div>
+        </motion.div>
+
+        {/* AI Insights Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Brain className="h-4 w-4 text-indigo-500" />
+            <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+              AI Insights
+            </span>
+            <span className="px-2 py-0.5 text-xs bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-300 rounded-full">
+              3 new
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {aiInsights.map((insight, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.12 + index * 0.05 }}
+                className="flex items-start gap-2 p-2 bg-white dark:bg-slate-800 rounded-lg"
+              >
+                <insight.icon
+                  className={`h-4 w-4 mt-0.5 ${
+                    insight.type === "alert"
+                      ? "text-amber-500"
+                      : insight.type === "recommendation"
+                        ? "text-green-500"
+                        : "text-blue-500"
+                  }`}
+                />
+                <span className="text-xs text-slate-600 dark:text-slate-400">
+                  {insight.message}
+                </span>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         {/* Stats Grid */}
