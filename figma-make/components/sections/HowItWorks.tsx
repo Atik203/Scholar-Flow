@@ -1,17 +1,20 @@
 "use client";
-import { motion } from "motion/react";
 import {
   ArrowRight,
   Brain,
   CheckCircle2,
   FileText,
   Folder,
+  MessageSquare,
   Play,
+  Quote,
   Search,
   Sparkles,
   Upload,
+  Users,
   Zap,
 } from "lucide-react";
+import { motion } from "motion/react";
 import React, { useState } from "react";
 
 const steps = [
@@ -186,6 +189,177 @@ const steps = [
       </div>
     ),
   },
+  {
+    number: "04",
+    title: "Collaborate with Team",
+    subtitle: "Real-time Collaboration",
+    desc: "Invite team members, share collections, and work together in real-time. Comments, mentions, and activity tracking keep everyone aligned.",
+    icon: Users,
+    gradient: "from-green-500 to-teal-500",
+    highlights: ["Real-time editing", "Team workspaces", "Activity feeds"],
+    mockContent: (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-500/10 to-teal-500/10 rounded-lg border border-green-500/30">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center">
+            <Users className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm font-medium">Research Team</div>
+            <div className="text-xs text-muted-foreground">
+              5 members • 3 online
+            </div>
+          </div>
+          <div className="flex -space-x-2">
+            {["bg-blue-500", "bg-green-500", "bg-purple-500"].map(
+              (color, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`w-8 h-8 rounded-full ${color} border-2 border-background flex items-center justify-center text-white text-xs font-medium`}
+                >
+                  {String.fromCharCode(65 + i)}
+                </motion.div>
+              )
+            )}
+          </div>
+        </div>
+        <div className="space-y-3">
+          {[
+            {
+              user: "Alice",
+              action: "commented on",
+              item: "ML Research",
+              time: "2m ago",
+              color: "text-blue-500",
+            },
+            {
+              user: "Bob",
+              action: "added paper to",
+              item: "AI Collection",
+              time: "5m ago",
+              color: "text-green-500",
+            },
+            {
+              user: "Carol",
+              action: "shared",
+              item: "Literature Review",
+              time: "12m ago",
+              color: "text-purple-500",
+            },
+          ].map((activity, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.15 }}
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+            >
+              <div
+                className={`w-6 h-6 rounded-full bg-muted flex items-center justify-center ${activity.color} text-xs font-medium`}
+              >
+                {activity.user[0]}
+              </div>
+              <div className="flex-1 text-sm">
+                <span className="font-medium">{activity.user}</span>{" "}
+                <span className="text-muted-foreground">{activity.action}</span>{" "}
+                <span className="font-medium">{activity.item}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {activity.time}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    number: "05",
+    title: "Generate Citations",
+    subtitle: "Auto-Format References",
+    desc: "Automatically generate citations in any format - APA, MLA, Chicago, IEEE, and more. Export to Word, LaTeX, or copy to clipboard instantly.",
+    icon: Quote,
+    gradient: "from-indigo-500 to-violet-500",
+    highlights: ["50+ citation styles", "One-click export", "BibTeX support"],
+    mockContent: (
+      <div className="space-y-4">
+        <div className="p-4 bg-gradient-to-r from-indigo-500/10 to-violet-500/10 rounded-xl border border-indigo-500/30">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Quote className="h-5 w-5 text-indigo-500" />
+              <span className="text-sm font-medium">Citation Generator</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {["APA", "MLA", "IEEE"].map((style, i) => (
+                <motion.button
+                  key={style}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`px-2 py-1 text-xs rounded-md transition-colors ${i === 0 ? "bg-indigo-500 text-white" : "bg-muted hover:bg-muted/80"}`}
+                >
+                  {style}
+                </motion.button>
+              ))}
+            </div>
+          </div>
+          <motion.div
+            className="p-3 bg-background/60 rounded-lg border border-border/50 font-mono text-xs"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <span className="text-muted-foreground">
+              Smith, J., & Johnson, A. (2024).{" "}
+            </span>
+            <span className="text-foreground italic">
+              Machine Learning in Research
+            </span>
+            <span className="text-muted-foreground">
+              . Journal of AI, 15(3), 234-256.
+            </span>
+          </motion.div>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            {
+              icon: FileText,
+              label: "Copy",
+              color: "from-blue-500 to-cyan-500",
+            },
+            {
+              icon: MessageSquare,
+              label: "Word",
+              color: "from-indigo-500 to-violet-500",
+            },
+            {
+              icon: Zap,
+              label: "LaTeX",
+              color: "from-green-500 to-emerald-500",
+            },
+          ].map((action, i) => (
+            <motion.button
+              key={action.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.1 }}
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center justify-center gap-2 p-3 rounded-lg bg-card border border-border/50 hover:border-primary/30 transition-all"
+            >
+              <div
+                className={`w-6 h-6 rounded-md bg-gradient-to-br ${action.color} flex items-center justify-center`}
+              >
+                <action.icon className="h-3 w-3 text-white" />
+              </div>
+              <span className="text-sm font-medium">{action.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    ),
+  },
 ];
 
 export const HowItWorks: React.FC = () => {
@@ -229,7 +403,7 @@ export const HowItWorks: React.FC = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
           >
             <Zap className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">Simple 3-Step Workflow</span>
+            <span className="text-sm font-medium">Simple 5-Step Workflow</span>
           </motion.div>
 
           <h2

@@ -205,7 +205,8 @@ Enhanced Enterprise Pages:
 - [x] Typing effect with rotating words
 - [x] Floating particles with staggered animations
 - [x] Animated decorations (gradients, sparkles)
-- [x] Counter animation for stats
+- [x] Counter animation for stats (50K+, 12K+, 3.5K+, 99.9%)
+- [x] Trustpilot badge with animated stars (4.8 TrustScore, 2,847 reviews)
 - [x] Trust badges with hover effects
 - [x] Premium gradient text styling
 - [x] Enhanced feature preview cards
@@ -226,7 +227,21 @@ Enhanced Enterprise Pages:
 - [x] Stats badges on cards
 - [x] Animated accent lines on hover
 - [x] Sparkle decorations
-- [x] Bottom CTA for roadmap
+- [x] Feature summary card (removed roadmap text)
+
+### HowItWorks.tsx - Complete Rewrite ✅
+
+- [x] Changed from 3-step to 5-step workflow
+- [x] Interactive step navigation tabs
+- [x] Mobile step selector with pill buttons
+- [x] Enhanced step cards with gradients
+- [x] Premium preview window with macOS-style controls
+- [x] Step 1: Upload Your Papers (smart document processing)
+- [x] Step 2: Organize & Annotate (intelligent organization)
+- [x] Step 3: Search & Discover (AI-powered insights)
+- [x] Step 4: Collaborate with Team (real-time editing, team workspaces)
+- [x] Step 5: Generate Citations (50+ styles, one-click export, BibTeX)
+- [x] Bottom CTA section with trial buttons
 
 ---
 
