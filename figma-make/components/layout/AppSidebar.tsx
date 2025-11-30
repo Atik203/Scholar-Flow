@@ -517,8 +517,19 @@ export function AppSidebar({
         </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-auto p-3">
+      {/* Content - Hide scrollbar but keep scroll functionality */}
+      <div
+        className="flex-1 overflow-auto p-3 sidebar-scroll"
+        style={{
+          scrollbarWidth: "none", // Firefox
+          msOverflowStyle: "none", // IE/Edge
+        }}
+      >
+        <style>{`
+          .sidebar-scroll::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
         {/* Workspace Switcher */}
         <div className="mb-4">
           <WorkspaceSwitcher onNavigate={onNavigate} />
