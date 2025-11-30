@@ -1080,7 +1080,7 @@ export function AdminAuditLogPage({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto"
               >
                 <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
@@ -1218,7 +1218,7 @@ export function AdminAuditLogPage({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6"
               >
                 <div className="flex items-center gap-4 mb-4">
@@ -1274,7 +1274,7 @@ export function AdminAuditLogPage({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
                 className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6"
               >
                 <div className="flex items-center gap-4 mb-6">

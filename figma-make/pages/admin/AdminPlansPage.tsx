@@ -14,19 +14,26 @@
  * - Framer Motion animations
  */
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertTriangle,
   BarChart3,
+  Brain,
   Check,
   Crown,
   DollarSign,
   Edit2,
   Eye,
+  FileJson,
+  FileSpreadsheet,
+  FileText,
   MoreHorizontal,
   Plus,
+  RefreshCw,
   Rocket,
   Save,
   Settings,
+  Sparkles,
   Star,
   Trash2,
   TrendingUp,
@@ -34,8 +41,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
@@ -827,6 +833,65 @@ export function AdminPlansPage({
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Enhanced features state
+  const [isAutoRefresh, setIsAutoRefresh] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [savedViews, setSavedViews] = useState([
+    { id: "1", name: "Active Plans", filter: "active" },
+    { id: "2", name: "Enterprise Focus", filter: "enterprise" },
+    { id: "3", name: "High Revenue", filter: "high-revenue" },
+  ]);
+  const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [aiInsights] = useState([
+    {
+      type: "recommendation",
+      message: "Professional plan shows highest conversion rate at 45%",
+      icon: TrendingUp,
+    },
+    {
+      type: "alert",
+      message:
+        "Consider adding a Team tier between Professional and Enterprise",
+      icon: Sparkles,
+    },
+    {
+      type: "info",
+      message: "Free trial conversion improved 12% this month",
+      icon: Brain,
+    },
+  ]);
+
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    const interval = setInterval(() => {
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [isAutoRefresh]);
+
+  // Bulk selection handlers
+  const togglePlanSelection = (planId: string) => {
+    setSelectedPlans((prev) =>
+      prev.includes(planId)
+        ? prev.filter((id) => id !== planId)
+        : [...prev, planId]
+    );
+  };
+
+  const toggleAllPlans = () => {
+    setSelectedPlans((prev) =>
+      prev.length === plans.length ? [] : plans.map((p) => p.id)
+    );
+  };
+
+  // Export handlers
+  const handleExport = (format: string) => {
+    console.log(`Exporting plans as ${format}`);
+    setShowExportMenu(false);
+  };
+
   // Calculate totals
   const totalSubscribers = plans.reduce((sum, p) => sum + p.subscriberCount, 0);
   const totalMRR = plans.reduce((sum, p) => sum + p.monthlyRevenue, 0);
@@ -881,6 +946,154 @@ export function AdminPlansPage({
                 Create Plan
               </motion.button>
             </div>
+
+            {/* Enhanced Toolbar */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="mt-4 flex flex-wrap items-center gap-3"
+            >
+              {/* Live Refresh Indicator */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <motion.div
+                  animate={isAutoRefresh ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className={`h-2 w-2 rounded-full ${isAutoRefresh ? "bg-green-500" : "bg-gray-400"}`}
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  {isAutoRefresh ? "Live" : "Paused"}
+                </span>
+                <button
+                  onClick={() => setIsAutoRefresh(!isAutoRefresh)}
+                  className="text-xs text-blue-500 hover:text-blue-600"
+                >
+                  {isAutoRefresh ? "Pause" : "Resume"}
+                </button>
+              </div>
+
+              {/* Saved Views */}
+              <div className="flex items-center gap-1">
+                {savedViews.map((view) => (
+                  <button
+                    key={view.id}
+                    className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    {view.name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Bulk Actions */}
+              {selectedPlans.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800"
+                >
+                  <span className="text-xs text-blue-600 dark:text-blue-400">
+                    {selectedPlans.length} selected
+                  </span>
+                  <button className="text-xs text-green-600 hover:text-green-700">
+                    Activate
+                  </button>
+                  <button className="text-xs text-yellow-600 hover:text-yellow-700">
+                    Deactivate
+                  </button>
+                  <button className="text-xs text-red-600 hover:text-red-700">
+                    Delete
+                  </button>
+                </motion.div>
+              )}
+
+              {/* Export Menu */}
+              <div className="relative ml-auto">
+                <button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  Export
+                </button>
+                <AnimatePresence>
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50"
+                    >
+                      <button
+                        onClick={() => handleExport("csv")}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileSpreadsheet className="h-3.5 w-3.5" /> CSV
+                      </button>
+                      <button
+                        onClick={() => handleExport("json")}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileJson className="h-3.5 w-3.5" /> JSON
+                      </button>
+                      <button
+                        onClick={() => handleExport("pdf")}
+                        className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <FileText className="h-3.5 w-3.5" /> PDF
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Last Refresh */}
+              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                <RefreshCw className="h-3 w-3" />
+                {lastRefresh.toLocaleTimeString()}
+              </div>
+            </motion.div>
+
+            {/* AI Insights Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl border border-purple-200 dark:border-purple-800"
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Brain className="h-4 w-4 text-purple-500" />
+                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                  AI Insights
+                </span>
+                <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-800 text-purple-600 dark:text-purple-300 rounded-full">
+                  3 new
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {aiInsights.map((insight, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + index * 0.05 }}
+                    className="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-lg"
+                  >
+                    <insight.icon
+                      className={`h-4 w-4 mt-0.5 ${
+                        insight.type === "alert"
+                          ? "text-amber-500"
+                          : insight.type === "recommendation"
+                            ? "text-green-500"
+                            : "text-blue-500"
+                      }`}
+                    />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {insight.message}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </motion.div>
 
           {/* Stats Cards */}
