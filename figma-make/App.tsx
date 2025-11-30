@@ -20,10 +20,14 @@ import { RoleProvider } from "./components/context";
 import { AuthenticatedNavbar } from "./components/layout/AuthenticatedNavbar";
 import { Footer } from "./components/layout/Footer";
 import { Navbar } from "./components/layout/Navbar";
+import { Comparison } from "./components/sections/Comparison";
 import { CTA } from "./components/sections/CTA";
+import { FAQ } from "./components/sections/FAQ";
 import { Features } from "./components/sections/Features";
 import { Hero } from "./components/sections/Hero";
 import { HowItWorks } from "./components/sections/HowItWorks";
+import { Integrations } from "./components/sections/Integrations";
+import { Newsletter } from "./components/sections/Newsletter";
 import { Testimonials } from "./components/sections/Testimonials";
 
 // Import all pages from routes
@@ -899,7 +903,11 @@ export default function App() {
               <Hero onNavigate={handleNavigate} />
               <Features />
               <HowItWorks />
+              <Integrations />
+              <Comparison />
               <Testimonials />
+              <FAQ />
+              <Newsletter />
               <CTA onNavigate={handleNavigate} />
             </main>
             <Footer onNavigate={handleNavigate} />
