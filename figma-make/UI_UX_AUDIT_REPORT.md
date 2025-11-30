@@ -18,7 +18,7 @@ This document provides a comprehensive UI/UX audit of the ScholarFlow platform. 
 - **Medium Priority**: 22/22 ✅
 - **Low Priority**: 12/12 ✅
 - **HomePage Enhancements**: ✅ Hero, CTA, Features enhanced with premium animations
-- **Import Standardization**: 90+ files fixed to use `framer-motion`
+- **Import Standardization**: 90+ files fixed to use `motion/react` (Motion v12+)
 
 ### Key Design Patterns Established (Reference Standards)
 
@@ -237,10 +237,12 @@ Enhanced Enterprise Pages:
 All 90+ files fixed to use consistent imports:
 
 ```tsx
-// ✅ Standard pattern (all pages now unified)
-import { motion } from "framer-motion";
-import { AnimatePresence, motion } from "framer-motion";
+// ✅ Standard pattern (all pages now unified) - Motion v12+
+import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 ```
+
+**Note:** `motion/react` is the new import path for Motion (formerly Framer Motion) v12+. See [motion.dev/docs/react](https://motion.dev/docs/react)
 
 **All pages fixed via bulk update (Sep 2025)**
 
