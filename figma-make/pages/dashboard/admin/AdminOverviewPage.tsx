@@ -8,14 +8,19 @@ import {
   Database,
   Download,
   FileText,
+  Play,
   Plus,
+  RefreshCw,
   Server,
   Settings,
   Shield,
+  Terminal,
   TrendingUp,
   Users,
+  Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 
@@ -108,6 +113,232 @@ const systemHealth = {
   api: { status: "healthy", latency: "45ms", uptime: "99.95%" },
   storage: { status: "healthy", latency: "8ms", uptime: "99.99%" },
   cache: { status: "warning", latency: "125ms", uptime: "99.80%" },
+};
+
+// ============================================================================
+// Quick Commands Data
+// ============================================================================
+const quickCommands = [
+  {
+    id: "clear-cache",
+    label: "Clear Cache",
+    description: "Clear all cached data",
+    icon: RefreshCw,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    dangerous: false,
+  },
+  {
+    id: "restart-workers",
+    label: "Restart Workers",
+    description: "Restart background processing workers",
+    icon: Play,
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+    dangerous: false,
+  },
+  {
+    id: "run-diagnostics",
+    label: "Run Diagnostics",
+    description: "Execute system health check",
+    icon: Terminal,
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
+    dangerous: false,
+  },
+  {
+    id: "force-sync",
+    label: "Force Sync",
+    description: "Force synchronization of all data",
+    icon: Zap,
+    color: "text-orange-500",
+    bgColor: "bg-orange-500/10",
+    dangerous: true,
+  },
+];
+
+// ============================================================================
+// Real-time Health Indicator Component
+// ============================================================================
+interface LiveHealthIndicatorProps {
+  status: "healthy" | "warning" | "error";
+  latency: string;
+  serviceName: string;
+}
+
+const LiveHealthIndicator: React.FC<LiveHealthIndicatorProps> = ({
+  status,
+  latency,
+  serviceName,
+}) => {
+  const [pulse, setPulse] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPulse((prev) => !prev);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const statusColors = {
+    healthy: "bg-green-500",
+    warning: "bg-yellow-500",
+    error: "bg-red-500",
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="relative">
+        <div className={cn("w-3 h-3 rounded-full", statusColors[status])} />
+        <motion.div
+          className={cn("absolute inset-0 rounded-full", statusColors[status])}
+          animate={{
+            scale: pulse ? [1, 1.8, 1] : 1,
+            opacity: pulse ? [1, 0, 1] : 1,
+          }}
+          transition={{ duration: 1.5, ease: "easeInOut" }}
+        />
+      </div>
+      <span className="text-xs font-mono text-muted-foreground">{latency}</span>
+    </div>
+  );
+};
+
+// ============================================================================
+// Quick Command Modal
+// ============================================================================
+interface QuickCommandModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  command: (typeof quickCommands)[0] | null;
+  onExecute: (commandId: string) => void;
+}
+
+const QuickCommandModal: React.FC<QuickCommandModalProps> = ({
+  isOpen,
+  onClose,
+  command,
+  onExecute,
+}) => {
+  const [executing, setExecuting] = useState(false);
+  const [result, setResult] = useState<"success" | "error" | null>(null);
+
+  const handleExecute = async () => {
+    if (!command) return;
+    setExecuting(true);
+    setResult(null);
+
+    // Simulate command execution
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setExecuting(false);
+    setResult("success");
+
+    setTimeout(() => {
+      onClose();
+      setResult(null);
+    }, 1000);
+  };
+
+  if (!command) return null;
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-card border rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className={cn("p-3 rounded-xl", command.bgColor)}>
+                <command.icon className={cn("h-6 w-6", command.color)} />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">{command.label}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {command.description}
+                </p>
+              </div>
+            </div>
+
+            {command.dangerous && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div className="flex items-center gap-2 text-red-500">
+                  <AlertCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    Warning: This action may affect system performance
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {result === "success" && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-xl"
+              >
+                <div className="flex items-center gap-2 text-green-500">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    Command executed successfully
+                  </span>
+                </div>
+              </motion.div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 border rounded-xl hover:bg-muted transition-colors"
+                disabled={executing}
+              >
+                Cancel
+              </button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleExecute}
+                disabled={executing || result === "success"}
+                className={cn(
+                  "flex-1 px-4 py-2 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors",
+                  command.dangerous
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                )}
+              >
+                {executing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Executing...
+                  </>
+                ) : result === "success" ? (
+                  <>
+                    <CheckCircle className="h-4 w-4" />
+                    Done
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Execute
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };
 
 const adminActions = [
@@ -292,6 +523,17 @@ export function AdminOverviewPage({
   const { role: contextRole } = useRole();
   const effectiveRole = propRole ?? contextRole;
   const user = { ...defaultUser, role: effectiveRole };
+
+  // Quick command modal state
+  const [showCommandModal, setShowCommandModal] = useState(false);
+  const [selectedCommand, setSelectedCommand] = useState<
+    (typeof quickCommands)[0] | null
+  >(null);
+
+  const handleCommandClick = (command: (typeof quickCommands)[0]) => {
+    setSelectedCommand(command);
+    setShowCommandModal(true);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -492,22 +734,49 @@ export function AdminOverviewPage({
             </div>
           </div>
 
-          {/* System Health */}
+          {/* System Health with Live Indicators */}
           <div className="rounded-xl border bg-card">
             <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Server className="h-5 w-5" />
-                System Health
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Real-time system monitoring
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <Server className="h-5 w-5" />
+                    System Health
+                    <span className="ml-2 px-2 py-0.5 bg-green-500/10 text-green-500 text-xs font-medium rounded-full flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                      Live
+                    </span>
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Real-time system monitoring
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 border rounded-lg hover:bg-muted transition-colors"
+                  title="Refresh health status"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </motion.button>
+              </div>
             </div>
             <div className="p-6 space-y-4">
               {Object.entries(systemHealth).map(([service, data]) => (
-                <div key={service} className="p-4 border rounded-lg">
+                <motion.div
+                  key={service}
+                  className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                  whileHover={{ scale: 1.01 }}
+                >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium capitalize">{service}</span>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium capitalize">{service}</span>
+                      <LiveHealthIndicator
+                        status={data.status as "healthy" | "warning" | "error"}
+                        latency={data.latency}
+                        serviceName={service}
+                      />
+                    </div>
                     <HealthStatus status={data.status} />
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
@@ -520,11 +789,63 @@ export function AdminOverviewPage({
                       <p className="font-medium">{data.uptime}</p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
+
+          {/* Quick Commands */}
+          <div className="rounded-xl border bg-card">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-semibold flex items-center gap-2">
+                <Terminal className="h-5 w-5" />
+                Quick Commands
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Execute system operations
+              </p>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 gap-3">
+                {quickCommands.map((command) => (
+                  <motion.button
+                    key={command.id}
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleCommandClick(command)}
+                    className="p-4 border rounded-xl text-left hover:shadow-lg transition-all flex items-center gap-4 group"
+                  >
+                    <div className={cn("p-2.5 rounded-xl", command.bgColor)}>
+                      <command.icon className={cn("h-5 w-5", command.color)} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium flex items-center gap-2">
+                        {command.label}
+                        {command.dangerous && (
+                          <span className="px-1.5 py-0.5 bg-red-500/10 text-red-500 text-xs rounded">
+                            Caution
+                          </span>
+                        )}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {command.description}
+                      </p>
+                    </div>
+                    <Play className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Quick Command Modal */}
+        <QuickCommandModal
+          isOpen={showCommandModal}
+          onClose={() => setShowCommandModal(false)}
+          command={selectedCommand}
+          onExecute={(id) => console.log("Executing command:", id)}
+        />
 
         {/* Paper Processing Stats */}
         <div className="rounded-xl border bg-card">

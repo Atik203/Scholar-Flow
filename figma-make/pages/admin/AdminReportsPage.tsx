@@ -11,6 +11,7 @@ import {
   Download,
   FileSpreadsheet,
   FileText,
+  GripVertical,
   LineChart,
   Mail,
   Pause,
@@ -20,10 +21,12 @@ import {
   RefreshCw,
   Search,
   Settings,
+  Sparkles,
   Trash2,
   TrendingDown,
   TrendingUp,
   Users,
+  X,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -213,7 +216,91 @@ const statusConfig: Record<
   },
 };
 
-type TabType = "all" | "scheduled" | "custom";
+type TabType = "all" | "scheduled" | "custom" | "builder";
+
+// Utility function
+function cn(...classes: (string | undefined | null | false)[]): string {
+  return classes.filter(Boolean).join(" ");
+}
+
+// ============================================================================
+// Visual Report Builder Types
+// ============================================================================
+interface ReportWidget {
+  id: string;
+  type: "chart" | "table" | "metric" | "text";
+  title: string;
+  icon: React.ReactNode;
+  width: "full" | "half" | "third";
+  dataSource: string;
+}
+
+const availableWidgets: ReportWidget[] = [
+  {
+    id: "w1",
+    type: "chart",
+    title: "Line Chart",
+    icon: <LineChart className="h-5 w-5" />,
+    width: "half",
+    dataSource: "user_activity",
+  },
+  {
+    id: "w2",
+    type: "chart",
+    title: "Bar Chart",
+    icon: <BarChart3 className="h-5 w-5" />,
+    width: "half",
+    dataSource: "papers_uploaded",
+  },
+  {
+    id: "w3",
+    type: "chart",
+    title: "Pie Chart",
+    icon: <PieChart className="h-5 w-5" />,
+    width: "third",
+    dataSource: "user_roles",
+  },
+  {
+    id: "w4",
+    type: "metric",
+    title: "Total Users",
+    icon: <Users className="h-5 w-5" />,
+    width: "third",
+    dataSource: "total_users",
+  },
+  {
+    id: "w5",
+    type: "metric",
+    title: "Revenue",
+    icon: <TrendingUp className="h-5 w-5" />,
+    width: "third",
+    dataSource: "revenue",
+  },
+  {
+    id: "w6",
+    type: "table",
+    title: "Top Papers",
+    icon: <FileText className="h-5 w-5" />,
+    width: "full",
+    dataSource: "top_papers",
+  },
+  {
+    id: "w7",
+    type: "table",
+    title: "Active Users",
+    icon: <Users className="h-5 w-5" />,
+    width: "half",
+    dataSource: "active_users",
+  },
+  {
+    id: "w8",
+    type: "metric",
+    title: "Growth Rate",
+    icon: <TrendingUp className="h-5 w-5" />,
+    width: "third",
+    dataSource: "growth",
+  },
+];
 
 const defaultUser = {
   name: "Admin User",
@@ -234,6 +321,32 @@ export function AdminReportsPage({
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+
+  // Visual Report Builder state
+  const [showReportBuilder, setShowReportBuilder] = useState(false);
+  const [builderWidgets, setBuilderWidgets] = useState<ReportWidget[]>([]);
+  const [reportTitle, setReportTitle] = useState("Untitled Report");
+
+  // Add widget to builder
+  const addWidgetToBuilder = (widget: ReportWidget) => {
+    setBuilderWidgets((prev) => [
+      ...prev,
+      { ...widget, id: `${widget.id}-${Date.now()}` },
+    ]);
+  };
+
+  // Remove widget from builder
+  const removeWidgetFromBuilder = (widgetId: string) => {
+    setBuilderWidgets((prev) => prev.filter((w) => w.id !== widgetId));
+  };
+
+  // Move widget in builder
+  const moveWidget = (fromIndex: number, toIndex: number) => {
+    const updated = [...builderWidgets];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    setBuilderWidgets(updated);
+  };
 
   const filteredReports = mockReports.filter((report) => {
     const matchesSearch =
@@ -354,24 +467,31 @@ export function AdminReportsPage({
           transition={{ delay: 0.2 }}
           className="flex gap-2 mb-6"
         >
-          {(["all", "scheduled", "custom"] as TabType[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors
-                ${
+          {(["all", "scheduled", "custom", "builder"] as TabType[]).map(
+            (tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2",
                   activeTab === tab
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
+                    ? tab === "builder"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25"
+                      : "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
                     : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
-                }`}
-            >
-              {tab === "all"
-                ? "All Reports"
-                : tab === "scheduled"
-                  ? "Scheduled"
-                  : "Custom Reports"}
-            </button>
-          ))}
+                )}
+              >
+                {tab === "builder" && <Sparkles className="h-4 w-4" />}
+                {tab === "all"
+                  ? "All Reports"
+                  : tab === "scheduled"
+                    ? "Scheduled"
+                    : tab === "builder"
+                      ? "Visual Builder"
+                      : "Custom Reports"}
+              </button>
+            )
+          )}
         </motion.div>
 
         {/* Search and Filters */}
@@ -413,8 +533,143 @@ export function AdminReportsPage({
           </div>
         </motion.div>
 
-        {/* Reports List or Scheduled */}
-        {activeTab === "scheduled" ? (
+        {/* Reports List, Scheduled, or Builder */}
+        {activeTab === "builder" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
+            {/* Builder Header */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={reportTitle}
+                      onChange={(e) => setReportTitle(e.target.value)}
+                      className="text-xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 text-slate-900 dark:text-white"
+                      placeholder="Report Title"
+                    />
+                    <p className="text-sm text-slate-500">
+                      Drag and drop widgets to build your custom report
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                    Preview
+                  </button>
+                  <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Export Report
+                  </button>
+                </div>
+              </div>
+
+              {/* Widget Palette */}
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+                <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-3">
+                  Available Widgets
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {availableWidgets.map((widget) => (
+                    <motion.button
+                      key={widget.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => addWidgetToBuilder(widget)}
+                      className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                    >
+                      {widget.icon}
+                      <span>{widget.title}</span>
+                      <Plus className="h-3 w-3 text-slate-400" />
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Builder Canvas */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 min-h-[400px]">
+              <h3 className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-4">
+                Report Layout
+              </h3>
+
+              {builderWidgets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl">
+                  <div className="p-4 rounded-full bg-slate-100 dark:bg-slate-700 mb-4">
+                    <Plus className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-center">
+                    Click widgets above to add them to your report
+                  </p>
+                  <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
+                    Drag to reorder, click × to remove
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-6 gap-4">
+                  {builderWidgets.map((widget, index) => (
+                    <motion.div
+                      key={widget.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className={cn(
+                        "relative p-4 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl group",
+                        widget.width === "full"
+                          ? "col-span-6"
+                          : widget.width === "half"
+                            ? "col-span-3"
+                            : "col-span-2"
+                      )}
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors">
+                          <GripVertical className="h-4 w-4 text-slate-400" />
+                        </div>
+                        <div className="p-2 rounded-lg bg-white dark:bg-slate-700">
+                          {widget.icon}
+                        </div>
+                        <span className="font-medium text-sm">
+                          {widget.title}
+                        </span>
+                        <button
+                          onClick={() => removeWidgetFromBuilder(widget.id)}
+                          className="ml-auto p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      {/* Widget Preview */}
+                      <div className="h-24 bg-white dark:bg-slate-800 rounded-lg border border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center">
+                        <span className="text-xs text-slate-400">
+                          {widget.type === "chart"
+                            ? "Chart Preview"
+                            : widget.type === "table"
+                              ? "Table Preview"
+                              : widget.type === "metric"
+                                ? "Metric Value"
+                                : "Text Content"}
+                        </span>
+                      </div>
+
+                      <div className="mt-2 text-xs text-slate-400">
+                        Data: {widget.dataSource}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        ) : activeTab === "scheduled" ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
