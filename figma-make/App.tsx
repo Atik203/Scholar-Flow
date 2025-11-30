@@ -105,6 +105,8 @@ import {
   // Import Pages
   ImportPapersPage,
   IntegrationsPage,
+  // Settings Pages
+  IntegrationsSettingsPage,
   // Phase 6 - Invitation Response
   InvitationResponsePage,
   isActiveSessionsRoute,
@@ -124,6 +126,8 @@ import {
   isExportAnalyticsRoute,
   isExportRoute,
   isHelpRoute,
+  // Settings Integrations Route Helper
+  isIntegrationsSettingsRoute,
   // Phase 6 - Invitation Route Helper
   isInvitationRoute,
   isMarketingRoute,
@@ -413,6 +417,11 @@ export default function App() {
     // Export Data route (Settings)
     if (isExportRoute(currentPage)) {
       return <ExportDataPage onNavigate={handleNavigate} />;
+    }
+
+    // Integrations Settings route
+    if (isIntegrationsSettingsRoute(currentPage)) {
+      return <IntegrationsSettingsPage onNavigate={handleNavigate} />;
     }
 
     // Billing route
