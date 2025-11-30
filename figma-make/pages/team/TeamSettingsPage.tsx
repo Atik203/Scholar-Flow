@@ -1010,7 +1010,7 @@ export function TeamSettingsPage({
                         </p>
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
-                          className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors"
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                         >
                           Delete Team
                         </button>
@@ -1077,7 +1077,7 @@ export function TeamSettingsPage({
                         setShowDeleteConfirm(false);
                         onNavigate?.("/dashboard");
                       }}
-                      className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-gray-900 dark:text-white rounded-lg transition-colors"
+                      className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                     >
                       Delete Permanently
                     </button>

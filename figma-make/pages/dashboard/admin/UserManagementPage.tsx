@@ -635,7 +635,7 @@ export function UserManagementPage({
                     whileTap={{ scale: 0.98 }}
                     onClick={handlePermanentDelete}
                     disabled={isLoading}
-                    className="px-4 py-2 bg-destructive text-white rounded-lg flex items-center gap-2"
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors"
                   >
                     {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Delete Permanently
