@@ -1053,6 +1053,10 @@ export const isTeamInvitationsRoute = (path: string): boolean =>
 export const isAdminPlansRoute = (path: string): boolean =>
   path === "/admin/plans";
 export const isDiscoverRoute = (path: string): boolean => path === "/discover";
+export const isTrendingRoute = (path: string): boolean =>
+  path === "/discover/trending";
+export const isRecommendationsRoute = (path: string): boolean =>
+  path === "/discover/recommendations";
 
 // Phase 5 Route Helpers
 export const isOnboardingRoleRoute = (path: string): boolean =>
@@ -1176,6 +1180,9 @@ export {
   IntegrationsPage,
   // Phase 6 - Invitation Response
   InvitationResponsePage,
+  // Route helpers for Trending and Recommendations
+  isRecommendationsRoute,
+  isTrendingRoute,
   KeyboardShortcutsPage,
   LoadingPage,
   // Auth
@@ -1209,6 +1216,7 @@ export {
   // User
   ProfilePage,
   RecentActivityPage,
+  RecommendationsPage,
   RegisterPage,
   // Phase 8 - Research Map
   ResearchMapPage,
@@ -1234,6 +1242,8 @@ export {
   TeamSettingsPage,
   TeamsPage,
   TextEditorPage,
+  // Phase 4 - Trending and Recommendations
+  TrendingPage,
   TutorialsPage,
   // 2FA
   TwoFactorSetupPage,

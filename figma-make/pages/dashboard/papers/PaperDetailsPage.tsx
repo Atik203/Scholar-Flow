@@ -2,10 +2,15 @@
 
 import {
   ArrowLeft,
+  ArrowUp,
   Bot,
   Calendar,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Crown,
   Edit,
   Eye,
   FileText,
@@ -17,14 +22,16 @@ import {
   Plus,
   RotateCcw,
   Save,
-  Send,
   Sparkles,
   Square,
   StickyNote,
+  ThumbsDown,
+  ThumbsUp,
   Trash2,
   Type,
   User,
   X,
+  Zap,
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
@@ -162,16 +169,40 @@ const dummyChatMessages = [
 
 const AI_MODELS = [
   {
-    value: "gemini-2.5-flash-lite",
-    label: "Gemini 2.5 Flash Lite (Free)",
-    description: "Fast and free",
+    value: "gemini-3-flash",
+    label: "Gemini 3 Flash",
+    description: "Fast & free",
+    tier: "free",
+    icon: "⚡",
   },
   {
-    value: "gpt-4o-mini",
-    label: "GPT-4o Mini",
-    description: "Quick responses",
+    value: "gpt-5.1-mini",
+    label: "GPT 5.1 Mini",
+    description: "Balanced",
+    tier: "free",
+    icon: "🎯",
   },
-  { value: "gpt-4o", label: "GPT-4o (Premium)", description: "Best quality" },
+  {
+    value: "gpt-5.1",
+    label: "GPT 5.1",
+    description: "Most capable",
+    tier: "premium",
+    icon: "🚀",
+  },
+  {
+    value: "opus-4.5",
+    label: "Opus 4.5",
+    description: "Best for research",
+    tier: "premium",
+    icon: "🧠",
+  },
+  {
+    value: "gemini-3-ultra",
+    label: "Gemini 3 Ultra",
+    description: "Multimodal",
+    tier: "premium",
+    icon: "✨",
+  },
 ];
 
 // ============================================================================
@@ -209,7 +240,8 @@ export function PaperDetailsPage({
   const [showAISummary, setShowAISummary] = useState(true);
   const [showAIChat, setShowAIChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash-lite");
+  const [selectedModel, setSelectedModel] = useState("gemini-3-flash");
+  const [showModelSelector, setShowModelSelector] = useState(false);
   const [chatMessages, setChatMessages] = useState<
     Array<{
       id: string;
@@ -218,6 +250,11 @@ export function PaperDetailsPage({
       timestamp: string | Date;
     }>
   >(dummyChatMessages);
+
+  // Derived state
+  const currentModel = AI_MODELS.find((m) => m.value === selectedModel);
+  const isPremiumUser =
+    effectiveRole === "pro_researcher" || effectiveRole === "admin";
 
   const tabs = [
     { id: "preview" as const, label: "Preview", icon: Eye },
@@ -542,8 +579,99 @@ export function PaperDetailsPage({
                       className="w-full py-3 bg-primary text-primary-foreground rounded-lg inline-flex items-center justify-center gap-2"
                     >
                       <Eye className="h-5 w-5" />
-                      View Full Document
+                      View Full Screen
                     </motion.button>
+
+                    {/* Inline PDF Preview */}
+                    <div className="border rounded-xl overflow-hidden bg-muted/20">
+                      <div className="flex items-center justify-between p-3 border-b bg-card">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <FileText className="h-4 w-4 text-red-500" />
+                          {dummyPaper.file.originalFilename}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center border rounded-lg overflow-hidden bg-background">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              className="p-1.5 hover:bg-muted border-r"
+                            >
+                              <ZoomOut className="h-4 w-4" />
+                            </motion.button>
+                            <span className="px-3 py-1.5 text-xs font-medium">
+                              100%
+                            </span>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              className="p-1.5 hover:bg-muted border-l"
+                            >
+                              <ZoomIn className="h-4 w-4" />
+                            </motion.button>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs bg-muted px-2 py-1.5 rounded-lg">
+                            <ChevronLeft className="h-4 w-4" />
+                            <span className="font-medium">1 / 12</span>
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* PDF Content Area */}
+                      <div className="h-[500px] overflow-auto bg-muted/30 p-6">
+                        <div className="flex justify-center">
+                          <div
+                            className="relative bg-white shadow-2xl rounded-sm"
+                            style={{ width: "550px", minHeight: "700px" }}
+                          >
+                            {/* Simulated PDF Page */}
+                            <div className="p-8 text-gray-800 space-y-4">
+                              <h1 className="text-xl font-bold text-center mb-6">
+                                {dummyPaper.title}
+                              </h1>
+                              <p className="text-center text-gray-600 text-sm mb-4">
+                                {dummyPaper.metadata.authors.join(", ")}
+                              </p>
+                              <div className="text-center text-gray-500 text-xs mb-8">
+                                Published: {dummyPaper.metadata.year}
+                              </div>
+
+                              <h2 className="text-lg font-semibold border-b pb-2 mb-3">
+                                Abstract
+                              </h2>
+                              <p className="text-sm leading-relaxed text-gray-700">
+                                {dummyPaper.abstract}
+                              </p>
+
+                              <h2 className="text-lg font-semibold border-b pb-2 mb-3 mt-6">
+                                1. Introduction
+                              </h2>
+                              <p className="text-sm leading-relaxed text-gray-700">
+                                The Transformer model introduces a novel
+                                architecture based entirely on attention
+                                mechanisms. This paper proposes a new simple
+                                network architecture, the Transformer, based
+                                solely on attention mechanisms, dispensing with
+                                recurrence and convolutions entirely.
+                              </p>
+                              <p className="text-sm leading-relaxed text-gray-700 mt-3">
+                                Self-attention, sometimes called
+                                intra-attention, is an attention mechanism
+                                relating different positions of a single
+                                sequence in order to compute a representation of
+                                the sequence. The model achieves
+                                state-of-the-art performance on machine
+                                translation tasks while being more
+                                parallelizable and requiring significantly less
+                                time to train.
+                              </p>
+
+                              <p className="text-gray-400 text-xs mt-8 text-center">
+                                Page 1 of 12
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </>
                 )}
 
@@ -1004,16 +1132,101 @@ export function PaperDetailsPage({
                   <div className="p-4 border-b bg-gradient-to-r from-purple-500/10 to-pink-500/10">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-purple-500" />
-                        AI Chat
+                        <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                          <Bot className="h-4 w-4 text-white" />
+                        </div>
+                        AI Research Assistant
                       </h3>
                       <div className="flex items-center gap-2">
-                        <select className="text-xs bg-background border rounded-md px-2 py-1">
-                          <option>GPT-4o-mini</option>
-                          <option>GPT-3.5-turbo</option>
-                          <option>GPT-4o</option>
-                          <option>Gemini 2.5 Flash Lite</option>
-                        </select>
+                        {/* Model Selector */}
+                        <div className="relative">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            onClick={() =>
+                              setShowModelSelector(!showModelSelector)
+                            }
+                            className="inline-flex items-center gap-1.5 px-2 py-1 bg-background border rounded-lg text-xs font-medium"
+                          >
+                            <span>{currentModel?.icon}</span>
+                            <span className="hidden sm:inline">
+                              {currentModel?.label}
+                            </span>
+                            {currentModel?.tier === "premium" && (
+                              <Crown className="h-3 w-3 text-yellow-500" />
+                            )}
+                            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                          </motion.button>
+
+                          <AnimatePresence>
+                            {showModelSelector && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute right-0 mt-2 w-56 bg-card border rounded-xl shadow-xl z-50 overflow-hidden"
+                              >
+                                <div className="p-2">
+                                  {AI_MODELS.map((model) => {
+                                    const isLocked =
+                                      model.tier === "premium" &&
+                                      !isPremiumUser;
+                                    return (
+                                      <motion.button
+                                        key={model.value}
+                                        whileHover={{
+                                          scale: isLocked ? 1 : 1.01,
+                                        }}
+                                        onClick={() => {
+                                          if (!isLocked) {
+                                            setSelectedModel(model.value);
+                                            setShowModelSelector(false);
+                                          }
+                                        }}
+                                        className={cn(
+                                          "w-full p-2.5 rounded-lg text-left transition-colors",
+                                          selectedModel === model.value
+                                            ? "bg-primary/10"
+                                            : isLocked
+                                              ? "opacity-50 cursor-not-allowed"
+                                              : "hover:bg-muted"
+                                        )}
+                                      >
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <span>{model.icon}</span>
+                                            <div>
+                                              <div className="font-medium text-xs flex items-center gap-1.5">
+                                                {model.label}
+                                                {model.tier === "premium" && (
+                                                  <span className="px-1.5 py-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-[9px] rounded-full font-semibold">
+                                                    PRO
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <p className="text-[10px] text-muted-foreground">
+                                                {model.description}
+                                              </p>
+                                            </div>
+                                          </div>
+                                          {selectedModel === model.value && (
+                                            <Check className="h-3.5 w-3.5 text-primary" />
+                                          )}
+                                        </div>
+                                      </motion.button>
+                                    );
+                                  })}
+                                </div>
+                                {!isPremiumUser && (
+                                  <div className="p-2 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-t">
+                                    <p className="text-[10px] text-muted-foreground">
+                                      Upgrade to Pro for premium models
+                                    </p>
+                                  </div>
+                                )}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -1031,8 +1244,8 @@ export function PaperDetailsPage({
                   <div className="h-80 overflow-y-auto p-4 space-y-4">
                     {chatMessages.length === 0 ? (
                       <div className="h-full flex flex-col items-center justify-center text-center">
-                        <div className="p-4 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
-                          <Bot className="h-8 w-8 text-purple-500" />
+                        <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl mb-4">
+                          <Sparkles className="h-8 w-8 text-purple-500" />
                         </div>
                         <h4 className="font-medium mb-2">
                           Ask about this paper
@@ -1072,32 +1285,54 @@ export function PaperDetailsPage({
                         >
                           <div
                             className={cn(
-                              "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+                              "flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center",
                               message.role === "user"
                                 ? "bg-primary text-primary-foreground"
-                                : "bg-purple-100 dark:bg-purple-900/30"
+                                : "bg-gradient-to-br from-purple-500 to-pink-500"
                             )}
                           >
                             {message.role === "user" ? (
                               <User className="h-4 w-4" />
                             ) : (
-                              <Bot className="h-4 w-4 text-purple-500" />
+                              <Bot className="h-4 w-4 text-white" />
                             )}
                           </div>
                           <div
                             className={cn(
-                              "flex-1 rounded-lg p-3 max-w-[85%]",
+                              "flex-1 rounded-2xl p-3 max-w-[85%]",
                               message.role === "user"
                                 ? "bg-primary text-primary-foreground ml-auto"
                                 : "bg-muted"
                             )}
                           >
-                            <p className="text-sm whitespace-pre-wrap">
+                            <p className="text-sm whitespace-pre-wrap leading-relaxed">
                               {message.content}
                             </p>
-                            <span className="text-xs opacity-60 mt-1 block">
-                              {formatTime(message.timestamp)}
-                            </span>
+                            {message.role === "assistant" && (
+                              <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  className="p-1 hover:bg-background rounded text-muted-foreground"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  className="p-1 hover:bg-background rounded text-muted-foreground"
+                                >
+                                  <ThumbsUp className="h-3 w-3" />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  className="p-1 hover:bg-background rounded text-muted-foreground"
+                                >
+                                  <ThumbsDown className="h-3 w-3" />
+                                </motion.button>
+                                <span className="text-[10px] text-muted-foreground ml-auto">
+                                  {formatTime(message.timestamp)}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))
@@ -1106,7 +1341,7 @@ export function PaperDetailsPage({
 
                   {/* Chat Input */}
                   <div className="p-4 border-t bg-muted/20">
-                    <div className="flex gap-2">
+                    <div className="relative bg-background rounded-xl border focus-within:border-primary transition-colors">
                       <input
                         type="text"
                         value={chatInput}
@@ -1127,15 +1362,15 @@ export function PaperDetailsPage({
                                 id: `ai-${Date.now()}`,
                                 role: "assistant" as const,
                                 content:
-                                  "I'm analyzing your question about the paper. In a production environment, this would provide detailed insights based on the paper's content using advanced AI models.",
+                                  "I'm analyzing your question about the paper. Based on the Transformer architecture described in this paper, the key innovation is the self-attention mechanism that allows the model to weigh the importance of different parts of the input sequence when producing each element of the output.",
                                 timestamp: new Date(),
                               };
                               setChatMessages((prev) => [...prev, aiResponse]);
                             }, 1000);
                           }
                         }}
-                        placeholder="Ask a question about this paper..."
-                        className="flex-1 px-3 py-2 bg-background border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                        placeholder="Ask about this paper..."
+                        className="w-full px-4 py-3 pr-12 bg-transparent text-sm rounded-xl focus:outline-none"
                       />
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -1155,7 +1390,7 @@ export function PaperDetailsPage({
                                 id: `ai-${Date.now()}`,
                                 role: "assistant" as const,
                                 content:
-                                  "I'm analyzing your question about the paper. In a production environment, this would provide detailed insights based on the paper's content using advanced AI models.",
+                                  "I'm analyzing your question about the paper. Based on the Transformer architecture described in this paper, the key innovation is the self-attention mechanism that allows the model to weigh the importance of different parts of the input sequence when producing each element of the output.",
                                 timestamp: new Date(),
                               };
                               setChatMessages((prev) => [...prev, aiResponse]);
@@ -1164,17 +1399,18 @@ export function PaperDetailsPage({
                         }}
                         disabled={!chatInput.trim()}
                         className={cn(
-                          "p-2 rounded-lg transition-colors",
+                          "absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-colors",
                           chatInput.trim()
-                            ? "bg-purple-500 text-white hover:bg-purple-600"
+                            ? "bg-primary text-white hover:bg-primary/90"
                             : "bg-muted text-muted-foreground cursor-not-allowed"
                         )}
                       >
-                        <Send className="h-4 w-4" />
+                        <ArrowUp className="h-4 w-4" />
                       </motion.button>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2 text-center">
-                      AI responses are based on paper content analysis
+                    <p className="text-[10px] text-muted-foreground mt-2 text-center flex items-center justify-center gap-1">
+                      <Zap className="h-3 w-3" />
+                      Powered by {currentModel?.label}
                     </p>
                   </div>
                 </motion.div>
