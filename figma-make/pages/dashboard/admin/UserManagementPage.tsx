@@ -2,14 +2,17 @@
 
 import {
   AlertCircle,
+  Ban,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  Download,
   Edit,
   Loader2,
   RotateCcw,
   Search,
   Trash2,
+  UserCheck,
   UserX,
   Users,
   X,
@@ -224,6 +227,53 @@ export function UserManagementPage({
   const [newRole, setNewRole] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Bulk selection state
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [showBulkActionConfirm, setShowBulkActionConfirm] = useState(false);
+  const [bulkAction, setBulkAction] = useState<
+    "delete" | "suspend" | "activate" | "export" | null
+  >(null);
+
+  // Toggle user selection
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Select all users
+  const toggleSelectAll = () => {
+    if (selectedUserIds.length === filteredUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(filteredUsers.map((u) => u.id));
+    }
+  };
+
+  // Handle bulk action
+  const handleBulkAction = (
+    action: "delete" | "suspend" | "activate" | "export"
+  ) => {
+    setBulkAction(action);
+    if (action === "export") {
+      // Export doesn't need confirmation
+      console.log("Exporting users:", selectedUserIds);
+      setSelectedUserIds([]);
+    } else {
+      setShowBulkActionConfirm(true);
+    }
+  };
+
+  // Execute bulk action
+  const executeBulkAction = () => {
+    console.log(`Executing ${bulkAction} on users:`, selectedUserIds);
+    setShowBulkActionConfirm(false);
+    setSelectedUserIds([]);
+    setBulkAction(null);
+  };
+
   // Filter users
   const filteredUsers = dummyUsers.filter((user) => {
     const matchesSearch =
@@ -369,6 +419,17 @@ export function UserManagementPage({
             <table className="w-full">
               <thead className="border-b bg-muted/30">
                 <tr>
+                  <th className="px-3 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedUserIds.length === filteredUsers.length &&
+                        filteredUsers.length > 0
+                      }
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                     Name
                   </th>
@@ -395,7 +456,7 @@ export function UserManagementPage({
               <tbody className="divide-y">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center">
+                    <td colSpan={8} className="px-6 py-12 text-center">
                       <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
                       <p className="text-muted-foreground">No users found</p>
                     </td>
@@ -406,8 +467,19 @@ export function UserManagementPage({
                       key={user.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="hover:bg-muted/30"
+                      className={cn(
+                        "hover:bg-muted/30",
+                        selectedUserIds.includes(user.id) && "bg-primary/5"
+                      )}
                     >
+                      <td className="px-3 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedUserIds.includes(user.id)}
+                          onChange={() => toggleUserSelection(user.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                      </td>
                       <td className="px-6 py-4 font-medium">{user.name}</td>
                       <td className="px-6 py-4 text-sm text-muted-foreground">
                         {user.email}
@@ -639,6 +711,161 @@ export function UserManagementPage({
                   >
                     {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                     Delete Permanently
+                  </motion.button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bulk Action Toolbar */}
+        <AnimatePresence>
+          {selectedUserIds.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+            >
+              <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-2xl shadow-2xl px-6 py-3 flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold">
+                    {selectedUserIds.length}
+                  </div>
+                  <span className="text-sm font-medium">users selected</span>
+                </div>
+                <div className="h-6 w-px bg-gray-700 dark:bg-gray-300" />
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleBulkAction("activate")}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm flex items-center gap-2 transition-colors text-white"
+                  >
+                    <UserCheck className="h-4 w-4" />
+                    Activate
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleBulkAction("suspend")}
+                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-sm flex items-center gap-2 transition-colors text-white"
+                  >
+                    <Ban className="h-4 w-4" />
+                    Suspend
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleBulkAction("export")}
+                    className="px-4 py-2 bg-gray-700 dark:bg-gray-200 hover:bg-gray-600 dark:hover:bg-gray-300 rounded-lg text-sm flex items-center gap-2 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleBulkAction("delete")}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm flex items-center gap-2 transition-colors text-white"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </motion.button>
+                </div>
+                <button
+                  onClick={() => setSelectedUserIds([])}
+                  className="p-2 hover:bg-gray-700 dark:hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bulk Action Confirmation Modal */}
+        <AnimatePresence>
+          {showBulkActionConfirm && bulkAction && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowBulkActionConfirm(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-card rounded-2xl border shadow-xl max-w-md w-full p-6"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className={cn(
+                      "p-3 rounded-xl",
+                      bulkAction === "delete"
+                        ? "bg-red-100 dark:bg-red-900/30"
+                        : bulkAction === "suspend"
+                          ? "bg-yellow-100 dark:bg-yellow-900/30"
+                          : "bg-green-100 dark:bg-green-900/30"
+                    )}
+                  >
+                    {bulkAction === "delete" ? (
+                      <Trash2 className="h-6 w-6 text-red-600" />
+                    ) : bulkAction === "suspend" ? (
+                      <Ban className="h-6 w-6 text-yellow-600" />
+                    ) : (
+                      <UserCheck className="h-6 w-6 text-green-600" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold capitalize">
+                      {bulkAction} {selectedUserIds.length} Users
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      This action will{" "}
+                      {bulkAction === "delete"
+                        ? "permanently remove"
+                        : bulkAction}{" "}
+                      the selected users
+                    </p>
+                  </div>
+                </div>
+
+                {bulkAction === "delete" && (
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl mb-4">
+                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">
+                        This action cannot be undone
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowBulkActionConfirm(false)}
+                    className="flex-1 px-4 py-2 border rounded-xl hover:bg-muted transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={executeBulkAction}
+                    className={cn(
+                      "flex-1 px-4 py-2 rounded-xl font-medium transition-colors",
+                      bulkAction === "delete"
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : bulkAction === "suspend"
+                          ? "bg-yellow-600 hover:bg-yellow-700 text-white"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                    )}
+                  >
+                    Confirm {bulkAction}
                   </motion.button>
                 </div>
               </motion.div>

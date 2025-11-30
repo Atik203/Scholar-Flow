@@ -14,12 +14,16 @@
 
 import {
   ArrowUp,
+  Bell,
+  BellOff,
   Bookmark,
   BookOpen,
   ChevronRight,
   Eye,
   Flame,
   Hash,
+  LineChart,
+  Network,
   RefreshCw,
   Search,
   Share2,
@@ -57,6 +61,8 @@ interface TrendingTopic {
   description: string;
   color: string;
   isFollowing: boolean;
+  notificationsEnabled: boolean;
+  trendData: number[]; // Weekly paper counts for chart
 }
 
 // Trending paper type
@@ -86,6 +92,8 @@ const mockTrendingTopics: TrendingTopic[] = [
       "Research on scaling and improving language models for various tasks",
     color: "purple",
     isFollowing: true,
+    notificationsEnabled: true,
+    trendData: [45, 52, 68, 75, 89, 95, 112, 125, 145, 167, 189, 210],
   },
   {
     id: "t2",
@@ -97,6 +105,8 @@ const mockTrendingTopics: TrendingTopic[] = [
     description: "Combining multiple data modalities for richer understanding",
     color: "blue",
     isFollowing: false,
+    notificationsEnabled: false,
+    trendData: [23, 28, 35, 42, 48, 55, 62, 71, 85, 95, 108, 120],
   },
   {
     id: "t3",
@@ -108,6 +118,8 @@ const mockTrendingTopics: TrendingTopic[] = [
     description: "Ensuring AI systems are safe and aligned with human values",
     color: "red",
     isFollowing: true,
+    notificationsEnabled: true,
+    trendData: [12, 18, 25, 35, 48, 62, 78, 95, 115, 138, 162, 190],
   },
   {
     id: "t4",
@@ -119,6 +131,8 @@ const mockTrendingTopics: TrendingTopic[] = [
     description: "Making machine learning more efficient and accessible",
     color: "green",
     isFollowing: false,
+    notificationsEnabled: false,
+    trendData: [32, 35, 38, 42, 45, 48, 52, 58, 65, 72, 80, 88],
   },
   {
     id: "t5",
@@ -130,6 +144,8 @@ const mockTrendingTopics: TrendingTopic[] = [
     description: "Creating new content using AI models",
     color: "amber",
     isFollowing: true,
+    notificationsEnabled: false,
+    trendData: [55, 72, 95, 125, 158, 195, 245, 305, 378, 462, 558, 670],
   },
   {
     id: "t6",
@@ -141,6 +157,8 @@ const mockTrendingTopics: TrendingTopic[] = [
     description: "Training agents through interaction with environments",
     color: "cyan",
     isFollowing: false,
+    notificationsEnabled: false,
+    trendData: [42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 76, 80],
   },
 ];
 
@@ -263,6 +281,163 @@ const getTopicColorClasses = (color: string) => {
   return colors[color] || colors.purple;
 };
 
+// Interactive Trend Chart Component
+function TrendChart({ data, color }: { data: number[]; color: string }) {
+  const max = Math.max(...data);
+  const colorClasses: Record<string, string> = {
+    purple: "bg-purple-500",
+    blue: "bg-blue-500",
+    red: "bg-red-500",
+    green: "bg-green-500",
+    amber: "bg-amber-500",
+    cyan: "bg-cyan-500",
+    orange: "bg-orange-500",
+  };
+
+  return (
+    <div className="flex items-end gap-1 h-16">
+      {data.map((value, index) => (
+        <motion.div
+          key={index}
+          initial={{ height: 0 }}
+          animate={{ height: `${(value / max) * 100}%` }}
+          transition={{ delay: index * 0.05, duration: 0.3 }}
+          className={`flex-1 rounded-t ${colorClasses[color] || "bg-orange-500"} opacity-80 hover:opacity-100 transition-opacity cursor-pointer relative group`}
+        >
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            {value} papers
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
+// Topic Network Visualization (simplified)
+function TopicNetwork({
+  topics,
+  selectedTopic,
+  onSelect,
+}: {
+  topics: TrendingTopic[];
+  selectedTopic: string | null;
+  onSelect: (name: string | null) => void;
+}) {
+  const getSize = (paperCount: number) => {
+    if (paperCount > 10000) return "w-20 h-20";
+    if (paperCount > 5000) return "w-16 h-16";
+    return "w-12 h-12";
+  };
+
+  const colorMap: Record<string, string> = {
+    purple: "from-purple-400 to-purple-600",
+    blue: "from-blue-400 to-blue-600",
+    red: "from-red-400 to-red-600",
+    green: "from-green-400 to-green-600",
+    amber: "from-amber-400 to-amber-600",
+    cyan: "from-cyan-400 to-cyan-600",
+  };
+
+  return (
+    <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-900/50 rounded-xl p-6 min-h-[200px]">
+      <div className="flex flex-wrap justify-center gap-4">
+        {topics.slice(0, 6).map((topic, index) => (
+          <motion.button
+            key={topic.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ scale: 1.1, zIndex: 10 }}
+            onClick={() =>
+              onSelect(selectedTopic === topic.name ? null : topic.name)
+            }
+            className={`${getSize(topic.paperCount)} rounded-full bg-gradient-to-br ${colorMap[topic.color] || "from-gray-400 to-gray-600"} flex items-center justify-center text-white text-xs font-medium shadow-lg ${selectedTopic === topic.name ? "ring-4 ring-orange-400 ring-offset-2" : ""}`}
+          >
+            <span className="text-center px-1 leading-tight line-clamp-2">
+              {topic.name.split(" ")[0]}
+            </span>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Connection lines (decorative) */}
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none opacity-20"
+        style={{ zIndex: 0 }}
+      >
+        <line
+          x1="20%"
+          y1="30%"
+          x2="50%"
+          y2="50%"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-gray-400"
+        />
+        <line
+          x1="80%"
+          y1="30%"
+          x2="50%"
+          y2="50%"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-gray-400"
+        />
+        <line
+          x1="30%"
+          y1="70%"
+          x2="50%"
+          y2="50%"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-gray-400"
+        />
+        <line
+          x1="70%"
+          y1="70%"
+          x2="50%"
+          y2="50%"
+          stroke="currentColor"
+          strokeWidth="1"
+          className="text-gray-400"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// Notification Toggle for Topic
+function TopicNotificationToggle({
+  isEnabled,
+  onToggle,
+}: {
+  isEnabled: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+      className={`p-1.5 rounded-lg transition-colors ${
+        isEnabled
+          ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+          : "bg-gray-100 dark:bg-gray-700 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+      }`}
+      title={isEnabled ? "Notifications enabled" : "Enable notifications"}
+    >
+      {isEnabled ? (
+        <Bell className="h-4 w-4" />
+      ) : (
+        <BellOff className="h-4 w-4" />
+      )}
+    </motion.button>
+  );
+}
+
 export function TrendingPage({
   onNavigate,
   role: propRole,
@@ -277,6 +452,7 @@ export function TrendingPage({
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "network">("list");
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -287,6 +463,16 @@ export function TrendingPage({
     setTopics(
       topics.map((t) =>
         t.id === topicId ? { ...t, isFollowing: !t.isFollowing } : t
+      )
+    );
+  };
+
+  const toggleNotifications = (topicId: string) => {
+    setTopics(
+      topics.map((t) =>
+        t.id === topicId
+          ? { ...t, notificationsEnabled: !t.notificationsEnabled }
+          : t
       )
     );
   };
@@ -331,16 +517,43 @@ export function TrendingPage({
                   Discover the hottest topics and papers in your field
                 </p>
               </div>
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </button>
+              <div className="flex items-center gap-3">
+                {/* View Mode Toggle */}
+                <div className="flex bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                      viewMode === "list"
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <LineChart className="h-4 w-4" />
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode("network")}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                      viewMode === "network"
+                        ? "bg-orange-500 text-white"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    <Network className="h-4 w-4" />
+                    Network
+                  </button>
+                </div>
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                  />
+                  Refresh
+                </button>
+              </div>
             </div>
 
             {/* Time Filter & Search */}
@@ -433,6 +646,32 @@ export function TrendingPage({
             ))}
           </motion.div>
 
+          {/* Topic Network View */}
+          {viewMode === "network" && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Network className="h-5 w-5 text-orange-500" />
+                    Topic Network
+                  </h2>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Click a topic to filter papers
+                  </span>
+                </div>
+                <TopicNetwork
+                  topics={topics}
+                  selectedTopic={selectedTopic}
+                  onSelect={setSelectedTopic}
+                />
+              </div>
+            </motion.div>
+          )}
+
           {/* Main Content Grid */}
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Trending Topics */}
@@ -469,7 +708,7 @@ export function TrendingPage({
                             : ""
                         }`}
                       >
-                        <div className="flex items-start justify-between">
+                        <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-lg font-bold text-gray-400">
@@ -492,19 +731,34 @@ export function TrendingPage({
                               </span>
                             </div>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFollowTopic(topic.id);
-                            }}
-                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                              topic.isFollowing
-                                ? "bg-orange-500 text-white"
-                                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
-                            }`}
-                          >
-                            {topic.isFollowing ? "Following" : "Follow"}
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {topic.isFollowing && (
+                              <TopicNotificationToggle
+                                isEnabled={topic.notificationsEnabled}
+                                onToggle={() => toggleNotifications(topic.id)}
+                              />
+                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFollowTopic(topic.id);
+                              }}
+                              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                                topic.isFollowing
+                                  ? "bg-orange-500 text-white"
+                                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600"
+                              }`}
+                            >
+                              {topic.isFollowing ? "Following" : "Follow"}
+                            </button>
+                          </div>
+                        </div>
+                        {/* Trend Chart */}
+                        <div className="mt-2">
+                          <TrendChart
+                            data={topic.trendData}
+                            color={topic.color}
+                          />
                         </div>
                       </motion.button>
                     );

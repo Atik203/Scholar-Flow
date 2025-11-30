@@ -3,18 +3,27 @@
 import {
   ArrowUpRight,
   BookOpen,
+  Brain,
   Building2,
   Calendar,
   Check,
+  CheckSquare,
   ChevronDown,
   Eye,
   FileText,
   Filter,
+  Grid3X3,
+  LayoutList,
   Play,
   Plus,
   Search,
+  SortAsc,
+  Sparkles,
+  Square,
   Trash2,
+  TrendingUp,
   Upload,
+  X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
@@ -54,6 +63,11 @@ const dummyPapers = [
     processingStatus: "PROCESSED",
     file: { originalFilename: "attention.pdf", sizeBytes: 2457600 },
     createdAt: "2024-01-15T10:30:00Z",
+    abstract:
+      "We propose a new simple network architecture, the Transformer, based solely on attention mechanisms...",
+    citations: 89000,
+    aiRelevance: 98,
+    tags: ["Transformers", "NLP", "Deep Learning"],
   },
   {
     id: "paper-2",
@@ -63,6 +77,11 @@ const dummyPapers = [
     processingStatus: "PROCESSING",
     file: { originalFilename: "bert.pdf", sizeBytes: 1843200 },
     createdAt: "2024-01-14T14:20:00Z",
+    abstract:
+      "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations...",
+    citations: 56000,
+    aiRelevance: 95,
+    tags: ["BERT", "NLP", "Pre-training"],
   },
   {
     id: "paper-3",
@@ -72,6 +91,11 @@ const dummyPapers = [
     processingStatus: "UPLOADED",
     file: { originalFilename: "gpt4-report.pdf", sizeBytes: 5242880 },
     createdAt: "2024-01-13T09:15:00Z",
+    abstract:
+      "We report the development of GPT-4, a large-scale, multimodal model which can accept image and text inputs...",
+    citations: 2500,
+    aiRelevance: 92,
+    tags: ["GPT-4", "LLM", "Multimodal"],
   },
   {
     id: "paper-4",
@@ -81,6 +105,11 @@ const dummyPapers = [
     processingStatus: "PROCESSED",
     file: { originalFilename: "gan.pdf", sizeBytes: 1024000 },
     createdAt: "2024-01-12T16:45:00Z",
+    abstract:
+      "We propose a new framework for estimating generative models via an adversarial process...",
+    citations: 45000,
+    aiRelevance: 88,
+    tags: ["GANs", "Generative", "Deep Learning"],
   },
   {
     id: "paper-5",
@@ -90,6 +119,11 @@ const dummyPapers = [
     processingStatus: "FAILED",
     file: { originalFilename: "resnet.pdf", sizeBytes: 3145728 },
     createdAt: "2024-01-11T11:00:00Z",
+    abstract:
+      "We present a residual learning framework to ease the training of networks that are substantially deeper...",
+    citations: 120000,
+    aiRelevance: 85,
+    tags: ["ResNet", "Computer Vision", "CNN"],
   },
 ];
 
@@ -386,6 +420,294 @@ const PaperRow: React.FC<PaperRowProps> = ({
 };
 
 // ============================================================================
+// Paper Card Component (New Grid View)
+// ============================================================================
+interface PaperCardProps {
+  paper: (typeof dummyPapers)[0];
+  isSelected: boolean;
+  onSelect: () => void;
+  onView: () => void;
+  onProcess: () => void;
+  onDelete: () => void;
+}
+
+const PaperCard: React.FC<PaperCardProps> = ({
+  paper,
+  isSelected,
+  onSelect,
+  onView,
+  onProcess,
+  onDelete,
+}) => {
+  const status = getStatusBadge(paper.processingStatus);
+  const [showPreview, setShowPreview] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      className={cn(
+        "bg-card border rounded-xl overflow-hidden hover:shadow-xl transition-all relative group",
+        isSelected && "ring-2 ring-primary border-primary"
+      )}
+    >
+      {/* Selection Checkbox */}
+      <div className="absolute top-3 left-3 z-10">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          className={cn(
+            "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+            isSelected
+              ? "bg-primary border-primary text-white"
+              : "bg-white/80 border-gray-300 dark:bg-gray-800/80 dark:border-gray-600 opacity-0 group-hover:opacity-100"
+          )}
+        >
+          {isSelected && <Check className="h-3 w-3" />}
+        </button>
+      </div>
+
+      {/* AI Relevance Badge */}
+      <div className="absolute top-3 right-3 z-10">
+        <div className="flex items-center gap-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+          <Sparkles className="h-3 w-3" />
+          <span>{paper.aiRelevance}% match</span>
+        </div>
+      </div>
+
+      {/* Paper Preview Thumbnail */}
+      <div
+        className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center cursor-pointer relative overflow-hidden"
+        onClick={() => setShowPreview(true)}
+      >
+        <FileText className="h-12 w-12 text-muted-foreground" />
+        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Eye className="h-8 w-8 text-white" />
+        </div>
+      </div>
+
+      {/* Card Content */}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className={cn(
+              "px-2 py-0.5 rounded-full text-xs font-medium",
+              status.color
+            )}
+          >
+            {status.label}
+          </span>
+          <span className="text-xs text-muted-foreground">{paper.year}</span>
+        </div>
+
+        <h3 className="font-semibold text-sm line-clamp-2 mb-2 group-hover:text-primary transition-colors">
+          {paper.title}
+        </h3>
+
+        <p className="text-xs text-muted-foreground mb-3">
+          {paper.authors.slice(0, 2).join(", ")}
+          {paper.authors.length > 2 && ` +${paper.authors.length - 2} more`}
+        </p>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {paper.tags?.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="px-2 py-0.5 bg-secondary text-secondary-foreground text-xs rounded-full"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Stats Row */}
+        <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-3">
+          <div className="flex items-center gap-1">
+            <TrendingUp className="h-3 w-3" />
+            <span>{paper.citations?.toLocaleString() || 0} citations</span>
+          </div>
+          <span>{formatFileSize(paper.file.sizeBytes)}</span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 mt-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onView}
+            className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium flex items-center justify-center gap-1"
+          >
+            <Eye className="h-3 w-3" />
+            View
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onDelete}
+            className="p-2 bg-red-600 text-white rounded-lg"
+          >
+            <Trash2 className="h-3 w-3" />
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Inline Preview Modal */}
+      <AnimatePresence>
+        {showPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowPreview(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-background rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl"
+            >
+              <div className="p-6 border-b flex items-center justify-between">
+                <h3 className="font-semibold text-lg">Paper Preview</h3>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="p-2 hover:bg-muted rounded-lg"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                <h2 className="text-xl font-bold mb-3">{paper.title}</h2>
+                <p className="text-muted-foreground text-sm mb-4">
+                  {paper.authors.join(", ")} • {paper.year}
+                </p>
+                <div className="bg-muted/50 rounded-xl p-4 mb-4">
+                  <h4 className="font-medium text-sm mb-2">Abstract</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {paper.abstract}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {paper.tags?.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-primary/10 text-primary text-sm rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 border-t flex justify-end gap-3">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="px-4 py-2 border rounded-lg hover:bg-muted"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={onView}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  Open Full Details
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+// ============================================================================
+// Bulk Actions Toolbar
+// ============================================================================
+interface BulkActionsProps {
+  selectedCount: number;
+  onClearSelection: () => void;
+  onDelete: () => void;
+  onAddToCollection: () => void;
+  onExport: () => void;
+}
+
+const BulkActionsToolbar: React.FC<BulkActionsProps> = ({
+  selectedCount,
+  onClearSelection,
+  onDelete,
+  onAddToCollection,
+  onExport,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
+  >
+    <div className="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-2xl shadow-2xl px-6 py-3 flex items-center gap-6">
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-sm font-bold">
+          {selectedCount}
+        </div>
+        <span className="text-sm font-medium">papers selected</span>
+      </div>
+      <div className="h-6 w-px bg-gray-700 dark:bg-gray-300" />
+      <div className="flex items-center gap-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onAddToCollection}
+          className="px-4 py-2 bg-gray-700 dark:bg-gray-200 hover:bg-gray-600 dark:hover:bg-gray-300 rounded-lg text-sm flex items-center gap-2 transition-colors"
+        >
+          <BookOpen className="h-4 w-4" />
+          Add to Collection
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onExport}
+          className="px-4 py-2 bg-gray-700 dark:bg-gray-200 hover:bg-gray-600 dark:hover:bg-gray-300 rounded-lg text-sm flex items-center gap-2 transition-colors"
+        >
+          <ArrowUpRight className="h-4 w-4" />
+          Export
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onDelete}
+          className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm flex items-center gap-2 transition-colors text-white"
+        >
+          <Trash2 className="h-4 w-4" />
+          Delete
+        </motion.button>
+      </div>
+      <button
+        onClick={onClearSelection}
+        className="p-2 hover:bg-gray-700 dark:hover:bg-gray-200 rounded-lg transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  </motion.div>
+);
+
+// ============================================================================
+// AI Sort Options
+// ============================================================================
+const sortOptions = [
+  { id: "ai-relevance", label: "AI Relevance", icon: Sparkles },
+  { id: "recent", label: "Most Recent", icon: Calendar },
+  { id: "citations", label: "Most Cited", icon: TrendingUp },
+  { id: "title", label: "Title A-Z", icon: SortAsc },
+];
+
+// ============================================================================
 // Papers Page Component
 // ============================================================================
 export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
@@ -403,6 +725,10 @@ export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState(
     dummyWorkspaces[0].id
   );
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState("ai-relevance");
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   // Calculate stats
   const totalPapers = dummyPapers.length;
@@ -538,18 +864,148 @@ export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
           />
         </div>
 
-        {/* Papers Library */}
-        <div className="bg-card border rounded-xl">
-          <div className="p-4 border-b flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Papers Library</h2>
+        {/* AI Insights Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-orange-500/10 border border-purple-200 dark:border-purple-800/50 rounded-2xl p-4"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+              <Brain className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-sm">AI Research Assistant</h3>
+                <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-full font-medium">
+                  PRO
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Based on your library, we recommend exploring{" "}
+                <span className="font-medium text-primary">
+                  3 related papers
+                </span>{" "}
+                on transformer architectures. Your most-read topic this month is{" "}
+                <span className="font-medium text-primary">Deep Learning</span>.
+              </p>
+            </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-3 py-1.5 border rounded-lg flex items-center gap-2 text-sm hover:bg-accent transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium flex items-center gap-2 flex-shrink-0"
             >
-              <Filter className="h-4 w-4" />
-              Filter
+              <Sparkles className="h-4 w-4" />
+              Discover Papers
             </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Papers Library */}
+        <div className="bg-card border rounded-xl">
+          <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold">Papers Library</h2>
+              {selectedPapers.length > 0 && (
+                <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">
+                  {selectedPapers.length} selected
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* View Toggle */}
+              <div className="flex items-center bg-muted rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={cn(
+                    "p-2 rounded-md transition-colors",
+                    viewMode === "grid"
+                      ? "bg-background shadow-sm"
+                      : "hover:bg-background/50"
+                  )}
+                  title="Grid view"
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "p-2 rounded-md transition-colors",
+                    viewMode === "list"
+                      ? "bg-background shadow-sm"
+                      : "hover:bg-background/50"
+                  )}
+                  title="List view"
+                >
+                  <LayoutList className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* AI Sort */}
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                  className="px-3 py-2 border rounded-lg flex items-center gap-2 text-sm hover:bg-accent transition-colors"
+                >
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  {sortOptions.find((s) => s.id === sortBy)?.label}
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 transition-transform",
+                      showSortMenu && "rotate-180"
+                    )}
+                  />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showSortMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-popover border rounded-lg shadow-lg z-50 overflow-hidden"
+                    >
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setSortBy(option.id);
+                            setShowSortMenu(false);
+                          }}
+                          className={cn(
+                            "w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-accent transition-colors",
+                            sortBy === option.id && "bg-accent"
+                          )}
+                        >
+                          <option.icon
+                            className={cn(
+                              "h-4 w-4",
+                              option.id === "ai-relevance" && "text-purple-500"
+                            )}
+                          />
+                          {option.label}
+                          {sortBy === option.id && (
+                            <Check className="h-4 w-4 ml-auto" />
+                          )}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-3 py-2 border rounded-lg flex items-center gap-2 text-sm hover:bg-accent transition-colors"
+              >
+                <Filter className="h-4 w-4" />
+                Filter
+              </motion.button>
+            </div>
           </div>
 
           <div className="p-4">
@@ -565,43 +1021,104 @@ export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
               />
             </div>
 
-            <div className="border-t mb-6" />
+            {/* Select All (for grid view) */}
+            {viewMode === "grid" && (
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={() => {
+                    if (selectedPapers.length === filteredPapers.length) {
+                      setSelectedPapers([]);
+                    } else {
+                      setSelectedPapers(filteredPapers.map((p) => p.id));
+                    }
+                  }}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {selectedPapers.length === filteredPapers.length ? (
+                    <CheckSquare className="h-4 w-4 text-primary" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                  Select All
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  {filteredPapers.length} papers
+                </span>
+              </div>
+            )}
 
-            {/* Papers Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
-                      Title
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
-                      File Info
-                    </th>
-                    <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
-                      Created
-                    </th>
-                    <th className="py-3 px-4 text-right text-sm font-medium text-muted-foreground">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+            {/* Grid View */}
+            <AnimatePresence mode="wait">
+              {viewMode === "grid" ? (
+                <motion.div
+                  key="grid"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                >
                   {filteredPapers.map((paper) => (
-                    <PaperRow
+                    <PaperCard
                       key={paper.id}
                       paper={paper}
+                      isSelected={selectedPapers.includes(paper.id)}
+                      onSelect={() => {
+                        setSelectedPapers((prev) =>
+                          prev.includes(paper.id)
+                            ? prev.filter((id) => id !== paper.id)
+                            : [...prev, paper.id]
+                        );
+                      }}
                       onView={() => onNavigate?.(`/papers/${paper.id}`)}
                       onProcess={() => console.log("Process", paper.id)}
                       onDelete={() => console.log("Delete", paper.id)}
                     />
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="list"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
+                            Title
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
+                            Status
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
+                            File Info
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-muted-foreground">
+                            Created
+                          </th>
+                          <th className="py-3 px-4 text-right text-sm font-medium text-muted-foreground">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredPapers.map((paper) => (
+                          <PaperRow
+                            key={paper.id}
+                            paper={paper}
+                            onView={() => onNavigate?.(`/papers/${paper.id}`)}
+                            onProcess={() => console.log("Process", paper.id)}
+                            onDelete={() => console.log("Delete", paper.id)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Pagination */}
             <div className="flex items-center justify-between mt-6 pt-6 border-t">
@@ -625,6 +1142,21 @@ export function PapersPage({ onNavigate, role: propRole }: PapersPageProps) {
             </div>
           </div>
         </div>
+
+        {/* Bulk Actions Toolbar */}
+        <AnimatePresence>
+          {selectedPapers.length > 0 && (
+            <BulkActionsToolbar
+              selectedCount={selectedPapers.length}
+              onClearSelection={() => setSelectedPapers([])}
+              onDelete={() => console.log("Delete selected:", selectedPapers)}
+              onAddToCollection={() =>
+                console.log("Add to collection:", selectedPapers)
+              }
+              onExport={() => console.log("Export:", selectedPapers)}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </DashboardLayout>
   );

@@ -4,23 +4,30 @@ import {
   Archive,
   Bell,
   BellOff,
+  Brain,
+  Calendar,
   Check,
   CheckCheck,
   ChevronDown,
   Clock,
   FileText,
   Filter,
+  Flame,
+  Layers,
+  List,
   MessageSquare,
   MoreHorizontal,
   RefreshCw,
   Search,
   Settings,
   Share2,
+  Sparkles,
   Trash2,
   UserPlus,
   Users,
+  Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { Button } from "../../components/ui/button";
@@ -228,6 +235,164 @@ const getNotificationColor = (type: NotificationType) => {
 };
 
 // ============================================================================
+// AI Priority Scorer
+// ============================================================================
+const getAIPriority = (
+  notification: Notification
+): "high" | "medium" | "low" => {
+  // Unread workspace/collection invites are high priority
+  if (
+    !notification.read &&
+    (notification.type === "workspace_invite" ||
+      notification.type === "collection_invite")
+  ) {
+    return "high";
+  }
+  // Recent mentions are high priority
+  if (!notification.read && notification.type === "mention") {
+    return "high";
+  }
+  // Recent unread items are medium priority
+  if (!notification.read) {
+    return "medium";
+  }
+  return "low";
+};
+
+// ============================================================================
+// Smart Grouping Helper
+// ============================================================================
+interface NotificationGroup {
+  title: string;
+  icon: React.ElementType;
+  notifications: Notification[];
+  color: string;
+}
+
+const groupNotificationsByType = (
+  notifications: Notification[]
+): NotificationGroup[] => {
+  const groups: NotificationGroup[] = [];
+
+  const invites = notifications.filter(
+    (n) => n.type === "workspace_invite" || n.type === "collection_invite"
+  );
+  if (invites.length > 0) {
+    groups.push({
+      title: "Invitations",
+      icon: UserPlus,
+      notifications: invites,
+      color: "from-green-500 to-emerald-500",
+    });
+  }
+
+  const social = notifications.filter(
+    (n) => n.type === "comment" || n.type === "mention"
+  );
+  if (social.length > 0) {
+    groups.push({
+      title: "Mentions & Comments",
+      icon: MessageSquare,
+      notifications: social,
+      color: "from-orange-500 to-pink-500",
+    });
+  }
+
+  const papers = notifications.filter((n) => n.type === "paper_shared");
+  if (papers.length > 0) {
+    groups.push({
+      title: "Shared Papers",
+      icon: FileText,
+      notifications: papers,
+      color: "from-blue-500 to-indigo-500",
+    });
+  }
+
+  const team = notifications.filter((n) => n.type === "team_update");
+  if (team.length > 0) {
+    groups.push({
+      title: "Team Updates",
+      icon: Users,
+      notifications: team,
+      color: "from-cyan-500 to-blue-500",
+    });
+  }
+
+  const system = notifications.filter((n) => n.type === "system");
+  if (system.length > 0) {
+    groups.push({
+      title: "System",
+      icon: Bell,
+      notifications: system,
+      color: "from-gray-500 to-slate-500",
+    });
+  }
+
+  return groups;
+};
+
+const groupNotificationsByDate = (
+  notifications: Notification[]
+): NotificationGroup[] => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+  const lastWeek = new Date(today.getTime() - 7 * 86400000);
+
+  const todayNotifs = notifications.filter(
+    (n) => new Date(n.timestamp) >= today
+  );
+  const yesterdayNotifs = notifications.filter((n) => {
+    const date = new Date(n.timestamp);
+    return date >= yesterday && date < today;
+  });
+  const thisWeekNotifs = notifications.filter((n) => {
+    const date = new Date(n.timestamp);
+    return date >= lastWeek && date < yesterday;
+  });
+  const olderNotifs = notifications.filter(
+    (n) => new Date(n.timestamp) < lastWeek
+  );
+
+  const groups: NotificationGroup[] = [];
+
+  if (todayNotifs.length > 0) {
+    groups.push({
+      title: "Today",
+      icon: Clock,
+      notifications: todayNotifs,
+      color: "from-purple-500 to-pink-500",
+    });
+  }
+  if (yesterdayNotifs.length > 0) {
+    groups.push({
+      title: "Yesterday",
+      icon: Calendar,
+      notifications: yesterdayNotifs,
+      color: "from-blue-500 to-indigo-500",
+    });
+  }
+  if (thisWeekNotifs.length > 0) {
+    groups.push({
+      title: "This Week",
+      icon: Calendar,
+      notifications: thisWeekNotifs,
+      color: "from-green-500 to-teal-500",
+    });
+  }
+  if (olderNotifs.length > 0) {
+    groups.push({
+      title: "Earlier",
+      icon: Archive,
+      notifications: olderNotifs,
+      color: "from-gray-500 to-slate-500",
+    });
+  }
+
+  return groups;
+};
+
+// ============================================================================
 // Notifications Page Component
 // ============================================================================
 export function NotificationsPage({
@@ -239,6 +404,10 @@ export function NotificationsPage({
   const [typeFilter, setTypeFilter] = useState<NotificationType | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<
+    "list" | "grouped-type" | "grouped-date"
+  >("list");
+  const [showAIPriority, setShowAIPriority] = useState(true);
 
   // Create user with the correct role
   const user = {
@@ -298,6 +467,20 @@ export function NotificationsPage({
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
+  // Sort by AI priority when enabled
+  const sortedNotifications = showAIPriority
+    ? [...filteredNotifications].sort((a, b) => {
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return (
+          priorityOrder[getAIPriority(a)] - priorityOrder[getAIPriority(b)]
+        );
+      })
+    : filteredNotifications;
+
+  // Get grouped notifications
+  const groupedByType = groupNotificationsByType(sortedNotifications);
+  const groupedByDate = groupNotificationsByDate(sortedNotifications);
+
   return (
     <DashboardLayout
       user={user}
@@ -328,21 +511,55 @@ export function NotificationsPage({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center border rounded-lg p-0.5 mr-2">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded transition-colors ${
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="List View"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grouped-type")}
+                className={`p-1.5 rounded transition-colors ${
+                  viewMode === "grouped-type"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Group by Type"
+              >
+                <Layers className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("grouped-date")}
+                className={`p-1.5 rounded transition-colors ${
+                  viewMode === "grouped-date"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Group by Date"
+              >
+                <Calendar className="h-4 w-4" />
+              </button>
+            </div>
+            {/* AI Priority Toggle */}
             <Button
-              variant="outline"
+              variant={showAIPriority ? "default" : "outline"}
               size="sm"
-              onClick={() => onNavigate?.("/notifications/center")}
+              onClick={() => setShowAIPriority(!showAIPriority)}
+              className={
+                showAIPriority
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 border-0"
+                  : ""
+              }
             >
-              <Bell className="h-4 w-4 mr-2" />
-              Center
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigate?.("/notifications/history")}
-            >
-              <Archive className="h-4 w-4 mr-2" />
-              History
+              <Sparkles className="h-4 w-4 mr-2" />
+              AI Sort
             </Button>
             <Button
               variant="outline"
@@ -426,12 +643,52 @@ export function NotificationsPage({
           </div>
         </motion.div>
 
-        {/* Notifications List */}
-        <div className="space-y-3">
-          {filteredNotifications.length === 0 ? (
+        {/* AI Priority Banner */}
+        {showAIPriority && unreadCount > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg">
+                <Brain className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-purple-900 dark:text-purple-100">
+                  AI Priority Sorting Active
+                </p>
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  High-priority items like invitations and mentions are shown
+                  first
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {sortedNotifications.filter((n) => getAIPriority(n) === "high")
+                  .length > 0 && (
+                  <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium flex items-center gap-1">
+                    <Flame className="h-3 w-3" />
+                    {
+                      sortedNotifications.filter(
+                        (n) => getAIPriority(n) === "high"
+                      ).length
+                    }{" "}
+                    High Priority
+                  </span>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Notifications Content */}
+        <AnimatePresence mode="wait">
+          {sortedNotifications.length === 0 ? (
             <motion.div
+              key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               className="rounded-xl border bg-card p-12 text-center"
             >
               <BellOff className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -442,129 +699,233 @@ export function NotificationsPage({
                   : "No notifications to display"}
               </p>
             </motion.div>
-          ) : (
-            filteredNotifications.map((notification, index) => {
-              const Icon = getNotificationIcon(notification.type);
-              const colorClass = getNotificationColor(notification.type);
+          ) : viewMode === "list" ? (
+            /* List View */
+            <motion.div
+              key="list"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-3"
+            >
+              {sortedNotifications.map((notification, index) => {
+                const Icon = getNotificationIcon(notification.type);
+                const colorClass = getNotificationColor(notification.type);
+                const priority = getAIPriority(notification);
 
-              return (
-                <motion.div
-                  key={notification.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`rounded-xl border bg-card p-4 hover:shadow-md transition-all cursor-pointer ${
-                    !notification.read ? "border-l-4 border-l-primary" : ""
-                  }`}
-                  onClick={() => {
-                    if (!notification.read) handleMarkAsRead(notification.id);
-                    if (notification.actionUrl)
-                      onNavigate?.(notification.actionUrl);
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    {/* Icon */}
-                    <div
-                      className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h4
-                            className={`font-medium ${
-                              !notification.read
-                                ? "text-foreground"
-                                : "text-muted-foreground"
-                            }`}
-                          >
-                            {notification.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground mt-0.5">
-                            {notification.message}
-                          </p>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {formatTimeAgo(notification.timestamp)}
-                          </span>
-                          <div className="relative group">
-                            <button
-                              onClick={(e) => e.stopPropagation()}
-                              className="p-1.5 hover:bg-muted rounded-lg transition-colors"
-                            >
-                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                            </button>
-                            {/* Dropdown menu would go here */}
-                          </div>
-                        </div>
+                return (
+                  <motion.div
+                    key={notification.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`rounded-xl border bg-card p-4 hover:shadow-md transition-all cursor-pointer ${
+                      !notification.read ? "border-l-4 border-l-primary" : ""
+                    } ${priority === "high" && showAIPriority ? "ring-2 ring-red-200 dark:ring-red-800" : ""}`}
+                    onClick={() => {
+                      if (!notification.read) handleMarkAsRead(notification.id);
+                      if (notification.actionUrl)
+                        onNavigate?.(notification.actionUrl);
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* Icon */}
+                      <div
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}
+                      >
+                        <Icon className="h-5 w-5" />
                       </div>
 
-                      {/* Actor */}
-                      {notification.actor && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-xs font-medium text-primary">
-                              {notification.actor.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .slice(0, 2)}
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              {priority === "high" && showAIPriority && (
+                                <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded text-xs font-medium flex items-center gap-0.5">
+                                  <Zap className="h-3 w-3" />
+                                  Priority
+                                </span>
+                              )}
+                              <h4
+                                className={`font-medium ${
+                                  !notification.read
+                                    ? "text-foreground"
+                                    : "text-muted-foreground"
+                                }`}
+                              >
+                                {notification.title}
+                              </h4>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-0.5">
+                              {notification.message}
+                            </p>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {formatTimeAgo(notification.timestamp)}
+                            </span>
+                            <div className="relative group">
+                              <button
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1.5 hover:bg-muted rounded-lg transition-colors"
+                              >
+                                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                              {/* Dropdown menu would go here */}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actor */}
+                        {notification.actor && (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <span className="text-xs font-medium text-primary">
+                                {notification.actor.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {notification.actor.name}
                             </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {notification.actor.name}
-                          </span>
-                        </div>
-                      )}
+                        )}
 
-                      {/* Quick Actions */}
-                      <div className="flex items-center gap-2 mt-3">
-                        {!notification.read && (
+                        {/* Quick Actions */}
+                        <div className="flex items-center gap-2 mt-3">
+                          {!notification.read && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMarkAsRead(notification.id);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Check className="h-3 w-3" />
+                              Mark as read
+                            </button>
+                          )}
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleMarkAsRead(notification.id);
+                              handleArchive(notification.id);
                             }}
                             className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            <Check className="h-3 w-3" />
-                            Mark as read
+                            <Archive className="h-3 w-3" />
+                            Archive
                           </button>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleArchive(notification.id);
-                          }}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <Archive className="h-3 w-3" />
-                          Archive
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(notification.id);
-                          }}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          Delete
-                        </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(notification.id);
+                            }}
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            /* Grouped Views */
+            <motion.div
+              key={viewMode}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="space-y-6"
+            >
+              {(viewMode === "grouped-type"
+                ? groupedByType
+                : groupedByDate
+              ).map((group, groupIndex) => (
+                <motion.div
+                  key={group.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: groupIndex * 0.1 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`p-2 bg-gradient-to-r ${group.color} rounded-lg`}
+                    >
+                      <group.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-lg">{group.title}</h3>
+                    <span className="px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">
+                      {group.notifications.length}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 ml-2 pl-6 border-l-2 border-muted">
+                    {group.notifications.map((notification, index) => {
+                      const Icon = getNotificationIcon(notification.type);
+                      const colorClass = getNotificationColor(
+                        notification.type
+                      );
+
+                      return (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          className={`rounded-lg border bg-card p-3 hover:shadow-sm transition-all cursor-pointer ${
+                            !notification.read
+                              ? "border-l-4 border-l-primary"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            if (!notification.read)
+                              handleMarkAsRead(notification.id);
+                            if (notification.actionUrl)
+                              onNavigate?.(notification.actionUrl);
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorClass}`}
+                            >
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h4
+                                  className={`text-sm font-medium ${!notification.read ? "text-foreground" : "text-muted-foreground"}`}
+                                >
+                                  {notification.title}
+                                </h4>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatTimeAgo(notification.timestamp)}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                {notification.message}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </motion.div>
-              );
-            })
+              ))}
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
         {/* Notification Stats */}
         <motion.div

@@ -3,15 +3,18 @@
 import {
   Activity,
   BarChart3,
+  Calendar,
   CheckCircle,
   ChevronDown,
   Clock,
+  Crown,
   Download,
   Edit,
   ExternalLink,
   Eye,
   FileText,
   FolderOpen,
+  Medal,
   MessageSquare,
   MoreHorizontal,
   RefreshCw,
@@ -21,10 +24,12 @@ import {
   Trash2,
   TrendingDown,
   TrendingUp,
+  Trophy,
   Upload,
   UserMinus,
   UserPlus,
   Users,
+  Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -211,6 +216,103 @@ const teamStats = {
   activityChange: 12,
 };
 
+// Contribution Leaderboard
+interface LeaderboardEntry {
+  member: TeamMember;
+  score: number;
+  papers: number;
+  comments: number;
+  reviews: number;
+  streak: number;
+  trend: "up" | "down" | "stable";
+  badge?: "gold" | "silver" | "bronze";
+}
+
+const mockLeaderboard: LeaderboardEntry[] = [
+  {
+    member: mockMembers[0],
+    score: 1250,
+    papers: 24,
+    comments: 156,
+    reviews: 18,
+    streak: 14,
+    trend: "up",
+    badge: "gold",
+  },
+  {
+    member: mockMembers[1],
+    score: 980,
+    papers: 18,
+    comments: 134,
+    reviews: 12,
+    streak: 7,
+    trend: "up",
+    badge: "silver",
+  },
+  {
+    member: mockMembers[3],
+    score: 875,
+    papers: 15,
+    comments: 98,
+    reviews: 10,
+    streak: 5,
+    trend: "stable",
+    badge: "bronze",
+  },
+  {
+    member: mockMembers[2],
+    score: 650,
+    papers: 12,
+    comments: 76,
+    reviews: 8,
+    streak: 3,
+    trend: "down",
+  },
+  {
+    member: mockMembers[4],
+    score: 420,
+    papers: 8,
+    comments: 45,
+    reviews: 5,
+    streak: 1,
+    trend: "up",
+  },
+];
+
+// Activity Heatmap Data (7 days x 24 hours)
+const generateHeatmapData = () => {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const data: { day: string; hour: number; value: number }[] = [];
+
+  days.forEach((day) => {
+    for (let hour = 0; hour < 24; hour++) {
+      // Simulate higher activity during work hours
+      let baseValue = Math.random() * 10;
+      if (hour >= 9 && hour <= 17 && day !== "Sun" && day !== "Sat") {
+        baseValue += Math.random() * 40;
+      }
+      if (hour >= 10 && hour <= 14 && day !== "Sun" && day !== "Sat") {
+        baseValue += Math.random() * 30;
+      }
+      data.push({ day, hour, value: Math.floor(baseValue) });
+    }
+  });
+  return data;
+};
+
+const heatmapData = generateHeatmapData();
+
+// Weekly Activity Chart Data
+const weeklyActivityData = [
+  { day: "Mon", uploads: 8, comments: 24, reviews: 5 },
+  { day: "Tue", uploads: 12, comments: 31, reviews: 8 },
+  { day: "Wed", uploads: 6, comments: 18, reviews: 4 },
+  { day: "Thu", uploads: 15, comments: 42, reviews: 10 },
+  { day: "Fri", uploads: 9, comments: 27, reviews: 6 },
+  { day: "Sat", uploads: 3, comments: 12, reviews: 2 },
+  { day: "Sun", uploads: 2, comments: 8, reviews: 1 },
+];
+
 interface TeamActivityPageProps {
   onNavigate?: (path: string) => void;
   role?: UserRole;
@@ -227,6 +329,32 @@ export function TeamActivityPage({
   const [timeRange, setTimeRange] = useState("7d");
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [activeChartView, setActiveChartView] = useState<"bar" | "heatmap">(
+    "bar"
+  );
+
+  const getHeatmapColor = (value: number) => {
+    if (value === 0) return "bg-gray-100 dark:bg-gray-800";
+    if (value < 10) return "bg-purple-100 dark:bg-purple-900/30";
+    if (value < 25) return "bg-purple-300 dark:bg-purple-700/50";
+    if (value < 40) return "bg-purple-500 dark:bg-purple-600/70";
+    return "bg-purple-700 dark:bg-purple-500";
+  };
+
+  const getBadgeIcon = (badge?: "gold" | "silver" | "bronze") => {
+    switch (badge) {
+      case "gold":
+        return <Crown className="h-4 w-4 text-amber-400" />;
+      case "silver":
+        return <Medal className="h-4 w-4 text-gray-400" />;
+      case "bronze":
+        return <Trophy className="h-4 w-4 text-amber-700" />;
+      default:
+        return null;
+    }
+  };
 
   const defaultUser = {
     name: "Dr. Sarah Chen",
@@ -315,35 +443,45 @@ export function TeamActivityPage({
         return (
           <>
             uploaded{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "paper_view":
         return (
           <>
             viewed{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "paper_edit":
         return (
           <>
             edited{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "paper_delete":
         return (
           <>
             deleted{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "paper_share":
         return (
           <>
             shared{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>{" "}
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>{" "}
             with {(activity.metadata?.sharedWith as string) || "team"}
           </>
         );
@@ -351,21 +489,27 @@ export function TeamActivityPage({
         return (
           <>
             created collection{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "collection_edit":
         return (
           <>
             updated collection{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "collection_share":
         return (
           <>
             shared collection{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "member_join":
@@ -384,7 +528,9 @@ export function TeamActivityPage({
         return (
           <>
             changed{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}'s</span>{" "}
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}'s
+            </span>{" "}
             role from {(activity.metadata?.oldRole as string) || "Member"} to{" "}
             <span className="text-purple-400">
               {(activity.metadata?.newRole as string) || "Admin"}
@@ -395,7 +541,9 @@ export function TeamActivityPage({
         return (
           <>
             commented on{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "annotation_add":
@@ -403,22 +551,28 @@ export function TeamActivityPage({
           <>
             added {(activity.metadata?.annotationCount as number) || 1}{" "}
             annotation(s) to{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       case "export":
         return (
           <>
             exported{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span> as{" "}
-            {(activity.metadata?.format as string) || "PDF"}
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>{" "}
+            as {(activity.metadata?.format as string) || "PDF"}
           </>
         );
       case "ai_insight":
         return (
           <>
             generated AI insight:{" "}
-            <span className="text-gray-900 dark:text-white font-medium">{activity.target}</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+              {activity.target}
+            </span>
           </>
         );
       default:
@@ -589,8 +743,12 @@ export function TeamActivityPage({
                   )}
                 </div>
                 <div className="mt-4">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{stat.label}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stat.value}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+                    {stat.label}
+                  </p>
                   <p className="text-gray-500 text-xs mt-0.5">
                     {stat.subValue}
                   </p>
@@ -624,7 +782,9 @@ export function TeamActivityPage({
                       <Users className="h-5 w-5 text-gray-900 dark:text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-gray-900 dark:text-white font-medium">All Members</p>
+                      <p className="text-gray-900 dark:text-white font-medium">
+                        All Members
+                      </p>
                       <p className="text-gray-600 dark:text-gray-400 text-xs">
                         {mockMembers.length} total
                       </p>
@@ -654,7 +814,9 @@ export function TeamActivityPage({
                         <p className="text-gray-900 dark:text-white font-medium text-sm truncate">
                           {member.name}
                         </p>
-                        <p className="text-gray-600 dark:text-gray-400 text-xs">{member.role}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs">
+                          {member.role}
+                        </p>
                       </div>
                     </button>
                   ))}
@@ -718,7 +880,9 @@ export function TeamActivityPage({
                     {filteredActivities.length === 0 ? (
                       <div className="py-12 text-center">
                         <Activity className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                        <p className="text-gray-600 dark:text-gray-400">No activities found</p>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          No activities found
+                        </p>
                         <p className="text-gray-500 text-sm">
                           Try adjusting your filters
                         </p>
@@ -821,6 +985,325 @@ export function TeamActivityPage({
                   </div>
                 )}
               </div>
+            </motion.div>
+          </div>
+
+          {/* Activity Charts & Leaderboard Section */}
+          <div className="grid lg:grid-cols-2 gap-6 mt-6">
+            {/* Weekly Activity Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                    <BarChart3 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Weekly Activity
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Team contributions this week
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setActiveChartView("bar")}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      activeChartView === "bar"
+                        ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                  >
+                    Chart
+                  </button>
+                  <button
+                    onClick={() => setActiveChartView("heatmap")}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      activeChartView === "heatmap"
+                        ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                  >
+                    Heatmap
+                  </button>
+                </div>
+              </div>
+
+              {activeChartView === "bar" ? (
+                <>
+                  {/* Legend */}
+                  <div className="flex items-center gap-6 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-indigo-500" />
+                      <span className="text-xs text-gray-500">Uploads</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-500" />
+                      <span className="text-xs text-gray-500">Comments</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                      <span className="text-xs text-gray-500">Reviews</span>
+                    </div>
+                  </div>
+
+                  {/* Bar Chart */}
+                  <div className="flex items-end gap-3 h-40">
+                    {weeklyActivityData.map((day, index) => {
+                      const maxValue = Math.max(
+                        ...weeklyActivityData.map((d) =>
+                          Math.max(d.uploads, d.comments / 3, d.reviews)
+                        )
+                      );
+                      return (
+                        <div
+                          key={day.day}
+                          className="flex-1 flex flex-col items-center gap-1"
+                        >
+                          <div className="w-full flex gap-1 items-end h-32">
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{
+                                height: `${(day.uploads / maxValue) * 100}%`,
+                              }}
+                              transition={{
+                                delay: 0.4 + index * 0.05,
+                                duration: 0.5,
+                              }}
+                              className="flex-1 bg-indigo-500 rounded-t-md min-h-[4px]"
+                              title={`${day.uploads} uploads`}
+                            />
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{
+                                height: `${(day.comments / 3 / maxValue) * 100}%`,
+                              }}
+                              transition={{
+                                delay: 0.45 + index * 0.05,
+                                duration: 0.5,
+                              }}
+                              className="flex-1 bg-purple-500 rounded-t-md min-h-[4px]"
+                              title={`${day.comments} comments`}
+                            />
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{
+                                height: `${(day.reviews / maxValue) * 100}%`,
+                              }}
+                              transition={{
+                                delay: 0.5 + index * 0.05,
+                                duration: 0.5,
+                              }}
+                              className="flex-1 bg-emerald-500 rounded-t-md min-h-[4px]"
+                              title={`${day.reviews} reviews`}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {day.day}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                /* Activity Heatmap */
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <span className="text-xs text-gray-500">
+                      Activity by time of day
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[500px]">
+                      {/* Hours header */}
+                      <div className="flex mb-1 pl-10">
+                        {[0, 3, 6, 9, 12, 15, 18, 21].map((hour) => (
+                          <span
+                            key={hour}
+                            className="flex-1 text-xs text-gray-400 text-center"
+                          >
+                            {hour.toString().padStart(2, "0")}:00
+                          </span>
+                        ))}
+                      </div>
+                      {/* Heatmap grid */}
+                      {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                        (day) => (
+                          <div
+                            key={day}
+                            className="flex items-center gap-1 mb-1"
+                          >
+                            <span className="w-8 text-xs text-gray-500">
+                              {day}
+                            </span>
+                            <div className="flex-1 flex gap-0.5">
+                              {heatmapData
+                                .filter((d) => d.day === day)
+                                .map((cell, i) => (
+                                  <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.01 * i }}
+                                    className={`h-4 flex-1 rounded-sm ${getHeatmapColor(cell.value)}`}
+                                    title={`${day} ${cell.hour}:00 - ${cell.value} activities`}
+                                  />
+                                ))}
+                            </div>
+                          </div>
+                        )
+                      )}
+                      {/* Legend */}
+                      <div className="flex items-center justify-end gap-1 mt-3">
+                        <span className="text-xs text-gray-400">Less</span>
+                        <div className="flex gap-0.5">
+                          <div className="w-3 h-3 rounded-sm bg-gray-100 dark:bg-gray-800" />
+                          <div className="w-3 h-3 rounded-sm bg-purple-100 dark:bg-purple-900/30" />
+                          <div className="w-3 h-3 rounded-sm bg-purple-300 dark:bg-purple-700/50" />
+                          <div className="w-3 h-3 rounded-sm bg-purple-500 dark:bg-purple-600/70" />
+                          <div className="w-3 h-3 rounded-sm bg-purple-700 dark:bg-purple-500" />
+                        </div>
+                        <span className="text-xs text-gray-400">More</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+
+            {/* Contribution Leaderboard */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
+              <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white">
+                    <Trophy className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                      Contribution Leaderboard
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Top contributors this month
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowLeaderboard(!showLeaderboard)}
+                  className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                >
+                  {showLeaderboard ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {showLeaderboard && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="divide-y divide-gray-100 dark:divide-gray-700"
+                  >
+                    {mockLeaderboard.map((entry, index) => (
+                      <motion.div
+                        key={entry.member.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * index }}
+                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Rank */}
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                              index === 0
+                                ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600"
+                                : index === 1
+                                  ? "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                  : index === 2
+                                    ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600"
+                                    : "bg-gray-50 dark:bg-gray-800 text-gray-500"
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+
+                          {/* Avatar & Name */}
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <div
+                              className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-medium ${
+                                entry.member.isOnline
+                                  ? "bg-gradient-to-br from-purple-500 to-pink-500 ring-2 ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-800"
+                                  : "bg-gradient-to-br from-gray-400 to-gray-600"
+                              }`}
+                            >
+                              {entry.member.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-gray-900 dark:text-white">
+                                  {entry.member.name}
+                                </span>
+                                {entry.badge && getBadgeIcon(entry.badge)}
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {entry.member.role}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Stats */}
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                {entry.score}
+                              </p>
+                              <p className="text-xs text-gray-500">points</p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Zap className="h-4 w-4 text-orange-400" />
+                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                {entry.streak}d
+                              </span>
+                            </div>
+                            <div
+                              className={`flex items-center gap-0.5 ${
+                                entry.trend === "up"
+                                  ? "text-emerald-500"
+                                  : entry.trend === "down"
+                                    ? "text-red-500"
+                                    : "text-gray-400"
+                              }`}
+                            >
+                              {entry.trend === "up" && (
+                                <TrendingUp className="h-4 w-4" />
+                              )}
+                              {entry.trend === "down" && (
+                                <TrendingDown className="h-4 w-4" />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </div>
         </div>
