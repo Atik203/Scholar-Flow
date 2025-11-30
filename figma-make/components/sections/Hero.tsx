@@ -1,54 +1,234 @@
 "use client";
+import { motion } from "framer-motion";
 import {
   ArrowRight,
+  BookOpen,
+  Brain,
   CheckCircle2,
   FileText,
+  Microscope,
   Search,
+  Sparkles,
+  Star,
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 
 interface HeroProps {
   onNavigate?: (path: string) => void;
 }
 
+// Floating particle component
+const FloatingParticle = ({
+  delay,
+  duration,
+  x,
+  y,
+  size,
+}: {
+  delay: number;
+  duration: number;
+  x: string;
+  y: string;
+  size: number;
+}) => (
+  <motion.div
+    className="absolute rounded-full bg-gradient-to-r from-primary/30 to-chart-1/30 blur-sm"
+    style={{ left: x, top: y, width: size, height: size }}
+    animate={{
+      y: [0, -30, 0],
+      x: [0, 15, 0],
+      opacity: [0.3, 0.6, 0.3],
+      scale: [1, 1.2, 1],
+    }}
+    transition={{
+      duration,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  />
+);
+
+// Typing effect hook
+const useTypewriter = (
+  words: string[],
+  typingSpeed = 100,
+  deletingSpeed = 50,
+  pauseDuration = 2000
+) => {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const word = words[currentWordIndex];
+
+    const timeout = setTimeout(
+      () => {
+        if (!isDeleting) {
+          if (currentText.length < word.length) {
+            setCurrentText(word.slice(0, currentText.length + 1));
+          } else {
+            setTimeout(() => setIsDeleting(true), pauseDuration);
+          }
+        } else {
+          if (currentText.length > 0) {
+            setCurrentText(word.slice(0, currentText.length - 1));
+          } else {
+            setIsDeleting(false);
+            setCurrentWordIndex((prev) => (prev + 1) % words.length);
+          }
+        }
+      },
+      isDeleting ? deletingSpeed : typingSpeed
+    );
+
+    return () => clearTimeout(timeout);
+  }, [
+    currentText,
+    isDeleting,
+    currentWordIndex,
+    words,
+    typingSpeed,
+    deletingSpeed,
+    pauseDuration,
+  ]);
+
+  return currentText;
+};
+
+// Animated counter component
+const AnimatedCounter = ({
+  target,
+  suffix = "",
+  duration = 2,
+}: {
+  target: number;
+  suffix?: string;
+  duration?: number;
+}) => {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    if (hasAnimated) return;
+
+    const steps = 60;
+    const increment = target / steps;
+    let current = 0;
+
+    const timer = setInterval(
+      () => {
+        current += increment;
+        if (current >= target) {
+          setCount(target);
+          clearInterval(timer);
+        } else {
+          setCount(Math.floor(current));
+        }
+      },
+      (duration * 1000) / steps
+    );
+
+    setHasAnimated(true);
+    return () => clearInterval(timer);
+  }, [target, duration, hasAnimated]);
+
+  return (
+    <span>
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+};
+
 export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
+  const typedWord = useTypewriter(
+    ["Research", "Discovery", "Innovation", "Collaboration"],
+    120,
+    80,
+    2500
+  );
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   const features = [
     {
       icon: Search,
       title: "Semantic Search",
       description: "Find papers by meaning, not just keywords",
+      gradient: "from-blue-500 to-cyan-500",
+      delay: 0,
+    },
+    {
+      icon: Brain,
+      title: "AI Analysis",
+      description: "Get instant summaries and key insights",
+      gradient: "from-purple-500 to-pink-500",
+      delay: 0.1,
     },
     {
       icon: FileText,
       title: "Smart Collections",
       description: "Organize research with AI-powered insights",
+      gradient: "from-green-500 to-emerald-500",
+      delay: 0.2,
     },
     {
       icon: Users,
       title: "Collaboration",
       description: "Work together seamlessly with your team",
-    },
-    {
-      icon: Zap,
-      title: "AI Analysis",
-      description: "Get instant summaries and key insights",
+      gradient: "from-orange-500 to-amber-500",
+      delay: 0.3,
     },
   ];
 
   const stats = [
-    { number: "10K+", label: "Research Papers" },
-    { number: "5K+", label: "Active Users" },
-    { number: "500+", label: "Collections" },
-    { number: "99%", label: "Uptime" },
+    {
+      number: 50000,
+      suffix: "+",
+      label: "Research Papers",
+      icon: BookOpen,
+      color: "text-blue-500",
+    },
+    {
+      number: 12000,
+      suffix: "+",
+      label: "Active Researchers",
+      icon: Users,
+      color: "text-green-500",
+    },
+    {
+      number: 3500,
+      suffix: "+",
+      label: "Collections Created",
+      icon: FileText,
+      color: "text-amber-500",
+    },
+    {
+      number: 99,
+      suffix: ".9%",
+      label: "Uptime SLA",
+      icon: Zap,
+      color: "text-purple-500",
+    },
   ];
+
+  const trustedLogos = ["MIT", "Stanford", "Harvard", "Oxford", "Cambridge"];
 
   const handleGetStarted = () => {
     if (onNavigate) {
-      onNavigate("/login");
+      onNavigate("/register");
     }
   };
 
@@ -60,18 +240,79 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
   return (
     <section
-      className="relative pt-32 pb-32 overflow-hidden"
+      className="relative pt-28 pb-32 overflow-hidden"
       aria-labelledby="hero-heading"
     >
-      {/* Enhanced background patterns */}
-      <div className="pointer-events-none absolute inset-0 -z-10 [mask-image:radial-gradient(circle_at_center,white,transparent_75%)] bg-gradient-to-br from-primary/12 via-[var(--chart-1)]/8 to-transparent" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_50%,var(--primary)_0%,transparent_50%)] opacity-10" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_80%_20%,var(--chart-1)_0%,transparent_50%)] opacity-8" />
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 -z-20 bg-gradient-to-br from-background via-background to-background" />
+
+      {/* Mouse-following gradient */}
+      <motion.div
+        className="pointer-events-none absolute -z-10 h-[500px] w-[500px] rounded-full bg-gradient-to-r from-primary/20 via-chart-1/15 to-purple-500/10 blur-3xl"
+        animate={{
+          x: mousePosition.x - 250,
+          y: mousePosition.y - 250,
+        }}
+        transition={{ type: "spring", damping: 30, stiffness: 200 }}
+      />
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <FloatingParticle delay={0} duration={4} x="10%" y="20%" size={8} />
+        <FloatingParticle delay={0.5} duration={5} x="85%" y="15%" size={12} />
+        <FloatingParticle delay={1} duration={4.5} x="70%" y="60%" size={6} />
+        <FloatingParticle
+          delay={1.5}
+          duration={5.5}
+          x="20%"
+          y="70%"
+          size={10}
+        />
+        <FloatingParticle delay={2} duration={4} x="50%" y="30%" size={8} />
+        <FloatingParticle delay={0.3} duration={6} x="90%" y="80%" size={14} />
+        <FloatingParticle delay={1.2} duration={5} x="5%" y="50%" size={10} />
+        <FloatingParticle delay={0.8} duration={4.5} x="40%" y="85%" size={8} />
+      </div>
 
       {/* Animated grid pattern */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(circle_at_center,white,transparent_70%)] opacity-10" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_70%)] opacity-20" />
+
+      {/* Decorative orbs */}
+      <motion.div
+        className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl -z-10"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-20 right-10 w-96 h-96 bg-chart-1/10 rounded-full blur-3xl -z-10"
+        animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
 
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        {/* Announcement Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center mb-8"
+        >
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-chart-1/10 to-purple-500/10 border border-primary/20 backdrop-blur-sm cursor-pointer group"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+            <span className="text-sm font-medium">
+              <span className="text-primary">New:</span> AI-powered paper
+              summaries now available
+            </span>
+            <ArrowRight className="h-3 w-3 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+          </motion.div>
+        </motion.div>
+
         {/* Main Hero Content */}
         <div className="text-center mb-20">
           <motion.div
@@ -80,11 +321,22 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
               Collaborate Smarter on{" "}
-              <span className="bg-gradient-to-r from-primary to-[var(--chart-1)] bg-clip-text text-transparent relative">
-                Research
-                <span className="absolute -inset-x-2 -inset-y-1 bg-gradient-to-r from-primary/10 via-[var(--chart-1)]/10 to-transparent blur-2xl -z-10" />
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-primary via-chart-1 to-purple-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
+                  {typedWord}
+                </span>
+                <motion.span
+                  className="inline-block w-[3px] h-[1em] bg-primary ml-1 align-middle"
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                />
+                <motion.span
+                  className="absolute -inset-x-4 -inset-y-2 bg-gradient-to-r from-primary/20 via-chart-1/15 to-purple-500/20 blur-2xl -z-10"
+                  animate={{ opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                />
               </span>
             </h1>
           </motion.div>
@@ -93,36 +345,80 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15, duration: 0.7, ease: "easeOut" }}
-            className="mt-6 mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed"
+            className="mt-8 mx-auto max-w-3xl text-lg md:text-xl text-muted-foreground leading-relaxed"
           >
             ScholarFlow centralizes your papers, semantic search, AI summaries,
             annotations, and collection sharing so your literature review
-            accelerates.
+            accelerates —{" "}
+            <span className="text-foreground font-medium">10x faster</span>.
           </motion.p>
 
+          {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4"
+            className="mt-10 flex flex-wrap items-center justify-center gap-4"
           >
-            <Button
-              size="lg"
-              variant="gradient"
-              className="shadow-xl hover:shadow-2xl transition-all duration-300 btn-hover-glow btn-shine"
-              onClick={handleGetStarted}
-            >
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="backdrop-blur border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 btn-hover-glow"
-              onClick={handleHowItWorks}
-            >
-              How it Works
-            </Button>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                size="lg"
+                className="relative overflow-hidden bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 text-white shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 px-8 py-6 text-lg group"
+                onClick={handleGetStarted}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  Start Free Trial
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                />
+              </Button>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="backdrop-blur-sm border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 px-8 py-6 text-lg"
+                onClick={handleHowItWorks}
+              >
+                <Microscope className="h-5 w-5 mr-2" />
+                See How it Works
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Social Proof */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-10 flex flex-col items-center gap-4"
+          >
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 + i * 0.1 }}
+                >
+                  <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
+                </motion.div>
+              ))}
+              <span className="ml-2 text-sm text-muted-foreground">
+                4.9/5 from 2,000+ researchers
+              </span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <span>✓ No credit card required</span>
+              <span>✓ 14-day free trial</span>
+              <span>✓ Cancel anytime</span>
+            </div>
           </motion.div>
         </div>
 
@@ -130,27 +426,49 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-18"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ delay: 0.2, duration: 0.7 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20"
         >
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: 0.1 * index, duration: 0.5 }}
-              className="group relative p-6 rounded-2xl border border-primary/20 bg-gradient-to-b from-muted/50 via-background/80 to-background hover:border-success/40 transition-all duration-300 hover:shadow-lg hover:shadow-success/10"
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ delay: feature.delay, duration: 0.5 }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              className="group relative p-6 rounded-2xl border border-border/50 bg-gradient-to-b from-muted/30 via-background/50 to-background backdrop-blur-sm hover:border-primary/40 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 overflow-hidden"
             >
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-success/10 text-success mb-4 group-hover:bg-success/20 transition-colors duration-300">
-                <feature.icon className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+              {/* Hover gradient */}
+              <motion.div
+                className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
+              />
+
+              {/* Icon */}
+              <motion.div
+                className={`relative flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br ${feature.gradient} mb-5 shadow-lg`}
+                whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <feature.icon className="h-7 w-7 text-white" />
+              </motion.div>
+
+              <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+                {feature.title}
+              </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {feature.description}
               </p>
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-success/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              {/* Arrow indicator */}
+              <motion.div
+                className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                initial={{ x: -10 }}
+                whileHover={{ x: 0 }}
+              >
+                <ArrowRight className="h-4 w-4 text-primary" />
+              </motion.div>
             </motion.div>
           ))}
         </motion.div>
@@ -159,20 +477,33 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ delay: 0.6, duration: 0.7 }}
-          className="relative mx-auto max-w-4xl rounded-2xl border border-primary/20 bg-gradient-to-b from-muted/50 via-background/80 to-background p-8 md:p-12 shadow-2xl hover:shadow-3xl transition-all duration-500"
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ delay: 0.3, duration: 0.7 }}
+          className="relative mx-auto max-w-5xl rounded-3xl border border-border/50 bg-gradient-to-b from-muted/30 via-background/80 to-background backdrop-blur-md p-10 md:p-14 shadow-2xl overflow-hidden"
         >
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
+          {/* Background decoration */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-chart-1 to-purple-500" />
+
+          <div className="text-center mb-10">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4"
+            >
+              <Zap className="h-4 w-4" />
+              Trusted Platform
+            </motion.div>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight mb-3">
               Trusted by Researchers Worldwide
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Join thousands of researchers who have transformed their workflow
+              with ScholarFlow
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -180,20 +511,18 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ delay: 0.1 * index, duration: 0.5 }}
-                className="text-center"
+                whileHover={{ scale: 1.05 }}
+                className="text-center group"
               >
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-1 ${
-                    index === 0
-                      ? "text-info"
-                      : index === 1
-                        ? "text-success"
-                        : index === 2
-                          ? "text-warning"
-                          : "text-primary"
-                  }`}
+                <motion.div
+                  className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-muted to-muted/50 mb-3 ${stat.color} group-hover:scale-110 transition-transform`}
                 >
-                  {stat.number}
+                  <stat.icon className="h-6 w-6" />
+                </motion.div>
+                <div
+                  className={`text-3xl md:text-4xl font-bold mb-1 ${stat.color}`}
+                >
+                  <AnimatedCounter target={stat.number} suffix={stat.suffix} />
                 </div>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
               </motion.div>
@@ -201,30 +530,71 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           </div>
 
           {/* Trust indicators */}
-          <div className="mt-8 pt-8 border-t border-border/20">
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
-                <span className="text-sm text-muted-foreground">
-                  99.9% Uptime
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-info" />
-                <span className="text-sm text-muted-foreground">
-                  Enterprise Security
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-warning" />
-                <span className="text-sm text-muted-foreground">
-                  24/7 Support
-                </span>
-              </div>
+          <div className="mt-10 pt-8 border-t border-border/30">
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              {[
+                {
+                  icon: CheckCircle2,
+                  text: "99.9% Uptime SLA",
+                  color: "text-green-500",
+                },
+                {
+                  icon: CheckCircle2,
+                  text: "SOC 2 Certified",
+                  color: "text-blue-500",
+                },
+                {
+                  icon: CheckCircle2,
+                  text: "24/7 Support",
+                  color: "text-amber-500",
+                },
+                {
+                  icon: CheckCircle2,
+                  text: "GDPR Compliant",
+                  color: "text-purple-500",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.text}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * i }}
+                  className="flex items-center gap-2"
+                >
+                  <item.icon className={`h-4 w-4 ${item.color}`} />
+                  <span className="text-sm text-muted-foreground">
+                    {item.text}
+                  </span>
+                </motion.div>
+              ))}
             </div>
           </div>
 
-          <div className="absolute inset-x-0 -bottom-12 mx-auto h-20 w-[70%] blur-3xl rounded-full bg-gradient-to-r from-primary/30 via-[var(--chart-1)]/20 to-primary/30 -z-10" />
+          {/* University logos */}
+          <div className="mt-8 pt-6 border-t border-border/30">
+            <p className="text-center text-xs text-muted-foreground mb-4">
+              TRUSTED BY RESEARCHERS FROM
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-8">
+              {trustedLogos.map((logo, i) => (
+                <motion.div
+                  key={logo}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 0.5 }}
+                  whileHover={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * i }}
+                  className="text-lg font-semibold text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
+                  {logo}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom glow */}
+          <div className="absolute inset-x-0 -bottom-20 mx-auto h-32 w-[80%] blur-3xl rounded-full bg-gradient-to-r from-primary/20 via-chart-1/15 to-purple-500/20 -z-10" />
         </motion.div>
       </div>
     </section>

@@ -1,182 +1,446 @@
 "use client";
+import { motion } from "framer-motion";
 import {
+  ArrowRight,
   Brain,
+  CheckCircle2,
   FileText,
   Folder,
+  Play,
   Search,
   Sparkles,
   Upload,
+  Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
-import React from "react";
+import React, { useState } from "react";
 
 const steps = [
   {
-    title: "1. Upload & Parse",
-    desc: "Drag PDFs – we extract text, structure, and prep embeddings.",
+    number: "01",
+    title: "Upload Your Papers",
+    subtitle: "Smart Document Processing",
+    desc: "Simply drag and drop your PDFs. Our intelligent parser extracts text, identifies structure, and prepares embeddings for semantic search.",
     icon: Upload,
+    gradient: "from-blue-500 to-cyan-500",
+    highlights: [
+      "PDF, DOC, TXT support",
+      "Auto metadata extraction",
+      "Bulk upload ready",
+    ],
     mockContent: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border-2 border-dashed border-primary/30">
-          <FileText className="h-6 w-6 text-primary" />
-          <div className="flex-1">
-            <div className="h-3 bg-primary/20 rounded w-2/3" />
-            <div className="h-2 bg-muted-foreground/20 rounded w-1/2 mt-1" />
+      <div className="space-y-4">
+        <motion.div
+          className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl border-2 border-dashed border-blue-500/40"
+          animate={{
+            borderColor: [
+              "rgba(59, 130, 246, 0.4)",
+              "rgba(59, 130, 246, 0.8)",
+              "rgba(59, 130, 246, 0.4)",
+            ],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+            <FileText className="h-6 w-6 text-white" />
           </div>
-          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-8 bg-gradient-to-r from-primary/10 to-primary/5 rounded animate-pulse"
-              style={{ animationDelay: `${i * 0.2}s` }}
-            />
+          <div className="flex-1">
+            <div className="h-3 bg-foreground/20 rounded-full w-2/3 mb-2" />
+            <div className="h-2 bg-muted-foreground/30 rounded-full w-1/2" />
+          </div>
+          <motion.div
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/20 rounded-full"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <div className="w-2 h-2 bg-green-500 rounded-full" />
+            <span className="text-xs font-medium text-green-600">
+              Processing
+            </span>
+          </motion.div>
+        </motion.div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Text", progress: 100 },
+            { label: "Metadata", progress: 80 },
+            { label: "Embeddings", progress: 45 },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              className="p-3 bg-card/50 rounded-lg border border-border/50"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.2 }}
+            >
+              <div className="text-xs text-muted-foreground mb-2">
+                {item.label}
+              </div>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${item.progress}%` }}
+                  transition={{ duration: 1, delay: i * 0.3 }}
+                />
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
     ),
   },
   {
-    title: "2. Organize & Annotate",
-    desc: "Group into collections & leave contextual highlights.",
+    number: "02",
+    title: "Organize & Annotate",
+    subtitle: "Intelligent Organization",
+    desc: "Create smart collections, add contextual highlights, and attach notes. Everything stays connected and searchable.",
     icon: Folder,
+    gradient: "from-amber-500 to-orange-500",
+    highlights: ["Smart collections", "Inline annotations", "Team sharing"],
     mockContent: (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 mb-3">
-          <Folder className="h-5 w-5 text-blue-500" />
-          <div className="h-3 bg-blue-500/20 rounded flex-1" />
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg border border-amber-500/30">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+            <Folder className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm font-medium">Research Collection</div>
+            <div className="text-xs text-muted-foreground">
+              12 papers • 45 annotations
+            </div>
+          </div>
         </div>
         <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div
+          {[
+            { color: "border-l-yellow-500", highlight: true },
+            { color: "border-l-green-500", highlight: false },
+            { color: "border-l-blue-500", highlight: true },
+          ].map((item, i) => (
+            <motion.div
               key={i}
-              className="p-2 bg-card/50 rounded border-l-4 border-l-yellow-500/50 group hover:border-l-yellow-500 transition-colors"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.15 }}
+              className={`p-3 bg-card/60 rounded-lg border-l-4 ${item.color} hover:bg-card transition-colors`}
             >
-              <div className="h-2.5 bg-foreground/15 rounded w-full" />
-              <div className="h-2 bg-yellow-500/30 rounded w-2/3 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
+              <div className="h-2.5 bg-foreground/15 rounded w-full mb-1.5" />
+              {item.highlight && (
+                <div className="h-2 bg-yellow-500/30 rounded w-2/3" />
+              )}
+            </motion.div>
           ))}
         </div>
       </div>
     ),
   },
   {
-    title: "3. Search & Summarize",
-    desc: "Vector similarity (coming) & AI summaries spotlight insights.",
+    number: "03",
+    title: "Search & Discover",
+    subtitle: "AI-Powered Insights",
+    desc: "Use semantic search to find relevant passages. Get AI-generated summaries that spotlight key insights and claims.",
     icon: Search,
+    gradient: "from-purple-500 to-pink-500",
+    highlights: ["Semantic search", "AI summaries", "Citation tracking"],
     mockContent: (
-      <div className="space-y-3">
-        <div className="relative p-3 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-lg border border-primary/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Search className="h-4 w-4 text-primary" />
-            <div className="h-2.5 bg-primary/30 rounded flex-1" />
+      <div className="space-y-4">
+        <div className="relative">
+          <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/30">
+            <div className="flex items-center gap-3 mb-3">
+              <Search className="h-5 w-5 text-purple-500" />
+              <div className="flex-1 h-3 bg-purple-500/20 rounded-full" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="h-4 w-4 text-purple-500" />
+              </motion.div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-2 bg-foreground/20 rounded w-full" />
+              <div className="h-2 bg-foreground/15 rounded w-4/5" />
+              <div className="h-2 bg-foreground/10 rounded w-3/5" />
+            </div>
           </div>
-          <div className="space-y-1">
-            <div className="h-2 bg-foreground/20 rounded w-full" />
-            <div className="h-2 bg-foreground/15 rounded w-4/5" />
-          </div>
-          <Sparkles className="absolute top-2 right-2 h-4 w-4 text-primary animate-pulse" />
         </div>
-        <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded border border-green-500/20">
-          <Brain className="h-4 w-4 text-green-600 mt-0.5" />
-          <div className="flex-1 space-y-1">
-            <div className="h-2 bg-green-600/30 rounded w-3/4" />
-            <div className="h-2 bg-green-600/20 rounded w-1/2" />
+        <motion.div
+          className="p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-xl border border-green-500/30"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0">
+              <Brain className="h-4 w-4 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="text-xs font-medium text-green-600 mb-2">
+                AI Summary
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-2 bg-green-600/20 rounded w-full" />
+                <div className="h-2 bg-green-600/15 rounded w-5/6" />
+                <div className="h-2 bg-green-600/10 rounded w-4/6" />
+              </div>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     ),
   },
 ];
 
 export const HowItWorks: React.FC = () => {
+  const [activeStep, setActiveStep] = useState(0);
+
   return (
     <section
       id="how-it-works"
-      className="py-28 bg-gradient-to-b from-background via-muted/30 to-background relative overflow-hidden"
+      className="py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden"
       aria-labelledby="how-heading"
     >
-      {/* Enhanced background patterns */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--primary)_0%,transparent_50%)] opacity-8" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--chart-1)_0%,transparent_50%)] opacity-6" />
+      {/* Enhanced background effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--primary)_0%,transparent_50%)] opacity-5" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,var(--chart-1)_0%,transparent_50%)] opacity-5" />
+
+      {/* Floating decorations */}
+      <motion.div
+        className="absolute top-40 left-[5%] w-32 h-32 rounded-full bg-primary/10 blur-3xl"
+        animate={{ y: [0, -20, 0], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 6, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-40 right-[10%] w-40 h-40 rounded-full bg-chart-1/10 blur-3xl"
+        animate={{ y: [0, 20, 0], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity }}
+      />
 
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 relative">
-        <div className="max-w-2xl mb-20">
-          <motion.h2
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-3xl mx-auto mb-20"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6"
+          >
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Simple 3-Step Workflow</span>
+          </motion.div>
+
+          <h2
             id="how-heading"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl md:text-4xl font-bold tracking-tight"
+            className="text-3xl md:text-5xl font-bold tracking-tight mb-6"
           >
-            How{" "}
-            <span className="bg-gradient-to-r from-primary to-[var(--chart-1)] bg-clip-text text-transparent">
-              ScholarFlow
-            </span>{" "}
-            works
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-6 text-lg text-muted-foreground leading-relaxed"
-          >
-            Three focused steps to transform reading into collaborative insight.
-          </motion.p>
-        </div>
+            Your research workflow,{" "}
+            <span className="bg-gradient-to-r from-primary via-chart-1 to-purple-500 bg-clip-text text-transparent">
+              reimagined
+            </span>
+          </h2>
+          <p className="text-lg text-muted-foreground leading-relaxed">
+            Transform how you discover, organize, and collaborate on research
+            papers. Get started in minutes, not hours.
+          </p>
+        </motion.div>
 
-        <div className="space-y-24">
-          {steps.map((step, i) => {
-            const IconComponent = step.icon;
-            return (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.7, delay: i * 0.15 }}
-                className="grid lg:grid-cols-2 gap-12 items-center"
+        {/* Steps Navigation - Desktop */}
+        <div className="hidden lg:flex items-center justify-center gap-4 mb-16">
+          {steps.map((step, i) => (
+            <motion.button
+              key={step.number}
+              onClick={() => setActiveStep(i)}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className={`relative flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 ${
+                activeStep === i
+                  ? "bg-gradient-to-r from-primary/10 to-chart-1/10 border-2 border-primary/30 shadow-lg"
+                  : "bg-card/50 border border-border/50 hover:border-primary/30"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${step.gradient} text-white font-bold text-lg shadow-lg`}
               >
-                <div className={i % 2 === 1 ? "lg:order-2" : ""}>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-[var(--chart-1)]/10 border border-primary/20 flex items-center justify-center shadow-lg">
-                      <IconComponent className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
-                  </div>
-
-                  <h3 className="font-bold text-2xl tracking-tight mb-4">
-                    {step.title}
-                  </h3>
-                  <p className="text-base text-muted-foreground leading-relaxed max-w-lg">
-                    {step.desc}
-                  </p>
+                {step.number}
+              </div>
+              <div className="text-left">
+                <div className="font-semibold">{step.title}</div>
+                <div className="text-sm text-muted-foreground">
+                  {step.subtitle}
                 </div>
-
-                <div className="relative group">
-                  <div className="relative rounded-2xl border border-border/50 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-sm p-6 shadow-xl hover:shadow-2xl transition-all duration-500 group-hover:border-primary/20">
-                    <div className="aspect-video w-full rounded-xl bg-gradient-to-br from-muted/50 via-background/80 to-muted/30 p-4 relative overflow-hidden">
-                      {step.mockContent}
-
-                      {/* Subtle overlay effects */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-background/5" />
-                      <div className="absolute inset-0 ring-1 ring-inset ring-border/20 rounded-xl" />
-                    </div>
-
-                    {/* Enhanced glow effects */}
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-[var(--chart-1)]/20 to-primary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-                  </div>
-
-                  {/* Bottom glow */}
-                  <div className="absolute inset-x-8 -bottom-6 h-12 bg-gradient-to-r from-transparent via-primary/15 to-transparent blur-xl rounded-full" />
-                </div>
-              </motion.div>
-            );
-          })}
+              </div>
+              {activeStep === i && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-primary to-chart-1 rounded-full"
+                />
+              )}
+            </motion.button>
+          ))}
         </div>
+
+        {/* Main Content Area */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left: Step Details */}
+          <motion.div
+            key={activeStep}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-8"
+          >
+            {/* Mobile Step Selector */}
+            <div className="flex lg:hidden items-center gap-3 overflow-x-auto pb-4">
+              {steps.map((step, i) => (
+                <button
+                  key={step.number}
+                  onClick={() => setActiveStep(i)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    activeStep === i
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  Step {step.number}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br ${steps[activeStep].gradient} shadow-xl`}
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                >
+                  {React.createElement(steps[activeStep].icon, {
+                    className: "h-8 w-8 text-white",
+                  })}
+                </motion.div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground mb-1">
+                    Step {steps[activeStep].number}
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold">
+                    {steps[activeStep].title}
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                {steps[activeStep].desc}
+              </p>
+
+              <div className="space-y-3">
+                {steps[activeStep].highlights.map((highlight, i) => (
+                  <motion.div
+                    key={highlight}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center bg-gradient-to-br ${steps[activeStep].gradient}`}
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-foreground font-medium">
+                      {highlight}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02, x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 text-primary font-medium group"
+              >
+                Learn more about this step
+                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
+            </div>
+          </motion.div>
+
+          {/* Right: Interactive Preview */}
+          <motion.div
+            key={`preview-${activeStep}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="relative"
+          >
+            <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl p-8 shadow-2xl overflow-hidden">
+              {/* Top bar decoration */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-chart-1 to-purple-500" />
+
+              {/* Window controls */}
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                <div className="flex-1 mx-4 h-6 rounded-md bg-muted/50 flex items-center px-3">
+                  <div className="h-2 bg-muted-foreground/30 rounded w-1/3" />
+                </div>
+              </div>
+
+              {/* Mock content */}
+              <div className="min-h-[300px]">
+                {steps[activeStep].mockContent}
+              </div>
+
+              {/* Floating badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="absolute -bottom-3 -right-3 flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-full shadow-lg"
+              >
+                <Play className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Watch Demo</span>
+              </motion.div>
+            </div>
+
+            {/* Background glow */}
+            <motion.div
+              className={`absolute inset-0 -z-10 blur-3xl opacity-30 rounded-3xl bg-gradient-to-br ${steps[activeStep].gradient}`}
+              animate={{ opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 4, repeat: Infinity }}
+            />
+          </motion.div>
+        </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="mt-20 text-center"
+        >
+          <div className="inline-flex flex-col sm:flex-row items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl transition-all"
+            >
+              Start Your Free Trial
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-8 py-4 rounded-xl border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5 font-semibold transition-all flex items-center gap-2"
+            >
+              <Play className="h-5 w-5" />
+              Watch Full Demo
+            </motion.button>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
   ArrowRight,
   BookOpen,
@@ -14,7 +15,6 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { Footer } from "../../components/layout/Footer";
 import { Navbar } from "../../components/layout/Navbar";
 import { Button } from "../../components/ui/button";

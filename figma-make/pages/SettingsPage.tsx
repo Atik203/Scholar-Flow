@@ -36,7 +36,7 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 
 import { Badge } from "../components/ui/badge";

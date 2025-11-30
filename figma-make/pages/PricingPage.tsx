@@ -28,7 +28,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
