@@ -15,7 +15,7 @@ import {
   Search,
   Send,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { Button } from "../../components/ui/button";

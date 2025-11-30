@@ -32,7 +32,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import React, { useMemo, useState } from "react";
 import { useRole, type UserRole } from "../../../components/context";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";

@@ -39,7 +39,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";

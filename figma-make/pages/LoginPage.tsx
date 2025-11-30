@@ -27,7 +27,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
