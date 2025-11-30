@@ -1,17 +1,34 @@
 "use client";
 
+/**
+ * AnalyticsPage - Research Analytics Dashboard
+ *
+ * Enhanced with:
+ * - Custom date range picker with presets
+ * - Export to image/PDF functionality
+ * - Comparison mode between time periods
+ * - Goal overlays on charts
+ */
+
 import {
   ArrowDownRight,
   ArrowUpRight,
   BarChart3,
+  Calendar,
+  ChevronDown,
   Database,
+  Download,
+  FileImage,
   FileText,
   FolderOpen,
   Lock,
   Sparkles,
+  Target,
   TrendingUp,
+  X,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 
@@ -138,6 +155,58 @@ const STATUS_COLORS: Record<string, string> = {
   FAILED: "#ef4444",
 };
 
+// Date Range Presets
+const datePresets = [
+  { label: "Last 7 days", value: "7d", days: 7 },
+  { label: "Last 30 days", value: "30d", days: 30 },
+  { label: "Last 90 days", value: "90d", days: 90 },
+  { label: "This year", value: "year", days: 365 },
+  { label: "Custom", value: "custom", days: 0 },
+];
+
+// Comparison data for demo
+const comparisonData = {
+  papersOverTime: [
+    { date: "Dec 1", count: 3 },
+    { date: "Dec 8", count: 5 },
+    { date: "Dec 15", count: 7 },
+    { date: "Dec 22", count: 6 },
+    { date: "Dec 29", count: 9 },
+    { date: "Jan 5", count: 11 },
+    { date: "Jan 12", count: 14 },
+  ],
+};
+
+// Goals/Targets
+const goals = {
+  papers: { target: 60, label: "Monthly target" },
+  collections: { target: 15, label: "Quarterly target" },
+  storage: { target: 50, label: "Optimal usage" },
+  tokens: { target: 40, label: "Budget target" },
+};
+
+// Export formats
+const exportFormats = [
+  {
+    id: "png",
+    label: "PNG Image",
+    icon: FileImage,
+    description: "High-quality image",
+  },
+  {
+    id: "pdf",
+    label: "PDF Report",
+    icon: FileText,
+    description: "Full analytics report",
+  },
+  {
+    id: "csv",
+    label: "CSV Data",
+    icon: Download,
+    description: "Raw data export",
+  },
+];
+
 // ============================================================================
 // Analytics Page Component
 // ============================================================================
@@ -149,12 +218,31 @@ export function AnalyticsPage({
   const effectiveRole = propRole ?? contextRole;
   const user = { ...defaultUser, role: effectiveRole };
 
+  // State for new features
+  const [selectedDateRange, setSelectedDateRange] = useState("30d");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [comparisonMode, setComparisonMode] = useState(false);
+  const [showGoals, setShowGoals] = useState(true);
+  const [exporting, setExporting] = useState<string | null>(null);
+
   // For demo purposes, we can simulate different access levels
   const hasStandardAccess = true;
   const hasPremiumAccess =
     user.role === "pro_researcher" ||
     user.role === "team_lead" ||
     user.role === "admin";
+
+  // Handle export
+  const handleExport = (format: string) => {
+    setExporting(format);
+    setTimeout(() => {
+      setExporting(null);
+      setShowExportMenu(false);
+    }, 2000);
+  };
 
   if (!hasStandardAccess) {
     return (
@@ -229,17 +317,229 @@ export function AnalyticsPage({
           </div>
         </div>
 
+        {/* Analytics Controls Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl border bg-card">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Date Range Picker */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border bg-background hover:bg-muted transition-colors"
+              >
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">
+                  {datePresets.find((p) => p.value === selectedDateRange)
+                    ?.label || "Select Range"}
+                </span>
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              </button>
+
+              <AnimatePresence>
+                {showDatePicker && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 mt-2 p-3 rounded-xl border bg-card shadow-xl z-20 min-w-[280px]"
+                  >
+                    <div className="space-y-1 mb-3">
+                      {datePresets.map((preset) => (
+                        <button
+                          key={preset.value}
+                          onClick={() => {
+                            setSelectedDateRange(preset.value);
+                            if (preset.value !== "custom") {
+                              setShowDatePicker(false);
+                            }
+                          }}
+                          className={cn(
+                            "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
+                            selectedDateRange === preset.value
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-muted"
+                          )}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {selectedDateRange === "custom" && (
+                      <div className="border-t pt-3 space-y-2">
+                        <div>
+                          <label className="text-xs text-muted-foreground">
+                            Start Date
+                          </label>
+                          <input
+                            type="date"
+                            value={customStartDate}
+                            onChange={(e) => setCustomStartDate(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground">
+                            End Date
+                          </label>
+                          <input
+                            type="date"
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                          />
+                        </div>
+                        <button
+                          onClick={() => setShowDatePicker(false)}
+                          className="w-full px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Comparison Mode Toggle */}
+            <button
+              onClick={() => setComparisonMode(!comparisonMode)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors",
+                comparisonMode
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted"
+              )}
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="text-sm font-medium">Compare</span>
+            </button>
+
+            {/* Goals Toggle */}
+            <button
+              onClick={() => setShowGoals(!showGoals)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors",
+                showGoals
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background hover:bg-muted"
+              )}
+            >
+              <Target className="h-4 w-4" />
+              <span className="text-sm font-medium">Goals</span>
+            </button>
+          </div>
+
+          {/* Export Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              <Download className="h-4 w-4" />
+              <span className="text-sm font-medium">Export</span>
+            </button>
+
+            <AnimatePresence>
+              {showExportMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full right-0 mt-2 p-2 rounded-xl border bg-card shadow-xl z-20 min-w-[220px]"
+                >
+                  {exportFormats.map((format) => {
+                    const Icon = format.icon;
+                    return (
+                      <button
+                        key={format.id}
+                        onClick={() => handleExport(format.id)}
+                        disabled={exporting !== null}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors text-left"
+                      >
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <Icon className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">
+                            {format.label}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {format.description}
+                          </div>
+                        </div>
+                        {exporting === format.id && (
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Comparison Mode Banner */}
+        <AnimatePresence>
+          {comparisonMode && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
+                    <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100">
+                      Comparison Mode Active
+                    </h4>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      Comparing current period vs previous period
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-primary" />
+                    <span className="text-sm text-muted-foreground">
+                      Current
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-primary/40" />
+                    <span className="text-sm text-muted-foreground">
+                      Previous
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setComparisonMode(false)}
+                    className="p-1 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+                  >
+                    <X className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Usage Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {usageCards.map((card, index) => {
             const Icon = card.icon;
+            const goal = goals[card.key as keyof typeof goals];
             return (
               <motion.div
                 key={card.key}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="rounded-xl border bg-card p-5"
+                className="rounded-xl border bg-card p-5 relative overflow-hidden"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
@@ -253,25 +553,45 @@ export function AnalyticsPage({
                     / {card.limit}
                   </span>
                 </div>
-                {/* Progress Bar */}
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${card.percentage}%` }}
-                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                    className={cn(
-                      "h-full rounded-full",
-                      card.percentage > 80
-                        ? "bg-destructive"
-                        : card.percentage > 60
-                          ? "bg-yellow-500"
-                          : "bg-primary"
-                    )}
-                  />
+                {/* Progress Bar with Goal Overlay */}
+                <div className="relative">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${card.percentage}%` }}
+                      transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                      className={cn(
+                        "h-full rounded-full",
+                        card.percentage > 80
+                          ? "bg-destructive"
+                          : card.percentage > 60
+                            ? "bg-yellow-500"
+                            : "bg-primary"
+                      )}
+                    />
+                  </div>
+                  {/* Goal Line Overlay */}
+                  {showGoals && goal && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="absolute top-0 h-2 w-0.5 bg-emerald-500"
+                      style={{ left: `${goal.target}%` }}
+                      title={`${goal.label}: ${goal.target}%`}
+                    />
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {card.percentage}% used
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground">
+                    {card.percentage}% used
+                  </p>
+                  {showGoals && goal && (
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <Target className="h-3 w-3" />
+                      {goal.target}% target
+                    </p>
+                  )}
+                </div>
               </motion.div>
             );
           })}
@@ -319,22 +639,55 @@ export function AnalyticsPage({
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Papers Over Time Chart */}
+          {/* Papers Over Time Chart - Enhanced with Comparison */}
           <div className="rounded-xl border bg-card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">Upload Activity</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Upload Activity</h3>
+              </div>
+              {showGoals && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Target className="h-3 w-3 text-emerald-500" />
+                  <span>Goal: 20 papers/week</span>
+                </div>
+              )}
             </div>
-            <div className="h-48 flex items-end gap-2">
+            <div className="h-48 flex items-end gap-2 relative">
+              {/* Goal Line */}
+              {showGoals && (
+                <div
+                  className="absolute left-0 right-0 border-t-2 border-dashed border-emerald-500/50"
+                  style={{ bottom: `${(20 / 25) * 100}%` }}
+                >
+                  <span className="absolute -top-4 right-0 text-xs text-emerald-500 bg-card px-1">
+                    Goal
+                  </span>
+                </div>
+              )}
               {dummyAnalytics.charts.papersOverTime.map((item, index) => (
-                <motion.div
-                  key={item.date}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${(item.count / 25) * 100}%` }}
-                  transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                  className="flex-1 bg-primary/80 rounded-t-md min-h-[4px]"
-                  title={`${item.date}: ${item.count} papers`}
-                />
+                <div key={item.date} className="flex-1 flex items-end gap-0.5">
+                  {/* Comparison bar (previous period) */}
+                  {comparisonMode && (
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{
+                        height: `${(comparisonData.papersOverTime[index]?.count / 25) * 100}%`,
+                      }}
+                      transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
+                      className="flex-1 bg-primary/30 rounded-t-md min-h-[4px]"
+                      title={`Previous: ${comparisonData.papersOverTime[index]?.count || 0} papers`}
+                    />
+                  )}
+                  {/* Current period bar */}
+                  <motion.div
+                    initial={{ height: 0 }}
+                    animate={{ height: `${(item.count / 25) * 100}%` }}
+                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
+                    className="flex-1 bg-primary/80 rounded-t-md min-h-[4px]"
+                    title={`${item.date}: ${item.count} papers`}
+                  />
+                </div>
               ))}
             </div>
             <div className="flex justify-between mt-2">
@@ -344,6 +697,22 @@ export function AnalyticsPage({
                 </span>
               ))}
             </div>
+            {comparisonMode && (
+              <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-primary/80" />
+                  <span className="text-xs text-muted-foreground">
+                    Current Period
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded bg-primary/30" />
+                  <span className="text-xs text-muted-foreground">
+                    Previous Period
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Papers by Status Chart */}

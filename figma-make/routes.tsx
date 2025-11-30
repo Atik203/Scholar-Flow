@@ -302,32 +302,32 @@ export const routes: Record<string, RouteConfig[]> = {
   dashboard: [
     {
       path: "/dashboard",
-      component: DashboardPage as ComponentType<PageProps>,
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
       auth: true,
       exact: true,
       title: "Dashboard",
     },
     {
       path: "/dashboard/researcher",
-      component: DashboardPage as ComponentType<PageProps>,
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
       auth: true,
       title: "Researcher Dashboard",
     },
     {
       path: "/dashboard/pro-researcher",
-      component: DashboardPage as ComponentType<PageProps>,
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
       auth: true,
       title: "Pro Researcher Dashboard",
     },
     {
       path: "/dashboard/team-lead",
-      component: DashboardPage as ComponentType<PageProps>,
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
       auth: true,
       title: "Team Lead Dashboard",
     },
     {
       path: "/dashboard/admin",
-      component: DashboardPage as ComponentType<PageProps>,
+      component: EnhancedDashboardPage as ComponentType<PageProps>,
       auth: true,
       title: "Admin Dashboard",
     },
@@ -528,12 +528,6 @@ export const routes: Record<string, RouteConfig[]> = {
       component: ResearchNotesPage as ComponentType<PageProps>,
       auth: true,
       title: "Research Notes",
-    },
-    {
-      path: "/dashboard-enhanced",
-      component: EnhancedDashboardPage as ComponentType<PageProps>,
-      auth: true,
-      title: "Enhanced Dashboard",
     },
     {
       path: "/search",
@@ -1180,9 +1174,6 @@ export {
   IntegrationsPage,
   // Phase 6 - Invitation Response
   InvitationResponsePage,
-  // Route helpers for Trending and Recommendations
-  isRecommendationsRoute,
-  isTrendingRoute,
   KeyboardShortcutsPage,
   LoadingPage,
   // Auth

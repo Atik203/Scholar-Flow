@@ -68,8 +68,6 @@ import {
   DashboardAIInsightsPage,
   // Dashboard Module - Collections
   DashboardCollectionsPage,
-  // Dashboard
-  DashboardPage,
   // Dashboard Module - Papers
   DashboardPapersPage,
   // Dashboard Module - Research
@@ -374,11 +372,7 @@ export default function App() {
     // This ensures role persists when navigating to /dashboard without role suffix
     if (isDashboardRoute(currentPage)) {
       return (
-        <DashboardPage
-          role={currentRole}
-          onNavigate={handleNavigate}
-          onShowToast={showToast}
-        />
+        <EnhancedDashboardPage role={currentRole} onNavigate={handleNavigate} />
       );
     }
 
@@ -465,11 +459,6 @@ export default function App() {
     // Global Search route
     if (isSearchRoute(currentPage)) {
       return <GlobalSearchPage onNavigate={handleNavigate} />;
-    }
-
-    // Enhanced Dashboard route
-    if (currentPage === "/enhanced-dashboard") {
-      return <EnhancedDashboardPage onNavigate={handleNavigate} />;
     }
 
     // Onboarding route
