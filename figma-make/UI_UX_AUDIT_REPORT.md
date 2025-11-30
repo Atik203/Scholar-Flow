@@ -24,13 +24,13 @@ This document provides a comprehensive UI/UX audit of the ScholarFlow platform. 
 
 ## Audit Categories
 
-| Priority        | Description                                  | Count      |
-| --------------- | -------------------------------------------- | ---------- |
-| 🔴 **Critical** | Major UX issues affecting core functionality | 8 ✅       |
-| 🟠 **High**     | Significant improvements needed              | 15 ✅      |
-| 🟡 **Medium**   | Enhancement opportunities                    | 22 ✅ / 22 |
-| 🟢 **Low**      | Polish and refinements                       | 12         |
-| ✅ **Good**     | Meets current standards                      | 44         |
+| Priority        | Description                                  | Count |
+| --------------- | -------------------------------------------- | ----- |
+| 🔴 **Critical** | Major UX issues affecting core functionality | 8 ✅  |
+| 🟠 **High**     | Significant improvements needed              | 15 ✅ |
+| 🟡 **Medium**   | Enhancement opportunities                    | 22 ✅ |
+| 🟢 **Low**      | Polish and refinements                       | 12    |
+| ✅ **Good**     | Meets current standards                      | 44    |
 
 ---
 
