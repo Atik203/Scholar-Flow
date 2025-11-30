@@ -2,7 +2,7 @@
 
 **Complete React UI Components for Figma Make AI**
 
-All 99 pages are fully implemented and navigable. Just paste this into Figma Make and it works!
+All 102 pages are fully implemented and navigable. Just paste this into Figma Make and it works!
 
 ---
 
@@ -21,7 +21,7 @@ figma-make/
 ├── App.tsx                    # Main entry point - handles all routing
 ├── routes.tsx                 # Route definitions and helpers
 ├── DashboardRouter.tsx        # Dashboard routing logic
-├── PAGE_LIST.md               # Complete page reference (99 pages)
+├── PAGE_LIST.md               # Complete page reference (102 pages)
 │
 ├── components/
 │   ├── index.ts               # Component barrel exports
@@ -40,10 +40,14 @@ figma-make/
 │   │   └── PageContainer.tsx
 │   │
 │   ├── sections/              # Landing page sections
+│   │   ├── Comparison.tsx
 │   │   ├── CTA.tsx
+│   │   ├── FAQ.tsx
 │   │   ├── Features.tsx
 │   │   ├── Hero.tsx
 │   │   ├── HowItWorks.tsx
+│   │   ├── Integrations.tsx
+│   │   ├── Newsletter.tsx
 │   │   └── Testimonials.tsx
 │   │
 │   ├── form/                  # Form components
@@ -252,7 +256,8 @@ figma-make/
 │   │
 │   ├── settings/              # Settings pages
 │   │   ├── index.ts
-│   │   └── ExportDataPage.tsx
+│   │   ├── ExportDataPage.tsx
+│   │   └── IntegrationsSettingsPage.tsx
 │   │
 │   └── team/                  # Team pages
 │       ├── index.ts
@@ -269,7 +274,7 @@ figma-make/
 
 ---
 
-## 🎯 All 99 Pages
+## 🎯 All 102 Pages
 
 ### Auth & Onboarding (8 pages)
 
@@ -383,16 +388,17 @@ figma-make/
 | SearchHistoryPage | `/search/history` | Search menu  |
 | DiscoverPage      | `/discover`       | Sidebar      |
 
-### Help & Settings (5 pages)
+### Help & Settings (6 pages)
 
-| Page                  | Path               | Access    |
-| --------------------- | ------------------ | --------- |
-| HelpCenterPage        | `/help`            | Sidebar   |
-| KeyboardShortcutsPage | `/help/shortcuts`  | Sidebar   |
-| ProfilePage           | `/profile`         | User menu |
-| SettingsPage          | `/settings`        | User menu |
-| BillingPage           | `/billing`         | Sidebar   |
-| ExportDataPage        | `/settings/export` | Settings  |
+| Page                     | Path                     | Access    |
+| ------------------------ | ------------------------ | --------- |
+| HelpCenterPage           | `/help`                  | Sidebar   |
+| KeyboardShortcutsPage    | `/help/shortcuts`        | Sidebar   |
+| ProfilePage              | `/profile`               | User menu |
+| SettingsPage             | `/settings`              | User menu |
+| BillingPage              | `/billing`               | Sidebar   |
+| ExportDataPage           | `/settings/export`       | Settings  |
+| IntegrationsSettingsPage | `/settings/integrations` | Settings  |
 
 ### AI & Insights (2 pages)
 
