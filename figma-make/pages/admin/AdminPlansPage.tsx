@@ -14,7 +14,7 @@
  * - Framer Motion animations
  */
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import {
   AlertTriangle,
   BarChart3,

@@ -10,7 +10,7 @@
  */
 
 import { AlertCircle, CheckCircle, Info, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useState } from "react";
 
 // Role Context Provider
