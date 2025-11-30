@@ -119,6 +119,7 @@ import { WorkspaceAnalyticsPage } from "./pages/analytics/WorkspaceAnalyticsPage
 import { ImportPapersPage } from "./pages/papers/ImportPapersPage";
 import { PaperRelationsPage } from "./pages/papers/PaperRelationsPage";
 import { ExportDataPage } from "./pages/settings/ExportDataPage";
+import { IntegrationsSettingsPage } from "./pages/settings/IntegrationsSettingsPage";
 
 // Security Pages
 import { ActiveSessionsPage } from "./pages/security/ActiveSessionsPage";
@@ -631,6 +632,16 @@ export const routes: Record<string, RouteConfig[]> = {
     },
   ],
 
+  // Settings Integrations Route
+  settingsIntegrations: [
+    {
+      path: "/settings/integrations",
+      component: IntegrationsSettingsPage as ComponentType<PageProps>,
+      auth: true,
+      title: "Integrations",
+    },
+  ],
+
   // Notifications Routes
   notifications: [
     {
@@ -1028,6 +1039,8 @@ export const isImportRoute = (path: string): boolean =>
   path === "/papers/import";
 export const isExportRoute = (path: string): boolean =>
   path === "/settings/export";
+export const isIntegrationsSettingsRoute = (path: string): boolean =>
+  path === "/settings/integrations";
 export const isCitationGraphRoute = (path: string): boolean =>
   path === "/research/citation-graph";
 export const isAdminReportsRoute = (path: string): boolean =>
@@ -1172,6 +1185,8 @@ export {
   // Import Pages
   ImportPapersPage,
   IntegrationsPage,
+  // Settings Pages
+  IntegrationsSettingsPage,
   // Phase 6 - Invitation Response
   InvitationResponsePage,
   KeyboardShortcutsPage,
