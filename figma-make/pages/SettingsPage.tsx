@@ -25,6 +25,7 @@ import {
   Monitor,
   Moon,
   Palette,
+  Puzzle,
   Search,
   Settings as SettingsIcon,
   Shield,
@@ -514,6 +515,15 @@ export function SettingsPage({ onNavigate, onShowToast }: SettingsPageProps) {
           >
             <Eye className="h-4 w-4 mr-2" />
             {showPreview ? "Hide Preview" : "Live Preview"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onNavigate("/settings/integrations")}
+            className="btn-hover-glow bg-gradient-to-r from-primary/5 to-chart-1/5 hover:from-primary/10 hover:to-chart-1/10 border-primary/20"
+          >
+            <Puzzle className="h-4 w-4 mr-2 text-primary" />
+            Integrations
           </Button>
         </motion.div>
 
