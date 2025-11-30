@@ -243,6 +243,44 @@ Enhanced Enterprise Pages:
 - [x] Step 5: Generate Citations (50+ styles, one-click export, BibTeX)
 - [x] Bottom CTA section with trial buttons
 
+### NEW: Additional SaaS Sections ✅
+
+#### FAQ.tsx - Created ✅
+
+- [x] 8 comprehensive FAQ items with categories
+- [x] Accordion-style expand/collapse with animations
+- [x] Category filter pills (AI Features, Collaboration, Security, etc.)
+- [x] Premium card styling with gradients
+- [x] "Still have questions?" CTA with support button
+- [x] AnimatePresence for smooth transitions
+
+#### Integrations.tsx - Created ✅
+
+- [x] 9 integrations (Zotero, Mendeley, EndNote, Google Scholar, etc.)
+- [x] Category filter (Reference Managers, Search, Repositories, etc.)
+- [x] Status badges (Available / Coming Soon)
+- [x] Feature tags for each integration
+- [x] Hover effects with gradient backgrounds
+- [x] "Request Integration" CTA
+
+#### Comparison.tsx - Created ✅
+
+- [x] Feature comparison table (ScholarFlow vs Zotero, Mendeley, Paperpile)
+- [x] 16 features across 6 categories
+- [x] Visual status indicators (check, partial, X)
+- [x] ScholarFlow column highlighted as "Recommended"
+- [x] Category filter for features
+- [x] Responsive table with horizontal scroll
+
+#### Newsletter.tsx - Created ✅
+
+- [x] Newsletter signup form with email validation
+- [x] Success state with animation
+- [x] Stats section (25K+ subscribers, 150+ articles, 100K+ readers)
+- [x] Blog posts grid with 3 featured articles
+- [x] Trending badges and category tags
+- [x] Author avatars and read time meta
+
 ---
 
 ## ✅ Design System Consistency - FIXED
