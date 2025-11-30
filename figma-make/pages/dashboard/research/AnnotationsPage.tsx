@@ -2,11 +2,21 @@
 
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Download,
   Eye,
   FileText,
   Highlighter,
   MessageSquare,
+  MousePointer2,
+  Pencil,
+  RotateCcw,
+  Square,
   StickyNote,
+  Type,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
@@ -163,8 +173,14 @@ export function AnnotationsPage({
   const [activeTab, setActiveTab] = useState<
     "preview" | "annotations" | "comments" | "notes"
   >("preview");
+  const [activeTool, setActiveTool] = useState<
+    "select" | "highlight" | "underline" | "draw" | "area"
+  >("select");
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const selectedPaper = dummyPapers.find((p) => p.id === selectedPaperId);
+  const totalPages = selectedPaper?.pageCount || 1;
 
   return (
     <DashboardLayout
@@ -267,19 +283,342 @@ export function AnnotationsPage({
                 </div>
 
                 {/* Tab Content */}
-                <div className="rounded-xl border bg-card">
+                <div className="rounded-xl border bg-card overflow-hidden">
                   {activeTab === "preview" && (
-                    <div className="p-8">
-                      <div className="flex items-center justify-center py-24 bg-muted rounded-lg">
-                        <div className="text-center">
-                          <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                          <p className="text-muted-foreground">
-                            PDF Preview would render here
-                          </p>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {selectedPaper.fileName} • {selectedPaper.pageCount}{" "}
-                            pages
-                          </p>
+                    <div className="flex flex-col h-[650px]">
+                      {/* Annotation Toolbar */}
+                      <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+                        <div className="flex items-center gap-2">
+                          {/* Tool Selection */}
+                          <div className="flex items-center border rounded-lg overflow-hidden bg-background">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => setActiveTool("select")}
+                              className={cn(
+                                "p-2 border-r transition-colors",
+                                activeTool === "select"
+                                  ? "bg-primary/10"
+                                  : "hover:bg-muted"
+                              )}
+                              title="Select"
+                            >
+                              <MousePointer2
+                                className={cn(
+                                  "h-4 w-4",
+                                  activeTool === "select" ? "text-primary" : ""
+                                )}
+                              />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => setActiveTool("highlight")}
+                              className={cn(
+                                "p-2 border-r transition-colors",
+                                activeTool === "highlight"
+                                  ? "bg-yellow-100 dark:bg-yellow-900/30"
+                                  : "hover:bg-muted"
+                              )}
+                              title="Highlight"
+                            >
+                              <Highlighter className="h-4 w-4 text-yellow-500" />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => setActiveTool("underline")}
+                              className={cn(
+                                "p-2 border-r transition-colors",
+                                activeTool === "underline"
+                                  ? "bg-blue-100 dark:bg-blue-900/30"
+                                  : "hover:bg-muted"
+                              )}
+                              title="Underline"
+                            >
+                              <Type className="h-4 w-4 text-blue-500" />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => setActiveTool("draw")}
+                              className={cn(
+                                "p-2 border-r transition-colors",
+                                activeTool === "draw"
+                                  ? "bg-green-100 dark:bg-green-900/30"
+                                  : "hover:bg-muted"
+                              )}
+                              title="Draw"
+                            >
+                              <Pencil className="h-4 w-4 text-green-500" />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() => setActiveTool("area")}
+                              className={cn(
+                                "p-2 transition-colors",
+                                activeTool === "area"
+                                  ? "bg-purple-100 dark:bg-purple-900/30"
+                                  : "hover:bg-muted"
+                              )}
+                              title="Area Selection"
+                            >
+                              <Square className="h-4 w-4 text-purple-500" />
+                            </motion.button>
+                          </div>
+
+                          {/* Zoom Controls */}
+                          <div className="flex items-center border rounded-lg overflow-hidden bg-background ml-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() =>
+                                setZoomLevel(Math.max(50, zoomLevel - 10))
+                              }
+                              className="p-2 hover:bg-muted border-r"
+                              title="Zoom Out"
+                            >
+                              <ZoomOut className="h-4 w-4" />
+                            </motion.button>
+                            <span className="px-3 py-2 text-sm font-medium min-w-[60px] text-center">
+                              {zoomLevel}%
+                            </span>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              onClick={() =>
+                                setZoomLevel(Math.min(200, zoomLevel + 10))
+                              }
+                              className="p-2 hover:bg-muted border-l"
+                              title="Zoom In"
+                            >
+                              <ZoomIn className="h-4 w-4" />
+                            </motion.button>
+                          </div>
+
+                          {/* Rotate */}
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            className="p-2 border rounded-lg hover:bg-muted bg-background"
+                            title="Rotate"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </motion.button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {/* Page Navigation */}
+                          <div className="flex items-center gap-1 text-sm">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() =>
+                                setCurrentPage(Math.max(1, currentPage - 1))
+                              }
+                              className="p-1.5 hover:bg-muted rounded-lg"
+                              disabled={currentPage <= 1}
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </motion.button>
+                            <span className="px-2 py-1 bg-muted rounded text-xs font-medium min-w-[70px] text-center">
+                              {currentPage} / {totalPages}
+                            </span>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() =>
+                                setCurrentPage(
+                                  Math.min(totalPages, currentPage + 1)
+                                )
+                              }
+                              className="p-1.5 hover:bg-muted rounded-lg"
+                              disabled={currentPage >= totalPages}
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </motion.button>
+                          </div>
+
+                          {/* Download */}
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="p-2 border rounded-lg hover:bg-muted bg-background"
+                            title="Download PDF"
+                          >
+                            <Download className="h-4 w-4" />
+                          </motion.button>
+                        </div>
+                      </div>
+
+                      {/* PDF Viewer Area */}
+                      <div className="flex-1 flex overflow-hidden">
+                        {/* Main PDF View */}
+                        <div className="flex-1 overflow-auto bg-muted/20 p-6">
+                          <div className="flex justify-center">
+                            <div
+                              className="relative bg-white shadow-2xl rounded-sm"
+                              style={{
+                                width: `${550 * (zoomLevel / 100)}px`,
+                                minHeight: `${700 * (zoomLevel / 100)}px`,
+                                transform: `scale(1)`,
+                                transformOrigin: "top center",
+                              }}
+                            >
+                              {/* Simulated PDF Page */}
+                              <div className="p-8 text-gray-800 space-y-4">
+                                <h1 className="text-xl font-bold text-center mb-6">
+                                  {selectedPaper?.title}
+                                </h1>
+                                <p className="text-center text-gray-600 text-sm mb-4">
+                                  Research Paper • Page {currentPage} of{" "}
+                                  {totalPages}
+                                </p>
+
+                                {/* Demo Highlight Annotation */}
+                                <div className="relative mt-8">
+                                  <h2 className="text-lg font-semibold border-b pb-2 mb-3">
+                                    Abstract
+                                  </h2>
+                                  <span className="bg-yellow-200 px-1">
+                                    Deep learning has revolutionized
+                                  </span>
+                                  <span>
+                                    {" "}
+                                    the field of natural language processing,
+                                    enabling significant advances in tasks such
+                                    as machine translation, sentiment analysis,
+                                    and question answering.
+                                  </span>
+                                  {selectedPaper?.annotations.some(
+                                    (a) => a.type === "highlight"
+                                  ) && (
+                                    <div className="absolute -right-2 -top-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+                                      <span className="text-[10px] font-bold text-yellow-800">
+                                        1
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <h2 className="text-lg font-semibold border-b pb-2 mb-3 mt-6">
+                                  1. Introduction
+                                </h2>
+                                <p className="text-sm leading-relaxed text-gray-700">
+                                  This paper explores the application of
+                                  transformer-based architectures in natural
+                                  language understanding tasks. We present a
+                                  comprehensive analysis of various approaches
+                                  and their effectiveness in real-world
+                                  scenarios.
+                                </p>
+
+                                {/* Demo Underline Annotation */}
+                                <div className="relative mt-4">
+                                  <span className="border-b-2 border-blue-500">
+                                    Self-attention mechanisms
+                                  </span>
+                                  <span>
+                                    {" "}
+                                    have become the cornerstone of modern NLP
+                                    systems, allowing models to capture
+                                    long-range dependencies more effectively
+                                    than previous approaches.
+                                  </span>
+                                  {selectedPaper?.annotations.some(
+                                    (a) => a.type === "comment"
+                                  ) && (
+                                    <div className="absolute -right-2 -top-1 w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center cursor-pointer shadow-sm">
+                                      <span className="text-[10px] font-bold text-blue-800">
+                                        2
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <p className="text-sm leading-relaxed text-gray-700 mt-4">
+                                  The contributions of this paper include: (1) A
+                                  novel architecture that improves upon existing
+                                  transformer models, (2) Comprehensive
+                                  experiments demonstrating state-of-the-art
+                                  performance, and (3) Analysis of model
+                                  behavior across different domains.
+                                </p>
+
+                                <p className="text-gray-400 text-xs mt-12 text-center">
+                                  Page {currentPage} of {totalPages}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Annotations Sidebar */}
+                        <div className="w-72 border-l bg-card overflow-y-auto hidden lg:block">
+                          <div className="p-4 border-b">
+                            <h4 className="font-semibold flex items-center gap-2">
+                              <Highlighter className="h-4 w-4" />
+                              Annotations
+                              <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                {selectedPaper?.annotations.length || 0}
+                              </span>
+                            </h4>
+                          </div>
+                          {selectedPaper?.annotations &&
+                          selectedPaper.annotations.length > 0 ? (
+                            <div className="divide-y">
+                              {selectedPaper.annotations.map(
+                                (annotation, index) => (
+                                  <div
+                                    key={annotation.id}
+                                    className="p-3 hover:bg-muted/50 cursor-pointer"
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <div
+                                        className={cn(
+                                          "w-3 h-3 rounded-full mt-1 shrink-0",
+                                          annotation.type === "highlight"
+                                            ? annotation.color === "yellow"
+                                              ? "bg-yellow-400"
+                                              : "bg-green-400"
+                                            : "bg-blue-400"
+                                        )}
+                                      />
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium truncate capitalize">
+                                          {annotation.type}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground line-clamp-2">
+                                          "{annotation.text}"
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <span className="text-xs text-muted-foreground">
+                                            Page {annotation.page}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <div className="p-4 text-center text-muted-foreground">
+                              <Highlighter className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <p className="text-sm">No annotations yet</p>
+                              <p className="text-xs mt-1">
+                                Select a tool and start annotating
+                              </p>
+                            </div>
+                          )}
+                          {/* Add Note Input */}
+                          <div className="p-3 border-t">
+                            <textarea
+                              placeholder="Add a note to selected text..."
+                              rows={2}
+                              className="w-full px-3 py-2 border rounded-lg bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="w-full mt-2 py-2 bg-primary text-primary-foreground rounded-lg text-sm"
+                            >
+                              Add Note
+                            </motion.button>
+                          </div>
                         </div>
                       </div>
                     </div>
