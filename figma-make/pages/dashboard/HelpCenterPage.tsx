@@ -10,7 +10,6 @@
  * - Community forum links
  */
 
-import { AnimatePresence, motion } from "motion/react";
 import {
   BookOpen,
   Bot,
@@ -39,6 +38,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
@@ -462,6 +462,51 @@ const communityLinks = [
   },
 ];
 
+// Community forums data
+const communityForums = [
+  {
+    id: "general",
+    title: "General Discussion",
+    description:
+      "Connect with researchers worldwide and discuss academic topics",
+    color: "from-violet-500 to-purple-500",
+    link: "/community/general",
+    members: 12500,
+    activeNow: 234,
+    topics: 1847,
+  },
+  {
+    id: "research",
+    title: "Research Methods",
+    description: "Share methodologies and best practices for academic research",
+    color: "from-blue-500 to-cyan-500",
+    link: "/community/research",
+    members: 8200,
+    activeNow: 156,
+    topics: 923,
+  },
+  {
+    id: "technical",
+    title: "Technical Support",
+    description: "Get help with platform features and troubleshooting",
+    color: "from-amber-500 to-orange-500",
+    link: "/community/technical",
+    members: 5600,
+    activeNow: 89,
+    topics: 654,
+  },
+  {
+    id: "showcase",
+    title: "Research Showcase",
+    description: "Share your published work and get feedback from peers",
+    color: "from-emerald-500 to-teal-500",
+    link: "/community/showcase",
+    members: 9800,
+    activeNow: 178,
+    topics: 1256,
+  },
+];
+
 // AI Chatbot suggested questions
 const suggestedQuestions = [
   "How do I upload a paper?",
@@ -500,6 +545,7 @@ export function HelpCenterPage({
   const [selectedVideo, setSelectedVideo] = useState<
     (typeof videoTutorials)[0] | null
   >(null);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   // Tutorial state
@@ -1402,7 +1448,7 @@ export function HelpCenterPage({
 
       {/* AI Chatbot Floating Widget */}
       <AnimatePresence>
-        {chatOpen ? (
+        {isChatOpen ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -1425,7 +1471,7 @@ export function HelpCenterPage({
                 </div>
               </div>
               <button
-                onClick={() => setChatOpen(false)}
+                onClick={() => setIsChatOpen(false)}
                 className="p-2 rounded-lg hover:bg-white/20 transition-colors"
               >
                 <X className="h-5 w-5 text-white" />
@@ -1511,7 +1557,7 @@ export function HelpCenterPage({
             animate={{ scale: 1 }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setChatOpen(true)}
+            onClick={() => setIsChatOpen(true)}
             className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 
                      text-white shadow-lg shadow-violet-500/30 z-50 flex items-center justify-center
                      hover:shadow-xl hover:shadow-violet-500/40 transition-shadow"
