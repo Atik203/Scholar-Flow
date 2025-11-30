@@ -144,6 +144,7 @@ import {
   isProductsRoute,
   isProfileRoute,
   isRecentActivityRoute,
+  isRecommendationsRoute,
   // Phase 8 - Research Map Route Helper
   isResearchMapRoute,
   isResearchNotesRoute,
@@ -158,6 +159,8 @@ import {
   isTeamInvitationsRoute,
   isTeamRoute,
   isTeamSettingsRoute,
+  // Phase 4 - Trending and Recommendations route helpers
+  isTrendingRoute,
   isTwoFactorRoute,
   // Phase 8 - Usage Reports Route Helper
   isUsageReportsRoute,
@@ -197,6 +200,7 @@ import {
   // User
   ProfilePage,
   RecentActivityPage,
+  RecommendationsPage,
   RegisterPage,
   // Phase 8 - Research Map
   ResearchMapPage,
@@ -222,6 +226,8 @@ import {
   TeamSettingsPage,
   TeamsPage,
   TextEditorPage,
+  // Phase 4 - Trending and Recommendations
+  TrendingPage,
   TutorialsPage,
   // 2FA
   TwoFactorSetupPage,
@@ -434,6 +440,16 @@ export default function App() {
     // Discover route (Phase 4)
     if (isDiscoverRoute(currentPage)) {
       return <DiscoverPage onNavigate={handleNavigate} />;
+    }
+
+    // Trending route (Phase 4)
+    if (isTrendingRoute(currentPage)) {
+      return <TrendingPage onNavigate={handleNavigate} />;
+    }
+
+    // Recommendations route (Phase 4)
+    if (isRecommendationsRoute(currentPage)) {
+      return <RecommendationsPage onNavigate={handleNavigate} />;
     }
 
     // Team Members route
