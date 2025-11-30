@@ -56,153 +56,33 @@ This document provides a comprehensive UI/UX audit of the ScholarFlow platform. 
 
 ### 9. `EnhancedDashboardPage.tsx` (dashboard/) ✅
 
-**Current:** Good widget layout with stats and activity feed  
-**Enhanced Features:**
-
-- [x] AI-powered daily research summary
-- [x] Personalized recommendations widget
-- [x] Research goals/milestones tracker
-- [x] Quick actions floating button
-
 ### 10. `PapersPage.tsx` (dashboard/) ✅
-
-**Current:** Table view with status badges  
-**Enhanced Features:**
-
-- [x] Card view toggle option
-- [x] Inline paper preview on hover
-- [x] Bulk action toolbar
-- [x] AI-powered sorting (relevance, importance)
 
 ### 11. `CollectionsPage.tsx` (dashboard/) ✅
 
-**Current:** Grid of collection cards  
-**Enhanced Features:**
-
-- [x] Visual paper count preview
-- [x] Drag-drop paper assignment (Reorder from motion/react)
-- [x] AI collection suggestions
-- [x] Recent activity per collection
-
 ### 12. `WorkspacesPage.tsx` (dashboard/) ✅
-
-**Current:** Card grid with member counts  
-**Enhanced Features:**
-
-- [x] Activity heatmaps (MiniActivityChart)
-- [x] Member contribution graphs
-- [x] Quick invite modal (QuickInviteModal)
-- [x] Workspace analytics preview
 
 ### 13. `DiscoverPage.tsx` (discover/) ✅
 
-**Current:** Paper recommendations with filters  
-**Enhanced Features:**
-
-- [x] Personalization controls (PersonalizationModal)
-- [x] "Based on your library" section
-- [x] Research community trending
-- [x] Save/follow research areas
-
 ### 14. `TrendingPage.tsx` (discover/) ✅
-
-**Current:** Topic cards with growth rates  
-**Enhanced Features:**
-
-- [x] Interactive trend charts (TrendChart)
-- [x] Topic relationship graph (TopicNetwork)
-- [x] Alert/follow notifications
-- [x] Historical trend data
 
 ### 15. `RecommendationsPage.tsx` (discover/) ✅
 
-**Current:** Paper list with reason badges  
-**Enhanced Features:**
-
-- [x] Recommendation preferences tuning (PreferencesTuningModal)
-- [x] "Not interested" feedback
-- [x] Discovery history
-- [x] AI explanation cards
-
 ### 16. `WorkspaceAnalyticsPage.tsx` (analytics/) ✅
-
-**Current:** Charts and member stats  
-**Enhanced Features:**
-
-- [x] Exportable reports (ExportModal)
-- [x] Goal tracking widgets
-- [x] Comparison with previous periods
-- [x] AI insights on productivity
 
 ### 17. `PersonalAnalyticsPage.tsx` (analytics/) ✅
 
-**Current:** Usage statistics  
-**Enhanced Features:**
-
-- [x] Reading time tracking (Reading Time Tracker widget)
-- [x] Research progress visualization
-- [x] Personal goal setting
-- [x] Achievement badges (AchievementBadge)
-
 ### 18. `SecurityDashboardPage.tsx` (security/) ✅
-
-**Current:** Security events and sessions  
-**Enhanced Features:**
-
-- [x] Visual security score meter
-- [x] Interactive session map (geography)
-- [x] Security recommendations AI (AISecurityRecommendation)
-- [x] One-click security actions
 
 ### 19. `NotificationCenterPage.tsx` (notifications/) ✅
 
-**Current:** Notification list with filters  
-**Enhanced Features:**
-
-- [x] Smart notification grouping (groupNotificationsByDate)
-- [x] AI priority sorting (showAIPriority)
-- [x] Notification digest view
-- [x] Action previews without navigation
-
 ### 20. `TeamActivityPage.tsx` (team/) ✅
-
-**Current:** Activity timeline with filters  
-**Enhanced Features:**
-
-- [x] Visual activity graphs
-- [x] Contribution leaderboard (Leaderboard section)
-- [x] Activity heatmap calendar (ActivityHeatmap)
-- [x] AI activity summary
 
 ### 21. `AdminReportsPage.tsx` (admin/) ✅
 
-**Current:** Report list with scheduling  
-**Enhanced Features:**
-
-- [x] Visual report builder (Builder tab)
-- [x] Drag-drop report customization
-- [x] AI-generated insights
-- [x] Interactive chart previews
-
 ### 22. `AdminOverviewPage.tsx` (dashboard/admin/) ✅
 
-**Current:** Admin dashboard stats  
-**Enhanced Features:**
-
-- [x] Real-time system health (LiveHealthIndicator)
-- [x] User activity heatmap
-- [x] Anomaly detection alerts
-- [x] Quick action commands (QuickCommandModal)
-
 ### 23. `UserManagementPage.tsx` (dashboard/admin/) ✅
-
-**Current:** User table with roles  
-**Enhanced Features:**
-
-- [x] User activity graphs
-- [x] Bulk user operations (BulkActionsToolbar)
-- [x] Visual role permissions
-- [x] User journey tracking
 
 ---
 
