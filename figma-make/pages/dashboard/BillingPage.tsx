@@ -1,18 +1,37 @@
 "use client";
 
+/**
+ * BillingPage - Subscription and Payment Management
+ *
+ * Enhanced with:
+ * - Usage prediction charts
+ * - Cost optimization suggestions
+ * - Invoice history timeline
+ * - Plan feature comparison slider
+ */
+
 import {
+  Calendar,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Crown,
+  Download,
   ExternalLink,
+  Lightbulb,
+  LineChart,
   RefreshCw,
+  TrendingDown,
+  TrendingUp,
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useRole, type UserRole } from "../../components/context";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
+import { Progress } from "../../components/ui/progress";
 
 // ============================================================================
 // Default User for Demo
@@ -127,6 +146,65 @@ const dummyInvoices = [
   { id: "inv-3", date: "Dec 15, 2023", amount: "$19.00", status: "Paid" },
 ];
 
+// Usage prediction data
+const usagePrediction = {
+  currentMonth: {
+    papers: 45,
+    aiTokens: 15000,
+    storage: 256,
+  },
+  predicted: {
+    papers: 62,
+    aiTokens: 21000,
+    storage: 380,
+  },
+  limits: {
+    papers: 100,
+    aiTokens: 50000,
+    storage: 1024,
+  },
+  trend: "up" as const,
+  percentChange: 18,
+};
+
+// Cost optimization suggestions
+const costOptimizations = [
+  {
+    id: "1",
+    title: "Switch to Annual Billing",
+    description: "Save $46/year by switching from monthly to annual billing",
+    savings: "$46/year",
+    priority: "high",
+    action: "Switch Now",
+  },
+  {
+    id: "2",
+    title: "Optimize AI Token Usage",
+    description: "Use batch processing to reduce token consumption by 15%",
+    savings: "~$5/month",
+    priority: "medium",
+    action: "Learn More",
+  },
+  {
+    id: "3",
+    title: "Archive Old Papers",
+    description: "Free up 120MB by archiving papers not accessed in 6 months",
+    savings: "Storage space",
+    priority: "low",
+    action: "Review",
+  },
+];
+
+// Invoice timeline data
+const invoiceTimeline = [
+  { month: "Nov", amount: 19, status: "upcoming" },
+  { month: "Oct", amount: 19, status: "paid" },
+  { month: "Sep", amount: 19, status: "paid" },
+  { month: "Aug", amount: 19, status: "paid" },
+  { month: "Jul", amount: 19, status: "paid" },
+  { month: "Jun", amount: 19, status: "paid" },
+];
+
 // ============================================================================
 // Billing Page Component
 // ============================================================================
@@ -136,6 +214,11 @@ export function BillingPage({ onNavigate, role: propRole }: BillingPageProps) {
   const user = { ...defaultUser, role: effectiveRole };
 
   const [isLoading, setIsLoading] = useState(false);
+  const [comparisonSlider, setComparisonSlider] = useState(1); // 0: Free, 1: Pro, 2: Team
+  const [showPrediction, setShowPrediction] = useState(true);
+  const [dismissedOptimizations, setDismissedOptimizations] = useState<
+    string[]
+  >([]);
 
   // For demo, simulate different user roles
   const userRole = effectiveRole.toUpperCase() as keyof typeof PLAN_DISPLAY;
@@ -145,12 +228,20 @@ export function BillingPage({ onNavigate, role: propRole }: BillingPageProps) {
   const hasActiveSubscription = userRole !== "RESEARCHER";
   const showUpgradeCard = userRole === "RESEARCHER";
 
+  const activeOptimizations = costOptimizations.filter(
+    (opt) => !dismissedOptimizations.includes(opt.id)
+  );
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+  };
+
+  const handleDismissOptimization = (id: string) => {
+    setDismissedOptimizations([...dismissedOptimizations, id]);
   };
 
   const STATUS_META = {
@@ -192,6 +283,351 @@ export function BillingPage({ onNavigate, role: propRole }: BillingPageProps) {
             details current.
           </p>
         </div>
+
+        {/* Usage Prediction Section */}
+        {hasActiveSubscription && showPrediction && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20 p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <LineChart className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Usage Prediction</h3>
+                  <p className="text-sm text-muted-foreground">
+                    AI-powered forecast for this billing cycle
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {usagePrediction.trend === "up" ? (
+                  <TrendingUp className="h-4 w-4 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                )}
+                <span
+                  className={`text-sm font-medium ${usagePrediction.trend === "up" ? "text-green-600" : "text-red-600"}`}
+                >
+                  {usagePrediction.percentChange}% vs last month
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Papers</span>
+                  <span className="font-medium">
+                    {usagePrediction.currentMonth.papers} →{" "}
+                    {usagePrediction.predicted.papers}
+                  </span>
+                </div>
+                <div className="relative">
+                  <Progress
+                    value={
+                      (usagePrediction.predicted.papers /
+                        usagePrediction.limits.papers) *
+                      100
+                    }
+                    className="h-2"
+                  />
+                  <div
+                    className="absolute top-0 h-2 w-0.5 bg-primary/50"
+                    style={{
+                      left: `${(usagePrediction.currentMonth.papers / usagePrediction.limits.papers) * 100}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Predicted: {usagePrediction.predicted.papers}/
+                  {usagePrediction.limits.papers}
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">AI Tokens</span>
+                  <span className="font-medium">
+                    {(usagePrediction.currentMonth.aiTokens / 1000).toFixed(0)}K
+                    → {(usagePrediction.predicted.aiTokens / 1000).toFixed(0)}K
+                  </span>
+                </div>
+                <div className="relative">
+                  <Progress
+                    value={
+                      (usagePrediction.predicted.aiTokens /
+                        usagePrediction.limits.aiTokens) *
+                      100
+                    }
+                    className="h-2"
+                  />
+                  <div
+                    className="absolute top-0 h-2 w-0.5 bg-primary/50"
+                    style={{
+                      left: `${(usagePrediction.currentMonth.aiTokens / usagePrediction.limits.aiTokens) * 100}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Predicted:{" "}
+                  {(usagePrediction.predicted.aiTokens / 1000).toFixed(0)}K/
+                  {(usagePrediction.limits.aiTokens / 1000).toFixed(0)}K
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Storage</span>
+                  <span className="font-medium">
+                    {usagePrediction.currentMonth.storage}MB →{" "}
+                    {usagePrediction.predicted.storage}MB
+                  </span>
+                </div>
+                <div className="relative">
+                  <Progress
+                    value={
+                      (usagePrediction.predicted.storage /
+                        usagePrediction.limits.storage) *
+                      100
+                    }
+                    className="h-2"
+                  />
+                  <div
+                    className="absolute top-0 h-2 w-0.5 bg-primary/50"
+                    style={{
+                      left: `${(usagePrediction.currentMonth.storage / usagePrediction.limits.storage) * 100}%`,
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Predicted: {usagePrediction.predicted.storage}MB/
+                  {usagePrediction.limits.storage}MB
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Cost Optimization Suggestions */}
+        {hasActiveSubscription && activeOptimizations.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-xl border bg-gradient-to-br from-green-500/5 to-emerald-500/5 border-green-500/20 p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                <Lightbulb className="h-5 w-5 text-green-500" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Cost Optimization Tips</h3>
+                <p className="text-sm text-muted-foreground">
+                  Personalized suggestions to save money
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {activeOptimizations.map((opt, index) => (
+                <motion.div
+                  key={opt.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50 border border-green-500/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        opt.priority === "high"
+                          ? "bg-green-500"
+                          : opt.priority === "medium"
+                            ? "bg-yellow-500"
+                            : "bg-gray-400"
+                      }`}
+                    />
+                    <div>
+                      <p className="font-medium text-sm">{opt.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {opt.description}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-green-600">
+                      {opt.savings}
+                    </span>
+                    <button
+                      onClick={() => handleDismissOptimization(opt.id)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Dismiss
+                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium"
+                    >
+                      {opt.action}
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Invoice History Timeline */}
+        {hasActiveSubscription && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-xl border bg-card p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Invoice Timeline</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Visual history of your billing
+                  </p>
+                </div>
+              </div>
+              <button className="p-2 hover:bg-muted rounded-lg">
+                <Download className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              {invoiceTimeline.map((invoice, index) => (
+                <div key={invoice.month} className="flex-1 text-center">
+                  <div className="relative">
+                    <div
+                      className={`h-12 w-full rounded-lg flex items-center justify-center ${
+                        invoice.status === "upcoming"
+                          ? "bg-primary/10 border-2 border-dashed border-primary/30"
+                          : "bg-green-500/10"
+                      }`}
+                    >
+                      <span
+                        className={`text-sm font-semibold ${
+                          invoice.status === "upcoming"
+                            ? "text-primary"
+                            : "text-green-600"
+                        }`}
+                      >
+                        ${invoice.amount}
+                      </span>
+                    </div>
+                    {index < invoiceTimeline.length - 1 && (
+                      <div className="absolute top-1/2 -right-1 w-2 h-0.5 bg-border" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {invoice.month}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {invoice.status === "upcoming" ? "Due" : "Paid"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Plan Feature Comparison Slider */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="rounded-xl border bg-card p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="font-semibold">Compare Plans</h3>
+              <p className="text-sm text-muted-foreground">
+                Slide to compare features
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() =>
+                  setComparisonSlider(Math.max(0, comparisonSlider - 1))
+                }
+                disabled={comparisonSlider === 0}
+                className="p-1 hover:bg-muted rounded disabled:opacity-30"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() =>
+                  setComparisonSlider(Math.min(2, comparisonSlider + 1))
+                }
+                disabled={comparisonSlider === 2}
+                className="p-1 hover:bg-muted rounded disabled:opacity-30"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mb-6">
+            {["Free", "Pro", "Team"].map((plan, index) => (
+              <button
+                key={plan}
+                onClick={() => setComparisonSlider(index)}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                  comparisonSlider === index
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                {plan}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={comparisonSlider}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            >
+              {[
+                {
+                  label: "Papers/month",
+                  values: ["10", "Unlimited", "Unlimited"],
+                },
+                { label: "AI Tokens", values: ["5K", "50K", "200K"] },
+                { label: "Storage", values: ["100MB", "1GB", "10GB"] },
+                { label: "Team members", values: ["1", "5", "Unlimited"] },
+              ].map((feature) => (
+                <div
+                  key={feature.label}
+                  className="text-center p-4 rounded-lg bg-muted/50"
+                >
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {feature.label}
+                  </p>
+                  <p className="text-xl font-bold">
+                    {feature.values[comparisonSlider]}
+                  </p>
+                </div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
 
         {/* Current Plan Card */}
         <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-blue-500/10 shadow-sm p-6 md:p-8">

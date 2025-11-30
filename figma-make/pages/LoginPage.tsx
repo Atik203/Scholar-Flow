@@ -1,17 +1,34 @@
 "use client";
+
+/**
+ * LoginPage - User Authentication
+ *
+ * Enhanced with:
+ * - Animated background particles
+ * - Recent login locations
+ * - Magic link option
+ * - Biometric authentication hint
+ */
+
 import {
   ArrowLeft,
   ArrowRight,
+  ChevronDown,
   Eye,
   EyeOff,
+  Fingerprint,
   Github,
+  Globe,
   Loader2,
   Mail,
+  MapPin,
   Shield,
+  Smartphone,
   Sparkles,
+  Wand2,
 } from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Footer } from "../components/layout/Footer";
 import { Navbar } from "../components/layout/Navbar";
 import { Button } from "../components/ui/button";
@@ -32,12 +49,48 @@ const roleEmailPatterns: Record<string, UserRole> = {
   "admin@example.com": "admin",
 };
 
+// Recent login locations for security display
+const recentLoginLocations = [
+  {
+    city: "New York, USA",
+    device: "Chrome on MacOS",
+    time: "2 hours ago",
+    current: true,
+  },
+  { city: "Boston, USA", device: "Safari on iPhone", time: "Yesterday" },
+  { city: "London, UK", device: "Firefox on Windows", time: "3 days ago" },
+];
+
+// Animated background particles configuration
+const particles = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  x: Math.random() * 100,
+  y: Math.random() * 100,
+  size: Math.random() * 4 + 2,
+  duration: Math.random() * 20 + 10,
+  delay: Math.random() * 5,
+}));
+
 export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loginMethod, setLoginMethod] = useState<"password" | "magic-link">(
+    "password"
+  );
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [showRecentLogins, setShowRecentLogins] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+
+  // Check for biometric availability on mount
+  useEffect(() => {
+    // Simulating biometric availability check
+    if (typeof window !== "undefined" && "PublicKeyCredential" in window) {
+      setBiometricAvailable(true);
+    }
+  }, []);
 
   // Determine role from email
   const determineRole = (email: string): UserRole | null => {
@@ -101,6 +154,30 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
     }, 1500);
   };
 
+  const handleMagicLinkSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      onShowToast?.("Please enter your email address", "error");
+      return;
+    }
+    setIsLoading("magic-link");
+    setTimeout(() => {
+      setIsLoading(null);
+      setMagicLinkSent(true);
+      onShowToast?.("Magic link sent! Check your email.", "success");
+    }, 1500);
+  };
+
+  const handleBiometricAuth = () => {
+    setIsLoading("biometric");
+    onShowToast?.("Authenticating with biometrics...", "info");
+    setTimeout(() => {
+      setIsLoading(null);
+      onShowToast?.("Welcome back!", "success");
+      onNavigate?.("/dashboard/researcher");
+    }, 2000);
+  };
+
   const handleSocialLogin = (provider: "google" | "github") => {
     setIsLoading(provider);
     onShowToast?.(`Redirecting to ${provider}...`, "info");
@@ -114,12 +191,40 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
+      {/* Animated Background Particles */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {particles.map((particle) => (
+          <motion.div
+            key={particle.id}
+            className="absolute rounded-full bg-primary/20"
+            style={{
+              width: particle.size,
+              height: particle.size,
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+            }}
+            animate={{
+              y: [0, -100, 0],
+              x: [0, Math.random() * 50 - 25, 0],
+              opacity: [0.2, 0.6, 0.2],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: particle.duration,
+              repeat: Infinity,
+              delay: particle.delay,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
       {/* Navbar */}
       <Navbar onNavigate={onNavigate} />
 
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex relative z-10">
         {/* Left side - Form */}
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-md">
@@ -139,9 +244,17 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                 </button>
 
                 <div className="mb-6">
-                  <div className="h-16 w-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-[var(--chart-1)]/20 border border-primary/30 flex items-center justify-center">
+                  <motion.div
+                    className="h-16 w-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-primary/20 to-[var(--chart-1)]/20 border border-primary/30 flex items-center justify-center"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
                     <Sparkles className="h-8 w-8 text-primary" />
-                  </div>
+                  </motion.div>
                   <h1 className="text-3xl font-bold tracking-tight">
                     Welcome back
                   </h1>
@@ -149,6 +262,58 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                     Sign in to continue your research journey
                   </p>
                 </div>
+
+                {/* Biometric Authentication Hint */}
+                {biometricAvailable && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mb-4"
+                  >
+                    <Button
+                      onClick={handleBiometricAuth}
+                      disabled={isLoading !== null}
+                      variant="outline"
+                      className="w-full border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-all duration-300"
+                    >
+                      {isLoading === "biometric" ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Fingerprint className="h-5 w-5 mr-2 text-primary" />
+                      )}
+                      Sign in with Biometrics
+                      <Smartphone className="h-4 w-4 ml-2 text-muted-foreground" />
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use Face ID, Touch ID, or Windows Hello
+                    </p>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Login Method Toggle */}
+              <div className="flex rounded-lg border border-border p-1 mb-6">
+                <button
+                  onClick={() => setLoginMethod("password")}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                    loginMethod === "password"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Password
+                </button>
+                <button
+                  onClick={() => setLoginMethod("magic-link")}
+                  className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center justify-center gap-1 ${
+                    loginMethod === "magic-link"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Wand2 className="h-3.5 w-3.5" />
+                  Magic Link
+                </button>
               </div>
 
               {/* Social Login Buttons */}
@@ -213,93 +378,244 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
                 </div>
               </div>
 
-              {/* Login Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Try: admin@..., lead@..., pro@..., or any email for
-                    researcher
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="w-full pr-12 pl-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
-                    />
-                    Remember me
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => onNavigate?.("/forgot-password")}
-                    className="text-sm text-primary hover:text-primary/80 transition-colors"
+              {/* Login Form - Conditional based on method */}
+              <AnimatePresence mode="wait">
+                {loginMethod === "password" ? (
+                  <motion.form
+                    key="password-form"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
                   >
-                    Forgot password?
-                  </button>
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Email address
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="name@example.com"
+                          className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Try: admin@..., lead@..., pro@..., or any email for
+                        researcher
+                      </p>
+                    </div>
 
-                <Button
-                  type="submit"
-                  disabled={isLoading !== null}
-                  variant="gradient"
-                  className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
-                  size="lg"
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          className="w-full pr-12 pl-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
+                        />
+                        Remember me
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate?.("/forgot-password")}
+                        className="text-sm text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={isLoading !== null}
+                      variant="gradient"
+                      className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
+                      size="lg"
+                    >
+                      {isLoading === "credentials" ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Signing in...
+                        </>
+                      ) : (
+                        <>
+                          Sign in
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </motion.form>
+                ) : (
+                  <motion.form
+                    key="magic-link-form"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    onSubmit={handleMagicLinkSubmit}
+                    className="space-y-4"
+                  >
+                    {!magicLinkSent ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Email address
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              placeholder="name@example.com"
+                              className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            We'll send you a magic link to sign in instantly
+                          </p>
+                        </div>
+
+                        <Button
+                          type="submit"
+                          disabled={isLoading !== null}
+                          variant="gradient"
+                          className="w-full px-4 py-3 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none btn-hover-glow btn-shine"
+                          size="lg"
+                        >
+                          {isLoading === "magic-link" ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              Sending link...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="h-4 w-4 mr-2" />
+                              Send Magic Link
+                            </>
+                          )}
+                        </Button>
+                      </>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center py-8"
+                      >
+                        <div className="h-16 w-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <Mail className="h-8 w-8 text-green-500" />
+                        </div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          Check your email!
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          We sent a magic link to <strong>{email}</strong>
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setMagicLinkSent(false)}
+                          className="text-sm text-primary hover:text-primary/80 transition-colors"
+                        >
+                          Didn't receive it? Try again
+                        </button>
+                      </motion.div>
+                    )}
+                  </motion.form>
+                )}
+              </AnimatePresence>
+
+              {/* Recent Login Locations */}
+              <div className="mt-6">
+                <button
+                  onClick={() => setShowRecentLogins(!showRecentLogins)}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
                 >
-                  {isLoading === "credentials" ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      Signing in...
-                    </>
-                  ) : (
-                    <>
-                      Sign in
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </>
+                  <Globe className="h-4 w-4" />
+                  <span>Recent login activity</span>
+                  <ChevronDown
+                    className={`h-4 w-4 ml-auto transition-transform ${
+                      showRecentLogins ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {showRecentLogins && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 space-y-2 overflow-hidden"
+                    >
+                      {recentLoginLocations.map((login, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className={`flex items-center gap-3 p-3 rounded-lg border ${
+                            login.current
+                              ? "border-green-500/30 bg-green-500/5"
+                              : "border-border bg-muted/30"
+                          }`}
+                        >
+                          <MapPin
+                            className={`h-4 w-4 ${login.current ? "text-green-500" : "text-muted-foreground"}`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">
+                              {login.city}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {login.device}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">
+                              {login.time}
+                            </p>
+                            {login.current && (
+                              <span className="text-xs text-green-500 font-medium">
+                                Current
+                              </span>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   )}
-                </Button>
-              </form>
+                </AnimatePresence>
+              </div>
 
               {/* Footer */}
               <div className="mt-8 text-center">
