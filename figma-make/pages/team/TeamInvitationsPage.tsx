@@ -32,7 +32,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";

@@ -15,7 +15,7 @@
  * @version 1.0.0 - Phase 7
  */
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   AlertTriangle,
