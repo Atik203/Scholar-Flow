@@ -1,11 +1,11 @@
 "use client";
-import { motion } from "motion/react";
 import {
   ArrowRight,
   BookOpen,
   Brain,
   CheckCircle2,
   FileText,
+  GraduationCap,
   Microscope,
   Search,
   Sparkles,
@@ -13,7 +13,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { motion } from "motion/react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 
 interface HeroProps {
@@ -100,21 +101,41 @@ const useTypewriter = (
   return currentText;
 };
 
-// Animated counter component
+// Animated counter component with IntersectionObserver
 const AnimatedCounter = ({
   target,
   suffix = "",
   duration = 2,
+  decimals = 0,
 }: {
   target: number;
   suffix?: string;
   duration?: number;
+  decimals?: number;
 }) => {
   const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (hasAnimated) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible) return;
 
     const steps = 60;
     const increment = target / steps;
@@ -127,19 +148,22 @@ const AnimatedCounter = ({
           setCount(target);
           clearInterval(timer);
         } else {
-          setCount(Math.floor(current));
+          setCount(
+            decimals > 0
+              ? parseFloat(current.toFixed(decimals))
+              : Math.floor(current)
+          );
         }
       },
       (duration * 1000) / steps
     );
 
-    setHasAnimated(true);
     return () => clearInterval(timer);
-  }, [target, duration, hasAnimated]);
+  }, [isVisible, target, duration, decimals]);
 
   return (
-    <span>
-      {count.toLocaleString()}
+    <span ref={ref}>
+      {decimals > 0 ? count.toFixed(decimals) : count.toLocaleString()}
       {suffix}
     </span>
   );
@@ -195,36 +219,48 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
   const stats = [
     {
-      number: 50000,
-      suffix: "+",
+      number: 50,
+      suffix: "K+",
       label: "Research Papers",
       icon: BookOpen,
       color: "text-blue-500",
     },
     {
-      number: 12000,
-      suffix: "+",
+      number: 12,
+      suffix: "K+",
       label: "Active Researchers",
       icon: Users,
       color: "text-green-500",
     },
     {
-      number: 3500,
-      suffix: "+",
+      number: 3.5,
+      suffix: "K+",
       label: "Collections Created",
       icon: FileText,
       color: "text-amber-500",
     },
     {
-      number: 99,
-      suffix: ".9%",
+      number: 99.9,
+      suffix: "%",
       label: "Uptime SLA",
       icon: Zap,
       color: "text-purple-500",
     },
   ];
 
-  const trustedLogos = ["MIT", "Stanford", "Harvard", "Oxford", "Cambridge"];
+  // University/Institution data with logos
+  const trustedInstitutions = [
+    { name: "MIT", fullName: "Massachusetts Institute of Technology" },
+    { name: "Stanford", fullName: "Stanford University" },
+    { name: "Harvard", fullName: "Harvard University" },
+    { name: "Oxford", fullName: "University of Oxford" },
+    { name: "Cambridge", fullName: "University of Cambridge" },
+    { name: "Berkeley", fullName: "UC Berkeley" },
+    { name: "Princeton", fullName: "Princeton University" },
+    { name: "Yale", fullName: "Yale University" },
+    { name: "Caltech", fullName: "California Institute of Technology" },
+    { name: "ETH Zürich", fullName: "ETH Zürich" },
+  ];
 
   const handleGetStarted = () => {
     if (onNavigate) {
@@ -392,32 +428,123 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             </motion.div>
           </motion.div>
 
-          {/* Social Proof */}
+          {/* Trustpilot Section */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-10 flex flex-col items-center gap-4"
+            className="mt-10 flex flex-col items-center gap-6"
           >
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.6 + i * 0.1 }}
-                >
-                  <Star className="h-5 w-5 fill-amber-400 text-amber-400" />
-                </motion.div>
-              ))}
-              <span className="ml-2 text-sm text-muted-foreground">
-                4.9/5 from 2,000+ researchers
-              </span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <span>✓ No credit card required</span>
-              <span>✓ 14-day free trial</span>
-              <span>✓ Cancel anytime</span>
+            {/* Trustpilot Badge */}
+            <motion.div
+              className="flex items-center gap-4 px-6 py-4 rounded-2xl bg-gradient-to-r from-card/80 to-card/60 border border-border/50 backdrop-blur-sm shadow-lg"
+              whileHover={{ scale: 1.02, y: -2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex flex-col items-center">
+                <div className="flex items-center gap-0.5 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0, rotate: -180 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      transition={{
+                        delay: 0.6 + i * 0.08,
+                        type: "spring",
+                        stiffness: 200,
+                      }}
+                      className="w-6 h-6 bg-[#00B67A] flex items-center justify-center"
+                      style={{
+                        clipPath:
+                          "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+                      }}
+                    >
+                      <Star className="h-3.5 w-3.5 fill-white text-white" />
+                    </motion.div>
+                  ))}
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  TrustScore <strong className="text-foreground">4.8</strong>
+                </span>
+              </div>
+
+              <div className="h-10 w-px bg-border" />
+
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-[#00B67A]">
+                    Excellent
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Based on</span>
+                  <span className="font-semibold text-foreground">
+                    2,847 reviews
+                  </span>
+                  <svg className="h-4 w-auto" viewBox="0 0 126 31" fill="none">
+                    <path d="M21.1 0H0v30.8h21.1V0z" fill="#00B67A" />
+                    <path d="M52.1 0H31v30.8h21.1V0z" fill="#00B67A" />
+                    <path d="M83.1 0H62v30.8h21.1V0z" fill="#00B67A" />
+                    <path d="M114.1 0H93v30.8h21.1V0z" fill="#00B67A" />
+                    <path
+                      d="M10.5 21.3l-3.2 2.4 1.2-3.8-3.2-2.3h4l1.2-3.8 1.2 3.8h4l-3.2 2.3 1.2 3.8-3.2-2.4z"
+                      fill="#fff"
+                    />
+                    <path
+                      d="M41.5 21.3l-3.2 2.4 1.2-3.8-3.2-2.3h4l1.2-3.8 1.2 3.8h4l-3.2 2.3 1.2 3.8-3.2-2.4z"
+                      fill="#fff"
+                    />
+                    <path
+                      d="M72.5 21.3l-3.2 2.4 1.2-3.8-3.2-2.3h4l1.2-3.8 1.2 3.8h4l-3.2 2.3 1.2 3.8-3.2-2.4z"
+                      fill="#fff"
+                    />
+                    <path
+                      d="M103.5 21.3l-3.2 2.4 1.2-3.8-3.2-2.3h4l1.2-3.8 1.2 3.8h4l-3.2 2.3 1.2 3.8-3.2-2.4z"
+                      fill="#fff"
+                    />
+                    <path d="M125.1 0H104v30.8h21.1V0z" fill="#DCDCE6" />
+                    <path
+                      d="M114.6 13.8l1.2 3.8h4l-3.2 2.3 1.2 3.8-3.2-2.4v-7.5z"
+                      fill="#00B67A"
+                    />
+                    <path
+                      d="M114.6 21.3l-3.2 2.4 1.2-3.8-3.2-2.3h4l1.2-3.8v7.5z"
+                      fill="#fff"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Additional Social Proof */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+              <motion.span
+                className="flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                No credit card required
+              </motion.span>
+              <motion.span
+                className="flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 }}
+              >
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                14-day free trial
+              </motion.span>
+              <motion.span
+                className="flex items-center gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.0 }}
+              >
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                Cancel anytime
+              </motion.span>
             </div>
           </motion.div>
         </div>
@@ -522,7 +649,16 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                 <div
                   className={`text-3xl md:text-4xl font-bold mb-1 ${stat.color}`}
                 >
-                  <AnimatedCounter target={stat.number} suffix={stat.suffix} />
+                  <AnimatedCounter
+                    target={stat.number}
+                    suffix={stat.suffix}
+                    decimals={
+                      stat.label === "Uptime SLA" ||
+                      stat.label === "Collections Created"
+                        ? 1
+                        : 0
+                    }
+                  />
                 </div>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
               </motion.div>
@@ -571,25 +707,44 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* University logos */}
+          {/* University Logos - Infinite Marquee */}
           <div className="mt-8 pt-6 border-t border-border/30">
-            <p className="text-center text-xs text-muted-foreground mb-4">
-              TRUSTED BY RESEARCHERS FROM
+            <p className="text-center text-xs text-muted-foreground mb-6">
+              TRUSTED BY RESEARCHERS FROM TOP INSTITUTIONS
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-8">
-              {trustedLogos.map((logo, i) => (
-                <motion.div
-                  key={logo}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 0.5 }}
-                  whileHover={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.1 * i }}
-                  className="text-lg font-semibold text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-                >
-                  {logo}
-                </motion.div>
-              ))}
+
+            {/* Marquee Container */}
+            <div className="relative overflow-hidden">
+              {/* Gradient Overlays for smooth fade effect */}
+              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+
+              {/* Marquee Track */}
+              <div className="flex animate-marquee">
+                {/* First set of logos */}
+                {[...trustedInstitutions, ...trustedInstitutions].map(
+                  (institution, i) => (
+                    <div
+                      key={`${institution.name}-${i}`}
+                      className="flex-shrink-0 mx-8 group"
+                    >
+                      <div className="flex items-center gap-3 px-6 py-3 rounded-xl bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-300 cursor-pointer">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center group-hover:from-primary/20 group-hover:to-chart-1/20 transition-all">
+                          <GraduationCap className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold text-foreground/80 group-hover:text-foreground transition-colors">
+                            {institution.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground hidden sm:block">
+                            {institution.fullName}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
 
