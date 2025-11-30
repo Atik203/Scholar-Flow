@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useCallback, useState } from "react";
 
 const testimonials = [

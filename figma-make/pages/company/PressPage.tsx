@@ -14,7 +14,7 @@ import {
   Rocket,
   Trophy,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Footer } from "../../components/layout/Footer";
 import { Navbar } from "../../components/layout/Navbar";
 import { Button } from "../../components/ui/button";

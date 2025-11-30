@@ -27,7 +27,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 
