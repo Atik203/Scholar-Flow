@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   ArrowRight,
@@ -19,6 +18,7 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
@@ -73,6 +73,52 @@ export function TwoFactorSetupPage({
 
   const secretKey = "JBSWY3DPEHPK3PXP";
 
+  // Safe clipboard copy with fallback
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } else {
+        // Fallback for older browsers or restricted contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          return true;
+        } catch {
+          return false;
+        } finally {
+          textArea.remove();
+        }
+      }
+    } catch {
+      // Final fallback - create textarea for manual copy
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        return true;
+      } catch {
+        return false;
+      } finally {
+        textArea.remove();
+      }
+    }
+  };
+
   const handleCodeInput = (index: number, value: string) => {
     if (value.length > 1) {
       // Handle paste
@@ -117,10 +163,12 @@ export function TwoFactorSetupPage({
     }, 1500);
   };
 
-  const copyBackupCodes = () => {
-    navigator.clipboard.writeText(mockBackupCodes.join("\n"));
-    setCodesCopied(true);
-    setTimeout(() => setCodesCopied(false), 2000);
+  const copyBackupCodes = async () => {
+    const success = await copyToClipboard(mockBackupCodes.join("\n"));
+    if (success) {
+      setCodesCopied(true);
+      setTimeout(() => setCodesCopied(false), 2000);
+    }
   };
 
   const downloadBackupCodes = () => {
@@ -388,7 +436,7 @@ Keep these codes in a safe place. Do not share them with anyone.
                       </button>
                     </div>
                     <button
-                      onClick={() => navigator.clipboard.writeText(secretKey)}
+                      onClick={() => copyToClipboard(secretKey)}
                       className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400
                                hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                     >
