@@ -1,6 +1,6 @@
-% ScholarFlow - DBMS Lab Report
+% ScholarFlow - Software Requirements Specification (SRS)
 % Course: Database Management System Lab
-% Date: October 22, 2025
+% Date: December 8, 2025
 % Section: I
 
 \documentclass[12pt,a4paper,openany]{report}
@@ -70,28 +70,23 @@
     filecolor=black,
     urlcolor=black,
     citecolor=black,
-    pdftitle={ScholarFlow Project Report},
+    pdftitle={ScholarFlow - Software Requirements Specification},
     pdfauthor={Md. Atikur Rahaman},
-    pdfsubject={AI-Powered Research Paper Collaboration Hub},
-    pdfkeywords={ScholarFlow, Research, AI, Collaboration, Paper Management}
+    pdfsubject={AI-Powered Research Paper Collaboration Hub - SRS Document},
+    pdfkeywords={ScholarFlow, SRS, Software Requirements, Research, AI, Collaboration}
 }
 
 % ============================================
-% HEADERS & FOOTERS
+% HEADERS & FOOTERS (Disabled - No Header)
 % ============================================
-\pagestyle{fancy}
+\pagestyle{plain}
 \fancyhf{}
-\fancyhead[L]{\textbf{ScholarFlow}}
-\fancyhead[R]{\leftmark}
 \fancyfoot[C]{\thepage}
-\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
 % ============================================
-% CHAPTER & SECTION STYLING (Report class)
-% ============================================
-% Using default black headings for academic style.
-% TABLE OF CONTENTS STYLING
+% CHAPTER & SECTION STYLING
 % ============================================
 \renewcommand{\cfttoctitlefont}{\Huge\bfseries}
 \renewcommand{\cftchapfont}{\bfseries}
@@ -99,41 +94,33 @@
 \renewcommand{\cftsubsecfont}{}
 
 % ============================================
-% CODE LISTINGS
+% LISTINGS (CODE BLOCKS)
 % ============================================
-\lstset{
-    basicstyle=\ttfamily\small,
+\lstdefinestyle{sqlstyle}{
+    language=SQL,
     backgroundcolor=\color{codebg},
     frame=single,
-    frameround=tttt,
     rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{darkgray}\itshape,
+    stringstyle=\color{secondarygreen},
+    numberstyle=\tiny\color{darkgray},
+    numbers=left,
     breaklines=true,
     breakatwhitespace=true,
-    numbers=left,
-    numberstyle=\tiny\color{darkgray},
-    keywordstyle=\color{primaryblue}\bfseries,
-    commentstyle=\color{secondarygreen}\itshape,
-    stringstyle=\color{accentorange},
-    showstringspaces=false,
     tabsize=2,
+    showstringspaces=false,
     captionpos=b
 }
 
-% SQL Language Definition
-\lstdefinelanguage{SQL}{
-    keywords={SELECT, FROM, WHERE, AND, OR, INSERT, UPDATE, DELETE, CREATE, TABLE, INDEX, JOIN, LEFT, RIGHT, INNER, OUTER, ON, AS, GROUP, BY, ORDER, LIMIT, OFFSET, COUNT, SUM, AVG, MAX, MIN, DISTINCT, CASE, WHEN, THEN, ELSE, END},
-    sensitive=false,
-    morecomment=[l]{--},
-    morecomment=[s]{/*}{*/},
-    morestring=[b]',
-    morestring=[b]"
-}
+\lstset{style=sqlstyle}
 
 % ============================================
 % CUSTOM BOXES
 % ============================================
 \newtcolorbox{infobox}[1][]{
-    colback=lightgray,
+    colback=primaryblue!5,
     colframe=primaryblue,
     fonttitle=\bfseries,
     title={#1},
@@ -141,7 +128,7 @@
 }
 
 \newtcolorbox{warningbox}[1][]{
-    colback=yellow!10,
+    colback=accentorange!5,
     colframe=accentorange,
     fonttitle=\bfseries,
     title={#1},
@@ -176,26 +163,28 @@
     \end{figure}
     \vspace{0.3cm}
     {\LARGE\textbf{ScholarFlow}}\\
+    \vspace{0.5cm}
+    {\Large Software Requirements Specification (SRS)}\\
     \vspace{0.3cm}
-    {\large AI-Powered Research Paper Collaboration Platform}\\
+    {\large AI-Powered Research Paper Collaboration Hub}\\
     \vspace{0.5cm}
     {\normalsize\textbf{Team: Phantom Devs}}\\
-    \vspace{0.5cm}
+    \vspace{0.3cm}
 }
 \author{
     \textbf{Team Members:}\\[0.5cm]
     \begin{tabular}{rl}
     \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
     \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
-    \textbf{0112220081} & Sagor Ahmed \\
+    \textbf{0112220081} & Prattay Pal \\
     \textbf{0112310302} & Md. Sarowar Alam Sourov \\
     \end{tabular}
     \\[1cm]
-    {\normalsize\textbf{Section: I}}
+    {\normalsize\textbf{Section: I}}\\
+    {\normalsize\textbf{Course: Database Management System Lab}}\\
+    {\normalsize\textbf{United International University (UIU)}}
 }
-  
-
-
+\date{December 8, 2025}
 
 % ============================================
 % BEGIN DOCUMENT
@@ -208,34 +197,35 @@
 
 \newpage
 
-% Abstract/Overview
+% Abstract/Executive Summary
 \begin{abstract}
     \noindent
-    \projectname{} is an AI-powered research paper collaboration platform designed to revolutionize how researchers, students, and academics manage, organize, and collaborate on research papers efficiently. Built with modern web technologies and robust database management principles, the platform provides comprehensive paper management, AI-driven insights, and team collaboration features.
+    This Software Requirements Specification (SRS) document provides a comprehensive description of the \textbf{ScholarFlow} platform, an AI-powered research paper collaboration hub designed to revolutionize how academic researchers manage, organize, and collaborate on research papers.
 
     \vspace{0.3cm}
     \noindent
-    The system leverages PostgreSQL with Prisma ORM using RAW Query patterns for optimal performance. Key features include secure paper upload via AWS S3 with automated metadata extraction, advanced full-text search with PostgreSQL GIN indexing, and AI-powered summarization using Gemini 2.5-flash-lite. The platform supports role-based workspace collaboration (OWNER, TEAM\_LEAD, PRO\_RESEARCHER, RESEARCHER), enabling teams to create shared collections, annotate papers, and track research progress through activity logs and notifications.
+    Based on extensive market research including a survey of 29 academic researchers across 10 universities in Bangladesh, this document establishes the functional and non-functional requirements for ScholarFlow. The survey revealed strong market demand, with 72.4\% of respondents expressing moderate-to-extreme need for a dedicated research management platform, and 82.7\% showing high interest in AI-powered paper summarization features.
 
     \vspace{0.3cm}
     \noindent
-    \projectname{} implements a three-tier subscription system (FREE, PRO, INSTITUTIONAL) integrated with Stripe. Additional features include TipTap rich text editing, research notes management, citation export in multiple formats (BibTeX, RIS, APA, MLA, IEEE), admin dashboard with real-time system monitoring, and email-based notification system for team collaboration.
+    ScholarFlow addresses critical gaps identified in the current research workflow landscape, where 37.9\% of researchers cite "lack of proper tools" as their primary pain point, and current tool satisfaction averages only 3.31 out of 5.00. The platform combines modern UI/UX design (102 Figma screens), advanced AI integration (Google Gemini + OpenAI), and comprehensive collaboration features to create a unified research management ecosystem.
 
     \vspace{0.3cm}
     \noindent
-    \textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma (RAW Query), AWS S3, Stripe, Gemini AI, Redis, Docker
+    \textbf{Target Audience:} 86.2\% undergraduate students, 67\%+ Computer Science/IT backgrounds, 75.9\% ages 22-25 (Gen-Z digital natives)
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Google Gemini AI, OpenAI, Stripe, TipTap Editor
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Document Standard:} IEEE Std 830-1998 (Software Requirements Specifications)
 
     \vspace{0.3cm}
     \noindent
     \textbf{Repository:} \url{https://github.com/Atik203/Scholar-Flow}
 
-    \vspace{0.3cm}
-    \noindent
-    \textbf{Live Demo:} \url{https://scholar-flow-ai.vercel.app}
-
-    \vspace{0.3cm}
-    \noindent
-    \textbf{Demo Video:} \url{https://youtu.be/your-demo-video-id}
 \end{abstract}
 
 \newpage
@@ -244,24 +234,36 @@
 \tableofcontents
 \newpage
 
-% ============================================
-% CHAPTERS
-% ============================================
-\input{chapters/03-introduction}
-\input{chapters/04-motivation}
-\input{chapters/05-similar-projects}
-\input{chapters/06-benchmark-analysis}
-\input{chapters/07-feature-list}
-\input{chapters/08-erd}
-\input{chapters/09-database-schema}
-\input{chapters/10-sql-queries}
-\input{chapters/11-screenshots}
-\input{chapters/12-limitations}
-\input{chapters/13-future-work}
-\input{chapters/14-conclusion}
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
 
 % ============================================
-% BIBLIOGRAPHY (removed per report requirements)
+% SRS CHAPTERS
+% ============================================
+% Introduction, Problem Statement, Goals, SDLC
+\input{SRS/00-introduction-problem-goals}
+
+% System Study & Information Gathering
+\input{SRS/00-system-study-info-gathering}
+
+% System Analysis with Gap Analysis, Benchmark, Survey
+\input{SRS/03-system-analysis}
+
+% ============================================
+% APPENDICES (Optional)
+% ============================================
+% \appendix
+% \chapter{Survey Questionnaire}
+% \chapter{Raw Survey Data}
+% \chapter{Feature Request Details}
+
+% ============================================
+% END DOCUMENT
 % ============================================
 
 \end{document}
