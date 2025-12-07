@@ -112,69 +112,14 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
 
 \subsection{Feature Comparison Matrix}
 
-We conducted a comprehensive 20-feature benchmark comparing ScholarFlow against 5 primary competitors. Each feature was evaluated on a 3-point scale: ✅ Full Support, 🟡 Partial Support, ❌ Not Supported.
+We present the consolidated feature comparison as a single visual matrix.
 
-\begin{table}[H]
+\begin{figure}[H]
     \centering
-    \scriptsize
-    \begin{tabular}{|p{3.5cm}|c|c|c|c|c|c|}
-        \hline
-        \textbf{Feature}                  & \textbf{ScholarFlow} & \textbf{Paperpal} & \textbf{Zotero} & \textbf{Mendeley} & \textbf{Paperpile} \\
-        \hline
-        \multicolumn{7}{|c|}{\cellcolor{blue!10}\textbf{AI Features}}                                                                           \\
-        \hline
-        Semantic AI Search                & ✅                    & ❌                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        AI Paper Summaries                & ✅                    & 🟡                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        Multi-paper Chat                  & ✅                    & ❌                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        Deep Research Mode                & ✅                    & ❌                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        AI Writing Assistant              & ✅                    & ✅                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        \multicolumn{7}{|c|}{\cellcolor{green!10}\textbf{Collaboration Features}}                                                               \\
-        \hline
-        Real-time Collaboration           & ✅                    & ❌                 & 🟡               & 🟡                 & ✅                  \\
-        \hline
-        Team Workspaces                   & ✅                    & ❌                 & 🟡               & 🟡                 & ✅                  \\
-        \hline
-        Inline Annotations                & ✅                    & ❌                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        \multicolumn{7}{|c|}{\cellcolor{orange!10}\textbf{Core Features}}                                                                       \\
-        \hline
-        Smart Collections                 & ✅                    & ❌                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        Citation Generation (10K+ styles) & ✅                    & 🟡                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        PDF Viewer with Highlights        & ✅                    & ❌                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        Plagiarism Detection              & ✅                    & ✅                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        \multicolumn{7}{|c|}{\cellcolor{purple!10}\textbf{Integrations}}                                                                        \\
-        \hline
-        Reference Manager Import          & ✅                    & ❌                 & N/A             & N/A               & ✅                  \\
-        \hline
-        Browser Extension                 & 🟡                    & ❌                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        Overleaf Integration              & 🟡                    & ❌                 & ✅               & 🟡                 & ❌                  \\
-        \hline
-        MS Word / Google Docs             & 🟡                    & ✅                 & ✅               & ✅                 & ✅                  \\
-        \hline
-        API Access                        & 🟡                    & ❌                 & 🟡               & ❌                 & ❌                  \\
-        \hline
-        \multicolumn{7}{|c|}{\cellcolor{red!10}\textbf{Enterprise Features}}                                                                    \\
-        \hline
-        SOC 2 Certified                   & 🟡                    & ❌                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        SSO / SAML                        & 🟡                    & ❌                 & ❌               & ❌                 & ❌                  \\
-        \hline
-        24/7 Priority Support             & ❌                    & ✅                 & ❌               & ✅                 & ❌                  \\
-        \hline
-    \end{tabular}
-    \caption{Feature Benchmark: ScholarFlow vs. Top 4 Competitors}
-    \label{table:benchmark-matrix}
-\end{table}
+    \includegraphics[width=\textwidth]{../response_image/features_comparision_matrix.png}
+    \caption{Feature Comparison Matrix: ScholarFlow vs. Competitors}
+    \label{fig:benchmark-matrix}
+\end{figure}
 
 \subsection{Benchmark Scoring}
 
@@ -1026,55 +971,3 @@ ScholarFlow's technical architecture leverages proven, production-ready technolo
     \item \textbf{Freemium Growth}: Generous free tier to drive viral campus adoption
 \end{enumerate}
 
-% ============================================
-% 3.6 STRATEGIC RECOMMENDATIONS
-% ============================================
-\section{Strategic Recommendations}
-
-Based on comprehensive system analysis and survey insights, the following strategic actions are recommended:
-
-\subsection{Phase 1: UIU Campus Pilot (Q1 2026)}
-
-\textbf{Objective}: Validate product-market fit with 100 active users
-
-\begin{enumerate}
-    \item \textbf{Beta Program Launch}
-          \begin{itemize}
-              \item Recruit 50 UIU students from CS department (leverage 47.4\% survey concentration)
-              \item Offer free Pro tier for 6 months in exchange for feedback
-              \item Host weekly office hours for onboarding support
-              \item Implement referral program (invite 3 friends, unlock premium feature)
-          \end{itemize}
-
-    \item \textbf{Feature Focus}: Prioritize P0 features (AI summarization, collaboration, rich text editor)
-
-    \item \textbf{Success Metrics}:
-          \begin{itemize}
-              \item 100 monthly active users (MAU)
-              \item 60\% retention at 30 days
-              \item 4.5+ star rating in feedback surveys
-              \item 20 net referrals from ambassadors
-          \end{itemize}
-\end{enumerate}
-
-\subsection{Phase 2: Multi-Campus Expansion (Q2 2026)}
-
-\textbf{Objective}: Scale to 500 active users across 5 universities
-
-\begin{enumerate}
-    \item \textbf{University Partnerships}: NSU, AIUB, BRAC, Dhaka University, Khulna University
-    \item \textbf{Marketing Strategy}: Content marketing, Product Hunt launch, social media campaigns
-    \item \textbf{Feature Enhancements}: Citation export, personal analytics, AI recommendations
-    \item \textbf{Success Metrics}: 500 MAU, \$250+ MRR, 5\% free-to-paid conversion
-\end{enumerate}
-
-\subsection{Risk Mitigation Strategies}
-
-\begin{enumerate}
-    \item \textbf{Privacy Concerns}: Publish transparent privacy policy, obtain SOC 2 certification (Q3 2026)
-    \item \textbf{Cost Skepticism}: Student discount (50\% off with .edu email), scholarship program
-    \item \textbf{Brand Awareness}: Campus ambassador program, faculty partnerships, university library integration
-    \item \textbf{Technical Scalability}: Implement caching, database query optimization, CDN for static assets
-\end{enumerate}
-
-\textbf{Conclusion}: Survey data provides strong validation for ScholarFlow's market opportunity, with clear demand signals, identified pain points, and high adoption intent. Strategic focus on UIU pilot, AI differentiation, and freemium growth model positions ScholarFlow for successful campus-first expansion.
