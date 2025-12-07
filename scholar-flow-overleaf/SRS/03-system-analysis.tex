@@ -108,100 +108,8 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
 % ============================================
 % 3.3 BENCHMARK ANALYSIS
 % ============================================
-\section{Benchmark}
 
-\subsection{Feature Comparison Matrix}
-
-To maintain academic clarity, we consolidate the cross-platform feature benchmark into a single visual matrix (Figure~\ref{fig:benchmark-matrix}). The matrix adheres to a three-level evaluation rubric—full support, partial support, and not available—applied uniformly across six peer systems. This presentation emphasizes relative capability breadth while preserving replicability of the underlying coding scheme.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{../response_image/features_comparision_matrix.png}
-    \caption{Feature Comparison Matrix: ScholarFlow vs. Competitors}
-    \label{fig:benchmark-matrix}
-\end{figure}
-
-\subsection{Benchmark Scoring}
-
-We assigned weighted scores to each feature category based on survey demand:
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabular}{|l|c|c|c|c|c|c|}
-        \hline
-        \textbf{Category}    & \textbf{Weight} & \textbf{ScholarFlow} & \textbf{Paperpal} & \textbf{Zotero} & \textbf{Mendeley} & \textbf{Paperpile} \\
-        \hline
-        AI Features (5)      & 40\%            & 5/5 (100\%)          & 2/5 (40\%)        & 0/5 (0\%)       & 0/5 (0\%)         & 0/5 (0\%)          \\
-        \hline
-        Collaboration (3)    & 25\%            & 3/3 (100\%)          & 0/3 (0\%)         & 1.5/3 (50\%)    & 1.5/3 (50\%)      & 3/3 (100\%)        \\
-        \hline
-        Core Features (4)    & 20\%            & 4/4 (100\%)          & 1/4 (25\%)        & 3/4 (75\%)      & 3/4 (75\%)        & 3/4 (75\%)         \\
-        \hline
-        Integrations (5)     & 10\%            & 2.5/5 (50\%)         & 1/5 (20\%)        & 3.5/5 (70\%)    & 2.5/5 (50\%)      & 3/5 (60\%)         \\
-        \hline
-        Enterprise (3)       & 5\%             & 1/3 (33\%)           & 1/3 (33\%)        & 0/3 (0\%)       & 1/3 (33\%)        & 0/3 (0\%)          \\
-        \hline
-        \hline
-        \textbf{Total Score} & \textbf{100\%}  & \textbf{87.8\%}      & \textbf{27.6\%}   & \textbf{33.5\%} & \textbf{34.2\%}   & \textbf{50.0\%}    \\
-        \hline
-    \end{tabular}
-    \caption{Weighted Benchmark Scoring (Higher is Better)}
-    \label{table:benchmark-scoring}
-\end{table}
-
-\textbf{Key Insights}:
-\begin{itemize}
-    \item \textbf{ScholarFlow leads with 87.8\%}, driven by AI features (100\% vs. 0--40\% competitors)
-    \item \textbf{Paperpile is closest competitor} (50.0\%) due to strong collaboration features, but lacks AI
-    \item \textbf{Legacy tools (Zotero, Mendeley) score 33--34\%} due to missing AI and modern collaboration
-    \item \textbf{Paperpal scores lowest} (27.6\%) as it's a niche writing tool, not full research manager
-\end{itemize}
-
-% ============================================
-% 3.4 SURVEY ANALYSIS
-% ============================================
 \section{Survey}
-
-\subsection{Survey Methodology}
-
-\subsubsection{Survey Design}
-
-We conducted a comprehensive survey using Google Forms with 21 questions across 5 categories:
-
-\begin{table}[H]
-    \centering
-    \small
-    \begin{tabular}{|l|l|p{7cm}|}
-        \hline
-        \textbf{Category}  & \textbf{Questions} & \textbf{Objective}                                         \\
-        \hline
-        Demographics       & 5                  &
-        Age, role, field of study, academic level, institution --- Validate target audience                  \\
-        \hline
-        Current Tools      & 3                  &
-        Tools used, reading frequency, top pain points --- Map existing landscape                            \\
-        \hline
-        Feature Priorities & 10                 &
-        AI search/summaries, collaboration, citations, annotations, integrations --- Rank features by demand \\
-        \hline
-        Adoption Intent    & 3                  &
-        Need level, interest level, likelihood to try free tier --- Validate product-market fit              \\
-        \hline
-    \end{tabular}
-    \caption{Survey Structure and Objectives}
-    \label{table:survey-methodology}
-\end{table}
-
-\subsubsection{Survey Distribution}
-
-\begin{itemize}
-    \item \textbf{Total Responses}: 29 academic researchers
-    \item \textbf{Target Audience}: Undergraduate/graduate students, faculty, research assistants
-    \item \textbf{Institutions}: 10 universities (47.4\% UIU, 52.6\% other: NSU, AIUB, BRAC, IUT, Khulna, etc.)
-    \item \textbf{Response Period}: November--December 2025 (4-week window)
-    \item \textbf{Distribution Channels}: University email lists, research lab Slack channels, social media (Facebook groups, LinkedIn)
-\end{itemize}
 
 \subsection{Survey Results}
 
@@ -275,186 +183,55 @@ We conducted a comprehensive survey using Google Forms with 21 questions across 
     \label{fig:survey-10}
 \end{figure}
 
-\begin{figure}[H]
+\subsection{Strengths and Weaknesses (Two-Column Summary)}
+
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/11.png}
-    \caption{Question 11: Essential Features - Paper Upload}
-    \label{fig:survey-11}
-\end{figure}
+    \small
+    \begin{tabularx}{\textwidth}{|p{6.5cm}|p{6.5cm}|}
+        \hline
+        \textbf{Strengths (Internal)}                                                                                                          & \textbf{Weaknesses (Internal)}                                                                      \\
+        \hline
+        29 validated survey responses; 86.2\% undergraduates; 10 universities represented; 67\%+ CS/IT audience                                & Zero brand awareness; no testimonials or social proof; competing with entrenched incumbents         \\
+        \hline
+        102 Figma screens; modern SaaS UI with dark mode; mobile-responsive flows                                                              & Limited engineering and marketing bandwidth; support capacity not yet scaled                        \\
+        \hline
+        Mature stack: Next.js 15 + Express; PostgreSQL/Prisma; AWS S3; dual AI providers (Gemini 2.5-flash, GPT-4o-mini); TipTap with autosave & Early-stage scale/security hardening pending (load/chaos, SOC 2); offline sync not production-ready \\
+        \hline
+        Advanced features: real-time collaboration, AI summarization/citations, rich search, versioning                                        & Monetization unvalidated; free-tier cannibalization risk; billing/quotas need tighter observability \\
+        \hline
+        Market validation: 72.4\% need, 58.6\% high interest, 82.7\% want AI summaries, 69\% want recommendations                              & Execution risk: small team velocity; risk of scope creep without disciplined prioritization         \\
+        \hline
+        First-mover advantage in Bangladesh; UIU concentration (47.4\%) for rapid word-of-mouth                                                & Go-to-market playbook for campuses still forming; limited field presence today                      \\
+        \hline
+    \end{tabularx}
+    \caption{SWOT Internal Factors: Strengths vs. Weaknesses}
+    \label{table:swot-internal}
+\end{table}
 
-\begin{figure}[H]
+\subsection{Opportunities and Threats (Two-Column Summary)}
+
+\begin{table}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/12.png}
-    \caption{Question 12: Essential Features - PDF Annotation}
-    \label{fig:survey-12}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/13.png}
-    \caption{Question 13: Essential Features - AI Summarization}
-    \label{fig:survey-13}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/14.png}
-    \caption{Question 14: Essential Features - AI Recommendations}
-    \label{fig:survey-14}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/15.png}
-    \caption{Question 15: Essential Features - Collaboration Tools}
-    \label{fig:survey-15}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/16.png}
-    \caption{Question 16: Essential Features - Citation Management}
-    \label{fig:survey-16}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/17.png}
-    \caption{Question 17: Essential Features - Offline Access}
-    \label{fig:survey-17}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/18.png}
-    \caption{Question 18: Willingness to Pay}
-    \label{fig:survey-18}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/19.png}
-    \caption{Question 19: Acceptable Subscription Price}
-    \label{fig:survey-19}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/20.png}
-    \caption{Question 20: Referral Likelihood}
-    \label{fig:survey-20}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/21.png}
-    \caption{Question 21: Beta Testing Interest}
-    \label{fig:survey-21}
-\end{figure}
-
-% ============================================
-% 3.5 FEATURE DEMAND ANALYSIS (Existing Content)
-% ============================================
-\section{Feature Demand Analysis}
-
-\subsection{AI-Powered Features}
-
-The survey revealed exceptionally strong demand for AI-powered capabilities, which form ScholarFlow's core competitive differentiation:
-
-\subsubsection{AI Paper Summarization}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/13.png}
-    \caption{Interest in AI-Powered Paper Summarization (n=29)}
-    \label{fig:ai-summarization}
-\end{figure}
-
-\textbf{Demand Level: 82.7\% High Interest}
-\begin{itemize}
-    \item \textbf{55.2\% Extremely Interested}: Killer feature for time-constrained researchers
-    \item \textbf{27.6\% Very Interested}: Strong secondary demand
-    \item \textbf{17.3\% Moderate-to-Low Interest}: Minority segment
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P0 - Critical MVP Feature}
-
-\textbf{Implementation Details}:
-\begin{itemize}
-    \item Multi-provider AI service (Google Gemini 2.5-flash-lite primary, OpenAI GPT-4o-mini fallback)
-    \item Context-aware summarization with customizable length (short/medium/long)
-    \item Key findings extraction, methodology summary, and conclusion highlighting
-    \item Export summaries to notes or share with workspace members
-\end{itemize}
-
-\subsubsection{AI Recommendation Engine}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/14.png}
-    \caption{Interest in AI-Powered Paper Recommendations (n=29)}
-    \label{fig:ai-recommendations}
-\end{figure}
-
-\textbf{Demand Level: 69.0\% High Interest}
-\begin{itemize}
-    \item \textbf{34.5\% Extremely Interested}: Discovery and literature review automation
-    \item \textbf{34.5\% Very Interested}: Strong complementary demand
-    \item \textbf{31.0\% Moderate-to-Low Interest}: Research focus varies by field
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P1 - Phase 2 Enhancement}
-
-\textbf{Rationale for Deferral}: While demand is strong, recommendation engines require:
-\begin{itemize}
-    \item Large paper corpus for effective matching (cold-start problem)
-    \item Machine learning infrastructure for embeddings and similarity search
-    \item Integration with external databases (arXiv, PubMed, Google Scholar)
-\end{itemize}
-
-\subsection{Collaboration Features}
-
-\subsubsection{Real-Time Collaborative Editing}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/15.png}
-    \caption{Interest in Real-Time Collaborative Editing (n=29)}
-    \label{fig:collaboration}
-\end{figure}
-
-\textbf{Demand Level: 62.1\% High Interest}
-\begin{itemize}
-    \item \textbf{31.0\% Extremely Interested}: Team-based research projects
-    \item \textbf{31.0\% Very Interested}: Co-authoring and peer review workflows
-    \item \textbf{37.9\% Moderate-to-Low Interest}: Solo researchers (44.8\% from collaboration frequency data)
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P0 - Critical MVP Feature}
-
-\textbf{Implementation Details}:
-\begin{itemize}
-    \item TipTap-based rich text editor with WebSocket real-time sync
-    \item 5-tier role system: Owner, Admin, Editor, Commenter, Viewer
-    \item Inline comments, mentions (@username), and change tracking
-    \item Conflict resolution for simultaneous edits
-\end{itemize}
-
-\subsubsection{Role-Based Access Control}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/16.png}
-    \caption{Interest in Role-Based Workspace Permissions (n=29)}
-    \label{fig:rbac}
-\end{figure}
-
-\textbf{Demand Level: 62.1\% High Interest}
-\begin{itemize}
-    \item \textbf{31.0\% Extremely Interested}: Privacy and access control for sensitive research
-    \item \textbf{31.0\% Very Interested}: Team management and permission delegation
-    \item \textbf{37.9\% Moderate-to-Low Interest}: Solo researchers or small trusted teams
-\end{itemize}
+    \small
+    \begin{tabularx}{\textwidth}{|p{6.5cm}|p{6.5cm}|}
+        \hline
+        \textbf{Opportunities (External)}                                                                 & \textbf{Threats (External)}                                                                                                \\
+        \hline
+        AI adoption tailwind in academia; universities seeking AI-assisted research tooling               & Incumbent gravity: Google Drive (79.3\%), Notion (37.9\%), Zotero (27.6\%) with strong network effects                     \\
+        \hline
+        Underserved campus market in Bangladesh; 10+ partnerable universities; ambassador-led viral loops & Differentiation risk: 24.1\% “not sure”; risk of being perceived as another note tool; incumbents can copy AI features     \\
+        \hline
+        Integration runway: Overleaf, Docs/Word plugins, browser extensions, open API for labs            & Price sensitivity in student segment; 41.4\% may resist subscriptions; freemium must be carefully tuned                    \\
+        \hline
+        Data network effects: recommendations, citation/annotation graphs improve with usage              & Regulatory and privacy load: GDPR/CCPA, data residency, university IT approvals; legal/compliance cost                     \\
+        \hline
+        Early mover in local market; scope for research partnerships and grants                           & AI provider dependency and cost volatility; need multi-model fallback; potential scope bloat from diverse feature requests \\
+        \hline
+    \end{tabularx}
+    \caption{SWOT External Factors: Opportunities vs. Threats}
+    \label{table:swot-external}
+\end{table}
 
 \textbf{Priority Classification}: \textbf{P0 - Critical MVP Feature}
 
@@ -466,93 +243,6 @@ The survey revealed exceptionally strong demand for AI-powered capabilities, whi
     \item Commenter: View and comment only, no editing privileges
     \item Viewer: Read-only access, export capabilities
 \end{itemize}
-
-\subsection{Analytics and Tracking Features}
-
-\subsubsection{Personal Analytics Dashboard}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/17.png}
-    \caption{Interest in Personal Analytics Dashboard (n=29)}
-    \label{fig:personal-analytics}
-\end{figure}
-
-\textbf{Demand Level: 55.2\% High Interest}
-\begin{itemize}
-    \item \textbf{24.1\% Extremely Interested}: Productivity tracking and habit formation
-    \item \textbf{31.0\% Very Interested}: Self-improvement and goal setting
-    \item \textbf{44.8\% Moderate-to-Low Interest}: Less data-driven researchers
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P1 - MVP Enhancement}
-
-\subsubsection{Reading Progress Tracking}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/18.png}
-    \caption{Interest in Reading Progress Tracking (n=29)}
-    \label{fig:progress-tracking}
-\end{figure}
-
-\textbf{Demand Level: 51.7\% High Interest}
-\begin{itemize}
-    \item \textbf{24.1\% Extremely Interested}: Gamification and completion metrics
-    \item \textbf{27.6\% Very Interested}: Visual progress indicators
-    \item \textbf{48.3\% Moderate-to-Low Interest}: Prefer organic reading patterns
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P2 - Phase 2 Nice-to-Have}
-
-\subsection{Citation and Reference Management}
-
-\subsubsection{Citation Export and Bibliography Generation}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/19.png}
-    \caption{Interest in Citation Management Features (n=29)}
-    \label{fig:citations}
-\end{figure}
-
-\textbf{Demand Level: 65.5\% High Interest}
-\begin{itemize}
-    \item \textbf{37.9\% Extremely Interested}: Academic writing and thesis preparation
-    \item \textbf{27.6\% Very Interested}: Time savings on formatting
-    \item \textbf{34.5\% Moderate-to-Low Interest}: Use dedicated tools like Zotero
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P1 - MVP Enhancement}
-
-\textbf{Implementation Details}:
-\begin{itemize}
-    \item Support for 5+ citation formats: APA, MLA, Chicago, IEEE, Harvard
-    \item One-click export to BibTeX, RIS, EndNote formats
-    \item Automatic metadata extraction from uploaded PDFs
-    \item Integration with Google Scholar for citation lookup
-\end{itemize}
-
-\subsection{Advanced Comparison and Analysis Tools}
-
-\subsubsection{Paper Comparison Feature}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{../response_image/20.png}
-    \caption{Interest in Side-by-Side Paper Comparison (n=29)}
-    \label{fig:comparison}
-\end{figure}
-
-\textbf{Demand Level: 65.5\% High Interest}
-\begin{itemize}
-    \item \textbf{37.9\% Extremely Interested}: Literature review and methodology comparison
-    \item \textbf{27.6\% Very Interested}: Identifying research gaps
-    \item \textbf{34.5\% Moderate-to-Low Interest}: Single-paper focus workflows
-\end{itemize}
-
-\textbf{Priority Classification}: \textbf{P2 - Phase 2 Differentiation}
-
 \textbf{Rationale for Deferral}: Comparison requires advanced UI/UX design and may overwhelm MVP users. Focus on core reading and collaboration first.
 
 % ============================================
