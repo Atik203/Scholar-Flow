@@ -48,12 +48,14 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 - **Tool**: Google Forms with 21 comprehensive questions
 - **Structure**: 5 demographic + 10 feature priority + 6 adoption questions
-- **Data Source**: `response_image/1.png - 21.png` (auto-generated charts)
+- **Data Source**: Survey response charts (auto-generated)
 - **Analysis**: Python notebook with statistical breakdowns
 
 ### Demographic Breakdown
 
-**👤 Role Distribution** (`response_image/1.png`)
+**👤 Role Distribution**
+
+![Role Distribution](../response_image/1.png)
 
 - **86.2%** Undergraduate Students (primary target)
 - **3.4%** Masters Students
@@ -61,27 +63,35 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - **3.4%** Faculty/Professors
 - **3.4%** Other (Research Assistants, Industry)
 
-**📚 Field of Study** (`response_image/2.png`)
+**📚 Field of Study**
+
+![Field of Study](../response_image/2.png)
 
 - **67%+** Computer Science / IT (dominant segment)
 - **15%** Engineering (Civil, Electrical, Mechanical)
 - **10%** Medical Sciences (Pharmacy)
 - **8%** Social Sciences (Economics, Sociology)
 
-**🎓 Academic Level** (`response_image/3.png`)
+**🎓 Academic Level**
+
+![Academic Level](../response_image/3.png)
 
 - **58.6%** 3rd Year Undergraduates (peak research intensity)
 - **17.2%** 2nd Year Undergraduates
 - **6.9%** Masters Students
 - **6.9%** Non-students (professionals)
 
-**🎂 Age Distribution** (`response_image/4.png`)
+**🎂 Age Distribution**
+
+![Age Distribution](../response_image/4.png)
 
 - **75.9%** Ages 22-25 (Gen-Z digital natives)
 - **13.8%** Ages 18-21
 - **10.3%** Ages 26-30
 
-**🏛️ Institution Footprint** (`response_image/5.png`)
+**🏛️ Institution Footprint**
+
+![Institution Footprint](../response_image/5.png)
 
 - **47.4%** United International University (UIU) - Primary launch campus
 - **52.6%** Other universities (NSU, AIUB, BRAC, IUT, Khulna, etc.)
@@ -93,7 +103,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 # SLIDE 3: Current Tool Landscape & Pain Points
 
-## **What Users Currently Use** (`response_image/6.png`)
+## **What Users Currently Use**
+
+![Current Tools](../response_image/6.png)
 
 ### Existing Tool Stack (Multi-select responses)
 
@@ -108,7 +120,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Reading Frequency Patterns** (`response_image/7.png`)
+## **Reading Frequency Patterns**
+
+![Reading Frequency](../response_image/7.png)
 
 - **48.3%** Rarely read papers (casual researchers)
 - **20.7%** Multiple times per day (power users)
@@ -119,7 +133,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Top Pain Points** (`response_image/8.png`)
+## **Top Pain Points**
+
+![Pain Points](../response_image/8.png)
 
 ### Critical Challenges (Multi-select)
 
@@ -138,7 +154,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Collaboration Habits** (`response_image/9.png`)
+## **Collaboration Habits**
+
+![Collaboration Habits](../response_image/9.png)
 
 - **55.2%** Work alone (no collaboration)
 - **20.7%** Share via messaging apps (WhatsApp/Telegram)
@@ -150,7 +168,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Current Satisfaction Score** (`response_image/10.png`)
+## **Current Satisfaction Score**
+
+![Satisfaction Score](../response_image/10.png)
 
 ### Satisfaction Distribution (1-5 scale)
 
@@ -168,7 +188,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 # SLIDE 4: Market Demand & Interest Validation
 
-## **Need Intensity** (`response_image/11.png`)
+## **Need Intensity**
+
+![Need Intensity](../response_image/11.png)
 
 ### How important is a dedicated research tool?
 
@@ -184,7 +206,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Interest in ScholarFlow** (`response_image/12.png`)
+## **Interest in ScholarFlow**
+
+![Interest in ScholarFlow](../response_image/12.png)
 
 ### Overall Interest Level
 
@@ -200,7 +224,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Free Tier Adoption Likelihood** (`response_image/18.png`)
+## **Free Tier Adoption Likelihood**
+
+![Free Tier Likelihood](../response_image/18.png)
 
 ### How likely to try free tier?
 
@@ -222,7 +248,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 # SLIDE 5: Feature Prioritization Matrix
 
-## **Organization & Search Features** (`response_image/13.png`)
+## **Organization & Search Features**
+
+![Organization & Search Features](../response_image/13.png)
 
 ### Must-Have Features (Multi-select)
 
@@ -235,16 +263,11 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 **Decision:** Collections, Search, and Upload form the "holy trinity" - keep above the fold in all product tours and onboarding flows.
 
-**Implementation Status:** ✅ Complete
-
-- Advanced search with full-text, author, date, type filters
-- Collections with public/private permissions
-- Bulk upload with AI metadata extraction
-- Duplicate detection via hash comparison
-
 ---
 
-## **Reading & Annotation Features** (`response_image/14.png`)
+## **Reading & Annotation Features**
+
+![Reading & Annotation Features](../response_image/14.png)
 
 ### Top Priorities
 
@@ -257,17 +280,11 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 **Decision:** PDF viewer + Research Notes are table stakes. Rich text editor with auto-save becomes competitive differentiator.
 
-**Implementation Status:** ✅ Complete
-
-- TipTap-based rich text editor with full toolbar
-- Auto-save with debounced updates
-- Export to PDF and DOCX with embedded images
-- Share functionality with email notifications
-- Draft/publish workflow
-
 ---
 
-## **AI-Powered Features** (`response_image/15.png`)
+## **AI-Powered Features**
+
+![AI-Powered Features](../response_image/15.png)
 
 ### Highest Impact AI Features
 
@@ -281,18 +298,11 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 **Decision:** Position AI as "research copilot" not gimmick. Lead with comparison tools and visual knowledge graphs.
 
-**Implementation Status:** ✅ Complete
-
-- Multi-provider AI (Gemini 2.5-flash-lite primary, OpenAI fallback)
-- AI paper summarization with caching
-- Intelligent chat with full paper context
-- Context retention across chat sessions
-
-**Roadmap:** Mind maps, comparison view, citation graphs (Phase 2-3)
-
 ---
 
-## **Collaboration Features** (`response_image/16.png`)
+## **Collaboration Features**
+
+![Collaboration Features](../response_image/16.png)
 
 ### Essential Team Features
 
@@ -306,17 +316,11 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 **Decision:** Permissions UI and shared workspaces become MVP requirements. Include activity feed in roadmap.
 
-**Implementation Status:** ✅ Complete
-
-- Workspace invitation system with email notifications
-- 5-tier role system (Owner/Admin/Team Lead/Pro Researcher/Researcher)
-- Member management (add/remove/update roles)
-- Accept/decline invitation workflow
-- Activity logging for workspace actions
-
 ---
 
-## **Analytics & Tracking** (`response_image/17.png`)
+## **Analytics & Tracking**
+
+![Analytics & Tracking](../response_image/17.png)
 
 ### Desired Analytics Features
 
@@ -329,47 +333,35 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 **Decision:** Justify analytics investment with coordinator dashboards for labs and courses. Build progressive disclosure (personal → team → admin views).
 
-**Implementation Status:** ✅ Complete
-
-- Personal analytics dashboard with reading stats
-- Workspace analytics with team metrics
-- Admin system monitoring (CPU, memory, storage, database)
-- Real-time health checks with 10-second polling
-- Performance visualization with auto-colored progress bars
-
 ---
 
 # SLIDE 6: Survey Result Table & Strategic Decisions
 
-| Question                | Top Responses (% share)                                                           | Strategic Decision                                                                                     | Implementation Status                          |
-| ----------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| **Q6: Current Tools**   | Browser PDFs 34.5%<br>Local folders 31.0%<br>Cloud storage 31.0%<br>No tool 27.6% | Build importers for folders/cloud storage. Highlight workflow upgrades for "no tool" segment.          | 🟡 Partial (S3 integration complete)           |
-| **Q7: Reading Cadence** | Rarely 48.3%<br>Multiple/day 20.7%<br>Few times/week 20.7%                        | Design flexible engagement journeys: nudge infrequent readers, power-user views for daily researchers. | ✅ Complete (Dashboard personalization)        |
-| **Q8: Pain Points**     | Notes/highlights 44.8%<br>Finding papers 37.9%<br>Organization 31.0%              | Prioritize universal annotation, knowledge graph tagging, smarter retrieval.                           | ✅ Complete (Rich editor, Search, Collections) |
-| **Q9: Collaboration**   | Work alone 55.2%<br>Share via chat/email 20.7%                                    | Lead with "from solo to shared" messaging. Emphasize lightweight workspace invites.                    | ✅ Complete (Invitation system)                |
-| **Q10: Satisfaction**   | Score 3: 41.4%<br>Average: 3.31/5                                                 | Showcase ScholarFlow as upgrade path from "meh" tooling. Demo delight moments.                         | ✅ Complete (Modern UI/UX)                     |
-| **Q11: Need Intensity** | Moderate-to-extreme: 72.4%                                                        | Justifies investing in richer discovery & onboarding flows immediately.                                | ✅ Complete (Comprehensive onboarding)         |
-| **Q12: Interest**       | Very interested: 51.7%<br>Extremely: 6.9%                                         | Highlight social proof + waitlist CTA to convert warm intent.                                          | 🟡 Partial (Marketing page needed)             |
-| **Q13: Org/Search**     | Collections/Upload/Search: 55.2%                                                  | Keep Collections + Unified Library above the fold in product tours.                                    | ✅ Complete                                    |
-| **Q14: Reading/Notes**  | In-browser annotation: 69.0%<br>Shared note hub: 51.7%                            | Showcase PDF viewer + Research Notes screens on demo slide.                                            | ✅ Complete (TipTap editor)                    |
-| **Q15: AI Priorities**  | Compare papers & mind maps: 65.5%<br>Summaries: 62.1%                             | Position AI Insights as "copilot" not gimmick. Include workflow story.                                 | ✅ Complete (AI chat + summaries)              |
-| **Q16: Collaboration**  | Role-based access: 62.1%<br>Shared workspaces: 58.6%                              | Bring permissions UI mockup into feasibility story.                                                    | ✅ Complete (5-tier role system)               |
-| **Q17: Analytics**      | Reading overview: 55.2%<br>Activity tracking: 51.7%                               | Reinforce analytics roadmap. Justify dashboard investments.                                            | ✅ Complete (Personal + Admin analytics)       |
-| **Q18: Free Tier**      | Likely: 31.0%<br>Very likely: 27.6%                                               | Offer free core plan with upgrade hooks (storage, AI limits).                                          | ✅ Complete (Stripe billing system)            |
-| **Q19: Concerns**       | Privacy/cost themes: ~7.7% each                                                   | Dedicate trust slide to security, encryption, pricing transparency.                                    | ✅ Complete (Security headers, GDPR-ready)     |
-| **Q20: Extras**         | Referencing: 10%<br>Plagiarism: 10%<br>LMS sync: 10%<br>Offline: 10%              | Capture in backlog. Mention as "future enhancements" slide.                                            | 🔴 Roadmap (Phase 2-3)                         |
-
-**Legend:**
-
-- ✅ Complete (production-ready)
-- 🟡 Partial (MVP functional, enhancements planned)
-- 🔴 Roadmap (Phase 2-3 priority)
+| Question                | Top Responses (% share)                                                     | Strategic Decision                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Q6: Current Tools**   | Browser PDFs 34.5%, Local folders 31.0%, Cloud storage 31.0%, No tool 27.6% | Build importers for folders/cloud storage. Highlight workflow upgrades for "no tool" segment.          |
+| **Q7: Reading Cadence** | Rarely 48.3%, Multiple/day 20.7%, Few times/week 20.7%                      | Design flexible engagement journeys: nudge infrequent readers, power-user views for daily researchers. |
+| **Q8: Pain Points**     | Notes/highlights 44.8%, Finding papers 37.9%, Organization 31.0%            | Prioritize universal annotation, knowledge graph tagging, smarter retrieval.                           |
+| **Q9: Collaboration**   | Work alone 55.2%, Share via chat/email 20.7%                                | Lead with "from solo to shared" messaging. Emphasize lightweight workspace invites.                    |
+| **Q10: Satisfaction**   | Score 3: 41.4%, Average: 3.31/5                                             | Showcase ScholarFlow as upgrade path from "meh" tooling. Demo delight moments.                         |
+| **Q11: Need Intensity** | Moderate-to-extreme: 72.4%                                                  | Justifies investing in richer discovery & onboarding flows immediately.                                |
+| **Q12: Interest**       | Very interested: 51.7%, Extremely: 6.9%                                     | Highlight social proof + waitlist CTA to convert warm intent.                                          |
+| **Q13: Org/Search**     | Collections/Upload/Search: 55.2%                                            | Keep Collections + Unified Library above the fold in product tours.                                    |
+| **Q14: Reading/Notes**  | In-browser annotation: 69.0%, Shared note hub: 51.7%                        | Showcase PDF viewer + Research Notes screens on demo slide.                                            |
+| **Q15: AI Priorities**  | Compare papers & mind maps: 65.5%, Summaries: 62.1%                         | Position AI Insights as "copilot" not gimmick. Include workflow story.                                 |
+| **Q16: Collaboration**  | Role-based access: 62.1%, Shared workspaces: 58.6%                          | Bring permissions UI mockup into feasibility story.                                                    |
+| **Q17: Analytics**      | Reading overview: 55.2%, Activity tracking: 51.7%                           | Reinforce analytics roadmap. Justify dashboard investments.                                            |
+| **Q18: Free Tier**      | Likely: 31.0%, Very likely: 27.6%                                           | Offer free core plan with upgrade hooks (storage, AI limits).                                          |
+| **Q19: Concerns**       | Privacy/cost themes: ~7.7% each                                             | Dedicate trust slide to security, encryption, pricing transparency.                                    |
+| **Q20: Extras**         | Referencing: 10%, Plagiarism: 10%, LMS sync: 10%, Offline: 10%              | Capture in backlog. Mention as "future enhancements" slide.                                            |
 
 ---
 
 # SLIDE 7: Adoption Concerns & Risk Mitigation
 
-## **User Concerns Analysis** (`response_image/19.png`)
+## **User Concerns Analysis**
+
+![User Concerns](../response_image/19.png)
 
 ### Open-Ended Response Themes (13 responses)
 
@@ -498,7 +490,9 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 # SLIDE 8: Feature Requests & Product Roadmap
 
-## **Additional Features Requested** (`response_image/20.png`)
+## **Additional Features Requested**
+
+![Feature Requests](../response_image/20.png)
 
 ### Open-Ended Responses (Top 10 requests)
 
@@ -509,13 +503,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - In-text citation insertion
 - Reference list formatting
 
-**Status:** ✅ Complete (v1.1.9)
-
-- Full citation export (BibTeX, EndNote, APA, MLA, IEEE)
-- Academic citation formatting
-- Export history management
-- Direct download from citations page
-
 ---
 
 **Plagiarism Detection** (10%)
@@ -524,12 +511,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Citation verification
 - Paraphrasing detection
 - Academic integrity tools
-
-**Status:** 🔴 Phase 2 (Q2 2026)
-
-- Partner with Turnitin API
-- Custom ML model for paper similarity
-- Integration with citation manager
 
 ---
 
@@ -540,12 +521,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Blackboard compatibility
 - Assignment submission workflow
 
-**Status:** 🔴 Phase 3 (Q3 2026)
-
-- LTI (Learning Tools Interoperability) standard
-- OAuth integration with major LMS platforms
-- Grade passback functionality
-
 ---
 
 **Offline Mode** (10%)
@@ -554,12 +529,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Offline PDF reading
 - Local notes editing
 - Background synchronization
-
-**Status:** 🔴 Phase 2 (Q2 2026)
-
-- PWA with service workers (✅ v1.1.7)
-- Electron desktop app (roadmap)
-- Sync conflict resolution
 
 ---
 
@@ -570,12 +539,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Concept mapping
 - Study schedule optimization
 
-**Status:** 🔴 Phase 3 (Q4 2026)
-
-- Leverage existing AI infrastructure
-- Spaced repetition algorithm
-- Gamification elements
-
 ---
 
 **Enhanced Collaboration** (8%)
@@ -584,11 +547,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Screen sharing for paper review
 - Real-time cursor tracking
 - Collaborative annotation
-
-**Status:** 🟡 Partial (async collaboration complete)
-
-- Agora/Zoom SDK integration (roadmap)
-- WebRTC for peer-to-peer sharing
 
 ---
 
@@ -599,11 +557,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Author network visualization
 - Topic clustering
 
-**Status:** 🟡 Partial (full-text search complete)
-
-- pgvector for semantic embeddings (database ready)
-- Graph database integration (Neo4j roadmap)
-
 ---
 
 **Mobile App** (5%)
@@ -612,11 +565,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Android native app
 - Mobile-optimized reading
 - Push notifications
-
-**Status:** 🔴 Phase 2 (Q3 2026)
-
-- React Native or Flutter
-- Offline-first architecture
 
 ---
 
@@ -627,11 +575,6 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Google Scholar integration
 - ORCID profile linking
 
-**Status:** 🟡 Partial (S3 import ready)
-
-- API partnerships
-- Standard data formats (BibTeX, RIS)
-
 ---
 
 **Custom Workflows** (3%)
@@ -641,16 +584,11 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Email-to-paper forwarding
 - Slack notifications
 
-**Status:** 🔴 Phase 3 (Q4 2026)
-
-- Webhook infrastructure
-- No-code automation builder
-
 ---
 
 ## **Product Roadmap Visualization**
 
-### Phase 1: MVP Complete ✅ (Weeks 1-6)
+### Phase 1: Core Features (Weeks 1-6)
 
 - Authentication (Google OAuth, email/password)
 - Paper upload & storage (S3, metadata extraction)
@@ -661,7 +599,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Analytics (personal + admin)
 - Stripe billing
 
-### Phase 2: Advanced Features 🚧 (Weeks 7-12)
+### Phase 2: Advanced Features (Weeks 7-12)
 
 - Citation graph visualization
 - Plagiarism detection (Turnitin API)
@@ -670,7 +608,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 - Enhanced search (semantic, pgvector)
 - Desktop app (Electron)
 
-### Phase 3: Enterprise & Scale 📋 (Weeks 13-20)
+### Phase 3: Enterprise & Scale (Weeks 13-20)
 
 - LMS integration (Canvas, Moodle)
 - AI study assistant (quizzes, flashcards)
@@ -685,7 +623,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ## **Core Feature Set Based on Survey Data**
 
-### 1. **Unified Paper Library** ✅ Complete
+### 1. **Unified Paper Library**
 
 **Survey Validation:** 55.2% demand for collections, 55.2% for advanced search
 
@@ -709,7 +647,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 2. **Rich PDF & Document Editor** ✅ Complete
+### 2. **Rich PDF & Document Editor**
 
 **Survey Validation:** 69.0% want in-browser annotation, 51.7% need centralized notes
 
@@ -738,7 +676,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 3. **AI Research Assistant** ✅ Complete
+### 3. **AI Research Assistant**
 
 **Survey Validation:** 65.5% want paper comparison, 62.1% need summaries
 
@@ -771,7 +709,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 4. **Collaboration Suite** ✅ Complete
+### 4. **Collaboration Suite**
 
 **Survey Validation:** 62.1% need role-based access, 58.6% want shared workspaces
 
@@ -809,7 +747,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 5. **Analytics & Insights Dashboard** ✅ Complete
+### 5. **Analytics & Insights Dashboard**
 
 **Survey Validation:** 55.2% want reading overview, 51.7% need activity tracking
 
@@ -853,7 +791,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 6. **Subscription & Billing System** ✅ Complete
+### 6. **Subscription & Billing System**
 
 **Survey Validation:** 58.6% likely to try free tier, cost concerns addressed
 
@@ -887,7 +825,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 7. **Security & Authentication** ✅ Complete
+### 7. **Security & Authentication**
 
 **Survey Validation:** Privacy/security top concern (~7.7%)
 
@@ -920,7 +858,7 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-### 8. **Modern UI/UX Design** ✅ Complete
+### 8. **Modern UI/UX Design**
 
 **Survey Validation:** 75.9% Gen-Z users (ages 22-25) expect modern interface
 
@@ -958,27 +896,27 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ---
 
-## **Feature Comparison: Survey Demand vs. Implementation**
+## **Feature Priority Matrix**
 
-| Feature Category        | Survey Demand | Implementation Status     | Priority     |
-| ----------------------- | ------------- | ------------------------- | ------------ |
-| Collections & Search    | 55.2%         | ✅ Complete               | P0 (MVP)     |
-| PDF Viewer & Annotation | 69.0%         | ✅ Complete (Rich editor) | P0 (MVP)     |
-| AI Summarization        | 62.1%         | ✅ Complete               | P0 (MVP)     |
-| AI Comparison Tools     | 65.5%         | 🔴 Roadmap                | P1 (Phase 2) |
-| Role-Based Access       | 62.1%         | ✅ Complete               | P0 (MVP)     |
-| Shared Workspaces       | 58.6%         | ✅ Complete               | P0 (MVP)     |
-| Analytics Dashboard     | 55.2%         | ✅ Complete               | P0 (MVP)     |
-| Citation Management     | 10% requests  | ✅ Complete               | P1 (MVP+)    |
-| Plagiarism Detection    | 10% requests  | 🔴 Roadmap                | P2 (Phase 2) |
-| LMS Integration         | 10% requests  | 🔴 Roadmap                | P2 (Phase 3) |
-| Offline Mode            | 10% requests  | 🟡 Partial (PWA)          | P2 (Phase 2) |
+| Feature Category        | Survey Demand | Priority     |
+| ----------------------- | ------------- | ------------ |
+| PDF Viewer & Annotation | 69.0%         | P0 (Core)    |
+| AI Comparison Tools     | 65.5%         | P1 (Phase 2) |
+| AI Summarization        | 62.1%         | P0 (Core)    |
+| Role-Based Access       | 62.1%         | P0 (Core)    |
+| Shared Workspaces       | 58.6%         | P0 (Core)    |
+| Collections & Search    | 55.2%         | P0 (Core)    |
+| Analytics Dashboard     | 55.2%         | P0 (Core)    |
+| Citation Management     | 10% requests  | P1 (Phase 2) |
+| Plagiarism Detection    | 10% requests  | P2 (Phase 3) |
+| LMS Integration         | 10% requests  | P2 (Phase 3) |
+| Offline Mode            | 10% requests  | P2 (Phase 3) |
 
 **Legend:**
 
-- P0: Must-have (MVP)
-- P1: Should-have (Phase 2)
-- P2: Nice-to-have (Phase 3)
+- P0: Core features (essential for project scope)
+- P1: Phase 2 features (short-term roadmap)
+- P2: Phase 3 features (future enhancements)
 
 ---
 
@@ -1398,17 +1336,20 @@ This document provides a complete feasibility analysis for ScholarFlow based on 
 
 ## **Survey Insights**
 
-✅ 29 responses, 86.2% undergraduates, UIU concentration (47.4%)  
-✅ Current satisfaction 3.31/5 (opportunity for improvement)  
-✅ Top pain points: notes/highlights (44.8%), finding papers (37.9%)  
-✅ Feature priorities: AI comparison (65.5%), in-browser annotation (69.0%), role-based access (62.1%)  
-✅ Free tier adoption: 58.6% likely/very likely
+📊 29 responses, 86.2% undergraduates, UIU concentration (47.4%)  
+📊 Current satisfaction 3.31/5 (opportunity for improvement)  
+📊 Top pain points: notes/highlights (44.8%), finding papers (37.9%)  
+📊 Feature priorities: AI comparison (65.5%), in-browser annotation (69.0%), role-based access (62.1%)  
+📊 Free tier adoption: 58.6% likely/very likely
 
-## **Product Status**
+## **Core Features**
 
-✅ **Complete MVP**: Authentication, paper management, rich text editor, AI chat, collaboration, analytics, billing  
-🟡 **Partial**: Offline mode (PWA), citation graphs  
-🔴 **Roadmap**: Plagiarism detection, LMS integration, mobile app, mind maps
+🎯 **Paper Management**: Smart collections, advanced search, bulk upload  
+🎯 **Rich Text Editor**: TipTap-based with auto-save and export  
+🎯 **AI Assistant**: Multi-provider summarization and intelligent chat  
+🎯 **Collaboration**: 5-tier role system with workspace invitations  
+🎯 **Analytics**: Personal, workspace, and admin dashboards  
+🎯 **Billing**: Stripe integration with flexible pricing tiers
 
 ## **Strategic Direction**
 
