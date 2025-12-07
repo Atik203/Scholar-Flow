@@ -173,13 +173,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
     if (dropdownTimeoutRef.current) {
       clearTimeout(dropdownTimeoutRef.current);
     }
+    // Show dropdown immediately on hover
     setHoveredDropdown(label);
   };
 
   const handleDropdownMouseLeave = () => {
+    // Keep dropdown open for 10 seconds after mouse leaves (for copying design from Figma)
     dropdownTimeoutRef.current = setTimeout(() => {
       setHoveredDropdown(null);
-    }, 150);
+    }, 10000);
   };
 
   useEffect(() => {
