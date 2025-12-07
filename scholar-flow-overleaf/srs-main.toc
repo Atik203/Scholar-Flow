@@ -59,41 +59,30 @@
 \contentsline {subsection}{\numberline {3.2.1}Targeted Gap Analysis: What Others Lack That ScholarFlow Offers}{24}{subsection.3.2.1}%
 \contentsline {subsection}{\numberline {3.2.2}Gap Prioritization Matrix}{25}{subsection.3.2.2}%
 \contentsline {section}{\numberline {3.3}Benchmark}{26}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Feature Comparison Matrix}{26}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Benchmark Scoring}{26}{subsection.3.3.2}%
-\contentsline {section}{\numberline {3.4}Survey}{27}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}Survey Methodology}{27}{subsection.3.4.1}%
-\contentsline {subsubsection}{Survey Design}{27}{subsection.3.4.1}%
-\contentsline {subsubsection}{Survey Distribution}{27}{table.caption.19}%
-\contentsline {subsection}{\numberline {3.4.2}Survey Results}{28}{subsection.3.4.2}%
-\contentsline {section}{\numberline {3.5}Feature Demand Analysis}{38}{section.3.5}%
-\contentsline {subsection}{\numberline {3.5.1}AI-Powered Features}{38}{subsection.3.5.1}%
-\contentsline {subsubsection}{AI Paper Summarization}{38}{subsection.3.5.1}%
-\contentsline {subsubsection}{AI Recommendation Engine}{39}{figure.caption.41}%
-\contentsline {subsection}{\numberline {3.5.2}Collaboration Features}{40}{subsection.3.5.2}%
-\contentsline {subsubsection}{Real-Time Collaborative Editing}{40}{subsection.3.5.2}%
-\contentsline {subsubsection}{Role-Based Access Control}{41}{figure.caption.43}%
-\contentsline {subsection}{\numberline {3.5.3}Analytics and Tracking Features}{42}{subsection.3.5.3}%
-\contentsline {subsubsection}{Personal Analytics Dashboard}{42}{subsection.3.5.3}%
-\contentsline {subsubsection}{Reading Progress Tracking}{42}{figure.caption.45}%
-\contentsline {subsection}{\numberline {3.5.4}Citation and Reference Management}{43}{subsection.3.5.4}%
-\contentsline {subsubsection}{Citation Export and Bibliography Generation}{43}{subsection.3.5.4}%
-\contentsline {subsection}{\numberline {3.5.5}Advanced Comparison and Analysis Tools}{44}{subsection.3.5.5}%
-\contentsline {subsubsection}{Paper Comparison Feature}{44}{subsection.3.5.5}%
-\contentsline {section}{\numberline {3.6}Feasibility Analysis}{45}{section.3.6}%
-\contentsline {subsection}{\numberline {3.6.1}Technical Feasibility}{45}{subsection.3.6.1}%
-\contentsline {subsection}{\numberline {3.6.2}Economic Feasibility}{45}{subsection.3.6.2}%
-\contentsline {subsubsection}{Revenue Model}{46}{subsection.3.6.2}%
-\contentsline {subsubsection}{Willingness to Pay Analysis}{46}{table.caption.50}%
-\contentsline {subsection}{\numberline {3.6.3}Operational Feasibility}{47}{subsection.3.6.3}%
-\contentsline {subsubsection}{Team Composition}{47}{subsection.3.6.3}%
-\contentsline {subsubsection}{Development Timeline}{47}{subsection.3.6.3}%
-\contentsline {subsubsection}{Risk Factors}{48}{subsection.3.6.3}%
-\contentsline {section}{\numberline {3.7}SWOT Analysis}{48}{section.3.7}%
-\contentsline {subsection}{\numberline {3.7.1}Strengths (Internal Positive Factors)}{48}{subsection.3.7.1}%
-\contentsline {subsection}{\numberline {3.7.2}Weaknesses (Internal Negative Factors)}{49}{subsection.3.7.2}%
-\contentsline {subsection}{\numberline {3.7.3}Opportunities (External Positive Factors)}{50}{subsection.3.7.3}%
-\contentsline {subsection}{\numberline {3.7.4}Threats (External Negative Factors)}{51}{subsection.3.7.4}%
-\contentsline {section}{\numberline {3.8}Competitive Analysis}{52}{section.3.8}%
-\contentsline {subsection}{\numberline {3.8.1}Direct Competitors}{53}{subsection.3.8.1}%
-\contentsline {subsection}{\numberline {3.8.2}Unique Value Proposition}{54}{subsection.3.8.2}%
+\contentsline {subsection}{\numberline {3.3.1}Opportunities and Threats (Two-Column Summary)}{26}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Survey Results}{26}{subsection.3.3.2}%
+\contentsline {section}{\numberline {3.4}Feature Demand Analysis}{36}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}AI-Powered Features}{36}{subsection.3.4.1}%
+\contentsline {subsubsection}{AI Paper Summarization}{36}{subsection.3.4.1}%
+\contentsline {subsubsection}{AI Recommendation Engine}{37}{figure.caption.39}%
+\contentsline {subsection}{\numberline {3.4.2}Collaboration Features}{38}{subsection.3.4.2}%
+\contentsline {subsubsection}{Real-Time Collaborative Editing}{38}{subsection.3.4.2}%
+\contentsline {subsubsection}{Role-Based Access Control}{39}{figure.caption.41}%
+\contentsline {subsection}{\numberline {3.4.3}Strengths and Weaknesses (Two-Column Summary)}{40}{subsection.3.4.3}%
+\contentsline {section}{\numberline {3.5}Feasibility Analysis}{40}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Technical Feasibility}{40}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Economic Feasibility}{41}{subsection.3.5.2}%
+\contentsline {subsubsection}{Revenue Model}{41}{subsection.3.5.2}%
+\contentsline {subsubsection}{Willingness to Pay Analysis}{42}{table.caption.45}%
+\contentsline {subsection}{\numberline {3.5.3}Operational Feasibility}{43}{subsection.3.5.3}%
+\contentsline {subsubsection}{Team Composition}{43}{subsection.3.5.3}%
+\contentsline {subsubsection}{Development Timeline}{43}{subsection.3.5.3}%
+\contentsline {subsubsection}{Risk Factors}{43}{subsection.3.5.3}%
+\contentsline {section}{\numberline {3.6}SWOT Analysis}{43}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Strengths (Internal Positive Factors)}{44}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Weaknesses (Internal Negative Factors)}{45}{subsection.3.6.2}%
+\contentsline {subsection}{\numberline {3.6.3}Opportunities (External Positive Factors)}{46}{subsection.3.6.3}%
+\contentsline {subsection}{\numberline {3.6.4}Threats (External Negative Factors)}{47}{subsection.3.6.4}%
+\contentsline {section}{\numberline {3.7}Competitive Analysis}{48}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Direct Competitors}{48}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Unique Value Proposition}{49}{subsection.3.7.2}%
