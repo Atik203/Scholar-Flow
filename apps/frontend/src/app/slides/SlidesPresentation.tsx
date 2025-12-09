@@ -189,6 +189,9 @@ export default function SlidesPresentation() {
           id="slide-container"
         >
           <CurrentSlideComponent />
+          <div className="absolute bottom-4 right-4 text-xs text-slate-700 bg-white/80 border border-slate-200 rounded-full px-3 py-1 shadow-sm pointer-events-none">
+            {currentSlide + 1} / {slides.length}
+          </div>
         </div>
       </div>
 
