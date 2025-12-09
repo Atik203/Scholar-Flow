@@ -1,0 +1,269 @@
+% ScholarFlow - Software Requirements Specification (SRS)
+% Course: Database Management System Lab
+% Date: December 8, 2025
+% Section: I
+
+\documentclass[12pt,a4paper,openany]{report}
+
+% ============================================
+% PACKAGES
+% ============================================
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{fontawesome5}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{verbatim}
+
+% ============================================
+% GEOMETRY & LAYOUT
+% ============================================
+\geometry{
+    left=1in,
+    right=1in,
+    top=1in,
+    bottom=1in,
+    headheight=15pt
+}
+
+% ============================================
+% COLOR DEFINITIONS
+% ============================================
+\definecolor{primaryblue}{RGB}{59, 130, 246}
+\definecolor{secondarygreen}{RGB}{16, 185, 129}
+\definecolor{accentorange}{RGB}{251, 146, 60}
+\definecolor{darkgray}{RGB}{55, 65, 81}
+\definecolor{lightgray}{RGB}{243, 244, 246}
+\definecolor{codebg}{RGB}{248, 250, 252}
+\definecolor{codeframe}{RGB}{226, 232, 240}
+
+% ============================================
+% HYPERLINKS
+% ============================================
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=black,
+    urlcolor=black,
+    citecolor=black,
+    pdftitle={ScholarFlow - Software Requirements Specification},
+    pdfauthor={Md. Atikur Rahaman},
+    pdfsubject={AI-Powered Research Paper Collaboration Hub - SRS Document},
+    pdfkeywords={ScholarFlow, SRS, Software Requirements, Research, AI, Collaboration}
+}
+
+% ============================================
+% HEADERS & FOOTERS (Disabled - No Header)
+% ============================================
+\pagestyle{plain}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ============================================
+% CHAPTER & SECTION STYLING
+% ============================================
+\renewcommand{\cfttoctitlefont}{\Huge\bfseries}
+\renewcommand{\cftchapfont}{\bfseries}
+\renewcommand{\cftsecfont}{}
+\renewcommand{\cftsubsecfont}{}
+
+% ============================================
+% LISTINGS (CODE BLOCKS)
+% ============================================
+\lstdefinestyle{sqlstyle}{
+    language=SQL,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{codeframe},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{primaryblue}\bfseries,
+    commentstyle=\color{darkgray}\itshape,
+    stringstyle=\color{secondarygreen},
+    numberstyle=\tiny\color{darkgray},
+    numbers=left,
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=2,
+    showstringspaces=false,
+    captionpos=b
+}
+
+\lstset{style=sqlstyle}
+
+% ============================================
+% CUSTOM BOXES
+% ============================================
+\newtcolorbox{infobox}[1][]{
+    colback=primaryblue!5,
+    colframe=primaryblue,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{warningbox}[1][]{
+    colback=accentorange!5,
+    colframe=accentorange,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+\newtcolorbox{successbox}[1][]{
+    colback=green!5,
+    colframe=secondarygreen,
+    fonttitle=\bfseries,
+    title={#1},
+    arc=2mm
+}
+
+% ============================================
+% CUSTOM COMMANDS
+% ============================================
+\newcommand{\projectname}{\textbf{ScholarFlow}}
+\newcommand{\version}{\texttt{v1.1.9}}
+\newcommand{\feature}[1]{\textbf{#1}}
+\newcommand{\tech}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\colorbox{codebg}{\texttt{#1}}}
+
+% ============================================
+% DOCUMENT INFORMATION
+% ============================================
+\title{
+    \vspace{-2cm}
+    \begin{figure}[h]
+    \centering
+    \includegraphics[width=0.3\textwidth]{images/logos/logo.png}
+    \end{figure}
+    \vspace{0.3cm}
+    {\LARGE\textbf{ScholarFlow}}\\
+    \vspace{0.5cm}
+    {\Large Software Requirements Specification (SRS)}\\
+    \vspace{0.3cm}
+    {\large AI-Powered Research Paper Collaboration Hub}\\
+    \vspace{0.5cm}
+    {\normalsize\textbf{Team: Phantom Devs}}\\
+    \vspace{0.3cm}
+}
+\author{
+    \textbf{Team Members:}\\[0.5cm]
+    \begin{tabular}{rl}
+    \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
+    \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
+    \textbf{0112220081} & Prattay Pal \\
+    \textbf{0112310302} & Md. Sarowar Alam Sourov \\
+    \end{tabular}
+    \\[1cm]
+    {\normalsize\textbf{Section: I}}\\
+    {\normalsize\textbf{Course: Database Management System Lab}}\\
+    {\normalsize\textbf{United International University (UIU)}}
+}
+\date{December 8, 2025}
+
+% ============================================
+% BEGIN DOCUMENT
+% ============================================
+\begin{document}
+
+% Title Page
+\maketitle
+\thispagestyle{empty}
+
+\newpage
+
+% Abstract/Executive Summary
+\begin{abstract}
+    \noindent
+    This Software Requirements Specification (SRS) document provides a comprehensive description of the \textbf{ScholarFlow} platform, an AI-powered research paper collaboration hub designed to revolutionize how academic researchers manage, organize, and collaborate on research papers.
+
+    \vspace{0.3cm}
+    \noindent
+    Based on extensive market research including a survey of 29 academic researchers across 10 universities in Bangladesh, this document establishes the functional and non-functional requirements for ScholarFlow. The survey revealed strong market demand, with 72.4\% of respondents expressing moderate-to-extreme need for a dedicated research management platform, and 82.7\% showing high interest in AI-powered paper summarization features.
+
+    \vspace{0.3cm}
+    \noindent
+    ScholarFlow addresses critical gaps identified in the current research workflow landscape, where 37.9\% of researchers cite "lack of proper tools" as their primary pain point, and current tool satisfaction averages only 3.31 out of 5.00. The platform combines modern UI/UX design (102 Figma screens), advanced AI integration (Google Gemini + OpenAI), and comprehensive collaboration features to create a unified research management ecosystem.
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Target Audience:} 86.2\% undergraduate students, 67\%+ Computer Science/IT backgrounds, 75.9\% ages 22-25 (Gen-Z digital natives)
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Google Gemini AI, OpenAI, Stripe, TipTap Editor
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Document Standard:} IEEE Std 830-1998 (Software Requirements Specifications)
+
+    \vspace{0.3cm}
+    \noindent
+    \textbf{Repository:} \url{https://github.com/Atik203/Scholar-Flow}
+
+\end{abstract}
+
+\newpage
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% List of Figures
+\listoffigures
+\newpage
+
+% List of Tables
+\listoftables
+\newpage
+
+% ============================================
+% SRS CHAPTERS
+% ============================================
+% Introduction, Problem Statement, Goals, SDLC
+\input{SRS/00-introduction-problem-goals}
+
+% System Study & Information Gathering
+\input{SRS/00-system-study-info-gathering}
+
+% System Analysis with Gap Analysis, Benchmark, Survey
+\input{SRS/03-system-analysis}
+
+% ============================================
+% APPENDICES (Optional)
+% ============================================
+% \appendix
+% \chapter{Survey Questionnaire}
+% \chapter{Raw Survey Data}
+% \chapter{Feature Request Details}
+
+% ============================================
+% END DOCUMENT
+% ============================================
+
+\end{document}
