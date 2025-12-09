@@ -2,7 +2,12 @@ import {
   Brain,
   FolderKanban,
   LineChart,
+  LockKeyhole,
   PencilRuler,
+  Rocket,
+  ShieldCheck,
+  SplitSquareHorizontal,
+  UploadCloud,
   Users,
 } from "lucide-react";
 
@@ -41,6 +46,48 @@ const features = [
     description:
       "Personal/workspace dashboards, streaks, upload trends, health monitoring (CPU/memory/DB), auto-refresh with polling.",
     icon: LineChart,
+  },
+  {
+    title: "Smart Import & Dedup",
+    stat: "Targets browser/drive/local users",
+    description:
+      "One-click imports from folders/cloud, duplicate detection via hashing, clean metadata on entry to reduce clutter.",
+    icon: UploadCloud,
+  },
+  {
+    title: "Collections & Tagging",
+    stat: "59.4% want folders/collections",
+    description:
+      "Public/private collections, tags, filters, and saved searches to keep fast retrieval for every workspace.",
+    icon: SplitSquareHorizontal,
+  },
+  {
+    title: "Advanced Search & Filters",
+    stat: "59.4% want advanced search",
+    description:
+      "Full-text, author, year, type, and keyword filters with ranking; spotlight-style quick search on web and mobile.",
+    icon: Rocket,
+  },
+  {
+    title: "Pricing & Plan Controls",
+    stat: "Freemium expected (62.6% likely)",
+    description:
+      "Free core with upgrade hooks (storage, AI quota); plan-aware limits surfaced inline to reduce surprise costs.",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Security & Privacy",
+    stat: "Privacy is a top concern",
+    description:
+      "SOC2-ready roadmap, encryption, audit logs, rate limits, and transparent AI guardrails to build trust.",
+    icon: LockKeyhole,
+  },
+  {
+    title: "Performance & Offline Resilience",
+    stat: "Gen-Z expects zero lag",
+    description:
+      "Optimized caching, responsive UI, and graceful offline handling for uploads and notes to avoid drop-offs.",
+    icon: Rocket,
   },
 ];
 

@@ -39,8 +39,8 @@ export default function Slide01Title() {
         {/* Info Card */}
         <div className="bg-slate-50 border border-slate-200 rounded-2xl px-14 py-12 shadow-xl max-w-4xl w-full">
           <h2 className="text-4xl font-bold text-blue-600 text-center mb-10 flex items-center justify-center gap-3">
-            <span className="text-5xl">📝</span> PROJECT PROPOSAL & BENCHMARK
-            ANALYSIS
+            <span className="text-5xl">📝</span> FEASIBILITY ANALYSIS & SURVEY
+            READOUT
           </h2>
 
           <div className="grid grid-cols-2 gap-10 text-black">
