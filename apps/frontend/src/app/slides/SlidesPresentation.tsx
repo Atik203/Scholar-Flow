@@ -13,8 +13,10 @@ import { useEffect, useRef, useState } from "react";
 
 // Feasibility deck slides
 import Slide01SurveyStats from "./slides/Slide01SurveyStats";
+import Slide01SurveyStatsPart2 from "./slides/Slide01SurveyStatsPart2";
 import Slide01Title from "./slides/Slide01Title";
-import Slide02SurveyTable from "./slides/Slide02SurveyTable";
+import Slide02SurveyTablePart1 from "./slides/Slide02SurveyTablePart1";
+import Slide02SurveyTablePart2 from "./slides/Slide02SurveyTablePart2";
 import Slide03SelectedFeatures from "./slides/Slide03SelectedFeatures";
 import Slide04SwotStrategy from "./slides/Slide04SwotStrategy";
 import Slide05SwotStrategyB from "./slides/Slide05SwotStrategyB";
@@ -35,37 +37,60 @@ import {
 
 const slides = [
   { id: 1, title: "Introduction", component: Slide01Title },
-  { id: 2, title: "Survey Attendee Stats", component: Slide01SurveyStats },
-  { id: 3, title: "Q1–Q2", component: SlideSurvey01 },
-  { id: 4, title: "Q3–Q4", component: SlideSurvey02 },
-  { id: 5, title: "Q5–Q6", component: SlideSurvey03 },
-  { id: 6, title: "Q7–Q8", component: SlideSurvey04 },
-  { id: 7, title: "Q9–Q10", component: SlideSurvey05 },
-  { id: 8, title: "Q11–Q12", component: SlideSurvey06 },
-  { id: 9, title: "Q13–Q14", component: SlideSurvey07 },
-  { id: 10, title: "Q15–Q16", component: SlideSurvey08 },
-  { id: 11, title: "Q17–Q18", component: SlideSurvey09 },
-  { id: 12, title: "Q19–Q20", component: SlideSurvey10 },
-  { id: 13, title: "Q21", component: SlideSurvey11 },
-  { id: 14, title: "Survey Result Table", component: Slide02SurveyTable },
-  { id: 15, title: "Selected Features", component: Slide03SelectedFeatures },
+  {
+    id: 2,
+    title: "Survey Attendee Stats (1/2)",
+    component: Slide01SurveyStats,
+  },
+  {
+    id: 3,
+    title: "Survey Attendee Stats (2/2)",
+    component: Slide01SurveyStatsPart2,
+  },
+  { id: 4, title: "Q1–Q2", component: SlideSurvey01 },
+  { id: 5, title: "Q3–Q4", component: SlideSurvey02 },
+  { id: 6, title: "Q5–Q6", component: SlideSurvey03 },
+  { id: 7, title: "Q7–Q8", component: SlideSurvey04 },
+  { id: 8, title: "Q9–Q10", component: SlideSurvey05 },
+  { id: 9, title: "Q11–Q12", component: SlideSurvey06 },
+  { id: 10, title: "Q13–Q14", component: SlideSurvey07 },
+  { id: 11, title: "Q15–Q16", component: SlideSurvey08 },
+  { id: 12, title: "Q17–Q18", component: SlideSurvey09 },
+  { id: 13, title: "Q19–Q20", component: SlideSurvey10 },
+  { id: 14, title: "Q21", component: SlideSurvey11 },
+  {
+    id: 15,
+    title: "Survey Result Table (1/2)",
+    component: Slide02SurveyTablePart1,
+  },
   {
     id: 16,
+    title: "Survey Result Table (2/2)",
+    component: Slide02SurveyTablePart2,
+  },
+  { id: 17, title: "Selected Features", component: Slide03SelectedFeatures },
+  {
+    id: 18,
     title: "SWOT: Strengths & Weaknesses",
     component: Slide04SwotStrategy,
   },
   {
-    id: 17,
+    id: 19,
     title: "SWOT: Opportunities & Threats",
     component: Slide05SwotStrategyB,
   },
-  { id: 18, title: "Any Questions?", component: SlideClosingQA },
+  { id: 20, title: "Any Questions?", component: SlideClosingQA },
 ];
 
 export default function SlidesPresentation() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure keyboard focus stays on the slide container for reliable arrow navigation
+  useEffect(() => {
+    slideContainerRef.current?.focus();
+  }, [currentSlide]);
 
   const goToPrevious = () => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
@@ -90,22 +115,6 @@ export default function SlidesPresentation() {
       console.error("Fullscreen error:", err);
     }
   };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Listen for fullscreen change events
   useEffect(() => {
@@ -167,6 +176,16 @@ export default function SlidesPresentation() {
             "w-full max-w-[1200px] aspect-[16/9]",
             isFullscreen && "!max-w-none !rounded-none w-screen h-screen"
           )}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" || e.key === " ") {
+              e.preventDefault();
+              goToNext();
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              goToPrevious();
+            }
+          }}
           id="slide-container"
         >
           <CurrentSlideComponent />

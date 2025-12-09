@@ -5,6 +5,8 @@ const opportunities = [
   "82%+ AI interest and mind-map/comparison demand",
   "Campus network effects with ambassadors and class cohorts",
   "Freemium appetite (58.6% willing to try free tier)",
+  "Annotation + search priority aligns with our MVP scope",
+  "Early adopters want dashboards; lightweight analytics is enough",
 ];
 
 const threats = [
@@ -12,6 +14,8 @@ const threats = [
   "Price-sensitive students; AI cost volatility",
   "Compliance/privacy overhead (GDPR/CCPA) and trust",
   "Feature creep risk across diverse requests",
+  "Bandwidth risk if support and onboarding are not templatized",
+  "AI output quality swings can erode trust quickly",
 ];
 
 export default function Slide05SwotStrategyB() {
@@ -46,12 +50,12 @@ export default function Slide05SwotStrategyB() {
       </header>
 
       <div className="relative z-10 flex-1 flex items-center justify-center">
-        <div className="bg-white/85 border border-slate-200 rounded-3xl shadow-lg w-full max-w-[1100px] overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 text-center font-semibold">
-            Centered SWOT table for feasibility review
+        <div className="bg-white/90 border border-slate-200 rounded-3xl shadow-lg w-full max-w-[1200px] overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-500 text-white px-10 py-6 text-center font-semibold text-lg">
+            Opportunities and threats with immediate counter-moves
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-            <div className="p-6">
+            <div className="p-8">
               <p className="text-sm uppercase tracking-wide text-blue-600 font-semibold mb-3">
                 Opportunities
               </p>
@@ -62,10 +66,11 @@ export default function Slide05SwotStrategyB() {
               </ul>
               <div className="mt-4 text-sm font-medium text-slate-900">
                 Plan: campus-first growth with ambassadors, showcase AI
-                workflows, and lean freemium to convert warm intent.
+                workflows, lean freemium to convert warm intent, and add light
+                analytics to prove value.
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-8">
               <p className="text-sm uppercase tracking-wide text-rose-600 font-semibold mb-3">
                 Threats
               </p>
@@ -76,9 +81,22 @@ export default function Slide05SwotStrategyB() {
               </ul>
               <div className="mt-4 text-sm font-medium text-slate-900">
                 Mitigation: differentiate on student-first UX + AI; cap AI
-                spend; publish trust/privacy posture; avoid feature creep.
+                spend; publish trust/privacy posture; templatize onboarding and
+                support; guardrail AI outputs.
               </div>
             </div>
+          </div>
+          <div className="bg-slate-50 border-t border-slate-200 px-10 py-6 text-sm text-black leading-relaxed">
+            <p className="text-base font-semibold text-slate-900 mb-2">
+              Strategy
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-slate-800">
+              <li>
+                Lead with freemium plus visible limits to avoid cost shocks
+              </li>
+              <li>Run ambassador program for campus virality</li>
+              <li>Ship quick AI quality checks to maintain trust</li>
+            </ul>
           </div>
         </div>
       </div>
