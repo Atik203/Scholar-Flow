@@ -11,39 +11,17 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-// Import all slides
-import Slide01Title from "./slides/Slide01Title";
-import Slide02Problem from "./slides/Slide02Problem";
-import Slide03Solution from "./slides/Slide03Solution";
-import Slide04Motivation from "./slides/Slide04Motivation";
-import Slide05FeaturesA from "./slides/Slide05FeaturesA";
-import Slide05FeaturesB from "./slides/Slide05FeaturesB";
-import Slide05Scope from "./slides/Slide05Scope";
-import Slide06TechStack from "./slides/Slide06TechStack";
-import Slide08Competitors from "./slides/Slide08Competitors";
-import Slide09Comparison from "./slides/Slide09Comparison";
-import Slide10Advantage from "./slides/Slide10Advantage";
-import Slide11GapAnalysis from "./slides/Slide11GapAnalysis";
-import Slide12ScreenshotsA from "./slides/Slide12ScreenshotsA";
-import Slide12ScreenshotsB from "./slides/Slide12ScreenshotsB";
-import Slide15Conclusion from "./slides/Slide15Conclusion";
+// Feasibility deck slides
+import Slide01SurveyStats from "./slides/Slide01SurveyStats";
+import Slide02SurveyTable from "./slides/Slide02SurveyTable";
+import Slide03SelectedFeatures from "./slides/Slide03SelectedFeatures";
+import Slide04SwotStrategy from "./slides/Slide04SwotStrategy";
 
 const slides = [
-  { id: 1, title: "Title", component: Slide01Title },
-  { id: 2, title: "Problem Statement", component: Slide02Problem },
-  { id: 3, title: "Proposed Solution", component: Slide03Solution },
-  { id: 4, title: "Motivation", component: Slide04Motivation },
-  { id: 5, title: "Project Scope", component: Slide05Scope },
-  { id: 6, title: "Features (1/2)", component: Slide05FeaturesA },
-  { id: 7, title: "Features (2/2)", component: Slide05FeaturesB },
-  { id: 8, title: "Competitors", component: Slide08Competitors },
-  { id: 9, title: "Comparison", component: Slide09Comparison },
-  { id: 10, title: "Competitive Advantage", component: Slide10Advantage },
-  { id: 11, title: "Gap Analysis", component: Slide11GapAnalysis },
-  { id: 12, title: "Tech Stack", component: Slide06TechStack },
-  { id: 13, title: "UI/UX (1/2)", component: Slide12ScreenshotsA },
-  { id: 14, title: "UI/UX (2/2)", component: Slide12ScreenshotsB },
-  { id: 15, title: "Conclusion", component: Slide15Conclusion },
+  { id: 1, title: "Survey Attendee Stats", component: Slide01SurveyStats },
+  { id: 2, title: "Survey Result Table", component: Slide02SurveyTable },
+  { id: 3, title: "Selected Features", component: Slide03SelectedFeatures },
+  { id: 4, title: "SWOT & Strategy", component: Slide04SwotStrategy },
 ];
 
 export default function SlidesPresentation() {
