@@ -13,15 +13,53 @@ import { useEffect, useRef, useState } from "react";
 
 // Feasibility deck slides
 import Slide01SurveyStats from "./slides/Slide01SurveyStats";
+import Slide01Title from "./slides/Slide01Title";
 import Slide02SurveyTable from "./slides/Slide02SurveyTable";
 import Slide03SelectedFeatures from "./slides/Slide03SelectedFeatures";
 import Slide04SwotStrategy from "./slides/Slide04SwotStrategy";
+import Slide05SwotStrategyB from "./slides/Slide05SwotStrategyB";
+import SlideClosingQA from "./slides/SlideClosingQA";
+import {
+  SlideSurvey01,
+  SlideSurvey02,
+  SlideSurvey03,
+  SlideSurvey04,
+  SlideSurvey05,
+  SlideSurvey06,
+  SlideSurvey07,
+  SlideSurvey08,
+  SlideSurvey09,
+  SlideSurvey10,
+  SlideSurvey11,
+} from "./slides/SlideSurveyPairs";
 
 const slides = [
-  { id: 1, title: "Survey Attendee Stats", component: Slide01SurveyStats },
-  { id: 2, title: "Survey Result Table", component: Slide02SurveyTable },
-  { id: 3, title: "Selected Features", component: Slide03SelectedFeatures },
-  { id: 4, title: "SWOT & Strategy", component: Slide04SwotStrategy },
+  { id: 1, title: "Introduction", component: Slide01Title },
+  { id: 2, title: "Survey Attendee Stats", component: Slide01SurveyStats },
+  { id: 3, title: "Q1–Q2", component: SlideSurvey01 },
+  { id: 4, title: "Q3–Q4", component: SlideSurvey02 },
+  { id: 5, title: "Q5–Q6", component: SlideSurvey03 },
+  { id: 6, title: "Q7–Q8", component: SlideSurvey04 },
+  { id: 7, title: "Q9–Q10", component: SlideSurvey05 },
+  { id: 8, title: "Q11–Q12", component: SlideSurvey06 },
+  { id: 9, title: "Q13–Q14", component: SlideSurvey07 },
+  { id: 10, title: "Q15–Q16", component: SlideSurvey08 },
+  { id: 11, title: "Q17–Q18", component: SlideSurvey09 },
+  { id: 12, title: "Q19–Q20", component: SlideSurvey10 },
+  { id: 13, title: "Q21", component: SlideSurvey11 },
+  { id: 14, title: "Survey Result Table", component: Slide02SurveyTable },
+  { id: 15, title: "Selected Features", component: Slide03SelectedFeatures },
+  {
+    id: 16,
+    title: "SWOT: Strengths & Weaknesses",
+    component: Slide04SwotStrategy,
+  },
+  {
+    id: 17,
+    title: "SWOT: Opportunities & Threats",
+    component: Slide05SwotStrategyB,
+  },
+  { id: 18, title: "Any Questions?", component: SlideClosingQA },
 ];
 
 export default function SlidesPresentation() {
