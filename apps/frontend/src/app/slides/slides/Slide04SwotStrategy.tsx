@@ -3,8 +3,9 @@ import { ShieldCheck } from "lucide-react";
 const strengths = [
   "72.4% need validation · 58.6% high interest",
   "Dual AI stack (Gemini + OpenAI) ready",
-  "102 Figma screens and full-stack MVP in place",
   "UIU concentration (47.4%) enables campus-first beta",
+  "Annotation + search are top asks; we already scoped them",
+  "Clear privacy posture drafted; easy to message trust",
 ];
 
 const weaknesses = [
@@ -12,6 +13,8 @@ const weaknesses = [
   "Solo-founder bandwidth and complexity of realtime + AI",
   "Privacy & pricing uncertainty raised in feedback",
   "Reliance on third-party services (OAuth, S3, Stripe, AI APIs)",
+  "Support/process still forming (runbooks, SLAs, status comms)",
+  "Need burn controls for AI so costs stay predictable",
 ];
 
 export default function Slide04SwotStrategy() {
@@ -46,12 +49,12 @@ export default function Slide04SwotStrategy() {
       </header>
 
       <div className="relative z-10 flex-1 flex items-center justify-center">
-        <div className="bg-white/85 border border-slate-200 rounded-3xl shadow-lg w-full max-w-[1100px] overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 text-center font-semibold">
-            Centered SWOT table for feasibility review
+        <div className="bg-white/90 border border-slate-200 rounded-3xl shadow-lg w-full max-w-[1200px] overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-700 via-blue-600 to-cyan-500 text-white px-10 py-6 text-center font-semibold text-lg">
+            Strengths and weaknesses with immediate launch moves
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-            <div className="p-6">
+            <div className="p-8">
               <p className="text-sm uppercase tracking-wide text-emerald-600 font-semibold mb-3">
                 Strengths
               </p>
@@ -61,11 +64,12 @@ export default function Slide04SwotStrategy() {
                 ))}
               </ul>
               <div className="mt-4 text-sm font-medium text-slate-900">
-                Launch move: demo-ready, AI-forward beta at UIU to capture
-                social proof quickly.
+                Launch move: run an AI-forward beta at UIU with annotation,
+                search, and note flows polished; gather testimonials within 2
+                weeks.
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-8">
               <p className="text-sm uppercase tracking-wide text-amber-600 font-semibold mb-3">
                 Weaknesses
               </p>
@@ -75,10 +79,21 @@ export default function Slide04SwotStrategy() {
                 ))}
               </ul>
               <div className="mt-4 text-sm font-medium text-slate-900">
-                Mitigation: keep MVP scope tight, publish privacy copy, and add
-                pricing experiments before broad launch.
+                Mitigation: publish privacy copy, pre-set AI spend caps,
+                simplify scope to annotations+collections, and set a lightweight
+                support playbook.
               </div>
             </div>
+          </div>
+          <div className="bg-slate-50 border-t border-slate-200 px-10 py-6 text-sm text-black leading-relaxed">
+            <p className="text-base font-semibold text-slate-900 mb-2">
+              Strategy
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-slate-800">
+              <li>Campus-first beta at UIU with curated cohort</li>
+              <li>Ship trust center and AI cost caps before promotions</li>
+              <li>Collect testimonials fast, then widen invites</li>
+            </ul>
           </div>
         </div>
       </div>

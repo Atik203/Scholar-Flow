@@ -26,9 +26,6 @@ export default function SlideClosingQA() {
             <MailQuestion className="w-5 h-5" />
             <span className="font-semibold">team@scholarflow.ai</span>
           </div>
-          <span className="text-sm text-slate-500">
-            Slides remain 16:9 · fullscreen friendly
-          </span>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   LockKeyhole,
   PencilRuler,
   Rocket,
+  Share2,
   ShieldCheck,
   SplitSquareHorizontal,
   UploadCloud,
@@ -84,10 +85,17 @@ const features = [
   },
   {
     title: "Performance & Offline Resilience",
-    stat: "Gen-Z expects zero lag",
+    stat: "Users expect zero lag",
     description:
       "Optimized caching, responsive UI, and graceful offline handling for uploads and notes to avoid drop-offs.",
     icon: Rocket,
+  },
+  {
+    title: "Collaboration Flow Readiness",
+    stat: "Share-ready from day one",
+    description:
+      "Live cursors, commenting lanes, and clear invite flows ensure teams can collaborate without friction.",
+    icon: Share2,
   },
 ];
 
@@ -100,48 +108,46 @@ export default function Slide03SelectedFeatures() {
 
       <header className="relative z-10 flex items-start justify-between gap-6 flex-wrap">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-700">
             Product Direction
           </p>
-          <h1 className="text-4xl font-bold text-slate-900 mt-2">
+          <h1 className="text-4xl font-bold text-black mt-2">
             List of Selected Features
           </h1>
-          <p className="text-lg text-slate-600 mt-2 max-w-4xl">
+          <p className="text-lg text-black mt-2 max-w-4xl">
             Feature shortlist grounded entirely in survey validation to keep
             scope tight and high-impact for launch.
           </p>
         </div>
         <div className="bg-white/80 border border-slate-200 rounded-2xl px-5 py-3 shadow-sm backdrop-blur max-w-sm">
-          <p className="text-xs text-slate-500">Validation snapshot</p>
-          <p className="font-semibold text-slate-800">
+          <p className="text-xs text-slate-700">Validation snapshot</p>
+          <p className="font-semibold text-black">
             • 75%+ express need · 81%+ show interest · 0% uninterested in AI
           </p>
         </div>
       </header>
 
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 flex-1">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 flex-1">
         {features.map((feature) => {
           const Icon = feature.icon;
           return (
             <div
               key={feature.title}
-              className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+              className="bg-white border border-slate-200 rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow flex flex-col"
             >
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white flex items-center justify-center">
                   <Icon className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-slate-500 uppercase tracking-wide">
+                  <p className="text-xs text-slate-700 uppercase tracking-wide">
                     Survey-backed
                   </p>
-                  <p className="font-semibold text-slate-900">{feature.stat}</p>
+                  <p className="font-semibold text-black">{feature.stat}</p>
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-slate-900">
-                {feature.title}
-              </h3>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed flex-1">
+              <h3 className="text-xl font-bold text-black">{feature.title}</h3>
+              <p className="text-sm text-black mt-2 leading-relaxed flex-1">
                 {feature.description}
               </p>
             </div>

@@ -36,7 +36,7 @@ const surveyItems: SurveyItem[] = [
     title: "Age distribution",
     stat: "75.9% ages 22–25 · 13.8% 18–21 · 10.3% 26–30",
     insight:
-      "Gen-Z users expect crisp UI, mobile-friendly flows, and instant feedback.",
+      "Younger respondents expect crisp UI, mobile-friendly flows, and instant feedback.",
     image: "/response_image/4.png",
   },
   {
@@ -178,6 +178,10 @@ function makeSurveySlide(startIndex: number) {
       items.length === 1
         ? `Question ${items[0].id}`
         : `Questions ${items[0].id}–${items[items.length - 1].id}`;
+    const gridCols =
+      items.length === 1
+        ? "md:grid-cols-1 place-items-center"
+        : "md:grid-cols-2";
 
     return (
       <div className="w-full h-full bg-white p-12 flex flex-col gap-6 relative overflow-hidden">
@@ -187,13 +191,11 @@ function makeSurveySlide(startIndex: number) {
 
         <header className="relative z-10 flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+            <p className="text-sm uppercase tracking-[0.2em] text-slate-700">
               Survey Insights
             </p>
-            <h1 className="text-4xl font-bold text-slate-900 mt-2">
-              {rangeLabel}
-            </h1>
-            <p className="text-lg text-slate-600 mt-2 max-w-4xl">
+            <h1 className="text-4xl font-bold text-black mt-2">{rangeLabel}</h1>
+            <p className="text-lg text-black mt-2 max-w-4xl">
               Two-question snapshot with concise takeaways to guide build and
               launch decisions.
             </p>
@@ -201,19 +203,21 @@ function makeSurveySlide(startIndex: number) {
           <div className="flex items-center gap-3 bg-white/80 border border-slate-200 rounded-2xl px-5 py-3 shadow-sm backdrop-blur">
             <PieChart className="w-6 h-6 text-indigo-600" />
             <div>
-              <p className="text-xs text-slate-500">Survey size</p>
-              <p className="font-semibold text-slate-800">
+              <p className="text-xs text-slate-700">Survey size</p>
+              <p className="font-semibold text-black">
                 32 respondents · 21 questions
               </p>
             </div>
           </div>
         </header>
 
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-5 flex-1">
+        <div
+          className={`relative z-10 grid grid-cols-1 ${gridCols} gap-5 flex-1`}
+        >
           {items.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col"
+              className="bg-white border border-slate-200 rounded-3xl p-6 shadow-md hover:shadow-lg transition-shadow flex flex-col w-full md:max-w-4xl"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -221,10 +225,10 @@ function makeSurveySlide(startIndex: number) {
                     Q{item.id}
                   </div>
                   <div>
-                    <p className="text-sm uppercase tracking-wide text-slate-500">
+                    <p className="text-sm uppercase tracking-wide text-slate-700">
                       Key finding
                     </p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="text-lg font-semibold text-black">
                       {item.title}
                     </p>
                   </div>
@@ -232,27 +236,27 @@ function makeSurveySlide(startIndex: number) {
                 <Lightbulb className="w-5 h-5 text-amber-500" />
               </div>
 
-              <p className="text-sm text-slate-600 mt-3 leading-relaxed">
+              <p className="text-base text-black mt-3 leading-relaxed">
                 {item.stat}
               </p>
 
-              <div className="mt-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-semibold">
+              <div className="mt-4 bg-indigo-50 border border-indigo-100 rounded-2xl p-3 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-semibold">
                   →
                 </div>
-                <p className="text-sm font-medium text-slate-900 leading-relaxed">
+                <p className="text-sm font-semibold text-black leading-relaxed">
                   {item.insight}
                 </p>
               </div>
 
               {item.image ? (
-                <div className="mt-4 relative w-full h-48 rounded-2xl overflow-hidden bg-white border border-slate-200">
+                <div className="mt-4 relative w-full h-80 rounded-2xl overflow-hidden bg-white border border-slate-200">
                   <Image
                     src={item.image}
                     alt={item.title}
                     fill
                     className="object-contain"
-                    sizes="(max-width: 1024px) 50vw, 33vw"
+                    sizes="(max-width: 1024px) 90vw, 45vw"
                   />
                 </div>
               ) : null}
