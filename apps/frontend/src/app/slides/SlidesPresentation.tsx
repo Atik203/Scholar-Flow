@@ -11,45 +11,86 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-// Import all slides
+// Feasibility deck slides
+import Slide01SurveyStats from "./slides/Slide01SurveyStats";
+import Slide01SurveyStatsPart2 from "./slides/Slide01SurveyStatsPart2";
 import Slide01Title from "./slides/Slide01Title";
-import Slide02Problem from "./slides/Slide02Problem";
-import Slide03Solution from "./slides/Slide03Solution";
-import Slide04Motivation from "./slides/Slide04Motivation";
-import Slide05FeaturesA from "./slides/Slide05FeaturesA";
-import Slide05FeaturesB from "./slides/Slide05FeaturesB";
-import Slide05Scope from "./slides/Slide05Scope";
-import Slide06TechStack from "./slides/Slide06TechStack";
-import Slide08Competitors from "./slides/Slide08Competitors";
-import Slide09Comparison from "./slides/Slide09Comparison";
-import Slide10Advantage from "./slides/Slide10Advantage";
-import Slide11GapAnalysis from "./slides/Slide11GapAnalysis";
-import Slide12ScreenshotsA from "./slides/Slide12ScreenshotsA";
-import Slide12ScreenshotsB from "./slides/Slide12ScreenshotsB";
-import Slide15Conclusion from "./slides/Slide15Conclusion";
+import Slide02SurveyTablePart1 from "./slides/Slide02SurveyTablePart1";
+import Slide02SurveyTablePart2 from "./slides/Slide02SurveyTablePart2";
+import Slide03SelectedFeatures from "./slides/Slide03SelectedFeatures";
+import Slide04SwotStrategy from "./slides/Slide04SwotStrategy";
+import Slide05SwotStrategyB from "./slides/Slide05SwotStrategyB";
+import SlideClosingQA from "./slides/SlideClosingQA";
+import {
+  SlideSurvey01,
+  SlideSurvey02,
+  SlideSurvey03,
+  SlideSurvey04,
+  SlideSurvey05,
+  SlideSurvey06,
+  SlideSurvey07,
+  SlideSurvey08,
+  SlideSurvey09,
+  SlideSurvey10,
+  SlideSurvey11,
+} from "./slides/SlideSurveyPairs";
 
 const slides = [
-  { id: 1, title: "Title", component: Slide01Title },
-  { id: 2, title: "Problem Statement", component: Slide02Problem },
-  { id: 3, title: "Proposed Solution", component: Slide03Solution },
-  { id: 4, title: "Motivation", component: Slide04Motivation },
-  { id: 5, title: "Project Scope", component: Slide05Scope },
-  { id: 6, title: "Features (1/2)", component: Slide05FeaturesA },
-  { id: 7, title: "Features (2/2)", component: Slide05FeaturesB },
-  { id: 8, title: "Competitors", component: Slide08Competitors },
-  { id: 9, title: "Comparison", component: Slide09Comparison },
-  { id: 10, title: "Competitive Advantage", component: Slide10Advantage },
-  { id: 11, title: "Gap Analysis", component: Slide11GapAnalysis },
-  { id: 12, title: "Tech Stack", component: Slide06TechStack },
-  { id: 13, title: "UI/UX (1/2)", component: Slide12ScreenshotsA },
-  { id: 14, title: "UI/UX (2/2)", component: Slide12ScreenshotsB },
-  { id: 15, title: "Conclusion", component: Slide15Conclusion },
+  { id: 1, title: "Introduction", component: Slide01Title },
+  {
+    id: 2,
+    title: "Survey Attendee Stats (1/2)",
+    component: Slide01SurveyStats,
+  },
+  {
+    id: 3,
+    title: "Survey Attendee Stats (2/2)",
+    component: Slide01SurveyStatsPart2,
+  },
+  { id: 4, title: "Q1–Q2", component: SlideSurvey01 },
+  { id: 5, title: "Q3–Q4", component: SlideSurvey02 },
+  { id: 6, title: "Q5–Q6", component: SlideSurvey03 },
+  { id: 7, title: "Q7–Q8", component: SlideSurvey04 },
+  { id: 8, title: "Q9–Q10", component: SlideSurvey05 },
+  { id: 9, title: "Q11–Q12", component: SlideSurvey06 },
+  { id: 10, title: "Q13–Q14", component: SlideSurvey07 },
+  { id: 11, title: "Q15–Q16", component: SlideSurvey08 },
+  { id: 12, title: "Q17–Q18", component: SlideSurvey09 },
+  { id: 13, title: "Q19–Q20", component: SlideSurvey10 },
+  { id: 14, title: "Q21", component: SlideSurvey11 },
+  {
+    id: 15,
+    title: "Survey Result Table (1/2)",
+    component: Slide02SurveyTablePart1,
+  },
+  {
+    id: 16,
+    title: "Survey Result Table (2/2)",
+    component: Slide02SurveyTablePart2,
+  },
+  { id: 17, title: "Selected Features", component: Slide03SelectedFeatures },
+  {
+    id: 18,
+    title: "SWOT: Strengths & Weaknesses",
+    component: Slide04SwotStrategy,
+  },
+  {
+    id: 19,
+    title: "SWOT: Opportunities & Threats",
+    component: Slide05SwotStrategyB,
+  },
+  { id: 20, title: "Any Questions?", component: SlideClosingQA },
 ];
 
 export default function SlidesPresentation() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const slideContainerRef = useRef<HTMLDivElement>(null);
+
+  // Ensure keyboard focus stays on the slide container for reliable arrow navigation
+  useEffect(() => {
+    slideContainerRef.current?.focus();
+  }, [currentSlide]);
 
   const goToPrevious = () => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
@@ -74,22 +115,6 @@ export default function SlidesPresentation() {
       console.error("Fullscreen error:", err);
     }
   };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight" || e.key === " ") {
-        e.preventDefault();
-        setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Listen for fullscreen change events
   useEffect(() => {
@@ -151,6 +176,16 @@ export default function SlidesPresentation() {
             "w-full max-w-[1200px] aspect-[16/9]",
             isFullscreen && "!max-w-none !rounded-none w-screen h-screen"
           )}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight" || e.key === " ") {
+              e.preventDefault();
+              goToNext();
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              goToPrevious();
+            }
+          }}
           id="slide-container"
         >
           <CurrentSlideComponent />
