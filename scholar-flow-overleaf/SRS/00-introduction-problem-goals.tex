@@ -12,39 +12,39 @@ This SRS serves multiple stakeholders:
     \item \textbf{Development Team}: Provides architectural blueprints, technical specifications, and implementation guidelines for building ScholarFlow's multi-tier architecture (Next.js frontend, Express.js backend, PostgreSQL database).
     \item \textbf{Project Managers}: Defines project scope boundaries, feature prioritization frameworks (P0/P1/P2 tiers), and milestone acceptance criteria aligned with the 7-phase roadmap.
     \item \textbf{Quality Assurance Team}: Establishes testable requirements, performance benchmarks (sub-300ms search latency, 95\% AI accuracy), and validation criteria for feature acceptance.
-    \item \textbf{Stakeholders \& Investors}: Demonstrates market validation through survey-backed insights (29 responses, 72.4\% need validation), competitive differentiation, and revenue model viability.
+    \item \textbf{Stakeholders \& Investors}: Demonstrates market validation through survey-backed insights (32 responses, 75\% need validation), competitive differentiation, and revenue model viability.
 \end{itemize}
 
 \subsection{Target Audience Demographics}
 
-Based on comprehensive survey data from 29 academic researchers across 10 universities:
+Based on comprehensive survey data from 32 respondents (students and faculty) across multiple universities:
 
 \begin{table}[H]
     \centering
     \small
     \begin{tabular}{|l|l|p{8cm}|}
         \hline
-        \textbf{Demographic}       & \textbf{Percentage} & \textbf{Strategic Implications}                                                                            \\
+        \textbf{Demographic}       & \textbf{Percentage} & \textbf{Strategic Implications}                                                                          \\
         \hline
         \textbf{Role}              &
-        86.2\% Undergraduate       &
-        Design for minimal learning curve; prioritize mobile responsiveness for on-the-go access; implement lightweight features for casual researchers.              \\
+        78.1\% Undergraduate       &
+        Design for minimal learning curve; prioritize mobile responsiveness for on-the-go access; implement lightweight features for casual researchers.            \\
         \hline
         \textbf{Age}               &
-        75.9\% Ages 22-25          &
-        Gen-Z digital natives expect modern UI/UX (dark mode, glassmorphism), seamless OAuth (Google/GitHub), and instant AI-powered insights.                        \\
+        68.8\% Ages 22-25          &
+        Gen-Z digital natives expect modern UI/UX (dark mode, glassmorphism), seamless OAuth (Google/GitHub), and instant AI-powered insights.                      \\
         \hline
         \textbf{Field}             &
-        67\%+ CS/IT                &
-        Tech-savvy users will demand API access, browser extensions, Overleaf integration, and advanced features like semantic search and AI chat.                    \\
+        34.4\% Computer Science    &
+        Tech-savvy users will demand API access, browser extensions, Overleaf integration, and advanced features like semantic search and AI chat.                  \\
         \hline
         \textbf{Reading Frequency} &
-        48.3\% Rarely Read         &
-        Dual-persona design required: lightweight interface for casual users, power features (annotations, collections, AI summaries) for daily researchers (20.7\%). \\
+        43.8\% Rarely Read         &
+        Dual-persona design required: lightweight interface for casual users, power features (annotations, collections, AI summaries) for daily researchers (25\%). \\
         \hline
         \textbf{Institution}       &
-        47.4\% UIU Concentration   &
-        Ideal beta testing ground; leverage UIU cohort for early feedback loops, feature validation, and organic campus network effects.                              \\
+        60\% UIU Concentration     &
+        Ideal beta testing ground; leverage UIU cohort for early feedback loops, feature validation, and organic campus network effects.                            \\
         \hline
     \end{tabular}
     \caption{Target Audience Demographics and Design Implications}
@@ -59,7 +59,7 @@ The exponential growth of academic literature --- with over 2.5 million papers p
 
 \subsection{Problem Description}
 
-Our survey of 29 academic researchers revealed critical pain points in current research workflows:
+Our survey of 32 respondents revealed critical pain points in current research workflows:
 
 \begin{figure}[H]
     \centering
@@ -71,23 +71,22 @@ Our survey of 29 academic researchers revealed critical pain points in current r
 \textbf{Top Pain Points (Multi-Select Responses):}
 
 \begin{enumerate}
-    \item \textbf{44.8\%} - Keeping notes and highlights organized across multiple papers
-    \item \textbf{37.9\%} - Finding papers when needed (poor search/tagging in existing tools)
-    \item \textbf{31.0\%} - Organizing papers into meaningful categories/collections
-    \item \textbf{27.6\%} - Extracting key information efficiently (manual skimming wastes hours)
-    \item \textbf{24.1\%} - Collaborating with team members (email attachments, version conflicts)
-    \item \textbf{20.7\%} - Tracking reading progress across dozens of papers
+    \item \textbf{46.9\%} - Difficulty taking and keeping notes
+    \item \textbf{40.6\%} - Hard to find specific papers later
+    \item \textbf{34.4\%} - Hard to keep papers organized
+    \item \textbf{28.1\%} - Syncing across devices is inconsistent
+    \item \textbf{25\%} - Collaboration challenges
+    \item \textbf{25\%} - Tools feel complex or overwhelming
 \end{enumerate}
 
 \textbf{Current Tool Fragmentation (Figure~\ref{fig:current-tools}):}
 
 \begin{itemize}
-    \item \textbf{34.5\%} use browser PDFs (no organization, lost tabs)
-    \item \textbf{31.0\%} rely on desktop folders (``Desktop chaos'', no search)
-    \item \textbf{31.0\%} store files in cloud drives (Drive/Dropbox/OneDrive --- files only, no metadata)
-    \item \textbf{27.6\%} use no dedicated tool whatsoever
-    \item \textbf{20.7\%} use reference managers (Zotero/Mendeley --- outdated UI, no AI)
-    \item \textbf{13.8\%} use note-taking apps (Notion/Evernote --- not designed for papers)
+    \item \textbf{34.4\%} read directly in the browser (no organization, lost tabs)
+    \item \textbf{31.3\%} rely on local folders (no metadata, weak search)
+    \item \textbf{31.3\%} store files in cloud drives (Drive/OneDrive --- files only, no paper context)
+    \item \textbf{28.1\%} do not use any specific tool
+    \item \textbf{15.6\%} use Zotero (citation manager; limited modern collaboration)
 \end{itemize}
 
 \begin{figure}[H]
@@ -117,7 +116,7 @@ The fragmented tool landscape stems from three fundamental market failures:
     \item \textbf{AI Integration Gap}: Despite the transformer revolution (2017--2024), existing research tools remain fundamentally unchanged. Papers are still searched by keywords (not semantic meaning), summaries are manual, and citations lack context. The market lacks a platform that treats AI as a first-class citizen, not a bolt-on feature.
 \end{enumerate}
 
-\textbf{Validation}: 72.4\% of surveyed researchers indicated ``moderate to extreme need'' for a dedicated research paper management solution (Figure~\ref{fig:need-assessment}), while current tool satisfaction averages only 3.31/5 --- indicating significant room for improvement.
+extbf{Validation}: 75\% of surveyed researchers indicated ``moderate to extreme need'' for a dedicated research paper management solution (Figure~\ref{fig:need-assessment}), while current tool satisfaction averages only 3.28/5 --- indicating significant room for improvement.
 
 \begin{figure}[H]
     \centering
@@ -182,31 +181,31 @@ Develop a production-ready, AI-native research paper collaboration platform that
     \small
     \begin{tabular}{|l|p{4cm}|p{6cm}|}
         \hline
-        \textbf{Metric}                   & \textbf{Target} & \textbf{Measurement Method} \\
+        \textbf{Metric}                   & \textbf{Target} & \textbf{Measurement Method}                         \\
         \hline
         User Adoption                     &
         1,000 beta users (6 months)       &
-        Registration analytics, UIU campus penetration (47.4\% survey base)               \\
+        Registration analytics, UIU campus penetration (\textasciitilde{}60\% survey base, incl. duplicate entry) \\
         \hline
         Feature Engagement                &
         60\% weekly active on AI features &
-        Track semantic search, AI summaries, multi-paper chat usage                       \\
+        Track semantic search, AI summaries, multi-paper chat usage                                               \\
         \hline
         Time Savings                      &
         40\% reduction in research admin  &
-        User surveys, session duration analytics before/after onboarding                  \\
+        User surveys, session duration analytics before/after onboarding                                          \\
         \hline
         Collaboration Uptake              &
         30\% users in shared workspaces   &
-        Workspace creation rate, team member invitation acceptance                        \\
+        Workspace creation rate, team member invitation acceptance                                                \\
         \hline
         Revenue (Phase 7)                 &
         \$50K ARR (Year 1)                &
-        Stripe dashboard, Pro tier conversion rate (5--10\% target)                       \\
+        Stripe dashboard, Pro tier conversion rate (5--10\% target)                                               \\
         \hline
         Satisfaction Score                &
-        4.5/5 (vs. 3.31/5 current)        &
-        In-app NPS surveys, feature feedback forms                                        \\
+        4.5/5 (vs. 3.28/5 current)        &
+        In-app NPS surveys, feature feedback forms                                                                \\
         \hline
     \end{tabular}
     \caption{Key Performance Indicators and Success Metrics}
@@ -247,7 +246,7 @@ ScholarFlow follows an \textbf{Agile-Iterative SDLC} with 7 phased rollouts, bal
 \subsubsection{1. Requirements Analysis}
 
 \begin{itemize}
-    \item \textbf{Survey-Driven Requirements}: 29-response survey with 21 questions across demographics, feature priorities, and adoption intent
+    \item \textbf{Survey-Driven Requirements}: 32-response survey with 21 questions across demographics, feature priorities, and adoption intent
     \item \textbf{Competitive Analysis}: Feature matrix comparing ScholarFlow vs. Zotero, Mendeley, Paperpile, Paperpal (20+ features)
     \item \textbf{Stakeholder Interviews}: Conversations with UIU researchers, professors, and research assistants
     \item \textbf{Output}: This SRS document, feature prioritization matrix (P0/P1/P2), technical feasibility assessment

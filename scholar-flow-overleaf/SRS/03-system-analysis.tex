@@ -7,7 +7,7 @@ System analysis is the process of examining ScholarFlow's proposed solution agai
 \begin{enumerate}
     \item \textbf{Gap Analysis}: Targeted comparison of what existing tools lack vs. what ScholarFlow delivers
     \item \textbf{Benchmark Analysis}: Quantitative comparison against 5 primary competitors across 20+ features
-    \item \textbf{Survey Analysis}: Comprehensive breakdown of 29-response survey validating market demand
+    \item \textbf{Survey Analysis}: Comprehensive breakdown of 32-response survey validating market demand
     \item \textbf{SWOT Analysis}: Strategic assessment of strengths, weaknesses, opportunities, and threats
     \item \textbf{Feature Prioritization}: P0/P1/P2 framework for phased rollout
     \item \textbf{Feasibility Assessment}: Technical, economic, and operational viability analysis
@@ -34,7 +34,7 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
         \textbf{Mendeley}: No semantic search or summaries \newline
         \textbf{Paperpile}: Keyword search only \newline
         \textbf{Paperpal}: AI writing only (no management)              &
-        \textbf{AI-First Architecture}: Semantic search (pgvector), AI summaries (82.7\% demand), multi-paper chat, deep research mode with citation context               \\
+        extbf{AI-First Architecture}: Semantic search (pgvector), AI summaries (65.6\% selection), multi-paper chat, deep research mode with citation context              \\
         \hline
         \textbf{Modern UX} \newline \textit{(High Impact)}              &
         \textbf{Zotero}: Outdated desktop UI (feels like 2010) \newline
@@ -190,19 +190,19 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
     \small
     \begin{tabularx}{\textwidth}{|p{6.5cm}|p{6.5cm}|}
         \hline
-        \textbf{Strengths (Internal)}                                                                                                          & \textbf{Weaknesses (Internal)}                                                                      \\
+        \textbf{Strengths (Internal)}                                                                                                                                  & \textbf{Weaknesses (Internal)}                                                                      \\
         \hline
-        29 validated survey responses; 86.2\% undergraduates; 10 universities represented; 67\%+ CS/IT audience                                & Zero brand awareness; no testimonials or social proof; competing with entrenched incumbents         \\
+        32 validated survey responses; 78.1\% undergraduates; Computer Science largest field (34.4\%); UIU \textasciitilde{}60\% concentration (incl. duplicate entry) & Zero brand awareness; no testimonials or social proof; competing with entrenched incumbents         \\
         \hline
-        102 Figma screens; modern SaaS UI with dark mode; mobile-responsive flows                                                              & Limited engineering and marketing bandwidth; support capacity not yet scaled                        \\
+        102 Figma screens; modern SaaS UI with dark mode; mobile-responsive flows                                                                                      & Limited engineering and marketing bandwidth; support capacity not yet scaled                        \\
         \hline
-        Mature stack: Next.js 15 + Express; PostgreSQL/Prisma; AWS S3; dual AI providers (Gemini 2.5-flash, GPT-4o-mini); TipTap with autosave & Early-stage scale/security hardening pending (load/chaos, SOC 2); offline sync not production-ready \\
+        Mature stack: Next.js 15 + Express; PostgreSQL/Prisma; AWS S3; dual AI providers (Gemini 2.5-flash, GPT-4o-mini); TipTap with autosave                         & Early-stage scale/security hardening pending (load/chaos, SOC 2); offline sync not production-ready \\
         \hline
-        Advanced features: real-time collaboration, AI summarization/citations, rich search, versioning                                        & Monetization unvalidated; free-tier cannibalization risk; billing/quotas need tighter observability \\
+        Advanced features: real-time collaboration, AI summarization/citations, rich search, versioning                                                                & Monetization unvalidated; free-tier cannibalization risk; billing/quotas need tighter observability \\
         \hline
-        Market validation: 72.4\% need, 58.6\% high interest, 82.7\% want AI summaries, 69\% want recommendations                              & Execution risk: small team velocity; risk of scope creep without disciplined prioritization         \\
+        Market validation: 75\% need, 81.3\% interest, 62.6\% likely to try free tier, 100\% AI interest (65.6\% selected AI summaries; 62.5\% selected AI Q\&A)       & Execution risk: small team velocity; risk of scope creep without disciplined prioritization         \\
         \hline
-        First-mover advantage in Bangladesh; UIU concentration (47.4\%) for rapid word-of-mouth                                                & Go-to-market playbook for campuses still forming; limited field presence today                      \\
+        First-mover advantage in Bangladesh; UIU concentration (\textasciitilde{}60\%) for rapid word-of-mouth                                                         & Go-to-market playbook for campuses still forming; limited field presence today                      \\
         \hline
     \end{tabularx}
     \caption{SWOT Internal Factors: Strengths vs. Weaknesses}
@@ -216,17 +216,17 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
     \small
     \begin{tabularx}{\textwidth}{|p{6.5cm}|p{6.5cm}|}
         \hline
-        \textbf{Opportunities (External)}                                                                 & \textbf{Threats (External)}                                                                                                \\
+        \textbf{Opportunities (External)}                                                      & \textbf{Threats (External)}                                                                                                   \\
         \hline
-        AI adoption tailwind in academia; universities seeking AI-assisted research tooling               & Incumbent gravity: Google Drive (79.3\%), Notion (37.9\%), Zotero (27.6\%) with strong network effects                     \\
+        AI adoption tailwind in academia; universities seeking AI-assisted research tooling    & Incumbent gravity: browser reading (34.4\%), cloud drives (31.3\%), and local folders (31.3\%) as default habits              \\
         \hline
-        Underserved campus market in Bangladesh; 10+ partnerable universities; ambassador-led viral loops & Differentiation risk: 24.1\% “not sure”; risk of being perceived as another note tool; incumbents can copy AI features     \\
+        Underserved campus market in Bangladesh; ambassador-led viral loops                    & Adoption uncertainty: 21.9\% “not sure” about trying the free tier; 18.8\% show low interest; incumbents can copy AI features \\
         \hline
-        Integration runway: Overleaf, Docs/Word plugins, browser extensions, open API for labs            & Price sensitivity in student segment; 41.4\% may resist subscriptions; freemium must be carefully tuned                    \\
+        Integration runway: Overleaf, Docs/Word plugins, browser extensions, open API for labs & Price sensitivity in student segment; affordability is a recurring concern; freemium must be carefully tuned                  \\
         \hline
-        Data network effects: recommendations, citation/annotation graphs improve with usage              & Regulatory and privacy load: GDPR/CCPA, data residency, university IT approvals; legal/compliance cost                     \\
+        Data network effects: recommendations, citation/annotation graphs improve with usage   & Regulatory and privacy load: GDPR/CCPA, data residency, university IT approvals; legal/compliance cost                        \\
         \hline
-        Early mover in local market; scope for research partnerships and grants                           & AI provider dependency and cost volatility; need multi-model fallback; potential scope bloat from diverse feature requests \\
+        Early mover in local market; scope for research partnerships and grants                & AI provider dependency and cost volatility; need multi-model fallback; potential scope bloat from diverse feature requests    \\
         \hline
     \end{tabularx}
     \caption{SWOT External Factors: Opportunities vs. Threats}
@@ -314,23 +314,20 @@ ScholarFlow's technical architecture leverages proven, production-ready technolo
     \label{table:pricing-tiers}
 \end{table}
 
-\subsubsection{Willingness to Pay Analysis}
+\subsubsection{Adoption Intent and Pricing Sensitivity}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/21.png}
-    \caption{Willingness to Pay for Premium Features (n=29)}
+    \caption{Adoption Intent and Pricing Sensitivity (n=32)}
     \label{fig:willingness-to-pay}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{58.6\% Willing to Pay} (Yes + Maybe Combined)
-          \begin{itemize}
-              \item 31.0\% Definitely willing ("Yes")
-              \item 27.6\% Conditionally willing ("Maybe")
-          \end{itemize}
-    \item \textbf{41.4\% Not Willing} ("No")
+    \item \textbf{62.6\% Likely-to-Very Likely} to try a free version (low-friction onboarding)
+    \item \textbf{21.9\% Not sure} and \textbf{15.7\% Unlikely}: opportunity to convert through clear value messaging
+    \item \textbf{Pricing sensitivity} is a recurring concern in open-ended feedback, indicating affordability must be prioritized
 \end{itemize}
 
 \textbf{Revenue Projections (Conservative)}:
@@ -388,22 +385,90 @@ ScholarFlow's technical architecture leverages proven, production-ready technolo
 
 This section applies a classical SWOT lens to situate ScholarFlow within its competitive and organizational context, distinguishing internal factors (strengths/weaknesses) from external forces (opportunities/threats) as recommended in strategic systems analysis literature.
 
+\subsection{SWOT Matrix (2\texorpdfstring{$\times$}{x}2 Summary)}
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.25}
+    \setlength{\tabcolsep}{8pt}
+    \begin{tabularx}{\textwidth}{|X|X|}
+        \hline
+        \begin{minipage}[t]{\linewidth}
+            \csname textbf\endcsname{Strengths (Internal)}
+            \begin{itemize}[leftmargin=*, nosep]
+                \item Strong market validation (75\% need; 81.3\% interest; 100\% AI interest)
+                \item Mature MVP stack: Next.js + Express + PostgreSQL + Prisma
+                \item Scalable storage + AI integration (AWS S3; Gemini/OpenAI)
+                \item Production-grade reliability patterns (health checks, error handling)
+            \end{itemize}
+        \end{minipage}
+         &
+        \begin{minipage}[t]{\linewidth}
+            \csname textbf\endcsname{Weaknesses (Internal)}
+            \begin{itemize}[leftmargin=*, nosep]
+                \item Low brand awareness and limited social proof
+                \item Resource constraints (small team, support/ops not scaled)
+                \item Security/compliance hardening still evolving (privacy trust barrier)
+                \item Enterprise readiness (SSO/SAML, audit logs) not yet delivered
+            \end{itemize}
+        \end{minipage}
+        \\
+        \hline
+        \begin{minipage}[t]{\linewidth}
+            \csname textbf\endcsname{Opportunities (External)}
+            \begin{itemize}[leftmargin=*, nosep]
+                \item Underserved campus research market in Bangladesh
+                \item AI adoption tailwind in academia; demand for productivity tooling
+                \item Integration runway (Overleaf, Word/Docs plugins, browser extensions)
+                \item University/department partnerships for faster onboarding and trust
+            \end{itemize}
+        \end{minipage}
+         &
+        \begin{minipage}[t]{\linewidth}
+            \csname textbf\endcsname{Threats (External)}
+            \begin{itemize}[leftmargin=*, nosep]
+                \item Strong incumbents (Drive/Notion/Zotero) and switching inertia
+                \item Price sensitivity in student segment; freemium tuning risk
+                \item AI provider dependency, costs, and privacy/regulatory constraints
+                \item Rapid feature imitation as AI capabilities become commoditized
+            \end{itemize}
+        \end{minipage}
+        \\
+        \hline
+        \multicolumn{2}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{
+        \begin{minipage}[t]{\linewidth}
+            \csname textbf\endcsname{Strategy (Summary Action Plan)}
+            \begin{itemize}[leftmargin=*, nosep]
+                \item \textbf{SO}: Launch UIU pilot + campus ambassadors; lead with AI summaries/search as the key differentiator
+                \item \textbf{WO}: Build trust fast (privacy messaging, security hardening) while creating early case studies/social proof
+                \item \textbf{ST}: Control AI costs via quotas and multi-provider routing; tune freemium limits to protect unit economics
+                \item \textbf{WT}: Keep MVP scope tight and retention-focused (reading + collaboration workflows) to reduce churn and feature creep
+            \end{itemize}
+        \end{minipage}
+        }  \\
+        \hline
+    \end{tabularx}
+    \caption{SWOT Matrix for ScholarFlow with Strategy Summary (Two-Row, Two-Column Layout + Strategy Row)}
+    \label{table:swot-matrix}
+\end{table}
+
 \subsection{Strengths (Internal Positive Factors)}
 
 \begin{enumerate}
     \item \textbf{Deep User Insight}
           \begin{itemize}
-              \item 29 validated survey responses from target demographic
-              \item 86.2\% undergraduate students (perfect product-market fit)
-              \item Direct feedback from 10 universities (UIU concentration 47.4\%)
-              \item 67\%+ from CS/IT fields (tech-savvy early adopters)
+              \item 32 validated survey responses from target demographic
+              \item 78.1\% undergraduate students (clear student-centric product fit)
+              \item Strong UIU pilot concentration (\textasciitilde{}60\% when combining duplicate UIU entries)
+              \item Computer Science is the largest field (34.4\%), with additional tech-related fields represented
           \end{itemize}
 
     \item \textbf{Comprehensive UI/UX Design}
           \begin{itemize}
               \item 102 Figma screens ready for implementation
               \item Modern SaaS-style interface with dark mode
-              \item Responsive design for mobile-first generation (75.9\% ages 22-25)
+              \item Responsive design for mobile-first generation (68.8\% ages 22--25)
               \item User-tested onboarding flows and dashboard layouts
           \end{itemize}
 
@@ -427,16 +492,16 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 
     \item \textbf{Strong Market Validation}
           \begin{itemize}
-              \item 72.4\% express moderate-to-extreme need for platform
-              \item 58.6\% show high interest in immediate adoption
-              \item 82.7\% want AI summarization (killer feature identified)
-              \item 69\% demand recommendation engines (personalization)
+              \item 75\% express at least a moderate need for a better platform
+              \item 81.3\% show moderate-to-high interest in using ScholarFlow
+              \item 100\% express interest in AI features; 65.6\% selected AI paper summaries
+              \item 62.6\% are likely/very likely to try a free version
           \end{itemize}
 
     \item \textbf{First-Mover Advantage in Local Market}
           \begin{itemize}
               \item No direct competitors with AI-powered research management in Bangladesh
-              \item UIU campus concentration (47.4\%) enables rapid word-of-mouth
+              \item UIU campus concentration (\textasciitilde{}60\%) enables rapid word-of-mouth
               \item Early-stage project allows agile pivots based on user feedback
           \end{itemize}
 \end{enumerate}
@@ -501,31 +566,30 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 \begin{enumerate}
     \item \textbf{Underserved Academic Research Market}
           \begin{itemize}
-              \item 86.2\% students actively conducting research
-              \item 37.9\% cite "lack of proper tools" as primary pain point
-              \item Current satisfaction only 3.31/5 (room for disruption)
-              \item Fragmented tool usage (Drive 79.3\%, Notion 37.9\%, Zotero 27.6\%)
+              \item 78.1\% undergraduates in the sample (student research workflow focus)
+              \item Top pain points: note-taking (46.9\%), discoverability (40.6\%), organization (34.4\%)
+              \item Current satisfaction only 3.28/5 (room for disruption)
+              \item Fragmented tool usage (browser 34.4\%, cloud drives 31.3\%, local folders 31.3\%, no tool 28.1\%)
           \end{itemize}
 
     \item \textbf{Low Switching Costs from Incumbents}
           \begin{itemize}
-              \item 100\% of respondents use free tools (no paid subscriptions)
-              \item No vendor lock-in with existing solutions
-              \item Easy data import from Google Drive, Dropbox, OneDrive
+              \item Many respondents rely on ad-hoc workflows (browser/cloud/local folders), indicating low lock-in
+              \item Easy data import from Google Drive/OneDrive and local folders
               \item Students already comfortable with cloud-based workflows
           \end{itemize}
 
     \item \textbf{AI-Driven Product Differentiation}
           \begin{itemize}
-              \item 82.7\% interested in AI summarization (highest demand)
-              \item 69\% want AI-powered recommendation engines
-              \item 65.5\% need citation management automation
-              \item Incumbents lack advanced AI features (competitive gap)
+              \item 100\% express interest in AI features (0\% not interested)
+              \item 68.8\% selected AI-generated key points/mind maps from collections
+              \item 65.6\% selected AI-generated summaries of papers
+              \item 62.5\% selected AI-powered Q\&A and 62.5\% selected AI suggestions for related papers
           \end{itemize}
 
     \item \textbf{Freemium Growth Model with Clear Upsell Path}
           \begin{itemize}
-              \item 58.6\% willing to pay for premium features
+              \item 62.6\% are likely/very likely to try a free version
               \item High-value features identified: citations, collaboration, analytics
               \item Free tier drives viral adoption, paid converts power users
               \item Stripe integration ready for subscription management
@@ -533,7 +597,7 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 
     \item \textbf{Campus Network Effects \& Viral Growth}
           \begin{itemize}
-              \item UIU concentration (47.4\%) creates dense user network
+              \item UIU concentration (\textasciitilde{}60\%, incl. duplicate entry) creates dense user network
               \item Shared workspaces encourage team invitations
               \item Referral incentives can accelerate campus adoption
               \item Student ambassadors and faculty partnerships
@@ -549,7 +613,7 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 
     \item \textbf{Mobile-First \& Gen-Z Alignment}
           \begin{itemize}
-              \item 75.9\% users ages 22-25 (digital natives)
+              \item 68.8\% users ages 22--25 (digital natives)
               \item High comfort with SaaS tools and cloud storage
               \item Expectation for modern UX and real-time collaboration
               \item Social features (sharing, comments) align with user habits
@@ -561,16 +625,15 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 \begin{enumerate}
     \item \textbf{Incumbent Platform Dominance}
           \begin{itemize}
-              \item Google Drive (79.3\% usage) with massive user base
-              \item Notion (37.9\%) with strong brand and feature depth
-              \item Zotero (27.6\%) as established academic tool
-              \item Microsoft OneNote, Evernote, Obsidian as alternatives
+              \item Default habits: browser reading (34.4\%), cloud drives (31.3\%), local folders (31.3\%)
+              \item Zotero (15.6\%) and other reference managers as established academic tools
+              \item Multiple alternative workflows compete for attention (folders, drives, PDF viewers)
               \item Network effects favor incumbents (team collaboration)
           \end{itemize}
 
     \item \textbf{Low Differentiation Perception Risk}
           \begin{itemize}
-              \item 24.1\% "not sure" about adoption (unclear value prop)
+              \item 21.9\% "not sure" about trying the free version (unclear value prop)
               \item Risk of being seen as "just another note-taking app"
               \item Need to communicate AI and collaboration advantages
               \item Incumbents may copy AI features (feature parity race)
@@ -578,7 +641,6 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 
     \item \textbf{Price Sensitivity in Student Market}
           \begin{itemize}
-              \item 58.6\% willing to pay, but 41.4\% may resist subscriptions
               \item Bangladesh market is price-conscious
               \item Students prefer free tools (limited budgets)
               \item Need aggressive freemium limits to drive conversions
@@ -610,8 +672,8 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 
     \item \textbf{Adoption Friction \& Churn Risk}
           \begin{itemize}
-              \item 13.8\% moderate interest (lukewarm early adopters)
-              \item 27.6\% low/no interest (market resistance)
+              \item 18.8\% moderately interested (lukewarm early adopters)
+              \item 18.8\% low interest (slightly interested + not interested)
               \item Onboarding complexity may deter casual users
               \item Retention strategies needed to combat churn
               \item Switching inertia from existing tool ecosystems
