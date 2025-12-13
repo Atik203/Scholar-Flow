@@ -22,33 +22,33 @@ To validate the market need and gather comprehensive user requirements, a struct
 The survey consisted of 21 comprehensive questions organized into four main categories:
 
 \begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|l|c|X|}
-\hline
-\textbf{Question Category} & \textbf{Count} & \textbf{Purpose} \\
-\hline
-\textbf{Demographics} & 5 & 
-Understand respondent roles, academic levels, fields of study, age groups, and institutional affiliations \\
-\hline
-\textbf{Current Tool Usage} & 6 & 
-Assess existing tools, satisfaction levels, pain points, and collaboration patterns \\
-\hline
-\textbf{Feature Priorities} & 10 & 
-Measure interest in AI features, collaboration tools, analytics, citation management, and advanced capabilities \\
-\hline
-\textbf{Adoption Intent} & 6 & 
-Gauge likelihood of adoption, willingness to pay, concerns, and feedback mechanisms \\
-\hline
-\end{tabularx}
-\caption{Survey Question Categories}
-\label{table:survey-categories}
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|X|}
+        \hline
+        \textbf{Question Category}  & \textbf{Count} & \textbf{Purpose}                                                 \\
+        \hline
+        \textbf{Demographics}       & 5              &
+        Understand respondent roles, academic levels, fields of study, age groups, and institutional affiliations       \\
+        \hline
+        \textbf{Current Tool Usage} & 6              &
+        Assess existing tools, satisfaction levels, pain points, and collaboration patterns                             \\
+        \hline
+        \textbf{Feature Priorities} & 10             &
+        Measure interest in AI features, collaboration tools, analytics, citation management, and advanced capabilities \\
+        \hline
+        \textbf{Adoption Intent}    & 6              &
+        Gauge likelihood of adoption, willingness to pay, concerns, and feedback mechanisms                             \\
+        \hline
+    \end{tabularx}
+    \caption{Survey Question Categories}
+    \label{table:survey-categories}
 \end{table}
 
 \subsection{Data Collection}
 
 \begin{itemize}[leftmargin=*]
     \item \textbf{Survey Period}: November - December 2025
-    \item \textbf{Total Responses}: 29 academic researchers
+    \item \textbf{Total Responses}: 32 survey respondents
     \item \textbf{Distribution Method}: Online via email, university forums, and academic social networks
     \item \textbf{Target Population}: Students, faculty, and researchers across multiple universities
     \item \textbf{Geographic Focus}: Primarily Bangladesh, with concentration at United International University (UIU)
@@ -67,17 +67,17 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/1.png}
-    \caption{Survey Respondents by Role (n=29)}
+    \caption{Survey Respondents by Role (n=32)}
     \label{fig:role-distribution}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{86.2\% Undergraduate Students}: Dominant user segment, validating focus on student-centric features
-    \item \textbf{3.4\% Masters Students}: Growing segment requiring advanced collaboration features
-    \item \textbf{3.4\% PhD Students}: Power users needing extensive paper libraries and citation tools
-    \item \textbf{3.4\% Faculty/Professors}: Potential institutional buyers and influencers
-    \item \textbf{3.4\% Other}: Research assistants and industry professionals
+    \item \textbf{78.1\% Undergraduate Students}: Dominant user segment, validating focus on student-centric features
+    \item \textbf{12.5\% Faculty/Professors}: Potential institutional buyers and influencers
+    \item \textbf{\textasciitilde{}3.1\% Postgraduate (Masters/MPhil)}: Emerging segment requiring advanced collaboration features
+    \item \textbf{\textasciitilde{}3.1\% PhD Researchers}: Power users needing extensive paper libraries and citation tools
+    \item \textbf{\textasciitilde{}3.1\% Other}: Research assistants and other academic roles
 \end{itemize}
 
 \textbf{Strategic Implication}: Product messaging and feature prioritization should focus heavily on undergraduate research workflows while ensuring scalability for graduate-level requirements.
@@ -87,16 +87,16 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/2.png}
-    \caption{Respondents by Academic Field (n=29)}
+    \caption{Respondents by Academic Field (n=32)}
     \label{fig:field-distribution}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{67\%+ Computer Science \& IT}: Tech-savvy early adopters comfortable with cloud tools
-    \item \textbf{15\% Engineering}: Civil, Electrical, Mechanical engineers with project documentation needs
-    \item \textbf{10\% Medical Sciences}: Pharmacy and health researchers requiring literature review tools
-    \item \textbf{8\% Social Sciences}: Economics, Sociology researchers needing qualitative data management
+    \item \textbf{34.4\% Computer Science}: Highest field concentration
+    \item \textbf{\textasciitilde{}18\% Other CS-related fields}: Additional technology-centric audience
+    \item \textbf{6.3\% Electrical Engineering} and \textbf{6.3\% Data Science}: Strong technical alignment
+    \item Remaining fields (Civil, Pharmaceutical Science, and others): \textbf{\textasciitilde{}3.1\% each}
 \end{itemize}
 
 \textbf{Strategic Implication}: CS/IT concentration suggests low technical friction for adoption. Marketing should emphasize modern UI/UX and AI features that resonate with tech-forward users.
@@ -106,16 +106,17 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/3.png}
-    \caption{Respondents by Academic Year (n=29)}
+    \caption{Respondents by Academic Year (n=32)}
     \label{fig:academic-level}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{58.6\% 3rd Year Undergraduates}: Peak research intensity period (capstone projects, thesis preparation)
-    \item \textbf{17.2\% 2nd Year Undergraduates}: Beginning research exposure
-    \item \textbf{13.8\% 4th Year Undergraduates}: Finalizing major research projects
-    \item \textbf{10.4\% Graduate Students}: Masters and PhD combined
+    \item \textbf{53.1\% 3rd-year undergraduates}: Peak research intensity period (capstone projects, thesis preparation)
+    \item \textbf{15.6\% 2nd-year undergraduates}: Beginning research exposure
+    \item \textbf{\textasciitilde{}3.1\% 1st-year undergraduates}: Early-stage research exposure
+    \item \textbf{12.5\% Not a student}: Faculty/other roles included in the sample
+    \item \textbf{\textasciitilde{}6.3\% Masters/MPhil} and \textbf{\textasciitilde{}6.3\% PhD}: Advanced research segments
 \end{itemize}
 
 \textbf{Strategic Implication}: Campus rollout should target 3rd-year students first, then expand to other years through peer referrals.
@@ -125,15 +126,16 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/4.png}
-    \caption{Respondents by Age Group (n=29)}
+    \caption{Respondents by Age Group (n=32)}
     \label{fig:age-distribution}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{75.9\% Ages 22-25}: Gen-Z digital natives expecting modern SaaS experiences
-    \item \textbf{17.2\% Ages 18-21}: Younger undergraduates beginning research journeys
-    \item \textbf{6.9\% Ages 26-30+}: Graduate students and professionals
+    \item \textbf{68.8\% Ages 22--25}: Gen-Z digital natives expecting modern SaaS experiences
+    \item \textbf{12.5\% Ages 18--21}: Younger undergraduates beginning research journeys
+    \item \textbf{12.5\% Ages 26--30}: Graduate students and professionals
+    \item \textbf{\textasciitilde{}3.1\% Ages 31--35} and \textbf{\textasciitilde{}3.1\% Above 40}: Faculty/older professionals
 \end{itemize}
 
 \textbf{Strategic Implication}: Design must prioritize mobile-first responsive layouts, dark mode, and social collaboration features aligned with Gen-Z preferences.
@@ -143,18 +145,18 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/5.png}
-    \caption{Respondents by University (n=29)}
+    \caption{Respondents by University (n=32)}
     \label{fig:university-distribution}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{47.4\% United International University (UIU)}: Strong concentration enables focused beta testing
-    \item \textbf{52.6\% Other Universities}: NSU, AIUB, BRAC, Dhaka University, Khulna University, etc.
-    \item \textbf{10 Universities Total}: Multi-campus validation of market need
+    \item \textbf{\textasciitilde{}60\% United International University (UIU)}: Strong concentration enables focused beta testing (includes duplicate UIU entry)
+    \item \textbf{10\% North South University (NSU)}: Secondary concentration
+    \item \textbf{\textasciitilde{}30\% Other Universities}: AIUB, IUB, Khulna University, and others
 \end{itemize}
 
-\textbf{Strategic Implication}: Phase 1 launch should focus on UIU as the pilot campus, leveraging high response concentration for rapid word-of-mouth growth.
+extbf{Strategic Implication}: Phase 1 launch should focus on UIU as the pilot campus, leveraging high response concentration for rapid word-of-mouth growth while expanding outreach for broader validation.
 
 % ============================================
 % 2.3 CURRENT TOOL LANDSCAPE
@@ -166,78 +168,78 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/6.png}
-    \caption{Current Research Management Tools Used (n=29, multiple selections allowed)}
+    \caption{Current Research Management Tools Used (n=32, multiple selections allowed)}
     \label{fig:current-tools}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{79.3\% Google Drive}: Dominant file storage solution, but lacks research-specific features
-    \item \textbf{37.9\% Notion}: Popular for note-taking, but not optimized for paper management
-    \item \textbf{27.6\% Zotero}: Established citation manager, but outdated interface and limited AI
-    \item \textbf{34.5\% Browser PDFs}: Basic reading, missing collaboration and organization
-    \item \textbf{24.1\% Mendeley}: Legacy tool with privacy concerns (Elsevier ownership)
-    \item \textbf{17.2\% Microsoft OneNote}: Note-taking focus, poor PDF handling
-    \item \textbf{10.3\% Evernote, Obsidian}: Niche tools for specific workflows
+    \item \textbf{34.4\% Browser PDFs}: Basic reading without organization or collaboration
+    \item \textbf{31.3\% Google Drive / OneDrive}: Storage-first workflows lacking research context
+    \item \textbf{31.3\% Local folders}: Fragmented organization without metadata/search
+    \item \textbf{28.1\% No specific tool}: Ad-hoc workflows and low tool lock-in
+    \item \textbf{15.6\% Zotero} and \textbf{15.6\% built-in reference managers}: Citation-focused tools with limited modern collaboration
+    \item \textbf{9.4\% EndNote} and \textbf{9.4\% Paperpile}; \textbf{6.3\% Mendeley}: Smaller legacy segments
 \end{itemize}
 
-\textbf{Critical Insight}: \textit{100\% of respondents use free tools}, indicating low switching costs and high opportunity for freemium adoption strategy.
+extbf{Critical Insight}: High reliance on ad-hoc and storage-only workflows indicates low switching costs and strong opportunity for a freemium onboarding strategy.
 
 \subsection{Current Satisfaction Levels}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/7.png}
-    \caption{Satisfaction with Current Research Tools (n=29)}
+    \caption{Satisfaction with Current Research Tools (n=32)}
     \label{fig:satisfaction-levels}
 \end{figure}
 
-\textbf{Average Satisfaction Score: 3.31/5.00} (66.2\% satisfaction)
+extbf{Average Satisfaction Score: 3.28/5.00}
 
 \textbf{Distribution:}
 \begin{itemize}
-    \item \textbf{27.6\% Very Satisfied (5/5)}: Power users who have optimized workflows
-    \item \textbf{41.4\% Moderately Satisfied (4/5)}: Functional but see room for improvement
-    \item \textbf{20.7\% Neutral (3/5)}: Indifferent or using multiple fragmented tools
-    \item \textbf{10.3\% Dissatisfied (1-2/5)}: Actively seeking better alternatives
+    \item \textbf{40.6\% Neutral (3/5)}: Indifferent or using multiple fragmented tools
+    \item \textbf{31.3\% Satisfied (4/5)}: Functional but see room for improvement
+    \item \textbf{15.6\% Rating 2/5} and \textbf{3.1\% Rating 1/5}: Actively seeking better alternatives
+    \item \textbf{9.4\% Very satisfied (5/5)}: Power users who have optimized workflows
 \end{itemize}
 
-\textbf{Strategic Implication}: 31\% dissatisfaction + 20.7\% neutrality = \textbf{51.7\% addressable market} open to switching to a superior solution.
+extbf{Strategic Implication}: 18.7\% dissatisfaction (1--2/5) + 40.6\% neutrality (3/5) = \textbf{59.3\% addressable market} open to switching to a superior solution.
 
 \subsection{Primary Pain Points}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/8.png}
-    \caption{Biggest Challenges in Research Paper Management (n=29)}
+    \caption{Biggest Challenges in Research Paper Management (n=32)}
     \label{fig:pain-points}
 \end{figure}
 
 \textbf{Top 5 Challenges:}
 \begin{enumerate}
-    \item \textbf{37.9\% Lack of Proper Tools}: No integrated solution for end-to-end research workflow
-    \item \textbf{31.0\% Organization Difficulties}: Files scattered across multiple platforms
-    \item \textbf{24.1\% Citation Management}: Manual formatting and bibliography generation
-    \item \textbf{20.7\% Collaboration Issues}: Difficulty sharing and co-authoring papers
-    \item \textbf{17.2\% Version Control}: Tracking changes and managing multiple drafts
+    \item \textbf{46.9\% Difficulty taking and keeping notes}: Notes are scattered and hard to maintain
+    \item \textbf{40.6\% Hard to find papers later}: Poor discoverability across tools and folders
+    \item \textbf{34.4\% Hard to keep papers organized}: Lack of structured collections/tags
+    \item \textbf{28.1\% Syncing across devices is inconsistent}: Workflow breaks across laptop/mobile
+    \item \textbf{25\% Collaboration challenges}: Sharing and discussion are fragmented
 \end{enumerate}
 
-\textbf{Critical Insight}: The \#1 pain point is explicitly "lack of proper tools," validating ScholarFlow's core value proposition.
+extbf{Critical Insight}: The top pain points cluster around note-taking, discoverability, and organization, directly validating ScholarFlow's core value proposition.
 
 \subsection{Collaboration Frequency}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/9.png}
-    \caption{Frequency of Collaborative Research (n=29)}
+    \caption{Collaboration Practices for Research Papers (n=32)}
     \label{fig:collaboration-frequency}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{44.8\% Solo Researchers}: Need personal organization tools first, collaboration second
-    \item \textbf{34.5\% Occasional Collaborators}: 2-3 times per year for group projects
-    \item \textbf{20.7\% Frequent Collaborators}: Monthly or weekly team research activities
+    \item \textbf{50\% Mostly work alone}: Personal organization is the first value driver
+    \item \textbf{25\% Share PDFs via email/messaging apps}: Collaboration is informal and unstructured
+    \item \textbf{9.4\% Use shared cloud folders} and \textbf{9.4\% use dedicated collaboration tools}: Small but meaningful collaboration segment
+    \item \textbf{\textasciitilde{}6.3\% Comment directly in shared PDFs}: Lightweight discussion behavior exists
 \end{itemize}
 
 \textbf{Strategic Implication}: Product should support "from solo to shared" workflows, allowing individual users to easily invite collaborators when needed.
@@ -252,19 +254,19 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/10.png}
-    \caption{Need for Dedicated Research Paper Management Platform (n=29)}
+    \caption{Need for Dedicated Research Paper Management Platform (n=32)}
     \label{fig:market-need}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{72.4\% Moderate-to-Extreme Need} (Ratings 3-5/5)
-    \begin{itemize}
-        \item 27.6\% Extreme need (5/5)
-        \item 17.2\% High need (4/5)
-        \item 27.6\% Moderate need (3/5)
-    \end{itemize}
-    \item \textbf{27.6\% Low-to-No Need} (Ratings 1-2/5)
+    \item \textbf{75\% At least a moderate need} (Moderate + Strong + Very Strong)
+          \begin{itemize}
+              \item 28.1\% Moderate need
+              \item 28.1\% Strong need
+              \item 18.8\% Very strong need
+          \end{itemize}
+    \item \textbf{25\% Slight-to-No need} (Slight need + No need)
 \end{itemize}
 
 \textbf{Critical Validation}: Nearly \textbf{3 out of 4 researchers} express moderate-to-extreme need for a dedicated platform, confirming significant market opportunity.
@@ -274,41 +276,41 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/11.png}
-    \caption{Interest in Using ScholarFlow Platform (n=29)}
+    \caption{Interest in Using ScholarFlow Platform (n=32)}
     \label{fig:product-interest}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{58.6\% High Interest} (Very + Extremely Interested)
-    \begin{itemize}
-        \item 31.0\% Extremely interested
-        \item 27.6\% Very interested
-    \end{itemize}
-    \item \textbf{13.8\% Moderate Interest}
-    \item \textbf{27.6\% Low-to-No Interest}
+    \item \textbf{81.3\% Moderate-to-High Interest} (Moderately + Very + Extremely Interested)
+          \begin{itemize}
+              \item 18.8\% Moderately interested
+              \item 53.1\% Very interested
+              \item 9.4\% Extremely interested
+          \end{itemize}
+    \item \textbf{18.8\% Low interest} (Slightly interested + Not interested)
 \end{itemize}
 
-\textbf{Critical Validation}: Over half of respondents (58.6\%) express strong immediate interest, indicating high conversion potential from awareness to adoption.
+extbf{Critical Validation}: A strong majority of respondents (81.3\%) express moderate-to-high interest, indicating high conversion potential from awareness to adoption.
 
 \subsection{Adoption Likelihood (Free Tier)}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{../response_image/12.png}
-    \caption{Likelihood of Trying ScholarFlow Free Tier (n=29)}
+    \caption{Likelihood of Trying ScholarFlow Free Tier (n=32)}
     \label{fig:adoption-likelihood}
 \end{figure}
 
 \textbf{Key Findings:}
 \begin{itemize}
-    \item \textbf{58.6\% Likely-to-Very Likely} to try free tier
-    \begin{itemize}
-        \item 37.9\% Very likely
-        \item 20.7\% Likely
-    \end{itemize}
-    \item \textbf{24.1\% Not Sure} (fence-sitters requiring more marketing)
-    \item \textbf{17.3\% Unlikely} (satisfied with current tools or skeptical)
+    \item \textbf{62.6\% Likely-to-Very Likely} to try free tier
+          \begin{itemize}
+              \item 31.3\% Very likely
+              \item 31.3\% Likely
+          \end{itemize}
+    \item \textbf{21.9\% Not sure} (fence-sitters requiring more marketing)
+    \item \textbf{15.7\% Unlikely} (Unlikely + Very unlikely)
 \end{itemize}
 
 \textbf{Strategic Implication}: Generous free tier is critical for reducing friction and driving viral adoption through student networks.
@@ -316,35 +318,35 @@ The survey captured a diverse range of academic roles, with a strong concentrati
 \subsection{Summary: Market Validation Metrics}
 
 \begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|l|c|X|}
-\hline
-\textbf{Metric} & \textbf{Value} & \textbf{Interpretation} \\
-\hline
-\textbf{Perceived Need} & 72.4\% & 
-Strong market demand for dedicated solution \\
-\hline
-\textbf{Product Interest} & 58.6\% & 
-High immediate conversion potential \\
-\hline
-\textbf{Trial Likelihood} & 58.6\% & 
-Freemium model will drive adoption \\
-\hline
-\textbf{Current Satisfaction} & 3.31/5 & 
-Significant room for disruption \\
-\hline
-\textbf{"Not Sure" Segment} & 24.1\% & 
-Opportunity to convert fence-sitters through marketing \\
-\hline
-\textbf{Target Demographic} & 86.2\% & 
-Undergraduates = clear product-market fit \\
-\hline
-\textbf{Geographic Concentration} & 47.4\% & 
-UIU pilot enables rapid iteration and feedback \\
-\hline
-\end{tabularx}
-\caption{Market Validation Summary Metrics}
-\label{table:validation-metrics}
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|X|}
+        \hline
+        \textbf{Metric}                 & \textbf{Value}        & \textbf{Interpretation} \\
+        \hline
+        extbf{Perceived Need}           & 75\%                  &
+        Strong market demand for dedicated solution                                       \\
+        \hline
+        extbf{Product Interest}         & 81.3\%                &
+        High immediate conversion potential                                               \\
+        \hline
+        extbf{Trial Likelihood}         & 62.6\%                &
+        Freemium model will drive adoption                                                \\
+        \hline
+        extbf{Current Satisfaction}     & 3.28/5                &
+        Significant room for disruption                                                   \\
+        \hline
+        extbf{"Not Sure" Segment}       & 21.9\%                &
+        Opportunity to convert fence-sitters through marketing                            \\
+        \hline
+        extbf{Target Demographic}       & 78.1\%                &
+        Undergraduates = clear product-market fit                                         \\
+        \hline
+        extbf{Geographic Concentration} & \textasciitilde{}60\% &
+        UIU pilot enables rapid iteration and feedback                                    \\
+        \hline
+    \end{tabularx}
+    \caption{Market Validation Summary Metrics}
+    \label{table:validation-metrics}
 \end{table}
 
 \textbf{Conclusion}: Survey data provides \textit{strong validation} for ScholarFlow's market opportunity, with clear demand signals, identified pain points, and high adoption intent among the target undergraduate segment.
