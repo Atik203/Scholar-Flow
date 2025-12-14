@@ -36,13 +36,13 @@ ScholarFlow is a comprehensive web-based platform that addresses critical gaps i
 \begin{figure}[H]
     \centering
     \begin{tikzpicture}[
-        node distance=2cm,
-        box/.style={rectangle, draw=primaryblue, thick, fill=lightgray, rounded corners, minimum width=3cm, minimum height=1cm, text centered, font=\small},
-        arrow/.style={->, >=stealth, thick, draw=primaryblue}
-    ]
+            node distance=2cm,
+            box/.style={rectangle, draw=primaryblue, thick, fill=lightgray, rounded corners, minimum width=3cm, minimum height=1cm, text centered, font=\small},
+            arrow/.style={->, >=stealth, thick, draw=primaryblue}
+        ]
         % Central node
         \node[box, fill=primaryblue!20] (core) at (0,0) {\textbf{ScholarFlow Core}};
-        
+
         % Surrounding nodes
         \node[box] (auth) at (-3,3) {Authentication \& Security};
         \node[box] (paper) at (3,3) {Paper Management};
@@ -50,7 +50,7 @@ ScholarFlow is a comprehensive web-based platform that addresses critical gaps i
         \node[box] (collab) at (3,0) {Collaboration};
         \node[box] (analytics) at (-3,-3) {Analytics \& Reports};
         \node[box] (billing) at (3,-3) {Subscription \& Billing};
-        
+
         % Arrows
         \draw[arrow] (auth) -- (core);
         \draw[arrow] (paper) -- (core);
@@ -68,54 +68,54 @@ ScholarFlow is a comprehensive web-based platform that addresses critical gaps i
 The ScholarFlow platform encompasses the following major feature categories:
 
 \begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|l|X|}
-\hline
-\textbf{Feature Category} & \textbf{Description} \\
-\hline
-\textbf{User Management} & 
-Multi-provider authentication (Email/Password, Google OAuth, GitHub OAuth), role-based access control, profile management, and session security \\
-\hline
-\textbf{Paper Management} & 
-PDF upload and storage, metadata extraction, version history, advanced search and filtering, tag management, and file organization \\
-\hline
-\textbf{Rich Text Editor} & 
-TipTap-based WYSIWYG editor with auto-save, markdown support, collaborative editing, comments, and mentions \\
-\hline
-\textbf{AI Integration} & 
-Multi-provider AI service (Google Gemini, OpenAI), context-aware chat, paper summarization, citation generation, and recommendation engine \\
-\hline
-\textbf{Collaboration} & 
-Workspace creation, 5-tier role system (Owner, Admin, Editor, Commenter, Viewer), real-time collaboration, and sharing permissions \\
-\hline
-\textbf{Analytics Dashboard} & 
-Personal analytics, workspace analytics, admin system metrics, usage tracking, and export capabilities \\
-\hline
-\textbf{Subscription System} & 
-Freemium model with Free, Pro, and Team tiers, Stripe integration, quota management, and billing history \\
-\hline
-\end{tabularx}
-\caption{Major Feature Categories in ScholarFlow}
-\label{table:feature-categories}
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Feature Category}    & \textbf{Description}                                                                                             \\
+        \hline
+        \textbf{User Management}     &
+        Multi-provider authentication (Email/Password, Google OAuth, GitHub OAuth), role-based access control, profile management, and session security \\
+        \hline
+        \textbf{Paper Management}    &
+        PDF upload and storage, metadata extraction, version history, advanced search and filtering, tag management, and file organization              \\
+        \hline
+        \textbf{Rich Text Editor}    &
+        TipTap-based WYSIWYG editor with auto-save, markdown support, collaborative editing, comments, and mentions                                     \\
+        \hline
+        \textbf{AI Integration}      &
+        Multi-provider AI service (Google Gemini, OpenAI), context-aware chat, paper summarization, citation generation, and recommendation engine      \\
+        \hline
+        \textbf{Collaboration}       &
+        Workspace creation, 5-tier role system (Owner, Admin, Editor, Commenter, Viewer), real-time collaboration, and sharing permissions              \\
+        \hline
+        \textbf{Analytics Dashboard} &
+        Personal analytics, workspace analytics, admin system metrics, usage tracking, and export capabilities                                          \\
+        \hline
+        \textbf{Subscription System} &
+        Freemium model with Free, Pro, and Team tiers, Stripe integration, quota management, and billing history                                        \\
+        \hline
+    \end{tabularx}
+    \caption{Major Feature Categories in ScholarFlow}
+    \label{table:feature-categories}
 \end{table}
 
 \subsection{Target User Demographics}
 
-Based on comprehensive survey data from 29 academic researchers across 10 universities, ScholarFlow targets the following primary user segments:
+Based on comprehensive survey data from 32 respondents (students and faculty) across multiple universities, ScholarFlow targets the following primary user segments:
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Primary Segment (86.2\%)}: Undergraduate students conducting research projects, particularly in Computer Science and IT fields
-    \item \textbf{Secondary Segment (10.4\%)}: Graduate students (Masters and PhD) managing larger research portfolios
-    \item \textbf{Tertiary Segment (3.4\%)}: Faculty members, research assistants, and academic professionals
+    \item \textbf{Primary Segment (78.1\%)}: Undergraduate students conducting research projects, particularly in technology-centric fields
+    \item \textbf{Secondary Segment (12.5\%)}: University faculty (lecturer/professor) supervising research and managing academic resources
+    \item \textbf{Supporting Segments (\textasciitilde{}3.1\% each)}: Postgraduate students (Masters/MPhil), PhD researchers, and other academic roles
 \end{itemize}
 
 \textbf{Key User Characteristics:}
 \begin{itemize}
-    \item \textbf{Age Range}: 75.9\% between 22-25 years old (Gen-Z, mobile-first generation)
-    \item \textbf{Academic Level}: 58.6\% are 3rd-year undergraduates at peak research intensity
-    \item \textbf{Technical Proficiency}: 67\%+ from CS/IT backgrounds (tech-savvy early adopters)
-    \item \textbf{Geographic Focus}: Bangladesh market with UIU concentration (47.4\% of respondents)
-    \item \textbf{Current Pain Points}: 37.9\% cite "lack of proper tools" as primary research challenge
+    \item \textbf{Age Range}: 68.8\% between 22--25 years old (student and early-career researcher segment)
+    \item \textbf{Academic Level}: 53.1\% are 3rd-year undergraduates at peak research intensity
+    \item \textbf{Technical Proficiency}: Computer Science is the largest field (34.4\%), with additional tech-related fields represented
+    \item \textbf{Geographic Focus}: Bangladesh market with strong UIU concentration (\textasciitilde{}60\% when combining duplicate UIU entries)
+    \item \textbf{Current Pain Points}: Note-taking (46.9\%), discoverability (40.6\%), and organization (34.4\%) are the top challenges
 \end{itemize}
 
 \subsection{Operating Environment}
@@ -123,38 +123,38 @@ Based on comprehensive survey data from 29 academic researchers across 10 univer
 ScholarFlow operates in a modern cloud-based infrastructure with the following technical environment:
 
 \begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|l|X|}
-\hline
-\textbf{Component} & \textbf{Technology Stack} \\
-\hline
-\textbf{Frontend} & 
-Next.js 15 (React 19), TypeScript, Tailwind CSS, ShadCN UI components, Redux Toolkit Query for state management \\
-\hline
-\textbf{Backend} & 
-Node.js with Express.js, TypeScript, RESTful API architecture, JWT-based authentication \\
-\hline
-\textbf{Database} & 
-PostgreSQL 14+ with Prisma ORM, type-safe queries, migrations support \\
-\hline
-\textbf{File Storage} & 
-AWS S3 for scalable object storage, CloudFront CDN for content delivery \\
-\hline
-\textbf{AI Services} & 
-Google Gemini 2.5-flash-lite (primary), OpenAI GPT-4o-mini (fallback), multi-provider architecture \\
-\hline
-\textbf{Payment Processing} & 
-Stripe API for subscription management, webhook handlers for real-time events \\
-\hline
-\textbf{Deployment} & 
-Vercel for frontend hosting, serverless functions, edge network distribution \\
-\hline
-\textbf{Development Tools} & 
-Yarn Berry (v4), Turborepo monorepo, ESLint, Prettier, Jest for testing \\
-\hline
-\end{tabularx}
-\caption{ScholarFlow Technology Stack}
-\label{table:tech-stack}
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Component}          & \textbf{Technology Stack}                                                         \\
+        \hline
+        \textbf{Frontend}           &
+        Next.js 15 (React 19), TypeScript, Tailwind CSS, ShadCN UI components, Redux Toolkit Query for state management \\
+        \hline
+        \textbf{Backend}            &
+        Node.js with Express.js, TypeScript, RESTful API architecture, JWT-based authentication                         \\
+        \hline
+        \textbf{Database}           &
+        PostgreSQL 14+ with Prisma ORM, type-safe queries, migrations support                                           \\
+        \hline
+        \textbf{File Storage}       &
+        AWS S3 for scalable object storage, CloudFront CDN for content delivery                                         \\
+        \hline
+        \textbf{AI Services}        &
+        Google Gemini 2.5-flash-lite (primary), OpenAI GPT-4o-mini (fallback), multi-provider architecture              \\
+        \hline
+        \textbf{Payment Processing} &
+        Stripe API for subscription management, webhook handlers for real-time events                                   \\
+        \hline
+        \textbf{Deployment}         &
+        Vercel for frontend hosting, serverless functions, edge network distribution                                    \\
+        \hline
+        \textbf{Development Tools}  &
+        Yarn Berry (v4), Turborepo monorepo, ESLint, Prettier, Jest for testing                                         \\
+        \hline
+    \end{tabularx}
+    \caption{ScholarFlow Technology Stack}
+    \label{table:tech-stack}
 \end{table}
 
 \subsection{Design and Implementation Constraints}
@@ -163,43 +163,43 @@ The following constraints influence the design and implementation of ScholarFlow
 
 \begin{enumerate}
     \item \textbf{Performance Constraints}:
-    \begin{itemize}
-        \item Page load time must be under 3 seconds on 4G connections
-        \item API response time should not exceed 500ms for standard queries
-        \item Large file uploads (up to 50MB per paper) must be handled efficiently
-        \item Real-time collaboration features require WebSocket support
-    \end{itemize}
-    
+          \begin{itemize}
+              \item Page load time must be under 3 seconds on 4G connections
+              \item API response time should not exceed 500ms for standard queries
+              \item Large file uploads (up to 50MB per paper) must be handled efficiently
+              \item Real-time collaboration features require WebSocket support
+          \end{itemize}
+
     \item \textbf{Security Constraints}:
-    \begin{itemize}
-        \item All data transmission must use HTTPS/TLS encryption
-        \item Password storage requires bcrypt hashing with minimum 10 rounds
-        \item JWT tokens must expire within 24 hours
-        \item File uploads must be validated and sanitized to prevent malicious content
-    \end{itemize}
-    
+          \begin{itemize}
+              \item All data transmission must use HTTPS/TLS encryption
+              \item Password storage requires bcrypt hashing with minimum 10 rounds
+              \item JWT tokens must expire within 24 hours
+              \item File uploads must be validated and sanitized to prevent malicious content
+          \end{itemize}
+
     \item \textbf{Regulatory Constraints}:
-    \begin{itemize}
-        \item GDPR compliance for European users (data privacy, right to deletion)
-        \item CCPA compliance for California users
-        \item Data residency requirements for educational institutions
-        \item Accessibility standards (WCAG 2.1 Level AA)
-    \end{itemize}
-    
+          \begin{itemize}
+              \item GDPR compliance for European users (data privacy, right to deletion)
+              \item CCPA compliance for California users
+              \item Data residency requirements for educational institutions
+              \item Accessibility standards (WCAG 2.1 Level AA)
+          \end{itemize}
+
     \item \textbf{Resource Constraints}:
-    \begin{itemize}
-        \item Development team: 4 members (1 project leader + 3 developers)
-        \item Budget limitations for third-party API costs (AI, storage, payment processing)
-        \item Academic timeline constraints (semester-based development)
-    \end{itemize}
-    
+          \begin{itemize}
+              \item Development team: 4 members (1 project leader + 3 developers)
+              \item Budget limitations for third-party API costs (AI, storage, payment processing)
+              \item Academic timeline constraints (semester-based development)
+          \end{itemize}
+
     \item \textbf{Technical Constraints}:
-    \begin{itemize}
-        \item Browser compatibility: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
-        \item Mobile responsiveness required for all features
-        \item Offline functionality for core reading and editing features
-        \item Database query optimization to prevent N+1 problems
-    \end{itemize}
+          \begin{itemize}
+              \item Browser compatibility: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+              \item Mobile responsiveness required for all features
+              \item Offline functionality for core reading and editing features
+              \item Database query optimization to prevent N+1 problems
+          \end{itemize}
 \end{enumerate}
 
 % ============================================
@@ -211,73 +211,73 @@ The following constraints influence the design and implementation of ScholarFlow
 
 \begin{description}[leftmargin=3cm, style=nextline]
     \item[\textbf{Workspace}] A collaborative environment where multiple users can organize and share research papers, notes, and resources under shared permissions and quotas.
-    
+
     \item[\textbf{Paper}] A research document (typically PDF format) uploaded to ScholarFlow, including its metadata, annotations, notes, and version history.
-    
+
     \item[\textbf{Collection}] A user-defined grouping of papers organized by topic, project, or any custom criteria for better organization.
-    
+
     \item[\textbf{Rich Text Note}] A formatted document created using the TipTap editor, supporting markdown, mentions, comments, and collaborative editing.
-    
+
     \item[\textbf{AI Context}] The accumulated conversation history and referenced papers used by the AI chat assistant to provide contextually relevant responses.
-    
+
     \item[\textbf{Subscription Tier}] The level of service (Free, Pro, Team) that determines user quotas, feature access, and billing amounts.
-    
+
     \item[\textbf{Role-Based Access}] A permission system with 5 levels (Owner, Admin, Editor, Commenter, Viewer) controlling user capabilities within a workspace.
 \end{description}
 
 \subsection{Acronyms}
 
 \begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|l|X|}
-\hline
-\textbf{Acronym} & \textbf{Full Form} \\
-\hline
-API & Application Programming Interface \\
-\hline
-AWS & Amazon Web Services \\
-\hline
-CDN & Content Delivery Network \\
-\hline
-CORS & Cross-Origin Resource Sharing \\
-\hline
-CRUD & Create, Read, Update, Delete \\
-\hline
-DBMS & Database Management System \\
-\hline
-ERD & Entity Relationship Diagram \\
-\hline
-GDPR & General Data Protection Regulation \\
-\hline
-HTTPS & Hypertext Transfer Protocol Secure \\
-\hline
-JWT & JSON Web Token \\
-\hline
-MVP & Minimum Viable Product \\
-\hline
-OAuth & Open Authorization \\
-\hline
-ORM & Object-Relational Mapping \\
-\hline
-PDF & Portable Document Format \\
-\hline
-REST & Representational State Transfer \\
-\hline
-S3 & Simple Storage Service (AWS) \\
-\hline
-SRS & Software Requirements Specification \\
-\hline
-SSL/TLS & Secure Sockets Layer / Transport Layer Security \\
-\hline
-UI/UX & User Interface / User Experience \\
-\hline
-WCAG & Web Content Accessibility Guidelines \\
-\hline
-WYSIWYG & What You See Is What You Get \\
-\hline
-\end{tabularx}
-\caption{List of Acronyms}
-\label{table:acronyms}
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Acronym} & \textbf{Full Form}                              \\
+        \hline
+        API              & Application Programming Interface               \\
+        \hline
+        AWS              & Amazon Web Services                             \\
+        \hline
+        CDN              & Content Delivery Network                        \\
+        \hline
+        CORS             & Cross-Origin Resource Sharing                   \\
+        \hline
+        CRUD             & Create, Read, Update, Delete                    \\
+        \hline
+        DBMS             & Database Management System                      \\
+        \hline
+        ERD              & Entity Relationship Diagram                     \\
+        \hline
+        GDPR             & General Data Protection Regulation              \\
+        \hline
+        HTTPS            & Hypertext Transfer Protocol Secure              \\
+        \hline
+        JWT              & JSON Web Token                                  \\
+        \hline
+        MVP              & Minimum Viable Product                          \\
+        \hline
+        OAuth            & Open Authorization                              \\
+        \hline
+        ORM              & Object-Relational Mapping                       \\
+        \hline
+        PDF              & Portable Document Format                        \\
+        \hline
+        REST             & Representational State Transfer                 \\
+        \hline
+        S3               & Simple Storage Service (AWS)                    \\
+        \hline
+        SRS              & Software Requirements Specification             \\
+        \hline
+        SSL/TLS          & Secure Sockets Layer / Transport Layer Security \\
+        \hline
+        UI/UX            & User Interface / User Experience                \\
+        \hline
+        WCAG             & Web Content Accessibility Guidelines            \\
+        \hline
+        WYSIWYG          & What You See Is What You Get                    \\
+        \hline
+    \end{tabularx}
+    \caption{List of Acronyms}
+    \label{table:acronyms}
 \end{table}
 
 % ============================================
@@ -296,7 +296,7 @@ WYSIWYG & What You See Is What You Get \\
     \item OpenAI API Reference: \url{https://platform.openai.com/docs}
     \item Stripe API Documentation: \url{https://stripe.com/docs/api}
     \item TipTap Editor Documentation: \url{https://tiptap.dev/docs}
-    \item ScholarFlow Feasibility Survey Results (29 responses, November-December 2025)
+    \item ScholarFlow Feasibility Survey Results (32 responses, November-December 2025)
     \item ScholarFlow GitHub Repository: \url{https://github.com/Atik203/Scholar-Flow}
 \end{enumerate}
 
@@ -308,33 +308,33 @@ WYSIWYG & What You See Is What You Get \\
 This Software Requirements Specification is organized into the following chapters:
 
 \begin{description}[leftmargin=3cm, style=nextline]
-    \item[\textbf{Chapter 1: Introduction}] 
-    Provides the purpose, scope, definitions, and references for the ScholarFlow system. Establishes the context and objectives of the project.
-    
-    \item[\textbf{Chapter 2: System Study \& Information Gathering}] 
-    Documents the survey methodology, demographic analysis, current tool landscape, market validation, and pain points identified through comprehensive user research with 29 academic researchers.
-    
-    \item[\textbf{Chapter 3: System Analysis}] 
-    Presents feasibility study results, SWOT analysis, competitive analysis, feature prioritization matrix, and strategic recommendations based on survey data and market research.
-    
-    \item[\textbf{Chapter 4: System Design}] 
-    Details the system architecture, database schema, Entity-Relationship Diagrams (ERD), API design, and technical implementation specifications.
-    
-    \item[\textbf{Chapter 5: System Implementation}] 
-    Describes the development methodology, technology stack integration, code structure, deployment pipeline, and testing strategies.
-    
-    \item[\textbf{Chapter 6: Testing \& Validation}] 
-    Outlines the comprehensive testing approach including unit tests, integration tests, end-to-end tests, and user acceptance testing results.
-    
-    \item[\textbf{Chapter 7: Results \& Screenshots}] 
-    Showcases the implemented system with annotated screenshots, feature demonstrations, and user interface walkthroughs.
-    
-    \item[\textbf{Chapter 8: Limitations \& Constraints}] 
-    Identifies current system limitations, known issues, scope boundaries, and areas requiring future enhancement.
-    
-    \item[\textbf{Chapter 9: Future Work}] 
-    Proposes roadmap for Phase 2 and Phase 3 features, scalability improvements, and long-term product evolution.
-    
-    \item[\textbf{Chapter 10: Conclusion}] 
-    Summarizes project achievements, lessons learned, and overall assessment of ScholarFlow's success in addressing academic research needs.
+    \item[\textbf{Chapter 1: Introduction}]
+          Provides the purpose, scope, definitions, and references for the ScholarFlow system. Establishes the context and objectives of the project.
+
+    \item[\textbf{Chapter 2: System Study \& Information Gathering}]
+          Documents the survey methodology, demographic analysis, current tool landscape, market validation, and pain points identified through comprehensive user research with 32 survey respondents.
+
+    \item[\textbf{Chapter 3: System Analysis}]
+          Presents feasibility study results, SWOT analysis, competitive analysis, feature prioritization matrix, and strategic recommendations based on survey data and market research.
+
+    \item[\textbf{Chapter 4: System Design}]
+          Details the system architecture, database schema, Entity-Relationship Diagrams (ERD), API design, and technical implementation specifications.
+
+    \item[\textbf{Chapter 5: System Implementation}]
+          Describes the development methodology, technology stack integration, code structure, deployment pipeline, and testing strategies.
+
+    \item[\textbf{Chapter 6: Testing \& Validation}]
+          Outlines the comprehensive testing approach including unit tests, integration tests, end-to-end tests, and user acceptance testing results.
+
+    \item[\textbf{Chapter 7: Results \& Screenshots}]
+          Showcases the implemented system with annotated screenshots, feature demonstrations, and user interface walkthroughs.
+
+    \item[\textbf{Chapter 8: Limitations \& Constraints}]
+          Identifies current system limitations, known issues, scope boundaries, and areas requiring future enhancement.
+
+    \item[\textbf{Chapter 9: Future Work}]
+          Proposes roadmap for Phase 2 and Phase 3 features, scalability improvements, and long-term product evolution.
+
+    \item[\textbf{Chapter 10: Conclusion}]
+          Summarizes project achievements, lessons learned, and overall assessment of ScholarFlow's success in addressing academic research needs.
 \end{description}
