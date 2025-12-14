@@ -1,0 +1,237 @@
+\chapter{System Design}
+\label{ch:system-design}
+
+\section{Architectural Overview}
+\label{sec:architectural-overview}
+
+\projectname{} follows a modular, three-tier architecture consisting of a web client, an API layer, and a persistent data layer.
+The system is implemented as a monorepo with a \textbf{Next.js 15} frontend and an \textbf{Express.js} backend.
+Data is stored in \textbf{PostgreSQL} and accessed through \textbf{Prisma} using parameterized RAW query patterns where appropriate.
+For file storage and large binary objects, the platform integrates \textbf{AWS S3}.
+
+The overall design aims to ensure (i) secure authentication and authorization, (ii) scalable paper processing and retrieval, and (iii) extensibility for AI-driven capabilities such as summarization and semantic search.
+
+\section{Context Diagram}
+\label{sec:context-diagram}
+
+The context diagram (Figure~\ref{fig:context-diagram}) presents \projectname{} as a single system boundary and highlights the external actors and external services that interact with the platform.
+The primary users are guest users (unauthenticated) and authenticated users working individually or within collaborative workspaces.
+External services include OAuth providers for federated login, an email service for verification and password reset flows, Stripe for subscription billing, an AI provider for summarization/insights, and AWS S3 for object storage.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpg}
+    \caption{ScholarFlow Context Diagram}
+    \label{fig:context-diagram}
+\end{figure}
+
+\section{Use Case Diagram and Descriptive Forms}
+\label{sec:use-case-diagram}
+
+The use case diagram (Figure~\ref{fig:use-case-diagram}) summarizes the key interactions between system actors and core platform functions.
+To support academic clarity and traceability, representative use cases are specified using structured descriptive forms.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/use_case_diagram.png}
+    \caption{ScholarFlow Use Case Diagram}
+    \label{fig:use-case-diagram}
+\end{figure}
+
+\subsection{Use Case Descriptions}
+\label{subsec:use-case-descriptions}
+
+\renewcommand{\arraystretch}{1.15}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}                 & UC-01                                                                                                                                                                                           \\
+        \hline
+        \textbf{Name}                        & Register / Login                                                                                                                                                                                \\
+        \hline
+        \textbf{Primary Actor}               & Guest User                                                                                                                                                                                      \\
+        \hline
+        \textbf{Goal}                        & Create an account or authenticate to access the dashboard and workspace features.                                                                                                               \\
+        \hline
+        \textbf{Preconditions}               & The user has access to the web application; authentication service endpoints are available.                                                                                                     \\
+        \hline
+        \textbf{Main Success Scenario}       & (1) User selects register or login. (2) User provides credentials or chooses OAuth. (3) System validates input and issues a session/JWT. (4) User is redirected to the authenticated dashboard. \\
+        \hline
+        \textbf{Alternative/Exception Flows} & Invalid credentials; unverified email; OAuth failure; rate limiting on repeated attempts.                                                                                                       \\
+        \hline
+        \textbf{Postconditions}              & A valid authenticated session is established; user profile becomes accessible.                                                                                                                  \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Register / Login}
+    \label{tab:uc-01}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}                 & UC-02                                                                                                                                                                                                                                                               \\
+        \hline
+        \textbf{Name}                        & Upload Paper                                                                                                                                                                                                                                                        \\
+        \hline
+        \textbf{Primary Actor}               & Authenticated User                                                                                                                                                                                                                                                  \\
+        \hline
+        \textbf{Goal}                        & Upload a research paper to a workspace and store it reliably for later retrieval and processing.                                                                                                                                                                    \\
+        \hline
+        \textbf{Preconditions}               & The user is authenticated and has access to a target workspace.                                                                                                                                                                                                     \\
+        \hline
+        \textbf{Main Success Scenario}       & (1) User selects a file and submits an upload request. (2) System validates file type/size and metadata. (3) System stores the file in object storage and persists paper records in the database. (4) System returns a success response and updates the paper list. \\
+        \hline
+        \textbf{Alternative/Exception Flows} & Unsupported file type; upload interrupted; storage failure; insufficient workspace permissions.                                                                                                                                                                     \\
+        \hline
+        \textbf{Postconditions}              & Paper and file metadata are recorded; the file is available for preview and further processing.                                                                                                                                                                     \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Upload Paper}
+    \label{tab:uc-02}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}                 & UC-03                                                                                                                                                                                             \\
+        \hline
+        \textbf{Name}                        & Create Workspace and Invite Members                                                                                                                                                               \\
+        \hline
+        \textbf{Primary Actor}               & Workspace Owner                                                                                                                                                                                   \\
+        \hline
+        \textbf{Goal}                        & Create a collaborative workspace and invite other users for team-based paper management.                                                                                                          \\
+        \hline
+        \textbf{Preconditions}               & The user is authenticated; invitation email delivery is configured.                                                                                                                               \\
+        \hline
+        \textbf{Main Success Scenario}       & (1) Owner creates a workspace. (2) Owner submits member invitations. (3) System records membership/invitations and sends emails. (4) Invited users accept and become members with assigned roles. \\
+        \hline
+        \textbf{Alternative/Exception Flows} & Email delivery failure; invitee already a member; invalid email; role restrictions.                                                                                                               \\
+        \hline
+        \textbf{Postconditions}              & Workspace is created; membership records reflect the invited and accepted users.                                                                                                                  \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Create Workspace and Invite Members}
+    \label{tab:uc-03}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}                 & UC-04                                                                                                                                                                \\
+        \hline
+        \textbf{Name}                        & Create Collection and Add Paper                                                                                                                                      \\
+        \hline
+        \textbf{Primary Actor}               & Collection Owner                                                                                                                                                     \\
+        \hline
+        \textbf{Goal}                        & Organize papers into collections for structured reading and collaboration.                                                                                           \\
+        \hline
+        \textbf{Preconditions}               & The user is authenticated and has appropriate permissions within the workspace.                                                                                      \\
+        \hline
+        \textbf{Main Success Scenario}       & (1) User creates a collection with name/description. (2) User selects one or more papers. (3) System links papers to the collection and updates the collection view. \\
+        \hline
+        \textbf{Alternative/Exception Flows} & Duplicate collection names; paper not found; permission denied; invalid request payload.                                                                             \\
+        \hline
+        \textbf{Postconditions}              & A collection record exists and includes linked papers via the join table.                                                                                            \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Create Collection and Add Paper}
+    \label{tab:uc-04}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}                 & UC-05                                                                                                                                                                                                      \\
+        \hline
+        \textbf{Name}                        & Generate AI Summary                                                                                                                                                                                        \\
+        \hline
+        \textbf{Primary Actor}               & Authenticated User                                                                                                                                                                                         \\
+        \hline
+        \textbf{Goal}                        & Obtain an AI-generated summary of a selected paper to accelerate comprehension.                                                                                                                            \\
+        \hline
+        \textbf{Preconditions}               & The paper is uploaded and accessible; the AI provider integration is available.                                                                                                                            \\
+        \hline
+        \textbf{Main Success Scenario}       & (1) User requests a summary from the paper detail view. (2) System retrieves the paper text/chunks. (3) System calls the AI provider with appropriate prompts. (4) System stores and displays the summary. \\
+        \hline
+        \textbf{Alternative/Exception Flows} & AI provider error; rate limits; paper content unavailable; user plan does not include the feature.                                                                                                         \\
+        \hline
+        \textbf{Postconditions}              & A summary artifact is stored and can be reused without recomputation.                                                                                                                                      \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Generate AI Summary}
+    \label{tab:uc-05}
+\end{table}
+
+\section{Data Flow Diagram (DFD)}
+\label{sec:dfd}
+
+The Data Flow Diagram (Figure~\ref{fig:dfd-diagram}) illustrates how data moves through \projectname{} processes and stores.
+At a high level, the system receives user requests through the web client, performs authentication and authorization in the API layer, and persists results in the database and object storage.
+The main processes include session management, workspace and membership operations, paper upload and processing, AI-driven analysis, and subscription management.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.jpg}
+    \caption{ScholarFlow Data Flow Diagram (DFD)}
+    \label{fig:dfd-diagram}
+\end{figure}
+
+\subsection{DFD Notes (Process and Data Store Overview)}
+\begin{itemize}[leftmargin=*,topsep=5pt,itemsep=3pt]
+    \item \textbf{Processes}: authentication/session handling, workspace and collection management, paper ingestion and metadata extraction, AI summarization/insights, and billing operations.
+    \item \textbf{Data Stores}: PostgreSQL stores structured entities (users, workspaces, papers, collections, memberships, AI artifacts, billing records), while AWS S3 stores uploaded documents and derived file assets.
+    \item \textbf{External Interfaces}: OAuth providers and email services support identity verification workflows; Stripe manages subscription events; AI providers perform inference for summaries and insights.
+\end{itemize}
+
+\section{Activity Diagram}
+\label{sec:activity-diagram}
+
+The activity diagram (Figure~\ref{fig:activity-diagram}) captures the operational workflow for paper upload, validation, persistence, and completion.
+It emphasizes validation points (file checks, field validation, authorization) and highlights the separation between user actions and backend processing responsibilities.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/diagrams/activity_diagram.jpg}
+    \caption{Activity Diagram for Paper Upload and Persistence}
+    \label{fig:activity-diagram}
+\end{figure}
+
+\section{ERD and Relational Schema Diagrams}
+\label{sec:erd-and-schema}
+
+The database design of \projectname{} is centered around the entities required for authentication, collaborative workspaces, paper management, and AI features.
+The ERD (Figure~\ref{fig:system-erd}) visualizes the conceptual model and relationships, while the schema diagram (Figure~\ref{fig:system-schema}) represents the logical relational structure used in the PostgreSQL database.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/ERD.png}
+    \caption{ScholarFlow ERD (Conceptual Data Model)}
+    \label{fig:system-erd}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/schema.png}
+    \caption{ScholarFlow Relational Schema Diagram}
+    \label{fig:system-schema}
+\end{figure}
+
+\subsection{Core Entities and Relationships}
+\begin{itemize}[leftmargin=*,topsep=5pt,itemsep=3pt]
+    \item \textbf{User, Account, Session, UserToken}: authentication and OAuth linkage.
+    \item \textbf{Workspace, WorkspaceMember}: collaborative boundaries and role-based membership.
+    \item \textbf{Paper, PaperFile, PaperChunk}: paper storage, metadata, and chunking for downstream AI operations.
+    \item \textbf{Collection, CollectionPaper, CollectionMember}: grouping of papers and controlled sharing.
+    \item \textbf{AISummary}: persisted AI outputs associated with papers.
+\end{itemize}

@@ -1,0 +1,218 @@
+\chapter{System Design}
+
+\section{Overview}
+
+This chapter presents the high-level system design of \projectname{}, focusing on the architecture, external integrations, core system interactions, and database design.
+The design artifacts are documented using six diagrams: \textbf{context diagram}, \textbf{use case diagram (with descriptive forms)}, \textbf{data flow diagram (DFD)}, \textbf{activity diagram}, \textbf{ERD}, and \textbf{relational schema diagram}.
+
+\section{Context Diagram}
+
+The context diagram (Figure~\ref{fig:srs-context-diagram}) models \projectname{} as a single system boundary and shows how it interacts with external actors and services.
+The primary actors are guest users and authenticated users, while the main external systems include OAuth providers for federated sign-in, an email service for verification and password reset, Stripe for subscription billing, AI providers for summarization and insights, and AWS S3 for document storage.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpg}
+    \caption{ScholarFlow Context Diagram}
+    \label{fig:srs-context-diagram}
+\end{figure}
+
+\section{Use Case Diagram with Descriptive Forms}
+
+The use case diagram (Figure~\ref{fig:srs-use-case-diagram}) summarizes the major functional interactions between the system and its users.
+To support academic documentation and traceability, selected use cases are specified using structured descriptive forms.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/use_case_diagram.png}
+    \caption{ScholarFlow Use Case Diagram}
+    \label{fig:srs-use-case-diagram}
+\end{figure}
+
+\subsection{Use Case Descriptions}
+
+\renewcommand{\arraystretch}{1.15}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}       & UC-01                                                                                                                                                                                                                         \\
+        \hline
+        \textbf{Name}              & Register / Login                                                                                                                                                                                                              \\
+        \hline
+        \textbf{Primary Actor}     & Guest User                                                                                                                                                                                                                    \\
+        \hline
+        \textbf{Goal}              & Authenticate a user to enable access to protected features and resources.                                                                                                                                                     \\
+        \hline
+        \textbf{Preconditions}     & The user can access the web application; the authentication endpoints are available.                                                                                                                                          \\
+        \hline
+        \textbf{Main Flow}         & (1) User selects register or login. (2) User submits credentials or chooses OAuth. (3) System validates the request. (4) System creates a session and returns authentication tokens. (5) User is redirected to the dashboard. \\
+        \hline
+        \textbf{Alternative Flows} & Invalid credentials; unverified email; OAuth callback failure; rate limiting on repeated attempts.                                                                                                                            \\
+        \hline
+        \textbf{Postconditions}    & An authenticated session is established and the user profile becomes accessible.                                                                                                                                              \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Register / Login}
+    \label{tab:srs-uc-01}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}       & UC-02                                                                                                                                                                                                                                                          \\
+        \hline
+        \textbf{Name}              & Upload Paper                                                                                                                                                                                                                                                   \\
+        \hline
+        \textbf{Primary Actor}     & Authenticated User                                                                                                                                                                                                                                             \\
+        \hline
+        \textbf{Goal}              & Upload a research paper into a workspace for storage, indexing, and later retrieval.                                                                                                                                                                           \\
+        \hline
+        \textbf{Preconditions}     & The user is authenticated and has access to the target workspace.                                                                                                                                                                                              \\
+        \hline
+        \textbf{Main Flow}         & (1) User selects a file and submits upload. (2) System validates file type/size and metadata. (3) System stores the file in object storage. (4) System creates database records for the paper and file. (5) System returns success and updates the paper list. \\
+        \hline
+        \textbf{Alternative Flows} & Unsupported file type; upload failure; storage error; permission denied.                                                                                                                                                                                       \\
+        \hline
+        \textbf{Postconditions}    & Paper metadata and file references are persisted and available for preview and processing.                                                                                                                                                                     \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Upload Paper}
+    \label{tab:srs-uc-02}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}       & UC-03                                                                                                                                                                       \\
+        \hline
+        \textbf{Name}              & Create Workspace and Invite Members                                                                                                                                         \\
+        \hline
+        \textbf{Primary Actor}     & Workspace Owner                                                                                                                                                             \\
+        \hline
+        \textbf{Goal}              & Create a shared workspace and invite collaborators with role-based permissions.                                                                                             \\
+        \hline
+        \textbf{Preconditions}     & The user is authenticated; invitation delivery (email) is configured.                                                                                                       \\
+        \hline
+        \textbf{Main Flow}         & (1) Owner creates workspace. (2) Owner provides invitee emails and roles. (3) System records invitations and sends emails. (4) Invitees accept and membership is activated. \\
+        \hline
+        \textbf{Alternative Flows} & Invalid email; invitee already a member; email delivery failure; role restrictions.                                                                                         \\
+        \hline
+        \textbf{Postconditions}    & Workspace and membership records reflect invited and accepted users.                                                                                                        \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Create Workspace and Invite Members}
+    \label{tab:srs-uc-03}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}       & UC-04                                                                                                                                                 \\
+        \hline
+        \textbf{Name}              & Create Collection and Add Papers                                                                                                                      \\
+        \hline
+        \textbf{Primary Actor}     & Collection Owner                                                                                                                                      \\
+        \hline
+        \textbf{Goal}              & Organize papers into collections for structured reading and sharing.                                                                                  \\
+        \hline
+        \textbf{Preconditions}     & The user is authenticated and has appropriate workspace permissions.                                                                                  \\
+        \hline
+        \textbf{Main Flow}         & (1) User creates a collection. (2) User selects papers to include. (3) System links papers to the collection. (4) System updates the collection view. \\
+        \hline
+        \textbf{Alternative Flows} & Duplicate name; paper not found; permission denied; invalid payload.                                                                                  \\
+        \hline
+        \textbf{Postconditions}    & A collection exists and contains linked papers via the association table.                                                                             \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Create Collection and Add Papers}
+    \label{tab:srs-uc-04}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Use Case ID}       & UC-05                                                                                                                                                                                         \\
+        \hline
+        \textbf{Name}              & Generate AI Summary                                                                                                                                                                           \\
+        \hline
+        \textbf{Primary Actor}     & Authenticated User                                                                                                                                                                            \\
+        \hline
+        \textbf{Goal}              & Generate and store an AI-based summary for a selected paper to improve comprehension.                                                                                                         \\
+        \hline
+        \textbf{Preconditions}     & Paper content is available; AI provider integration is operational; user has feature access.                                                                                                  \\
+        \hline
+        \textbf{Main Flow}         & (1) User requests summary. (2) System retrieves paper text/chunks. (3) System calls AI provider with prompt. (4) System stores summary artifact. (5) System displays the summary to the user. \\
+        \hline
+        \textbf{Alternative Flows} & AI provider error; rate limiting; paper text extraction unavailable; plan restriction.                                                                                                        \\
+        \hline
+        \textbf{Postconditions}    & Summary is persisted and reusable for future viewing.                                                                                                                                         \\
+        \hline
+    \end{tabularx}
+    \caption{Use Case Description: Generate AI Summary}
+    \label{tab:srs-uc-05}
+\end{table}
+
+\section{Data Flow Diagram (DFD)}
+
+The Data Flow Diagram (DFD) in Figure~\ref{fig:srs-dfd-diagram} describes how data moves between external actors, system processes, and internal data stores.
+At a high level, user requests originate from the web application, are processed through the API (authentication, authorization, validation, and business logic), and are persisted in the database and object storage.
+The model highlights the main operational processes: authentication and session handling, workspace/membership management, paper upload and metadata extraction, AI summarization and insights, and subscription management.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.jpg}
+    \caption{ScholarFlow Data Flow Diagram (DFD)}
+    \label{fig:srs-dfd-diagram}
+\end{figure}
+
+\section{Activity Diagram}
+
+The activity diagram (Figure~\ref{fig:srs-activity-diagram}) represents the operational workflow of the paper upload feature, including validation checks and persistence steps.
+It emphasizes key decision points (file validation and field validation) and the separation of responsibilities across user actions and backend operations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/diagrams/activity_diagram.jpg}
+    \caption{Activity Diagram for Paper Upload and Persistence}
+    \label{fig:srs-activity-diagram}
+\end{figure}
+
+\section{ERD and Schema Diagrams}
+
+The database of \projectname{} is designed to support authentication, collaborative workspaces, paper management, and AI artifacts.
+The ERD (Figure~\ref{fig:srs-erd}) captures the conceptual relationships among entities, while the schema diagram (Figure~\ref{fig:srs-schema}) reflects the logical relational structure implemented in PostgreSQL.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/ERD.png}
+    \caption{ScholarFlow Entity Relationship Diagram (ERD)}
+    \label{fig:srs-erd}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{images/diagrams/schema.png}
+    \caption{ScholarFlow Relational Schema Diagram}
+    \label{fig:srs-schema}
+\end{figure}
+
+\subsection{Core Entities (Summary)}
+
+\begin{itemize}[leftmargin=*,topsep=5pt,itemsep=3pt]
+    \item \textbf{Authentication}: \textit{User}, \textit{Account}, \textit{Session}, and \textit{UserToken} support local and OAuth-based authentication.
+    \item \textbf{Collaboration}: \textit{Workspace} and \textit{WorkspaceMember} define collaborative boundaries and role-based membership.
+    \item \textbf{Paper Management}: \textit{Paper}, \textit{PaperFile}, and \textit{PaperChunk} manage document storage, metadata, and chunking for AI workflows.
+    \item \textbf{Collections}: \textit{Collection}, \textit{CollectionPaper}, and \textit{CollectionMember} enable structured grouping and controlled sharing.
+    \item \textbf{AI Artifacts}: \textit{AISummary} stores generated outputs for reproducibility and performance.
+\end{itemize}
