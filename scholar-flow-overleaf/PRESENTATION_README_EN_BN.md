@@ -25,11 +25,11 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- `srs-main.pdf` → **Chapter 1: Introduction** (section **Purpose**)
+- `srs-main.pdf` → **Chapter 1: Introduction** (page 5, section **Purpose**)
 
 **English (simple):**
 
-- My name is ****\_****. I will start our presentation.
+- My name is \***\*\_\*\***. I will start our presentation.
 - Our project name is **ScholarFlow**. It is an **AI-powered research paper collaboration hub**.
 - The goal is to make it easier for students and researchers to **store papers, organize them, get AI summaries, and work together** in one place.
 
@@ -47,8 +47,8 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 1 → **Problem Statement**, **Problem Description**
-- Figures: **Top Research Workflow Pain Points**, **Current Tools Used by Researchers**
+- Chapter 1 → **Problem Statement** (page 6), **Problem Description** (page 6)
+- Figures: **Top Research Workflow Pain Points**, **Current Tools Used by Researchers** (same chapter, around pages 6–8)
 
 **English (simple):**
 
@@ -76,7 +76,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 1 → **Target Audience Demographics** table
+- Chapter 1 → **Target Audience Demographics** table (page 5)
 
 **English (simple):**
 
@@ -96,7 +96,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 1 → **Goal**, **Specific Goals**, **Success Metrics (KPIs)**
+- Chapter 1 → **Goal** (page 9), **Specific Goals** (page 9), **Success Metrics (KPIs)** (page 10)
 
 **English (simple):**
 
@@ -128,8 +128,8 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- `srs-main.pdf` → **Chapter 2: System Study and Information Gathering**
-  - Sections: Introduction, Information Sources, Internal Sources, External Sources, Google Forms Survey
+- `srs-main.pdf` → **Chapter 2: System Study and Information Gathering** (starts on page 13)
+  - Sections: Introduction, Information Sources, Internal Sources, External Sources, Google Forms Survey (pages 13–17)
 
 **English (simple):**
 
@@ -164,7 +164,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- `srs-main.pdf` → **Chapter 3: System Analysis**, Introduction
+- `srs-main.pdf` → **Chapter 3: System Analysis**, Introduction (page 24)
 
 **English (simple):**
 
@@ -182,7 +182,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 3 → **Gap Analysis**, tables for competitor limitations vs ScholarFlow
+- Chapter 3 → **Gap Analysis** (page 24), tables for competitor limitations vs ScholarFlow (pages 24–25)
 
 **English (simple):**
 
@@ -212,7 +212,8 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 3 → **SWOT Analysis** tables
+- Chapter 3 → **SWOT Analysis** (section starts on page 34)
+- Detailed SWOT subsections and tables: pages 35–38
 
 **English (simple):**
 
@@ -236,7 +237,8 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 3 → **Feasibility Assessment** (Technical, Economic, Operational)
+- Chapter 3 → **Feasibility Analysis / Assessment** (section 3.4 starts on page 31)
+- Technical and Economic feasibility details: page 32; revenue and pricing details: pages 32–33
 
 **English (simple):**
 
@@ -263,7 +265,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- `srs-main.pdf` → **Chapter 4: System Design**, Overview
+- `srs-main.pdf` → **Chapter 4: System Design**, Overview (page 42)
 
 **English (simple):**
 
@@ -281,7 +283,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 4 → **Context Diagram**, figure “ScholarFlow Context Diagram”
+- Chapter 4 → **Context Diagram**, figure “ScholarFlow Context Diagram” (page 42)
 
 **English (simple):**
 
@@ -303,7 +305,8 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 4 → **Use Case Diagram with Descriptive Forms**, tables UC-01 to UC-05
+- Chapter 4 → **Use Case Diagram with Descriptive Forms** (page 44)
+- Use case description tables UC-01 to UC-05 (pages 45–47)
 
 **English (simple):**
 
@@ -333,7 +336,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 4 → **Data Flow Diagram (DFD)**, **Activity Diagram**
+- Chapter 4 → **Data Flow Diagram (DFD)** (page 47), **Activity Diagram** (page 47)
 
 **English (simple):**
 
@@ -361,7 +364,7 @@ When speaking, you can mention chapter/section names like this:
 
 **Where in SRS:**
 
-- Chapter 4 → **ERD and Schema Diagrams**, figures “ScholarFlow ERD”, “ScholarFlow Schema Diagram”
+- Chapter 4 → **ERD and Schema Diagrams**, figures “ScholarFlow ERD”, “ScholarFlow Schema Diagram” (pages 48–50)
 
 **English (simple):**
 
