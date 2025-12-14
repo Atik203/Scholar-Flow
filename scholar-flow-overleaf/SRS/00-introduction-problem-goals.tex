@@ -32,7 +32,7 @@ Based on comprehensive survey data from 32 respondents (students and faculty) ac
         \hline
         \textbf{Age}               &
         68.8\% Ages 22-25          &
-        Gen-Z digital natives expect modern UI/UX (dark mode, glassmorphism), seamless OAuth (Google/GitHub), and instant AI-powered insights.                      \\
+        Student researchers expect modern UI/UX (dark mode, responsive design), seamless OAuth (Google/GitHub), and instant AI-powered insights.                      \\
         \hline
         \textbf{Field}             &
         34.4\% Computer Science    &
@@ -101,7 +101,7 @@ Our survey of 32 respondents revealed critical pain points in current research w
 The fragmented tool landscape stems from three fundamental market failures:
 
 \begin{enumerate}
-    \item \textbf{Legacy Tool Stagnation}: Traditional reference managers (Zotero, Mendeley) were designed in the pre-AI era (2006--2011). Their outdated interfaces and lack of modern features (semantic search, AI summaries, real-time collaboration) fail to meet Gen-Z expectations shaped by tools like Notion, Figma, and ChatGPT.
+    \item \textbf{Legacy Tool Stagnation}: Traditional reference managers (Zotero, Mendeley) were designed in the pre-AI era (2006--2011). Their outdated interfaces and lack of modern features (semantic search, AI summaries, real-time collaboration) fail to meet student researcher expectations shaped by tools like Notion, Figma, and ChatGPT.
 
     \item \textbf{Lack of Integrated Workflows}: Researchers cobble together 3--5 disconnected tools:
           \begin{itemize}
@@ -114,9 +114,10 @@ The fragmented tool landscape stems from three fundamental market failures:
           This creates context-switching overhead, data silos, and cognitive load that reduces research velocity by 30--50\%.
 
     \item \textbf{AI Integration Gap}: Despite the transformer revolution (2017--2024), existing research tools remain fundamentally unchanged. Papers are still searched by keywords (not semantic meaning), summaries are manual, and citations lack context. The market lacks a platform that treats AI as a first-class citizen, not a bolt-on feature.
+ 
 \end{enumerate}
 
-extbf{Validation}: 75\% of surveyed researchers indicated ``moderate to extreme need'' for a dedicated research paper management solution (Figure~\ref{fig:need-assessment}), while current tool satisfaction averages only 3.28/5 --- indicating significant room for improvement.
+{\bfseries Validation}: 75\% of surveyed researchers indicated ``moderate to extreme need'' for a dedicated research paper management solution (Figure~\ref{fig:need-assessment}), while current tool satisfaction averages only 3.28/5 --- indicating significant room for improvement.
 
 \begin{figure}[H]
     \centering
@@ -144,7 +145,7 @@ Develop a production-ready, AI-native research paper collaboration platform that
     \item \textbf{AI-Powered Knowledge Discovery}
           \begin{itemize}
               \item Semantic search using pgvector embeddings (sub-300ms latency)
-              \item AI paper summaries with 85\% time savings (validated by 82.7\% feature demand)
+              \item AI paper summaries that reduce reading time and improve comprehension (survey signals: 100\% interest in AI features; 65.6\% selected AI-generated paper summaries)
               \item Multi-paper chat for cross-paper insights and synthesis
               \item Deep research mode with citation graph exploration
           \end{itemize}
@@ -157,9 +158,9 @@ Develop a production-ready, AI-native research paper collaboration platform that
               \item Email sharing with granular permissions (view/edit)
           \end{itemize}
 
-    \item \textbf{Modern Gen-Z UX}
+    \item \textbf{Modern UX for Student Researchers}
           \begin{itemize}
-              \item Dark mode, glassmorphism, responsive mobile-first design
+              \item Dark mode, responsive mobile-first design, streamlined interface
               \item OAuth (Google/GitHub) with JWT session management
               \item Sub-second interactions, optimistic updates, skeleton loaders
               \item WCAG 2.1 AA accessibility compliance

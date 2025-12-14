@@ -29,18 +29,18 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
         \hline
         \textbf{Gap Category}                                           & \textbf{Competitor Limitations} & \textbf{ScholarFlow Solution}                                  \\
         \hline
-        \textbf{AI Integration} \newline \textit{(Critical Gap)}        &
-        \textbf{Zotero}: Zero AI features \newline
-        \textbf{Mendeley}: No semantic search or summaries \newline
-        \textbf{Paperpile}: Keyword search only \newline
-        \textbf{Paperpal}: AI writing only (no management)              &
-        extbf{AI-First Architecture}: Semantic search (pgvector), AI summaries (65.6\% selection), multi-paper chat, deep research mode with citation context              \\
+            {\bfseries AI Integration} \newline \textit{(Critical Gap)}        &
+            {\bfseries Zotero}: Zero AI features \newline
+            {\bfseries Mendeley}: No semantic search or summaries \newline
+            {\bfseries Paperpile}: Keyword search only \newline
+            {\bfseries Paperpal}: AI writing only (no management)              &
+            {\bfseries AI-First Architecture}: Semantic search (pgvector), AI summaries (65.6\% selection), multi-paper chat, deep research mode with citation context              \\
         \hline
-        \textbf{Modern UX} \newline \textit{(High Impact)}              &
-        \textbf{Zotero}: Outdated desktop UI (feels like 2010) \newline
-        \textbf{Mendeley}: Cluttered interface, slow sync \newline
-        \textbf{ReadCube}: Desktop-only, poor mobile                    &
-        \textbf{Gen-Z UX}: Dark mode, glassmorphism, mobile-first responsive design, OAuth (Google/GitHub), sub-second interactions, Notion-like simplicity                \\
+            {\bfseries Modern UX} \newline \textit{(High Impact)}              &
+            {\bfseries Zotero}: Outdated desktop UI (legacy interface) \newline
+            {\bfseries Mendeley}: Cluttered interface, slow sync \newline
+            {\bfseries ReadCube}: Desktop-only, poor mobile                    &
+            {\bfseries Modern UX}: Dark mode, mobile-first responsive design, OAuth (Google/GitHub), sub-second interactions, streamlined interaction design                \\
         \hline
         \textbf{Real-Time Collaboration} \newline \textit{(Medium Gap)} &
         \textbf{Zotero}: Basic group libraries (no live editing) \newline
@@ -202,7 +202,7 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
         \hline
         Market validation: 75\% need, 81.3\% interest, 62.6\% likely to try free tier, 100\% AI interest (65.6\% selected AI summaries; 62.5\% selected AI Q\&A)       & Execution risk: small team velocity; risk of scope creep without disciplined prioritization         \\
         \hline
-        First-mover advantage in Bangladesh; UIU concentration (\textasciitilde{}60\%) for rapid word-of-mouth                                                         & Go-to-market playbook for campuses still forming; limited field presence today                      \\
+        First-mover advantage in Bangladesh; UIU concentration (\textasciitilde{}60\%) for rapid peer referral                                                         & Go-to-market playbook for campuses still forming; limited field presence today                      \\
         \hline
     \end{tabularx}
     \caption{SWOT Internal Factors: Strengths vs. Weaknesses}
@@ -220,7 +220,7 @@ Based on competitive analysis of Zotero, Mendeley, Paperpile, Paperpal, and Read
         \hline
         AI adoption tailwind in academia; universities seeking AI-assisted research tooling    & Incumbent gravity: browser reading (34.4\%), cloud drives (31.3\%), and local folders (31.3\%) as default habits              \\
         \hline
-        Underserved campus market in Bangladesh; ambassador-led viral loops                    & Adoption uncertainty: 21.9\% “not sure” about trying the free tier; 18.8\% show low interest; incumbents can copy AI features \\
+        Underserved campus market in Bangladesh; ambassador-led network-driven growth                    & Adoption uncertainty: 21.9\% "not sure" about trying the free tier; 18.8\% show low interest; incumbents can copy AI features \\
         \hline
         Integration runway: Overleaf, Docs/Word plugins, browser extensions, open API for labs & Price sensitivity in student segment; affordability is a recurring concern; freemium must be carefully tuned                  \\
         \hline
@@ -303,7 +303,7 @@ ScholarFlow's technical architecture leverages proven, production-ready technolo
         \hline
         \textbf{Tier} & \textbf{Price} & \textbf{Target Segment}                            & \textbf{Quotas}                                                   \\
         \hline
-        \textbf{Free} & \$0/month      & Students, individual researchers, viral adoption   & 100MB storage, 10 papers, 50 AI queries/month                     \\
+        \textbf{Free} & \$0/month      & Students, individual researchers, rapid adoption   & 100MB storage, 10 papers, 50 AI queries/month                     \\
         \hline
         \textbf{Pro}  & \$9.99/month   & Power users, graduate students, thesis preparation & 5GB storage, 500 papers, 500 AI queries/month                     \\
         \hline
@@ -501,7 +501,7 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
     \item \textbf{First-Mover Advantage in Local Market}
           \begin{itemize}
               \item No direct competitors with AI-powered research management in Bangladesh
-              \item UIU campus concentration (\textasciitilde{}60\%) enables rapid word-of-mouth
+              \item UIU campus concentration (\textasciitilde{}60\%) enables rapid peer referral
               \item Early-stage project allows agile pivots based on user feedback
           \end{itemize}
 \end{enumerate}
@@ -591,11 +591,11 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
           \begin{itemize}
               \item 62.6\% are likely/very likely to try a free version
               \item High-value features identified: citations, collaboration, analytics
-              \item Free tier drives viral adoption, paid converts power users
+              \item Free tier drives rapid adoption, paid converts power users
               \item Stripe integration ready for subscription management
           \end{itemize}
 
-    \item \textbf{Campus Network Effects \& Viral Growth}
+    \item \textbf{Campus Network Effects \& Network-Driven Growth}
           \begin{itemize}
               \item UIU concentration (\textasciitilde{}60\%, incl. duplicate entry) creates dense user network
               \item Shared workspaces encourage team invitations
@@ -611,9 +611,9 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
               \item Potential for multi-language localization
           \end{itemize}
 
-    \item \textbf{Mobile-First \& Gen-Z Alignment}
+    \item \textbf{Mobile-First \& Student Researcher Alignment}
           \begin{itemize}
-              \item 68.8\% users ages 22--25 (digital natives)
+              \item 68.8\% of respondents are aged 22--25
               \item High comfort with SaaS tools and cloud storage
               \item Expectation for modern UX and real-time collaboration
               \item Social features (sharing, comments) align with user habits
@@ -685,7 +685,7 @@ This section applies a classical SWOT lens to situate ScholarFlow within its com
 % ============================================
 \section{Competitive Analysis}
 
-We contextualize ScholarFlow against leading reference managers and AI writing tools using a two-panel feature matrix derived from the frontend slide set. The visualization preserves methodological transparency by retaining the same rubric (full/partial/not available) used in Section~\ref{fig:benchmark-matrix}, enabling reproducible peer comparison.
+We contextualize ScholarFlow against leading reference managers and AI writing tools using a two-panel feature matrix derived from the frontend slide set (Figures~\ref{fig:comparison-part1} and~\ref{fig:comparison-part2}). The visualization preserves methodological transparency by retaining the same rubric (full/partial/not available), enabling reproducible peer comparison.
 
 \subsection{Direct Competitors}
 
@@ -706,14 +706,14 @@ We contextualize ScholarFlow against leading reference managers and AI writing t
 \subsection{Unique Value Proposition}
 
 \begin{tcolorbox}[colback=primaryblue!5, colframe=primaryblue, title=\textbf{ScholarFlow's Unique Value Proposition}]
-    \textit{"ScholarFlow is the only AI-powered research hub that combines Notion's modern UX, Zotero's citation management, and ChatGPT's intelligence—designed specifically for Gen-Z researchers."}
+    	extit{"ScholarFlow integrates modern UX, citation management, and AI-assisted research support into a single collaborative workspace for student researchers."}
 \end{tcolorbox}
 
 \textbf{Key Differentiators:}
 \begin{enumerate}
     \item \textbf{AI-First Approach}: Multi-provider AI service (Gemini + OpenAI) for summarization, chat, and recommendations
-    \item \textbf{Modern Gen-Z UX}: Dark mode, responsive design, social collaboration features
+    \item \textbf{Modern UX}: Dark mode, responsive design, and collaboration features
     \item \textbf{Unified Workflow}: All-in-one platform vs. fragmented tool ecosystem
-    \item \textbf{Freemium Growth}: Generous free tier to drive viral campus adoption
+    \item \textbf{Freemium Model}: Free tier to support campus adoption
 \end{enumerate}
 
