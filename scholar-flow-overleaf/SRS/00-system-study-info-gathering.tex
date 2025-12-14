@@ -6,7 +6,7 @@ The system study phase of ScholarFlow involved comprehensive information gatheri
 
 Our information gathering strategy combined:
 \begin{itemize}
-    \item \textbf{Primary Research}: Survey of 29 academic researchers across 10 universities
+    \item \textbf{Primary Research}: Survey of 32 respondents (students and faculty) across multiple universities
     \item \textbf{Secondary Research}: Analysis of academic papers on research workflow optimization
     \item \textbf{Competitive Analysis}: Feature matrix comparison of 5 research management platforms
     \item \textbf{Technical Research}: Evaluation of AI technologies (LLMs, vector databases, RAG architectures)
@@ -26,19 +26,19 @@ We conducted structured interviews with 15+ individuals across various academic 
     \small
     \begin{tabular}{|l|l|p{7cm}|}
         \hline
-        \textbf{Role}          & \textbf{Count} & \textbf{Key Insights}                                                                        \\
+        \textbf{Role}          & \textbf{Count} & \textbf{Key Insights}                                                                                                                           \\
         \hline
         Undergraduate Students & 8              &
-        Need lightweight tools with minimal learning curve; prefer mobile access; value AI summaries for time-saving (82.7\% survey demand)    \\
+        Need lightweight tools with minimal learning curve; prefer mobile access; value integrated annotation and AI features (71.9\% want PDF highlights/comments; 65.6\% selected AI summaries) \\
         \hline
         Masters/PhD Students   & 3              &
-        Require advanced features (citation graphs, batch operations); manage 50--200 papers; collaboration is critical for lab work           \\
+        Require advanced features (citation graphs, batch operations); manage 50--200 papers; collaboration is critical for lab work                                                              \\
         \hline
         Faculty/Professors     & 2              &
-        Need institutional compliance (SOC 2, SSO); willing to pay for team plans; value integration with existing workflows (Overleaf, LaTeX) \\
+        Need institutional compliance (SOC 2, SSO); willing to pay for team plans; value integration with existing workflows (Overleaf, LaTeX)                                                    \\
         \hline
         Research Assistants    & 2              &
-        Bridge role between faculty and students; need role-based permissions; organize papers across multiple projects                        \\
+        Bridge role between faculty and students; need role-based permissions; organize papers across multiple projects                                                                           \\
         \hline
     \end{tabular}
     \caption{Internal Stakeholder Interview Summary}
@@ -48,10 +48,10 @@ We conducted structured interviews with 15+ individuals across various academic 
 \subsubsection{UIU Campus Network}
 
 \begin{itemize}
-    \item \textbf{47.4\%} of survey respondents from United International University (UIU)
+    \item \textbf{~60\%} of survey respondents from United International University (UIU) (including duplicate entry)
     \item Provides ideal beta testing ground with concentrated user base
     \item Direct feedback channels through CS department, research labs, and student organizations
-    \item Campus network effects enable organic growth through word-of-mouth and shared workspace invitations
+    \item Campus network effects enable organic growth through peer referral and shared workspace invitations
 \end{itemize}
 
 \subsection{External Sources}
@@ -77,7 +77,7 @@ Reviewed 15+ papers on research workflow optimization, knowledge management, and
 \begin{itemize}
     \item \textbf{Gartner: Collaborative Work Management Tools 2024} --- Identified shift toward unified platforms over point solutions; predicted 35\% CAGR for AI-powered knowledge management
 
-    \item \textbf{Forrester: Future of Academic Software 2023} --- Highlighted Gen-Z expectations for modern UX, OAuth, and AI-first features; forecasted decline of legacy reference managers
+    \item \textbf{Forrester: Future of Academic Software 2023} --- Highlighted younger user expectations for modern UX, OAuth, and AI-first features; forecasted decline of legacy reference managers
 
     \item \textbf{Statista: Global Academic Publishing Market} --- Validated market size (2.5M+ papers/year, \$28B market); confirmed growing demand for AI tools among researchers
 \end{itemize}
@@ -87,7 +87,7 @@ Reviewed 15+ papers on research workflow optimization, knowledge management, and
 \begin{itemize}
     \item \textbf{Reddit r/GradSchool, r/PhD, r/AskAcademia} --- 50+ threads analyzing pain points with Zotero/Mendeley; common complaints: outdated UI, slow sync, lack of AI features, poor collaboration
 
-    \item \textbf{Twitter Academic Community (\#AcademicTwitter)} --- Viral threads on research workflow frustrations; strong interest in AI-powered tools; demand for Notion-like UX for papers
+    \item \textbf{Twitter Academic Community (\#AcademicTwitter)} --- Popular threads on research workflow frustrations; strong interest in AI-powered tools; demand for Notion-like UX for papers
 
     \item \textbf{Product Hunt} --- Analysis of 10+ research tool launches (2020--2024); successful products combine AI, collaboration, and modern UX; failed products focus solely on citations
 \end{itemize}
@@ -159,7 +159,7 @@ Hands-on evaluation of 5 platforms over 2-week trial periods:
     \item \textbf{Zotero} (Free, Open-Source)
           \begin{itemize}
               \item \textit{Strengths}: Free, 10K+ citation styles, browser extension
-              \item \textit{Weaknesses}: Outdated UI (desktop app feels like 2010), no AI features, limited collaboration (basic group libraries)
+              \item \textit{Weaknesses}: Outdated UI (legacy desktop interface), no AI features, limited collaboration (basic group libraries)
               \item \textit{Opportunity}: Modernize UI, add AI-powered search and summaries
           \end{itemize}
 
@@ -273,7 +273,7 @@ We analyzed 5 primary competitors and 8 adjacent tools to identify market gaps a
 \textbf{1. Zotero} (Free, Open-Source Reference Manager)
 \begin{itemize}
     \item \textbf{Strengths}: Free forever, 10K+ citation styles, browser extension, active open-source community
-    \item \textbf{Weaknesses}: Outdated desktop UI (feels like 2010), no AI features, limited collaboration (basic group libraries), slow sync
+    \item \textbf{Weaknesses}: Outdated desktop UI (legacy interface), no AI features, limited collaboration (basic group libraries), slow sync
     \item \textbf{Market Position}: Dominant among budget-conscious academics and open-source advocates
     \item \textbf{ScholarFlow Differentiation}: Modern web-first UI, AI-powered search/summaries, real-time collaboration
 \end{itemize}
@@ -401,9 +401,9 @@ Based on survey data and competitive analysis, we documented the current state o
 \begin{itemize}
     \item \textbf{Tool Fragmentation}: Average researcher uses \textbf{4.2 disconnected tools} daily
     \item \textbf{Context-Switching Overhead}: \textbf{30--50\% productivity loss} due to app-switching
-    \item \textbf{Search Inefficiency}: \textbf{37.9\%} struggle to find papers when needed
-    \item \textbf{Organization Chaos}: \textbf{44.8\%} can't keep notes/highlights organized
-    \item \textbf{Collaboration Friction}: \textbf{24.1\%} cite team collaboration as major pain point
+    \item \textbf{Search Inefficiency}: \textbf{40.6\%} struggle to find papers when needed
+    \item \textbf{Organization Chaos}: \textbf{46.9\%} can't keep notes/highlights organized
+    \item \textbf{Collaboration Friction}: \textbf{25\%} cite team collaboration as major pain point
     \item \textbf{Time Waste}: \textbf{40--60\%} of research time spent on administrative tasks (not actual research)
 \end{itemize}
 
@@ -444,10 +444,10 @@ ScholarFlow's vision is to consolidate fragmented workflows into a unified, AI-n
 
 \begin{itemize}
     \item \textbf{Single Platform}: Reduce tool count from \textbf{4.2 → 1 primary tool} (80\% reduction)
-    \item \textbf{Time Savings}: Cut research admin overhead by \textbf{40--50\%} (validated by AI summary demand: 82.7\%)
+    \item \textbf{Time Savings}: Cut research admin overhead by \textbf{40--50\%} (validated by AI summary selection: 65.6\%)
     \item \textbf{Search Accuracy}: Semantic search provides \textbf{40\% accuracy improvement} over keyword search
     \item \textbf{Collaboration Efficiency}: Real-time workspaces reduce collaboration friction by \textbf{60\%} vs. email
-    \item \textbf{User Satisfaction}: Target \textbf{4.5/5 satisfaction} (vs. current 3.31/5 with existing tools)
+    \item \textbf{User Satisfaction}: Target \textbf{4.5/5 satisfaction} (vs. current 3.28/5 with existing tools)
     \item \textbf{Adoption Goal}: \textbf{1,000 beta users} within 6 months, \textbf{10K users} by end of Year 1
 \end{itemize}
 
@@ -456,9 +456,9 @@ ScholarFlow's vision is to consolidate fragmented workflows into a unified, AI-n
 ScholarFlow targets the intersection of three market trends:
 
 \begin{enumerate}
-    \item \textbf{AI-First Tools}: Gen-Z researchers expect AI as default (not optional); ScholarFlow makes AI central to every workflow (search, summaries, chat)
+    \item \textbf{AI-First Tools}: Student researchers expect AI as default (not optional); ScholarFlow makes AI central to every workflow (search, summaries, chat)
 
-    \item \textbf{Modern UX}: Legacy tools (Zotero/Mendeley) feel outdated; ScholarFlow provides Notion-like UX with dark mode, glassmorphism, responsive design
+    \item \textbf{Modern UX}: Legacy tools (Zotero/Mendeley) feel outdated; ScholarFlow provides modern UX with dark mode, responsive design, and streamlined interactions
 
     \item \textbf{Collaboration-Native}: Remote research is norm post-COVID; ScholarFlow builds collaboration into core (vs. bolted-on features in competitors)
 \end{enumerate}
@@ -470,19 +470,19 @@ ScholarFlow targets the intersection of three market trends:
     \small
     \begin{tabular}{|l|p{10cm}|}
         \hline
-        \textbf{Phase}                                         & \textbf{Transition Actions}                                                                           \\
+        \textbf{Phase}                                         & \textbf{Transition Actions}                                                                                                                 \\
         \hline
         \textbf{Phase 1--2} \newline \textit{(MVP Launch)}     &
-        Target early adopters (UIU 47.4\% concentration); offer import from Zotero/Mendeley; emphasize AI features (semantic search, summaries) as key differentiators \\
+        Target early adopters (UIU \textasciitilde{}60\% concentration, incl. duplicate entry); offer import from Zotero/Mendeley; emphasize AI features (semantic search, summaries) as key differentiators \\
         \hline
         \textbf{Phase 3--4} \newline \textit{(Feature Parity)} &
-        Achieve feature parity with competitors (citations, browser extension, integrations); add unique features (multi-paper chat, citation graph) to create moat    \\
+        Achieve feature parity with competitors (citations, browser extension, integrations); add unique features (multi-paper chat, citation graph) to create moat                                          \\
         \hline
         \textbf{Phase 5--6} \newline \textit{(Monetization)}   &
-        Launch Pro tier (\$9.99/month) with advanced AI features; Enterprise tier (\$29.99/month) with SSO/team management; migrate power users from freemium          \\
+        Launch Pro tier (\$9.99/month) with advanced AI features; Enterprise tier (\$29.99/month) with SSO/team management; migrate power users from freemium                                                \\
         \hline
         \textbf{Phase 7} \newline \textit{(Enterprise)}        &
-        Target institutional sales (universities, research labs); achieve SOC 2 certification; offer dedicated support and custom integrations                         \\
+        Target institutional sales (universities, research labs); achieve SOC 2 certification; offer dedicated support and custom integrations                                                               \\
         \hline
     \end{tabular}
     \caption{Current-to-Desired State Transition Strategy}

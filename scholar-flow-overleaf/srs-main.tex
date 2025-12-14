@@ -174,17 +174,17 @@
 \author{
     \textbf{Team Members:}\\[0.5cm]
     \begin{tabular}{rl}
-    \textbf{0112310298} & Md. Atikur Rahaman (Project Leader) \\
+    \textbf{0112310298} & Md. Atikur Rahaman \\
     \textbf{0112310484} & Md. Salman Rohoman Nayeem \\
-    \textbf{0112220081} & Prattay Pal \\
+    % \textbf{0112220081} & Prattay Pal \\
     \textbf{0112310302} & Md. Sarowar Alam Sourov \\
     \end{tabular}
     \\[1cm]
-    {\normalsize\textbf{Section: I}}\\
-    {\normalsize\textbf{Course: Database Management System Lab}}\\
+    {\normalsize\textbf{Section: E}}\\
+    {\normalsize\textbf{Course: System Analysis and Design}}\\
     {\normalsize\textbf{United International University (UIU)}}
 }
-\date{December 8, 2025}
+
 
 % ============================================
 % BEGIN DOCUMENT
@@ -204,23 +204,21 @@
 
     \vspace{0.3cm}
     \noindent
-    Based on extensive market research including a survey of 29 academic researchers across 10 universities in Bangladesh, this document establishes the functional and non-functional requirements for ScholarFlow. The survey revealed strong market demand, with 72.4\% of respondents expressing moderate-to-extreme need for a dedicated research management platform, and 82.7\% showing high interest in AI-powered paper summarization features.
+    Based on extensive market research including a survey of 32 respondents (students and faculty) across multiple universities in Bangladesh, this document establishes the functional and non-functional requirements for ScholarFlow. The survey revealed strong market demand, with 75\% of respondents expressing at least a moderate need for a dedicated research management platform, and 100\% expressing interest in AI features (including 65.6\% selecting AI-generated paper summaries).
 
     \vspace{0.3cm}
     \noindent
-    ScholarFlow addresses critical gaps identified in the current research workflow landscape, where 37.9\% of researchers cite "lack of proper tools" as their primary pain point, and current tool satisfaction averages only 3.31 out of 5.00. The platform combines modern UI/UX design (102 Figma screens), advanced AI integration (Google Gemini + OpenAI), and comprehensive collaboration features to create a unified research management ecosystem.
+    ScholarFlow addresses critical gaps identified in the current research workflow landscape, where 46.9\% of respondents report difficulty taking and keeping notes, and 40.6\% report difficulty finding specific papers later. Current tool satisfaction averages 3.28 out of 5.00, indicating clear room for improvement. The platform combines modern UI/UX design (102 Figma screens), advanced AI integration (Google Gemini + OpenAI), and comprehensive collaboration features to create a unified research management ecosystem.
 
     \vspace{0.3cm}
     \noindent
-    \textbf{Target Audience:} 86.2\% undergraduate students, 67\%+ Computer Science/IT backgrounds, 75.9\% ages 22-25 (Gen-Z digital natives)
+    	extbf{Target Audience:} 78.1\% undergraduate students, Computer Science as the largest field (34.4\%), 68.8\% ages 22--25
 
     \vspace{0.3cm}
     \noindent
     \textbf{Key Technologies:} Next.js 15, Express.js, PostgreSQL, Prisma ORM, AWS S3, Google Gemini AI, OpenAI, Stripe, TipTap Editor
 
-    \vspace{0.3cm}
-    \noindent
-    \textbf{Document Standard:} IEEE Std 830-1998 (Software Requirements Specifications)
+
 
     \vspace{0.3cm}
     \noindent
@@ -253,6 +251,9 @@
 
 % System Analysis with Gap Analysis, Benchmark, Survey
 \input{SRS/03-system-analysis}
+
+% System Design (Diagrams)
+\input{SRS/04-system-design}
 
 % ============================================
 % APPENDICES (Optional)
