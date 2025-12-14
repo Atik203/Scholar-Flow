@@ -21,6 +21,11 @@ When speaking, you can mention chapter/section names like this:
 
 ## Presenter 1 – Chapters 1 & 2 (≈ 3.5 minutes)
 
+**Body language tips (Presenter 1):**
+
+- English: Stand straight, face the audience, and smile once before you start. Keep one hand lightly open in front of you, and use the other hand to point to the SRS page only when needed.
+- বাংলা: সোজা হয়ে দাঁড়ান, একবার হাসি দিয়ে সবাইকে দেখুন। এক হাত হালকা খোলা রাখুন, আর দরকার হলে অন্য হাত দিয়ে SRS-এর পেজে আলতো করে ইশারা করুন।
+
 ### 1.1 Start & Project Intro (≈ 40 seconds)
 
 **Where in SRS:**
@@ -160,6 +165,11 @@ When speaking, you can mention chapter/section names like this:
 
 ## Presenter 2 – Chapter 3: System Analysis (≈ 3 minutes)
 
+**Body language tips (Presenter 2):**
+
+- English: Start by looking at the previous presenter, then turn to the audience. When you mention “gaps” or “strengths”, use a small hand gesture (palm up) to show the idea, but do not move too fast.
+- বাংলা: শুরুতে আগের presenter-এর দিকে একবার তাকান, তারপর ধীরে দর্শকদের দিকে ঘুরে কথা বলুন। যখন “gap” বা “strengths” বলবেন, তখন ছোট হাতের ইশারা (হাতের তালু সামান্য ওপরে) ব্যবহার করুন, কিন্তু খুব বেশি নড়াচড়া করবেন না।
+
 ### 2.1 System Analysis Intro (≈ 30 seconds)
 
 **Where in SRS:**
@@ -260,6 +270,11 @@ When speaking, you can mention chapter/section names like this:
 ---
 
 ## Presenter 3 – Chapter 4: System Design (≈ 3.5 minutes)
+
+**Body language tips (Presenter 3):**
+
+- English: Because you talk about diagrams, sometimes turn slightly toward the screen/page when naming a diagram, then turn back and keep eye contact with the audience.
+- বাংলা: আপনি যেহেতু diagram নিয়ে বলবেন, তাই diagram-এর নাম বলার সময় হালকা করে স্ক্রিন/পাতার দিকে ঘুরে দেখান, তারপর আবার দর্শকদের দিকে ফিরে চোখের যোগাযোগ রেখে কথা বলুন।
 
 ### 3.1 Design Overview (≈ 30 seconds)
 
