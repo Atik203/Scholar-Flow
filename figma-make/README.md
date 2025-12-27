@@ -12,6 +12,8 @@ All 102 pages are fully implemented and navigable. Just paste this into Figma Ma
 2. Paste into Figma Make AI
 3. All components and navigation work automatically
 
+For the Jira Kanban flow behind the 101-page rollout, see [KANBAN.md](KANBAN.md).
+
 ---
 
 ## 📁 Folder Structure
@@ -390,15 +392,20 @@ figma-make/
 
 ### Help & Settings (6 pages)
 
-| Page                     | Path                     | Access    |
-| ------------------------ | ------------------------ | --------- |
-| HelpCenterPage           | `/help`                  | Sidebar   |
-| KeyboardShortcutsPage    | `/help/shortcuts`        | Sidebar   |
-| ProfilePage              | `/profile`               | User menu |
-| SettingsPage             | `/settings`              | User menu |
-| BillingPage              | `/billing`               | Sidebar   |
-| ExportDataPage           | `/settings/export`       | Settings  |
-| IntegrationsSettingsPage | `/settings/integrations` | Settings  |
+| Page                  | Path               | Access    |
+| --------------------- | ------------------ | --------- |
+| HelpCenterPage        | `/help`            | Sidebar   |
+| KeyboardShortcutsPage | `/help/shortcuts`  | Sidebar   |
+| ProfilePage           | `/profile`         | User menu |
+| SettingsPage          | `/settings`        | User menu |
+| BillingPage           | `/billing`         | Sidebar   |
+| ExportDataPage        | `/settings/export` | Settings  |
+
+---
+
+| IntegrationsSettingsPage | `/settings/integrations` | Settings |
+
+---
 
 ### AI & Insights (2 pages)
 
