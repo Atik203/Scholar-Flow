@@ -725,19 +725,19 @@ This diagram consolidates the core user interactions (Dashboard, API, Database, 
 
 ```mermaid
 sequenceDiagram
-  actor User as Authenticated User
-  participant Web as ScholarFlow Web App (Next.js)
-  participant API as ScholarFlow API (Express)
-  participant DB as PostgreSQL Database
-  participant S3 as AWS S3 (Object Storage)
-  participant AI as AI Provider (OpenAI/Gemini/Deepseek)
+  actor User
+  participant Web as Web App (Next.js)
+  participant API as API (Express)
+  participant DB as Database (Postgres)
+  participant S3 as Storage (S3)
+  participant AI as AI Model
 
-  User->>Web: Use dashboard, manage work
-  Web->>API: API requests (JWT/session)
-  API->>DB: Read/write app data
-  API->>S3: Upload/download objects, presign URLs
-  API->>AI: Generate summary/insights
-  API-->>Web: API responses (metadata, status, summaries)
+  User->>Web: Manage work
+  Web->>API: Request (JWT)
+  API->>DB: Read/write data
+  API->>S3: Upload/Presign
+  API->>AI: Generate summary
+  API-->>Web: Response
 ```
 
 ---
