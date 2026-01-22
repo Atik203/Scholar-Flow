@@ -20,7 +20,7 @@ External services include OAuth providers for federated login, an email service 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpg}
+    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpeg}
     \caption{ScholarFlow Context Diagram}
     \label{fig:context-diagram}
 \end{figure}
@@ -182,7 +182,7 @@ The main processes include session management, workspace and membership operatio
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.jpg}
+    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.png}
     \caption{ScholarFlow Data Flow Diagram (DFD)}
     \label{fig:dfd-diagram}
 \end{figure}
@@ -206,6 +206,133 @@ It emphasizes validation points (file checks, field validation, authorization) a
     \caption{Activity Diagram for Paper Upload and Persistence}
     \label{fig:activity-diagram}
 \end{figure}
+
+\section{Sequence Diagram}
+
+The sequence diagram (Figure~\ref{fig:sequence-diagram}) captures the main interaction flow between the web client, API, database, storage, and AI provider.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/squence_diagram.png}
+    \caption{ScholarFlow Main Sequence Diagram}
+    \label{fig:sequence-diagram}
+\end{figure}
+
+\section{State Diagram}
+
+The state diagram (Figure~\ref{fig:state-diagram}) models the lifecycle of papers from upload and processing through moderation and publication.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/diagrams/state.png}
+    \caption{Paper Lifecycle State Diagram}
+    \label{fig:state-diagram}
+\end{figure}
+
+\section{Class Diagram}
+
+The class diagram (Figure~\ref{fig:class-diagram}) summarizes the core domain entities and their relationships derived from the Prisma data model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/class_diagram.png}
+    \caption{ScholarFlow Domain Class Diagram}
+    \label{fig:class-diagram}
+\end{figure}
+
+\section{CRC Cards}
+
+CRC (Class-Responsibility-Collaborator) cards capture the essential responsibilities and collaborators for primary domain classes.
+
+\subsection{User}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Responsibility}          & \textbf{Collaborator} \\
+        \hline
+        Authenticate and manage session  & Account, Session      \\
+        \hline
+        Create and own workspaces        & Workspace             \\
+        \hline
+        Upload and manage papers         & Paper, PaperFile      \\
+        \hline
+        Join workspaces as member        & WorkspaceMember       \\
+        \hline
+        Manage payments and subscription & Subscription, Payment \\
+        \hline
+    \end{tabularx}
+    \caption{CRC Card: User}
+    \label{tab:crc-user}
+\end{table}
+
+\subsection{Workspace}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Responsibility}              & \textbf{Collaborator} \\
+        \hline
+        Container for papers and collections & Paper, Collection     \\
+        \hline
+        Manage members and roles             & WorkspaceMember, User \\
+        \hline
+        Handle invitations                   & WorkspaceInvitation   \\
+        \hline
+        Track activity within scope          & ActivityLog           \\
+        \hline
+    \end{tabularx}
+    \caption{CRC Card: Workspace}
+    \label{tab:crc-workspace}
+\end{table}
+
+\subsection{Paper}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Responsibility}              & \textbf{Collaborator}      \\
+        \hline
+        Store metadata and content reference & PaperFile, Workspace       \\
+        \hline
+        Track processing status              & PaperProcessingStatus      \\
+        \hline
+        Provide chunks for AI analysis       & PaperChunk                 \\
+        \hline
+        Store AI-generated insights          & AISummary, AIInsightThread \\
+        \hline
+        Maintain citation links              & Citation                   \\
+        \hline
+    \end{tabularx}
+    \caption{CRC Card: Paper}
+    \label{tab:crc-paper}
+\end{table}
+
+\subsection{Collection}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|}
+        \hline
+        \textbf{Responsibility}        & \textbf{Collaborator}  \\
+        \hline
+        Group papers logically         & Paper, CollectionPaper \\
+        \hline
+        Manage access permissions      & CollectionMember, User \\
+        \hline
+        Belong to a specific workspace & Workspace              \\
+        \hline
+    \end{tabularx}
+    \caption{CRC Card: Collection}
+    \label{tab:crc-collection}
+\end{table}
 
 \section{ERD and Relational Schema Diagrams}
 \label{sec:erd-and-schema}
