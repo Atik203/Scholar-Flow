@@ -117,56 +117,63 @@ flowchart LR
 
 ---
 
+---
+
 ## 2) Use Case Diagram + Descriptive Forms
 
 ### 2.1 Use case diagram: actors
 
-| Actor ID | Actor name         |
-| -------- | ------------------ |
-| ACT-01   | Guest User         |
-| ACT-02   | Authenticated User |
-| ACT-03   | Workspace Owner    |
-| ACT-04   | Workspace Member   |
-| ACT-05   | Collection Owner   |
-| ACT-06   | Collection Member  |
-| ACT-07   | Admin              |
+ScholarFlow exposes a single role enum in the backend: `RESEARCHER | PRO_RESEARCHER | TEAM_LEAD | ADMIN`. The table below maps every actor used in the diagrams to that enum so role-based permissions stay consistent.
+
+| Actor ID | Actor name                           | Role enum mapping                              | Notes / Responsibilities                                                                  |
+| -------- | ------------------------------------ | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| ACT-01   | Guest User                           | —                                              | Not authenticated; can browse marketing pages, register, request password reset, verify.  |
+| ACT-02   | Researcher (default authenticated)   | `RESEARCHER`                                   | Baseline signed-in user; can join workspaces, upload/view papers within quota.            |
+| ACT-03   | Pro Researcher                       | `PRO_RESEARCHER`                               | Paid tier; inherits Researcher rights plus AI features and larger quotas.                 |
+| ACT-04   | Team Lead / Workspace Owner          | `TEAM_LEAD`                                    | Creates/owns workspaces, manages billing, invitations, approvals, and workspace settings. |
+| ACT-05   | Workspace Member                     | `RESEARCHER` or `PRO_RESEARCHER` (invited)     | Any authenticated user invited into a workspace; permissions derived from membership.     |
+| ACT-06   | Collection Owner / Collection Member | `RESEARCHER`, `PRO_RESEARCHER`, or `TEAM_LEAD` | Derived from workspace membership; permissions scoped by collection role (VIEW/EDIT).     |
+| ACT-07   | Admin                                | `ADMIN`                                        | Platform-level operator for moderation, compliance, billing overrides, feature flags.     |
 
 ### 2.2 Use case diagram: use cases (core)
 
 Use these IDs as your ellipse labels.
 
-| UC ID | Use case name (exact)                  | Primary actor(s)             | Related API groups              |
-| ----- | -------------------------------------- | ---------------------------- | ------------------------------- |
-| UC-01 | Register Account (Email/Password)      | Guest User                   | `/api/auth`                     |
-| UC-02 | Login (Email/Password)                 | Guest User                   | `/api/auth`                     |
-| UC-03 | Login (OAuth: Google/GitHub)           | Guest User                   | `/api/auth`                     |
-| UC-04 | Verify Email                           | Authenticated User           | `/api/auth`                     |
-| UC-05 | Request Password Reset                 | Guest User                   | `/api/auth`                     |
-| UC-06 | Reset Password                         | Guest User                   | `/api/auth`                     |
-| UC-07 | View/Update Profile                    | Authenticated User           | `/api/user`                     |
-| UC-08 | Create Workspace                       | Authenticated User           | `/api/workspaces`               |
-| UC-09 | Invite Member to Workspace             | Workspace Owner              | `/api/workspaces` + Email       |
-| UC-10 | Accept/Decline Workspace Invitation    | Workspace Member             | `/api/workspaces`               |
-| UC-11 | Create Collection                      | Authenticated User           | `/api/collections`              |
-| UC-12 | Invite Member to Collection            | Collection Owner             | `/api/collections` + Email      |
-| UC-13 | Accept/Decline Collection Invitation   | Collection Member            | `/api/collections`              |
-| UC-14 | Upload Paper (PDF/DOCX/DOC)            | Authenticated User           | `/api/papers` + S3              |
-| UC-15 | View Paper (metadata + file access)    | Authenticated User           | `/api/papers` + S3              |
-| UC-16 | Generate Preview (DOC/DOCX)            | Authenticated User           | `/api/papers` + Conversion + S3 |
-| UC-17 | Process Paper (extract + chunk)        | Authenticated User (trigger) | `/api/papers` + Redis + DB      |
-| UC-18 | Create Draft in Editor                 | Authenticated User           | `/api/editor`                   |
-| UC-19 | Update Draft Content                   | Authenticated User           | `/api/editor`                   |
-| UC-20 | Publish Draft                          | Authenticated User           | `/api/editor`                   |
-| UC-21 | Generate AI Summary                    | Authenticated User           | `/api/papers` + AI Provider     |
-| UC-22 | Generate AI Insights (thread/messages) | Authenticated User           | `/api/papers` + AI Provider     |
-| UC-23 | Add Paper to Collection                | Collection Member (EDIT)     | `/api/collections`              |
-| UC-24 | Remove Paper from Collection           | Collection Member (EDIT)     | `/api/collections`              |
-| UC-25 | Export Citations                       | Authenticated User           | `/api/citations`                |
-| UC-26 | Start Discussion Thread                | Workspace/Collection Member  | `/api/discussions`              |
-| UC-27 | Post Discussion Message                | Workspace/Collection Member  | `/api/discussions`              |
-| UC-28 | View Activity Log                      | Authenticated User           | `/api/activity-log`             |
-| UC-29 | Manage Subscription                    | Authenticated User           | `/api/billing` + Stripe         |
-| UC-30 | Admin Operations                       | Admin                        | `/api/admin`                    |
+| UC ID | Use case name (exact)                     | Primary actor(s)             | Role scope                                                               | Related API groups                    |
+| ----- | ----------------------------------------- | ---------------------------- | ------------------------------------------------------------------------ | ------------------------------------- |
+| UC-01 | Register Account (Email/Password)         | Guest User                   | Guest (pre-auth) selects eventual Researcher/Pro/Team Lead role          | `/api/auth`                           |
+| UC-02 | Login (Email/Password)                    | Guest User                   | Guest (pre-auth)                                                         | `/api/auth`                           |
+| UC-03 | Login (OAuth: Google/GitHub)              | Guest User                   | Guest (pre-auth)                                                         | `/api/auth`                           |
+| UC-04 | Verify Email                              | Authenticated User           | Researcher, Pro Researcher, Team Lead, Admin (self-verification)         | `/api/auth`                           |
+| UC-05 | Request Password Reset                    | Guest User                   | Guest (pre-auth)                                                         | `/api/auth`                           |
+| UC-06 | Reset Password                            | Guest User                   | Guest (pre-auth)                                                         | `/api/auth`                           |
+| UC-07 | View/Update Profile                       | Authenticated User           | Researcher, Pro Researcher, Team Lead, Admin (profile owner)             | `/api/user`                           |
+| UC-08 | Create Workspace                          | Authenticated User           | Pro Researcher, Team Lead, Admin (acting on behalf)                      | `/api/workspaces`                     |
+| UC-09 | Invite Member to Workspace                | Workspace Owner              | Team Lead (owner) or Admin (override)                                    | `/api/workspaces` + Email             |
+| UC-10 | Accept/Decline Workspace Invitation       | Workspace Member             | Researcher, Pro Researcher, Team Lead (invitee)                          | `/api/workspaces`                     |
+| UC-11 | Create Collection                         | Authenticated User           | Researcher, Pro Researcher, Team Lead (workspace member)                 | `/api/collections`                    |
+| UC-12 | Invite Member to Collection               | Collection Owner             | Collection Owner (Researcher/Pro/Team Lead) or Admin override            | `/api/collections` + Email            |
+| UC-13 | Accept/Decline Collection Invitation      | Collection Member            | Researcher, Pro Researcher, Team Lead (invitee)                          | `/api/collections`                    |
+| UC-14 | Upload Paper (PDF/DOCX/DOC)               | Authenticated User           | Researcher, Pro Researcher, Team Lead, Admin (audit upload)              | `/api/papers` + S3                    |
+| UC-15 | View Paper (metadata + file access)       | Authenticated User           | Workspace members (Researcher/Pro/Team Lead) and Admin (read-only)       | `/api/papers` + S3                    |
+| UC-16 | Generate Preview (DOC/DOCX)               | Authenticated User           | Researcher, Pro Researcher, Team Lead                                    | `/api/papers` + Conversion + S3       |
+| UC-17 | Process Paper (extract + chunk)           | Authenticated User (trigger) | Researcher, Pro Researcher, Team Lead trigger; Admin can force reprocess | `/api/papers` + Redis + DB            |
+| UC-18 | Create Draft in Editor                    | Authenticated User           | Researcher, Pro Researcher, Team Lead                                    | `/api/editor`                         |
+| UC-19 | Update Draft Content                      | Authenticated User           | Researcher, Pro Researcher, Team Lead                                    | `/api/editor`                         |
+| UC-20 | Publish Draft                             | Authenticated User           | Researcher, Pro Researcher, Team Lead (with publish permission)          | `/api/editor`                         |
+| UC-21 | Generate AI Summary                       | Authenticated User           | Researcher, Pro Researcher, Team Lead (feature-flag dependent)           | `/api/papers` + AI Provider           |
+| UC-22 | Generate AI Insights (thread/messages)    | Authenticated User           | Researcher, Pro Researcher, Team Lead (feature-flag dependent)           | `/api/papers` + AI Provider           |
+| UC-23 | Add Paper to Collection                   | Collection Member (EDIT)     | Collection Member with EDIT permission (Researcher/Pro/Team Lead)        | `/api/collections`                    |
+| UC-24 | Remove Paper from Collection              | Collection Member (EDIT)     | Collection Member with EDIT permission (Researcher/Pro/Team Lead)        | `/api/collections`                    |
+| UC-25 | Export Citations                          | Authenticated User           | Researcher, Pro Researcher, Team Lead                                    | `/api/citations`                      |
+| UC-26 | Start Discussion Thread                   | Workspace/Collection Member  | Researcher, Pro Researcher, Team Lead                                    | `/api/discussions`                    |
+| UC-27 | Post Discussion Message                   | Workspace/Collection Member  | Researcher, Pro Researcher, Team Lead                                    | `/api/discussions`                    |
+| UC-28 | View Activity Log                         | Authenticated User           | Researcher (own events), Pro Researcher, Team Lead, Admin (all events)   | `/api/activity-log`                   |
+| UC-29 | Manage Subscription                       | Authenticated User           | Team Lead (workspace owner) and Admin (billing override)                 | `/api/billing` + Stripe               |
+| UC-30 | Admin Operations                          | Admin                        | Admin only                                                               | `/api/admin`                          |
+| UC-31 | Moderate Flagged Paper                    | Admin                        | Admin only                                                               | `/api/admin/papers`, `/api/papers`    |
+| UC-32 | Manage User Roles & Workspace Escalations | Admin                        | Admin only                                                               | `/api/admin/roles`, `/api/workspaces` |
+| UC-33 | Run System Health & Compliance Checks     | Admin                        | Admin only                                                               | `/api/admin`, `/api/health/*`         |
 
 ### 2.3 Use case descriptive forms (copy/paste templates)
 
@@ -405,6 +412,65 @@ Below are the **recommended** descriptive forms for the most important flows. Us
   5. API updates user subscription fields.
 - **Related Systems**: Stripe
 - **Primary Data Stores**: `User` (stripe fields), `Subscription`, `Payment`
+
+#### UC-31 — Moderate Flagged Paper
+
+- **Primary Actor**: Admin
+- **Trigger**: Admin opens the “Flagged content” queue and selects a paper
+- **Inputs**: `paperId`, `action (APPROVE|REJECT|ARCHIVE)`, `moderationNotes?`, `notifyWorkspace?`
+- **Preconditions**: Paper exists; `Paper.moderationStatus = FLAGGED` or `UNDER_REVIEW`
+- **Postconditions (Success)**: `Paper.moderationStatus` updated (`APPROVED`, `REJECTED`, or `ARCHIVED`); activity log entry recorded; notifications sent to workspace members when applicable
+- **Main Flow**:
+  1. Admin fetches flagged paper details via admin API.
+  2. API validates admin permissions and current moderation state.
+  3. Admin selects resolution action and submits notes.
+  4. API updates `Paper` (status + optional archive flag) and writes an `ActivityLog` entry.
+  5. API emits notifications/webhooks to workspace members if `notifyWorkspace` is true.
+  6. Admin dashboard refreshes queue to remove resolved item.
+- **Alternative/Exception Flows**:
+  - Paper already resolved → API returns idempotent success with “already processed” detail.
+  - Paper missing or deleted → API returns `404` + guidance to re-sync queue.
+- **Related API**: `/api/admin/papers`, `/api/papers`
+- **Primary Data Stores**: `Paper`, `ActivityLog`, `Workspace`
+
+#### UC-32 — Manage User Roles & Workspace Escalations
+
+- **Primary Actor**: Admin
+- **Trigger**: Admin receives escalation (support ticket, compliance review, abuse report) requiring a role or membership change
+- **Inputs**: `userId`, `workspaceId?`, `targetRole (RESEARCHER|PRO_RESEARCHER|TEAM_LEAD|ADMIN)`, `membershipAction (PROMOTE|DEMOTE|REMOVE)?`, `reason`
+- **Preconditions**: Admin authenticated via `/api/admin`
+- **Postconditions (Success)**: `User.role` and/or `WorkspaceMember.role` updated; audit event stored; affected user notified if policy requires
+- **Main Flow**:
+  1. Admin searches for the user/workspace in the admin console.
+  2. API retrieves user profile, current roles, memberships, and billing context.
+  3. Admin chooses new role/membership action and submits justification.
+  4. API validates constraints (e.g., at least one Team Lead per workspace).
+  5. API performs updates in `User` and/or `WorkspaceMember` tables.
+  6. API records audit trail + optional notification to the affected user/workspace owner.
+- **Alternative/Exception Flows**:
+  - Constraint violation (e.g., demoting last Team Lead) → API rejects with actionable error.
+  - Concurrent update detected → API retries or returns conflict for admin to refresh.
+- **Related API**: `/api/admin/roles`, `/api/workspaces`
+- **Primary Data Stores**: `User`, `Workspace`, `WorkspaceMember`, `ActivityLog`
+
+#### UC-33 — Run System Health & Compliance Checks
+
+- **Primary Actor**: Admin
+- **Trigger**: Admin triggers scheduled/adhoc health check or compliance sweep
+- **Inputs**: `scope (ALL|AUTH|PAPERS|AI|BILLING)`, `runDiagnostics?`, `exportFormat?`
+- **Preconditions**: Monitoring endpoints enabled; admin authenticated
+- **Postconditions (Success)**: Health snapshot captured, optional export generated, alerts triggered if thresholds breached
+- **Main Flow**:
+  1. Admin selects a scope from the admin console and starts a run.
+  2. API fans out to relevant health endpoints (`/api/health`, `/api/health/detailed`, `/api/health/ready`, service-specific checks).
+  3. API aggregates responses, calculates SLA/latency metrics, and compares them with alert thresholds.
+  4. API persists a health snapshot (for audit) and surfaces the result to the UI.
+  5. If any component is degraded, API issues alerts (email/webhook/on-call) and links to remediation playbooks.
+- **Alternative/Exception Flows**:
+  - Downstream check times out → API retries with exponential backoff and tags the component as `UNKNOWN`.
+  - Export generation fails → return partial results but log error for follow-up.
+- **Related API**: `/api/admin`, `/api/health/*`
+- **Primary Data Stores**: `ActivityLog` (audit of check), monitoring snapshots (e.g., `SystemHealthSnapshot` table or log stream)
 
 ---
 
@@ -650,3 +716,191 @@ Use this for ERD labels and to keep DFD data stores consistent.
 - `Collection` M:N `Paper` (join via `CollectionPaper`)
 - `Paper` 0..N `AISummary`
 - `Paper` 0..N `AIInsightThread` 1..N `AIInsightMessage`
+
+---
+
+## 8) Sequence Diagrams (role-aware flows)
+
+Sequence diagrams capture end-to-end message ordering for the most sensitive, role-dependent flows. Reuse these participant labels when recreating diagrams so documentation, tests, and monitoring dashboards stay in sync.
+
+### 8.1 Sequence — Admin moderates flagged paper (UC-31)
+
+| Participant ID | Label (exact)                              | Notes                                        |
+| -------------- | ------------------------------------------ | -------------------------------------------- |
+| ACT            | Admin Operator                             | Human actor with `ADMIN` role                |
+| UI             | Admin Console (Next.js)                    | Uses existing dashboard shell                |
+| API            | Admin API Gateway (`/api/admin`)           | Express server handling admin auth + routing |
+| MOD            | Moderation Service (`/api/admin/papers/*`) | Internal module performing reads/writes      |
+| DB             | PostgreSQL (Paper + ActivityLog tables)    | Persistent store                             |
+| NOT            | Notification Bus (email/webhook)           | Sends workspace notifications                |
+
+**Message steps** (copy arrow labels for diagramming tools):
+
+1. `ACT → UI`: "Open Flagged Paper Queue"
+2. `UI → API`: `GET /api/admin/papers?status=FLAGGED`
+3. `API → MOD`: `fetchFlaggedPapers(adminContext)`
+4. `MOD → DB`: `SELECT Paper JOIN ActivityLog WHERE moderationStatus IN (...)`
+5. `DB → MOD`: `flaggedPaperList`
+6. `MOD → API`: `normalizeModerationQueue`
+7. `API → UI`: `200 OK + flaggedPaperList`
+8. `ACT → UI`: "Resolve paper" (action + notes)
+9. `UI → API`: `POST /api/admin/papers/{paperId}/moderate`
+10. `API → MOD`: `applyModerationAction(command)`
+11. `MOD → DB`: `UPDATE Paper SET moderationStatus=?, archivedAt? WHERE id=?`
+12. `MOD → DB`: `INSERT ActivityLog (moderation event)`
+13. `MOD → NOT`: `emitModerationNotice(workspaceId, action)` (optional)
+14. `NOT → Workspace`: `email/webhook notifications`
+15. `MOD → API`: `moderationResult`
+16. `API → UI`: `200 OK + moderationResult`
+17. `UI → ACT`: "Show toast + remove row"
+
+Mermaid validator:
+
+```mermaid
+sequenceDiagram
+  participant ACT as Admin Operator
+  participant UI as Admin Console (Next.js)
+  participant API as Admin API Gateway
+  participant MOD as Moderation Service
+  participant DB as PostgreSQL
+  participant NOT as Notification Bus
+
+  ACT->>UI: Open Flagged Paper Queue
+  UI->>API: GET /api/admin/papers?status=FLAGGED
+  API->>MOD: fetchFlaggedPapers()
+  MOD->>DB: SELECT flagged papers
+  DB-->>MOD: flaggedPaperList
+  MOD-->>API: normalized queue
+  API-->>UI: 200 OK + list
+  ACT->>UI: Resolve paper (action, notes)
+  UI->>API: POST /api/admin/papers/{paperId}/moderate
+  API->>MOD: applyModerationAction()
+  MOD->>DB: UPDATE Paper + INSERT ActivityLog
+  MOD->>NOT: emitModerationNotice()
+  NOT-->>Workspace: Notify
+  MOD-->>API: moderationResult
+  API-->>UI: 200 OK
+  UI-->>ACT: Show toast + remove row
+```
+
+### 8.2 Sequence — Team Lead escalates role change to Admin (UC-32 companion)
+
+| Participant ID | Label (exact)                          | Notes                         |
+| -------------- | -------------------------------------- | ----------------------------- |
+| TL             | Team Lead (Workspace Owner)            | Initiates escalation          |
+| WEB            | ScholarFlow Web App (Next.js)          | Dashboard UI                  |
+| API            | Workspace API (`/api/workspaces`)      | Handles TL requests           |
+| Q              | Escalation Queue (Redis / ActivityLog) | Stores escalation tasks       |
+| ADM            | Admin Console                          | Picks up escalation           |
+| AAPI           | Admin API (`/api/admin/roles`)         | Applies final decision        |
+| DB             | PostgreSQL                             | Stores user + membership data |
+
+**Message steps**:
+
+1. `TL → WEB`: "Request role escalation for member"
+2. `WEB → API`: `POST /api/workspaces/{workspaceId}/escalations`
+3. `API → Q`: `enqueueRoleEscalation(payload)`
+4. `Q → ADM`: `notifyNewEscalation`
+5. `ADM → AAPI`: `GET /api/admin/roles/escalations/{id}`
+6. `AAPI → DB`: `loadUserAndMembership`
+7. `DB → AAPI`: `userMembershipSnapshot`
+8. `ADM → AAPI`: `POST /api/admin/roles/{userId}` (with decision)
+9. `AAPI → DB`: `UPDATE User/WorkspaceMember`
+10. `AAPI → Q`: `resolveEscalation`
+11. `AAPI → WEB`: `emitEvent workspaceRoleChanged`
+12. `WEB → TL`: "Show success"
+13. `AAPI → Member`: `notifyRoleChange` (email/webhook)
+
+Mermaid validator:
+
+```mermaid
+sequenceDiagram
+  participant TL as Team Lead
+  participant WEB as ScholarFlow Web App
+  participant API as Workspace API
+  participant Q as Escalation Queue
+  participant ADM as Admin Console
+  participant AAPI as Admin Role API
+  participant DB as PostgreSQL
+
+  TL->>WEB: Request role escalation
+  WEB->>API: POST /api/workspaces/{id}/escalations
+  API->>Q: enqueueRoleEscalation()
+  Q-->>ADM: notifyNewEscalation
+  ADM->>AAPI: GET /api/admin/roles/escalations/{id}
+  AAPI->>DB: Load user + membership
+  DB-->>AAPI: Snapshot
+  ADM->>AAPI: POST /api/admin/roles/{userId}
+  AAPI->>DB: UPDATE User/WorkspaceMember
+  AAPI->>Q: resolveEscalation
+  AAPI->>WEB: emit roleChanged event
+  WEB-->>TL: Show success
+  AAPI->>Member: Notify role change
+```
+
+---
+
+## 9) State Diagrams (role-aware lifecycles)
+
+Use state diagrams to highlight how permissions gate transitions. The paper lifecycle is the most critical because uploads touch storage, AI processing, moderation, and billing limits.
+
+### 9.1 Paper lifecycle state machine
+
+| State          | Description                                          | Transition triggers                    | Responsible role                                    |
+| -------------- | ---------------------------------------------------- | -------------------------------------- | --------------------------------------------------- |
+| `Draft`        | Paper being edited locally (editor)                  | Publish draft, discard draft           | Researcher / Pro / Team Lead                        |
+| `Submitted`    | Draft submitted for workspace review (optional gate) | Reviewer approve/reject                | Team Lead or delegated Reviewer                     |
+| `Uploaded`     | File stored in S3, metadata persisted                | Auto process, manual process request   | Researcher / Pro / Team Lead                        |
+| `Processing`   | Background worker extracting text/chunks             | Job success/failure                    | System (worker)                                     |
+| `Processed`    | Chunks ready, AI features enabled                    | Flagged by member, AI summary requests | Researcher / Pro / Team Lead                        |
+| `Flagged`      | Member or automated classifier flagged content       | Admin picks up case                    | Researcher/Team Lead (flagging), Admin (resolution) |
+| `Under Review` | Admin actively reviewing flagged paper               | Approve, reject, archive               | Admin                                               |
+| `Approved`     | Cleared for collaboration/search                     | Future flags move back to `Flagged`    | Admin                                               |
+| `Rejected`     | Violates policy; removed from search                 | Optional appeal, escalate to Team Lead | Admin + Team Lead                                   |
+| `Archived`     | Soft-deleted/retained for compliance                 | Restore (Admin)                        | Admin                                               |
+
+Transition summary (label → from → to):
+
+- `publishDraft`: `Draft → Submitted` (Researcher/Pro/Team Lead)
+- `autoApproveDraft`: `Draft → Uploaded` (Team Lead disabled review gate)
+- `approveSubmission`: `Submitted → Uploaded` (Team Lead)
+- `rejectSubmission`: `Submitted → Draft` (Team Lead)
+- `enqueueProcessing`: `Uploaded → Processing` (System after user trigger)
+- `processingSuccess`: `Processing → Processed` (Worker)
+- `processingFailed`: `Processing → Uploaded` (Worker + error reason)
+- `flagPaper`: `Processed → Flagged` (Researcher/Pro/Team Lead)
+- `pickUpReview`: `Flagged → Under Review` (Admin)
+- `approveFlag`: `Under Review → Approved` (Admin)
+- `rejectFlag`: `Under Review → Rejected` (Admin)
+- `archivePaper`: `Under Review/Rejected → Archived` (Admin)
+- `reinstatePaper`: `Archived → Approved` (Admin after appeal)
+
+Mermaid validator:
+
+```mermaid
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Submitted: publishDraft
+  Submitted --> Uploaded: approveSubmission
+  Submitted --> Draft: rejectSubmission
+  Draft --> Uploaded: autoApproveDraft
+  Uploaded --> Processing: enqueueProcessing
+  Processing --> Processed: processingSuccess
+  Processing --> Uploaded: processingFailed
+  Processed --> Flagged: flagPaper
+  Flagged --> UnderReview: pickUpReview
+  UnderReview --> Approved: approveFlag
+  UnderReview --> Rejected: rejectFlag
+  UnderReview --> Archived: archivePaper
+  Rejected --> Archived: archivePaper
+  Archived --> Approved: reinstatePaper
+  Approved --> Flagged: newFlag
+  Approved --> [*]
+  Archived --> [*]
+```
+
+Diagrammer notes:
+
+- Show role ownership next to transitions (e.g., annotate `approveSubmission` arrow with "Team Lead").
+- Use color coding to distinguish user-triggered vs. admin/system-triggered transitions when recreating visuals in Figma.
+- Tie monitoring alerts to transitions `Processing → Uploaded` (failures) and `Flagged → Under Review` (ensure SLA).
