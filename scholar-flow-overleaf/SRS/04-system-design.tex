@@ -3,7 +3,7 @@
 \section{Overview}
 
 This chapter presents the high-level system design of \projectname{}, focusing on the architecture, external integrations, core system interactions, and database design.
-The design artifacts are documented using six diagrams: \textbf{context diagram}, \textbf{use case diagram (with descriptive forms)}, \textbf{data flow diagram (DFD)}, \textbf{activity diagram}, \textbf{ERD}, and \textbf{relational schema diagram}.
+The design artifacts are documented using the following diagrams: \textbf{context diagram}, \textbf{use case diagram (with descriptive forms)}, \textbf{data flow diagram (DFD)}, \textbf{activity diagram}, \textbf{sequence diagram}, \textbf{state diagram}, \textbf{class diagram}, \textbf{ERD}, and \textbf{relational schema diagram}. CRC cards are included to summarize class responsibilities and collaborators.
 
 \section{Context Diagram}
 
@@ -12,7 +12,7 @@ The primary actors are guest users and authenticated users, while the main exter
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpg}
+    \includegraphics[width=0.95\textwidth]{images/diagrams/context_diagram.jpeg}
     \caption{ScholarFlow Context Diagram}
     \label{fig:srs-context-diagram}
 \end{figure}
@@ -171,7 +171,7 @@ The model highlights the main operational processes: authentication and session 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.jpg}
+    \includegraphics[width=0.98\textwidth]{images/diagrams/dfd_diagram.png}
     \caption{ScholarFlow Data Flow Diagram (DFD)}
     \label{fig:srs-dfd-diagram}
 \end{figure}
@@ -216,3 +216,123 @@ The ERD (Figure~\ref{fig:srs-erd}) captures the conceptual relationships among e
     \item \textbf{Collections}: \textit{Collection}, \textit{CollectionPaper}, and \textit{CollectionMember} enable structured grouping and controlled sharing.
     \item \textbf{AI Artifacts}: \textit{AISummary} stores generated outputs for reproducibility and performance.
 \end{itemize}
+
+\section{Sequence Diagram}
+
+The sequence diagram (Figure~\ref{fig:srs-sequence-diagram}) captures the main interaction flow between the web client, API, database, storage, and AI provider.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/squence_diagram.png}
+    \caption{ScholarFlow Main Sequence Diagram}\label{fig:srs-sequence-diagram}
+\end{figure}
+
+\section{State Diagram}
+
+The state diagram (Figure~\ref{fig:srs-state-diagram}) models the lifecycle of papers from upload and processing through moderation and publication.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/diagrams/state.png}
+    \caption{Paper Lifecycle State Diagram}\label{fig:srs-state-diagram}
+\end{figure}
+
+\section{Class Diagram}
+
+The class diagram (Figure~\ref{fig:srs-class-diagram}) summarizes the core domain entities and their relationships derived from the Prisma data model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/diagrams/class_diagram.png}
+    \caption{ScholarFlow Domain Class Diagram}\label{fig:srs-class-diagram}
+\end{figure}
+
+\section{CRC Cards}
+
+CRC (Class-Responsibility-Collaborator) cards capture the essential responsibilities and collaborators for primary domain classes.
+
+\subsection{User}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|} % chktex 44
+        \hline % chktex 44
+        \textbf{Responsibility}          & \textbf{Collaborator} \\
+        \hline % chktex 44
+        Authenticate and manage session  & Account, Session      \\
+        \hline % chktex 44
+        Create and own workspaces        & Workspace             \\
+        \hline % chktex 44
+        Upload and manage papers         & Paper, PaperFile      \\
+        \hline % chktex 44
+        Join workspaces as member        & WorkspaceMember       \\
+        \hline % chktex 44
+        Manage payments and subscription & Subscription, Payment \\
+        \hline % chktex 44
+    \end{tabularx}
+    \caption{CRC Card: User}\label{tab:srs-crc-user}
+\end{table}
+
+\subsection{Workspace}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|} % chktex 44
+        \hline % chktex 44
+        \textbf{Responsibility}              & \textbf{Collaborator} \\
+        \hline % chktex 44
+        Container for papers and collections & Paper, Collection     \\
+        \hline % chktex 44
+        Manage members and roles             & WorkspaceMember, User \\
+        \hline % chktex 44
+        Handle invitations                   & WorkspaceInvitation   \\
+        \hline % chktex 44
+        Track activity within scope          & ActivityLog           \\
+        \hline % chktex 44
+    \end{tabularx}
+    \caption{CRC Card: Workspace}\label{tab:srs-crc-workspace}
+\end{table}
+
+\subsection{Paper}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|} % chktex 44
+        \hline % chktex 44
+        \textbf{Responsibility}              & \textbf{Collaborator}      \\
+        \hline % chktex 44
+        Store metadata and content reference & PaperFile, Workspace       \\
+        \hline % chktex 44
+        Track processing status              & PaperProcessingStatus      \\
+        \hline % chktex 44
+        Provide chunks for AI analysis       & PaperChunk                 \\
+        \hline % chktex 44
+        Store AI-generated insights          & AISummary, AIInsightThread \\
+        \hline % chktex 44
+        Maintain citation links              & Citation                   \\
+        \hline % chktex 44
+    \end{tabularx}
+    \caption{CRC Card: Paper}\label{tab:srs-crc-paper}
+\end{table}
+
+\subsection{Collection}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{|l|X|} % chktex 44
+        \hline % chktex 44
+        \textbf{Responsibility}        & \textbf{Collaborator}  \\
+        \hline % chktex 44
+        Group papers logically         & Paper, CollectionPaper \\
+        \hline % chktex 44
+        Manage access permissions      & CollectionMember, User \\
+        \hline % chktex 44
+        Belong to a specific workspace & Workspace              \\
+        \hline % chktex 44
+    \end{tabularx}
+    \caption{CRC Card: Collection}\label{tab:srs-crc-collection}
+\end{table}
