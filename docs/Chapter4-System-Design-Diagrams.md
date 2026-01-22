@@ -719,188 +719,185 @@ Use this for ERD labels and to keep DFD data stores consistent.
 
 ---
 
-## 8) Sequence Diagrams (role-aware flows)
+## 8) Sequence Diagrams (Main System Flow)
 
-Sequence diagrams capture end-to-end message ordering for the most sensitive, role-dependent flows. Reuse these participant labels when recreating diagrams so documentation, tests, and monitoring dashboards stay in sync.
-
-### 8.1 Sequence — Admin moderates flagged paper (UC-31)
-
-| Participant ID | Label (exact)                              | Notes                                        |
-| -------------- | ------------------------------------------ | -------------------------------------------- |
-| ACT            | Admin Operator                             | Human actor with `ADMIN` role                |
-| UI             | Admin Console (Next.js)                    | Uses existing dashboard shell                |
-| API            | Admin API Gateway (`/api/admin`)           | Express server handling admin auth + routing |
-| MOD            | Moderation Service (`/api/admin/papers/*`) | Internal module performing reads/writes      |
-| DB             | PostgreSQL (Paper + ActivityLog tables)    | Persistent store                             |
-| NOT            | Notification Bus (email/webhook)           | Sends workspace notifications                |
-
-**Message steps** (copy arrow labels for diagramming tools):
-
-1. `ACT → UI`: "Open Flagged Paper Queue"
-2. `UI → API`: `GET /api/admin/papers?status=FLAGGED`
-3. `API → MOD`: `fetchFlaggedPapers(adminContext)`
-4. `MOD → DB`: `SELECT Paper JOIN ActivityLog WHERE moderationStatus IN (...)`
-5. `DB → MOD`: `flaggedPaperList`
-6. `MOD → API`: `normalizeModerationQueue`
-7. `API → UI`: `200 OK + flaggedPaperList`
-8. `ACT → UI`: "Resolve paper" (action + notes)
-9. `UI → API`: `POST /api/admin/papers/{paperId}/moderate`
-10. `API → MOD`: `applyModerationAction(command)`
-11. `MOD → DB`: `UPDATE Paper SET moderationStatus=?, archivedAt? WHERE id=?`
-12. `MOD → DB`: `INSERT ActivityLog (moderation event)`
-13. `MOD → NOT`: `emitModerationNotice(workspaceId, action)` (optional)
-14. `NOT → Workspace`: `email/webhook notifications`
-15. `MOD → API`: `moderationResult`
-16. `API → UI`: `200 OK + moderationResult`
-17. `UI → ACT`: "Show toast + remove row"
-
-Mermaid validator:
+This diagram consolidates the core user interactions (Dashboard, API, Database, S3, AI) into a single flow suitable for A4/Letter size documentation.
 
 ```mermaid
 sequenceDiagram
-  participant ACT as Admin Operator
-  participant UI as Admin Console (Next.js)
-  participant API as Admin API Gateway
-  participant MOD as Moderation Service
-  participant DB as PostgreSQL
-  participant NOT as Notification Bus
+  actor User as Authenticated User
+  participant Web as ScholarFlow Web App (Next.js)
+  participant API as ScholarFlow API (Express)
+  participant DB as PostgreSQL Database
+  participant S3 as AWS S3 (Object Storage)
+  participant AI as AI Provider (OpenAI/Gemini/Deepseek)
 
-  ACT->>UI: Open Flagged Paper Queue
-  UI->>API: GET /api/admin/papers?status=FLAGGED
-  API->>MOD: fetchFlaggedPapers()
-  MOD->>DB: SELECT flagged papers
-  DB-->>MOD: flaggedPaperList
-  MOD-->>API: normalized queue
-  API-->>UI: 200 OK + list
-  ACT->>UI: Resolve paper (action, notes)
-  UI->>API: POST /api/admin/papers/{paperId}/moderate
-  API->>MOD: applyModerationAction()
-  MOD->>DB: UPDATE Paper + INSERT ActivityLog
-  MOD->>NOT: emitModerationNotice()
-  NOT-->>Workspace: Notify
-  MOD-->>API: moderationResult
-  API-->>UI: 200 OK
-  UI-->>ACT: Show toast + remove row
-```
-
-### 8.2 Sequence — Team Lead escalates role change to Admin (UC-32 companion)
-
-| Participant ID | Label (exact)                          | Notes                         |
-| -------------- | -------------------------------------- | ----------------------------- |
-| TL             | Team Lead (Workspace Owner)            | Initiates escalation          |
-| WEB            | ScholarFlow Web App (Next.js)          | Dashboard UI                  |
-| API            | Workspace API (`/api/workspaces`)      | Handles TL requests           |
-| Q              | Escalation Queue (Redis / ActivityLog) | Stores escalation tasks       |
-| ADM            | Admin Console                          | Picks up escalation           |
-| AAPI           | Admin API (`/api/admin/roles`)         | Applies final decision        |
-| DB             | PostgreSQL                             | Stores user + membership data |
-
-**Message steps**:
-
-1. `TL → WEB`: "Request role escalation for member"
-2. `WEB → API`: `POST /api/workspaces/{workspaceId}/escalations`
-3. `API → Q`: `enqueueRoleEscalation(payload)`
-4. `Q → ADM`: `notifyNewEscalation`
-5. `ADM → AAPI`: `GET /api/admin/roles/escalations/{id}`
-6. `AAPI → DB`: `loadUserAndMembership`
-7. `DB → AAPI`: `userMembershipSnapshot`
-8. `ADM → AAPI`: `POST /api/admin/roles/{userId}` (with decision)
-9. `AAPI → DB`: `UPDATE User/WorkspaceMember`
-10. `AAPI → Q`: `resolveEscalation`
-11. `AAPI → WEB`: `emitEvent workspaceRoleChanged`
-12. `WEB → TL`: "Show success"
-13. `AAPI → Member`: `notifyRoleChange` (email/webhook)
-
-Mermaid validator:
-
-```mermaid
-sequenceDiagram
-  participant TL as Team Lead
-  participant WEB as ScholarFlow Web App
-  participant API as Workspace API
-  participant Q as Escalation Queue
-  participant ADM as Admin Console
-  participant AAPI as Admin Role API
-  participant DB as PostgreSQL
-
-  TL->>WEB: Request role escalation
-  WEB->>API: POST /api/workspaces/{id}/escalations
-  API->>Q: enqueueRoleEscalation()
-  Q-->>ADM: notifyNewEscalation
-  ADM->>AAPI: GET /api/admin/roles/escalations/{id}
-  AAPI->>DB: Load user + membership
-  DB-->>AAPI: Snapshot
-  ADM->>AAPI: POST /api/admin/roles/{userId}
-  AAPI->>DB: UPDATE User/WorkspaceMember
-  AAPI->>Q: resolveEscalation
-  AAPI->>WEB: emit roleChanged event
-  WEB-->>TL: Show success
-  AAPI->>Member: Notify role change
+  User->>Web: Use dashboard, manage work
+  Web->>API: API requests (JWT/session)
+  API->>DB: Read/write app data
+  API->>S3: Upload/download objects, presign URLs
+  API->>AI: Generate summary/insights
+  API-->>Web: API responses (metadata, status, summaries)
 ```
 
 ---
 
-## 9) State Diagrams (role-aware lifecycles)
+## 9) State Diagrams (Paper Lifecycle)
 
-Use state diagrams to highlight how permissions gate transitions. The paper lifecycle is the most critical because uploads touch storage, AI processing, moderation, and billing limits.
-
-### 9.1 Paper lifecycle state machine
-
-| State          | Description                                          | Transition triggers                    | Responsible role                                    |
-| -------------- | ---------------------------------------------------- | -------------------------------------- | --------------------------------------------------- |
-| `Draft`        | Paper being edited locally (editor)                  | Publish draft, discard draft           | Researcher / Pro / Team Lead                        |
-| `Submitted`    | Draft submitted for workspace review (optional gate) | Reviewer approve/reject                | Team Lead or delegated Reviewer                     |
-| `Uploaded`     | File stored in S3, metadata persisted                | Auto process, manual process request   | Researcher / Pro / Team Lead                        |
-| `Processing`   | Background worker extracting text/chunks             | Job success/failure                    | System (worker)                                     |
-| `Processed`    | Chunks ready, AI features enabled                    | Flagged by member, AI summary requests | Researcher / Pro / Team Lead                        |
-| `Flagged`      | Member or automated classifier flagged content       | Admin picks up case                    | Researcher/Team Lead (flagging), Admin (resolution) |
-| `Under Review` | Admin actively reviewing flagged paper               | Approve, reject, archive               | Admin                                               |
-| `Approved`     | Cleared for collaboration/search                     | Future flags move back to `Flagged`    | Admin                                               |
-| `Rejected`     | Violates policy; removed from search                 | Optional appeal, escalate to Team Lead | Admin + Team Lead                                   |
-| `Archived`     | Soft-deleted/retained for compliance                 | Restore (Admin)                        | Admin                                               |
-
-Transition summary (label → from → to):
-
-- `publishDraft`: `Draft → Submitted` (Researcher/Pro/Team Lead)
-- `autoApproveDraft`: `Draft → Uploaded` (Team Lead disabled review gate)
-- `approveSubmission`: `Submitted → Uploaded` (Team Lead)
-- `rejectSubmission`: `Submitted → Draft` (Team Lead)
-- `enqueueProcessing`: `Uploaded → Processing` (System after user trigger)
-- `processingSuccess`: `Processing → Processed` (Worker)
-- `processingFailed`: `Processing → Uploaded` (Worker + error reason)
-- `flagPaper`: `Processed → Flagged` (Researcher/Pro/Team Lead)
-- `pickUpReview`: `Flagged → Under Review` (Admin)
-- `approveFlag`: `Under Review → Approved` (Admin)
-- `rejectFlag`: `Under Review → Rejected` (Admin)
-- `archivePaper`: `Under Review/Rejected → Archived` (Admin)
-- `reinstatePaper`: `Archived → Approved` (Admin after appeal)
-
-Mermaid validator:
+This state diagram models the `PaperProcessingStatus` and `isDraft`/`isPublished` flags.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> Draft
-  Draft --> Submitted: publishDraft
-  Submitted --> Uploaded: approveSubmission
-  Submitted --> Draft: rejectSubmission
-  Draft --> Uploaded: autoApproveDraft
-  Uploaded --> Processing: enqueueProcessing
-  Processing --> Processed: processingSuccess
-  Processing --> Uploaded: processingFailed
-  Processed --> Flagged: flagPaper
-  Flagged --> UnderReview: pickUpReview
-  UnderReview --> Approved: approveFlag
-  UnderReview --> Rejected: rejectFlag
-  UnderReview --> Archived: archivePaper
-  Rejected --> Archived: archivePaper
-  Archived --> Approved: reinstatePaper
-  Approved --> Flagged: newFlag
-  Approved --> [*]
+  state "Under Review" as UnderReview
+
+  [*] --> Draft: Created in Editor
+  Draft --> Published: Publish Draft
+
+  [*] --> Uploaded: File Upload (PDF/DOCX)
+  Uploaded --> Processing: Enqueue Job (Redis)
+  Processing --> Processed: Success (Chunks Created)
+  Processing --> Failed: Error (Retry logic)
+  Failed --> Processing: Retry
+
+  Processed --> Flagged: Content Flagged
+  Flagged --> UnderReview: Admin Pickup
+  UnderReview --> Published: Approve
+  UnderReview --> Rejected: Reject
+  UnderReview --> Archived: Archive
+
+  Published --> [*]
+  Rejected --> [*]
   Archived --> [*]
 ```
 
-Diagrammer notes:
+---
 
-- Show role ownership next to transitions (e.g., annotate `approveSubmission` arrow with "Team Lead").
-- Use color coding to distinguish user-triggered vs. admin/system-triggered transitions when recreating visuals in Figma.
-- Tie monitoring alerts to transitions `Processing → Uploaded` (failures) and `Flagged → Under Review` (ensure SLA).
+## 10) Class Diagram (Domain Model)
+
+Based on the Prisma schema, this diagram highlights core entities and relationships.
+
+```mermaid
+classDiagram
+    class Role {
+        <<enumeration>>
+        RESEARCHER
+        PRO_RESEARCHER
+        TEAM_LEAD
+        ADMIN
+    }
+
+    class PaperProcessingStatus {
+        <<enumeration>>
+        UPLOADED
+        PROCESSING
+        PROCESSED
+        FAILED
+    }
+
+    class User {
+        +String id
+        +String email
+        +Role role
+        +String stripeCustomerId
+        +createWorkspace()
+        +uploadPaper()
+    }
+
+    class Workspace {
+        +String id
+        +String name
+        +String ownerId
+    }
+
+    class WorkspaceMember {
+        +String userId
+        +String workspaceId
+        +Role role
+    }
+
+    class Paper {
+        +String id
+        +String title
+        +Json metadata
+        +PaperProcessingStatus processingStatus
+        +Boolean isDraft
+        +Boolean isPublished
+    }
+
+    class PaperFile {
+        +String paperId
+        +String objectKey
+        +String storageProvider
+    }
+
+    class PaperChunk {
+        +String paperId
+        +Int idx
+        +String content
+    }
+
+    class Collection {
+        +String id
+        +String name
+        +CollectionPermission permission
+    }
+
+    class AISummary {
+        +String paperId
+        +String content
+        +String modelUsed
+    }
+
+    User "1" --> "*" Workspace
+    User "1" --> "*" WorkspaceMember
+    WorkspaceMember "*" --> "1" Workspace
+    Workspace "1" --> "*" Paper
+    User "1" --> "*" Paper
+    Paper "1" --> "0..1" PaperFile
+    Paper "1" --> "*" PaperChunk
+    Paper "1" --> "*" AISummary
+    Workspace "1" --> "*" Collection
+    User "*" --> "*" Collection
+    Collection "*" --> "*" Paper
+```
+
+---
+
+## 11) CRC Cards (Class-Responsibility-Collaborator)
+
+### User
+
+| **Responsibility**               | **Collaborator**      |
+| :------------------------------- | :-------------------- |
+| Authenticate and manage session  | Account, Session      |
+| Create and own workspaces        | Workspace             |
+| Upload and manage papers         | Paper, PaperFile      |
+| Join workspaces as member        | WorkspaceMember       |
+| Manage payments and subscription | Subscription, Payment |
+
+### Workspace
+
+| **Responsibility**                   | **Collaborator**      |
+| :----------------------------------- | :-------------------- |
+| Container for papers and collections | Paper, Collection     |
+| Manage members and roles             | WorkspaceMember, User |
+| Handle invitations                   | WorkspaceInvitation   |
+| Track activity within scope          | ActivityLog           |
+
+### Paper
+
+| **Responsibility**                   | **Collaborator**           |
+| :----------------------------------- | :------------------------- |
+| Store metadata and content reference | PaperFile, Workspace       |
+| Track processing status              | PaperProcessingStatus      |
+| Provide chunks for AI analysis       | PaperChunk                 |
+| Store AI-generated insights          | AISummary, AIInsightThread |
+| Maintain citation links              | Citation                   |
+
+### Collection
+
+| **Responsibility**             | **Collaborator**       |
+| :----------------------------- | :--------------------- |
+| Group papers logically         | Paper, CollectionPaper |
+| Manage access permissions      | CollectionMember, User |
+| Belong to a specific workspace | Workspace              |
