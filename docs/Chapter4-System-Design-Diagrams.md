@@ -544,6 +544,63 @@ Below are the **recommended** descriptive forms for the most important flows. Us
 - User → P7: `discussion + activity log queries`
 - P7 → D7: `threads/messages/activity entries`
 
+```mermaid
+flowchart TB
+    User[User]
+    OAuth[OAuth Provider]
+    Email[Email Service]
+    S3[AWS S3]
+    AI[AI Provider]
+    Queue[Redis Queue]
+    Stripe[Stripe]
+
+    D1[(D1 Auth/User)]
+    D2[(D2 Workspaces)]
+    D3[(D3 Papers)]
+    D4[(D4 Collections)]
+    D5[(D5 AI Data)]
+    D6[(D6 Billing)]
+    D7[(D7 Collab)]
+
+    subgraph System
+      P1((P1 Auth))
+      P2((P2 Workspace))
+      P3((P3 Papers))
+      P4((P4 Collections))
+      P5((P5 AI/Process))
+      P6((P6 Billing))
+      P7((P7 Collab))
+    end
+
+    User --> P1 & P2 & P3 & P4 & P5 & P6 & P7
+
+    P1 <--> OAuth
+    P1 <--> D1
+    P1 --> Email
+
+    P2 <--> D2
+    P2 --> Email
+
+    P3 <--> S3
+    P3 <--> D3
+    P3 --> P5
+
+    P4 <--> D4
+    P4 -.-> D3
+    P4 --> Email
+
+    P5 <--> AI
+    P5 <--> S3
+    P5 <--> Queue
+    P5 <--> D3
+    P5 <--> D5
+
+    P6 <--> Stripe
+    P6 <--> D6
+
+    P7 <--> D7
+```
+
 ### 3.2 DFD Level 1 (expand Paper Management)
 
 #### P3.1 Upload Paper
@@ -567,6 +624,35 @@ Below are the **recommended** descriptive forms for the most important flows. Us
 #### P3.4 Delete Paper
 
 - **Writes**: soft-delete flags on `Paper` and related records
+
+```mermaid
+flowchart LR
+    User[User]
+    S3[AWS S3]
+    D3[(D3 Papers)]
+    D5[(D5 AI Data)]
+
+    subgraph "P3 Paper Management"
+      P31((P3.1 Upload))
+      P32((P3.2 Access))
+      P33((P3.3 Update))
+      P34((P3.4 Delete))
+    end
+
+    User --> P31 & P32 & P33 & P34
+
+    P31 --> S3
+    P31 --> D3
+
+    P32 --> S3
+    P32 <--> D3
+
+    P33 --> D3
+
+    P34 --> D3
+    P34 -.-> D5
+    P34 -.-> S3
+```
 
 ---
 
@@ -623,6 +709,24 @@ sequenceDiagram
 7. API updates `WorkspaceInvitation.status = ACCEPTED` and sets `acceptedAt`.
 8. Web App shows workspace available.
 
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant E as Email Service
+  participant W as Web App
+  participant A as API
+  participant D as Postgres DB
+
+  E->>U: Send invite email
+  U->>W: Open invite link
+  W->>A: POST /api/invitations/accept
+  A->>D: Validate PENDING status
+  A->>D: Create WorkspaceMember
+  A->>D: Update Invitation (ACCEPTED)
+  A-->>W: Success
+  W-->>U: Show workspace
+```
+
 ### 4.3 Activity — Reset Password
 
 **Swimlanes**: User | Web App | API | Email | DB
@@ -637,6 +741,27 @@ sequenceDiagram
 8. API invalidates token.
 9. Web App shows success.
 
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant W as Web App
+  participant A as API
+  participant E as Email Service
+  participant D as Postgres DB
+
+  U->>W: Request "Forgot Password"
+  W->>A: POST /api/auth/forgot
+  A->>D: Store reset token
+  A->>E: Send reset email
+  E-->>U: Reset link
+  U->>W: Click link + Enter new password
+  W->>A: POST /api/auth/reset
+  A->>D: Validate token + hash password
+  A->>D: Invalidate token
+  A-->>W: Success
+  W-->>U: Login page
+```
+
 ### 4.4 Activity — Generate AI Summary
 
 **Swimlanes**: User | Web App | API | DB | AI Provider
@@ -649,6 +774,24 @@ sequenceDiagram
 6. API stores summary in `AISummary`.
 7. API returns summary to Web App.
 
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant W as Web App
+  participant A as API
+  participant D as Postgres DB
+  participant AI as AI Provider
+
+  U->>W: Click "Generate Summary"
+  W->>A: POST /api/papers/{id}/summary
+  A->>D: Fetch paper + chunks
+  A->>AI: Send prompt
+  AI-->>A: Return summary
+  A->>D: Insert AISummary
+  A-->>W: Return summary text
+  W-->>U: Display summary
+```
+
 ### 4.5 Activity — Publish Draft (Editor)
 
 **Swimlanes**: User | Web App | API | DB
@@ -660,6 +803,22 @@ sequenceDiagram
 5. API updates paper fields: `isDraft=false`, `isPublished=true` (and metadata/title/abstract if provided).
 6. API records activity log event (if enabled).
 7. Web App refreshes and displays the published paper.
+
+```mermaid
+sequenceDiagram
+  actor U as User
+  participant W as Web App
+  participant A as API
+  participant D as Postgres DB
+
+  U->>W: Editor -> Publish
+  W->>A: POST /api/editor/publish
+  A->>A: Auth + validate draft
+  A->>D: Update Paper (isPublished=true)
+  A->>D: Log Activity
+  A-->>W: Success
+  W-->>U: Show published paper
+```
 
 ---
 
