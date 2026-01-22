@@ -99,20 +99,20 @@ Use only as a quick validator; draw final in Figma/Lucid.
 
 ```mermaid
 flowchart LR
-  A1[Guest User] -->|Browse, start auth| S1[ScholarFlow Web App (Next.js)]
+  A1[Guest User] -->|Browse, start auth| S1["ScholarFlow Web App (Next.js)"]
   A2[Authenticated User] -->|Use dashboard| S1
-  S1 -->|API requests (JWT/session)| S2[ScholarFlow API (Express)]
-  S2 -->|Read/write app data| S3[(PostgreSQL Database)]
+  S1 -->|API requests (JWT/session)| S2["ScholarFlow API (Express)"]
+  S2 -->|Read/write app data| S3[("PostgreSQL Database")]
 
-  S2 -->|OAuth| E1[OAuth Provider (Google)]
-  S2 -->|OAuth| E2[OAuth Provider (GitHub)]
-  S2 -->|Emails| E3[Email Service (SMTP/Gmail)]
+  S2 -->|OAuth| E1["OAuth Provider (Google)"]
+  S2 -->|OAuth| E2["OAuth Provider (GitHub)"]
+  S2 -->|Emails| E3["Email Service (SMTP/Gmail)"]
   S2 -->|Billing API| E4[Stripe]
   E4 -->|Webhooks (/webhooks/stripe)| S2
-  S2 -->|Summaries/Insights| E5[AI Provider (OpenAI/Gemini/Deepseek)]
-  S2 -->|Objects + presigned URLs| E6[AWS S3 (Object Storage)]
-  S2 -->|DOC/DOCX→PDF| E7[Document Conversion Service (Gotenberg/LibreOffice)]
-  S2 -->|Jobs/Queue| E8[Redis (Queue/Cache)]
+  S2 -->|Summaries/Insights| E5["AI Provider (OpenAI/Gemini/Deepseek)"]
+  S2 -->|Objects + presigned URLs| E6["AWS S3 (Object Storage)"]
+  S2 -->|DOC/DOCX→PDF| E7["Document Conversion Service (Gotenberg/LibreOffice)"]
+  S2 -->|Jobs/Queue| E8["Redis (Queue/Cache)"]
 ```
 
 ---
