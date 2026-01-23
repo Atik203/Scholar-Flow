@@ -1,0 +1,323 @@
+# ScholarFlow SRS Presentation Speech (5 Minutes)
+
+> **Important:** All presenters should mention that we are using **demo/test users only** in this building stage.
+
+---
+
+## Presenter 1 — Sourov (≈ 1.5 min)
+
+### Chapter 1: Introduction
+
+**Speech:**
+
+Good morning. My name is **Sourov**. I will start our presentation.
+
+Our project name is **ScholarFlow**. It is an **AI-powered research paper collaboration hub**.
+
+**The Problem:**
+
+Researchers and students use many tools and folders, so they **lose time** managing papers, notes, and files.
+
+In our survey, people said the biggest issues are:
+
+- Taking notes is hard
+- Finding a paper later is difficult
+- Keeping papers organized is challenging
+
+**Our Solution:**
+
+ScholarFlow solves this by giving **one place** to:
+
+- Upload papers
+- Store metadata
+- Search fast
+- Collaborate in a workspace
+
+**Important Note:**  
+In this stage, we are using **demo/test users only**, not real production users.
+
+**Our Goals:**
+
+1. Store and organize papers
+2. Smart search and AI help
+3. Teamwork with workspaces and collections
+
+**Handover:**  
+Now **Presenter 2** will explain the study and analysis part.
+
+---
+
+## Presenter 2 — Atik (≈ 1.5 min)
+
+### Chapter 2 + Chapter 3: System Study & Analysis
+
+**Speech:**
+
+**Chapter 2 — How We Collected Information:**
+
+We explain how we collected information:
+
+- Survey with 32 respondents
+- Stakeholder interviews
+- Secondary research
+- Comparing existing tools
+
+We studied tools like **Zotero, Mendeley, EndNote, Paperpile, and ReadCube**.
+
+**Chapter 3 — Gap Analysis:**
+
+From System Analysis, we found clear gaps:
+
+**What's Missing in Existing Tools:**
+
+- Many tools have **weak collaboration**
+- Most tools have **no AI summary** or **no AI chat**
+- Some tools have **old UI** or **paid-only features**
+
+**ScholarFlow's Advantages:**
+
+ScholarFlow combines:
+
+- Modern web experience
+- Teamwork features (workspaces and collections)
+- AI features for faster understanding of papers
+
+Again, we are testing these flows with **demo/test users only**.
+
+**Handover:**  
+Now **Presenter 3** will cover the most important part: **all the system design diagrams**.
+
+---
+
+## Presenter 3 — Salman (≈ 2 min)
+
+### Chapter 4 + Chapter 5: System Design Diagrams & UI
+
+**Speech:**
+
+I will focus on the **diagrams**, because they show how the whole system works.
+
+**We will cover 8 important diagrams** that explain the complete system design.
+
+---
+
+### 1) Context Diagram (most important)
+
+**[Point to the Context Diagram]**
+
+Here, **ScholarFlow is in the center**.
+
+- Users access the **Web App** (Next.js)
+- The Web App talks to the **API** (Express)
+- The API connects to:
+  - **PostgreSQL** for data
+  - **AWS S3** for paper files
+  - **OAuth** for login (Google, GitHub)
+  - **Email** for verification and password reset
+  - **Stripe** for billing
+  - **AI provider** for summary and insights
+
+This diagram shows all external services clearly.
+
+---
+
+### 2) Use Case Diagram
+
+**[Point to the Use Case Diagram]**
+
+This shows what users can do:
+
+- Register/Login
+- Upload paper
+- Create workspace
+- Create collection
+- Generate AI summary
+
+It is a quick view of system features from the user side.
+
+---
+
+### 3) DFD + Activity Diagram
+
+**[Point to DFD]**
+
+**DFD** shows how data moves:  
+Request → API → Database/S3/AI → Response
+
+**[Point to Activity Diagram]**
+
+**Activity diagram** shows the upload steps:  
+Validate file → Store → Save metadata → Success
+
+---
+
+### 4) ERD / Schema Diagram
+
+**[Point to ERD/Schema]**
+
+This shows the **database design**:
+
+- Users
+- Workspaces
+- Papers
+- Collections
+- AI summaries
+
+All are connected properly.
+
+---
+
+### 5) Sequence Diagram
+
+**[Point to Sequence Diagram]**
+
+This shows the **step-by-step interaction** between components:
+
+- User sends request to Web App
+- Web App calls API
+- API checks authentication
+- API queries Database
+- API stores files in S3
+- API calls AI provider
+- Response flows back to user
+
+This proves our system has **proper flow control**.
+
+---
+
+### 6) State Diagram
+
+**[Point to State Diagram]**
+
+This shows how a **paper changes state** during its lifecycle:
+
+- **Uploaded** → paper is stored
+- **Processing** → extracting metadata
+- **Ready** → available for use
+- **Failed** → if error occurs
+
+This ensures **proper state management**.
+
+---
+
+### 7) Class Diagram
+
+**[Point to Class Diagram]**
+
+This shows the **object-oriented structure**:
+
+- Main classes: User, Workspace, Paper, Collection
+- Their properties (attributes)
+- Their methods (functions)
+- Relationships between classes
+
+This is the **blueprint for our code**.
+
+---
+
+### 8) Chapter 5: UI Screens
+
+**[Point to 2–3 screenshots]**
+
+These screens show the real user flow:
+
+- **Sign In**
+- **Dashboard**
+- **Paper Upload**
+- **Paper Details**
+- **Editor**
+- **AI Insights**
+- **Shared Workspace**
+
+The UI matches the diagrams and the features in the SRS.
+
+---
+
+### Closing
+
+To summarize:
+
+- We defined the problem
+- We validated the need with survey data
+- We compared existing tools and found gaps
+- We designed a complete system with **8 diagrams** and UI
+
+**Right now, we are in the building phase with demo/test users only.**
+
+Thank you. If you have any questions, we are ready to answer.
+
+---
+
+## Tips for All Presenters
+
+### Body Language
+
+- Stand straight
+- Make eye contact with the audience
+- Point to diagrams when mentioning them
+- Use natural hand gestures (not too much)
+- Smile at the beginning
+
+### Speaking Tips
+
+- Speak slowly and clearly
+- Pause after each main point
+- Don't rush through diagrams
+- If you forget a word, take a breath and continue
+
+### Diagram Presentation (Presenter 3)
+
+When showing a diagram:
+
+1. **Say the diagram name first** ("This is the Context Diagram")
+2. **Point to it briefly**
+3. **Explain the main parts** (don't explain every detail)
+4. **Turn back to the audience** while speaking
+
+### Time Management
+
+- **Presenter 1:** 1.5 minutes (90 seconds)
+- **Presenter 2:** 1.5 minutes (90 seconds)
+- **Presenter 3:** 2 minutes (120 seconds) — **8 diagrams + UI**
+- **Total:** ~5 minutes (300 seconds)
+
+If you go over time, skip some UI screenshot details, but **always mention all 8 diagrams and demo/test users**.
+
+---
+
+## Quick Reference: All 8 Diagrams to Show
+
+### Must Show (Presenter 3) — All Diagrams
+
+1. ✅ **Context Diagram** — external services (25 sec)
+2. ✅ **Use Case Diagram** — user actions (15 sec)
+3. ✅ **DFD + Activity** — data flow (15 sec)
+4. ✅ **ERD/Schema** — database design (15 sec)
+5. ✅ **Sequence Diagram** — step-by-step interaction (20 sec)
+6. ✅ **State Diagram** — lifecycle states (15 sec)
+7. ✅ **Class Diagram** — OOP structure (20 sec)
+8. ✅ **UI Screenshots** — real interface (25 sec)
+
+**Total diagram time:** ~120 seconds (2 minutes)
+
+---
+
+---
+
+## Diagram Presentation Flow (Quick Reminder for Presenter 3)
+
+1. **Context** → External connections
+2. **Use Case** → User actions
+3. **DFD + Activity** → Data flow
+4. **ERD/Schema** → Database structure
+5. **Sequence** → Step-by-step flow
+6. **State** → Paper lifecycle
+7. **Class** → Code blueprint
+8. **UI** → Real interface
+
+**Remember:** Point, explain briefly, move on. Don't get stuck on details!
+
+---
+
+**Last Updated:** January 23, 2026  
+**Version:** 2.0 (5-minute speech, 8 diagrams included, diagram-focused)
