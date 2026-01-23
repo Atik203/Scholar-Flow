@@ -53,36 +53,33 @@ Now **Presenter 2** will explain the study and analysis part.
 
 **Speech:**
 
-**Chapter 2 — How We Collected Information:**
+**Chapter 2 — System Study & Survey:**
 
-We explain how we collected information:
+In Chapter 2, we gathered requirements through a survey with **32 respondents**.
 
-- Survey with 32 respondents
-- Stakeholder interviews
-- Secondary research
-- Comparing existing tools
+- **78% were undergraduate students**, mostly from CS backgrounds.
+- The data confirmed that **students struggle with organizing papers** and finding them later.
 
-We studied tools like **Zotero, Mendeley, EndNote, Paperpile, and ReadCube**.
+**Chapter 3 — System Analysis & Gaps:**
 
-**Chapter 3 — Gap Analysis:**
+We analyzed 5 major market tools: **Zotero, Mendeley, Paperpile, Paperpal, and ReadCube**.
 
-From System Analysis, we found clear gaps:
+From our analysis, we identified **three critical gaps**:
 
-**What's Missing in Existing Tools:**
+1. **The AI Gap:** Most tools lack semantic search or AI summaries.
+2. **The UX Gap:** Competitors often have outdated, cluttered interfaces.
+3. **The Collaboration Gap:** Real-time teamwork features are missing or very weak.
 
-- Many tools have **weak collaboration**
-- Most tools have **no AI summary** or **no AI chat**
-- Some tools have **old UI** or **paid-only features**
+**ScholarFlow's Solution:**
 
-**ScholarFlow's Advantages:**
+To fill these gaps, ScholarFlow provides:
 
-ScholarFlow combines:
+- **AI-first features** (summaries and chat)
+- **A modern, responsive UI**
+- **Real-time collaboration** (shared workspaces)
 
-- Modern web experience
-- Teamwork features (workspaces and collections)
-- AI features for faster understanding of papers
-
-Again, we are testing these flows with **demo/test users only**.
+**Important Note:**
+We have designed these features based on this analysis and are currently testing them with **demo users**.
 
 **Handover:**  
 Now **Presenter 3** will cover the most important part: **all the system design diagrams**.
