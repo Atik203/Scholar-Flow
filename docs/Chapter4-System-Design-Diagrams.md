@@ -680,7 +680,7 @@ Mermaid validator:
 
 ```mermaid
 sequenceDiagram
-  actor U as User
+  participant U as User
   participant W as Web App
   participant A as API
   participant S as AWS S3
@@ -711,7 +711,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-  actor U as User
+  participant U as User
   participant E as Email Service
   participant W as Web App
   participant A as API
@@ -743,7 +743,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-  actor U as User
+  participant U as User
   participant W as Web App
   participant A as API
   participant E as Email Service
@@ -776,7 +776,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-  actor U as User
+  participant U as User
   participant W as Web App
   participant A as API
   participant D as Postgres DB
@@ -806,7 +806,7 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-  actor U as User
+  participant U as User
   participant W as Web App
   participant A as API
   participant D as Postgres DB
@@ -884,7 +884,7 @@ This diagram consolidates the core user interactions (Dashboard, API, Database, 
 
 ```mermaid
 sequenceDiagram
-  actor User
+  participant User
   participant Web as Web App (Next.js)
   participant API as API (Express)
   participant DB as Database (Postgres)
