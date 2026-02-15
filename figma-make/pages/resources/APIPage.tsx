@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import {
   ArrowRight,
   BookOpen,
@@ -12,6 +11,7 @@ import {
   Terminal,
   Zap,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { Footer } from "../../components/layout/Footer";
 import { Navbar } from "../../components/layout/Navbar";
 import { Button } from "../../components/ui/button";
@@ -51,6 +51,7 @@ export function APIPage({ onNavigate }: APIPageProps) {
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground"
+                    onClick={() => onNavigate?.("/register")}
                   >
                     <Key className="h-5 w-5 mr-2" />
                     Get API Key
@@ -78,7 +79,16 @@ export function APIPage({ onNavigate }: APIPageProps) {
                         <Terminal className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Quick Start</span>
                       </div>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            'curl -X GET "https://api.scholarflow.io/v1/papers" -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json"',
+                          );
+                        }}
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
@@ -188,7 +198,7 @@ export function APIPage({ onNavigate }: APIPageProps) {
               ].map(
                 (
                   { icon: Icon, title, description, endpoints, color },
-                  index
+                  index,
                 ) => (
                   <motion.div
                     key={title}
@@ -221,7 +231,7 @@ export function APIPage({ onNavigate }: APIPageProps) {
                       </CardContent>
                     </Card>
                   </motion.div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -274,6 +284,12 @@ export function APIPage({ onNavigate }: APIPageProps) {
                         variant="outline"
                         size="sm"
                         className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-200"
+                        onClick={() =>
+                          window.open(
+                            `https://github.com/scholarflow/sdk-${name.toLowerCase()}`,
+                            "_blank",
+                          )
+                        }
                       >
                         View SDK <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Clock,
   Crown,
@@ -17,7 +18,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
 import { Button } from "../../components/ui/button";
@@ -28,6 +28,7 @@ import { Button } from "../../components/ui/button";
 interface TeamMembersPageProps {
   role?: "researcher" | "pro_researcher" | "team_lead" | "admin";
   onNavigate?: (path: string) => void;
+  onShowToast?: (message: string, type: "error" | "success" | "info") => void;
 }
 
 type MemberStatus = "active" | "pending" | "inactive" | "invited";
@@ -238,14 +239,15 @@ function getStatusColor(status: MemberStatus): string {
 export function TeamMembersPage({
   role = "team_lead",
   onNavigate,
+  onShowToast,
 }: TeamMembersPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<MemberStatus | "all">(
-    "all"
+    "all",
   );
   const [selectedRole, setSelectedRole] = useState<MemberRole | "all">("all");
   const [activeTab, setActiveTab] = useState<"members" | "invitations">(
-    "members"
+    "members",
   );
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
@@ -274,7 +276,7 @@ export function TeamMembersPage({
   });
 
   const pendingInvitations = sampleInvitations.filter(
-    (inv) => inv.status === "pending"
+    (inv) => inv.status === "pending",
   );
 
   const handleInvite = () => {
@@ -473,7 +475,7 @@ export function TeamMembersPage({
                         )}
                         <div
                           className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card ${getStatusColor(
-                            member.status
+                            member.status,
                           )}`}
                         />
                       </div>
@@ -514,7 +516,7 @@ export function TeamMembersPage({
                       {/* Role Badge */}
                       <div
                         className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleColor(
-                          member.role
+                          member.role,
                         )}`}
                       >
                         {getRoleLabel(member.role)}
@@ -592,20 +594,34 @@ export function TeamMembersPage({
                   </div>
                   <div
                     className={`px-3 py-1 rounded-full text-xs font-medium border ${getRoleColor(
-                      invitation.role
+                      invitation.role,
                     )}`}
                   >
                     {getRoleLabel(invitation.role)}
                   </div>
                   {isAdmin && (
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          console.log("Resending invitation:", invitation.id);
+                          onShowToast?.(
+                            "Invitation resent successfully!",
+                            "success",
+                          );
+                        }}
+                      >
                         <RefreshCcw className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-destructive"
+                        onClick={() => {
+                          console.log("Deleting invitation:", invitation.id);
+                          onShowToast?.("Invitation cancelled", "info");
+                        }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -770,19 +786,46 @@ export function TeamMembersPage({
                   </div>
                 </div>
                 <div className="p-2">
-                  <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors">
+                  <button
+                    onClick={() => {
+                      onNavigate?.(`/profile/${selectedMember.id}`);
+                      setSelectedMember(null);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors"
+                  >
                     <User className="h-4 w-4 text-muted-foreground" />
                     View Profile
                   </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors">
+                  <button
+                    onClick={() => {
+                      onShowToast?.("Role editor opened", "info");
+                      setSelectedMember(null);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors"
+                  >
                     <Shield className="h-4 w-4 text-muted-foreground" />
                     Change Role
                   </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors">
+                  <button
+                    onClick={() => {
+                      onNavigate?.("/workspaces");
+                      setSelectedMember(null);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors"
+                  >
                     <Tag className="h-4 w-4 text-muted-foreground" />
                     Manage Workspaces
                   </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left text-destructive transition-colors">
+                  <button
+                    onClick={() => {
+                      onShowToast?.(
+                        `${selectedMember.name} removed from team`,
+                        "success",
+                      );
+                      setSelectedMember(null);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left text-destructive transition-colors"
+                  >
                     <UserMinus className="h-4 w-4" />
                     Remove from Team
                   </button>
