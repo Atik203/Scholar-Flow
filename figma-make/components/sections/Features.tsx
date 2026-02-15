@@ -35,7 +35,7 @@ const features = [
     icon: LucideBrain,
     gradient: "from-amber-500 to-orange-500",
     stats: "85% time saved",
-    route: "/ai-tools",
+    route: "/products/ai-insights",
   },
   {
     title: "Collaborative Collections",
@@ -51,7 +51,7 @@ const features = [
     icon: LucideHighlighter,
     gradient: "from-pink-500 to-rose-500",
     stats: "1M+ annotations",
-    route: "/annotations",
+    route: "/research/annotations",
   },
   {
     title: "Team Ready",
@@ -59,7 +59,7 @@ const features = [
     icon: LucideUsers,
     gradient: "from-indigo-500 to-blue-500",
     stats: "Enterprise grade",
-    route: "/team",
+    route: "/enterprise/teams",
   },
 ];
 
