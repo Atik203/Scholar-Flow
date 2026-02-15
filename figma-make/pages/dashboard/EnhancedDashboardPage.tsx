@@ -196,13 +196,13 @@ const sampleGoals: Goal[] = [
 ];
 
 const weeklyStats = [
-  { day: "Mon", papers: 3, annotations: 12 },
-  { day: "Tue", papers: 2, annotations: 8 },
-  { day: "Wed", papers: 4, annotations: 15 },
-  { day: "Thu", papers: 1, annotations: 5 },
-  { day: "Fri", papers: 5, annotations: 20 },
-  { day: "Sat", papers: 2, annotations: 6 },
-  { day: "Sun", papers: 1, annotations: 4 },
+  { day: "Mon", papers: 5, annotations: 18, searches: 12 },
+  { day: "Tue", papers: 3, annotations: 10, searches: 8 },
+  { day: "Wed", papers: 7, annotations: 24, searches: 15 },
+  { day: "Thu", papers: 2, annotations: 7, searches: 5 },
+  { day: "Fri", papers: 8, annotations: 28, searches: 20 },
+  { day: "Sat", papers: 4, annotations: 11, searches: 6 },
+  { day: "Sun", papers: 1, annotations: 3, searches: 2 },
 ];
 
 // ============================================================================
@@ -262,6 +262,10 @@ export function EnhancedDashboardPage({
   );
   const totalAnnotationsThisWeek = weeklyStats.reduce(
     (acc, day) => acc + day.annotations,
+    0,
+  );
+  const totalSearchesThisWeek = weeklyStats.reduce(
+    (acc, day) => acc + day.searches,
     0,
   );
   const maxPapers = Math.max(...weeklyStats.map((d) => d.papers));
@@ -379,7 +383,7 @@ export function EnhancedDashboardPage({
                 <h3 className="font-semibold">Weekly Activity</h3>
                 <p className="text-sm text-muted-foreground">
                   {totalPapersThisWeek} papers • {totalAnnotationsThisWeek}{" "}
-                  annotations
+                  annotations • {totalSearchesThisWeek} searches
                 </p>
               </div>
               <div className="flex items-center gap-4 text-sm">
@@ -390,6 +394,10 @@ export function EnhancedDashboardPage({
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded bg-chart-1" />
                   <span className="text-muted-foreground">Annotations</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded bg-purple-500" />
+                  <span className="text-muted-foreground">Searches</span>
                 </div>
               </div>
             </div>
@@ -409,10 +417,17 @@ export function EnhancedDashboardPage({
                     />
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.annotations / 25) * 100}%` }}
+                      animate={{ height: `${(day.annotations / 30) * 100}%` }}
                       transition={{ delay: index * 0.1 + 0.05 }}
                       className="w-full bg-chart-1 rounded-t min-h-[4px]"
-                      style={{ height: `${(day.annotations / 25) * 60}px` }}
+                      style={{ height: `${(day.annotations / 30) * 60}px` }}
+                    />
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${(day.searches / 25) * 100}%` }}
+                      transition={{ delay: index * 0.1 + 0.1 }}
+                      className="w-full bg-purple-500 rounded-t min-h-[4px]"
+                      style={{ height: `${(day.searches / 25) * 50}px` }}
                     />
                   </div>
                   <span className="text-xs text-muted-foreground">
