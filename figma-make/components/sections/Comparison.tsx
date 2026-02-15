@@ -200,7 +200,11 @@ const FeatureStatus = ({ status }: { status: boolean | string }) => {
   );
 };
 
-export const Comparison: React.FC = () => {
+interface ComparisonProps {
+  onNavigate?: (path: string) => void;
+}
+
+export const Comparison: React.FC<ComparisonProps> = ({ onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const categories = [
@@ -362,7 +366,7 @@ export const Comparison: React.FC = () => {
                           status={
                             competitor.features[
                               comparisonData.features.findIndex(
-                                (f) => f.name === feature.name
+                                (f) => f.name === feature.name,
                               )
                             ]
                           }
@@ -387,6 +391,7 @@ export const Comparison: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => onNavigate?.("/register")}
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl transition-all"
           >
             Start Free Trial

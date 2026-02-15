@@ -326,7 +326,7 @@ export default function App() {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 4000);
     },
-    []
+    [],
   );
 
   // Dismiss toast
@@ -910,13 +910,13 @@ export default function App() {
             <Navbar onNavigate={handleNavigate} />
             <main>
               <Hero onNavigate={handleNavigate} />
-              <Features />
-              <HowItWorks />
-              <Integrations />
-              <Comparison />
+              <Features onNavigate={handleNavigate} />
+              <HowItWorks onNavigate={handleNavigate} />
+              <Integrations onNavigate={handleNavigate} />
+              <Comparison onNavigate={handleNavigate} />
               <Testimonials />
-              <FAQ />
-              <Newsletter />
+              <FAQ onNavigate={handleNavigate} />
+              <Newsletter onNavigate={handleNavigate} />
               <CTA onNavigate={handleNavigate} />
             </main>
             <Footer onNavigate={handleNavigate} />

@@ -3,6 +3,10 @@ import { ChevronDown, HelpCircle, MessageCircle, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
+interface FAQProps {
+  onNavigate?: (path: string) => void;
+}
+
 const faqs = [
   {
     question: "How does ScholarFlow's AI-powered search work?",
@@ -56,7 +60,7 @@ const faqs = [
 
 const categories = ["All", ...new Set(faqs.map((faq) => faq.category))];
 
-export const FAQ: React.FC = () => {
+export const FAQ: React.FC<FAQProps> = ({ onNavigate }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [activeCategory, setActiveCategory] = useState("All");
 
@@ -234,6 +238,7 @@ export const FAQ: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate?.("/contact")}
               className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-medium shadow-lg shadow-primary/25 hover:shadow-xl transition-all"
             >
               Contact Support
