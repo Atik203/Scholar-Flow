@@ -1,5 +1,4 @@
 "use client";
-import { motion } from "motion/react";
 import {
   ArrowRight,
   LucideBrain,
@@ -10,6 +9,7 @@ import {
   LucideUsers,
   Sparkles,
 } from "lucide-react";
+import { motion } from "motion/react";
 import React, { useState } from "react";
 
 const features = [
@@ -19,6 +19,7 @@ const features = [
     icon: LucideUpload,
     gradient: "from-blue-500 to-cyan-500",
     stats: "10K+ papers processed",
+    route: "/papers",
   },
   {
     title: "Semantic Search",
@@ -26,6 +27,7 @@ const features = [
     icon: LucideSearch,
     gradient: "from-violet-500 to-purple-500",
     stats: "0.3s avg search time",
+    route: "/search",
   },
   {
     title: "AI Summaries",
@@ -33,6 +35,7 @@ const features = [
     icon: LucideBrain,
     gradient: "from-amber-500 to-orange-500",
     stats: "85% time saved",
+    route: "/ai-tools",
   },
   {
     title: "Collaborative Collections",
@@ -40,6 +43,7 @@ const features = [
     icon: LucideFolder,
     gradient: "from-emerald-500 to-green-500",
     stats: "500+ teams active",
+    route: "/collections",
   },
   {
     title: "Inline Annotations",
@@ -47,6 +51,7 @@ const features = [
     icon: LucideHighlighter,
     gradient: "from-pink-500 to-rose-500",
     stats: "1M+ annotations",
+    route: "/annotations",
   },
   {
     title: "Team Ready",
@@ -54,10 +59,15 @@ const features = [
     icon: LucideUsers,
     gradient: "from-indigo-500 to-blue-500",
     stats: "Enterprise grade",
+    route: "/team",
   },
 ];
 
-export const Features: React.FC = () => {
+interface FeaturesProps {
+  onNavigate?: (path: string) => void;
+}
+
+export const Features: React.FC<FeaturesProps> = ({ onNavigate }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
@@ -144,6 +154,7 @@ export const Features: React.FC = () => {
                 stats={f.stats}
                 isHovered={hoveredIndex === i}
                 index={i}
+                onClick={() => onNavigate?.(f.route)}
               />
             </motion.div>
           ))}
@@ -207,6 +218,7 @@ interface FeatureCardProps {
   stats: string;
   isHovered: boolean;
   index: number;
+  onClick?: () => void;
 }
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
@@ -216,12 +228,14 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   gradient,
   stats,
   isHovered,
+  onClick,
 }) => {
   return (
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3 }}
       className="group relative h-full p-6 rounded-2xl border border-primary/20 bg-gradient-to-b from-card/80 via-card/60 to-background/40 backdrop-blur-sm overflow-hidden cursor-pointer"
+      onClick={onClick}
     >
       {/* Animated border gradient */}
       <motion.div

@@ -3,6 +3,10 @@ import { ArrowRight, Check, Link2, Puzzle, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
 import React, { useState } from "react";
 
+interface IntegrationsProps {
+  onNavigate?: (path: string) => void;
+}
+
 const integrations = [
   {
     name: "Zotero",
@@ -89,7 +93,7 @@ const integrations = [
 
 const categories = ["All", ...new Set(integrations.map((i) => i.category))];
 
-export const Integrations: React.FC = () => {
+export const Integrations: React.FC<IntegrationsProps> = ({ onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
@@ -240,6 +244,13 @@ export const Integrations: React.FC = () => {
                 {/* Action */}
                 <motion.button
                   whileHover={{ x: 5 }}
+                  onClick={() =>
+                    integration.status === "available"
+                      ? onNavigate?.(
+                          `/integrations/${integration.name.toLowerCase()}`,
+                        )
+                      : onNavigate?.("/contact")
+                  }
                   className="flex items-center gap-2 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   {integration.status === "available"
@@ -282,6 +293,7 @@ export const Integrations: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate?.("/contact")}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-medium shadow-lg shadow-primary/25"
             >
               <Link2 className="h-4 w-4" />

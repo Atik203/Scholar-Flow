@@ -10,13 +10,17 @@ import {
 import { motion } from "motion/react";
 import React, { useState } from "react";
 
+interface NewsletterProps {
+  onNavigate?: (path: string) => void;
+}
+
 const stats = [
   { label: "Newsletter Subscribers", value: "25K+", icon: Mail },
   { label: "Articles Published", value: "150+", icon: BookOpen },
   { label: "Monthly Readers", value: "100K+", icon: User },
 ];
 
-export const Newsletter: React.FC = () => {
+export const Newsletter: React.FC<NewsletterProps> = ({ onNavigate }) => {
   const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
 
@@ -153,9 +157,15 @@ export const Newsletter: React.FC = () => {
                   </form>
                   <p className="text-center text-sm text-muted-foreground mt-4">
                     No spam, unsubscribe anytime. Read our{" "}
-                    <a href="#" className="text-primary hover:underline">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate?.("/privacy");
+                      }}
+                      className="text-primary hover:underline"
+                    >
                       Privacy Policy
-                    </a>
+                    </button>
                   </p>
                 </>
               ) : (
