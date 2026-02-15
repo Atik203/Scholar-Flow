@@ -14,7 +14,6 @@
  * - Framer Motion animations
  */
 
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertTriangle,
   BarChart3,
@@ -41,6 +40,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
@@ -546,7 +546,7 @@ function EditPlanModal({
                     setEditedPlan(
                       editedPlan
                         ? { ...editedPlan, name: e.target.value }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -565,7 +565,7 @@ function EditPlanModal({
                             ...editedPlan,
                             tier: e.target.value as Plan["tier"],
                           }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -587,7 +587,7 @@ function EditPlanModal({
                   setEditedPlan(
                     editedPlan
                       ? { ...editedPlan, description: e.target.value }
-                      : null
+                      : null,
                   )
                 }
                 rows={2}
@@ -616,7 +616,7 @@ function EditPlanModal({
                             ...editedPlan,
                             monthlyPrice: Number(e.target.value),
                           }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -633,7 +633,7 @@ function EditPlanModal({
                     setEditedPlan(
                       editedPlan
                         ? { ...editedPlan, yearlyPrice: Number(e.target.value) }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -672,7 +672,7 @@ function EditPlanModal({
                                   : Number(e.target.value),
                             },
                           }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -695,7 +695,7 @@ function EditPlanModal({
                               storage: Number(e.target.value),
                             },
                           }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -725,7 +725,7 @@ function EditPlanModal({
                                   : Number(e.target.value),
                             },
                           }
-                        : null
+                        : null,
                     )
                   }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -757,10 +757,10 @@ function EditPlanModal({
                               features: editedPlan.features.map((f) =>
                                 f.id === feature.id
                                   ? { ...f, included: !f.included }
-                                  : f
+                                  : f,
                               ),
                             }
-                          : null
+                          : null,
                       )
                     }
                     className={`p-1.5 rounded-lg transition-colors ${
@@ -876,13 +876,13 @@ export function AdminPlansPage({
     setSelectedPlans((prev) =>
       prev.includes(planId)
         ? prev.filter((id) => id !== planId)
-        : [...prev, planId]
+        : [...prev, planId],
     );
   };
 
   const toggleAllPlans = () => {
     setSelectedPlans((prev) =>
-      prev.length === plans.length ? [] : plans.map((p) => p.id)
+      prev.length === plans.length ? [] : plans.map((p) => p.id),
     );
   };
 
@@ -904,13 +904,13 @@ export function AdminPlansPage({
 
   const handleSave = (updatedPlan: Plan) => {
     setPlans((prev) =>
-      prev.map((p) => (p.id === updatedPlan.id ? updatedPlan : p))
+      prev.map((p) => (p.id === updatedPlan.id ? updatedPlan : p)),
     );
   };
 
   const handleToggle = (planId: string) => {
     setPlans((prev) =>
-      prev.map((p) => (p.id === planId ? { ...p, isActive: !p.isActive } : p))
+      prev.map((p) => (p.id === planId ? { ...p, isActive: !p.isActive } : p)),
     );
   };
 
@@ -1170,7 +1170,7 @@ export function AdminPlansPage({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {plans.map((plan, index) => (
               <motion.div
