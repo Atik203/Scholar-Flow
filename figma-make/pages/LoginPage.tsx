@@ -78,7 +78,7 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "magic-link">(
-    "password"
+    "password",
   );
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [showRecentLogins, setShowRecentLogins] = useState(false);
@@ -173,8 +173,8 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
     onShowToast?.("Authenticating with biometrics...", "info");
     setTimeout(() => {
       setIsLoading(null);
-      onShowToast?.("Welcome back!", "success");
-      onNavigate?.("/dashboard/researcher");
+      onShowToast?.("Welcome back, Admin!", "success");
+      onNavigate?.("/dashboard/admin");
     }, 2000);
   };
 
@@ -185,8 +185,14 @@ export function LoginPage({ onNavigate, onShowToast }: LoginPageProps) {
     // Simulate OAuth redirect
     setTimeout(() => {
       setIsLoading(null);
-      // Default to researcher dashboard for social login
-      onNavigate?.("/dashboard/researcher");
+      if (provider === "github") {
+        onShowToast?.("Welcome, Team Lead!", "success");
+        onNavigate?.("/dashboard/team-lead");
+      } else {
+        // Google → researcher dashboard
+        onShowToast?.("Welcome back!", "success");
+        onNavigate?.("/dashboard/researcher");
+      }
     }, 1500);
   };
 
