@@ -67,13 +67,13 @@ const dummyAnalytics = {
   },
   charts: {
     papersOverTime: [
-      { date: "Jan 1", count: 5 },
-      { date: "Jan 8", count: 8 },
-      { date: "Jan 15", count: 12 },
-      { date: "Jan 22", count: 10 },
-      { date: "Jan 29", count: 15 },
-      { date: "Feb 5", count: 18 },
-      { date: "Feb 12", count: 22 },
+      { date: "Jan 1", count: 8 },
+      { date: "Jan 8", count: 14 },
+      { date: "Jan 15", count: 6 },
+      { date: "Jan 22", count: 18 },
+      { date: "Jan 29", count: 10 },
+      { date: "Feb 5", count: 22 },
+      { date: "Feb 12", count: 13 },
     ],
     papersByStatus: [
       { status: "PROCESSED", count: 38 },
@@ -167,13 +167,13 @@ const datePresets = [
 // Comparison data for demo
 const comparisonData = {
   papersOverTime: [
-    { date: "Dec 1", count: 3 },
-    { date: "Dec 8", count: 5 },
-    { date: "Dec 15", count: 7 },
-    { date: "Dec 22", count: 6 },
-    { date: "Dec 29", count: 9 },
-    { date: "Jan 5", count: 11 },
-    { date: "Jan 12", count: 14 },
+    { date: "Dec 1", count: 4 },
+    { date: "Dec 8", count: 9 },
+    { date: "Dec 15", count: 3 },
+    { date: "Dec 22", count: 11 },
+    { date: "Dec 29", count: 5 },
+    { date: "Jan 5", count: 14 },
+    { date: "Jan 12", count: 7 },
   ],
 };
 
@@ -356,7 +356,7 @@ export function AnalyticsPage({
                             "w-full text-left px-3 py-2 rounded-lg text-sm transition-colors",
                             selectedDateRange === preset.value
                               ? "bg-primary text-primary-foreground"
-                              : "hover:bg-muted"
+                              : "hover:bg-muted",
                           )}
                         >
                           {preset.label}
@@ -408,7 +408,7 @@ export function AnalyticsPage({
                 "flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors",
                 comparisonMode
                   ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted"
+                  : "bg-background hover:bg-muted",
               )}
             >
               <BarChart3 className="h-4 w-4" />
@@ -422,7 +422,7 @@ export function AnalyticsPage({
                 "flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors",
                 showGoals
                   ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background hover:bg-muted"
+                  : "bg-background hover:bg-muted",
               )}
             >
               <Target className="h-4 w-4" />
@@ -566,7 +566,7 @@ export function AnalyticsPage({
                           ? "bg-destructive"
                           : card.percentage > 60
                             ? "bg-yellow-500"
-                            : "bg-primary"
+                            : "bg-primary",
                       )}
                     />
                   </div>
@@ -618,7 +618,7 @@ export function AnalyticsPage({
                       "flex items-center text-xs font-medium",
                       insight.trendDirection === "up"
                         ? "text-green-600"
-                        : "text-red-600"
+                        : "text-red-600",
                     )}
                   >
                     {insight.trendDirection === "up" ? (
@@ -725,7 +725,7 @@ export function AnalyticsPage({
               {dummyAnalytics.charts.papersByStatus.map((item, index) => {
                 const total = dummyAnalytics.charts.papersByStatus.reduce(
                   (a, b) => a + b.count,
-                  0
+                  0,
                 );
                 const percentage = (item.count / total) * 100;
                 return (

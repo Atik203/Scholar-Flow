@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   BarChart3,
@@ -30,6 +29,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useState } from "react";
 
 import { useRole, type UserRole } from "../../components/context";
@@ -371,7 +371,7 @@ export function AdminReportsPage({
     setSelectedReports((prev) =>
       prev.includes(reportId)
         ? prev.filter((id) => id !== reportId)
-        : [...prev, reportId]
+        : [...prev, reportId],
     );
   };
 
@@ -379,7 +379,7 @@ export function AdminReportsPage({
     setSelectedReports((prev) =>
       prev.length === filteredReports.length
         ? []
-        : filteredReports.map((r) => r.id)
+        : filteredReports.map((r) => r.id),
     );
   };
 
@@ -688,7 +688,7 @@ export function AdminReportsPage({
                     ? tab === "builder"
                       ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/25"
                       : "bg-indigo-600 text-white shadow-lg shadow-indigo-600/25"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700",
                 )}
               >
                 {tab === "builder" && <Sparkles className="h-4 w-4" />}
@@ -700,7 +700,7 @@ export function AdminReportsPage({
                       ? "Visual Builder"
                       : "Custom Reports"}
               </button>
-            )
+            ),
           )}
         </motion.div>
 
@@ -836,7 +836,7 @@ export function AdminReportsPage({
                           ? "col-span-6"
                           : widget.width === "half"
                             ? "col-span-3"
-                            : "col-span-2"
+                            : "col-span-2",
                       )}
                     >
                       <div className="flex items-center gap-3 mb-3">
@@ -954,25 +954,25 @@ export function AdminReportsPage({
             className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden"
           >
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[35%]">
                       Report
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[12%]">
                       Type
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[12%]">
                       Frequency
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[12%]">
                       Status
                     </th>
-                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-left p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[15%]">
                       Last Generated
                     </th>
-                    <th className="text-right p-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+                    <th className="text-right p-4 text-sm font-medium text-slate-500 dark:text-slate-400 w-[14%]">
                       Actions
                     </th>
                   </tr>
@@ -995,7 +995,7 @@ export function AdminReportsPage({
                             <p className="font-medium text-slate-900 dark:text-white">
                               {report.name}
                             </p>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md truncate">
+                            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs truncate">
                               {report.description}
                             </p>
                           </div>
