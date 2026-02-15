@@ -163,7 +163,7 @@ export function ProfilePage({ onNavigate, onShowToast }: ProfilePageProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [researchInterests, setResearchInterests] = useState(
-    mockResearchInterests
+    mockResearchInterests,
   );
   const [newInterest, setNewInterest] = useState("");
   const [showAddInterest, setShowAddInterest] = useState(false);
@@ -189,7 +189,7 @@ export function ProfilePage({ onNavigate, onShowToast }: ProfilePageProps) {
   // Calculate profile completeness
   const profileCompleteness = profileFields.reduce(
     (acc, field) => acc + (field.completed ? field.weight : 0),
-    0
+    0,
   );
 
   const handleEdit = () => {
@@ -814,7 +814,12 @@ export function ProfilePage({ onNavigate, onShowToast }: ProfilePageProps) {
                     </CardDescription>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="btn-hover-glow">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="btn-hover-glow"
+                  onClick={() => onNavigate?.("/analytics")}
+                >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Full Analytics
                 </Button>
@@ -1033,7 +1038,12 @@ export function ProfilePage({ onNavigate, onShowToast }: ProfilePageProps) {
                     </CardDescription>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="btn-hover-glow">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="btn-hover-glow"
+                  onClick={() => onNavigate?.("/team")}
+                >
                   <Users className="h-4 w-4 mr-2" />
                   View All
                 </Button>
@@ -1149,7 +1159,13 @@ export function ProfilePage({ onNavigate, onShowToast }: ProfilePageProps) {
                       </p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      onShowToast?.("Connecting to ResearchGate...", "info")
+                    }
+                  >
                     Connect
                   </Button>
                 </div>
