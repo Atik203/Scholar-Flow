@@ -401,33 +401,36 @@ export function EnhancedDashboardPage({
                 </div>
               </div>
             </div>
-            <div className="h-48 flex items-end justify-between gap-2">
+            <div className="flex items-end gap-4 h-48">
               {weeklyStats.map((day, index) => (
                 <div
                   key={day.day}
-                  className="flex-1 flex flex-col items-center gap-2"
+                  className="flex-1 flex flex-col items-center gap-1"
                 >
-                  <div className="w-full flex flex-col gap-1">
+                  <div className="w-full flex gap-1 items-end h-40">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.papers / maxPapers) * 100}%` }}
-                      transition={{ delay: index * 0.1 }}
-                      className="w-full bg-primary rounded-t min-h-[4px]"
-                      style={{ height: `${(day.papers / maxPapers) * 120}px` }}
+                      animate={{
+                        height: `${(day.papers / maxPapers) * 100}%`,
+                      }}
+                      transition={{ delay: 0.3 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-primary rounded-t-lg min-h-[4px]"
                     />
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.annotations / 30) * 100}%` }}
-                      transition={{ delay: index * 0.1 + 0.05 }}
-                      className="w-full bg-chart-1 rounded-t min-h-[4px]"
-                      style={{ height: `${(day.annotations / 30) * 60}px` }}
+                      animate={{
+                        height: `${(day.annotations / Math.max(...weeklyStats.map((d) => d.annotations))) * 100}%`,
+                      }}
+                      transition={{ delay: 0.35 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-chart-1 rounded-t-lg min-h-[4px]"
                     />
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.searches / 25) * 100}%` }}
-                      transition={{ delay: index * 0.1 + 0.1 }}
-                      className="w-full bg-purple-500 rounded-t min-h-[4px]"
-                      style={{ height: `${(day.searches / 25) * 50}px` }}
+                      animate={{
+                        height: `${(day.searches / Math.max(...weeklyStats.map((d) => d.searches))) * 100}%`,
+                      }}
+                      transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-purple-500 rounded-t-lg min-h-[4px]"
                     />
                   </div>
                   <span className="text-xs text-muted-foreground">

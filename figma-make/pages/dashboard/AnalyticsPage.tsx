@@ -653,50 +653,54 @@ export function AnalyticsPage({
                 </div>
               )}
             </div>
-            <div className="h-48 flex items-end gap-2 relative">
-              {/* Goal Line */}
-              {showGoals && (
-                <div
-                  className="absolute left-0 right-0 border-t-2 border-dashed border-emerald-500/50"
-                  style={{ bottom: `${(20 / 25) * 100}%` }}
-                >
-                  <span className="absolute -top-4 right-0 text-xs text-emerald-500 bg-card px-1">
-                    Goal
-                  </span>
-                </div>
-              )}
-              {dummyAnalytics.charts.papersOverTime.map((item, index) => (
-                <div key={item.date} className="flex-1 flex items-end gap-0.5">
-                  {/* Comparison bar (previous period) */}
-                  {comparisonMode && (
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{
-                        height: `${(comparisonData.papersOverTime[index]?.count / 25) * 100}%`,
-                      }}
-                      transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                      className="flex-1 bg-primary/30 rounded-t-md min-h-[4px]"
-                      title={`Previous: ${comparisonData.papersOverTime[index]?.count || 0} papers`}
-                    />
-                  )}
-                  {/* Current period bar */}
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${(item.count / 25) * 100}%` }}
-                    transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}
-                    className="flex-1 bg-primary/80 rounded-t-md min-h-[4px]"
-                    title={`${item.date}: ${item.count} papers`}
-                  />
-                </div>
-              ))}
+            <div className="flex items-end gap-4 h-48">
+              {dummyAnalytics.charts.papersOverTime.map((item, index) => {
+                const maxCount = Math.max(
+                  ...dummyAnalytics.charts.papersOverTime.map((d) => d.count),
+                );
+                return (
+                  <div
+                    key={item.date}
+                    className="flex-1 flex flex-col items-center gap-1"
+                  >
+                    <div className="w-full flex gap-1 items-end h-40">
+                      {/* Comparison bar (previous period) */}
+                      {comparisonMode && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{
+                            height: `${((comparisonData.papersOverTime[index]?.count || 0) / maxCount) * 100}%`,
+                          }}
+                          transition={{
+                            delay: 0.3 + index * 0.05,
+                            duration: 0.5,
+                          }}
+                          className="flex-1 bg-primary/30 rounded-t-lg min-h-[4px]"
+                          title={`Previous: ${comparisonData.papersOverTime[index]?.count || 0} papers`}
+                        />
+                      )}
+                      {/* Current period bar */}
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{
+                          height: `${(item.count / maxCount) * 100}%`,
+                        }}
+                        transition={{
+                          delay: 0.35 + index * 0.05,
+                          duration: 0.5,
+                        }}
+                        className="flex-1 bg-primary/80 rounded-t-lg min-h-[4px]"
+                        title={`${item.date}: ${item.count} papers`}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {item.date.split(" ")[1]}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex justify-between mt-2">
-              {dummyAnalytics.charts.papersOverTime.map((item) => (
-                <span key={item.date} className="text-xs text-muted-foreground">
-                  {item.date.split(" ")[1]}
-                </span>
-              ))}
-            </div>
+
             {comparisonMode && (
               <div className="flex items-center justify-center gap-4 mt-4 pt-4 border-t">
                 <div className="flex items-center gap-2">
