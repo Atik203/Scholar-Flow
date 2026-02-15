@@ -58,7 +58,7 @@ const useTypewriter = (
   words: string[],
   typingSpeed = 100,
   deletingSpeed = 50,
-  pauseDuration = 2000
+  pauseDuration = 2000,
 ) => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
@@ -84,7 +84,7 @@ const useTypewriter = (
           }
         }
       },
-      isDeleting ? deletingSpeed : typingSpeed
+      isDeleting ? deletingSpeed : typingSpeed,
     );
 
     return () => clearTimeout(timeout);
@@ -124,7 +124,7 @@ const AnimatedCounter = ({
           setIsVisible(true);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (ref.current) {
@@ -151,11 +151,11 @@ const AnimatedCounter = ({
           setCount(
             decimals > 0
               ? parseFloat(current.toFixed(decimals))
-              : Math.floor(current)
+              : Math.floor(current),
           );
         }
       },
-      (duration * 1000) / steps
+      (duration * 1000) / steps,
     );
 
     return () => clearInterval(timer);
@@ -174,7 +174,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     ["Research", "Discovery", "Innovation", "Collaboration"],
     120,
     80,
-    2500
+    2500,
   );
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
@@ -335,6 +335,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         >
           <motion.div
             whileHover={{ scale: 1.02 }}
+            onClick={() => onNavigate?.("/features")}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-chart-1/10 to-purple-500/10 border border-primary/20 backdrop-blur-sm cursor-pointer group"
           >
             <span className="relative flex h-2 w-2">
@@ -742,7 +743,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                         </div>
                       </div>
                     </div>
-                  )
+                  ),
                 )}
               </div>
             </div>
