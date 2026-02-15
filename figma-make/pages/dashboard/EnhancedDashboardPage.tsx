@@ -30,6 +30,7 @@ import { Button } from "../../components/ui/button";
 interface EnhancedDashboardPageProps {
   role?: "researcher" | "pro_researcher" | "team_lead" | "admin";
   onNavigate?: (path: string) => void;
+  onShowToast?: (message: string, type: "error" | "success" | "info") => void;
 }
 
 interface DashboardWidget {
@@ -236,6 +237,7 @@ function getGoalStatusColor(status: Goal["status"]): string {
 export function EnhancedDashboardPage({
   role = "researcher",
   onNavigate,
+  onShowToast,
 }: EnhancedDashboardPageProps) {
   const [showCustomize, setShowCustomize] = useState(false);
   const [dateRange, setDateRange] = useState("week");
@@ -256,11 +258,11 @@ export function EnhancedDashboardPage({
 
   const totalPapersThisWeek = weeklyStats.reduce(
     (acc, day) => acc + day.papers,
-    0
+    0,
   );
   const totalAnnotationsThisWeek = weeklyStats.reduce(
     (acc, day) => acc + day.annotations,
-    0
+    0,
   );
   const maxPapers = Math.max(...weeklyStats.map((d) => d.papers));
 
@@ -425,7 +427,11 @@ export function EnhancedDashboardPage({
           <div className="rounded-xl border bg-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Research Goals</h3>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNavigate?.("/goals")}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -439,7 +445,7 @@ export function EnhancedDashboardPage({
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs ${getGoalStatusColor(
-                        goal.status
+                        goal.status,
                       )}`}
                     >
                       {goal.status === "on-track"
@@ -604,11 +610,19 @@ export function EnhancedDashboardPage({
                 current research.
               </p>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onNavigate?.("/ai-insights")}
+                >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Get Recommendations
                 </Button>
-                <Button size="sm" variant="ghost">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onNavigate?.("/analytics")}
+                >
                   View Analysis
                 </Button>
               </div>
@@ -622,13 +636,13 @@ export function EnhancedDashboardPage({
             {
               icon: Upload,
               label: "Upload Paper",
-              action: "/upload",
+              action: "/papers/upload",
               color: "text-blue-500",
             },
             {
               icon: Sparkles,
               label: "Ask AI",
-              action: "/ai",
+              action: "/ai-insights",
               color: "text-purple-500",
             },
             {
@@ -728,7 +742,12 @@ export function EnhancedDashboardPage({
                 <Button variant="ghost" onClick={() => setShowCustomize(false)}>
                   Cancel
                 </Button>
-                <Button onClick={() => setShowCustomize(false)}>
+                <Button
+                  onClick={() => {
+                    onShowToast?.("Dashboard layout saved!", "success");
+                    setShowCustomize(false);
+                  }}
+                >
                   Save Changes
                 </Button>
               </div>
