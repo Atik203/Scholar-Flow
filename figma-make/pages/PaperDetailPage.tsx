@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BookOpen,
   Brain,
+  Check,
   Clock,
   Download,
   ExternalLink,
@@ -18,10 +19,11 @@ import {
   Sparkles,
   Sun,
   Tag,
+  UserPlus,
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -43,6 +45,38 @@ export function PaperDetailPage({
 }: PaperDetailPageProps) {
   const [isDark, setIsDark] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showShareTooltip, setShowShareTooltip] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(`https://scholarflow.io/paper/${paper.doi}`);
+    setShowShareTooltip(true);
+    onShowToast?.("Link copied to clipboard!", "success");
+    setTimeout(() => setShowShareTooltip(false), 2000);
+  };
+
+  const handleDownload = () => {
+    onShowToast?.("Downloading PDF...", "info");
+    // Simulate download
+    setTimeout(() => {
+      onShowToast?.("PDF downloaded successfully!", "success");
+    }, 1500);
+  };
+
+  const handleViewPDF = () => {
+    window.open(`https://arxiv.org/abs/${paper.doi}`, "_blank");
+  };
+
+  const handleAddAnnotation = () => {
+    onShowToast?.("Opening annotation editor...", "info");
+  };
+
+  const handleAddCollaborator = () => {
+    onShowToast?.(
+      "Invite sent! Collaborator will receive an email.",
+      "success",
+    );
+  };
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -151,10 +185,44 @@ export function PaperDetailPage({
                 className={`h-5 w-5 ${isFavorite ? "fill-red-500 text-red-500" : ""}`}
               />
             </Button>
-            <Button variant="ghost" size="icon">
-              <Share2 className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
+            <div className="relative">
+              <Button variant="ghost" size="icon" onClick={handleShare}>
+                <AnimatePresence mode="wait">
+                  {showShareTooltip ? (
+                    <motion.div
+                      key="check"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                    >
+                      <Check className="h-5 w-5 text-green-500" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="share"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
+              <AnimatePresence>
+                {showShareTooltip && (
+                  <motion.span
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-xs bg-foreground text-background px-2 py-1 rounded whitespace-nowrap"
+                  >
+                    Copied!
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleDownload}>
               <Download className="h-5 w-5" />
             </Button>
             <button
@@ -167,9 +235,53 @@ export function PaperDetailPage({
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+              >
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
+              <AnimatePresence>
+                {showMoreMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    className="absolute right-0 top-full mt-1 w-48 bg-card border rounded-lg shadow-lg py-1 z-50"
+                  >
+                    <button
+                      onClick={() => {
+                        onNavigate?.("/papers");
+                        setShowMoreMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                    >
+                      View in Library
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleShare();
+                        setShowMoreMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
+                    >
+                      Copy Link
+                    </button>
+                    <button
+                      onClick={() => {
+                        onShowToast?.("Paper reported", "info");
+                        setShowMoreMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors text-destructive"
+                    >
+                      Report Issue
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </header>
@@ -235,11 +347,14 @@ export function PaperDetailPage({
                   </div>
 
                   <div className="flex items-center gap-2 mt-6 pt-6 border-t border-border">
-                    <Button className="bg-gradient-to-r from-primary to-[var(--chart-1)] text-white">
+                    <Button
+                      className="bg-gradient-to-r from-primary to-[var(--chart-1)] text-white"
+                      onClick={handleViewPDF}
+                    >
                       <ExternalLink className="h-4 w-4 mr-2" />
                       View PDF
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleAddAnnotation}>
                       <Highlighter className="h-4 w-4 mr-2" />
                       Add Annotation
                     </Button>
@@ -359,8 +474,15 @@ export function PaperDetailPage({
                 <CardContent>
                   <div className="space-y-3">
                     {relatedPapers.map((related, index) => (
-                      <button
+                      <motion.button
                         key={index}
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() =>
+                          onNavigate?.(
+                            `/paper/${related.title.toLowerCase().replace(/\s+/g, "-")}`,
+                          )
+                        }
                         className="w-full flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-left group"
                       >
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -374,7 +496,7 @@ export function PaperDetailPage({
                             {related.authors} • {related.year}
                           </p>
                         </div>
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </CardContent>
@@ -429,9 +551,14 @@ export function PaperDetailPage({
                         {String.fromCharCode(64 + i)}
                       </div>
                     ))}
-                    <button className="h-8 w-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
-                      +
-                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleAddCollaborator}
+                      className="h-8 w-8 rounded-full bg-muted border-2 border-background flex items-center justify-center text-xs text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                    </motion.button>
                   </div>
                 </CardContent>
               </Card>
