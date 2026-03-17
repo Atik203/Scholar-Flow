@@ -72,3 +72,4 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/dev.db*
+config.bat
