@@ -14,9 +14,7 @@
 >
 > Our project is called **ScholarFlow** — an AI-Powered Research Paper Collaboration Hub.
 >
-> In today's academic world, researchers struggle with scattered files, poor collaboration tools, and no AI support for their daily workflow. Our survey of 29 academic researchers confirmed this — **37.9% said their number one pain point is the lack of proper research tools**, and **82.7% expressed high interest in AI-powered summarization**.
->
-> ScholarFlow solves this by providing a unified platform where researchers can upload, organize, search, and collaborate on research papers — all powered by AI.
+> In today's academic world, researchers struggle with scattered files, poor collaboration tools, and no AI support for their daily workflow. ScholarFlow solves this by providing a unified platform where researchers can upload, organize, search, and collaborate on research papers — all powered by AI.
 >
 > Our platform supports **4 distinct user roles**:
 >
