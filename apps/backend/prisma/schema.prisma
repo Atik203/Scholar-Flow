@@ -21,10 +21,10 @@ enum Role {
 // Workspace-level roles (separate from global application Role)
 // These describe what a user can do WITHIN a specific workspace.
 enum WorkspaceRole {
-  VIEWER  // Read-only access to workspace content
-  EDITOR  // Can create/edit papers and collections in workspace
+  VIEWER // Read-only access to workspace content
+  EDITOR // Can create/edit papers and collections in workspace
   MANAGER // Can invite/remove members, manage workspace settings
-  OWNER   // Full control, can delete workspace and transfer ownership
+  OWNER // Full control, can delete workspace and transfer ownership
 }
 
 enum CollectionPermission {
@@ -67,12 +67,44 @@ enum PlanTier {
   INSTITUTIONAL
 }
 
-// Processing lifecycle for uploaded papers (Week 3 feature)
 enum PaperProcessingStatus {
   UPLOADED // File record created, extraction not started yet
   PROCESSING // Extraction & chunking in progress
   PROCESSED // All chunks stored successfully
   FAILED // Processing failed; see processingError
+}
+
+enum NotificationType {
+  MENTION
+  COMMENT
+  SHARE
+  INVITE
+  PAPER
+  COLLECTION
+  SYSTEM
+  ACHIEVEMENT
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String // The user receiving the notification
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  starred   Boolean          @default(false)
+  actionUrl String?
+
+  // Optional relations for context (actor and resource)
+  actorId    String? // User who triggered it
+  resourceId String? // ID of related entity (paperId, workspaceId, etc)
+  createdAt  DateTime @default(now())
+
+  user  User  @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read])
+  @@index([createdAt])
 }
 
 model User {
@@ -108,7 +140,8 @@ model User {
   subscriptions             Subscription[]
   payments                  Payment[]
   searchHistory             SearchHistory[]
-  notifications             Notification[]
+  notifications             Notification[]        @relation("UserNotifications")
+  triggeredNotifications    Notification[]        @relation("NotificationActor")
   usageEvents               UsageEvent[]
   activities                ActivityLog[]
   aiInsightThreads          AIInsightThread[]
@@ -605,22 +638,6 @@ model WebhookEvent {
   @@unique([provider, eventId])
   @@index([status, receivedAt]) // For retry queries
   @@index([type, processedAt]) // For event type analytics
-}
-
-model Notification {
-  id      String    @id @default(uuid())
-  userId  String
-  type    String
-  payload Json      @db.JsonB
-  readAt  DateTime?
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
-
-  @@index([userId, createdAt])
 }
 
 model UsageEvent {

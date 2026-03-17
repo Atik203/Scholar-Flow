@@ -59,6 +59,7 @@ import {
   Edit,
   Eye,
   FileText,
+  GitBranch,
   Highlighter,
   Loader2,
   MessageSquare,
@@ -314,6 +315,12 @@ export default function PaperDetailPage({ params }: PaperDetailPageProps) {
           <div className="flex space-x-2">
             {!isEditing ? (
               <>
+                <Button asChild variant="outline">
+                  <Link href={`/dashboard/papers/${resolvedParams.id}/relations`}>
+                    <GitBranch className="mr-2 h-4 w-4" />
+                    Relations
+                  </Link>
+                </Button>
                 <Button onClick={startEditing} disabled={isUpdating}>
                   <Edit className="mr-2 h-4 w-4" />
                   Edit

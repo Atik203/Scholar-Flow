@@ -21,7 +21,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { handleSignOutWithLoading } from "@/lib/auth/signout";
 import { useAuth } from "@/redux/auth/useAuth";
-import { LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
+import { Bell, LogOut, Menu, Moon, Settings, Sun, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -58,6 +58,27 @@ function generateBreadcrumbs(pathname: string) {
 }
 
 // Removed FloatingTrigger to avoid duplicate icons
+
+import { useGetUnreadCountQuery } from "@/redux/api/notificationApi";
+
+function NotificationBell() {
+  const { data } = useGetUnreadCountQuery(undefined, {
+    pollingInterval: 30000, // Poll every 30s as a fallback for real-time
+  });
+  const unreadCount = data?.data?.count || 0;
+
+  return (
+    <Button variant="ghost" size="icon" className="relative hidden md:flex" asChild>
+      <Link href="/dashboard/notifications">
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+        )}
+        <span className="sr-only">Notifications</span>
+      </Link>
+    </Button>
+  );
+}
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -194,6 +215,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Breadcrumb>
               </div>
               <div className="flex items-center gap-2">
+                <NotificationBell />
                 <ThemeToggle />
                 <UserMenu />
               </div>
@@ -241,6 +263,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Breadcrumb>
               </div>
               <div className="flex items-center gap-2">
+                <NotificationBell />
                 <ThemeToggle />
                 <UserMenu />
               </div>
