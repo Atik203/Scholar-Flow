@@ -81,7 +81,7 @@ export class WorkspaceService {
       const w = workspace[0];
       await prisma.$executeRaw`
         INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'ADMIN', now(), now(), now(), false)
+        VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'OWNER', now(), now(), now(), false)
       `;
       await prisma.$executeRaw`
         INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
@@ -143,7 +143,7 @@ export class WorkspaceService {
     const member = perm[0];
     if (!member) throw new ApiError(403, "Not a member of this workspace");
     const isManager =
-      ["ADMIN", "TEAM_LEAD"].includes(member.role) || member.ownerId === userId;
+      ["OWNER", "MANAGER"].includes(member.role) || member.ownerId === userId;
     if (!isManager) throw new ApiError(403, "Insufficient permissions");
 
     if (data.name !== undefined || data.description !== undefined) {
@@ -188,9 +188,9 @@ export class WorkspaceService {
     `;
     const member = perm[0];
     if (!member) throw new ApiError(403, "Not a member of this workspace");
-    const isAdmin = member.role === "ADMIN" || member.ownerId === userId;
-    if (!isAdmin)
-      throw new ApiError(403, "Only Admin or Owner can delete workspace");
+    const isOwner = member.role === "OWNER" || member.ownerId === userId;
+    if (!isOwner)
+      throw new ApiError(403, "Only Owner can delete workspace");
 
     // Soft delete workspace and cascade to related entities
     await prisma.$executeRaw`
@@ -264,7 +264,7 @@ export class WorkspaceService {
     const member = perm[0];
     if (!member) throw new ApiError(403, "Not a member of this workspace");
     const isManager =
-      ["ADMIN", "TEAM_LEAD"].includes(member.role) ||
+      ["OWNER", "MANAGER"].includes(member.role) ||
       member.ownerId === requestorId;
     if (!isManager) throw new ApiError(403, "Insufficient permissions");
 
@@ -281,7 +281,7 @@ export class WorkspaceService {
     // Upsert membership; if exists and soft-deleted, reactivate
     await prisma.$executeRaw`
       INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${payload.role || "RESEARCHER"}, now(), now(), now(), false)
+      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${payload.role || "EDITOR"}, now(), now(), now(), false)
       ON CONFLICT ("workspaceId", "userId") DO UPDATE SET role = EXCLUDED.role, "isDeleted" = false, "updatedAt" = now()
     `;
     await prisma.$executeRaw`
@@ -305,9 +305,9 @@ export class WorkspaceService {
     `;
     const member = perm[0];
     if (!member) throw new ApiError(403, "Not a member of this workspace");
-    const isAdmin = member.role === "ADMIN" || member.ownerId === requestorId;
-    if (!isAdmin)
-      throw new ApiError(403, "Only Admin or Owner can update roles");
+    const isOwner = member.role === "OWNER" || member.ownerId === requestorId;
+    if (!isOwner)
+      throw new ApiError(403, "Only Owner can update member roles");
 
     await prisma.$executeRaw`
       UPDATE "WorkspaceMember" SET role = ${role}, "updatedAt" = now()
@@ -331,7 +331,7 @@ export class WorkspaceService {
     const ctx = ownerRes[0];
     if (!ctx) throw new ApiError(403, "Not a member of this workspace");
     const canManage =
-      ["ADMIN", "TEAM_LEAD"].includes(ctx.requestorRole) ||
+      ["OWNER", "MANAGER"].includes(ctx.requestorRole) ||
       ctx.ownerId === requestorId;
     if (!canManage) throw new ApiError(403, "Insufficient permissions");
 
@@ -371,11 +371,11 @@ export class WorkspaceService {
     if (!ws) throw new ApiError(404, "Workspace not found");
 
     const isOwner = ws.ownerId === inviterId;
-    const isAdmin = ws.inviterRole === "ADMIN";
-    if (!isOwner && !isAdmin) {
+    const isOwnerOrManager = ["OWNER", "MANAGER"].includes(ws.inviterRole);
+    if (!isOwner && !isOwnerOrManager) {
       throw new ApiError(
         403,
-        "Only workspace owners and admins can invite members"
+        "Only workspace owners and managers can invite members"
       );
     }
 
@@ -412,12 +412,12 @@ export class WorkspaceService {
     }
 
     // Create or update invitation
-    const roleValue = payload.role || "RESEARCHER";
+    const roleValue = payload.role || "EDITOR";
     const invitationResult = await prisma.$queryRaw<any[]>`
       INSERT INTO "WorkspaceInvitation" (id, "workspaceId", "userId", role, "invitedById", status, "invitedAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${workspaceId}, ${targetUser.id}, ${roleValue}::"Role", ${inviterId}, 'PENDING'::"MembershipStatus", now(), now(), now(), false)
+      VALUES (gen_random_uuid(), ${workspaceId}, ${targetUser.id}, ${roleValue}::"WorkspaceRole", ${inviterId}, 'PENDING'::"MembershipStatus", now(), now(), now(), false)
       ON CONFLICT ("workspaceId", "userId") DO UPDATE SET 
-        role = ${roleValue}::"Role", 
+        role = ${roleValue}::"WorkspaceRole", 
         "invitedById" = EXCLUDED."invitedById",
         status = 'PENDING'::"MembershipStatus",
         "invitedAt" = now(),
@@ -476,9 +476,9 @@ export class WorkspaceService {
 
         await tx.$executeRaw`
           INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-          VALUES (gen_random_uuid(), ${workspaceId}, ${userId}, ${invitation[0].role}::"Role", now(), now(), now(), false)
+          VALUES (gen_random_uuid(), ${workspaceId}, ${userId}, ${invitation[0].role}::"WorkspaceRole", now(), now(), now(), false)
           ON CONFLICT ("workspaceId", "userId") DO UPDATE SET 
-            role = ${invitation[0].role}::"Role", 
+            role = ${invitation[0].role}::"WorkspaceRole", 
             "isDeleted" = false, 
             "joinedAt" = now(),
             "updatedAt" = now()
