@@ -5,6 +5,7 @@
 
 import type { TUser } from "@/types/user";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { clearAuthCookie, setAuthCookie } from "@/lib/auth/authCookies";
 
 export interface AuthState {
   user: TUser | null;
@@ -32,12 +33,16 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
       state.isLoading = false;
+      // Set lightweight cookie so Next.js middleware can detect auth
+      setAuthCookie();
     },
     clearCredentials: (state) => {
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
       state.isLoading = false;
+      // Clear the middleware auth cookie
+      clearAuthCookie();
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
