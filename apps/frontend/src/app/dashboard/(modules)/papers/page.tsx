@@ -101,6 +101,12 @@ export default function PapersPage() {
                 Advanced Search
               </Link>
             </Button>
+            <Button asChild variant="outline">
+              <Link href={scopedPath("/papers/import")}>
+                <Plus className="mr-2 h-4 w-4" />
+                Import
+              </Link>
+            </Button>
             <Button asChild>
               <Link
                 href={
