@@ -61,7 +61,13 @@ export function RoleGate({
 }: RoleGateProps) {
   const { user, isAuthenticated } = useAuth();
 
-  if (!isAuthenticated || !user || !allowedRoles.includes(user.role)) {
+  // Use hierarchy-based access: user passes if their role >= any of the allowed roles
+  const hasAccess =
+    isAuthenticated &&
+    user &&
+    allowedRoles.some((role) => hasRoleAccess(user.role, role));
+
+  if (!hasAccess) {
     if (showToast && allowedRoles.length > 0) {
       showAccessDeniedToast(allowedRoles[0]);
     }

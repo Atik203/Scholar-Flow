@@ -18,6 +18,15 @@ enum Role {
   ADMIN
 }
 
+// Workspace-level roles (separate from global application Role)
+// These describe what a user can do WITHIN a specific workspace.
+enum WorkspaceRole {
+  VIEWER  // Read-only access to workspace content
+  EDITOR  // Can create/edit papers and collections in workspace
+  MANAGER // Can invite/remove members, manage workspace settings
+  OWNER   // Full control, can delete workspace and transfer ownership
+}
+
 enum CollectionPermission {
   VIEW // Read-only access - can view collection and papers
   EDIT // Full access - can edit, add/remove papers, delete collection
@@ -158,11 +167,11 @@ model Workspace {
 }
 
 model WorkspaceMember {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   workspaceId String
   userId      String
-  role        Role     @default(RESEARCHER)
-  joinedAt    DateTime @default(now())
+  role        WorkspaceRole @default(EDITOR)
+  joinedAt    DateTime      @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
@@ -180,7 +189,7 @@ model WorkspaceInvitation {
   id          String           @id @default(uuid())
   workspaceId String
   userId      String
-  role        Role             @default(RESEARCHER)
+  role        WorkspaceRole    @default(EDITOR)
   invitedAt   DateTime         @default(now())
   // Invitation workflow fields
   status      MembershipStatus @default(PENDING)
@@ -410,8 +419,7 @@ model CollectionMember {
   id           String               @id @default(uuid())
   collectionId String
   userId       String
-  role         Role                 @default(RESEARCHER)
-  permission   CollectionPermission @default(EDIT) // Collection-specific permission
+  permission   CollectionPermission @default(EDIT) // Collection-specific permission (VIEW or EDIT)
   invitedAt    DateTime             @default(now())
   // Invitation workflow fields
   status       MembershipStatus     @default(PENDING)
