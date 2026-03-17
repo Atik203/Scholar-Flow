@@ -84,6 +84,7 @@ export const apiSlice = createApi({
     "Admin",
     "Note",
     "Notification",
+    "SearchHistory",
   ],
   // Performance optimizations
   keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)

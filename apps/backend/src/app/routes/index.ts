@@ -13,6 +13,7 @@ import { noteRoutes } from "../modules/notes/note.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
 import { notificationRoutes } from "../modules/Notification/notification.routes";
+import { searchRoutes } from "../modules/Search/search.routes";
 import { citationRoutes } from "./citation.routes";
 import { discussionRoutes } from "./discussion.routes";
 import { activityLogRoutes } from "./activityLog.routes";
@@ -48,6 +49,9 @@ router.use("/activity-log", activityLogRoutes);
 
 // Phase 3 features
 router.use("/notifications", notificationRoutes);
+
+// Phase 4 features
+router.use("/search", searchRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);
