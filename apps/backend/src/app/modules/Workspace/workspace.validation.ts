@@ -25,7 +25,7 @@ export const addMemberSchema = z
     userId: z.string().uuid().optional(),
     email: z.string().email().optional(),
     role: z
-      .enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"])
+      .enum(["VIEWER", "EDITOR", "MANAGER", "OWNER"])
       .optional(),
   })
   .refine((data) => !!data.userId || !!data.email, {
@@ -34,7 +34,7 @@ export const addMemberSchema = z
   });
 
 export const updateMemberRoleSchema = z.object({
-  role: z.enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"]),
+  role: z.enum(["VIEWER", "EDITOR", "MANAGER", "OWNER"]),
 });
 
 export const memberParamsSchema = z.object({
@@ -46,7 +46,7 @@ export const memberParamsSchema = z.object({
 export const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
   role: z
-    .enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"])
+    .enum(["VIEWER", "EDITOR", "MANAGER", "OWNER"])
     .optional()
-    .default("RESEARCHER"),
+    .default("EDITOR"),
 });
