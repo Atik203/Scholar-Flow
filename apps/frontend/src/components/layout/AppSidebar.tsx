@@ -74,7 +74,7 @@ const getQuickAccessItems = (userRole: string): ResolvedSidebarItem[] => {
       title: "Global Search",
       icon: Search,
       minRole: USER_ROLES.RESEARCHER,
-      href: buildRoleScopedPath(userRole, "/search"),
+      href: "/dashboard/search",
       badge: "AI",
     },
     {
