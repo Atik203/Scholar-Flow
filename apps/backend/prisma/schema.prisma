@@ -903,3 +903,4 @@ enum ActivitySeverity {
   ERROR
   CRITICAL
 }
+
