@@ -45,7 +45,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
-import { PageContainer } from "@/components/layout/PageContainer";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGlobalSearchQuery } from "@/redux/api/searchApi";
@@ -1043,8 +1043,8 @@ export default function SearchPage() {
   );
 
   return (
-    <PageContainer>
-      <div className="max-w-5xl mx-auto space-y-6 flex flex-col pt-6">
+    <DashboardLayout>
+      <div className="container mx-auto max-w-5xl px-4 py-8 space-y-6">
         {/* Header */}
         <div className="text-center pt-8">
           <motion.h1
@@ -1489,7 +1489,7 @@ export default function SearchPage() {
           }}
         />
       </div>
-    </PageContainer>
+    </DashboardLayout>
   );
 }
 
