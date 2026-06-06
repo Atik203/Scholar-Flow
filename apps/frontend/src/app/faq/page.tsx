@@ -11,6 +11,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 const faqCategories = [
@@ -362,7 +363,7 @@ export default function FAQPage() {
                 {filteredFAQs.map((faq, index) => {
                   const isOpen = openItems.has(index);
                   const category = faqCategories.find(
-                    (cat) => cat.id === faq.category
+                    (cat) => cat.id === faq.category,
                   );
 
                   return (
@@ -452,12 +453,12 @@ export default function FAQPage() {
                 <p className="text-muted-foreground text-sm mb-4">
                   Comprehensive guides and tutorials
                 </p>
-                <a
-                  href="/docs"
+                <Link
+                  href="/resources/docs"
                   className="text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Browse Docs →
-                </a>
+                </Link>
               </div>
 
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500">
@@ -466,12 +467,12 @@ export default function FAQPage() {
                 <p className="text-muted-foreground text-sm mb-4">
                   Connect with other researchers
                 </p>
-                <a
-                  href="/community"
+                <Link
+                  href="/resources/community"
                   className="text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Join Community →
-                </a>
+                </Link>
               </div>
 
               <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500">
@@ -480,12 +481,12 @@ export default function FAQPage() {
                 <p className="text-muted-foreground text-sm mb-4">
                   Get personalized help from our team
                 </p>
-                <a
-                  href="/contact"
+                <Link
+                  href="/company/contact"
                   className="text-primary hover:text-primary/80 transition-colors font-medium"
                 >
                   Contact Us →
-                </a>
+                </Link>
               </div>
             </div>
           </motion.div>
