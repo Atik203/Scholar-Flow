@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "skills": {
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "computedHash": "1e85f6f9686e145aca4a124e3b704b9bbea9aa87e08515c1e352eee70f6e6e7a"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "9bd26c52dfd10dfd613dd3cc85df217dc25a172e380bde41fdfa6fedda288b2a"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "71ed7794962fa6e803ee83030517b5b93a9f70fbfeb431ec4535c5480a8d8355"
+    },
+    "vercel-composition-patterns": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vercel-composition-patterns/SKILL.md",
+      "computedHash": "e38e0eaa609316b10423a9a138ed95e35099accd3f735585295c8a8f165c28a3"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f4647ca866a3accf763777f83e7682954f0187cd6bea7eea0399796652414e8f"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "51b7349e77ec63b7744a6f63647e7566a0b4d2e301121cc10e8c2113af6556a2"
+    },
+    "deploy-to-vercel": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/deploy-to-vercel/SKILL.md",
+      "computedHash": "cfcc3dd479ab2e0ae721ddf39b8af84d977321487672f1487c8d6855f576927b"
+    },
+    "vercel-optimize": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vercel-optimize/SKILL.md",
+      "computedHash": "95ae2683b30d892d165af92a350c5628b68106f395a59b448857b654e306ed91"
+    },
+    "prisma-client-api": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-client-api/SKILL.md",
+      "computedHash": "47ea4fb63fe45534872026f59ed937a6b7fda83a3d7ef95710b0d84e4bbeb905"
+    },
+    "prisma-cli": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-cli/SKILL.md",
+      "computedHash": "762e2e2fed3fc765edfc97a80ab1358640304593e3d603649adc847b8190be1c"
+    },
+    "prisma-database-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-database-setup/SKILL.md",
+      "computedHash": "7361a58b8a21799710e4ab856755298c07de03cf44f508da20f2621569c600e8"
+    },
+    "prisma-postgres": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-postgres/SKILL.md",
+      "computedHash": "2af6cd85a2ee5ccde839a4e34759964f4713a77439621fbec955611cee0a872a"
+    },
+    "prisma-postgres-setup": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-postgres-setup/SKILL.md",
+      "computedHash": "39693cabe74943b36d797c3a56dee2eca0cb1a0dc23a33c1fc26afdbd6421474"
+    },
+    "prisma-upgrade-v7": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-upgrade-v7/SKILL.md",
+      "computedHash": "ceeff02fd9fdb56d8b606e8fe1d8fed9099ea511e1876e4d356b6bcbfaef676e"
+    },
+    "docx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docx/SKILL.md",
+      "computedHash": "cfbabd72b1aec7dfaad988fb6e5e16b27dc744b9a00cae15db9045e95f53903e"
+    },
+    "pdf": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pdf/SKILL.md",
+      "computedHash": "9f78b8359fbd4943ad260a7a1e436e5a96503406d6c34e99f69223d647d85b9c"
+    },
+    "admin-dashboard": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/admin-dashboard/SKILL.md",
+      "computedHash": "a77ca5958af87241007d0e94cdde54124952097928108a720e81402d6a9283b6"
+    },
+    "auth-nextauth": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/auth-nextauth/SKILL.md",
+      "computedHash": "5072a6491a21a678f6ac6f56b1b5bb961a0e89f8079eaca37a2a3e3af56f97e5"
+    },
+    "pgvector-search": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/pgvector-search/SKILL.md",
+      "computedHash": "8d89e3eaa5e654cea193e40939805a21dcab3ceb126b4838539af04213de0d78"
+    },
+    "prisma-migrations": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/prisma-migrations/SKILL.md",
+      "computedHash": "a7cbac74a1effd2a60da49f8126035d56447a488bc75961823e78d759f603048"
+    },
+    "rtk-query": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/rtk-query/SKILL.md",
+      "computedHash": "367d05ec82d83c3a713c31375f7021250567da4e65218914b3597fd0e48729ad"
+    },
+    "s3-storage": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/s3-storage/SKILL.md",
+      "computedHash": "57aa98f1abe3dd42f20a5538b70588043e99353717431e3a4ad1f43f0dea258d"
+    },
+    "stripe-billing": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/stripe-billing/SKILL.md",
+      "computedHash": "0347852fda704e3397ab5f6289623958164735d3dc3f507773223decef9c3873"
+    },
+    "tiptap-editor": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/tiptap-editor/SKILL.md",
+      "computedHash": "0b3adb00478ea2b418cf5b7b42302f3ddf35bd2585ccd0226bcd6ce39179503d"
+    },
+    "turborepo-workspace": {
+      "source": "scholar-flow/.agents",
+      "sourceType": "local",
+      "skillPath": "skills/turborepo-workspace/SKILL.md",
+      "computedHash": "d2f838128deab1e29d6b8acdbba530a9d3197cee00850a6051674d2fdc76a832"
+    }
+  }
+}

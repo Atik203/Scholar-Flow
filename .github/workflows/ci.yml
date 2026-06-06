@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           # Do not use built-in yarn cache here; it queries yarn before Corepack activation
       - name: Enable Corepack
         run: corepack enable
