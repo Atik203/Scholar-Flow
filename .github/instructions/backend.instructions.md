@@ -4,15 +4,15 @@ applyTo: "apps/backend/**"
 
 # Backend Development Instructions
 
-## ✅ Phase 1 Progress (Week 5.5)
+## ✅ Phase 1 Progress
 
 - OAuth authentication, paper management, collections, and workspaces are production-ready.
-- Week 5 AI summarization + multi-provider insights shipped (Gemini primary, OpenAI fallback).
-- Week 5.5 dashboard restructure delivered with role-based routing, admin tools, and workspace refinements.
+- AI summarization + multi-provider insights shipped (Gemini primary, OpenAI fallback).
+- Dashboard restructure delivered with role-based routing, admin tools, and workspace refinements.
 
 Keep new work aligned with these shipped milestones and follow the standards below.
 
-## 🚀 Production-Ready Improvements (September 17, 2025)
+## 🚀 Production-Ready Improvements
 
 ### Security & Performance Standards
 
@@ -44,51 +44,47 @@ Keep new work aligned with these shipped milestones and follow the standards bel
 - **Services**: Use Prisma client from shared singleton. Handle transactions explicitly when needed
 - **Validation**: Zod for request bodies, params, queries. Reject early on failure
 
-## Database Operations - $queryRaw Optimization
+## Database Operations - Prisma Client vs Raw SQL Decision Tree
 
-**CRITICAL RULE**: All database operations MUST use `$queryRaw` or `$executeRaw` instead of Prisma Client methods for optimal performance.
+**PREFER Prisma Client when:**
 
-### ✅ REQUIRED: Use $queryRaw for:
+- Simple CRUD operations
+- Standard relationships and joins
+- OAuth account management (CRITICAL: use upsert patterns)
+- User management and basic queries
 
-- All SELECT queries (findMany, findUnique, findFirst)
-- All INSERT operations (create)
-- All UPDATE operations (update, upsert)
-- All DELETE operations (delete)
-- All aggregation queries (count, groupBy)
-- All complex joins and relationships
+**Use `$queryRaw` / `$executeRaw` when:**
 
-### 🔒 EXCEPTIONS: Keep Prisma Client ONLY for:
-
-- **OAuth operations** that require complex constraint handling:
-  - `createAccount()` - Provider constraint management
-  - `createOrUpdateUser()` - Email constraint management
-  - `createOrUpdateUserWithOAuth()` - Email verification handling
+- Complex joins not ergonomic in Prisma Client
+- Performance-critical read paths with explicit SQL + indexes
+- Complex aggregations or window functions
+- Bulk operations that need optimization
 
 ### Implementation Standards
 
 ```typescript
-// ✅ CORRECT: Use $queryRaw with proper typing
-const users = await prisma.$queryRaw<any[]>`
-  SELECT id, email, name, "createdAt"
-  FROM "User"
-  WHERE "isDeleted" = false
-  ORDER BY "createdAt" DESC
-  LIMIT ${limit} OFFSET ${skip}
-`;
-
-// ❌ WRONG: Using Prisma Client
+// ✅ CORRECT: Prisma Client for standard CRUD
 const users = await prisma.user.findMany({
   where: { isDeleted: false },
   orderBy: { createdAt: "desc" },
   skip,
   take: limit,
 });
+
+// ✅ CORRECT: Use $queryRaw for complex/performance-critical queries
+const users = await prisma.$queryRaw<User[]>`
+  SELECT id, email, name, "createdAt"
+  FROM "User"
+  WHERE "isDeleted" = false
+  ORDER BY "createdAt" DESC
+  LIMIT ${limit} OFFSET ${skip}
+`;
 ```
 
 ### Security & Performance
 
 - **SQL Injection Prevention**: Use template literals: `WHERE email = ${email}`
-- **Type Safety**: Use `prisma.$queryRaw<Type[]>` for proper typing
+- **Type Safety**: Use `prisma.$queryRaw<Type[]>` for proper typing (never `any[]`)
 - **Field Selection**: Select only required fields, avoid `SELECT *`
 - **Pagination**: Use `LIMIT ${limit} OFFSET ${skip}` for efficient pagination
 
@@ -136,6 +132,6 @@ const users = await prisma.user.findMany({
 
 ## Phase Overview
 
-- **Phase 1**: Auth ✅, profile, file uploads (S3 planned), paper/collection CRUD, basic search
+- **Phase 1**: Auth ✅, profile, file uploads (S3 integrated), paper/collection CRUD, basic search
 - **Phase 2**: Collaboration (roles, shared collections/workspaces), citation graph/formatting, improved UI
-- **Phase 3**: Billing (Stripe/SSLCommerz), admin tooling, external integrations, QA and launch
+- **Phase 3**: Billing (Stripe), admin tooling, external integrations, QA and launch
