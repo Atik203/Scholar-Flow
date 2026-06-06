@@ -3,6 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowRight,
   Calendar,
@@ -16,7 +17,6 @@ import {
   Video,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function ProductCollaboratePage() {
@@ -47,9 +47,14 @@ export default function ProductCollaboratePage() {
                   variant="gradient"
                   className="btn-hover-glow btn-shine text-base"
                 >
-                  <Link href={isAuthenticated ? "/dashboard" : "/login"} className="flex items-center gap-2">
+                  <Link
+                    href={isAuthenticated ? "/dashboard" : "/login"}
+                    className="flex items-center gap-2"
+                  >
                     <Rocket className="h-5 w-5" />
-                    {isAuthenticated ? "Go to dashboard" : "Start collaborating"}
+                    {isAuthenticated
+                      ? "Go to dashboard"
+                      : "Start collaborating"}
                   </Link>
                 </Button>
                 <Button
@@ -447,9 +452,14 @@ export default function ProductCollaboratePage() {
                   variant="gradient"
                   className="btn-hover-glow text-base"
                 >
-                  <Link href={isAuthenticated ? "/dashboard" : "/login"} className="flex items-center gap-2">
+                  <Link
+                    href={isAuthenticated ? "/dashboard" : "/login"}
+                    className="flex items-center gap-2"
+                  >
                     <Users className="h-5 w-5" />
-                    {isAuthenticated ? "Access your workspace" : "Start your team workspace"}
+                    {isAuthenticated
+                      ? "Access your workspace"
+                      : "Start your team workspace"}
                   </Link>
                 </Button>
                 <Button
@@ -458,7 +468,10 @@ export default function ProductCollaboratePage() {
                   variant="outline"
                   className="text-base"
                 >
-                  <Link href="/contact" className="flex items-center gap-2">
+                  <Link
+                    href="/company/contact"
+                    className="flex items-center gap-2"
+                  >
                     Contact sales
                     <ArrowRight className="h-4 w-4" />
                   </Link>

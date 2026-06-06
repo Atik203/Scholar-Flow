@@ -1,4 +1,5 @@
 "use client";
+import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const contactSchema = z.object({
@@ -134,7 +134,7 @@ export default function CompanyContactPage() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     console.log("Form submitted:", data);
-    toast.success("Message sent successfully! We'll get back to you soon.");
+    showSuccessToast("Message sent successfully! We'll get back to you soon.");
     reset();
     setIsSubmitting(false);
   };
