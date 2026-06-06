@@ -1,4 +1,8 @@
 "use client";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
 import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
@@ -24,7 +28,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const registerSchema = z
@@ -39,14 +42,14 @@ const registerSchema = z
       .min(8, "Password must be at least 8 characters")
       .regex(
         /^(?=.*[a-z])(?=.*\d)/,
-        "Password must contain at least one lowercase letter and one number"
+        "Password must contain at least one lowercase letter and one number",
       ),
     confirmPassword: z.string(),
     acceptTerms: z
       .boolean()
       .refine(
         (val) => val === true,
-        "You must accept the terms and conditions"
+        "You must accept the terms and conditions",
       ),
     newsletter: z.boolean().optional(),
   })
@@ -124,7 +127,7 @@ export default function RegisterPage() {
         throw new Error(result.message || "Registration failed");
       }
 
-      toast.success("Account created successfully! Welcome to ScholarFlow.");
+      showSuccessToast("Account created successfully! Welcome to ScholarFlow.");
 
       // Store credentials from registration response (includes accessToken)
       if (result.success && result.data?.user && result.data?.accessToken) {
@@ -132,7 +135,7 @@ export default function RegisterPage() {
           setCredentials({
             user: result.data.user,
             accessToken: result.data.accessToken,
-          })
+          }),
         );
 
         // Redirect after successful registration with token
@@ -143,7 +146,7 @@ export default function RegisterPage() {
         const signInResult = await signInWithCredentials(
           data.email,
           data.password,
-          dispatch
+          dispatch,
         );
 
         if (signInResult.success) {
@@ -161,10 +164,10 @@ export default function RegisterPage() {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error(
+      showErrorToast(
         error instanceof Error
           ? error.message
-          : "Registration failed. Please try again."
+          : "Registration failed. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -178,7 +181,7 @@ export default function RegisterPage() {
       const callbackUrl = getCallbackUrl(searchParams);
       signInWithOAuth(provider, callbackUrl);
     } catch {
-      toast.error(`Failed to sign up with ${provider}`);
+      showErrorToast(`Failed to sign up with ${provider}`);
       setIsLoading(false);
     }
   };

@@ -3,6 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowRight,
   BookOpen,
@@ -14,7 +15,6 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function ProductPapersPage() {
@@ -60,7 +60,10 @@ export default function ProductPapersPage() {
                   variant="outline"
                   className="text-base"
                 >
-                  <Link href="#demo" className="flex items-center gap-2">
+                  <Link
+                    href="/how-it-works"
+                    className="flex items-center gap-2"
+                  >
                     <Search className="h-5 w-5" />
                     See it in action
                   </Link>

@@ -1,4 +1,8 @@
 "use client";
+import {
+  showErrorToast,
+  showInfoToast,
+} from "@/components/providers/ToastProvider";
 import { CardWithVariants } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { useCreateCheckoutSessionMutation } from "@/redux/api/billingApi";
@@ -17,7 +21,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 // Stripe Price IDs from environment variables
 const PRICE_IDS = {
@@ -141,7 +144,7 @@ const faqs = [
 
 export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">(
-    "monthly"
+    "monthly",
   );
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const router = useRouter();
@@ -167,14 +170,14 @@ export default function PricingPage() {
 
     // Require authentication for paid plans
     if (!isAuthenticated) {
-      toast.error("Please sign in to subscribe");
+      showErrorToast("Please sign in to subscribe");
       router.push("/login");
       return;
     }
 
     // Check if priceId is valid
     if (!priceId) {
-      toast.error("Invalid price configuration. Please contact support.");
+      showErrorToast("Invalid price configuration. Please contact support.");
       return;
     }
 
@@ -184,8 +187,8 @@ export default function PricingPage() {
       user?.stripeCurrentPeriodEnd &&
       new Date(user.stripeCurrentPeriodEnd) > new Date()
     ) {
-      toast.info(
-        "You already have an active subscription. Visit your dashboard to manage it."
+      showInfoToast(
+        "You already have an active subscription. Visit your dashboard to manage it.",
       );
       router.push("/dashboard/billing");
       return;
@@ -218,13 +221,13 @@ export default function PricingPage() {
       }
 
       console.error("No checkout URL in response:", rawResult);
-      toast.error("Failed to create checkout session - no URL returned");
+      showErrorToast("Failed to create checkout session - no URL returned");
     } catch (error: any) {
       console.error("Checkout error:", error);
-      toast.error(
+      showErrorToast(
         error?.data?.message ||
           error?.message ||
-          "Failed to create checkout session"
+          "Failed to create checkout session",
       );
     } finally {
       setLoadingPlan(null);
@@ -451,7 +454,7 @@ export default function PricingPage() {
                     asChild
                     className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                   >
-                    <Link href="/contact">Talk to Sales</Link>
+                    <Link href="/company/contact">Talk to Sales</Link>
                   </Button>
                 </div>
               </div>
@@ -533,7 +536,7 @@ export default function PricingPage() {
                 variant="outline"
                 className="px-8 py-4 border-border bg-background/50 backdrop-blur hover:bg-primary/5 transition-all duration-300"
               >
-                <Link href="/contact">View Demo</Link>
+                <Link href="/company/contact">View Demo</Link>
               </Button>
             </div>
           </motion.div>

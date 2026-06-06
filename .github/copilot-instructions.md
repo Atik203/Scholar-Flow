@@ -72,10 +72,12 @@
 4. Error handling: wrap route handlers with `catchAsync`; throw `ApiError` for expected failures; let `globalErrorHandler` map Prisma/validation errors.
 5. Auth: Use standard Prisma upsert patterns for OAuth account linking and user/session records.
 6. Database access (important):
-   - Prefer `prisma.$queryRaw` for reads and `prisma.$executeRaw` for writes with parameterized queries (tagged templates or placeholders).
-   - Never use `prisma.$queryRawUnsafe`. ESLint enforces this.
-   - Use Prisma Client model ops only where established (OAuth upserts, seed/bootstrap, selective user/workspace creation). Otherwise stick to `$queryRaw/$executeRaw`.
-   - Always paginate and filter; don’t ship unbounded queries.
+
+- Prefer Prisma Client built-in model methods for standard CRUD, relations, and pagination.
+- Use `prisma.$queryRaw`/`prisma.$executeRaw` only for complex or performance-critical SQL that Prisma cannot express cleanly.
+- Never use `prisma.$queryRawUnsafe`.
+- Always paginate and filter; don’t ship unbounded queries.
+
 7. Security: Never log secrets. Enforce strict CORS, secure cookies, sanitize inputs, and validate all user-controlled data.
 8. Performance: Paginate, add indexes, and cache hot reads when applicable (follow patterns already present in services).
 9. Git hygiene: Conventional commits, small focused PRs, descriptive titles, linked issues, and stick to the current Roadmap phase.
@@ -118,15 +120,15 @@ yarn test
 ## Backend Patterns (what to copy)
 
 - Use the shared Prisma instance from `apps/backend/src/app/shared/prisma.ts`.
-- Prefer `$queryRaw`/`$executeRaw` with parameterization:
+- Prefer Prisma Client model methods for normal queries and mutations.
+- Use raw SQL only when needed:
   - Use tagged template literals: ``await prisma.$queryRaw`SELECT \* FROM "User" WHERE id = ${userId}```
   - Or positional placeholders: `await prisma.$queryRaw('SELECT ... WHERE id = $1', userId)`
   - Never build SQL via string concatenation.
-- Known allowed Prisma Client model ops: OAuth upserts, specific user/workspace bootstrap paths (see `Auth` and `papers` services). Otherwise, stick to raw ops.
 - Controllers: use `catchAsync` to wrap handlers and throw `ApiError` for invalid input, forbidden/unauthorized, and not-found cases.
 - Validation: define Zod schemas and enforce with `validateRequest` middleware. Do not trust request bodies or query params.
 - Error handling: `globalErrorHandler` maps `ApiError`, Prisma client errors, and generic failures to consistent responses.
-- Auth middleware: `auth.ts` decodes JWT, loads user via `$queryRaw`, and enforces roles/permissions.
+- Auth middleware: `auth.ts` decodes JWT, loads user via Prisma/shared service access, and enforces roles/permissions.
 
 ## Frontend Patterns (what to copy)
 
@@ -174,7 +176,7 @@ When changing authentication, UI/UX, or core patterns:
 
 - Using `npm` or adding `package-lock.json`. Use Yarn Berry only.
 - Writing raw SQL with string concatenation or using `$queryRawUnsafe`.
-- Using Prisma Client model methods where `$queryRaw/$executeRaw` is the standard (outside of the documented exceptions).
+- Overusing raw SQL when Prisma Client methods are sufficient.
 - Skipping Zod validation or bypassing `validateRequest`.
 - Throwing generic `Error` in controllers instead of `ApiError` or feature-specific error classes.
 - Unbounded queries without pagination or missing indexes on hot paths.
