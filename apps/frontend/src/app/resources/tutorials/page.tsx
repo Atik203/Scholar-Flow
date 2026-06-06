@@ -3,6 +3,7 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowRight,
   BookOpen,
@@ -13,7 +14,6 @@ import {
   Video,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function TutorialsPage() {
@@ -226,7 +226,7 @@ export default function TutorialsPage() {
                     </Button>
                   </CardContent>
                 </Card>
-              )
+              ),
             )}
           </div>
         </section>
@@ -329,7 +329,10 @@ export default function TutorialsPage() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="text-base">
-                <Link href="/community" className="flex items-center gap-2">
+                <Link
+                  href="/resources/community"
+                  className="flex items-center gap-2"
+                >
                   <HelpCircle className="h-5 w-5" />
                   Join Community
                 </Link>
