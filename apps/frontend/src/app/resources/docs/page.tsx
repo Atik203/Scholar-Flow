@@ -2,25 +2,24 @@
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   ArrowRight,
   BookMarked,
   BookOpen,
   Code,
-  FileText,
   Lightbulb,
   Rocket,
   Search,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 
 export default function DocumentationPage() {
   const { session } = useAuth();
   const isAuthenticated = !!session;
-  
+
   return (
     <div className="min-h-screen bg-background">
       <PageContainer>
@@ -36,7 +35,8 @@ export default function DocumentationPage() {
                 Complete guide to ScholarFlow
               </h1>
               <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-                Everything you need to master research paper management, from basic setup to advanced AI features and API integration.
+                Everything you need to master research paper management, from
+                basic setup to advanced AI features and API integration.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Button
@@ -59,7 +59,10 @@ export default function DocumentationPage() {
                   variant="outline"
                   className="text-base"
                 >
-                  <Link href="/api" className="flex items-center gap-2">
+                  <Link
+                    href="/resources/api"
+                    className="flex items-center gap-2"
+                  >
                     <Code className="h-5 w-5" />
                     API Reference
                   </Link>
@@ -76,9 +79,12 @@ export default function DocumentationPage() {
                       <BookOpen className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Quick Start Guide</h3>
+                      <h3 className="font-semibold text-lg">
+                        Quick Start Guide
+                      </h3>
                       <p className="text-muted-foreground">
-                        Set up your account and upload your first paper in minutes.
+                        Set up your account and upload your first paper in
+                        minutes.
                       </p>
                     </div>
                   </div>
@@ -87,7 +93,9 @@ export default function DocumentationPage() {
                       <Zap className="h-6 w-6 text-chart-1" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Advanced Features</h3>
+                      <h3 className="font-semibold text-lg">
+                        Advanced Features
+                      </h3>
                       <p className="text-muted-foreground">
                         Master AI insights, collaboration tools, and automation.
                       </p>
@@ -117,7 +125,8 @@ export default function DocumentationPage() {
               Choose your documentation path
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Whether you're a researcher, developer, or administrator, find the resources you need.
+              Whether you're a researcher, developer, or administrator, find the
+              resources you need.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -128,7 +137,7 @@ export default function DocumentationPage() {
                 description:
                   "Account setup, first login, uploading papers, and basic navigation through the platform.",
                 color: "primary",
-                href: "#basic-setup"
+                href: "#basic-setup",
               },
               {
                 icon: Search,
@@ -136,7 +145,7 @@ export default function DocumentationPage() {
                 description:
                   "Advanced search techniques, filters, citation networks, and finding related research.",
                 color: "chart-1",
-                href: "#search-guide"
+                href: "#search-guide",
               },
               {
                 icon: BookOpen,
@@ -144,7 +153,7 @@ export default function DocumentationPage() {
                 description:
                   "Collections, tags, folders, sharing, and collaborative research management.",
                 color: "chart-2",
-                href: "#organization"
+                href: "#organization",
               },
               {
                 icon: Lightbulb,
@@ -152,7 +161,7 @@ export default function DocumentationPage() {
                 description:
                   "Summaries, insights, recommendations, and intelligent paper analysis tools.",
                 color: "chart-3",
-                href: "#ai-features"
+                href: "#ai-features",
               },
               {
                 icon: Code,
@@ -160,7 +169,7 @@ export default function DocumentationPage() {
                 description:
                   "REST APIs, webhooks, authentication, and building custom integrations.",
                 color: "chart-4",
-                href: "#api-docs"
+                href: "#api-docs",
               },
               {
                 icon: Zap,
@@ -168,17 +177,19 @@ export default function DocumentationPage() {
                 description:
                   "Automation, batch operations, team management, and enterprise features.",
                 color: "chart-5",
-                href: "#advanced"
+                href: "#advanced",
               },
             ].map(({ icon: Icon, title, description, color, href }) => (
               <Card key={title} className="hover-lift group cursor-pointer">
                 <CardContent className="p-6">
-                  <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}
+                  >
                     <Icon className={`h-6 w-6 text-${color}`} />
                   </div>
                   <h3 className="font-semibold text-xl mb-2">{title}</h3>
                   <p className="text-muted-foreground mb-4">{description}</p>
-                  <Link 
+                  <Link
                     href={href}
                     className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-200"
                   >
@@ -211,7 +222,7 @@ export default function DocumentationPage() {
               { title: "API Authentication", href: "#api-auth" },
               { title: "Troubleshooting", href: "#troubleshooting" },
             ].map(({ title, href }) => (
-              <Link 
+              <Link
                 key={title}
                 href={href}
                 className="p-4 bg-background rounded-lg border hover:border-primary/50 hover:shadow-lg transition-all duration-200 group"
@@ -232,7 +243,8 @@ export default function DocumentationPage() {
               Ready to start your research journey?
             </h2>
             <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of researchers already using ScholarFlow to accelerate their work.
+              Join thousands of researchers already using ScholarFlow to
+              accelerate their work.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -249,13 +261,11 @@ export default function DocumentationPage() {
                   {isAuthenticated ? "Go to Dashboard" : "Start Free Trial"}
                 </Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="text-base"
-              >
-                <Link href="/tutorials" className="flex items-center gap-2">
+              <Button asChild size="lg" variant="outline" className="text-base">
+                <Link
+                  href="/resources/tutorials"
+                  className="flex items-center gap-2"
+                >
                   <BookOpen className="h-5 w-5" />
                   View Tutorials
                 </Link>

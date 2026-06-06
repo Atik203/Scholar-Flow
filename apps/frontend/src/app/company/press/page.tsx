@@ -64,7 +64,7 @@ const newsArticles = [
     date: "2024-12-10",
     excerpt:
       "ScholarFlow's semantic search technology is helping researchers discover connections they never would have found manually...",
-    url: "#",
+    url: "https://www.nature.com/",
     image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop&auto=format",
   },
@@ -74,7 +74,7 @@ const newsArticles = [
     date: "2024-11-28",
     excerpt:
       "New tools are breaking down silos between research institutions and enabling global collaboration at unprecedented scale...",
-    url: "#",
+    url: "https://www.science.org/",
     image:
       "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=300&h=200&fit=crop&auto=format",
   },
@@ -84,7 +84,7 @@ const newsArticles = [
     date: "2024-11-15",
     excerpt:
       "Founded by researchers for researchers, ScholarFlow is solving real pain points in academic workflows...",
-    url: "#",
+    url: "https://techcrunch.com/",
     image:
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&h=200&fit=crop&auto=format",
   },
@@ -94,7 +94,7 @@ const newsArticles = [
     date: "2024-10-30",
     excerpt:
       "Machine learning algorithms are reducing literature review time from weeks to hours while improving comprehensiveness...",
-    url: "#",
+    url: "https://spectrum.ieee.org/",
     image:
       "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&h=200&fit=crop&auto=format",
   },
@@ -298,7 +298,7 @@ export default function PressPage() {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
-                              }
+                              },
                             )}
                           </span>
                         </div>
@@ -390,11 +390,14 @@ export default function PressPage() {
                     </p>
 
                     <Button
+                      asChild
                       variant="ghost"
                       className="p-0 h-auto text-primary hover:text-primary/80"
                     >
-                      Read full article
-                      <ExternalLink className="ml-2 h-4 w-4" />
+                      <a href={article.url} target="_blank" rel="noreferrer">
+                        Read full article
+                        <ExternalLink className="ml-2 h-4 w-4" />
+                      </a>
                     </Button>
                   </CardContent>
                 </Card>

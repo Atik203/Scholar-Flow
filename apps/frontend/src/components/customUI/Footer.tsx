@@ -1,5 +1,6 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Github, Heart, Shield, Twitter } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 const sections: {
@@ -12,34 +13,34 @@ const sections: {
       { label: "Features", href: "/features" },
       { label: "How it works", href: "/how-it-works" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Roadmap", href: "/roadmap" },
+      { label: "FAQ", href: "/faq" },
     ],
   },
   {
     heading: "Resources",
     links: [
-      { label: "Changelog", href: "/changelog" },
-      { label: "Status", href: "/status" },
-      { label: "Docs", href: "/docs" },
-      { label: "Blog", href: "/blog" },
+      { label: "Documentation", href: "/resources/docs" },
+      { label: "Tutorials", href: "/resources/tutorials" },
+      { label: "API Reference", href: "/resources/api" },
+      { label: "Community", href: "/resources/community" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "About", href: "/about" },
-      { label: "Security", href: "/security" },
-      { label: "Contact", href: "/contact" },
-      { label: "Careers", href: "/careers" },
+      { label: "About", href: "/company/about" },
+      { label: "Careers", href: "/company/careers" },
+      { label: "Contact", href: "/company/contact" },
+      { label: "Press", href: "/company/press" },
     ],
   },
   {
-    heading: "Legal",
+    heading: "Enterprise",
     links: [
-      { label: "Privacy", href: "/legal/privacy" },
-      { label: "Terms", href: "/legal/terms" },
-      { label: "Cookies", href: "/legal/cookies" },
-      { label: "License", href: "/license" },
+      { label: "Enterprise", href: "/enterprise" },
+      { label: "Teams", href: "/enterprise/teams" },
+      { label: "Integrations", href: "/enterprise/integrations" },
+      { label: "Support", href: "/enterprise/support" },
     ],
   },
 ];
@@ -74,6 +75,8 @@ export const Footer: React.FC = () => {
               <a
                 href="https://github.com"
                 aria-label="GitHub"
+                target="_blank"
+                rel="noreferrer"
                 className="h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
               >
                 <Github className="h-4 w-4 sm:h-5 sm:w-5 text-slate-300 group-hover:text-white transition-colors" />
@@ -81,6 +84,8 @@ export const Footer: React.FC = () => {
               <a
                 href="https://twitter.com"
                 aria-label="Twitter"
+                target="_blank"
+                rel="noreferrer"
                 className="h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
               >
                 <Twitter className="h-4 w-4 sm:h-5 sm:w-5 text-slate-300 group-hover:text-white transition-colors" />
@@ -96,12 +101,12 @@ export const Footer: React.FC = () => {
                 <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
                   {section.links.map((l) => (
                     <li key={l.href}>
-                      <a
+                      <Link
                         href={l.href}
                         className="relative text-slate-400 dark:text-slate-500 hover:text-white dark:hover:text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded px-1 py-1 hover:translate-x-1 after:absolute after:inset-x-1 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-primary/70 after:to-primary/30 hover:after:scale-x-100 after:transition-transform after:duration-300"
                       >
                         {l.label}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
