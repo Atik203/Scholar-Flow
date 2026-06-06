@@ -4,15 +4,15 @@ applyTo: "apps/frontend/**"
 
 # Frontend Development Instructions
 
-## ✅ Phase 1 Progress (Week 5.5)
+## ✅ Phase 1 Progress
 
 - Auth flows, modern dashboard shell, paper/collection/workspace tooling are live.
-- Week 5 AI chat + summarization UI launched (Gemini-first with OpenAI fallback).
-- Week 5.5 introduced role-scoped dashboard routing and admin overview UX refresh.
+- AI chat + summarization UI launched (Gemini-first with OpenAI fallback).
+- Role-scoped dashboard routing and admin overview UX refresh delivered.
 
 Keep new UI consistent with these delivered experiences and the standards below.
 
-## 🚀 Advanced Error Handling (September 17, 2025)
+## 🚀 Advanced Error Handling
 
 ### RTK Query Enhancement with Retry Logic
 
@@ -48,6 +48,8 @@ Keep new UI consistent with these delivered experiences and the standards below.
 - **Auth**: NextAuth (JWT). Keep tokens server-only; never expose secrets; wrap app with provided `NextAuthProvider` and `ReduxProvider`
 - **UI**: Tailwind + ShadCN. Keep primitives in `components/ui`; compose variants with `class-variance-authority`
 - **Performance**: Use `next/image` and `next/font`; stream with Suspense where useful; minimize client JS
+- **Virtualization**: Use `react-window` for large data lists (papers, collections, search results)
+- **Sanitization**: Use `sanitize-html` for all user-generated HTML content before rendering
 - **SEO**: Use Metadata API; add `app/sitemap.ts` and `app/robots.ts` when routes stabilize; consider JSON-LD for key pages
 - **Error States**: Provide loading / empty / error UI for each data fetch
 - **Accessibility**: Maintain focus states, labels, keyboard navigation
@@ -103,7 +105,7 @@ Keep new UI consistent with these delivered experiences and the standards below.
 
 - **Phase 1**: Auth ✅, profile, uploads, collections, basic search/UI. Keep UI pragmatic and fast
 - **Phase 2**: Collaboration (shared collections, workspaces), citation graph/formatting, enhanced UI
-- **Phase 3**: Billing (Stripe/SSLCommerz), admin panel, external APIs, QA & launch
+- **Phase 3**: Billing (Stripe), admin panel, external APIs, QA & launch
 
 ## Frontend Best Practices
 
