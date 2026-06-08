@@ -904,3 +904,83 @@ enum ActivitySeverity {
   CRITICAL
 }
 
+// -------- Public Content Models (Phase 1.9) --------
+
+enum ContactSubmissionStatus {
+  NEW
+  READ
+  REPLIED
+}
+
+model Faq {
+  id          String   @id @default(uuid())
+  question    String
+  answer      String
+  category    String
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([category, order])
+  @@index([isPublished, category, order])
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  name        String
+  title       String
+  company     String?
+  avatar      String?
+  content     String
+  rating      Int      @default(5)
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([isPublished, order])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+
+  @@index([isActive])
+}
+
+model ContactSubmission {
+  id        String                  @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    ContactSubmissionStatus @default(NEW)
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+  isDeleted Boolean                 @default(false)
+
+  @@index([status, createdAt])
+}
+
+model PageContent {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  content     String
+  metadata    Json?    @db.JsonB
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([slug, isPublished])
+}
+
