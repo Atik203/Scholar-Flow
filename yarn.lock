@@ -5464,7 +5464,6 @@ __metadata:
     sonner: "npm:^2.0.7"
     tailwind-merge: "npm:^2.2.0"
     tailwindcss: "npm:^4"
-    tailwindcss-animate: "npm:^1.0.7"
     tiptap-resizable-image: "npm:^1.6.5"
     tw-animate-css: "npm:^1.3.7"
     typescript: "npm:^5"
@@ -19697,15 +19696,6 @@ __metadata:
   version: 2.6.0
   resolution: "tailwind-merge@npm:2.6.0"
   checksum: 10c0/fc8a5535524de9f4dacf1c16ab298581c7bb757d68a95faaf28942b1c555a619bba9d4c6726fe83986e44973b315410c1a5226e5354c30ba82353bd6d2288fa5
-  languageName: node
-  linkType: hard
-
-"tailwindcss-animate@npm:^1.0.7":
-  version: 1.0.7
-  resolution: "tailwindcss-animate@npm:1.0.7"
-  peerDependencies:
-    tailwindcss: "*"
-  checksum: 10c0/ec7dbd1631076b97d66a1fbaaa06e0725fccfa63119221e8d87a997b02dcede98ad88bb1ef6665b968f5d260fcefb10592e0299ca70208d365b37761edf5e19a
   languageName: node
   linkType: hard
 
