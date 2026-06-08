@@ -15,6 +15,8 @@ export interface User {
   stripeSubscriptionId?: string | null;
   stripePriceId?: string | null;
   stripeCurrentPeriodEnd?: Date | string | null;
+  onboardingCompleted?: boolean;
+  onboardingStep?: number;
   createdAt?: Date | string;
   updatedAt?: Date | string;
   isDeleted?: boolean;
