@@ -23,6 +23,16 @@ Do not shorten this file.
 - Never duplicate file content across turns — reference by path
 - Stop when goal is achieved — do not add unrequested changes
 
+## Multi-Model Cache Optimization
+This project supports multiple AI models with prefix caching:
+- **DeepSeek V4 Pro / DeepSeek Flash**: Cache hits from byte 0 on matching prefix
+- **Kimi K2.6**: Cache hits from byte 0 on matching prefix
+- **GLM-4 / MiMo**: Cache hits from byte 0 on matching prefix
+- **Qwen 3.x**: Requires minimum 1024 tokens to activate prefix caching
+- **Optimization strategy**: Keep AGENTS.md + skills content above 1024 tokens total
+- **Rule**: Never inject timestamps, dates, or session-specific values in the frozen prefix
+- **Rule**: Never modify the frozen prefix block between calls — any edit before byte N invalidates everything after it
+
 ---
 
 # Scholar-Flow AI Agent Instructions
@@ -397,3 +407,74 @@ Do not generate any code before completing steps 1-5.
 ### Development Server Ports
 - Frontend dev server: port 3000
 - Backend dev server: port 5000
+
+---
+
+## Project Repository
+**GitHub:** https://github.com/Atik203/Scholar-Flow
+
+---
+
+## Implementation Tracking
+**Before starting any task, check `IMPLEMENTATION.md` to understand:**
+1. What phase is currently active
+2. What has been completed (marked `[x]`)
+3. What is pending (marked `[ ]`)
+4. Current status and focus area
+
+**How to use IMPLEMENTATION.md:**
+- Read it first to understand the project roadmap
+- Check the "Current Status" section at the bottom
+- Identify which phase items are unchecked
+- Do not work on items from future phases unless explicitly requested
+- Mark completed items as `[x]` after implementation
+
+**Current Status:** Phase 1 Complete (Static Marketing Pages — 18-20 pages done)
+- Phase 1.9 Backend Migration: Public content models + API routes created
+- Next: Phase 2 Auth & Onboarding Pages (5-6 pages)
+
+---
+
+## Project Context Generation (Repomix)
+**Repomix** is installed as a dev dependency for generating AI-friendly project snapshots.
+
+### When to regenerate
+- After major structural changes (new directories, moved files)
+- After adding new dependencies or build tools
+- Before asking a new AI agent to work on the project
+- When the project context seems stale
+
+### How to generate
+```bash
+# From project root
+npx repomix
+# Or using the configured output
+yarn repomix
+```
+
+**Output file:** `repomix-output.xml` (8MB+ AI-friendly project snapshot)
+
+### What repomix includes
+- All source code (TS, TSX, JS, JSX, CSS, SCSS, JSON, Prisma, SQL)
+- Configuration files (package.json, tsconfig, etc.)
+- Documentation (README, AGENTS.md, IMPLEMENTATION.md, etc.)
+- Excludes: node_modules, images, LaTeX files, build artifacts, logs
+
+### What repomix ignores (configured in repomix.config.ts)
+- **scholar-flow-overleaf/** — LaTeX thesis/document files (SRS, chapters, images)
+- **response_image/** — Generated image responses
+- **images/** — Static image assets
+- **node_modules/**, **.yarn/** — Package dependencies
+- **.next/**, **dist/**, **out/** — Build outputs
+- **.git/**, **.turbo/**, **.vercel/** — VCS & deployment artifacts
+- **.vscode/**, **.cursor/**, **.agents/**, **.figma/** — IDE & tool configs
+- **CHANGELOG.md**, **LICENSE.md**, **CODE_OF_CONDUCT.md** — Meta docs
+- **Logs, coverage, media files** — Non-code assets
+
+### Using repomix output with AI
+1. Run `npx repomix` to generate `repomix-output.xml`
+2. Provide the file to an AI agent for full project context
+3. The AI gets a complete, token-efficient project snapshot
+4. Reference specific files by path when asking questions
+
+**Note:** The `repomix-output.xml` is already generated and available in the project root.
