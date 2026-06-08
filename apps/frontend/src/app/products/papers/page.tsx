@@ -1,389 +1,140 @@
-"use client";
-
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/redux/auth/useAuth";
-import {
-  ArrowRight,
-  BookOpen,
-  Brain,
-  FileText,
-  Lightbulb,
-  Rocket,
-  Search,
-  Upload,
-  Zap,
-} from "lucide-react";
+import { PageContainer, Section } from "@/components/layout/PageContainer";
+import { FileText, Upload, Search, Brain, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export default function ProductPapersPage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
+export default function ProductsPapersPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
-        <section className="py-12 md:py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <FileText className="h-4 w-4" />
-                Research Papers Platform
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                Your research library, supercharged
-              </h1>
-              <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-                Upload, organize, and analyze academic papers with AI-powered
-                insights. Transform how you discover, read, and connect
-                research.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
-                  >
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated ? "Go to dashboard" : "Start free today"}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base"
-                >
-                  <Link
-                    href="/how-it-works"
-                    className="flex items-center gap-2"
-                  >
-                    <Search className="h-5 w-5" />
-                    See it in action
-                  </Link>
-                </Button>
-              </div>
+    <>
+      <Section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-chart-1/5" />
+        <PageContainer className="relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Product</span>
             </div>
-            <Card className="hover-glow border-2">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <Upload className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Smart Upload</h3>
-                      <p className="text-muted-foreground">
-                        Drag & drop PDFs or paste arXiv links. Metadata
-                        extracted automatically.
-                      </p>
-                    </div>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              Research{" "}
+              <span className="bg-gradient-to-r from-primary via-chart-1 to-purple-500 bg-clip-text text-transparent">
+                Papers
+              </span>
+            </h1>
+            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+              Upload, organize, and analyze academic papers with AI-powered metadata extraction and semantic search.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/register">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-chart-1 text-white shadow-lg">
+                  Get Started
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/how-it-works">
+                <Button size="lg" variant="outline">Learn More</Button>
+              </Link>
+            </div>
+          </motion.div>
+        </PageContainer>
+      </Section>
+
+      <Section className="bg-muted/30">
+        <PageContainer>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl font-bold mb-4">Smart Paper Management</h2>
+              <p className="text-muted-foreground mb-6">
+                Our AI engine automatically extracts metadata, generates summaries, and creates semantic embeddings for every paper you upload.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  "Automatic metadata extraction (title, authors, abstract)",
+                  "OCR for scanned PDFs with 99%+ accuracy",
+                  "Semantic chunking for precise search",
+                  "Full-text search across all documents",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-chart-1/20 rounded-2xl blur-2xl" />
+              <div className="relative p-8 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Upload className="h-6 w-6 text-white" />
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-1/10">
-                      <Search className="h-6 w-6 text-chart-1" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Semantic Search</h3>
-                      <p className="text-muted-foreground">
-                        Find papers by concepts, not just keywords. AI
-                        understands context.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-2/10">
-                      <Brain className="h-6 w-6 text-chart-2" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">AI Summaries</h3>
-                      <p className="text-muted-foreground">
-                        Generate concise summaries and extract key insights
-                        instantly.
-                      </p>
-                    </div>
+                  <div>
+                    <div className="font-semibold">Upload Papers</div>
+                    <div className="text-sm text-muted-foreground">PDF, DOCX, TXT supported</div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Features Grid */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything you need for modern research
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From discovery to analysis, our platform accelerates every step of
-              your research workflow.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: FileText,
-                title: "Universal Import",
-                description:
-                  "Support for PDFs, URLs, DOIs, and direct database imports from arXiv, PubMed, IEEE.",
-                color: "primary",
-              },
-              {
-                icon: Search,
-                title: "Advanced Search",
-                description:
-                  "Full-text search, citation networks, author disambiguation, and topic clustering.",
-                color: "chart-1",
-              },
-              {
-                icon: BookOpen,
-                title: "Smart Organization",
-                description:
-                  "Auto-categorization, custom tags, folder hierarchies, and collaborative collections.",
-                color: "chart-2",
-              },
-              {
-                icon: Lightbulb,
-                title: "AI Insights",
-                description:
-                  "Research gap analysis, trend predictions, citation recommendations, and summary generation.",
-                color: "chart-3",
-              },
-              {
-                icon: Zap,
-                title: "Real-time Sync",
-                description:
-                  "Access your library anywhere. Cloud sync with offline reading capabilities.",
-                color: "chart-4",
-              },
-              {
-                icon: Brain,
-                title: "Citation Management",
-                description:
-                  "Auto-generate bibliographies in any format. Track impact and citation networks.",
-                color: "chart-5",
-              },
-            ].map(({ icon: Icon, title, description, color }) => (
-              <Card key={title} className="hover-lift hover-glow group">
-                <CardContent className="p-6">
-                  <div
-                    className={`p-3 rounded-lg bg-${color}/10 mb-4 group-hover:bg-${color}/20 transition-colors`}
-                  >
-                    <Icon className={`h-6 w-6 text-${color}`} />
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                    <Search className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                  <p className="text-muted-foreground">{description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="py-16 md:py-24 bg-muted/30 rounded-2xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Get started in minutes
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Three simple steps to transform your research workflow
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                title: "Import & Upload",
-                description:
-                  "Add papers via PDF upload, URL import, or direct database search. Our AI extracts all metadata automatically.",
-                features: [
-                  "PDF drag & drop",
-                  "arXiv/PubMed import",
-                  "Auto metadata extraction",
-                ],
-              },
-              {
-                step: "02",
-                title: "Organize & Annotate",
-                description:
-                  "Create collections, add tags, and make notes. Our smart categorization helps you stay organized effortlessly.",
-                features: [
-                  "Smart collections",
-                  "Collaborative folders",
-                  "Rich annotations",
-                ],
-              },
-              {
-                step: "03",
-                title: "Discover & Analyze",
-                description:
-                  "Use AI-powered search and insights to find connections, identify gaps, and accelerate your research.",
-                features: [
-                  "Semantic search",
-                  "AI summaries",
-                  "Citation analysis",
-                ],
-              },
-            ].map(({ step, title, description, features }) => (
-              <Card key={step} className="relative">
-                <CardHeader>
-                  <div className="text-4xl font-bold text-primary/20 mb-2">
-                    {step}
+                  <div>
+                    <div className="font-semibold">Semantic Search</div>
+                    <div className="text-sm text-muted-foreground">Find by meaning, not keywords</div>
                   </div>
-                  <CardTitle className="text-xl">{title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-                  <ul className="space-y-2">
-                    {features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Use Cases */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Built for every researcher
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Whether you're a student, academic, or industry researcher
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                title: "PhD Students & Postdocs",
-                description:
-                  "Master your literature review, track progress, and discover research gaps.",
-                benefits: [
-                  "Comprehensive literature tracking",
-                  "Progress visualization",
-                  "Advisor collaboration",
-                ],
-                cta: "Accelerate your research",
-              },
-              {
-                title: "Academic Researchers",
-                description:
-                  "Stay current with your field, manage grant research, and collaborate globally.",
-                benefits: [
-                  "Field trend monitoring",
-                  "Grant proposal support",
-                  "International collaboration",
-                ],
-                cta: "Enhance your impact",
-              },
-              {
-                title: "Industry R&D Teams",
-                description:
-                  "Track competitive research, evaluate prior art, and accelerate innovation.",
-                benefits: [
-                  "Competitive intelligence",
-                  "Patent landscape analysis",
-                  "Innovation acceleration",
-                ],
-                cta: "Drive innovation",
-              },
-              {
-                title: "Research Institutions",
-                description:
-                  "Enable campus-wide collaboration, track institutional output, and reduce duplicated effort.",
-                benefits: [
-                  "Institution-wide libraries",
-                  "Collaboration analytics",
-                  "Resource optimization",
-                ],
-                cta: "Transform your institution",
-              },
-            ].map(({ title, description, benefits, cta }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-8">
-                  <h3 className="font-semibold text-xl mb-3">{title}</h3>
-                  <p className="text-muted-foreground mb-6">{description}</p>
-                  <ul className="space-y-2 mb-6">
-                    {benefits.map((benefit) => (
-                      <li key={benefit} className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        <span className="text-sm">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button variant="outline" className="group">
-                    {cta}
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-16 md:py-24">
-          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20 hover-glow">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to revolutionize your research?
-              </h3>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of researchers who've already transformed their
-                workflow with ScholarFlow.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow text-base"
-                >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
-                  >
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated
-                      ? "Access your library"
-                      : "Start your free library"}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base"
-                >
-                  <Link href="/pricing" className="flex items-center gap-2">
-                    View pricing
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+                    <Brain className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-semibold">AI Summaries</div>
+                    <div className="text-sm text-muted-foreground">Key claims in seconds</div>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Free forever for up to 100 papers. No credit card required.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-      </PageContainer>
-    </div>
+            </div>
+          </div>
+        </PageContainer>
+      </Section>
+
+      <Section>
+        <PageContainer>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Key Features</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to manage your research library efficiently.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Upload, title: "Bulk Upload", desc: "Upload hundreds of papers at once with drag-and-drop." },
+              { icon: Search, title: "Full-Text Search", desc: "Search across all your papers with instant results." },
+              { icon: Brain, title: "AI Summaries", desc: "Get condensed summaries of any paper in seconds." },
+              { icon: Sparkles, title: "Smart Collections", desc: "Auto-organize papers by topic, author, or keyword." },
+              { icon: FileText, title: "Citation Export", desc: "Export citations in BibTeX, APA, MLA, and more." },
+              { icon: CheckCircle2, title: "Version Control", desc: "Track changes and annotations across versions." },
+            ].map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="p-6 rounded-2xl border border-border/50 bg-card/50 hover:border-primary/40 transition-all"
+              >
+                <feature.icon className="h-8 w-8 text-primary mb-4" />
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </PageContainer>
+      </Section>
+    </>
   );
 }

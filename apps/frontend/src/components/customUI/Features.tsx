@@ -2,7 +2,7 @@
 import { PageContainer, Section } from "@/components/layout/PageContainer";
 import { FeatureCard } from "@/components/ui/cards/FeatureCard";
 import { Typography, TypographyComponents } from "@/lib/typography";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   LucideBrain,
   LucideFolder,

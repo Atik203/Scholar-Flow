@@ -1,7 +1,8 @@
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Github, Heart, Shield, Twitter } from "lucide-react";
+"use client";
+
+import { Github, Heart, Shield, Twitter, X, MoreHorizontal, ChevronUp, Key, Mail, AlertCircle, Loader } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 
 const sections: {
   heading: string;
@@ -13,7 +14,7 @@ const sections: {
       { label: "Features", href: "/features" },
       { label: "How it works", href: "/how-it-works" },
       { label: "Pricing", href: "/pricing" },
-      { label: "FAQ", href: "/faq" },
+      { label: "Roadmap", href: "/roadmap" },
     ],
   },
   {
@@ -35,77 +36,98 @@ const sections: {
     ],
   },
   {
-    heading: "Enterprise",
+    heading: "Legal",
     links: [
-      { label: "Enterprise", href: "/enterprise" },
-      { label: "Teams", href: "/enterprise/teams" },
-      { label: "Integrations", href: "/enterprise/integrations" },
-      { label: "Support", href: "/enterprise/support" },
+      { label: "Privacy", href: "/legal/privacy" },
+      { label: "Terms", href: "/legal/terms" },
+      { label: "Cookies", href: "/legal/cookies" },
+      { label: "License", href: "/license" },
+    ],
+  },
+];
+
+const quickNavSections = [
+  {
+    heading: "Auth",
+    links: [
+      { label: "Forgot Password", href: "/forgot-password", icon: Key },
+      { label: "Reset Password", href: "/reset-password", icon: Key },
+      { label: "Verify Email", href: "/verify-email", icon: Mail },
+    ],
+  },
+  {
+    heading: "Utility",
+    links: [
+      { label: "404 Page", href: "/not-found", icon: AlertCircle },
+      { label: "Error Page", href: "/error", icon: AlertCircle },
+      { label: "Loading", href: "/loading", icon: Loader },
     ],
   },
 ];
 
 export const Footer: React.FC = () => {
+  const [isQuickNavOpen, setIsQuickNavOpen] = useState(false);
+
   return (
     <footer
-      className="relative mt-24 border-t bg-gradient-to-b from-slate-900 via-slate-950 to-black dark:from-slate-950 dark:via-black dark:to-slate-950"
+      className="relative mt-24 border-t bg-gradient-to-b from-gray-900 via-gray-950 to-black"
       aria-labelledby="footer-heading"
     >
-      {/* Enhanced background patterns */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,theme(colors.primary/15),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,theme(colors.chart-1/10),transparent_50%)]" />
-      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-slate-900/50 dark:to-slate-950/50" />
-      <PageContainer className="py-16 relative">
+      {/* Background patterns */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(99,102,241,0.15),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(249,115,22,0.1),transparent_50%)]" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative">
         <div className="md:grid md:grid-cols-12 md:gap-10 lg:gap-14">
+          {/* Logo and description */}
           <div className="md:col-span-4 lg:col-span-5">
-            <h3
-              id="footer-heading"
-              className="font-bold tracking-tight flex items-center gap-2 sm:gap-3"
-            >
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-primary" />
-              <span className="bg-gradient-to-r from-white via-slate-100 to-white dark:from-white dark:via-slate-200 dark:to-white bg-clip-text text-transparent font-bold text-lg sm:text-xl md:text-2xl">
-                ScholarFlow
-              </span>
-            </h3>
-            <p className="mt-4 sm:mt-6 text-xs sm:text-sm text-slate-300 dark:text-slate-400 leading-relaxed max-w-sm">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-[var(--chart-1)] flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-white">ScholarFlow</span>
+            </Link>
+            <p className="mt-6 text-sm text-gray-400 leading-relaxed max-w-sm">
               AI-powered research paper collaboration. Organize, annotate, and
               surface insight faster with semantic tooling.
             </p>
-            <div className="mt-6 sm:mt-8 flex items-center gap-3 sm:gap-4">
+            <div className="mt-8 flex items-center gap-4">
               <a
                 href="https://github.com"
                 aria-label="GitHub"
                 target="_blank"
                 rel="noreferrer"
-                className="h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
+                className="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800/50 hover:bg-primary/20 hover:border-primary/50 transition-all duration-300"
               >
-                <Github className="h-4 w-4 sm:h-5 sm:w-5 text-slate-300 group-hover:text-white transition-colors" />
+                <Github className="h-5 w-5 text-gray-300" />
               </a>
               <a
                 href="https://twitter.com"
                 aria-label="Twitter"
                 target="_blank"
                 rel="noreferrer"
-                className="h-9 w-9 sm:h-10 sm:w-10 md:h-11 md:w-11 inline-flex items-center justify-center rounded-lg border border-slate-700 dark:border-slate-600 bg-slate-800/50 dark:bg-slate-900/50 backdrop-blur hover:bg-primary/20 hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
+                className="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-gray-700 bg-gray-800/50 hover:bg-primary/20 hover:border-primary/50 transition-all duration-300"
               >
-                <Twitter className="h-4 w-4 sm:h-5 sm:w-5 text-slate-300 group-hover:text-white transition-colors" />
+                <Twitter className="h-5 w-5 text-gray-300" />
               </a>
             </div>
           </div>
-          <div className="mt-12 md:mt-0 md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 sm:gap-10 lg:gap-12 lg:grid-cols-4">
+
+          {/* Link sections */}
+          <div className="mt-12 md:mt-0 md:col-span-8 lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
             {sections.map((section) => (
               <div key={section.heading} className="space-y-4">
-                <h4 className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-primary">
+                <h4 className="text-sm font-semibold tracking-wide uppercase text-primary">
                   {section.heading}
                 </h4>
-                <ul className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                  {section.links.map((l) => (
-                    <li key={l.href}>
+                <ul className="space-y-3 text-sm">
+                  {section.links.map((link) => (
+                    <li key={link.href}>
                       <Link
-                        href={l.href}
-                        className="relative text-slate-400 dark:text-slate-500 hover:text-white dark:hover:text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded px-1 py-1 hover:translate-x-1 after:absolute after:inset-x-1 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-gradient-to-r after:from-primary/70 after:to-primary/30 hover:after:scale-x-100 after:transition-transform after:duration-300"
+                        href={link.href}
+                        className="text-gray-400 hover:text-white transition-colors duration-300 text-left"
                       >
-                        {l.label}
+                        {link.label}
                       </Link>
                     </li>
                   ))}
@@ -114,20 +136,92 @@ export const Footer: React.FC = () => {
             ))}
           </div>
         </div>
-        <div className="mt-16 sm:mt-20 flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs pt-6 sm:pt-8 border-t border-slate-700 dark:border-slate-600">
-          <p className="text-slate-400 dark:text-slate-500">
-            © {new Date().getFullYear()} ScholarFlow. All rights reserved.
+
+        {/* Bottom bar */}
+        <div className="mt-16 flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs pt-8 border-t border-gray-700">
+          <p className="text-gray-400">
+            &copy; {new Date().getFullYear()} ScholarFlow. All rights reserved.
           </p>
-          <p className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
-            Built with{" "}
-            <Heart className="h-3.5 w-3.5 text-primary animate-pulse" /> for
-            researchers.{" "}
-            <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium border border-primary/30">
-              Phase 1 MVP
-            </span>
-          </p>
+          <div className="flex items-center gap-3">
+            {/* Quick Navigation Button */}
+            <div className="relative">
+              <button
+                onClick={() => setIsQuickNavOpen(!isQuickNavOpen)}
+                className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-800/50 border border-gray-700 hover:border-gray-600 hover:bg-gray-800 transition-all duration-200 text-gray-400 hover:text-gray-300"
+                title="More pages"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="text-[10px]">More</span>
+                <ChevronUp
+                  className={`h-3 w-3 transition-transform duration-200 ${
+                    isQuickNavOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Quick Navigation Modal */}
+              {isQuickNavOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setIsQuickNavOpen(false)}
+                  />
+                  {/* Modal */}
+                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-gray-900 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700 bg-gray-800/50">
+                      <span className="text-[11px] font-medium text-gray-300">
+                        Quick Navigation
+                      </span>
+                      <button
+                        onClick={() => setIsQuickNavOpen(false)}
+                        className="p-0.5 rounded hover:bg-gray-700 transition-colors"
+                      >
+                        <X className="h-3 w-3 text-gray-400" />
+                      </button>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {quickNavSections.map((section, idx) => (
+                        <div key={section.heading}>
+                          {idx > 0 && (
+                            <div className="border-t border-gray-700/50" />
+                          )}
+                          <div className="px-3 py-1.5 bg-gray-800/30">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/80">
+                              {section.heading}
+                            </span>
+                          </div>
+                          <div className="py-1">
+                            {section.links.map((link) => {
+                              const Icon = link.icon;
+                              return (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => setIsQuickNavOpen(false)}
+                                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-gray-400 hover:text-white hover:bg-gray-800 transition-colors text-left"
+                                >
+                                  <Icon className="h-3 w-3 text-gray-500" />
+                                  {link.label}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <p className="flex items-center gap-1.5 text-gray-400">
+              Built with <Heart className="h-3.5 w-3.5 text-primary" /> for
+              researchers.
+            </p>
+          </div>
         </div>
-      </PageContainer>
+      </div>
     </footer>
   );
 };

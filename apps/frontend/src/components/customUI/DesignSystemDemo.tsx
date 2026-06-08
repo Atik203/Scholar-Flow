@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Typography, TypographyComponents } from "@/lib/typography";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ArrowRight,
   Award,
