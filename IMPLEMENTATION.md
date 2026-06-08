@@ -70,18 +70,18 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 - [x] Rewrite `/contact/page.tsx`
 
 ### 1.9 Backend Migration
-- [ ] Create `PageContent` model in Prisma schema (deferred to Phase 1 backend sprint)
-- [ ] Create `Faq` model in Prisma schema (deferred to Phase 1 backend sprint)
-- [ ] Create `Testimonial` model in Prisma schema (deferred to Phase 1 backend sprint)
-- [ ] Create `NewsletterSubscriber` model in Prisma schema (deferred to Phase 1 backend sprint)
-- [ ] Create `ContactSubmission` model in Prisma schema (deferred to Phase 1 backend sprint)
-- [ ] Run `yarn db:generate` and `yarn db:migrate`
-- [ ] Create `GET /public/faqs` route
-- [ ] Create `POST /public/contact` route
-- [ ] Create `POST /public/newsletter` route
-- [ ] Create `GET /public/testimonials` route
-- [ ] Create `GET /public/page-content/:slug` route
-- [ ] Add seed data for FAQ, Testimonials, and PageContent
+- [x] Create `Faq` model in Prisma schema
+- [x] Create `Testimonial` model in Prisma schema
+- [x] Create `NewsletterSubscriber` model in Prisma schema
+- [x] Create `ContactSubmission` model in Prisma schema
+- [x] Create `PageContent` model in Prisma schema
+- [x] Run `yarn db:generate` (new models in Prisma Client)
+- [x] Create `GET /public/faqs` route (+ `GET /public/faqs/categories`)
+- [x] Create `POST /public/contact` route
+- [x] Create `POST /public/newsletter` route
+- [x] Create `GET /public/testimonials` route
+- [x] Create `GET /public/page-content/:slug` route
+- [x] Add seed data for FAQ, Testimonials, and PageContent
 
 ### 1.10 Phase 1 QA
 - [x] All 18-20 pages render with figma-make design
@@ -507,10 +507,10 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 1 Complete (Frontend Pages)
+## Current Status: Phase 1 Complete
 
 Started: June 2026
 Completed: June 2026
-Current focus: Phase 1 Backend Migration (DB models + API routes)
+Current focus: Phase 2 Auth & Onboarding Pages (5-6 pages)
 
 Last updated: June 2026
