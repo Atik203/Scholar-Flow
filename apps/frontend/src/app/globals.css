@@ -1,5 +1,5 @@
-@import "../styles/_variables.scss";
-@import "../styles/_keyframe-animations.scss";
+@import "../styles/_variables.css";
+@import "../styles/_keyframe-animations.css";
 
 @import "tailwindcss";
 @import "tw-animate-css";
