@@ -40,9 +40,7 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-tooltip",
       "lucide-react",
     ],
-    // Enable CSS optimization (inline critical CSS, defer non-critical)
-    // Uses beasties (formerly critters) for critical CSS extraction
-    optimizeCss: true,
+    // CSS optimization disabled — breaks Tailwind CSS v4 utility classes in production
   },
 
   // Production error handling - hide error overlay in production
