@@ -106,7 +106,7 @@ class TokenService {
         SELECT ut.id, ut.token, ut."userId", u.email
         FROM "UserToken" ut
         JOIN "User" u ON u.id = ut."userId"
-        WHERE ut.type = ${tokenType}
+        WHERE ut.type = ${tokenType}::"TokenType"
           AND ut.used = false
           AND ut."expiresAt" > NOW()
         ORDER BY ut."createdAt" DESC
@@ -150,7 +150,7 @@ class TokenService {
     await prisma.$executeRaw`
       UPDATE "UserToken"
       SET used = true
-      WHERE token = ${token} AND type = ${tokenType}
+      WHERE token = ${token} AND type = ${tokenType}::"TokenType"
     `;
   }
 
@@ -168,7 +168,7 @@ class TokenService {
       UPDATE "UserToken"
       SET used = true
       WHERE "userId" = ${userId}
-        AND type = ${tokenType}
+        AND type = ${tokenType}::"TokenType"
         AND used = false
     `;
   }
