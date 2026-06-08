@@ -213,6 +213,49 @@ export const requireTeamLead = requireMinRole(USER_ROLES.TEAM_LEAD);
 export const requireProResearcher = requireMinRole(USER_ROLES.PRO_RESEARCHER);
 
 /**
+ * Middleware to check if user has completed onboarding.
+ * Returns 403 with onboarding_required error code if not completed.
+ * This allows the frontend to redirect to /onboarding.
+ */
+export const requireOnboarding = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      return next(new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED));
+    }
+
+    const users = await prisma.$queryRaw<any[]>`
+      SELECT "onboardingCompleted"
+      FROM "User"
+      WHERE id = ${req.user.id} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    const user = users[0];
+    if (!user) {
+      return next(new ApiError(401, AUTH_ERROR_MESSAGES.USER_NOT_FOUND));
+    }
+
+    if (!user.onboardingCompleted) {
+      return next(
+        new ApiError(403, "Onboarding required", "ONBOARDING_REQUIRED")
+      );
+    }
+
+    next();
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return next(error);
+    }
+    console.error("Onboarding middleware error:", error);
+    next(new ApiError(500, "Failed to check onboarding status"));
+  }
+};
+
+/**
  * Optional authentication middleware - doesn't throw error if no token
  */
 export const optionalAuth = async (

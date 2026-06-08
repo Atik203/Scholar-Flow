@@ -107,3 +107,32 @@ export function usePublicRoute() {
     user: isAuthenticated ? user : null,
   };
 }
+
+/**
+ * Onboarding guard - redirects to onboarding if authenticated but not completed
+ */
+export function useOnboardingGuard() {
+  const { user, isAuthenticated, isLoading, status } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (
+      isAuthenticated &&
+      user &&
+      !user.onboardingCompleted &&
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/onboarding"
+    ) {
+      router.replace("/onboarding");
+    }
+  }, [isAuthenticated, isLoading, user, router]);
+
+  return {
+    isAuthenticated,
+    isLoading,
+    status,
+    user,
+  };
+}

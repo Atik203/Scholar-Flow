@@ -64,6 +64,14 @@ export interface SendVerificationRequest {
 export interface AuthMessageResponse {
   success: boolean;
   message: string;
+  data?: {
+    oauthOnly?: boolean;
+  };
+}
+
+export interface UpdateOnboardingRequest {
+  onboardingCompleted?: boolean;
+  onboardingStep?: number;
 }
 
 export const authApi = apiSlice.injectEndpoints({
@@ -183,6 +191,19 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+
+    // Update onboarding status
+    updateOnboarding: builder.mutation<
+      { success: boolean; message: string; data: TUser },
+      UpdateOnboardingRequest
+    >({
+      query: (data) => ({
+        url: "/user/onboarding",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -197,4 +218,5 @@ export const {
   useResetPasswordMutation,
   useVerifyEmailMutation,
   useSendEmailVerificationMutation,
+  useUpdateOnboardingMutation,
 } = authApi;

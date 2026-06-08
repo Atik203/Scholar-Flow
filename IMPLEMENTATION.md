@@ -97,39 +97,39 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 ## Phase 2: Auth & Onboarding Pages (5-6 pages)
 
 ### 2.1 Auth Pages
-- [ ] Rewrite `/login/page.tsx` with figma-make form design
-- [ ] Rewrite `/register/page.tsx` with figma-make form design
-- [ ] Rewrite `/forgot-password/page.tsx` with figma-make form design
-- [ ] Rewrite `/reset-password/page.tsx` with figma-make form design
-- [ ] Rewrite `/verify-email/page.tsx` with figma-make form design
-- [ ] Create `/onboarding/page.tsx` with step-by-step flow
+- [x] Rewrite `/login/page.tsx` with figma-make form design
+- [x] Rewrite `/register/page.tsx` with figma-make form design
+- [x] Rewrite `/forgot-password/page.tsx` with figma-make form design
+- [x] Rewrite `/reset-password/page.tsx` with figma-make form design
+- [x] Rewrite `/verify-email/page.tsx` with figma-make form design
+- [x] Create `/onboarding/page.tsx` with step-by-step flow
 
 ### 2.2 Form Components
-- [ ] Create `FloatingInput.tsx` component
-- [ ] Create `DatePicker.tsx` component
-- [ ] Create `MultiSelect.tsx` component
-- [ ] Create `ToggleField.tsx` component
-- [ ] Create `SearchInput.tsx` component
-- [ ] Create `SelectField.tsx` component
-- [ ] Create `SliderField.tsx` component
-- [ ] Ensure all form components integrate with React Hook Form + Zod
+- [x] Create `FloatingInput.tsx` component
+- [x] Create `DatePicker.tsx` component
+- [x] Create `MultiSelect.tsx` component
+- [x] Create `ToggleField.tsx` component
+- [x] Create `SearchInput.tsx` component
+- [x] Create `SelectField.tsx` component
+- [x] Create `SliderField.tsx` component
+- [x] Ensure all form components integrate with React Hook Form + Zod
 
 ### 2.3 Backend Migration
-- [ ] Add `onboardingCompleted` boolean to `User` model
-- [ ] Add `onboardingStep` int to `User` model
-- [ ] Create `PUT /user/onboarding` route
-- [ ] Run `yarn db:generate` and `yarn db:migrate`
-- [ ] Add onboarding guard middleware (redirect incomplete users)
+- [x] Add `onboardingCompleted` boolean to `User` model
+- [x] Add `onboardingStep` int to `User` model
+- [x] Create `PUT /user/onboarding` route
+- [x] Run `yarn db:generate` and `yarn db:migrate`
+- [x] Add onboarding guard middleware (redirect incomplete users)
 
 ### 2.4 Phase 2 QA
-- [ ] All auth pages render with figma-make design
-- [ ] Login flow works end-to-end
-- [ ] Registration flow works end-to-end
-- [ ] Password reset flow works end-to-end
-- [ ] Onboarding flow redirects correctly
-- [ ] `yarn type-check` passes
-- [ ] `yarn lint` passes
-- [ ] Update this file: mark all Phase 2 items as done
+- [x] All auth pages render with figma-make design
+- [x] Login flow works end-to-end
+- [x] Registration flow works end-to-end
+- [x] Password reset flow works end-to-end
+- [x] Onboarding flow redirects correctly
+- [x] `yarn type-check` passes
+- [x] `yarn lint` passes
+- [x] Update this file: mark all Phase 2 items as done
 
 ---
 
@@ -507,10 +507,10 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 1 Complete
+## Current Status: Phase 2 Complete
 
 Started: June 2026
 Completed: June 2026
-Current focus: Phase 2 Auth & Onboarding Pages (5-6 pages)
+Current focus: Phase 3 Dashboard Shell & Core Pages (5-8 pages)
 
 Last updated: June 2026
