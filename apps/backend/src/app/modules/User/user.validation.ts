@@ -16,6 +16,11 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(8, "Password must be at least 8 characters").max(100, "Password too long"),
 });
 
-// Export types
+export const updateOnboardingSchema = z.object({
+  onboardingCompleted: z.boolean().optional(),
+  onboardingStep: z.number().int().min(0).max(4).optional(),
+});
+
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type UpdateOnboardingInput = z.infer<typeof updateOnboardingSchema>;

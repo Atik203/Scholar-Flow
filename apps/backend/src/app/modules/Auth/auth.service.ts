@@ -119,7 +119,7 @@ class AuthService {
     try {
       // Find user by email using $queryRaw for better performance
       const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name, image, password, role
+        SELECT id, email, name, image, password, role, "onboardingCompleted", "onboardingStep"
         FROM "User"
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
@@ -207,7 +207,7 @@ class AuthService {
       // Return the created user data using $queryRaw
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", institution, 
-               "fieldOfStudy", image, role, "createdAt"
+               "fieldOfStudy", image, role, "createdAt", "onboardingCompleted", "onboardingStep"
         FROM "User"
         WHERE id = ${userId}
         LIMIT 1
@@ -387,7 +387,8 @@ class AuthService {
     try {
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", image, role, password, 
-               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted",
+               "onboardingCompleted", "onboardingStep"
         FROM "User" 
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
@@ -403,7 +404,8 @@ class AuthService {
     try {
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", image, role, password,
-               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted",
+               "onboardingCompleted", "onboardingStep"
         FROM "User" 
         WHERE id = ${id} AND "isDeleted" = false
         LIMIT 1
@@ -599,16 +601,14 @@ class AuthService {
    */
   async initiateForgotPassword(email: string) {
     try {
-      // Find user by email using $queryRaw
       const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name
+        SELECT id, email, name, password
         FROM "User"
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
       `;
 
       if (users.length === 0) {
-        // Don't reveal if user exists or not for security
         return {
           message:
             "If an account with that email exists, a password reset link has been sent.",
@@ -617,13 +617,19 @@ class AuthService {
 
       const user = users[0];
 
-      // Generate and store password reset token
+      if (!user.password) {
+        return {
+          message:
+            "This account uses OAuth (Google/GitHub) login. Please sign in with your OAuth provider instead of resetting a password.",
+          oauthOnly: true,
+        };
+      }
+
       const resetToken = await tokenService.createAndStoreToken(
         user.id,
         "password-reset"
       );
 
-      // Send password reset email
       await emailService.sendPasswordResetEmail({
         email: user.email,
         name: user.name || "User",

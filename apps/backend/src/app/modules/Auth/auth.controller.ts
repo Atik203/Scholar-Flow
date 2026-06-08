@@ -58,6 +58,8 @@ class AuthController {
             name: user.name,
             image: user.image,
             role: user.role,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
           accessToken,
         },
@@ -124,6 +126,8 @@ class AuthController {
             fieldOfStudy: user.fieldOfStudy,
             role: user.role,
             createdAt: user.createdAt,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
           accessToken,
         },
@@ -397,6 +401,7 @@ class AuthController {
         statusCode: 200,
         success: true,
         message: result.message,
+        data: { oauthOnly: result.oauthOnly || false },
       });
     }
   );
