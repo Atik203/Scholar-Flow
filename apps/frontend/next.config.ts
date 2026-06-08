@@ -83,12 +83,12 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Cache HTML pages with revalidation
+        // Cache HTML pages with revalidation (shorter TTL for fast UI updates)
         source: "/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=3600, must-revalidate",
+            value: "public, max-age=60, must-revalidate",
           },
           {
             key: "X-Content-Type-Options",

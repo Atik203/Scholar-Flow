@@ -809,7 +809,7 @@ export default function RegisterPage() {
                           <PasswordStrengthBar password={password || ""} />
                         </div>
 
-                        <div>
+                        <div className="relative">
                           <FloatingInput
                             label="Confirm password"
                             type={showConfirmPassword ? "text" : "password"}
@@ -821,6 +821,7 @@ export default function RegisterPage() {
                             }}
                             error={fieldValidation.confirmPassword?.valid === false}
                             helperText={fieldValidation.confirmPassword?.message}
+                            className="pr-10"
                           />
                           <button
                             type="button"
