@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicRoute } from "@/hooks/useAuthGuard";
 import { getRoleDashboardUrl } from "@/lib/auth/redirects";
 import { Typography, TypographyComponents } from "@/lib/typography";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   CheckCircle2,

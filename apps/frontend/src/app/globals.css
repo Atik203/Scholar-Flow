@@ -2,7 +2,7 @@
 @import "../styles/_keyframe-animations.scss";
 
 @import "tailwindcss";
-@config "../tailwind.config.ts";
+@config "../../tailwind.config.ts";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
