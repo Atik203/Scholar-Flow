@@ -146,6 +146,18 @@ const getUserAnalytics = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateOnboarding = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updateOnboarding(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Onboarding status updated successfully!",
+    data: result,
+  });
+});
+
 export const userController: {
   getAllFromDB: AsyncRequestHandler;
   getMyProfile: AsyncRequestHandler;
@@ -154,6 +166,7 @@ export const userController: {
   deleteAccount: AsyncRequestHandler;
   uploadProfilePicture: AsyncRequestHandler;
   getUserAnalytics: AsyncRequestHandler;
+  updateOnboarding: AsyncRequestHandler;
 } = {
   getAllFromDB,
   getMyProfile,
@@ -162,4 +175,5 @@ export const userController: {
   deleteAccount,
   uploadProfilePicture,
   getUserAnalytics,
+  updateOnboarding,
 };
