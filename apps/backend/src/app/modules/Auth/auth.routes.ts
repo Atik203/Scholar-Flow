@@ -99,6 +99,20 @@ router.post(
   authController.sendEmailVerification
 );
 
+// Magic link routes (passwordless login)
+router.post(
+  "/magic-link/send",
+  sensitiveAuthLimiter,
+  validateRequestBody(authValidation.magicLinkSend),
+  authController.sendMagicLink
+);
+
+router.post(
+  "/magic-link/verify",
+  validateRequestBody(authValidation.magicLinkVerify),
+  authController.verifyMagicLink
+);
+
 // Protected routes for user management
 router.get(
   "/users",
