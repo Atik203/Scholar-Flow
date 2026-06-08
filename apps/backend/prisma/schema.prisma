@@ -757,6 +757,7 @@ model UserToken {
 enum TokenType {
   PASSWORD_RESET
   EMAIL_VERIFICATION
+  MAGIC_LINK
 }
 
 // Invitation/member status for collection sharing
