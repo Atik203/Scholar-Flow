@@ -24,7 +24,8 @@
     "db:generate": "yarn workspace @scholar-flow/backend prisma generate --sql",
     "db:studio": "yarn workspace @scholar-flow/backend prisma studio",
     "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.js",
-    "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force"
+    "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force",
+    "repomix": "npx repomix"
   },
   "devDependencies": {
     "@turbo/gen": "^2.5.5",
