@@ -1,8 +1,5 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight,
   BookOpen,
@@ -15,19 +12,24 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
+import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CardWithVariants } from "@/components/ui/card-variants";
 
-export default function ProductCollectionsPage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
+export default function ProductsCollectionsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
-        <section className="py-12 md:py-20">
+    <>
+      {/* Hero Section */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chart-1/10 text-chart-1 text-sm font-medium mb-6">
                 <BookOpen className="h-4 w-4" />
                 Collections Platform
@@ -41,82 +43,88 @@ export default function ProductCollectionsPage() {
                 research libraries.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link href="/login">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-chart-1 to-chart-2 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
+                  >
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Create collections
+                  </Button>
+                </Link>
                 <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link href={isAuthenticated ? "/dashboard" : "/login"} className="flex items-center gap-2">
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated ? "Go to dashboard" : "Create collections"}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
                   size="lg"
                   variant="outline"
-                  className="text-base"
+                  className="btn-hover-glow"
                 >
-                  <Link href="#demo" className="flex items-center gap-2">
-                    <FolderOpen className="h-5 w-5" />
-                    Explore examples
-                  </Link>
+                  <FolderOpen className="h-5 w-5 mr-2" />
+                  Explore examples
                 </Button>
               </div>
-            </div>
-            <Card className="hover-glow border-2">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-1/10">
-                      <BookOpen className="h-6 w-6 text-chart-1" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Smart Collections
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Auto-organize papers by topic, author, or custom
-                        criteria with AI assistance.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-2/10">
-                      <Users className="h-6 w-6 text-chart-2" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Team Collaboration
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Share collections, assign reading lists, and collaborate
-                        in real-time.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-3/10">
-                      <Share2 className="h-6 w-6 text-chart-3" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Public Sharing</h3>
-                      <p className="text-muted-foreground">
-                        Make collections discoverable or keep them private with
-                        granular permissions.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+            </motion.div>
 
-        {/* Features Grid */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Card className="border-2 shadow-xl">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-1/10">
+                        <BookOpen className="h-6 w-6 text-chart-1" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Smart Collections</h3>
+                        <p className="text-muted-foreground">
+                          Auto-organize papers by topic, author, or custom
+                          criteria with AI assistance.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-2/10">
+                        <Users className="h-6 w-6 text-chart-2" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Team Collaboration</h3>
+                        <p className="text-muted-foreground">
+                          Share collections, assign reading lists, and
+                          collaborate in real-time.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-3/10">
+                        <Share2 className="h-6 w-6 text-chart-3" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Public Sharing</h3>
+                        <p className="text-muted-foreground">
+                          Make collections discoverable or keep them private
+                          with granular permissions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Collections that work like your brain
             </h2>
@@ -124,7 +132,8 @@ export default function ProductCollectionsPage() {
               Intuitive organization meets powerful collaboration. Create
               structure from chaos.
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -169,25 +178,45 @@ export default function ProductCollectionsPage() {
                   "Real-time sync across devices, automated paper recommendations, and smart notifications.",
                 color: "primary",
               },
-            ].map(({ icon: Icon, title, description, color }) => (
-              <Card key={title} className="hover-lift hover-glow group">
-                <CardContent className="p-6">
-                  <div
-                    className={`p-3 rounded-lg bg-${color}/10 mb-4 group-hover:bg-${color}/20 transition-colors`}
-                  >
-                    <Icon className={`h-6 w-6 text-${color}`} />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                  <p className="text-muted-foreground">{description}</p>
-                </CardContent>
-              </Card>
+            ].map(({ icon: Icon, title, description, color }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <CardWithVariants
+                  variant="interactive"
+                  hover="lift"
+                  className="h-full group"
+                >
+                  <CardContent className="p-6">
+                    <div
+                      className={`p-3 rounded-lg bg-${color}/10 mb-4 w-fit group-hover:scale-110 transition-transform duration-200`}
+                    >
+                      <Icon className={`h-6 w-6 text-${color}`} />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{title}</h3>
+                    <p className="text-muted-foreground">{description}</p>
+                  </CardContent>
+                </CardWithVariants>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Collection Types */}
-        <section className="py-16 md:py-24 bg-muted/30 rounded-2xl">
-          <div className="text-center mb-16">
+      {/* Collection Types */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Collections for every purpose
             </h2>
@@ -195,234 +224,125 @@ export default function ProductCollectionsPage() {
               From literature reviews to reading lists, organize research your
               way
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
-                title: "Literature Review Collections",
+                title: "Literature Reviews",
                 description:
-                  "Systematic organization for thesis chapters, systematic reviews, and meta-analyses.",
+                  "Comprehensive collections for systematic reviews with built-in screening workflows.",
                 features: [
-                  "Chronological organization",
-                  "Methodology grouping",
-                  "Citation tracking",
-                  "Gap analysis",
+                  "Inclusion/exclusion tracking",
+                  "PRISMA flow diagrams",
+                  "Quality assessment tools",
                 ],
-                example: "PhD Thesis: ML in Healthcare (127 papers)",
               },
               {
-                title: "Course Reading Lists",
+                title: "Reading Lists",
                 description:
-                  "Curated reading materials for courses, with progress tracking and assignments.",
+                  "Curated lists for courses, seminars, or personal learning journeys.",
                 features: [
-                  "Week-by-week organization",
-                  "Student progress tracking",
-                  "Assignment integration",
-                  "Discussion forums",
+                  "Progress tracking",
+                  "Note integration",
+                  "Shareable links",
                 ],
-                example: "Advanced AI Ethics Course (45 papers)",
               },
               {
-                title: "Research Project Collections",
+                title: "Project Libraries",
                 description:
-                  "All papers related to specific grants, collaborations, or ongoing research.",
+                  "Organized collections for specific research projects or grant applications.",
                 features: [
-                  "Grant milestone tracking",
-                  "Collaboration tools",
-                  "Version control",
-                  "Progress reports",
+                  "Multi-author support",
+                  "Version history",
+                  "Export to bibliographies",
                 ],
-                example: "NSF Grant: Quantum Computing (89 papers)",
               },
               {
-                title: "Topic Monitoring Collections",
+                title: "Public Portfolios",
                 description:
-                  "Stay updated with emerging research in your field through automated curation.",
+                  "Showcase your research interests and expertise to the academic community.",
                 features: [
-                  "Alert subscriptions",
-                  "Auto-additions",
-                  "Trend analysis",
-                  "Weekly summaries",
+                  "Public profiles",
+                  "Follower system",
+                  "Research networking",
                 ],
-                example: "Emerging: Computer Vision (Auto-updated)",
               },
-            ].map(({ title, description, features, example }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-xl mb-3">{title}</h3>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-                  <div className="mb-4">
-                    <div className="text-sm font-medium text-primary mb-2">
-                      Key Features:
-                    </div>
-                    <ul className="grid grid-cols-2 gap-1">
+            ].map(({ title, description, features }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <CardWithVariants
+                  variant="elevated"
+                  hover="glow"
+                  className="h-full"
+                >
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                    <p className="text-muted-foreground mb-4">{description}</p>
+                    <ul className="space-y-2">
                       {features.map((feature) => (
                         <li
                           key={feature}
                           className="flex items-center gap-2 text-sm"
                         >
                           <div className="h-1.5 w-1.5 rounded-full bg-chart-1" />
-                          {feature}
+                          <span>{feature}</span>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      Example Collection:
-                    </div>
-                    <div className="text-sm font-medium">{example}</div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </CardWithVariants>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Collaboration Features */}
-        <section className="py-16 md:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Collaborate without friction
-              </h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                Share knowledge seamlessly with colleagues, students, and
-                research teams worldwide.
-              </p>
-              <div className="space-y-6">
-                {[
-                  {
-                    title: "Real-time Collaboration",
-                    description:
-                      "Multiple people can add papers, make notes, and organize simultaneously.",
-                  },
-                  {
-                    title: "Permission Management",
-                    description:
-                      "Fine-grained control: view-only, comment-only, edit access, or admin rights.",
-                  },
-                  {
-                    title: "Activity Feeds",
-                    description:
-                      "Stay updated with changes, new additions, and team discussions.",
-                  },
-                  {
-                    title: "Export & Integration",
-                    description:
-                      "Export to Zotero, Mendeley, EndNote, or generate reading lists for LMS.",
-                  },
-                ].map(({ title, description }) => (
-                  <div key={title} className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-chart-2/10 mt-1">
-                      <ArrowRight className="h-4 w-4 text-chart-2" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{title}</h3>
-                      <p className="text-muted-foreground text-sm">
-                        {description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <Card className="hover-glow">
-              <CardContent className="p-8">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-primary/20"></div>
-                      <div>
-                        <div className="font-medium text-sm">
-                          Dr. Sarah Chen
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Added 3 papers
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground">2h ago</div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-chart-1/20"></div>
-                      <div>
-                        <div className="font-medium text-sm">
-                          Prof. Ahmed Rahman
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Left a comment
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground">4h ago</div>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-chart-2/20"></div>
-                      <div>
-                        <div className="font-medium text-sm">
-                          Maria Rodriguez
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          Created new collection
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground">1d ago</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-16 md:py-24">
-          <Card className="bg-gradient-to-r from-chart-1/10 via-chart-2/5 to-transparent border-chart-1/20 hover-glow">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                Start organizing smarter today
-              </h3>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Transform scattered papers into organized knowledge. Create your
-                first collection in seconds.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      {/* CTA Section */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Ready to organize your research?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Create your first collection in seconds and start building your
+              research library.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login">
                 <Button
-                  asChild
                   size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow text-base"
+                  className="bg-gradient-to-r from-chart-1 to-chart-2 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
                 >
-                  <Link href={isAuthenticated ? "/dashboard" : "/login"} className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    {isAuthenticated ? "Access your collections" : "Create your first collection"}
-                  </Link>
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Start Free Trial
                 </Button>
+              </Link>
+              <Link href="/pricing">
                 <Button
-                  asChild
                   size="lg"
                   variant="outline"
-                  className="text-base"
+                  className="btn-hover-glow"
                 >
-                  <Link
-                    href="/products/papers"
-                    className="flex items-center gap-2"
-                  >
-                    Explore all products
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  View Pricing
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Unlimited collections on all plans. Start free.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-      </PageContainer>
-    </div>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 }

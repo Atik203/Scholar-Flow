@@ -1,496 +1,408 @@
 "use client";
-import { motion } from "framer-motion";
+
 import {
+  BookOpen,
   ChevronDown,
   ChevronUp,
   CreditCard,
   HelpCircle,
-  Lock,
+  Rocket,
   Search,
   Settings,
+  Shield,
   Users,
   Zap,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-const faqCategories = [
-  {
-    id: "general",
-    name: "General",
-    icon: HelpCircle,
-    color: "text-blue-500",
-  },
-  {
-    id: "features",
-    name: "Features",
-    icon: Zap,
-    color: "text-primary",
-  },
-  {
-    id: "pricing",
-    name: "Pricing & Billing",
-    icon: CreditCard,
-    color: "text-green-500",
-  },
-  {
-    id: "collaboration",
-    name: "Team & Collaboration",
-    icon: Users,
-    color: "text-purple-500",
-  },
-  {
-    id: "security",
-    name: "Security & Privacy",
-    icon: Lock,
-    color: "text-red-500",
-  },
-  {
-    id: "technical",
-    name: "Technical",
-    icon: Settings,
-    color: "text-orange-500",
-  },
-];
+interface FAQItem {
+  question: string;
+  answer: string;
+}
 
-const faqs = [
-  // General
-  {
-    category: "general",
-    question: "What is ScholarFlow?",
-    answer:
-      "ScholarFlow is an AI-powered research collaboration platform that helps researchers organize, annotate, and collaborate on academic papers. It combines semantic search, intelligent summaries, and collaborative tools to accelerate research workflows.",
-  },
-  {
-    category: "general",
-    question: "Who is ScholarFlow designed for?",
-    answer:
-      "ScholarFlow is built for researchers across academia and industry, including PhD students, postdocs, faculty members, research teams, and R&D departments. It's designed to support both individual researchers and collaborative teams.",
-  },
-  {
-    category: "general",
-    question: "How is ScholarFlow different from other reference managers?",
-    answer:
-      "Unlike traditional reference managers, ScholarFlow uses AI to provide semantic search, intelligent summaries, and contextual insights. It focuses on understanding and connecting ideas across papers rather than just organizing citations.",
-  },
-  {
-    category: "general",
-    question: "Do I need to install any software?",
-    answer:
-      "No! ScholarFlow is a web-based platform accessible from any modern browser. We also offer mobile apps for iOS and Android to access your research on the go.",
-  },
-
-  // Features
-  {
-    category: "features",
-    question: "How does the AI-powered search work?",
-    answer:
-      "Our semantic search uses advanced language models to understand the meaning and context of your queries, not just keywords. This allows you to find relevant papers even when they use different terminology or approach topics from different angles.",
-  },
-  {
-    category: "features",
-    question: "What file formats does ScholarFlow support?",
-    answer:
-      "ScholarFlow supports PDF files, which covers the vast majority of academic papers. We automatically extract text, figures, tables, and metadata. We're working on support for additional formats like Word documents and PowerPoint presentations.",
-  },
-  {
-    category: "features",
-    question: "Can I import my existing library from other tools?",
-    answer:
-      "Yes! We support imports from Zotero, Mendeley, EndNote, and BibTeX files. You can also bulk upload PDFs and we'll automatically extract metadata and organize them for you.",
-  },
-  {
-    category: "features",
-    question: "How accurate are the AI summaries?",
-    answer:
-      "Our AI summaries are highly accurate for identifying key findings, methodologies, and conclusions. However, we always recommend reading the original papers for critical research decisions. The summaries are designed to help you quickly assess relevance and prioritize your reading.",
-  },
-  {
-    category: "features",
-    question: "Can I export my annotations and notes?",
-    answer:
-      "Absolutely! You can export your annotations, notes, and bibliographies in various formats including Word, PDF, BibTeX, and RIS. We believe in data portability and never lock you into our platform.",
-  },
-
-  // Pricing
-  {
-    category: "pricing",
-    question: "Is there a free plan?",
-    answer:
-      "Yes! Our free plan allows you to upload up to 10 papers per month with basic AI summaries and personal workspace features. It's perfect for trying out ScholarFlow and light research usage.",
-  },
-  {
-    category: "pricing",
-    question: "What's included in the free trial?",
-    answer:
-      "All paid plans include a 14-day free trial with full access to premium features including unlimited papers, advanced AI insights, team collaboration, and priority support. No credit card required to start.",
-  },
-  {
-    category: "pricing",
-    question: "Do you offer student discounts?",
-    answer:
-      "Yes! We offer 50% off Pro plans for verified students and faculty members. Contact us with your institutional email address to apply for the academic discount.",
-  },
-  {
-    category: "pricing",
-    question: "Can I change my plan anytime?",
-    answer:
-      "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences. There are no long-term contracts or cancellation fees.",
-  },
-  {
-    category: "pricing",
-    question: "What payment methods do you accept?",
-    answer:
-      "We accept all major credit cards (Visa, MasterCard, Amex), PayPal, and bank transfers for annual plans. Enterprise customers can also pay via invoice with NET 30 terms.",
-  },
-
-  // Collaboration
-  {
-    category: "collaboration",
-    question: "How does team collaboration work?",
-    answer:
-      "Team members can share workspaces, collaborate on annotations in real-time, and maintain synchronized knowledge bases. You can set different permission levels and track team activity to see who's contributing what insights.",
-  },
-  {
-    category: "collaboration",
-    question: "Can I control who sees what in my team?",
-    answer:
-      "Yes! We offer granular permission controls. You can create private workspaces, share specific collections, and set read-only or edit permissions for different team members. Enterprise plans include advanced admin controls.",
-  },
-  {
-    category: "collaboration",
-    question: "How many team members can I add?",
-    answer:
-      "The Pro plan supports up to 5 team members, Team plan supports unlimited members, and Enterprise plans include custom user limits. All team members get full access to collaborative features within your plan limits.",
-  },
-  {
-    category: "collaboration",
-    question: "Can external collaborators access my research?",
-    answer:
-      "Yes! You can invite external collaborators with specific permissions. They can view and comment on papers without needing their own ScholarFlow subscription, making it easy to collaborate with colleagues at other institutions.",
-  },
-
-  // Security
-  {
-    category: "security",
-    question: "How secure is my research data?",
-    answer:
-      "We take security very seriously. All data is encrypted in transit and at rest using industry-standard AES-256 encryption. We're SOC 2 compliant and undergo regular security audits. Your research data is never used to train AI models.",
-  },
-  {
-    category: "security",
-    question: "Where is my data stored?",
-    answer:
-      "Data is stored in secure data centers in the US and EU (depending on your location) with full redundancy and backup systems. Enterprise customers can choose specific data residency requirements and even on-premise deployment options.",
-  },
-  {
-    category: "security",
-    question: "Do you use my papers to train AI models?",
-    answer:
-      "No, never. Your uploaded papers and research data are strictly private and are never used for training AI models or shared with third parties. We use only publicly available datasets for our AI training.",
-  },
-  {
-    category: "security",
-    question: "Can I delete my data?",
-    answer:
-      "Yes, you have complete control over your data. You can delete individual papers, annotations, or your entire account at any time. We provide data export tools and honor all deletion requests within 30 days.",
-  },
-
-  // Technical
-  {
-    category: "technical",
-    question: "What browsers are supported?",
-    answer:
-      "ScholarFlow works on all modern browsers including Chrome, Firefox, Safari, and Edge. We recommend keeping your browser updated for the best experience. Mobile browsers are also fully supported.",
-  },
-  {
-    category: "technical",
-    question: "Is there an API available?",
-    answer:
-      "Yes! Pro and higher plans include API access for integrating ScholarFlow with your existing research tools and workflows. We provide comprehensive documentation and SDKs for popular programming languages.",
-  },
-  {
-    category: "technical",
-    question: "What are the system requirements?",
-    answer:
-      "ScholarFlow is web-based, so you just need a modern browser and internet connection. For optimal performance, we recommend at least 4GB RAM and a stable broadband connection for large file uploads.",
-  },
-  {
-    category: "technical",
-    question: "Do you offer single sign-on (SSO)?",
-    answer:
-      "Yes! Team and Enterprise plans include SSO integration with popular providers like Google Workspace, Microsoft 365, Okta, and custom SAML providers. This makes it easy to integrate with your institutional authentication.",
-  },
-  {
-    category: "technical",
-    question: "What if I need help or training?",
-    answer:
-      "We offer multiple support channels: email support for all users, priority support for paid plans, live chat for Team/Enterprise customers, and dedicated training sessions for Enterprise accounts. We also have comprehensive documentation and video tutorials.",
-  },
-];
+interface FAQCategory {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  color: string;
+  faqs: FAQItem[];
+}
 
 export default function FAQPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [openItems, setOpenItems] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [openFAQs, setOpenFAQs] = useState<Set<string>>(new Set());
 
-  const toggleItem = (index: number) => {
-    const newOpenItems = new Set(openItems);
-    if (newOpenItems.has(index)) {
-      newOpenItems.delete(index);
+  const toggleFAQ = (id: string) => {
+    const newOpenFAQs = new Set(openFAQs);
+    if (newOpenFAQs.has(id)) {
+      newOpenFAQs.delete(id);
     } else {
-      newOpenItems.add(index);
+      newOpenFAQs.add(id);
     }
-    setOpenItems(newOpenItems);
+    setOpenFAQs(newOpenFAQs);
   };
 
-  const filteredFAQs = faqs.filter((faq) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
+  const categories: FAQCategory[] = [
+    {
+      icon: HelpCircle,
+      title: "Getting Started",
+      description: "New to ScholarFlow? Start here.",
+      color: "primary",
+      faqs: [
+        {
+          question: "What is ScholarFlow?",
+          answer: "ScholarFlow is an AI-powered research paper management platform that helps researchers organize, discover, and collaborate on academic papers. It includes features like smart search, AI summaries, collections, and team collaboration.",
+        },
+        {
+          question: "How do I create an account?",
+          answer: "Click the 'Get Started' button on our homepage. You can sign up with your email address or use Google/GitHub authentication for faster access. No credit card is required for the free plan.",
+        },
+        {
+          question: "Is ScholarFlow free to use?",
+          answer: "Yes! We offer a generous free plan that includes up to 50 papers, basic organization, and essential features. For more advanced features like AI summaries and unlimited papers, you can upgrade to Pro.",
+        },
+        {
+          question: "What file formats are supported?",
+          answer: "ScholarFlow supports PDF files, which is the standard format for academic papers. We automatically extract metadata, abstracts, and text content for search and AI features.",
+        },
+      ],
+    },
+    {
+      icon: Zap,
+      title: "Features & AI",
+      description: "Learn about our powerful features.",
+      color: "chart-1",
+      faqs: [
+        {
+          question: "How does the AI summary feature work?",
+          answer: "Our AI analyzes the full text of your papers and generates concise, accurate summaries highlighting key findings, methodology, and conclusions. You can customize summary length and focus areas.",
+        },
+        {
+          question: "What is semantic search?",
+          answer: "Semantic search understands the meaning of your query, not just keywords. So searching for 'machine learning in healthcare' will find papers about 'AI diagnosis' or 'neural networks for medical imaging' even if they don't contain your exact words.",
+        },
+        {
+          question: "Can I annotate PDFs in ScholarFlow?",
+          answer: "Yes! Pro and Team plans include PDF annotation features. You can highlight text, add notes, and share annotations with your team members.",
+        },
+        {
+          question: "How do collections work?",
+          answer: "Collections are like smart folders for organizing papers. You can create collections by topic, project, or any criteria. Papers can belong to multiple collections, and you can share collections with team members.",
+        },
+      ],
+    },
+    {
+      icon: CreditCard,
+      title: "Pricing & Billing",
+      description: "Questions about plans and payments.",
+      color: "chart-2",
+      faqs: [
+        {
+          question: "What payment methods do you accept?",
+          answer: "We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. Enterprise customers can pay by invoice with NET-30 terms.",
+        },
+        {
+          question: "Can I change my plan at any time?",
+          answer: "Yes! You can upgrade or downgrade your plan at any time. When upgrading, you get immediate access to new features. When downgrading, changes take effect at the next billing cycle.",
+        },
+        {
+          question: "Is there a student discount?",
+          answer: "Yes! Students with a valid .edu email address get 50% off Pro and Team plans. Contact our support team with proof of enrollment to apply the discount.",
+        },
+        {
+          question: "What's your refund policy?",
+          answer: "We offer a 30-day money-back guarantee on all paid plans. If you're not satisfied, contact support for a full refund, no questions asked.",
+        },
+      ],
+    },
+    {
+      icon: Users,
+      title: "Teams & Collaboration",
+      description: "Working together on research.",
+      color: "chart-3",
+      faqs: [
+        {
+          question: "How do I invite team members?",
+          answer: "From your team settings, click 'Invite Members' and enter their email addresses. They'll receive an invitation to join your team. You can set their role and permissions during the invite process.",
+        },
+        {
+          question: "What roles are available for team members?",
+          answer: "We offer three roles: Admin (full access), Member (can view and edit papers), and Viewer (read-only access). You can customize permissions for each role in team settings.",
+        },
+        {
+          question: "Can I share collections with people outside my team?",
+          answer: "Yes! You can create public links to share collections with anyone. You can also set permissions for external viewers, including view-only or commenting access.",
+        },
+        {
+          question: "How does real-time collaboration work?",
+          answer: "Team members can work on the same collection simultaneously. Changes sync in real-time, and you'll see who's currently viewing or editing. Comments and annotations are also shared instantly.",
+        },
+      ],
+    },
+    {
+      icon: Shield,
+      title: "Security & Privacy",
+      description: "Keeping your research safe.",
+      color: "chart-4",
+      faqs: [
+        {
+          question: "How is my data protected?",
+          answer: "All data is encrypted at rest and in transit using AES-256 encryption. We use SOC 2 certified infrastructure and conduct regular security audits. Your papers are stored securely in geographically distributed data centers.",
+        },
+        {
+          question: "Who can access my papers?",
+          answer: "Only you and team members you explicitly grant access to can see your papers. We never share your research with third parties or use it for training AI models.",
+        },
+        {
+          question: "Is ScholarFlow GDPR compliant?",
+          answer: "Yes, we are fully GDPR compliant. You can export or delete all your data at any time. We also offer data residency options for EU customers on Enterprise plans.",
+        },
+        {
+          question: "Do you offer SSO/SAML?",
+          answer: "Yes, Enterprise plans include SSO/SAML integration with identity providers like Okta, Azure AD, and Google Workspace. This enables secure, centralized authentication for your organization.",
+        },
+      ],
+    },
+    {
+      icon: Settings,
+      title: "Technical & API",
+      description: "Developer and integration questions.",
+      color: "chart-5",
+      faqs: [
+        {
+          question: "Does ScholarFlow have an API?",
+          answer: "Yes! We offer a comprehensive REST API for Pro and higher plans. You can programmatically manage papers, collections, and search. Full documentation is available at docs.scholarflow.io/api.",
+        },
+        {
+          question: "What integrations are available?",
+          answer: "We integrate with Zotero, Mendeley, EndNote, Google Drive, Dropbox, and more. Enterprise plans can request custom integrations with internal systems.",
+        },
+        {
+          question: "Can I import papers from other tools?",
+          answer: "Yes! We support importing from Zotero, Mendeley, EndNote, and BibTeX files. You can also bulk upload PDFs directly to your library.",
+        },
+        {
+          question: "Is there a browser extension?",
+          answer: "Yes! Our Chrome and Firefox extensions let you save papers directly from the web with one click. The extension automatically extracts metadata and adds papers to your library.",
+        },
+      ],
+    },
+  ];
 
-    const matchesCategory =
-      selectedCategory === "all" || faq.category === selectedCategory;
+  const filteredCategories = categories
+    .map((category) => ({
+      ...category,
+      faqs: category.faqs.filter(
+        (faq) =>
+          faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((category) =>
+      selectedCategory ? category.title === selectedCategory : true
+    );
 
-    return matchesSearch && matchesCategory;
-  });
+  const totalFAQs = filteredCategories.reduce(
+    (acc, cat) => acc + cat.faqs.length,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-24 lg:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-chart-1/5" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,theme(colors.primary/10),transparent_50%)]" />
+      <main>
+        <section className="py-12 md:py-20">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center max-w-4xl mx-auto"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                <HelpCircle className="h-4 w-4" />
+                Help Center
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent mb-6">
+                How can we help you?
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                Find answers to common questions about ScholarFlow features, pricing, and more.
+              </p>
 
-        <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
-              Frequently Asked{" "}
-              <span className="bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                Questions
-              </span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-xl text-muted-foreground leading-relaxed">
-              Find quick answers to common questions about ScholarFlow&apos;s
-              features, pricing, security, and more. Can&apos;t find what
-              you&apos;re looking for? Contact our support team.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+              <div className="max-w-2xl mx-auto relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search questions..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border border-border bg-background/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
-      {/* Search and Filters */}
-      <section className="py-16">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            {/* Search Bar */}
-            <div className="relative max-w-2xl mx-auto mb-12">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search questions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-xl border border-border bg-background/50 backdrop-blur focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-lg dark:text-white dark:placeholder:text-white/60"
-              />
-            </div>
-
-            {/* Category Filters */}
-            <div className="flex flex-wrap justify-center gap-3 mb-12">
+        <section className="py-8">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap justify-center gap-3">
               <button
-                onClick={() => setSelectedCategory("all")}
-                className={`px-6 py-3 rounded-xl transition-all duration-300 dark:text-white btn-hover-glow ${
-                  selectedCategory === "all"
+                onClick={() => setSelectedCategory(null)}
+                className={`px-6 py-3 rounded-xl transition-all duration-300 ${
+                  selectedCategory === null
                     ? "bg-primary text-primary-foreground shadow-lg"
                     : "bg-muted/50 hover:bg-primary/10 border border-border"
                 }`}
               >
                 All Questions
               </button>
-              {faqCategories.map((category) => (
+              {categories.map(({ title, icon: Icon, color }) => (
                 <button
-                  key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 dark:text-white btn-hover-glow ${
-                    selectedCategory === category.id
+                  key={title}
+                  onClick={() => setSelectedCategory(selectedCategory === title ? null : title)}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-2 ${
+                    selectedCategory === title
                       ? "bg-primary text-primary-foreground shadow-lg"
                       : "bg-muted/50 hover:bg-primary/10 border border-border"
                   }`}
                 >
-                  <category.icon
-                    className={`h-4 w-4 ${selectedCategory === category.id ? "text-primary-foreground" : category.color}`}
-                  />
-                  {category.name}
+                  <Icon className={`h-4 w-4 ${selectedCategory === title ? "text-primary-foreground" : `text-${color}`}`} />
+                  {title}
                 </button>
               ))}
             </div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* FAQ Items */}
-      <section className="pb-24">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            {filteredFAQs.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16"
-              >
-                <HelpCircle className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  No questions found
-                </h3>
-                <p className="text-muted-foreground">
-                  Try adjusting your search terms or browse different
-                  categories.
-                </p>
-              </motion.div>
-            ) : (
-              <div className="space-y-4">
-                {filteredFAQs.map((faq, index) => {
-                  const isOpen = openItems.has(index);
-                  const category = faqCategories.find(
-                    (cat) => cat.id === faq.category
-                  );
-
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.3 }}
-                      transition={{ delay: index * 0.05, duration: 0.6 }}
-                      className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-500"
-                    >
-                      <button
-                        onClick={() => toggleItem(index)}
-                        className="w-full text-left p-6 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-2xl"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            {category && (
-                              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary/20 to-chart-1/20 border border-primary/30 flex items-center justify-center">
-                                <category.icon
-                                  className={`h-4 w-4 ${category.color}`}
-                                />
-                              </div>
-                            )}
-                            <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
-                              {faq.question}
-                            </h3>
-                          </div>
-                          <div className="ml-4">
-                            {isOpen ? (
-                              <ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                            )}
-                          </div>
-                        </div>
-                      </button>
-
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-6 pb-6">
-                            <p className="text-muted-foreground leading-relaxed pl-11">
-                              {faq.answer}
-                            </p>
-                          </div>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  );
-                })}
-              </div>
+            {searchQuery && (
+              <p className="text-center mt-4 text-muted-foreground">
+                Found {totalFAQs} results for &quot;{searchQuery}&quot;
+              </p>
             )}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Still Have Questions */}
-      <section className="py-24 relative overflow-hidden bg-gradient-to-b from-background to-muted/20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,theme(colors.primary/5),transparent_70%)]" />
+        <section className="py-12 md:py-16">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <div className="space-y-12">
+              {filteredCategories.map(
+                ({ icon: Icon, title, description, color, faqs }) =>
+                  faqs.length > 0 && (
+                    <motion.div
+                      key={title}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center`}>
+                          <Icon className={`h-6 w-6 text-${color}`} />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold">{title}</h2>
+                          <p className="text-muted-foreground">{description}</p>
+                        </div>
+                      </div>
 
-        <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
-          >
-            <h2 className="text-3xl font-bold tracking-tight lg:text-4xl mb-6">
-              Still Have Questions?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-              Our support team is here to help. Get in touch and we&apos;ll
-              respond within 24 hours.
-            </p>
+                      <div className="space-y-4 max-w-4xl">
+                        {faqs.map(({ question, answer }, index) => {
+                          const faqId = `${title}-${question}`;
+                          const isOpen = openFAQs.has(faqId);
 
-            <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
-              <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500">
-                <HelpCircle className="h-8 w-8 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Documentation</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Comprehensive guides and tutorials
-                </p>
-                <a
-                  href="/docs"
-                  className="text-primary hover:text-primary/80 transition-colors font-medium"
-                >
-                  Browse Docs →
-                </a>
-              </div>
-
-              <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500">
-                <Users className="h-8 w-8 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Community</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Connect with other researchers
-                </p>
-                <a
-                  href="/community"
-                  className="text-primary hover:text-primary/80 transition-colors font-medium"
-                >
-                  Join Community →
-                </a>
-              </div>
-
-              <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/50 p-6 hover:shadow-xl transition-all duration-500">
-                <Search className="h-8 w-8 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Contact Support</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Get personalized help from our team
-                </p>
-                <a
-                  href="/contact"
-                  className="text-primary hover:text-primary/80 transition-colors font-medium"
-                >
-                  Contact Us →
-                </a>
-              </div>
+                          return (
+                            <motion.div
+                              key={question}
+                              initial={{ opacity: 0, y: 20 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              viewport={{ once: true, amount: 0.3 }}
+                              transition={{ delay: index * 0.05, duration: 0.6 }}
+                              className="group relative rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-500"
+                            >
+                              <button
+                                onClick={() => toggleFAQ(faqId)}
+                                className="w-full text-left p-6 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-2xl"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3 flex-1">
+                                    <div className={`h-8 w-8 rounded-lg bg-gradient-to-br from-${color}/20 to-chart-1/20 border border-${color}/30 flex items-center justify-center`}>
+                                      <Icon className={`h-4 w-4 text-${color}`} />
+                                    </div>
+                                    <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                                      {question}
+                                    </h3>
+                                  </div>
+                                  <div className="ml-4">
+                                    {isOpen ? (
+                                      <ChevronUp className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    ) : (
+                                      <ChevronDown className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                              {isOpen && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="px-6 pb-6">
+                                    <p className="text-muted-foreground leading-relaxed pl-11">
+                                      {answer}
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )
+              )}
             </div>
-          </motion.div>
-        </div>
-      </section>
+          </div>
+        </section>
+
+        <section className="py-16 md:py-24 bg-muted/30">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center max-w-3xl mx-auto"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Still need help?</h2>
+              <p className="text-xl text-muted-foreground mb-8">
+                Can&apos;t find what you&apos;re looking for? Our support team is here to help.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/contact">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
+                  >
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Contact Support
+                  </Button>
+                </Link>
+                <Link href="/resources/docs">
+                  <Button size="lg" variant="outline">
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    View Documentation
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

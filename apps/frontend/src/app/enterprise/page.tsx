@@ -1,448 +1,377 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "motion/react";
 import {
+  BookOpen,
   Building2,
   Check,
+  Globe,
+  Headphones,
+  Lock,
   Rocket,
-  Scale,
   Shield,
   Users,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function EnterprisePage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
-
   return (
     <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
+      <main>
         <section className="py-12 md:py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <Building2 className="h-4 w-4" />
-                Enterprise Solutions
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                Research at enterprise scale
-              </h1>
-              <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-                Powerful research management solutions designed for large
-                organizations, universities, and research institutions with
-                advanced security, compliance, and collaboration features.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link
-                    href="#contact-sales"
-                    className="flex items-center gap-2"
-                  >
-                    <Rocket className="h-5 w-5" />
-                    Contact Sales
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base"
-                >
-                  <Link
-                    href="#enterprise-demo"
-                    className="flex items-center gap-2"
-                  >
-                    <Building2 className="h-5 w-5" />
-                    Request Demo
-                  </Link>
-                </Button>
-              </div>
-            </div>
-
-            {/* Hero Visual */}
-            <Card className="hover-lift">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <Scale className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Unlimited Scale</h3>
-                      <p className="text-muted-foreground">
-                        Support for millions of papers and thousands of users.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-1/10">
-                      <Shield className="h-6 w-6 text-chart-1" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Enterprise Security
-                      </h3>
-                      <p className="text-muted-foreground">
-                        SOC 2, GDPR compliance with advanced access controls.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-2/10">
-                      <Zap className="h-6 w-6 text-chart-2" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibent text-lg">
-                        Custom Integration
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Seamless integration with existing research systems.
-                      </p>
-                    </div>
-                  </div>
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                  <Building2 className="h-4 w-4" />
+                  Enterprise Solutions
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
+                  Research at enterprise scale
+                </h1>
+                <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
+                  Power your institution with advanced security, dedicated
+                  support, and custom integrations for teams of any size.
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
+                  >
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Request Demo
+                  </Button>
+                  <Link href="/company/contact">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                    >
+                      <Headphones className="h-5 w-5 mr-2" />
+                      Contact Sales
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
 
-        {/* Enterprise Features */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Built for enterprise requirements
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Everything your organization needs to manage research at scale
-              with security, compliance, and performance.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Shield,
-                title: "Advanced Security",
-                description:
-                  "SOC 2 Type II, GDPR compliance, SSO integration, and enterprise-grade encryption.",
-                features: [
-                  "Single Sign-On (SSO)",
-                  "Role-based Access Control",
-                  "Data Encryption",
-                  "Audit Logs",
-                  "Regular Security Audits",
-                ],
-              },
-              {
-                icon: Scale,
-                title: "Unlimited Scale",
-                description:
-                  "Handle millions of research papers with high-performance infrastructure and global CDN.",
-                features: [
-                  "Unlimited Storage",
-                  "Global CDN",
-                  "99.99% Uptime SLA",
-                  "Auto-scaling",
-                  "High Availability"
-                ],
-              },
-              {
-                icon: Users,
-                title: "Team Management",
-                description:
-                  "Sophisticated user management with departments, permissions, and collaboration tools.",
-                features: [
-                  "Department Organization",
-                  "Custom User Roles",
-                  "Team Analytics",
-                  "Bulk Operations",
-                  "Collaboration Tools",
-                ],
-              },
-              {
-                icon: Zap,
-                title: "Custom Integrations",
-                description:
-                  "Connect with existing research systems, databases, and institutional repositories.",
-                features: [
-                  "API Access",
-                  "Webhook Support",
-                  "LDAP/AD Integration",
-                  "Custom Connectors",
-                  "Data Import Services",
-                ],
-              },
-              {
-                icon: Building2,
-                title: "White-label Options",
-                description:
-                  "Brand the platform with your institution's identity and custom domain.",
-                features: [
-                  "Custom Branding",
-                  "Custom Domain",
-                  "White-label UI",
-                  "Institutional SSO",
-                  "Branded Email Notifications",
-                ],
-              },
-              {
-                icon: Check,
-                title: "Premium Support",
-                description:
-                  "24/7 dedicated support with guaranteed response times and account management.",
-                features: [
-                  "24/7 Priority Support",
-                  "Dedicated Account Manager",
-                  "Training Sessions",
-                  "Implementation Support",
-                  "Regular Check-ins",
-                ],
-              },
-            ].map(({ icon: Icon, title, description, features }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-2">{title}</h3>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-                  <ul className="space-y-2">
-                    {features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <Check className="h-4 w-4 text-chart-1" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Enterprise Pricing */}
-        <section className="py-16 md:py-24 bg-muted/30 rounded-2xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Enterprise pricing plans
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Flexible pricing options designed for organizations of all sizes
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                name: "Professional",
-                price: "$49",
-                period: "per user/month",
-                description: "Perfect for research teams and small departments",
-                features: [
-                  "Up to 50 users",
-                  "10GB per user storage",
-                  "Advanced search & AI",
-                  "Team collaboration",
-                  "Email support",
-                ],
-                cta: "Start Free Trial",
-                popular: false,
-              },
-              {
-                name: "Enterprise",
-                price: "$99",
-                period: "per user/month",
-                description: "Comprehensive solution for large organizations",
-                features: [
-                  "Unlimited users",
-                  "Unlimited storage",
-                  "Custom integrations",
-                  "SSO & advanced security",
-                  "Priority support",
-                ],
-                cta: "Contact Sales",
-                popular: true,
-              },
-              {
-                name: "Enterprise+",
-                price: "Custom",
-                period: "pricing",
-                description: "Tailored solutions for complex requirements",
-                features: [
-                  "White-label options",
-                  "On-premise deployment",
-                  "Custom development",
-                  "Dedicated support",
-                  "SLA guarantees",
-                ],
-                cta: "Contact Sales",
-                popular: false,
-              },
-            ].map(
-              ({
-                name,
-                price,
-                period,
-                description,
-                features,
-                cta,
-                popular,
-              }) => (
-                <Card
-                  key={name}
-                  className={`relative ${popular ? "ring-2 ring-primary" : ""}`}
-                >
-                  {popular && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-                  <CardContent className="p-6">
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <Card className="border-2 shadow-xl">
+                  <CardContent className="p-8">
                     <div className="text-center mb-6">
-                      <h3 className="text-xl font-semibold mb-2">{name}</h3>
-                      <div className="mb-2">
-                        <span className="text-3xl font-bold">{price}</span>
-                        <span className="text-muted-foreground">/{period}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {description}
+                      <h3 className="text-2xl font-bold mb-2">
+                        Trusted by leading institutions
+                      </h3>
+                      <p className="text-muted-foreground">
+                        5,000+ organizations worldwide
                       </p>
                     </div>
-                    <ul className="space-y-3 mb-6">
-                      {features.map((feature) => (
-                        <li
-                          key={feature}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <Check className="h-4 w-4 text-chart-1" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      className="w-full"
-                      variant={popular ? "gradient" : "outline"}
-                    >
-                      {cta}
-                    </Button>
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div className="p-4 rounded-lg bg-primary/5">
+                        <div className="text-3xl font-bold text-primary mb-1">
+                          99.99%
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Uptime SLA
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-lg bg-chart-1/5">
+                        <div className="text-3xl font-bold text-chart-1 mb-1">
+                          SOC 2
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Certified
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-lg bg-chart-2/5">
+                        <div className="text-3xl font-bold text-chart-2 mb-1">
+                          24/7
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Support
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-lg bg-chart-3/5">
+                        <div className="text-3xl font-bold text-chart-3 mb-1">
+                          GDPR
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Compliant
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
-              )
-            )}
-          </div>
-        </section>
-
-        {/* Customer Testimonials */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted by leading organizations
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              See how top research institutions are transforming their workflows
-              with ScholarFlow
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                quote:
-                  "ScholarFlow transformed our research collaboration. Our publication rate increased by 40% in the first year.",
-                author: "Dr. Sarah Wilson",
-                title: "Research Director",
-                company: "Global University",
-                logo: "🏛️",
-              },
-              {
-                quote:
-                  "The enterprise security features gave us confidence to digitize our entire research library safely.",
-                author: "Prof. Michael Chen",
-                title: "CTO",
-                company: "Tech Research Institute",
-                logo: "🔬",
-              },
-              {
-                quote:
-                  "Implementation was seamless. Their team worked closely with our IT department every step of the way.",
-                author: "Lisa Rodriguez",
-                title: "IT Manager",
-                company: "Medical Research Center",
-                logo: "🏥",
-              },
-              {
-                quote:
-                  "The ROI was immediate. We saved thousands of hours in research organization and discovery.",
-                author: "Dr. James Park",
-                title: "Department Head",
-                company: "Innovation Labs",
-                logo: "💡",
-              },
-            ].map(({ quote, author, title, company, logo }) => (
-              <Card key={author} className="p-6">
-                <CardContent className="p-0">
-                  <div className="text-4xl mb-4">{logo}</div>
-                  <blockquote className="text-lg mb-4">"{quote}"</blockquote>
-                  <div>
-                    <div className="font-semibold">{author}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {title}, {company}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section id="contact-sales" className="py-16 md:py-24 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to transform your research organization?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Let's discuss how ScholarFlow Enterprise can meet your specific
-              requirements.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                asChild
-                size="lg"
-                variant="gradient"
-                className="btn-hover-glow btn-shine text-base"
-              >
-                <Link href="/contact-sales" className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5" />
-                  Contact Sales Team
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="text-base">
-                <Link
-                  href="/enterprise/demo"
-                  className="flex items-center gap-2"
-                >
-                  <Zap className="h-5 w-5" />
-                  Schedule Demo
-                </Link>
-              </Button>
+              </motion.div>
             </div>
           </div>
         </section>
-      </PageContainer>
+
+        <section className="py-16 md:py-24 bg-muted/30">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Enterprise-grade features
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Everything your institution needs to manage research at scale.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: Shield,
+                  title: "Advanced Security",
+                  description:
+                    "SSO, SAML 2.0, encryption at rest and in transit, and comprehensive audit logs.",
+                  color: "primary",
+                },
+                {
+                  icon: Users,
+                  title: "Team Management",
+                  description:
+                    "Granular permissions, department organization, and centralized administration.",
+                  color: "chart-1",
+                },
+                {
+                  icon: Zap,
+                  title: "Custom Integrations",
+                  description:
+                    "Connect with your existing tools via API, webhooks, and pre-built connectors.",
+                  color: "chart-2",
+                },
+                {
+                  icon: Lock,
+                  title: "Data Governance",
+                  description:
+                    "Data residency options, retention policies, and compliance controls.",
+                  color: "chart-3",
+                },
+                {
+                  icon: Headphones,
+                  title: "Dedicated Support",
+                  description:
+                    "24/7 priority support, dedicated customer success manager, and SLA guarantees.",
+                  color: "chart-4",
+                },
+                {
+                  icon: Globe,
+                  title: "Global Infrastructure",
+                  description:
+                    "Multi-region deployment, CDN acceleration, and 99.99% uptime guarantee.",
+                  color: "chart-5",
+                },
+              ].map(({ icon: Icon, title, description, color }, index) => (
+                <motion.div
+                  key={title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                >
+                  <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <CardContent className="p-6">
+                      <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center mb-4`}>
+                        <Icon className={`h-6 w-6 text-${color}`} />
+                      </div>
+                      <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                      <p className="text-muted-foreground">{description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 md:py-24">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Enterprise Plans
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                Flexible pricing for organizations of all sizes
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {[
+                {
+                  name: "Team",
+                  price: "$49",
+                  period: "per user/month",
+                  description: "For growing research teams",
+                  features: [
+                    "Up to 50 team members",
+                    "SSO authentication",
+                    "Priority support",
+                    "Advanced analytics",
+                    "API access",
+                  ],
+                  color: "primary",
+                  popular: false,
+                },
+                {
+                  name: "Enterprise",
+                  price: "Custom",
+                  period: "contact sales",
+                  description: "For large institutions",
+                  features: [
+                    "Unlimited team members",
+                    "SAML 2.0 SSO",
+                    "24/7 dedicated support",
+                    "Custom integrations",
+                    "Data residency options",
+                    "Dedicated account manager",
+                  ],
+                  color: "chart-1",
+                  popular: true,
+                },
+                {
+                  name: "Academic",
+                  price: "Special",
+                  period: "academic pricing",
+                  description: "For universities & research institutions",
+                  features: [
+                    "Institution-wide licensing",
+                    "Student discounts",
+                    "Library integration",
+                    "Research compliance tools",
+                    "Grant reporting features",
+                  ],
+                  color: "chart-2",
+                  popular: false,
+                },
+              ].map(
+                (
+                  {
+                    name,
+                    price,
+                    period,
+                    description,
+                    features,
+                    color,
+                    popular,
+                  },
+                  index
+                ) => (
+                  <motion.div
+                    key={name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
+                  >
+                    <Card
+                      className={`h-full relative ${popular ? "border-2 border-primary shadow-xl" : ""}`}
+                    >
+                      {popular && (
+                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full">
+                          Most Popular
+                        </div>
+                      )}
+                      <CardContent className="p-6">
+                        <h3 className={`text-xl font-bold text-${color} mb-2`}>
+                          {name}
+                        </h3>
+                        <div className="mb-4">
+                          <span className="text-4xl font-bold">{price}</span>
+                          <span className="text-muted-foreground ml-2">
+                            {period}
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground mb-6">
+                          {description}
+                        </p>
+                        <ul className="space-y-3 mb-6">
+                          {features.map((feature) => (
+                            <li
+                              key={feature}
+                              className="flex items-center gap-2"
+                            >
+                              <Check className={`h-5 w-5 text-${color}`} />
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Button
+                          className={`w-full ${popular ? "bg-gradient-to-r from-primary to-chart-1 hover:opacity-90" : ""}`}
+                          variant={popular ? "default" : "outline"}
+                        >
+                          {price === "Custom" || price === "Special"
+                            ? "Contact Sales"
+                            : "Start Free Trial"}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 md:py-24 bg-muted/30 text-center">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-3xl mx-auto"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Ready to scale your research?
+              </h2>
+              <p className="text-xl text-muted-foreground mb-8">
+                Schedule a demo and see how ScholarFlow can transform your
+                institution.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
+                >
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Request Demo
+                </Button>
+                <Link href="/pricing">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                  >
+                    <BookOpen className="h-5 w-5 mr-2" />
+                    View All Plans
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

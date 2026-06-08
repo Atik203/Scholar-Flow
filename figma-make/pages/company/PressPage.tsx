@@ -53,6 +53,7 @@ export function PressPage({ onNavigate }: PressPageProps) {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground"
+                onClick={() => onNavigate?.("/company/contact")}
               >
                 <Mail className="h-5 w-5 mr-2" />
                 Contact Press Team
@@ -139,7 +140,15 @@ export function PressPage({ onNavigate }: PressPageProps) {
                           </h3>
                           <p className="text-muted-foreground">{excerpt}</p>
                         </div>
-                        <Button variant="ghost" className="shrink-0">
+                        <Button
+                          variant="ghost"
+                          className="shrink-0"
+                          onClick={() =>
+                            onNavigate?.(
+                              `/press/${title.toLowerCase().replace(/\s+/g, "-")}`,
+                            )
+                          }
+                        >
                           Read More <ArrowRight className="h-4 w-4 ml-2" />
                         </Button>
                       </div>
@@ -209,7 +218,16 @@ export function PressPage({ onNavigate }: PressPageProps) {
                       <p className="text-sm text-muted-foreground italic mb-4">
                         &quot;{quote}&quot;
                       </p>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          window.open(
+                            `https://news.example.com/${source.toLowerCase().replace(/\s+/g, "-")}`,
+                            "_blank",
+                          )
+                        }
+                      >
                         Read Article <ExternalLink className="h-4 w-4 ml-2" />
                       </Button>
                     </CardContent>
@@ -310,11 +328,18 @@ export function PressPage({ onNavigate }: PressPageProps) {
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground"
+                    onClick={() =>
+                      window.open("/downloads/press-kit.zip", "_blank")
+                    }
                   >
                     <Download className="h-5 w-5 mr-2" />
                     Download Press Kit
                   </Button>
-                  <Button size="lg" variant="outline">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => onNavigate?.("/brand-guidelines")}
+                  >
                     <Image className="h-5 w-5 mr-2" />
                     Brand Guidelines
                   </Button>

@@ -10,7 +10,7 @@ description: Core project standards and architecture
 1. **Package Manager**: Use Yarn Berry (v4). Never introduce npm or package-lock.json.
 2. **TypeScript**: Strict typing; avoid `any`. Run `yarn type-check` before committing major changes.
 3. **Linting/Formatting**: Use existing ESLint/Prettier configs. Don't reformat unrelated code in a patch.
-4. **Monorepo**: Keep concerns separated (frontend vs backend). Shared logic belongs in `packages/*`.
+4. **Monorepo**: Keep concerns separated (frontend vs backend). No shared `packages/*` directory exists; shared logic should be placed in the appropriate workspace or extracted to a shared utility module if needed.
 5. **Ports**: Frontend 3000, Backend 5000.
 
 ## Environment & Security
@@ -22,7 +22,7 @@ description: Core project standards and architecture
 
 ## Project Status
 
-- **Current Phase**: Phase 1 MVP – Week 5.5 complete (AI summarization + role-based dashboard refresh)
+- **Current Phase**: Phase 1 MVP (AI summarization + role-based dashboard refresh)
 - **Technology Stack**: Next.js 15 + Express.js + PostgreSQL + Prisma ORM + TypeScript + Sonner (Toast)
 - **Major Completions**: OAuth auth ✅, Paper/collection/workspace systems ✅, AI insights ✅, Modern dashboard UX ✅
 - **Recent Improvements**: Security hardening, performance monitoring, comprehensive error handling, health checks, admin dashboard routing ✅
@@ -36,7 +36,7 @@ description: Core project standards and architecture
 4. **Tests**: Add/adjust tests for new logic; critical features require comprehensive test coverage.
 5. **Commits/PRs**: Small, focused, conventional messages. Reference related issue when possible.
 
-## 🚀 Production-Ready Standards (September 17, 2025)
+## 🚀 Production-Ready Standards
 
 ### Security & Performance
 - **Debug Logging**: Only log debug info in development (`NODE_ENV !== "production"`)

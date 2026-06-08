@@ -1,8 +1,5 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ArrowRight,
   BookOpen,
@@ -14,19 +11,23 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
+import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { CardWithVariants } from "@/components/ui/card-variants";
 
-export default function ProductPapersPage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
+export default function ProductsPapersPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
-        <section className="py-12 md:py-20">
+    <>
+      {/* Hero Section */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                 <FileText className="h-4 w-4" />
                 Research Papers Platform
@@ -40,35 +41,38 @@ export default function ProductPapersPage() {
                 research.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
+                <Link href="/login">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
                   >
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated ? "Go to dashboard" : "Start free today"}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base"
-                >
-                  <Link href="#demo" className="flex items-center gap-2">
-                    <Search className="h-5 w-5" />
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Start free today
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                  >
+                    <Search className="h-5 w-5 mr-2" />
                     See it in action
-                  </Link>
-                </Button>
+                  </Button>
+                </Link>
               </div>
-            </div>
-            <Card className="hover-glow border-2">
-              <CardContent className="p-8">
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <CardWithVariants
+                variant="elevated"
+                hover="glow"
+                padding="lg"
+                className="border-2 shadow-xl backdrop-blur-sm"
+              >
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
                     <div className="p-3 rounded-lg bg-primary/10">
@@ -107,22 +111,31 @@ export default function ProductPapersPage() {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </CardWithVariants>
+            </motion.div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Grid */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
+      {/* Features Grid */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Everything you need for modern research
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From discovery to analysis, our platform accelerates every step of
-              your research workflow.
+              From discovery to analysis, our platform accelerates every step
+              of your research workflow.
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -167,220 +180,139 @@ export default function ProductPapersPage() {
                   "Auto-generate bibliographies in any format. Track impact and citation networks.",
                 color: "chart-5",
               },
-            ].map(({ icon: Icon, title, description, color }) => (
-              <Card key={title} className="hover-lift hover-glow group">
-                <CardContent className="p-6">
+            ].map(({ icon: Icon, title, description, color }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <CardWithVariants
+                  variant="default"
+                  hover="lift"
+                  padding="md"
+                  className="h-full bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-500 group"
+                >
                   <div
-                    className={`p-3 rounded-lg bg-${color}/10 mb-4 group-hover:bg-${color}/20 transition-colors`}
+                    className={`p-3 rounded-lg bg-${color}/10 mb-4 w-fit group-hover:scale-110 transition-transform duration-200`}
                   >
                     <Icon className={`h-6 w-6 text-${color}`} />
                   </div>
-                  <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                  <p className="text-muted-foreground">{description}</p>
-                </CardContent>
-              </Card>
+                  <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                    {title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {description}
+                  </p>
+                </CardWithVariants>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* How It Works */}
-        <section className="py-16 md:py-24 bg-muted/30 rounded-2xl">
-          <div className="text-center mb-16">
+      {/* How It Works */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Get started in minutes
             </h2>
             <p className="text-xl text-muted-foreground">
               Three simple steps to transform your research workflow
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 step: "01",
                 title: "Import & Upload",
                 description:
-                  "Add papers via PDF upload, URL import, or direct database search. Our AI extracts all metadata automatically.",
-                features: [
-                  "PDF drag & drop",
-                  "arXiv/PubMed import",
-                  "Auto metadata extraction",
-                ],
+                  "Drag and drop PDFs, paste URLs, or connect to academic databases. We handle the rest.",
               },
               {
                 step: "02",
-                title: "Organize & Annotate",
+                title: "Organize & Discover",
                 description:
-                  "Create collections, add tags, and make notes. Our smart categorization helps you stay organized effortlessly.",
-                features: [
-                  "Smart collections",
-                  "Collaborative folders",
-                  "Rich annotations",
-                ],
+                  "AI automatically categorizes papers and suggests related research you might have missed.",
               },
               {
                 step: "03",
-                title: "Discover & Analyze",
+                title: "Analyze & Collaborate",
                 description:
-                  "Use AI-powered search and insights to find connections, identify gaps, and accelerate your research.",
-                features: [
-                  "Semantic search",
-                  "AI summaries",
-                  "Citation analysis",
-                ],
+                  "Get AI insights, share with your team, and accelerate your research breakthroughs.",
               },
-            ].map(({ step, title, description, features }) => (
-              <Card key={step} className="relative">
-                <CardHeader>
-                  <div className="text-4xl font-bold text-primary/20 mb-2">
-                    {step}
-                  </div>
-                  <CardTitle className="text-xl">{title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-                  <ul className="space-y-2">
-                    {features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
+            ].map(({ step, title, description }, index) => (
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-chart-1 text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                  {step}
+                </div>
+                <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                <p className="text-muted-foreground">{description}</p>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Use Cases */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background to-muted/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,theme(colors.primary/5),transparent_70%)]" />
+
+        <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Built for every researcher
+              Ready to supercharge your research?
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Whether you're a student, academic, or industry researcher
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join thousands of researchers already using ScholarFlow to
+              accelerate their work.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                title: "PhD Students & Postdocs",
-                description:
-                  "Master your literature review, track progress, and discover research gaps.",
-                benefits: [
-                  "Comprehensive literature tracking",
-                  "Progress visualization",
-                  "Advisor collaboration",
-                ],
-                cta: "Accelerate your research",
-              },
-              {
-                title: "Academic Researchers",
-                description:
-                  "Stay current with your field, manage grant research, and collaborate globally.",
-                benefits: [
-                  "Field trend monitoring",
-                  "Grant proposal support",
-                  "International collaboration",
-                ],
-                cta: "Enhance your impact",
-              },
-              {
-                title: "Industry R&D Teams",
-                description:
-                  "Track competitive research, evaluate prior art, and accelerate innovation.",
-                benefits: [
-                  "Competitive intelligence",
-                  "Patent landscape analysis",
-                  "Innovation acceleration",
-                ],
-                cta: "Drive innovation",
-              },
-              {
-                title: "Research Institutions",
-                description:
-                  "Enable campus-wide collaboration, track institutional output, and reduce duplicated effort.",
-                benefits: [
-                  "Institution-wide libraries",
-                  "Collaboration analytics",
-                  "Resource optimization",
-                ],
-                cta: "Transform your institution",
-              },
-            ].map(({ title, description, benefits, cta }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-8">
-                  <h3 className="font-semibold text-xl mb-3">{title}</h3>
-                  <p className="text-muted-foreground mb-6">{description}</p>
-                  <ul className="space-y-2 mb-6">
-                    {benefits.map((benefit) => (
-                      <li key={benefit} className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        <span className="text-sm">{benefit}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button variant="outline" className="group">
-                    {cta}
-                    <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-16 md:py-24">
-          <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-primary/20 hover-glow">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to revolutionize your research?
-              </h3>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of researchers who've already transformed their
-                workflow with ScholarFlow.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login">
                 <Button
-                  asChild
                   size="lg"
                   variant="gradient"
-                  className="btn-hover-glow text-base"
+                  className="btn-hover-glow btn-shine"
                 >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
-                  >
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated
-                      ? "Access your library"
-                      : "Start your free library"}
-                  </Link>
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Start Free Trial
                 </Button>
+              </Link>
+              <Link href="/pricing">
                 <Button
-                  asChild
                   size="lg"
                   variant="outline"
-                  className="text-base"
                 >
-                  <Link href="/pricing" className="flex items-center gap-2">
-                    View pricing
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  View Pricing
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Free forever for up to 100 papers. No credit card required.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-      </PageContainer>
-    </div>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 }

@@ -1,8 +1,5 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight,
   BarChart3,
@@ -13,21 +10,25 @@ import {
   Sparkles,
   Target,
   TrendingUp,
-  Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
+import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { CardWithVariants } from "@/components/ui/card-variants";
 
-export default function ProductAIInsightsPage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
+export default function ProductsAIInsightsPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
-        <section className="py-12 md:py-20">
+    <>
+      {/* Hero Section */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chart-3/10 text-chart-3 text-sm font-medium mb-6">
                 <Brain className="h-4 w-4" />
                 AI Insights Platform
@@ -41,93 +42,97 @@ export default function ProductAIInsightsPage() {
                 how you understand literature.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
+                <Link href="/login">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
                   >
-                    <Rocket className="h-5 w-5" />
-                    {isAuthenticated
-                      ? "Go to dashboard"
-                      : "Explore AI insights"}
-                  </Link>
-                </Button>
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Explore AI insights
+                  </Button>
+                </Link>
                 <Button
-                  asChild
                   size="lg"
                   variant="outline"
-                  className="text-base"
+                  className="btn-hover-glow"
                 >
-                  <Link href="#demo" className="flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    See AI in action
-                  </Link>
+                  <Brain className="h-5 w-5 mr-2" />
+                  See AI in action
                 </Button>
               </div>
-            </div>
-            <Card className="hover-glow border-2">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-3/10">
-                      <Brain className="h-6 w-6 text-chart-3" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Smart Analysis</h3>
-                      <p className="text-muted-foreground">
-                        AI analyzes patterns across millions of papers to
-                        surface hidden insights.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-4/10">
-                      <TrendingUp className="h-6 w-6 text-chart-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Trend Prediction
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Identify emerging research directions before they become
-                        mainstream.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-5/10">
-                      <Lightbulb className="h-6 w-6 text-chart-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">Research Gaps</h3>
-                      <p className="text-muted-foreground">
-                        Discover unexplored areas and potential breakthrough
-                        opportunities.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
+            </motion.div>
 
-        {/* AI Capabilities */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Card className="border-2 shadow-xl">
+                <CardContent className="p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-3/10">
+                        <Brain className="h-6 w-6 text-chart-3" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Smart Analysis</h3>
+                        <p className="text-muted-foreground">
+                          AI analyzes patterns across millions of papers to
+                          surface hidden insights.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-4/10">
+                        <TrendingUp className="h-6 w-6 text-chart-4" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Trend Prediction</h3>
+                        <p className="text-muted-foreground">
+                          Identify emerging research directions before they
+                          become mainstream.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-chart-5/10">
+                        <Lightbulb className="h-6 w-6 text-chart-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Research Gaps</h3>
+                        <p className="text-muted-foreground">
+                          Discover unexplored areas and potential breakthrough
+                          opportunities.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Capabilities */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               AI-powered research intelligence
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Advanced machine learning algorithms analyze research patterns to
-              provide actionable insights.
+              Advanced machine learning algorithms analyze research patterns
+              to provide actionable insights.
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -172,346 +177,170 @@ export default function ProductAIInsightsPage() {
                   "Generate accurate abstracts, key findings, and methodology summaries automatically.",
                 color: "chart-2",
               },
-            ].map(({ icon: Icon, title, description, color }) => (
-              <Card key={title} className="hover-lift hover-glow group">
-                <CardContent className="p-6">
-                  <div
-                    className={`p-3 rounded-lg bg-${color}/10 mb-4 group-hover:bg-${color}/20 transition-colors`}
-                  >
-                    <Icon className={`h-6 w-6 text-${color}`} />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                  <p className="text-muted-foreground">{description}</p>
-                </CardContent>
-              </Card>
+            ].map(({ icon: Icon, title, description, color }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <CardWithVariants
+                  variant="interactive"
+                  hover="lift"
+                  className="h-full group"
+                >
+                  <CardContent className="p-6">
+                    <div
+                      className={`p-3 rounded-lg bg-${color}/10 mb-4 w-fit group-hover:scale-110 transition-transform duration-200`}
+                    >
+                      <Icon className={`h-6 w-6 text-${color}`} />
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{title}</h3>
+                    <p className="text-muted-foreground">{description}</p>
+                  </CardContent>
+                </CardWithVariants>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* AI Features Deep Dive */}
-        <section className="py-16 md:py-24 bg-muted/30 rounded-2xl">
-          <div className="text-center mb-16">
+      {/* AI Features Deep Dive */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               AI insights that drive breakthroughs
             </h2>
             <p className="text-xl text-muted-foreground">
               From literature reviews to hypothesis generation
             </p>
-          </div>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
-                title: "Research Landscape Mapping",
+                title: "Automated Literature Reviews",
                 description:
-                  "Visualize entire research fields with AI-generated concept maps and relationship networks.",
+                  "AI scans thousands of papers to identify the most relevant work for your research area.",
                 features: [
-                  "Interactive concept maps",
-                  "Author collaboration networks",
-                  "Topic evolution timelines",
-                  "Cross-disciplinary connections",
+                  "Comprehensive coverage",
+                  "Citation prioritization",
+                  "Gap identification",
                 ],
-                example: "Map the entire field of quantum computing research",
-                icon: Eye,
               },
               {
-                title: "Competitive Intelligence",
+                title: "Research Trend Forecasting",
                 description:
-                  "Track competitor research, identify white spaces, and monitor funding trends in your field.",
+                  "Predictive models analyze publication patterns to forecast emerging research areas.",
                 features: [
-                  "Competitor tracking",
-                  "Funding analysis",
-                  "Patent landscape",
-                  "Market opportunity identification",
+                  "Emerging topic detection",
+                  "Funding trend analysis",
+                  "Collaboration opportunities",
                 ],
-                example: "Monitor all AI safety research publications",
-                icon: Target,
+              },
+              {
+                title: "Methodology Extraction",
+                description:
+                  "AI extracts and compares research methodologies across papers for meta-analysis.",
+                features: [
+                  "Method comparison",
+                  "Reproducibility assessment",
+                  "Best practice identification",
+                ],
               },
               {
                 title: "Hypothesis Generation",
                 description:
-                  "AI suggests novel research questions based on patterns in existing literature and identified gaps.",
+                  "AI suggests potential research directions based on gaps and connections in literature.",
                 features: [
-                  "Question generation",
-                  "Methodology suggestions",
-                  "Resource requirements",
-                  "Feasibility scoring",
+                  "Cross-field connections",
+                  "Novel combinations",
+                  "Testable hypotheses",
                 ],
-                example: "Generate 50 novel AI ethics research questions",
-                icon: Lightbulb,
               },
-              {
-                title: "Impact Prediction",
-                description:
-                  "Predict which papers, authors, and research directions will have the highest impact.",
-                features: [
-                  "Citation prediction",
-                  "Influence scoring",
-                  "Trend forecasting",
-                  "Career trajectory analysis",
-                ],
-                example: "Predict which 2024 papers will be highly cited",
-                icon: TrendingUp,
-              },
-            ].map(({ title, description, features, example, icon: Icon }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-lg bg-chart-3/10">
-                      <Icon className="h-6 w-6 text-chart-3" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-xl mb-2">{title}</h3>
-                      <p className="text-muted-foreground">{description}</p>
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <div className="text-sm font-medium text-chart-3 mb-2">
-                      AI Capabilities:
-                    </div>
-                    <ul className="grid grid-cols-2 gap-1">
+            ].map(({ title, description, features }, index) => (
+              <motion.div
+                key={title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+              >
+                <CardWithVariants
+                  variant="elevated"
+                  hover="glow"
+                  className="h-full"
+                >
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                    <p className="text-muted-foreground mb-4">{description}</p>
+                    <ul className="space-y-2">
                       {features.map((feature) => (
                         <li
                           key={feature}
                           className="flex items-center gap-2 text-sm"
                         >
-                          <div className="h-1.5 w-1.5 rounded-full bg-chart-3" />
-                          {feature}
+                          <Eye className="h-4 w-4 text-chart-3" />
+                          <span>{feature}</span>
                         </li>
                       ))}
                     </ul>
-                  </div>
-                  <div className="p-3 bg-chart-3/5 rounded-lg">
-                    <div className="text-xs text-muted-foreground">
-                      Use Case:
-                    </div>
-                    <div className="text-sm font-medium">{example}</div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </CardWithVariants>
+              </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* AI in Action */}
-        <section className="py-16 md:py-24">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                See AI insights in action
-              </h2>
-              <p className="text-xl text-muted-foreground mb-8">
-                Real examples of how our AI transforms research workflows and
-                accelerates discovery.
-              </p>
-              <div className="space-y-6">
-                {[
-                  {
-                    title: "Literature Review in Minutes",
-                    description:
-                      "AI analyzes 500+ papers and generates comprehensive literature reviews with key themes and gaps.",
-                    metric: "95% faster than manual review",
-                  },
-                  {
-                    title: "Research Direction Recommendations",
-                    description:
-                      "Personalized suggestions for your next research project based on your expertise and field trends.",
-                    metric: "78% of suggestions lead to funded projects",
-                  },
-                  {
-                    title: "Collaboration Discovery",
-                    description:
-                      "Find the perfect collaborators based on research overlap, complementary skills, and success patterns.",
-                    metric: "3x more successful collaborations",
-                  },
-                  {
-                    title: "Grant Success Prediction",
-                    description:
-                      "AI predicts funding success probability and suggests improvements to research proposals.",
-                    metric: "40% higher funding success rate",
-                  },
-                ].map(({ title, description, metric }) => (
-                  <div key={title} className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-chart-4/10 mt-1">
-                      <Zap className="h-4 w-4 text-chart-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{title}</h3>
-                      <p className="text-muted-foreground text-sm mb-1">
-                        {description}
-                      </p>
-                      <div className="text-xs font-medium text-chart-4">
-                        {metric}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <Card className="hover-glow">
-              <CardContent className="p-8">
-                <h3 className="font-semibold text-lg mb-6 text-center">
-                  AI Analysis Dashboard
-                </h3>
-                <div className="space-y-4">
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">
-                        Research Gap Analysis
-                      </span>
-                      <span className="text-xs text-green-600 font-medium">
-                        95% Complete
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-green-500 h-2 rounded-full"
-                        style={{ width: "95%" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">
-                        Trend Prediction
-                      </span>
-                      <span className="text-xs text-blue-600 font-medium">
-                        87% Confidence
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: "87%" }}
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">
-                        Citation Network Mapping
-                      </span>
-                      <span className="text-xs text-purple-600 font-medium">
-                        12,847 papers analyzed
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Discovered 23 research clusters
-                    </div>
-                  </div>
-                  <div className="p-4 bg-chart-3/10 rounded-lg">
-                    <div className="text-sm font-medium text-chart-3 mb-1">
-                      🎯 New Opportunity Detected
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      AI-powered protein folding in drug discovery shows 89%
-                      funding success rate
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Success Metrics */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
+      {/* CTA Section */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Proven research acceleration
+              Ready to unlock AI-powered research?
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Measurable impact on research productivity and discovery
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Experience the future of research with intelligent insights and
+              automated analysis.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                metric: "85%",
-                description: "Faster literature reviews",
-                detail:
-                  "AI-powered analysis reduces review time from weeks to hours",
-              },
-              {
-                metric: "3.2x",
-                description: "More research opportunities identified",
-                detail: "Discover gaps and trends that manual analysis misses",
-              },
-              {
-                metric: "67%",
-                description: "Higher citation impact",
-                detail:
-                  "AI insights help researchers focus on high-impact directions",
-              },
-              {
-                metric: "92%",
-                description: "User satisfaction rate",
-                detail:
-                  "Researchers report significant productivity improvements",
-              },
-            ].map(({ metric, description, detail }) => (
-              <Card key={metric} className="text-center hover-lift">
-                <CardContent className="p-6">
-                  <div className="text-3xl md:text-4xl font-bold text-chart-3 mb-2">
-                    {metric}
-                  </div>
-                  <div className="font-semibold mb-2">{description}</div>
-                  <div className="text-sm text-muted-foreground">{detail}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-16 md:py-24">
-          <Card className="bg-gradient-to-r from-chart-3/10 via-chart-4/5 to-transparent border-chart-3/20 hover-glow">
-            <CardContent className="p-8 md:p-12 text-center">
-              <h3 className="text-3xl md:text-4xl font-bold mb-4">
-                Unlock the power of AI for your research
-              </h3>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join the AI-powered research revolution. Discover insights that
-                traditional methods miss.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login">
                 <Button
-                  asChild
                   size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow text-base"
+                  className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
                 >
-                  <Link
-                    href={isAuthenticated ? "/dashboard" : "/login"}
-                    className="flex items-center gap-2"
-                  >
-                    <Brain className="h-5 w-5" />
-                    {isAuthenticated
-                      ? "Access AI insights"
-                      : "Experience AI insights"}
-                  </Link>
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Start Free Trial
                 </Button>
+              </Link>
+              <Link href="/pricing">
                 <Button
-                  asChild
                   size="lg"
                   variant="outline"
-                  className="text-base"
+                  className="btn-hover-glow"
                 >
-                  <Link
-                    href="/products/papers"
-                    className="flex items-center gap-2"
-                  >
-                    View all products
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  View Pricing
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                AI insights included in all plans. Start your free trial today.
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-      </PageContainer>
-    </div>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import {
   ArrowRight,
   BookOpen,
@@ -11,6 +10,7 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { Footer } from "../../components/layout/Footer";
 import { Navbar } from "../../components/layout/Navbar";
 import { Button } from "../../components/ui/button";
@@ -50,6 +50,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
                   <Button
                     size="lg"
                     className="bg-gradient-to-r from-chart-4 to-chart-5 hover:opacity-90 text-primary-foreground"
+                    onClick={() => onNavigate?.("/register")}
                   >
                     <Users className="h-5 w-5 mr-2" />
                     Join Community
@@ -208,7 +209,7 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
                       </CardContent>
                     </Card>
                   </motion.div>
-                )
+                ),
               )}
             </div>
           </div>
@@ -296,7 +297,11 @@ export function CommunityPage({ onNavigate }: CommunityPageProps) {
             </div>
 
             <div className="text-center mt-8">
-              <Button variant="outline" size="lg">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => onNavigate?.("/discussions")}
+              >
                 View All Discussions <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>

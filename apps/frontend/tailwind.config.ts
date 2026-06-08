@@ -1,14 +1,38 @@
 import type { Config } from "tailwindcss";
 
-import animate from "tailwindcss-animate";
-
-const config: Config = {
+const config = {
   darkMode: "class",
   content: [
     "./src/app/**/*.{ts,tsx}",
     "./src/components/**/*.{ts,tsx}",
     "./src/lib/**/*.{ts,tsx}",
     "./src/(app)/**/*.{ts,tsx}",
+  ],
+  safelist: [
+    "bg-primary/10",
+    "bg-primary/20",
+    "text-primary",
+    "group-hover:bg-primary/20",
+    "bg-chart-1/10",
+    "bg-chart-1/20",
+    "text-chart-1",
+    "group-hover:bg-chart-1/20",
+    "bg-chart-2/10",
+    "bg-chart-2/20",
+    "text-chart-2",
+    "group-hover:bg-chart-2/20",
+    "bg-chart-3/10",
+    "bg-chart-3/20",
+    "text-chart-3",
+    "group-hover:bg-chart-3/20",
+    "bg-chart-4/10",
+    "bg-chart-4/20",
+    "text-chart-4",
+    "group-hover:bg-chart-4/20",
+    "bg-chart-5/10",
+    "bg-chart-5/20",
+    "text-chart-5",
+    "group-hover:bg-chart-5/20",
   ],
   theme: {
     extend: {
@@ -122,6 +146,5 @@ const config: Config = {
       },
     },
   },
-  plugins: [animate],
-};
+} as Config;
 export default config;

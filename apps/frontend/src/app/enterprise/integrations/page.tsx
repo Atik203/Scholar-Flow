@@ -1,512 +1,337 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
+import { motion } from "motion/react";
+import {
+  BookOpen,
+  Code,
+  Database,
+  FileCode,
+  GitBranch,
+  Globe,
+  Link as LinkIcon,
+  Plug,
+  Rocket,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Check, Code, Database, Settings, Zap } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
-import Link from "next/link";
 
 export default function EnterpriseIntegrationsPage() {
-  const { session } = useAuth();
-  const isAuthenticated = !!session;
-
   return (
     <div className="min-h-screen bg-background">
-      <PageContainer>
-        {/* Hero Section */}
+      <main>
         <section className="py-12 md:py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                <Settings className="h-4 w-4" />
-                Custom Integrations
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                Seamlessly connect your research ecosystem
-              </h1>
-              <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-                Powerful integration capabilities to connect ScholarFlow with
-                your existing research tools, databases, and institutional
-                systems.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="gradient"
-                  className="btn-hover-glow btn-shine text-base"
-                >
-                  <Link
-                    href="#integrations"
-                    className="flex items-center gap-2"
-                  >
-                    <Zap className="h-5 w-5" />
-                    Explore Integrations
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="text-base"
-                >
-                  <Link
-                    href="#custom-development"
-                    className="flex items-center gap-2"
-                  >
-                    <Code className="h-5 w-5" />
-                    Custom Development
-                  </Link>
-                </Button>
-              </div>
-            </div>
-
-            {/* Hero Visual */}
-            <Card className="hover-lift">
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <Database className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Database Connectors
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Direct integration with institutional repositories and
-                        databases.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-1/10">
-                      <Code className="h-6 w-6 text-chart-1" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        API-First Architecture
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Comprehensive REST API for building custom solutions.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-lg bg-chart-2/10">
-                      <Settings className="h-6 w-6 text-chart-2" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        Custom Workflows
-                      </h3>
-                      <p className="text-muted-foreground">
-                        Tailored automation for your specific research
-                        processes.
-                      </p>
-                    </div>
-                  </div>
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chart-2/10 text-chart-2 text-sm font-medium mb-6">
+                  <Plug className="h-4 w-4" />
+                  Custom Integrations
                 </div>
-              </CardContent>
-            </Card>
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-chart-2 to-chart-3 bg-clip-text text-transparent">
+                  Connect your entire research stack
+                </h1>
+                <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
+                  Seamlessly integrate ScholarFlow with your existing tools,
+                  databases, and workflows through our powerful API and
+                  pre-built connectors.
+                </p>
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                  <Link href="/resources/api">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-chart-2 to-chart-3 hover:opacity-90 text-primary-foreground"
+                    >
+                      <Code className="h-5 w-5 mr-2" />
+                      View API Docs
+                    </Button>
+                  </Link>
+                  <Link href="/company/contact">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                    >
+                      <BookOpen className="h-5 w-5 mr-2" />
+                      Contact Sales
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                <Card className="border-2 shadow-xl">
+                  <CardContent className="p-8">
+                    <div className="space-y-6">
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-chart-2/10">
+                          <LinkIcon className="h-6 w-6 text-chart-2" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            Pre-built Connectors
+                          </h3>
+                          <p className="text-muted-foreground">
+                            Ready-to-use integrations with popular research
+                            tools.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-chart-3/10">
+                          <FileCode className="h-6 w-6 text-chart-3" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">REST API</h3>
+                          <p className="text-muted-foreground">
+                            Full-featured API for custom integrations.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-chart-4/10">
+                          <Zap className="h-6 w-6 text-chart-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">Webhooks</h3>
+                          <p className="text-muted-foreground">
+                            Real-time event notifications for automation.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        {/* Integration Categories */}
-        <section id="integrations" className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Pre-built integrations & custom solutions
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Connect with popular research tools or build custom integrations
-              tailored to your workflow
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Database,
-                title: "Research Databases",
-                description:
-                  "Direct integration with PubMed, arXiv, IEEE Xplore, Scopus, and institutional repositories.",
-                integrations: [
-                  "PubMed/MEDLINE",
-                  "arXiv.org",
-                  "IEEE Xplore",
-                  "Scopus API",
-                  "Institutional Repos",
-                  "CrossRef",
-                ],
-                color: "primary",
-              },
-              {
-                icon: Settings,
-                title: "Identity & Access",
-                description:
-                  "Single Sign-On with LDAP, Active Directory, SAML, and OAuth providers.",
-                integrations: [
-                  "LDAP/Active Directory",
-                  "SAML 2.0",
-                  "OAuth 2.0",
-                  "Okta",
-                  "Azure AD",
-                  "Google Workspace",
-                ],
-                color: "chart-1",
-              },
-              {
-                icon: BookOpen,
-                title: "Reference Managers",
-                description:
-                  "Seamless sync with popular reference management and citation tools.",
-                integrations: [
-                  "Zotero",
-                  "Mendeley",
-                  "EndNote",
-                  "RefWorks",
-                  "BibTeX",
-                  "Citation APIs",
-                ],
-                color: "chart-2",
-              },
-              {
-                icon: Code,
-                title: "Development Tools",
-                description:
-                  "Integration with version control, project management, and development workflows.",
-                integrations: [
-                  "GitHub",
-                  "GitLab",
-                  "Jira",
-                  "Slack",
-                  "Microsoft Teams",
-                  "CI/CD Pipelines",
-                ],
-                color: "chart-3",
-              },
-              {
-                icon: Zap,
-                title: "Analytics Platforms",
-                description:
-                  "Connect with business intelligence and analytics tools for advanced reporting.",
-                integrations: [
-                  "Tableau",
-                  "Power BI",
-                  "Google Analytics",
-                  "Mixpanel",
-                  "Custom BI",
-                ],
-                color: "chart-4",
-              },
-              {
-                icon: Settings,
-                title: "Custom Connectors",
-                description:
-                  "Build bespoke integrations for proprietary systems and unique workflows.",
-                integrations: [
-                  "Custom REST APIs",
-                  "Webhook Support",
-                  "ETL Pipelines",
-                  "Real-time Sync",
-                  "Legacy Systems",
-                ],
-                color: "chart-5",
-              },
-            ].map(({ icon: Icon, title, description, integrations, color }) => (
-              <Card key={title} className="hover-lift">
-                <CardContent className="p-6">
-                  <div
-                    className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center mb-4`}
+        <section className="py-16 md:py-24 bg-muted/30">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Integration Categories
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Connect with the tools your team already uses.
+              </p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: Database,
+                  title: "Databases & Storage",
+                  description:
+                    "Connect with institutional repositories, cloud storage, and research databases.",
+                  tools: [
+                    "AWS S3",
+                    "Google Cloud",
+                    "Azure",
+                    "Institutional Repos",
+                  ],
+                  color: "primary",
+                },
+                {
+                  icon: Globe,
+                  title: "Reference Managers",
+                  description:
+                    "Sync with popular reference management and citation tools.",
+                  tools: ["Zotero", "Mendeley", "EndNote", "BibTeX"],
+                  color: "chart-1",
+                },
+                {
+                  icon: GitBranch,
+                  title: "Version Control",
+                  description:
+                    "Integrate with code repositories for reproducible research.",
+                  tools: ["GitHub", "GitLab", "Bitbucket", "DVC"],
+                  color: "chart-2",
+                },
+                {
+                  icon: FileCode,
+                  title: "Documentation",
+                  description:
+                    "Connect with writing and documentation platforms.",
+                  tools: ["Overleaf", "Google Docs", "Notion", "Confluence"],
+                  color: "chart-3",
+                },
+                {
+                  icon: Plug,
+                  title: "Authentication",
+                  description:
+                    "Enterprise SSO and identity provider integrations.",
+                  tools: ["Okta", "Azure AD", "SAML 2.0", "LDAP"],
+                  color: "chart-4",
+                },
+                {
+                  icon: Zap,
+                  title: "Automation",
+                  description:
+                    "Connect with automation and workflow platforms.",
+                  tools: ["Zapier", "n8n", "Make", "Custom Webhooks"],
+                  color: "chart-5",
+                },
+              ].map(
+                ({ icon: Icon, title, description, tools, color }, index) => (
+                  <motion.div
+                    key={title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.6 }}
                   >
-                    <Icon className={`h-6 w-6 text-${color}`} />
-                  </div>
-                  <h3 className="font-semibold text-xl mb-2">{title}</h3>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">
-                      Available Integrations:
-                    </h4>
-                    <ul className="space-y-1">
-                      {integrations.map((integration) => (
-                        <li
-                          key={integration}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <Check className="h-3 w-3 text-chart-1 flex-shrink-0" />
-                          <span className="text-muted-foreground">
-                            {integration}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    <Card className="h-full hover:shadow-lg transition-all duration-300 hover:-translate-y-1 group cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className={`w-12 h-12 rounded-lg bg-${color}/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}>
+                          <Icon className={`h-6 w-6 text-${color}`} />
+                        </div>
+                        <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                        <p className="text-muted-foreground mb-4">
+                          {description}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {tools.map((tool) => (
+                            <span
+                              key={tool}
+                              className="text-xs px-2 py-1 rounded-full bg-muted"
+                            >
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              )}
+            </div>
           </div>
         </section>
 
-        {/* Integration Process */}
         <section className="py-16 md:py-24">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Our integration process
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From assessment to deployment, we ensure seamless integration with
-              your existing systems
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                step: "01",
-                title: "Assessment",
-                description:
-                  "Analyze your current systems, workflows, and integration requirements.",
-                duration: "1-2 weeks",
-              },
-              {
-                step: "02",
-                title: "Planning",
-                description:
-                  "Design integration architecture and create detailed implementation roadmap.",
-                duration: "1 week",
-              },
-              {
-                step: "03",
-                title: "Development",
-                description:
-                  "Build and test custom connectors, APIs, and automated workflows.",
-                duration: "2-8 weeks",
-              },
-              {
-                step: "04",
-                title: "Deployment",
-                description:
-                  "Deploy integrations, train your team, and provide ongoing support.",
-                duration: "1-2 weeks",
-              },
-            ].map(({ step, title, description, duration }) => (
-              <Card key={step} className="relative">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-lg flex items-center justify-center mx-auto mb-4">
-                    {step}
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                  <p className="text-muted-foreground text-sm mb-3">
-                    {description}
-                  </p>
-                  <span className="text-xs bg-muted px-2 py-1 rounded">
-                    {duration}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Custom Integration Process
+              </h2>
+              <p className="text-xl text-muted-foreground">
+                We work with your team to build exactly what you need
+              </p>
+            </motion.div>
 
-        {/* Custom Development */}
-        <section
-          id="custom-development"
-          className="py-16 md:py-24 bg-muted/30 rounded-2xl"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Custom development services
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Tailored solutions for unique requirements and complex workflows
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                title: "API Development",
-                description:
-                  "Custom REST APIs and GraphQL endpoints for specific data access patterns",
-                features: [
-                  "Custom data models",
-                  "Advanced query capabilities",
-                  "Real-time subscriptions",
-                  "Authentication & authorization",
-                  "Rate limiting & monitoring",
-                ],
-                price: "Starting at $25K",
-                timeline: "6-12 weeks",
-              },
-              {
-                title: "Workflow Automation",
-                description:
-                  "Automated processes tailored to your research and approval workflows",
-                features: [
-                  "Custom approval chains",
-                  "Conditional logic & routing",
-                  "Integration with external systems",
-                  "Notification & escalation rules",
-                  "Audit trails & reporting",
-                ],
-                price: "Starting at $15K",
-                timeline: "4-8 weeks",
-              },
-              {
-                title: "Data Migration",
-                description:
-                  "Comprehensive data migration from legacy systems and databases",
-                features: [
-                  "Legacy system analysis",
-                  "Data mapping & transformation",
-                  "Incremental migration support",
-                  "Data validation & cleanup",
-                  "Rollback & recovery plans",
-                ],
-                price: "Starting at $20K",
-                timeline: "8-16 weeks",
-              },
-              {
-                title: "Custom Analytics",
-                description:
-                  "Advanced analytics dashboards and reporting tailored to your KPIs",
-                features: [
-                  "Custom metrics & KPIs",
-                  "Real-time dashboards",
-                  "Automated report generation",
-                  "Data visualization",
-                  "Export & sharing capabilities",
-                ],
-                price: "Starting at $30K",
-                timeline: "8-12 weeks",
-              },
-            ].map(({ title, description, features, price, timeline }) => (
-              <Card key={title} className="h-full">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-xl mb-2">{title}</h3>
-                  <p className="text-muted-foreground mb-4">{description}</p>
-
-                  <ul className="space-y-2 mb-6">
-                    {features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <Check className="h-4 w-4 text-chart-1 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
-                    <span className="font-medium">{price}</span>
-                    <span>{timeline}</span>
-                  </div>
-
-                  <Button className="w-full" variant="outline">
-                    Discuss Requirements
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Success Cases */}
-        <section className="py-16 md:py-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Integration success stories
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Real-world examples of successful custom integrations
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              {
-                client: "Research Medical Center",
-                challenge:
-                  "Needed to integrate with 5 different databases and maintain HIPAA compliance",
-                solution:
-                  "Custom API layer with federated search across all systems plus audit logging",
-                results:
-                  "90% reduction in search time, full compliance audit passed",
-                integration: "Custom Medical Database Connector",
-              },
-              {
-                client: "Tech Innovation University",
-                challenge:
-                  "Complex approval workflows across 12 departments with varying requirements",
-                solution:
-                  "Configurable workflow engine with department-specific rules and escalation",
-                results: "75% faster approvals, 100% process compliance",
-                integration: "Custom Workflow Automation",
-              },
-            ].map(({ client, challenge, solution, results, integration }) => (
-              <Card key={client} className="p-6">
-                <CardContent className="p-0">
-                  <div className="mb-4">
-                    <h3 className="font-semibold text-lg">{client}</h3>
-                    <span className="text-primary text-sm font-medium">
-                      {integration}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+              {[
+                {
+                  step: "01",
+                  title: "Discovery",
+                  description:
+                    "We understand your existing tools and integration requirements.",
+                  color: "primary",
+                },
+                {
+                  step: "02",
+                  title: "Design",
+                  description:
+                    "Our team designs a custom integration architecture.",
+                  color: "chart-1",
+                },
+                {
+                  step: "03",
+                  title: "Build",
+                  description:
+                    "We develop and test the integration with your systems.",
+                  color: "chart-2",
+                },
+                {
+                  step: "04",
+                  title: "Deploy",
+                  description:
+                    "Launch with full documentation and ongoing support.",
+                  color: "chart-3",
+                },
+              ].map(({ step, title, description, color }, index) => (
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.6 }}
+                  className="text-center"
+                >
+                  <div className={`w-16 h-16 rounded-full bg-${color}/10 flex items-center justify-center mx-auto mb-4`}>
+                    <span className={`text-2xl font-bold text-${color}`}>
+                      {step}
                     </span>
                   </div>
-
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <span className="font-medium">Challenge: </span>
-                      <span className="text-muted-foreground">{challenge}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Solution: </span>
-                      <span className="text-muted-foreground">{solution}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">Results: </span>
-                      <span className="text-muted-foreground">{results}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Ready to integrate ScholarFlow with your systems?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Let's discuss your integration requirements and build a solution
-              that fits perfectly.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                asChild
-                size="lg"
-                variant="gradient"
-                className="btn-hover-glow btn-shine text-base"
-              >
-                <Link
-                  href="/contact-integrations"
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="h-5 w-5" />
-                  Discuss Integration Needs
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="text-base">
-                <Link href="/resources/api" className="flex items-center gap-2">
-                  <Code className="h-5 w-5" />
-                  View API Documentation
-                </Link>
-              </Button>
+                  <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                  <p className="text-muted-foreground">{description}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
-      </PageContainer>
+
+        <section className="py-16 md:py-24 bg-muted/30 text-center">
+          <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-3xl mx-auto"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Ready to integrate?
+              </h2>
+              <p className="text-xl text-muted-foreground mb-8">
+                Talk to our team about your integration needs.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/company/contact">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-chart-2 to-chart-3 hover:opacity-90 text-primary-foreground"
+                  >
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Contact Sales
+                  </Button>
+                </Link>
+                <Link href="/resources/api">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                  >
+                    <Code className="h-5 w-5 mr-2" />
+                    View API Docs
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

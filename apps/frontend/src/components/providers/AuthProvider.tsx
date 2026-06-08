@@ -15,6 +15,7 @@ import {
   setLoading,
   updateUser,
 } from "@/redux/auth/authSlice";
+import { setAuthCookie, clearAuthCookie } from "@/lib/auth/authCookies";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { ReactNode, useEffect, useMemo, useRef } from "react";
 
@@ -62,8 +63,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      // After hydration, mark auth as ready (run once on mount)
-      // redux-persist will have already restored auth state
+      // Sync the middleware cookie with persisted Redux state on app startup.
+      // This handles the case where a user has an existing session (from localStorage)
+      // but the sf_auth cookie hasn't been set yet (e.g., after a browser restart).
+      if (isAuthenticated && accessToken) {
+        setAuthCookie();
+      } else {
+        clearAuthCookie();
+      }
       dispatch(setLoading(false));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

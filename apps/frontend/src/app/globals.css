@@ -1,7 +1,8 @@
-@import "tailwindcss";
-@import "tw-animate-css";
 @import "../styles/_variables.scss";
 @import "../styles/_keyframe-animations.scss";
+
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -195,7 +196,7 @@
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.546 0.245 262.881);
-  --primary-foreground: oklch(0.379 0.146 265.522);
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.274 0.006 286.033);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.274 0.006 286.033);
@@ -215,7 +216,7 @@
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.546 0.245 262.881);
-  --sidebar-primary-foreground: oklch(0.379 0.146 265.522);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.274 0.006 286.033);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
@@ -277,10 +278,21 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 min-w-0;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-[100dvh];
+  }
+  html {
+    text-rendering: optimizelegibility;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    @apply cursor-pointer;
   }
 }
 
@@ -455,33 +467,6 @@
 
   .dark button[variant="destructive"] {
     @apply text-white font-semibold;
-  }
-}
-
-/* This layer is by next-forge */
-@layer base {
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    @apply border-border;
-  }
-  * {
-    @apply min-w-0;
-  }
-  html {
-    text-rendering: optimizelegibility;
-  }
-  body {
-    @apply min-h-[100dvh];
-  }
-  input::placeholder,
-  textarea::placeholder {
-    @apply text-muted-foreground;
-  }
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    @apply cursor-pointer;
   }
 }
 

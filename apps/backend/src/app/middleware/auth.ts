@@ -2,7 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../errors/ApiError";
 import { IAuthUser } from "../interfaces/common";
-import { AUTH_ERROR_MESSAGES, USER_ROLES } from "../modules/Auth/auth.constant";
+import {
+  AUTH_ERROR_MESSAGES,
+  ROLE_HIERARCHY,
+  USER_ROLES,
+} from "../modules/Auth/auth.constant";
 import prisma from "../shared/prisma";
 
 export interface AuthRequest extends Request {
@@ -152,7 +156,8 @@ export const authMiddleware = async (
 };
 
 /**
- * Authorization middleware to check user roles
+ * Authorization middleware to check user roles (exact match)
+ * Use requireMinRole for hierarchy-based checking instead.
  */
 export const requireRole = (allowedRoles: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
@@ -169,26 +174,43 @@ export const requireRole = (allowedRoles: string[]) => {
 };
 
 /**
- * Authorization middleware for admin only routes
+ * Hierarchy-based authorization middleware.
+ * Uses ROLE_HIERARCHY to allow higher roles automatic access.
+ * e.g., requireMinRole("TEAM_LEAD") allows TEAM_LEAD and ADMIN.
  */
-export const requireAdmin = requireRole([USER_ROLES.ADMIN]);
+export const requireMinRole = (minRole: string) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      return next(new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED));
+    }
+
+    const userLevel =
+      ROLE_HIERARCHY[req.user.role as keyof typeof ROLE_HIERARCHY] || 0;
+    const requiredLevel =
+      ROLE_HIERARCHY[minRole as keyof typeof ROLE_HIERARCHY] || 0;
+
+    if (userLevel < requiredLevel) {
+      return next(new ApiError(403, AUTH_ERROR_MESSAGES.FORBIDDEN));
+    }
+
+    next();
+  };
+};
 
 /**
- * Authorization middleware for team leads and admins
+ * Authorization middleware for admin only routes
  */
-export const requireTeamLead = requireRole([
-  USER_ROLES.TEAM_LEAD,
-  USER_ROLES.ADMIN,
-]);
+export const requireAdmin = requireMinRole(USER_ROLES.ADMIN);
+
+/**
+ * Authorization middleware for team leads and above
+ */
+export const requireTeamLead = requireMinRole(USER_ROLES.TEAM_LEAD);
 
 /**
  * Authorization middleware for pro researchers and above
  */
-export const requireProResearcher = requireRole([
-  USER_ROLES.PRO_RESEARCHER,
-  USER_ROLES.TEAM_LEAD,
-  USER_ROLES.ADMIN,
-]);
+export const requireProResearcher = requireMinRole(USER_ROLES.PRO_RESEARCHER);
 
 /**
  * Optional authentication middleware - doesn't throw error if no token

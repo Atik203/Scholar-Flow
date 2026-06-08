@@ -30,6 +30,7 @@ import { Button } from "../../components/ui/button";
 interface EnhancedDashboardPageProps {
   role?: "researcher" | "pro_researcher" | "team_lead" | "admin";
   onNavigate?: (path: string) => void;
+  onShowToast?: (message: string, type: "error" | "success" | "info") => void;
 }
 
 interface DashboardWidget {
@@ -195,13 +196,13 @@ const sampleGoals: Goal[] = [
 ];
 
 const weeklyStats = [
-  { day: "Mon", papers: 3, annotations: 12 },
-  { day: "Tue", papers: 2, annotations: 8 },
-  { day: "Wed", papers: 4, annotations: 15 },
-  { day: "Thu", papers: 1, annotations: 5 },
-  { day: "Fri", papers: 5, annotations: 20 },
-  { day: "Sat", papers: 2, annotations: 6 },
-  { day: "Sun", papers: 1, annotations: 4 },
+  { day: "Mon", papers: 5, annotations: 18, searches: 12 },
+  { day: "Tue", papers: 3, annotations: 10, searches: 8 },
+  { day: "Wed", papers: 7, annotations: 24, searches: 15 },
+  { day: "Thu", papers: 2, annotations: 7, searches: 5 },
+  { day: "Fri", papers: 8, annotations: 28, searches: 20 },
+  { day: "Sat", papers: 4, annotations: 11, searches: 6 },
+  { day: "Sun", papers: 1, annotations: 3, searches: 2 },
 ];
 
 // ============================================================================
@@ -236,6 +237,7 @@ function getGoalStatusColor(status: Goal["status"]): string {
 export function EnhancedDashboardPage({
   role = "researcher",
   onNavigate,
+  onShowToast,
 }: EnhancedDashboardPageProps) {
   const [showCustomize, setShowCustomize] = useState(false);
   const [dateRange, setDateRange] = useState("week");
@@ -256,11 +258,15 @@ export function EnhancedDashboardPage({
 
   const totalPapersThisWeek = weeklyStats.reduce(
     (acc, day) => acc + day.papers,
-    0
+    0,
   );
   const totalAnnotationsThisWeek = weeklyStats.reduce(
     (acc, day) => acc + day.annotations,
-    0
+    0,
+  );
+  const totalSearchesThisWeek = weeklyStats.reduce(
+    (acc, day) => acc + day.searches,
+    0,
   );
   const maxPapers = Math.max(...weeklyStats.map((d) => d.papers));
 
@@ -377,7 +383,7 @@ export function EnhancedDashboardPage({
                 <h3 className="font-semibold">Weekly Activity</h3>
                 <p className="text-sm text-muted-foreground">
                   {totalPapersThisWeek} papers • {totalAnnotationsThisWeek}{" "}
-                  annotations
+                  annotations • {totalSearchesThisWeek} searches
                 </p>
               </div>
               <div className="flex items-center gap-4 text-sm">
@@ -389,28 +395,42 @@ export function EnhancedDashboardPage({
                   <div className="h-3 w-3 rounded bg-chart-1" />
                   <span className="text-muted-foreground">Annotations</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded bg-purple-500" />
+                  <span className="text-muted-foreground">Searches</span>
+                </div>
               </div>
             </div>
-            <div className="h-48 flex items-end justify-between gap-2">
+            <div className="flex items-end gap-4 h-48">
               {weeklyStats.map((day, index) => (
                 <div
                   key={day.day}
-                  className="flex-1 flex flex-col items-center gap-2"
+                  className="flex-1 flex flex-col items-center gap-1"
                 >
-                  <div className="w-full flex flex-col gap-1">
+                  <div className="w-full flex gap-1 items-end h-40">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.papers / maxPapers) * 100}%` }}
-                      transition={{ delay: index * 0.1 }}
-                      className="w-full bg-primary rounded-t min-h-[4px]"
-                      style={{ height: `${(day.papers / maxPapers) * 120}px` }}
+                      animate={{
+                        height: `${(day.papers / maxPapers) * 100}%`,
+                      }}
+                      transition={{ delay: 0.3 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-primary rounded-t-lg min-h-[4px]"
                     />
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{ height: `${(day.annotations / 25) * 100}%` }}
-                      transition={{ delay: index * 0.1 + 0.05 }}
-                      className="w-full bg-chart-1 rounded-t min-h-[4px]"
-                      style={{ height: `${(day.annotations / 25) * 60}px` }}
+                      animate={{
+                        height: `${(day.annotations / Math.max(...weeklyStats.map((d) => d.annotations))) * 100}%`,
+                      }}
+                      transition={{ delay: 0.35 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-chart-1 rounded-t-lg min-h-[4px]"
+                    />
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{
+                        height: `${(day.searches / Math.max(...weeklyStats.map((d) => d.searches))) * 100}%`,
+                      }}
+                      transition={{ delay: 0.4 + index * 0.05, duration: 0.5 }}
+                      className="flex-1 bg-purple-500 rounded-t-lg min-h-[4px]"
                     />
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -425,7 +445,11 @@ export function EnhancedDashboardPage({
           <div className="rounded-xl border bg-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Research Goals</h3>
-              <Button variant="ghost" size="sm">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onNavigate?.("/goals")}
+              >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -439,7 +463,7 @@ export function EnhancedDashboardPage({
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs ${getGoalStatusColor(
-                        goal.status
+                        goal.status,
                       )}`}
                     >
                       {goal.status === "on-track"
@@ -604,11 +628,19 @@ export function EnhancedDashboardPage({
                 current research.
               </p>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onNavigate?.("/ai-insights")}
+                >
                   <Sparkles className="h-4 w-4 mr-2" />
                   Get Recommendations
                 </Button>
-                <Button size="sm" variant="ghost">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onNavigate?.("/analytics")}
+                >
                   View Analysis
                 </Button>
               </div>
@@ -622,13 +654,13 @@ export function EnhancedDashboardPage({
             {
               icon: Upload,
               label: "Upload Paper",
-              action: "/upload",
+              action: "/papers/upload",
               color: "text-blue-500",
             },
             {
               icon: Sparkles,
               label: "Ask AI",
-              action: "/ai",
+              action: "/ai-insights",
               color: "text-purple-500",
             },
             {
@@ -728,7 +760,12 @@ export function EnhancedDashboardPage({
                 <Button variant="ghost" onClick={() => setShowCustomize(false)}>
                   Cancel
                 </Button>
-                <Button onClick={() => setShowCustomize(false)}>
+                <Button
+                  onClick={() => {
+                    onShowToast?.("Dashboard layout saved!", "success");
+                    setShowCustomize(false);
+                  }}
+                >
                   Save Changes
                 </Button>
               </div>

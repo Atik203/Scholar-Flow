@@ -17,6 +17,10 @@ import {
 import { motion } from "motion/react";
 import React, { useState } from "react";
 
+interface HowItWorksProps {
+  onNavigate?: (path: string) => void;
+}
+
 const steps = [
   {
     number: "01",
@@ -221,7 +225,7 @@ const steps = [
                 >
                   {String.fromCharCode(65 + i)}
                 </motion.div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -362,7 +366,7 @@ const steps = [
   },
 ];
 
-export const HowItWorks: React.FC = () => {
+export const HowItWorks: React.FC<HowItWorksProps> = ({ onNavigate }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   return (
@@ -533,6 +537,7 @@ export const HowItWorks: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.02, x: 5 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => onNavigate?.("/features")}
                 className="inline-flex items-center gap-2 text-primary font-medium group"
               >
                 Learn more about this step
@@ -573,7 +578,8 @@ export const HowItWorks: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="absolute -bottom-3 -right-3 flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-full shadow-lg"
+                onClick={() => onNavigate?.("/demo")}
+                className="absolute -bottom-3 -right-3 flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-full shadow-lg cursor-pointer hover:bg-primary/5 transition-colors"
               >
                 <Play className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">Watch Demo</span>
@@ -601,6 +607,7 @@ export const HowItWorks: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate?.("/register")}
               className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl transition-all"
             >
               Start Your Free Trial
@@ -608,6 +615,7 @@ export const HowItWorks: React.FC = () => {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => onNavigate?.("/demo")}
               className="px-8 py-4 rounded-xl border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5 font-semibold transition-all flex items-center gap-2"
             >
               <Play className="h-5 w-5" />

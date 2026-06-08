@@ -57,7 +57,11 @@ export function PapersPage({ onNavigate }: PapersPageProps) {
                     <Rocket className="h-5 w-5 mr-2" />
                     Start free today
                   </Button>
-                  <Button size="lg" variant="outline">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => onNavigate?.("/demo")}
+                  >
                     <Search className="h-5 w-5 mr-2" />
                     See it in action
                   </Button>
