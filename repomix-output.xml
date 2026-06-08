@@ -1314,6 +1314,7 @@ docs/
   ENVIRONMENT.md
   ERD.md
   FIGMA_MAKE_MIGRATION_PLAN.md
+  PROMPTING_GUIDE.md
   REDIS_SETUP.md
   Release.md
   Roadmap.md
@@ -2401,6 +2402,798 @@ This section contains the contents of the repository's files.
 13:   )
 14: }
 15: export { Textarea }
+</file>
+
+<file path="docs/PROMPTING_GUIDE.md">
+  1: # AI Prompting Guide for Scholar-Flow
+  2: 
+  3: > **TL;DR**: Write `AGENTS.md` **once** per project and update it when conventions change. Don't rewrite it every session. Use model-specific strategies below to maximize cache hits and output quality.
+  4: 
+  5: ---
+  6: 
+  7: ## Table of Contents
+  8: 
+  9: 1. [AGENTS.md: Write Once, Update as Needed](#agentsmd-write-once-update-as-needed)
+ 10: 2. [Model-Specific Prompting Strategies](#model-specific-prompting-strategies)
+ 11: 3. [Scenario-Based Prompting Examples](#scenario-based-prompting-examples)
+ 12: 4. [Prefix Caching Best Practices](#prefix-caching-best-practices)
+ 13: 5. [Prompt Structure Templates](#prompt-structure-templates)
+ 14: 6. [Anti-Patterns to Avoid](#anti-patterns-to-avoid)
+ 15: 
+ 16: ---
+ 17: 
+ 18: ## AGENTS.md: Write Once, Update as Needed
+ 19: 
+ 20: ### What is AGENTS.md?
+ 21: 
+ 22: `AGENTS.md` is a **persistent project context file** that lives in your project root. It tells AI agents:
+ 23: - Project architecture and tech stack
+ 24: - Coding conventions and rules
+ 25: - File structure and where things live
+ 26: - Critical security rules (Stripe, S3, auth)
+ 27: - Commands and workflows
+ 28: 
+ 29: ### Do NOT Rewrite AGENTS.md Every Session
+ 30: 
+ 31: **Wrong approach:**
+ 32: ```
+ 33: User: "Write AGENTS.md with these rules..."
+ 34: AI: [writes full AGENTS.md]
+ 35: Next session:
+ 36: User: "Write AGENTS.md again with updated rules..."
+ 37: AI: [rewrites entire file]
+ 38: ```
+ 39: 
+ 40: **Correct approach:**
+ 41: ```
+ 42: User: "Update AGENTS.md to add the new Stripe webhook rule"
+ 43: AI: [edits only the relevant section, preserving the rest]
+ 44: ```
+ 45: 
+ 46: ### When to Update AGENTS.md
+ 47: 
+ 48: | Trigger | Action |
+ 49: |---------|--------|
+ 50: | New coding convention added | Append to relevant section |
+ 51: | Architecture change | Update structure section |
+ 52: | New critical rule (security, auth) | Add to "Never Do" / "Always Do" |
+ 53: | New command added | Add to "Exact Commands" |
+ 54: | Phase completed | Update "Current Status" |
+ 55: | Cache model changes | Update "Multi-Model Cache Optimization" |
+ 56: 
+ 57: ### When to Regenerate Repomix
+ 58: 
+ 59: Run `yarn repomix` when:
+ 60: - Major structural changes (new directories, moved files)
+ 61: - New dependencies or build tools added
+ 62: - Before asking a new AI agent to work on the project
+ 63: - When context seems stale (agent doesn't know about recent changes)
+ 64: 
+ 65: ---
+ 66: 
+ 67: ## Model-Specific Prompting Strategies
+ 68: 
+ 69: ### DeepSeek V4 Pro / Flash
+ 70: 
+ 71: **Characteristics:**
+ 72: - Cache hits from **byte 0** on matching prefix
+ 73: - Excellent for long-context reasoning
+ 74: - Strong code generation
+ 75: - Cost-effective for repeated queries
+ 76: 
+ 77: **Prompting Strategy:**
+ 78: ```markdown
+ 79: # CACHE OPTIMIZATION CONTRACT
+ 80: # This exact block must be first. Never modify.
+ 81: 
+ 82: [Your project context here - static between calls]
+ 83: 
+ 84: ---
+ 85: 
+ 86: ## Current Task
+ 87: [Task-specific context - changes per session]
+ 88: 
+ 89: ## Goal
+ 90: [One sentence goal]
+ 91: 
+ 92: ## Files to Read
+ 93: 1. [file path]
+ 94: 2. [file path]
+ 95: 
+ 96: ## Implementation Approach
+ 97: [Your approach]
+ 98: ```
+ 99: 
+100: **Example:**
+101: ```
+102: Goal: Fix the auth middleware token expiration bug
+103: Files to Read: 
+104: 1. apps/backend/src/app/middleware/auth.ts
+105: 2. apps/backend/src/app/errors/ApiError.ts
+106: 
+107: Approach: Check the JWT verify logic, look for clock skew issues,
+108: add a 5-minute leeway for token expiration.
+109: ```
+110: 
+111: ---
+112: 
+113: ### Kimi K2.6
+114: 
+115: **Characteristics:**
+116: - Cache hits from **byte 0** on matching prefix
+117: - Excellent reasoning and context understanding
+118: - Strong at following complex multi-step instructions
+119: - Good at maintaining context across long conversations
+120: 
+121: **Prompting Strategy:**
+122: - Be explicit about step ordering
+123: - Use numbered lists for multi-step tasks
+124: - Provide clear success criteria
+125: 
+126: **Example:**
+127: ```
+128: Goal: Implement Phase 2.1 auth pages with figma-make design
+129: 
+130: Steps (execute in order):
+131: 1. Read figma-make/pages/LoginPage.tsx and RegisterPage.tsx
+132: 2. Create apps/frontend/src/app/login/page.tsx with figma-make design
+133: 3. Create apps/frontend/src/app/register/page.tsx with figma-make design
+134: 4. Run yarn type-check after each file
+135: 5. Update IMPLEMENTATION.md to mark Phase 2.1 items as [x]
+136: 
+137: Success Criteria:
+138: - All 5 auth pages render with figma-make design
+139: - Type-check passes
+140: - No console errors
+141: ```
+142: 
+143: ---
+144: 
+145: ### GLM-4 / MiMo
+146: 
+147: **Characteristics:**
+148: - Cache hits from **byte 0** on matching prefix
+149: - Strong Chinese-English bilingual capability
+150: - Good at structured output
+151: 
+152: **Prompting Strategy:**
+153: - Use clear delimiters (---, ###)
+154: - Structure output expectations explicitly
+155: 
+156: **Example:**
+157: ```
+158: ## Input
+159: File: apps/frontend/src/components/sections/Hero.tsx
+160: 
+161: ## Required Changes
+162: 1. Add "Simple 5-Step Workflow" badge above heading
+163: 2. Update heading to "Your research workflow, reimagined"
+164: 3. Add gradient text effect on "reimagined"
+165: 
+166: ## Expected Output
+167: Return the COMPLETE updated file content.
+168: Do not summarize or truncate.
+169: ```
+170: 
+171: ---
+172: 
+173: ### Qwen 3.x
+174: 
+175: **Characteristics:**
+176: - Requires **minimum 1024 tokens** to activate prefix caching
+177: - Shorter prompts may not benefit from caching
+178: - Excellent for reasoning and tool use
+179: 
+180: **Prompting Strategy:**
+181: - Ensure AGENTS.md + skills content stays above 1024 tokens
+182: - Don't shorten the frozen prefix block
+183: - Add detailed context to activate cache
+184: 
+185: **Example:**
+186: ```
+187: # Project: Scholar-Flow (1.1.0)
+188: # Architecture: Turborepo + Next.js 15 + Express + Prisma + PostgreSQL
+189: # Current Phase: Phase 2 - Auth & Onboarding
+190: # Status: 5 of 6 auth pages pending
+191: 
+192: [Detailed project context... ensure this exceeds 1024 tokens]
+193: 
+194: ---
+195: 
+196: ## Task
+197: Implement the forgot-password page matching figma-make design.
+198: 
+199: ## Context
+200: - figma-make source: figma-make/pages/ForgotPasswordPage.tsx
+201: - Target location: apps/frontend/src/app/forgot-password/page.tsx
+202: - Must use "use client" and Link from next/link
+203: - Must not include Navbar/Footer (layout provides them)
+204: 
+205: ## Files to Read
+206: 1. figma-make/pages/ForgotPasswordPage.tsx
+207: 2. apps/frontend/src/components/ui/card-variants.tsx
+208: 3. apps/frontend/src/components/ui/button.tsx
+209: 
+210: ## Output
+211: Return the complete file content. Do not truncate.
+212: ```
+213: 
+214: ---
+215: 
+216: ## Scenario-Based Prompting Examples
+217: 
+218: ### Scenario 1: Feature Implementation
+219: 
+220: **When**: Adding a new feature (e.g., Phase 2.2 form components)
+221: 
+222: **Prompt Template:**
+223: ```
+224: Goal: [One sentence]
+225: 
+226: Phase: [Current phase from IMPLEMENTATION.md]
+227: Files to Read:
+228: 1. [Source file 1]
+229: 2. [Source file 2]
+230: 3. [Pattern example file]
+231: 
+232: Implementation Plan:
+233: 1. [Step 1]
+234: 2. [Step 2]
+235: 3. [Step 3]
+236: 
+237: Constraints:
+238: - [Rule 1 from AGENTS.md]
+239: - [Rule 2 from AGENTS.md]
+240: 
+241: Verify:
+242: - Run yarn type-check
+243: - Run yarn lint
+244: - Check [specific test or behavior]
+245: ```
+246: 
+247: **Example:**
+248: ```
+249: Goal: Create FloatingInput form component
+250: 
+251: Phase: Phase 2.2 - Form Components
+252: Files to Read:
+253: 1. figma-make/components/form/FloatingInput.tsx (pattern)
+254: 2. apps/frontend/src/components/ui/input.tsx (existing input)
+255: 3. apps/frontend/src/components/ui/label.tsx (label component)
+256: 
+257: Implementation Plan:
+258: 1. Create FloatingInput.tsx with floating label animation
+259: 2. Integrate with React Hook Form register
+260: 3. Add Zod validation support
+261: 4. Export from components/ui/index.ts
+262: 
+263: Constraints:
+264: - Must use "motion/react" for animations (not framer-motion)
+265: - Must integrate with react-hook-form
+266: - Must follow OKLCH color system
+267: 
+268: Verify:
+269: - Run yarn type-check
+270: - Run yarn lint
+271: - Check dark mode works
+272: ```
+273: 
+274: ---
+275: 
+276: ### Scenario 2: Bug Fix
+277: 
+278: **When**: Fixing a bug (e.g., Tailwind styles not applying)
+279: 
+280: **Prompt Template:**
+281: ```
+282: Bug: [Description]
+283: 
+284: Error: [Exact error message or behavior]
+285: 
+286: Reproduce:
+287: 1. [Step 1]
+288: 2. [Step 2]
+289: 
+290: Files to Check:
+291: 1. [File 1]
+292: 2. [File 2]
+293: 
+294: Expected: [What should happen]
+295: Actual: [What currently happens]
+296: 
+297: Additional Context:
+298: - [Any relevant env vars, recent changes, etc.]
+299: ```
+300: 
+301: **Example:**
+302: ```
+303: Bug: Tailwind CSS styles not applying on frontend pages
+304: 
+305: Error: Only pure HTML renders without CSS classes
+306: 
+307: Reproduce:
+308: 1. Run yarn dev:frontend
+309: 2. Open any page (e.g., /products/papers)
+310: 3. Observe no styling applied
+311: 
+312: Files to Check:
+313: 1. apps/frontend/src/app/globals.css
+314: 2. apps/frontend/postcss.config.mjs
+315: 3. apps/frontend/src/app/layout.tsx
+316: 4. apps/frontend/src/styles/_variables.scss
+317: 
+318: Expected: Styled pages with Tailwind classes
+319: Actual: Unstyled HTML
+320: 
+321: Additional Context:
+322: - Using Tailwind v4 with @tailwindcss/postcss
+323: - @config directive was removed from globals.css
+324: - SCSS files imported before @import "tailwindcss"
+325: ```
+326: 
+327: ---
+328: 
+329: ### Scenario 3: Code Review / Refactoring
+330: 
+331: **When**: Reviewing or refactoring existing code
+332: 
+333: **Prompt Template:**
+334: ```
+335: Task: Review/Refactor [component/file]
+336: 
+337: Current State:
+338: [What it currently does, issues, or goals]
+339: 
+340: Files to Read:
+341: 1. [Main file]
+342: 2. [Related files]
+343: 3. [Pattern reference]
+344: 
+345: Review Criteria:
+346: - [Criterion 1]
+347: - [Criterion 2]
+348: 
+349: Specific Focus:
+350: - [Area to focus on]
+351: 
+352: Constraints:
+353: - [Don't break X]
+354: - [Must maintain Y compatibility]
+355: ```
+356: 
+357: **Example:**
+358: ```
+359: Task: Refactor all marketing pages to match figma-make exactly
+360: 
+361: Current State:
+362: - 19 pages exist but are simplified versions
+363: - Missing full feature card grids, HowItWorks sections, CTA sections
+364: 
+365: Files to Read:
+366: 1. figma-make/pages/products/PapersPage.tsx (source of truth)
+367: 2. apps/frontend/src/app/products/papers/page.tsx (current)
+368: 3. figma-make/components/sections/Features.tsx (pattern)
+369: 
+370: Review Criteria:
+371: - Must match figma-make section structure exactly
+372: - Must use CardWithVariants for feature grids
+373: - Must include gradient hero + feature cards + CTA
+374: 
+375: Specific Focus:
+376: - Papers, Collections, Collaborate, AI-Insights pages
+377: 
+378: Constraints:
+379: - Don't break existing routes
+380: - Keep "use client" for animated sections
+381: - Don't include Navbar/Footer (layout provides them)
+382: ```
+383: 
+384: ---
+385: 
+386: ### Scenario 4: Documentation Update
+387: 
+388: **When**: Updating AGENTS.md, IMPLEMENTATION.md, or other docs
+389: 
+390: **Prompt Template:**
+391: ```
+392: Document: [Which file]
+393: Change Type: [Update/Add/Remove]
+394: Section: [Which section]
+395: 
+396: Current Content:
+397: [Current state or relevant excerpt]
+398: 
+399: Desired Change:
+400: [What to add/update/remove]
+401: 
+402: Reason:
+403: [Why this change is needed]
+404: ```
+405: 
+406: **Example:**
+407: ```
+408: Document: AGENTS.md
+409: Change Type: Update
+410: Section: Multi-Model Cache Optimization
+411: 
+412: Current Content:
+413: - DeepSeek: cache hits from byte 0
+414: - [Missing other models]
+415: 
+416: Desired Change:
+417: Add Kimi K2.6, GLM-4, MiMo, and Qwen 3.x cache rules
+418: 
+419: Reason:
+420: Project now supports multiple AI models. Need to document
+421: Qwen's 1024-token minimum requirement and other model-specific
+422: behaviors so future agents optimize correctly.
+423: ```
+424: 
+425: ---
+426: 
+427: ### Scenario 5: Backend API Implementation
+428: 
+429: **When**: Adding new backend routes/models
+430: 
+431: **Prompt Template:**
+432: ```
+433: Goal: [API/Model name]
+434: 
+435: Backend Module:
+436: - Location: apps/backend/src/app/modules/[Name]/
+437: - Files: [name].controller.ts, [name].service.ts, [name].routes.ts, [name].validation.ts
+438: 
+439: Prisma Model:
+440: [Schema definition]
+441: 
+442: Routes:
+443: - GET /api/[endpoint]
+444: - POST /api/[endpoint]
+445: 
+446: Data Flow:
+447: 1. [Request comes in]
+448: 2. [Validation happens]
+449: 3. [Service processes]
+450: 4. [Response returned]
+451: 
+452: Verify:
+453: - Run yarn db:generate --sql
+454: - Run yarn type-check
+455: - Test routes with curl/Postman
+456: ```
+457: 
+458: **Example:**
+459: ```
+460: Goal: Implement public content API (Phase 1.9)
+461: 
+462: Backend Module:
+463: - Location: apps/backend/src/app/modules/Public/
+464: - Files: public.controller.ts, public.service.ts, public.routes.ts, public.validation.ts
+465: 
+466: Prisma Model:
+467: model Faq {
+468:   id String @id @default(uuid())
+469:   question String
+470:   answer String
+471:   category String
+472:   order Int @default(0)
+473:   isPublished Boolean @default(true)
+474: }
+475: 
+476: Routes:
+477: - GET /api/public/faqs
+478: - GET /api/public/faqs/categories
+479: - GET /api/public/testimonials
+480: - POST /api/public/newsletter
+481: - POST /api/public/contact
+482: - GET /api/public/page-content/:slug
+483: 
+484: Data Flow:
+485: 1. Request hits Public routes
+486: 2. Validation middleware checks body/query/params
+487: 3. Controller calls PublicService
+488: 4. Service uses $queryRaw for all DB operations
+489: 5. Response returned via sendSuccessResponse
+490: 
+491: Verify:
+492: - Run yarn db:generate --sql
+493: - Run yarn type-check
+494: - Register routes in routes/index.ts
+495: ```
+496: 
+497: ---
+498: 
+499: ## Prefix Caching Best Practices
+500: 
+501: ### What is Prefix Caching?
+502: 
+503: Models like DeepSeek, Kimi, GLM, and MiMo cache the "prefix" (system prompt + project context) and reuse it across calls. This means:
+504: - **First call**: Full context is processed (expensive)
+505: - **Subsequent calls**: Only the new user message is processed (cheap)
+506: - **Cache invalidation**: Happens if ANY byte in the prefix changes
+507: 
+508: ### How to Maximize Cache Hits
+509: 
+510: 1. **Put project context first** in the prompt
+511:    - AGENTS.md content should be at the very beginning
+512:    - Never change it between calls
+513: 
+514: 2. **Use a frozen prefix block**
+515:    ```
+516:    # CACHE OPTIMIZATION CONTRACT — FROZEN PREFIX
+517:    # Never modify this block between calls.
+518:    ```
+519: 
+520: 3. **Keep the prefix stable**
+521:    - Don't add timestamps or session-specific values
+522:    - Don't modify the first 1000+ tokens
+523:    - Append new context at the END, not the beginning
+524: 
+525: 4. **For Qwen 3.x specifically:**
+526:    - Ensure prefix exceeds 1024 tokens
+527:    - Include AGENTS.md + skills + project context
+528:    - Don't shorten to save tokens — it breaks cache activation
+529: 
+530: 5. **For DeepSeek/Kimi/GLM/MiMo:**
+531:    - Any stable prefix works — they cache from byte 0
+532:    - Even a 100-token prefix gets cached
+533:    - These models are most efficient for iterative work
+534: 
+535: ### Example: Stable vs Unstable Prefix
+536: 
+537: **Stable (good for caching):**
+538: ```
+539: # Project: Scholar-Flow v1.1.0
+540: # Stack: Next.js 15 + Express + Prisma + PostgreSQL
+541: # Rules: [unchanged rules]
+542: 
+543: ---
+544: 
+545: ## Current Task
+546: [This changes per session]
+547: ```
+548: 
+549: **Unstable (bad for caching):**
+550: ```
+551: # Project: Scholar-Flow
+552: # Date: 2026-06-08 [CHANGES EVERY SESSION - BAD!]
+553: # Time: 14:30 [CHANGES EVERY SESSION - BAD!]
+554: # Stack: Next.js 15 + Express + Prisma + PostgreSQL
+555: 
+556: ---
+557: 
+558: ## Current Task
+559: ```
+560: 
+561: ---
+562: 
+563: ## Prompt Structure Templates
+564: 
+565: ### Template A: Implementation Task
+566: 
+567: ```markdown
+568: # Project Context
+569: [Static project info from AGENTS.md]
+570: 
+571: ---
+572: 
+573: ## Current Status
+574: [Current phase from IMPLEMENTATION.md]
+575: 
+576: ## Goal
+577: [One sentence]
+578: 
+579: ## Files to Read
+580: 1. [Path]
+581: 2. [Path]
+582: 
+583: ## Implementation Plan
+584: 1. [Step]
+585: 2. [Step]
+586: 
+587: ## Verification
+588: - [ ] yarn type-check
+589: - [ ] yarn lint
+590: - [ ] Specific test
+591: 
+592: ## Constraints
+593: - [Rule from AGENTS.md]
+594: - [Rule from AGENTS.md]
+595: ```
+596: 
+597: ### Template B: Debug Task
+598: 
+599: ```markdown
+600: # Project Context
+601: [Static project info]
+602: 
+603: ---
+604: 
+605: ## Bug Description
+606: [What is wrong]
+607: 
+608: ## Error Message
+609: ```
+610: [Exact error]
+611: ```
+612: 
+613: ## Reproduction Steps
+614: 1. [Step]
+615: 2. [Step]
+616: 
+617: ## Files to Check
+618: 1. [Path]
+619: 2. [Path]
+620: 
+621: ## Expected vs Actual
+622: - Expected: [What should happen]
+623: - Actual: [What happens]
+624: 
+625: ## Context
+626: [Any relevant info]
+627: ```
+628: 
+629: ### Template C: Review/Refactor Task
+630: 
+631: ```markdown
+632: # Project Context
+633: [Static project info]
+634: 
+635: ---
+636: 
+637: ## Task
+638: Review/Refactor [file/component]
+639: 
+640: ## Current State
+641: [What it does now]
+642: 
+643: ## Issues
+644: 1. [Issue 1]
+645: 2. [Issue 2]
+646: 
+647: ## Reference
+648: - [Pattern file]
+649: - [Design spec]
+650: 
+651: ## Success Criteria
+652: - [Criterion 1]
+653: - [Criterion 2]
+654: 
+655: ## Constraints
+656: - [Don't break X]
+657: - [Must maintain Y]
+658: ```
+659: 
+660: ---
+661: 
+662: ## Anti-Patterns to Avoid
+663: 
+664: ### ❌ Don't: Rewrite AGENTS.md Every Session
+665: 
+666: **Wrong:**
+667: ```
+668: User: "Write a new AGENTS.md for this session..."
+669: ```
+670: 
+671: **Right:**
+672: ```
+673: User: "Update AGENTS.md section [X] to add [Y] rule"
+674: ```
+675: 
+676: ### ❌ Don't: Add Timestamps to the Prefix
+677: 
+678: **Wrong:**
+679: ```
+680: # Project Context
+681: # Last updated: 2026-06-08 14:30
+682: # Session ID: abc123
+683: ```
+684: 
+685: **Right:**
+686: ```
+687: # Project Context
+688: # Version: 1.1.0
+689: # [No timestamps in prefix]
+690: ```
+691: 
+692: ### ❌ Don't: Change the Prefix Mid-Conversation
+693: 
+694: **Wrong:**
+695: ```
+696: Message 1: [Prefix A]
+697: Message 2: [Prefix A modified]
+698: Message 3: [Prefix A modified again]
+699: ```
+700: 
+701: **Right:**
+702: ```
+703: Message 1: [Prefix A]
+704: Message 2: [Prefix A - same]
+705: Message 3: [Prefix A - same]
+706: ```
+707: 
+708: ### ❌ Don't: Be Vague About Goals
+709: 
+710: **Wrong:**
+711: ```
+712: "Fix the auth issue"
+713: ```
+714: 
+715: **Right:**
+716: ```
+717: "Fix the JWT token expiration in auth middleware by adding 
+718: 5-minute leeway to clock tolerance. Check auth.ts line 146."
+719: ```
+720: 
+721: ### ❌ Don't: Ask for Multiple Unrelated Tasks
+722: 
+723: **Wrong:**
+724: ```
+725: "Implement auth pages, fix the footer, add a new model, 
+726: and update the database schema"
+727: ```
+728: 
+729: **Right:**
+730: ```
+731: "Implement auth pages (Phase 2.1). Files: login, register, 
+732: forgot-password, reset-password, verify-email."
+733: ```
+734: 
+735: ### ❌ Don't: Skip the 5-Step Pre-Implementation Checklist
+736: 
+737: **Wrong:**
+738: ```
+739: "Implement the new feature"
+740: [AI immediately starts coding]
+741: ```
+742: 
+743: **Right:**
+744: ```
+745: "Goal: Implement forgot-password page
+746: 
+747: 1. Read figma-make/pages/ForgotPasswordPage.tsx
+748: 2. Read apps/frontend/src/components/ui/card.tsx
+749: 3. Identify risks: Must use Link not onNavigate
+750: 4. Approach: Copy figma-make structure, adapt to Next.js
+751: 5. THEN write code"
+752: ```
+753: 
+754: ---
+755: 
+756: ## Quick Reference Card
+757: 
+758: | Model | Cache Strategy | Min Tokens | Best For |
+759: |-------|---------------|------------|----------|
+760: | DeepSeek V4 Pro | Byte 0 | Any | Long reasoning, complex tasks |
+761: | DeepSeek Flash | Byte 0 | Any | Fast, cost-effective iteration |
+762: | Kimi K2.6 | Byte 0 | Any | Multi-step reasoning, context heavy |
+763: | GLM-4 | Byte 0 | Any | Bilingual, structured output |
+764: | MiMo | Byte 0 | Any | General purpose, fast |
+765: | Qwen 3.x | 1024+ | 1024 | Tool use, coding, when cache is critical |
+766: 
+767: | Action | Do This | Not This |
+768: |--------|---------|----------|
+769: | AGENTS.md | Update specific sections | Rewrite entire file |
+770: | Prefix | Keep static, append at end | Add timestamps, modify mid-session |
+771: | Goals | One sentence, specific | Vague, multiple unrelated |
+772: | Files | List exact paths | "Check the backend" |
+773: | Verify | Specify commands | "Make sure it works" |
+774: 
+775: ---
+776: 
+777: ## Summary
+778: 
+779: 1. **Write AGENTS.md once**, update it incrementally
+780: 2. **Keep the prefix stable** — no timestamps, no session-specific data
+781: 3. **Match the model** — Qwen needs 1024+ tokens, others cache from byte 0
+782: 4. **Be specific** — exact files, exact goals, exact verification steps
+783: 5. **Use the 5-step checklist** — read, plan, identify risks, then code
+784: 6. **Regenerate repomix** when the project structure changes significantly
+785: 
+786: ---
+787: 
+788: *Last updated: June 2026*
+789: *Part of Scholar-Flow documentation*
 </file>
 
 <file path=".github/workflows/auto-close-issue.yml">
@@ -102510,489 +103303,6 @@ This section contains the contents of the repository's files.
 31:       react-dom: ">=16.0.0"
 </file>
 
-<file path="AGENTS.md">
-  1: # CACHE OPTIMIZATION CONTRACT — FROZEN PREFIX
-  2: # This block is always first. Never modify between calls.
-  3: # DeepSeek, Kimi, GLM, MiMo: cache matches from byte 0.
-  4: # Any edit before byte N invalidates everything after it.
-  5: 
-  6: ## Prefix stability rules (all models)
-  7: - System prompt + tool definitions: STATIC — frozen between calls
-  8: - File reads: DYNAMIC — always appended at END of context only
-  9: - User message: always last
- 10: - Conversation history: append-only, never rewrite earlier turns
- 11: - Never inject timestamps, dates, or session-specific values here
- 12: 
- 13: ## Qwen 3.x cache activation requirement
- 14: Qwen models need minimum 1024 tokens to activate prefix caching.
- 15: This AGENTS.md + skills content must stay above 1024 tokens total.
- 16: Do not shorten this file.
- 17: 
- 18: ## Agent behavior (cache-preserving)
- 19: - Understand the full goal before ANY tool call
- 20: - One tool call at a time — no parallel speculation
- 21: - Read each file ONCE per session unless you edited it
- 22: - Do not re-read files to verify — trust what is in context
- 23: - Never duplicate file content across turns — reference by path
- 24: - Stop when goal is achieved — do not add unrequested changes
- 25: 
- 26: ## Multi-Model Cache Optimization
- 27: This project supports multiple AI models with prefix caching:
- 28: - **DeepSeek V4 Pro / DeepSeek Flash**: Cache hits from byte 0 on matching prefix
- 29: - **Kimi K2.6**: Cache hits from byte 0 on matching prefix
- 30: - **GLM-4 / MiMo**: Cache hits from byte 0 on matching prefix
- 31: - **Qwen 3.x**: Requires minimum 1024 tokens to activate prefix caching
- 32: - **Optimization strategy**: Keep AGENTS.md + skills content above 1024 tokens total
- 33: - **Rule**: Never inject timestamps, dates, or session-specific values in the frozen prefix
- 34: - **Rule**: Never modify the frozen prefix block between calls — any edit before byte N invalidates everything after it
- 35: 
- 36: ---
- 37: 
- 38: # Scholar-Flow AI Agent Instructions
- 39: 
- 40: ## Product
- 41: Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
- 42: Target users: researchers, students, professors, academic teams.
- 43: Version: 1.1.0 (20 releases, 803 commits)
- 44: 
- 45: Core features:
- 46: - Research paper upload with AI metadata extraction (title/author/abstract)
- 47: - TipTap rich text editor: auto-save, drafts, export PDF/DOCX
- 48: - Collections and workspaces with role-based access
- 49: - Email sharing with permission management (view/edit)
- 50: - Stripe billing: checkout, webhooks, customer portal
- 51: - Admin dashboard: real-time CPU/memory/storage/DB metrics (10s refresh)
- 52: - pgvector semantic search
- 53: - PDF preview (secure iframe)
- 54: - AWS S3 for all file storage
- 55: 
- 56: ---
- 57: 
- 58: ## Monorepo Structure
- 59: Root: Turborepo v2.5.8 + Yarn Berry v4.9.2
- 60:   apps/frontend/    → Next.js 15 app (package: @scholar-flow/frontend)
- 61:   apps/backend/     → Express.js API (package: @scholar-flow/backend)
- 62:   docs/             → Documentation
- 63:   .cursor/rules/    → Cursor AI guidelines (read-only)
- 64:   figma-make/       → Figma-generated component references
- 65: 
- 66: ---
- 67: 
- 68: ## Frontend (apps/frontend)
- 69: Framework: Next.js 15 App Router
- 70: Language: TypeScript strict mode
- 71: State: Redux Toolkit Query (RTK Query) — NOT plain Redux
- 72: Auth: NextAuth.js (Google OAuth, GitHub OAuth, email/password)
- 73: UI: Tailwind CSS + shadcn/ui
- 74: Forms: React Hook Form + Zod
- 75: Editor: TipTap (tiptap-extension-resizable-image, tiptap-resizable-image)
- 76: Virtualization: react-window
- 77: Sanitization: sanitize-html
- 78: File structure:
- 79:   apps/frontend/src/app/         → App Router pages and layouts
- 80:   apps/frontend/components/      → Reusable UI components
- 81:   apps/frontend/lib/             → Utilities, auth config, API clients
- 82:   apps/frontend/redux/           → RTK Query slices and store config
- 83: 
- 84: ---
- 85: 
- 86: ## Backend (apps/backend)
- 87: Runtime: Node.js >=22, Express.js, TypeScript
- 88: ORM: Prisma 6.16.3 (always use --sql flag: yarn db:generate)
- 89: Database: PostgreSQL + pgvector extension
- 90: Auth: JWT + bcrypt (refresh tokens, rate limiting)
- 91: Storage: AWS S3 (presigned URLs only — never expose credentials)
- 92: Payments: Stripe (checkout + webhooks + customer portal)
- 93: Validation: Zod schemas
- 94: File structure:
- 95:   apps/backend/src/app/          → Controllers, routes, middleware
- 96:   apps/backend/prisma/           → schema.prisma + migrations
- 97:   apps/backend/scripts/          → Seed and utility scripts
- 98: 
- 99: ---
-100: 
-101: ## Exact Commands (always use Yarn — never npm, never pnpm)
-102: yarn dev:turbo           → start both apps via Turborepo
-103: yarn dev:frontend        → frontend only
-104: yarn dev:backend         → backend only
-105: yarn build               → production build (both)
-106: yarn lint                → ESLint (both)
-107: yarn type-check          → TypeScript check (both, needs build first)
-108: yarn test                → test suite
-109: yarn format              → Prettier
-110: yarn clean               → clean all build artifacts
-111: yarn db:migrate          → prisma migrate dev
-112: yarn db:generate         → prisma generate --sql  ← always --sql
-113: yarn db:studio           → Prisma Studio
-114: yarn db:seed             → seed database
-115: yarn db:reset            → prisma migrate reset --force
-116: yarn setup               → install + generate (use for fresh setup)
-117: 
-118: ---
-119: 
-120: ## Architecture Rules
-121: Frontend and backend are fully decoupled — REST API only.
-122: Frontend: UI, RTK Query, NextAuth sessions, Redux state.
-123: Backend: business logic, Prisma, S3, Stripe, JWT.
-124: NEVER import backend code into frontend.
-125: NEVER use Prisma in frontend.
-126: NEVER bypass the REST API layer.
-127: NEVER store files locally in production — use S3.
-128: NEVER expose AWS credentials or S3 bucket names in frontend code.
-129: 
-130: ---
-131: 
-132: ## Authentication Rules
-133: Frontend: NextAuth.js only — Google/GitHub OAuth + email/password.
-134: Backend: JWT + bcrypt + refresh tokens.
-135: NEVER suggest better-auth or any auth replacement.
-136: NEVER bypass auth middleware on protected routes.
-137: NEVER store raw passwords — always bcrypt.
-138: Session validation: backend verifies JWT, frontend uses NextAuth session.
-139: 
-140: ---
-141: 
-142: ## Stripe Rules (critical — production money flows)
-143: Webhooks are the ONLY source of truth for subscription status.
-144: NEVER update subscription roles from frontend.
-145: ALWAYS verify Stripe webhook signatures before processing.
-146: Customer portal accessed via backend endpoint only.
-147: Webhook handlers MUST be idempotent (safe to replay).
-148: Test mode and live mode keys are different — never mix them.
-149: Before touching billing code: read the webhook handler first.
-150: 
-151: ---
-152: 
-153: ## AWS S3 Rules (critical — user data)
-154: ALL file operations use presigned URLs.
-155: NEVER stream files through the backend if avoidable.
-156: NEVER hardcode S3 bucket names in frontend.
-157: NEVER expose AWS_ACCESS_KEY or AWS_SECRET in frontend.
-158: Image resizing happens server-side before S3 upload.
-159: PDF upload goes through backend S3 route — not direct from browser.
-160: 
-161: ---
-162: 
-163: ## pgvector Rules (critical — AI features)
-164: pgvector powers semantic search on research papers.
-165: NEVER drop vector columns or vector indexes.
-166: NEVER run prisma migrate reset in production.
-167: Always use yarn db:generate --sql after schema changes.
-168: Embedding dimension is fixed — never change vector size in production.
-169: queryRaw is required for pgvector operations (Prisma limitation).
-170: 
-171: ---
-172: 
-173: ## TipTap Editor Rules
-174: Auto-save uses debounce — never call save on every keystroke.
-175: Draft and publish states are separate fields.
-176: Image uploads go to S3 via backend — never base64 inline.
-177: Export PDF/DOCX uses server-side rendering — do not use browser print.
-178: resizable-image extension is installed — use it for image nodes.
-179: 
-180: ---
-181: 
-182: ## RTK Query Rules
-183: All API calls go through RTK Query slices in apps/frontend/redux/.
-184: Use cache invalidation tags correctly — providesTags / invalidatesTags.
-185: NEVER make raw fetch calls in components.
-186: NEVER put API logic inside React components.
-187: Optimistic updates must have rollback on error.
-188: 
-189: ---
-190: 
-191: ## Admin Dashboard Rules
-192: Metrics refresh every 10 seconds — do not change this interval.
-193: CPU calculation uses os.cpus() idle/total delta — do not simplify.
-194: Storage estimation: 10x actual DB usage, minimum 100GB baseline.
-195: Health thresholds: green <50%, blue <70%, yellow <85%, red >85%.
-196: Admin routes require admin role check middleware — never skip it.
-197: Code splitting with React.lazy is required for admin panel.
-198: 
-199: ---
-200: 
-201: ## File Read Priority by Task Type
-202: Before starting any task, identify which services are involved,
-203: then read these files first (one read per session):
-204: 
-205: Billing/Stripe task:
-206:   → apps/backend/src/app/ (billing or webhook routes)
-207:   → check for stripe.webhooks.constructEvent usage
-208: 
-209: S3/upload task:
-210:   → apps/backend/src/app/ (upload or storage routes)
-211:   → check presigned URL generation
-212: 
-213: Auth task:
-214:   → apps/frontend/lib/ (NextAuth config)
-215:   → apps/backend/src/app/ (auth middleware, JWT verification)
-216: 
-217: pgvector/search task:
-218:   → apps/backend/prisma/schema.prisma (vector column definition)
-219:   → apps/backend/src/app/ (search routes using queryRaw)
-220: 
-221: TipTap/editor task:
-222:   → apps/frontend/components/ (editor components)
-223:   → check auto-save debounce and S3 image upload handler
-224: 
-225: RTK Query task:
-226:   → apps/frontend/redux/ (relevant slice)
-227:   → check providesTags and invalidatesTags
-228: 
-229: Admin task:
-230:   → apps/backend/src/app/ (admin routes, metrics calculation)
-231:   → check admin role middleware
-232: 
-233: Prisma/DB task:
-234:   → apps/backend/prisma/schema.prisma (always read first)
-235:   → check vector columns and composite indexes before migrations
-236: 
-237: ---
-238: 
-239: ## Before Implementing Anything
-240: 1. State the goal in one sentence
-241: 2. List all services involved (S3, Stripe, pgvector, Auth, TipTap, Admin)
-242: 3. List exact files you will read
-243: 4. Identify risks: breaking webhooks, losing vectors, auth bypass, S3 exposure
-244: 5. State your implementation approach
-245: 6. THEN write code
-246: 
-247: Do not generate any code before completing steps 1-5.
-248: 
-249: ---
-250: 
-251: ## Never Do
-252: - Never use pnpm, npm, npx — always yarn
-253: - Never forget --sql on yarn db:generate
-254: - Never import backend into frontend
-255: - Never use Prisma in frontend
-256: - Never store files locally in production
-257: - Never expose AWS credentials in frontend
-258: - Never update subscription status from frontend
-259: - Never suggest NextAuth alternatives
-260: - Never suggest better-auth
-261: - Never remove pgvector columns or vector indexes
-262: - Never remove composite indexes without review
-263: - Never run prisma migrate reset in production
-264: - Never run prisma db push in production
-265: - Never add console.log for debugging
-266: - Never install packages without user confirmation
-267: - Never touch .env files
-268: - Never call save on every TipTap keystroke
-269: - Never make raw fetch calls inside React components
-270: - Never skip Stripe webhook signature verification
-271: - Never skip admin role middleware
-272: 
-273: ## Always Do
-274: - Run yarn type-check after TypeScript changes
-275: - Run yarn db:generate after schema changes (with --sql)
-276: - Run yarn lint after significant changes
-277: - Use presigned URLs for all S3 operations
-278: - Keep Stripe webhook handlers idempotent
-279: - Keep RTK Query cache tags consistent
-280: - Keep Redux slices in apps/frontend/redux/
-281: - Keep admin panel code-split with React.lazy
-282: - Follow the 5-step pre-implementation checklist above
-283: 
-284: ---
-285: 
-286: ## Additional Constraints from .cursor/rules/ (read-only source)
-287: 
-288: ### Backend Module Architecture
-289: - Feature modules live under `apps/backend/src/app/modules/` with structure: controller, service, routes, validation schemas.
-290: - Routes register ONLY in `apps/backend/src/app/routes` — never register ad-hoc routes elsewhere.
-291: - Controllers must be thin; all business logic belongs in services.
-292: - Services use Prisma client from shared singleton; handle transactions explicitly when needed.
-293: - Zod for request body, param, and query validation; reject early on failure.
-294: 
-295: ### Database Operations — $queryRaw Critical Rule
-296: - CRITICAL: All database operations MUST use `$queryRaw` or `$executeRaw` instead of standard Prisma Client methods for optimal performance.
-297: - This applies to: SELECT, INSERT, UPDATE, DELETE, aggregation, complex joins.
-298: - Use template literal syntax for SQL injection prevention: `WHERE email = ${email}`
-299: - Use `prisma.$queryRaw<Type[]>` for proper typing.
-300: - Select only required fields; never use `SELECT *`.
-301: - Use `LIMIT ${limit} OFFSET ${skip}` for pagination; never return unbounded lists.
-302: - EXCEPTION — OAuth operations MUST keep standard Prisma Client upsert:
-303:   - `createAccount()`
-304:   - `createOrUpdateUser()`
-305:   - `createOrUpdateUserWithOAuth()`
-306:   Changing these to raw queries causes P2002 unique constraint errors.
-307: 
-308: ### TypedSQL & Raw SQL Files
-309: - Raw SQL statements live in `apps/backend/prisma/sql/` with ONE statement per file.
-310: - File names must be valid JavaScript identifiers (no leading dashes) because they become generated function names.
-311: - Use positional parameters `$1`, `$2` with optional `-- @param {Type} $1:name` comments.
-312: - After adding/modifying SQL, run `yarn db:generate` to regenerate typed functions.
-313: - Import generated functions from `@prisma/client/sql`.
-314: - Execute typed queries with `prisma.$queryRawTyped(queryName(...params))` or `prisma.$queryRaw(...)`.
-315: - Always apply pending migrations BEFORE running `prisma generate --sql`.
-316: - Every new TypedSQL query must have at least one test verifying shape and performance assumptions.
-317: - Above any raw query usage, add a comment referencing the originating `.sql` file.
-318: 
-319: ### Frontend Component & Design Standards
-320: - Prefer Next.js Server Components; add `"use client"` ONLY when interactivity or state is required.
-321: - Use `next/image` and `next/font`; stream large UI with Suspense to avoid unnecessary client bundles.
-322: - Consult `docs/UI_DESIGN.md` BEFORE creating new pages or components.
-323: - Component taxonomy:
-324:   - `components/auth/` — Authentication related
-325:   - `components/layout/` — Navigation, headers, sidebars
-326:   - `components/ui/` — ShadCN primitives
-327:   - `components/customUI/` — Custom components
-328: - Design system: OKLCH color system, `max-w-[1440px]` container width, established Typography heading scales.
-329: - Use existing hover effects (lift, scale, glow) and transitions.
-330: - SEO: use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
-331: - Accessibility: WCAG 2.1 AA compliance, proper ARIA labels, roles, focus states, keyboard navigation.
-332: 
-333: ### Sonner Toast & Error Handling Patterns
-334: - Use Sonner via ToastProvider functions ONLY:
-335:   - `showErrorToast`, `showSuccessToast` from `@/components/providers/ToastProvider`
-336:   - `showApiErrorToast` from `@/lib/errorHandling`
-337: - NEVER import `toast` directly from `sonner`.
-338: - Use custom error handling hooks:
-339:   - `useErrorHandler` for generic errors
-340:   - `useQueryErrorHandler` for RTK Query queries
-341:   - `useMutationErrorHandler` for mutations
-342: - Smart retry: auto-retry on network/server errors, manual retry for client errors.
-343: - Error classification: Network (retry), Client 4xx (fix required), Server 5xx (retry).
-344: - All auth methods must use try/catch with `ApiError` for consistent error responses.
-345: - Feature-specific error classes must extend `ApiError` with standardized format:
-346:   ```typescript
-347:   {
-348:     success: false,
-349:     message: string,
-350:     statusCode: number,
-351:     errorCode?: string,
-352:     details?: object,
-353:     timestamp: string
-354:   }
-355:   ```
-356: 
-357: ### Production-Ready Security & Performance Standards
-358: - Debug logging is allowed ONLY in development; always gate with `process.env.NODE_ENV !== "production"`.
-359: - Replace all `any` types with proper interfaces (e.g., `AuthenticatedRequest`).
-360: - Apply feature-specific rate limiters to all mutation endpoints, especially uploads.
-361: - Use `performanceMonitor` middleware and add `X-Response-Time` headers.
-362: - Health check endpoints must exist:
-363:   - `/api/health` — Basic health status
-364:   - `/api/health/detailed` — Full system health
-365:   - `/api/health/live` — Kubernetes liveness probe
-366:   - `/api/health/ready` — Kubernetes readiness probe
-367: - BigInt handling: cast to integer in SQL for JSON serialization to avoid issues.
-368: - Memory monitoring: track heap usage and memory thresholds in health checks.
-369: 
-370: ### pgvector Detailed Rules
-371: - Only run similarity queries if `USE_PGVECTOR=true`.
-372: - `PaperChunk.embedding` column type is `vector`; migrations manage any transition from JSON fallback.
-373: - Use a service helper to format float arrays into vector literals (`[x,y,z]`).
-374: - Similarity operators: `<->` (L2), `<=>` (cosine), `<#>` (negative inner product). Align index operator class with chosen operator.
-375: - Create IVF index (`ivfflat`) only after sufficient data volume; document chosen `lists` parameter.
-376: - Limit result sets (e.g., `LIMIT 10`); avoid full vector scans.
-377: - Guard against mismatched dimensionality; validate embedding array length before insert.
-378: - Add round-trip test (insert + similarity query) when modifying embedding logic.
-379: 
-380: ### Auth Specifics
-381: - Frontend authentication state is managed via Redux Toolkit (in addition to NextAuth session).
-382: - OAuth account creation MUST use standard Prisma upsert pattern; do NOT convert to raw SQL.
-383: - Password strength indicators on register forms.
-384: - Auth guards for protected routes.
-385: - All auth functions must have JSDoc comments.
-386: - Authentication-related code requires minimum 90% test coverage.
-387: - Comprehensive integration tests required for all auth endpoints and flows.
-388: 
-389: ### Workflow & Documentation Discipline
-390: - Follow phase discipline strictly; see `Roadmap.md` before starting new features.
-391: - Ship only in-phase work; defer out-of-scope requests unless they unblock the current milestone.
-392: - Prefer shipping a thin vertical slice over broad incomplete scaffolding.
-393: - Do NOT create README.md, OPTIMIZATION.md, CHANGELOG.md, or PERFORMANCE.md files for minor updates or every change.
-394: - Inline documentation only; comments explain WHY not WHAT.
-395: - Quality gates before merge:
-396:   1. `yarn build` succeeds
-397:   2. `yarn type-check` clean
-398:   3. `yarn lint` zero errors
-399:   4. Tests pass; add/adjust tests for new logic
-400:   5. No secrets committed
-401:   6. No obvious N+1 or unbounded queries
-402:   7. WCAG 2.1 AA for new UI components
-403:   8. Migrations are additive (backwards compatible)
-404:   9. Update public docs (README, SCHEMA, ENVIRONMENT) for changed public behavior
-405:   10. Keep PR scope tight with summary + checklist
-406: 
-407: ### Development Server Ports
-408: - Frontend dev server: port 3000
-409: - Backend dev server: port 5000
-410: 
-411: ---
-412: 
-413: ## Project Repository
-414: **GitHub:** https://github.com/Atik203/Scholar-Flow
-415: 
-416: ---
-417: 
-418: ## Implementation Tracking
-419: **Before starting any task, check `IMPLEMENTATION.md` to understand:**
-420: 1. What phase is currently active
-421: 2. What has been completed (marked `[x]`)
-422: 3. What is pending (marked `[ ]`)
-423: 4. Current status and focus area
-424: 
-425: **How to use IMPLEMENTATION.md:**
-426: - Read it first to understand the project roadmap
-427: - Check the "Current Status" section at the bottom
-428: - Identify which phase items are unchecked
-429: - Do not work on items from future phases unless explicitly requested
-430: - Mark completed items as `[x]` after implementation
-431: 
-432: **Current Status:** Phase 1 Complete (Static Marketing Pages — 18-20 pages done)
-433: - Phase 1.9 Backend Migration: Public content models + API routes created
-434: - Next: Phase 2 Auth & Onboarding Pages (5-6 pages)
-435: 
-436: ---
-437: 
-438: ## Project Context Generation (Repomix)
-439: **Repomix** is installed as a dev dependency for generating AI-friendly project snapshots.
-440: 
-441: ### When to regenerate
-442: - After major structural changes (new directories, moved files)
-443: - After adding new dependencies or build tools
-444: - Before asking a new AI agent to work on the project
-445: - When the project context seems stale
-446: 
-447: ### How to generate
-448: ```bash
-449: # From project root
-450: npx repomix
-451: # Or using the configured output
-452: yarn repomix
-453: ```
-454: 
-455: **Output file:** `repomix-output.xml` (8MB+ AI-friendly project snapshot)
-456: 
-457: ### What repomix includes
-458: - All source code (TS, TSX, JS, JSX, CSS, SCSS, JSON, Prisma, SQL)
-459: - Configuration files (package.json, tsconfig, etc.)
-460: - Documentation (README, AGENTS.md, IMPLEMENTATION.md, etc.)
-461: - Excludes: node_modules, images, LaTeX files, build artifacts, logs
-462: 
-463: ### What repomix ignores (configured in repomix.config.ts)
-464: - **scholar-flow-overleaf/** — LaTeX thesis/document files (SRS, chapters, images)
-465: - **response_image/** — Generated image responses
-466: - **images/** — Static image assets
-467: - **node_modules/**, **.yarn/** — Package dependencies
-468: - **.next/**, **dist/**, **out/** — Build outputs
-469: - **.git/**, **.turbo/**, **.vercel/** — VCS & deployment artifacts
-470: - **.vscode/**, **.cursor/**, **.agents/**, **.figma/** — IDE & tool configs
-471: - **CHANGELOG.md**, **LICENSE.md**, **CODE_OF_CONDUCT.md** — Meta docs
-472: - **Logs, coverage, media files** — Non-code assets
-473: 
-474: ### Using repomix output with AI
-475: 1. Run `npx repomix` to generate `repomix-output.xml`
-476: 2. Provide the file to an AI agent for full project context
-477: 3. The AI gets a complete, token-efficient project snapshot
-478: 4. Reference specific files by path when asking questions
-479: 
-480: **Note:** The `repomix-output.xml` is already generated and available in the project root.
-</file>
-
 <file path="README.md">
   1: # ScholarFlow
   2: 
@@ -103281,78 +103591,6 @@ This section contains the contents of the repository's files.
 285: ---
 286: 
 287: ⭐ **Star this repository** if you find it helpful!
-</file>
-
-<file path="repomix.config.ts">
- 1: import { defineConfig } from 'repomix';
- 2: export default defineConfig({
- 3:   output: {
- 4:     filePath: 'repomix-output.xml',
- 5:     style: 'xml',
- 6:     removeComments: true,
- 7:     removeEmptyLines: true,
- 8:     showLineNumbers: true,
- 9:     topFilesLength: 20,
-10:   },
-11:   ignore: {
-12:     useGitignore: true,
-13:     useDefaultPatterns: true,
-14:     customPatterns: [
-15:       '**/dist/**',
-16:       '**/.next/**',
-17:       '**/out/**',
-18:       '**/.turbo/**',
-19:       '**/node_modules/**',
-20:       '**/.yarn/**',
-21:       '**/.pnp.*',
-22:       '**/.git/**',
-23:       '**/.vscode/**',
-24:       '**/.cursor/**',
-25:       '**/.agents/**',
-26:       '**/.figma/**',
-27:       '**/.vercel/**',
-28:       '**/images/**',
-29:       '**/response_image/**',
-30:       '**/scholar-flow-overleaf/**',
-31:       '**/*.png',
-32:       '**/*.jpg',
-33:       '**/*.jpeg',
-34:       '**/*.gif',
-35:       '**/*.svg',
-36:       '**/*.ico',
-37:       '**/*.pdf',
-38:       '**/*.docx',
-39:       '**/*.doc',
-40:       '**/*.zip',
-41:       '**/*.tar.gz',
-42:       '**/repomix-output.xml',
-43:       '**/CHANGELOG.md',
-44:       '**/LICENSE.md',
-45:       '**/CODE_OF_CONDUCT.md',
-46:       '**/CONTRIBUTING.md',
-47:       '**/SECURITY.md',
-48:       '**/*.log',
-49:       '**/coverage/**',
-50:       '**/apps/backend/node_modules/**',
-51:       '**/apps/frontend/node_modules/**',
-52:       '**/apps/backend/dist/**',
-53:     ],
-54:   },
-55:   include: [
-56:     '**/*.ts',
-57:     '**/*.tsx',
-58:     '**/*.js',
-59:     '**/*.jsx',
-60:     '**/*.css',
-61:     '**/*.scss',
-62:     '**/*.json',
-63:     '**/*.md',
-64:     '**/*.prisma',
-65:     '**/*.sql',
-66:     '**/*.yml',
-67:     '**/*.yaml',
-68:   ],
-69: });
 </file>
 
 <file path="skill-lock.json">
@@ -118051,6 +118289,561 @@ This section contains the contents of the repository's files.
 2: export { TeamActivityPage } from "./TeamActivityPage";
 3: export { TeamInvitationsPage } from "./TeamInvitationsPage";
 4: export { TeamSettingsPage } from "./TeamSettingsPage";
+</file>
+
+<file path="AGENTS.md">
+  1: # CACHE OPTIMIZATION CONTRACT — FROZEN PREFIX
+  2: # This block is always first. Never modify between calls.
+  3: # DeepSeek, Kimi, GLM, MiMo: cache matches from byte 0.
+  4: # Any edit before byte N invalidates everything after it.
+  5: 
+  6: ## Prefix stability rules (all models)
+  7: - System prompt + tool definitions: STATIC — frozen between calls
+  8: - File reads: DYNAMIC — always appended at END of context only
+  9: - User message: always last
+ 10: - Conversation history: append-only, never rewrite earlier turns
+ 11: - Never inject timestamps, dates, or session-specific values here
+ 12: 
+ 13: ## Qwen 3.x cache activation requirement
+ 14: Qwen models need minimum 1024 tokens to activate prefix caching.
+ 15: This AGENTS.md + skills content must stay above 1024 tokens total.
+ 16: Do not shorten this file.
+ 17: 
+ 18: ## Agent behavior (cache-preserving)
+ 19: - Understand the full goal before ANY tool call
+ 20: - One tool call at a time — no parallel speculation
+ 21: - Read each file ONCE per session unless you edited it
+ 22: - Do not re-read files to verify — trust what is in context
+ 23: - Never duplicate file content across turns — reference by path
+ 24: - Stop when goal is achieved — do not add unrequested changes
+ 25: 
+ 26: ## Multi-Model Cache Optimization
+ 27: This project supports multiple AI models with prefix caching:
+ 28: - **DeepSeek V4 Pro / DeepSeek Flash**: Cache hits from byte 0 on matching prefix
+ 29: - **Kimi K2.6**: Cache hits from byte 0 on matching prefix
+ 30: - **GLM-4 / MiMo**: Cache hits from byte 0 on matching prefix
+ 31: - **Qwen 3.x**: Requires minimum 1024 tokens to activate prefix caching
+ 32: - **Optimization strategy**: Keep AGENTS.md + skills content above 1024 tokens total
+ 33: - **Rule**: Never inject timestamps, dates, or session-specific values in the frozen prefix
+ 34: - **Rule**: Never modify the frozen prefix block between calls — any edit before byte N invalidates everything after it
+ 35: 
+ 36: ---
+ 37: 
+ 38: # Scholar-Flow AI Agent Instructions
+ 39: 
+ 40: ## Product
+ 41: Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
+ 42: Target users: researchers, students, professors, academic teams.
+ 43: Version: 1.1.0 (20 releases, 803 commits)
+ 44: 
+ 45: Core features:
+ 46: - Research paper upload with AI metadata extraction (title/author/abstract)
+ 47: - TipTap rich text editor: auto-save, drafts, export PDF/DOCX
+ 48: - Collections and workspaces with role-based access
+ 49: - Email sharing with permission management (view/edit)
+ 50: - Stripe billing: checkout, webhooks, customer portal
+ 51: - Admin dashboard: real-time CPU/memory/storage/DB metrics (10s refresh)
+ 52: - pgvector semantic search
+ 53: - PDF preview (secure iframe)
+ 54: - AWS S3 for all file storage
+ 55: 
+ 56: ---
+ 57: 
+ 58: ## Monorepo Structure
+ 59: Root: Turborepo v2.5.8 + Yarn Berry v4.9.2
+ 60:   apps/frontend/    → Next.js 15 app (package: @scholar-flow/frontend)
+ 61:   apps/backend/     → Express.js API (package: @scholar-flow/backend)
+ 62:   docs/             → Documentation
+ 63:   .cursor/rules/    → Cursor AI guidelines (read-only)
+ 64:   figma-make/       → Figma-generated component references
+ 65: 
+ 66: ---
+ 67: 
+ 68: ## Frontend (apps/frontend)
+ 69: Framework: Next.js 15 App Router
+ 70: Language: TypeScript strict mode
+ 71: State: Redux Toolkit Query (RTK Query) — NOT plain Redux
+ 72: Auth: NextAuth.js (Google OAuth, GitHub OAuth, email/password)
+ 73: UI: Tailwind CSS + shadcn/ui
+ 74: Forms: React Hook Form + Zod
+ 75: Editor: TipTap (tiptap-extension-resizable-image, tiptap-resizable-image)
+ 76: Virtualization: react-window
+ 77: Sanitization: sanitize-html
+ 78: File structure:
+ 79:   apps/frontend/src/app/         → App Router pages and layouts
+ 80:   apps/frontend/components/      → Reusable UI components
+ 81:   apps/frontend/lib/             → Utilities, auth config, API clients
+ 82:   apps/frontend/redux/           → RTK Query slices and store config
+ 83: 
+ 84: ---
+ 85: 
+ 86: ## Backend (apps/backend)
+ 87: Runtime: Node.js >=22, Express.js, TypeScript
+ 88: ORM: Prisma 6.16.3 (always use --sql flag: yarn db:generate)
+ 89: Database: PostgreSQL + pgvector extension
+ 90: Auth: JWT + bcrypt (refresh tokens, rate limiting)
+ 91: Storage: AWS S3 (presigned URLs only — never expose credentials)
+ 92: Payments: Stripe (checkout + webhooks + customer portal)
+ 93: Validation: Zod schemas
+ 94: File structure:
+ 95:   apps/backend/src/app/          → Controllers, routes, middleware
+ 96:   apps/backend/prisma/           → schema.prisma + migrations
+ 97:   apps/backend/scripts/          → Seed and utility scripts
+ 98: 
+ 99: ---
+100: 
+101: ## Exact Commands (always use Yarn — never npm, never pnpm)
+102: yarn dev:turbo           → start both apps via Turborepo
+103: yarn dev:frontend        → frontend only
+104: yarn dev:backend         → backend only
+105: yarn build               → production build (both)
+106: yarn lint                → ESLint (both)
+107: yarn type-check          → TypeScript check (both, needs build first)
+108: yarn test                → test suite
+109: yarn format              → Prettier
+110: yarn clean               → clean all build artifacts
+111: yarn db:migrate          → prisma migrate dev
+112: yarn db:generate         → prisma generate --sql  ← always --sql
+113: yarn db:studio           → Prisma Studio
+114: yarn db:seed             → seed database
+115: yarn db:reset            → prisma migrate reset --force
+116: yarn setup               → install + generate (use for fresh setup)
+117: 
+118: ---
+119: 
+120: ## Architecture Rules
+121: Frontend and backend are fully decoupled — REST API only.
+122: Frontend: UI, RTK Query, NextAuth sessions, Redux state.
+123: Backend: business logic, Prisma, S3, Stripe, JWT.
+124: NEVER import backend code into frontend.
+125: NEVER use Prisma in frontend.
+126: NEVER bypass the REST API layer.
+127: NEVER store files locally in production — use S3.
+128: NEVER expose AWS credentials or S3 bucket names in frontend code.
+129: 
+130: ---
+131: 
+132: ## Authentication Rules
+133: Frontend: NextAuth.js only — Google/GitHub OAuth + email/password.
+134: Backend: JWT + bcrypt + refresh tokens.
+135: NEVER suggest better-auth or any auth replacement.
+136: NEVER bypass auth middleware on protected routes.
+137: NEVER store raw passwords — always bcrypt.
+138: Session validation: backend verifies JWT, frontend uses NextAuth session.
+139: 
+140: ---
+141: 
+142: ## Stripe Rules (critical — production money flows)
+143: Webhooks are the ONLY source of truth for subscription status.
+144: NEVER update subscription roles from frontend.
+145: ALWAYS verify Stripe webhook signatures before processing.
+146: Customer portal accessed via backend endpoint only.
+147: Webhook handlers MUST be idempotent (safe to replay).
+148: Test mode and live mode keys are different — never mix them.
+149: Before touching billing code: read the webhook handler first.
+150: 
+151: ---
+152: 
+153: ## AWS S3 Rules (critical — user data)
+154: ALL file operations use presigned URLs.
+155: NEVER stream files through the backend if avoidable.
+156: NEVER hardcode S3 bucket names in frontend.
+157: NEVER expose AWS_ACCESS_KEY or AWS_SECRET in frontend.
+158: Image resizing happens server-side before S3 upload.
+159: PDF upload goes through backend S3 route — not direct from browser.
+160: 
+161: ---
+162: 
+163: ## pgvector Rules (critical — AI features)
+164: pgvector powers semantic search on research papers.
+165: NEVER drop vector columns or vector indexes.
+166: NEVER run prisma migrate reset in production.
+167: Always use yarn db:generate --sql after schema changes.
+168: Embedding dimension is fixed — never change vector size in production.
+169: queryRaw is required for pgvector operations (Prisma limitation).
+170: 
+171: ---
+172: 
+173: ## TipTap Editor Rules
+174: Auto-save uses debounce — never call save on every keystroke.
+175: Draft and publish states are separate fields.
+176: Image uploads go to S3 via backend — never base64 inline.
+177: Export PDF/DOCX uses server-side rendering — do not use browser print.
+178: resizable-image extension is installed — use it for image nodes.
+179: 
+180: ---
+181: 
+182: ## RTK Query Rules
+183: All API calls go through RTK Query slices in apps/frontend/redux/.
+184: Use cache invalidation tags correctly — providesTags / invalidatesTags.
+185: NEVER make raw fetch calls in components.
+186: NEVER put API logic inside React components.
+187: Optimistic updates must have rollback on error.
+188: 
+189: ---
+190: 
+191: ## Admin Dashboard Rules
+192: Metrics refresh every 10 seconds — do not change this interval.
+193: CPU calculation uses os.cpus() idle/total delta — do not simplify.
+194: Storage estimation: 10x actual DB usage, minimum 100GB baseline.
+195: Health thresholds: green <50%, blue <70%, yellow <85%, red >85%.
+196: Admin routes require admin role check middleware — never skip it.
+197: Code splitting with React.lazy is required for admin panel.
+198: 
+199: ---
+200: 
+201: ## File Read Priority by Task Type
+202: Before starting any task, identify which services are involved,
+203: then read these files first (one read per session):
+204: 
+205: Billing/Stripe task:
+206:   → apps/backend/src/app/ (billing or webhook routes)
+207:   → check for stripe.webhooks.constructEvent usage
+208: 
+209: S3/upload task:
+210:   → apps/backend/src/app/ (upload or storage routes)
+211:   → check presigned URL generation
+212: 
+213: Auth task:
+214:   → apps/frontend/lib/ (NextAuth config)
+215:   → apps/backend/src/app/ (auth middleware, JWT verification)
+216: 
+217: pgvector/search task:
+218:   → apps/backend/prisma/schema.prisma (vector column definition)
+219:   → apps/backend/src/app/ (search routes using queryRaw)
+220: 
+221: TipTap/editor task:
+222:   → apps/frontend/components/ (editor components)
+223:   → check auto-save debounce and S3 image upload handler
+224: 
+225: RTK Query task:
+226:   → apps/frontend/redux/ (relevant slice)
+227:   → check providesTags and invalidatesTags
+228: 
+229: Admin task:
+230:   → apps/backend/src/app/ (admin routes, metrics calculation)
+231:   → check admin role middleware
+232: 
+233: Prisma/DB task:
+234:   → apps/backend/prisma/schema.prisma (always read first)
+235:   → check vector columns and composite indexes before migrations
+236: 
+237: ---
+238: 
+239: ## Before Implementing Anything
+240: 1. State the goal in one sentence
+241: 2. List all services involved (S3, Stripe, pgvector, Auth, TipTap, Admin)
+242: 3. List exact files you will read
+243: 4. Identify risks: breaking webhooks, losing vectors, auth bypass, S3 exposure
+244: 5. State your implementation approach
+245: 6. THEN write code
+246: 
+247: Do not generate any code before completing steps 1-5.
+248: 
+249: ---
+250: 
+251: ## Never Do
+252: - Never use pnpm, npm, npx — always yarn
+253: - Never forget --sql on yarn db:generate
+254: - Never import backend into frontend
+255: - Never use Prisma in frontend
+256: - Never store files locally in production
+257: - Never expose AWS credentials in frontend
+258: - Never update subscription status from frontend
+259: - Never suggest NextAuth alternatives
+260: - Never suggest better-auth
+261: - Never remove pgvector columns or vector indexes
+262: - Never remove composite indexes without review
+263: - Never run prisma migrate reset in production
+264: - Never run prisma db push in production
+265: - Never add console.log for debugging
+266: - Never install packages without user confirmation
+267: - Never touch .env files
+268: - Never call save on every TipTap keystroke
+269: - Never make raw fetch calls inside React components
+270: - Never skip Stripe webhook signature verification
+271: - Never skip admin role middleware
+272: 
+273: ## Always Do
+274: - Run yarn type-check after TypeScript changes
+275: - Run yarn db:generate after schema changes (with --sql)
+276: - Run yarn lint after significant changes
+277: - Use presigned URLs for all S3 operations
+278: - Keep Stripe webhook handlers idempotent
+279: - Keep RTK Query cache tags consistent
+280: - Keep Redux slices in apps/frontend/redux/
+281: - Keep admin panel code-split with React.lazy
+282: - Follow the 5-step pre-implementation checklist above
+283: 
+284: ---
+285: 
+286: ## Additional Constraints from .cursor/rules/ (read-only source)
+287: 
+288: ### Backend Module Architecture
+289: - Feature modules live under `apps/backend/src/app/modules/` with structure: controller, service, routes, validation schemas.
+290: - Routes register ONLY in `apps/backend/src/app/routes` — never register ad-hoc routes elsewhere.
+291: - Controllers must be thin; all business logic belongs in services.
+292: - Services use Prisma client from shared singleton; handle transactions explicitly when needed.
+293: - Zod for request body, param, and query validation; reject early on failure.
+294: 
+295: ### Database Operations — $queryRaw Critical Rule
+296: - CRITICAL: All database operations MUST use `$queryRaw` or `$executeRaw` instead of standard Prisma Client methods for optimal performance.
+297: - This applies to: SELECT, INSERT, UPDATE, DELETE, aggregation, complex joins.
+298: - Use template literal syntax for SQL injection prevention: `WHERE email = ${email}`
+299: - Use `prisma.$queryRaw<Type[]>` for proper typing.
+300: - Select only required fields; never use `SELECT *`.
+301: - Use `LIMIT ${limit} OFFSET ${skip}` for pagination; never return unbounded lists.
+302: - EXCEPTION — OAuth operations MUST keep standard Prisma Client upsert:
+303:   - `createAccount()`
+304:   - `createOrUpdateUser()`
+305:   - `createOrUpdateUserWithOAuth()`
+306:   Changing these to raw queries causes P2002 unique constraint errors.
+307: 
+308: ### TypedSQL & Raw SQL Files
+309: - Raw SQL statements live in `apps/backend/prisma/sql/` with ONE statement per file.
+310: - File names must be valid JavaScript identifiers (no leading dashes) because they become generated function names.
+311: - Use positional parameters `$1`, `$2` with optional `-- @param {Type} $1:name` comments.
+312: - After adding/modifying SQL, run `yarn db:generate` to regenerate typed functions.
+313: - Import generated functions from `@prisma/client/sql`.
+314: - Execute typed queries with `prisma.$queryRawTyped(queryName(...params))` or `prisma.$queryRaw(...)`.
+315: - Always apply pending migrations BEFORE running `prisma generate --sql`.
+316: - Every new TypedSQL query must have at least one test verifying shape and performance assumptions.
+317: - Above any raw query usage, add a comment referencing the originating `.sql` file.
+318: 
+319: ### Frontend Component & Design Standards
+320: - Prefer Next.js Server Components; add `"use client"` ONLY when interactivity or state is required.
+321: - Use `next/image` and `next/font`; stream large UI with Suspense to avoid unnecessary client bundles.
+322: - Consult `docs/UI_DESIGN.md` BEFORE creating new pages or components.
+323: - Component taxonomy:
+324:   - `components/auth/` — Authentication related
+325:   - `components/layout/` — Navigation, headers, sidebars
+326:   - `components/ui/` — ShadCN primitives
+327:   - `components/customUI/` — Custom components
+328: - Design system: OKLCH color system, `max-w-[1440px]` container width, established Typography heading scales.
+329: - Use existing hover effects (lift, scale, glow) and transitions.
+330: - SEO: use Metadata API; ensure canonical URLs; plan sitemap + robots when routes stabilize.
+331: - Accessibility: WCAG 2.1 AA compliance, proper ARIA labels, roles, focus states, keyboard navigation.
+332: 
+333: ### Sonner Toast & Error Handling Patterns
+334: - Use Sonner via ToastProvider functions ONLY:
+335:   - `showErrorToast`, `showSuccessToast` from `@/components/providers/ToastProvider`
+336:   - `showApiErrorToast` from `@/lib/errorHandling`
+337: - NEVER import `toast` directly from `sonner`.
+338: - Use custom error handling hooks:
+339:   - `useErrorHandler` for generic errors
+340:   - `useQueryErrorHandler` for RTK Query queries
+341:   - `useMutationErrorHandler` for mutations
+342: - Smart retry: auto-retry on network/server errors, manual retry for client errors.
+343: - Error classification: Network (retry), Client 4xx (fix required), Server 5xx (retry).
+344: - All auth methods must use try/catch with `ApiError` for consistent error responses.
+345: - Feature-specific error classes must extend `ApiError` with standardized format:
+346:   ```typescript
+347:   {
+348:     success: false,
+349:     message: string,
+350:     statusCode: number,
+351:     errorCode?: string,
+352:     details?: object,
+353:     timestamp: string
+354:   }
+355:   ```
+356: 
+357: ### Production-Ready Security & Performance Standards
+358: - Debug logging is allowed ONLY in development; always gate with `process.env.NODE_ENV !== "production"`.
+359: - Replace all `any` types with proper interfaces (e.g., `AuthenticatedRequest`).
+360: - Apply feature-specific rate limiters to all mutation endpoints, especially uploads.
+361: - Use `performanceMonitor` middleware and add `X-Response-Time` headers.
+362: - Health check endpoints must exist:
+363:   - `/api/health` — Basic health status
+364:   - `/api/health/detailed` — Full system health
+365:   - `/api/health/live` — Kubernetes liveness probe
+366:   - `/api/health/ready` — Kubernetes readiness probe
+367: - BigInt handling: cast to integer in SQL for JSON serialization to avoid issues.
+368: - Memory monitoring: track heap usage and memory thresholds in health checks.
+369: 
+370: ### pgvector Detailed Rules
+371: - Only run similarity queries if `USE_PGVECTOR=true`.
+372: - `PaperChunk.embedding` column type is `vector`; migrations manage any transition from JSON fallback.
+373: - Use a service helper to format float arrays into vector literals (`[x,y,z]`).
+374: - Similarity operators: `<->` (L2), `<=>` (cosine), `<#>` (negative inner product). Align index operator class with chosen operator.
+375: - Create IVF index (`ivfflat`) only after sufficient data volume; document chosen `lists` parameter.
+376: - Limit result sets (e.g., `LIMIT 10`); avoid full vector scans.
+377: - Guard against mismatched dimensionality; validate embedding array length before insert.
+378: - Add round-trip test (insert + similarity query) when modifying embedding logic.
+379: 
+380: ### Auth Specifics
+381: - Frontend authentication state is managed via Redux Toolkit (in addition to NextAuth session).
+382: - OAuth account creation MUST use standard Prisma upsert pattern; do NOT convert to raw SQL.
+383: - Password strength indicators on register forms.
+384: - Auth guards for protected routes.
+385: - All auth functions must have JSDoc comments.
+386: - Authentication-related code requires minimum 90% test coverage.
+387: - Comprehensive integration tests required for all auth endpoints and flows.
+388: 
+389: ### Workflow & Documentation Discipline
+390: - Follow phase discipline strictly; see `Roadmap.md` before starting new features.
+391: - Ship only in-phase work; defer out-of-scope requests unless they unblock the current milestone.
+392: - Prefer shipping a thin vertical slice over broad incomplete scaffolding.
+393: - Do NOT create README.md, OPTIMIZATION.md, CHANGELOG.md, or PERFORMANCE.md files for minor updates or every change.
+394: - Inline documentation only; comments explain WHY not WHAT.
+395: - Quality gates before merge:
+396:   1. `yarn build` succeeds
+397:   2. `yarn type-check` clean
+398:   3. `yarn lint` zero errors
+399:   4. Tests pass; add/adjust tests for new logic
+400:   5. No secrets committed
+401:   6. No obvious N+1 or unbounded queries
+402:   7. WCAG 2.1 AA for new UI components
+403:   8. Migrations are additive (backwards compatible)
+404:   9. Update public docs (README, SCHEMA, ENVIRONMENT) for changed public behavior
+405:   10. Keep PR scope tight with summary + checklist
+406: 
+407: ### Development Server Ports
+408: - Frontend dev server: port 3000
+409: - Backend dev server: port 5000
+410: 
+411: ---
+412: 
+413: ## Project Repository
+414: **GitHub:** https://github.com/Atik203/Scholar-Flow
+415: 
+416: ---
+417: 
+418: ## Implementation Tracking
+419: **Before starting any task, check `IMPLEMENTATION.md` to understand:**
+420: 1. What phase is currently active
+421: 2. What has been completed (marked `[x]`)
+422: 3. What is pending (marked `[ ]`)
+423: 4. Current status and focus area
+424: 
+425: **How to use IMPLEMENTATION.md:**
+426: - Read it first to understand the project roadmap
+427: - Check the "Current Status" section at the bottom
+428: - Identify which phase items are unchecked
+429: - Do not work on items from future phases unless explicitly requested
+430: - Mark completed items as `[x]` after implementation
+431: 
+432: **Current Status:** Phase 1 Complete (Static Marketing Pages — 18-20 pages done)
+433: - Phase 1.9 Backend Migration: Public content models + API routes created
+434: - Next: Phase 2 Auth & Onboarding Pages (5-6 pages)
+435: 
+436: ---
+437: 
+438: ## Project Context Generation (Repomix)
+439: **Repomix** is installed as a dev dependency for generating AI-friendly project snapshots.
+440: 
+441: ### When to regenerate
+442: - After major structural changes (new directories, moved files)
+443: - After adding new dependencies or build tools
+444: - Before asking a new AI agent to work on the project
+445: - When the project context seems stale
+446: 
+447: ### How to generate
+448: ```bash
+449: # From project root
+450: npx repomix
+451: # Or using the configured output
+452: yarn repomix
+453: ```
+454: 
+455: **Output file:** `repomix-output.xml` (8MB+ AI-friendly project snapshot)
+456: 
+457: ### What repomix includes
+458: - All source code (TS, TSX, JS, JSX, CSS, SCSS, JSON, Prisma, SQL)
+459: - Configuration files (package.json, tsconfig, etc.)
+460: - Documentation (README, AGENTS.md, IMPLEMENTATION.md, etc.)
+461: - Excludes: node_modules, images, LaTeX files, build artifacts, logs
+462: 
+463: ### What repomix ignores (configured in repomix.config.ts)
+464: - **scholar-flow-overleaf/** — LaTeX thesis/document files (SRS, chapters, images)
+465: - **response_image/** — Generated image responses
+466: - **images/** — Static image assets
+467: - **node_modules/**, **.yarn/** — Package dependencies
+468: - **.next/**, **dist/**, **out/** — Build outputs
+469: - **.git/**, **.turbo/**, **.vercel/** — VCS & deployment artifacts
+470: - **.vscode/**, **.cursor/**, **.agents/**, **.figma/** — IDE & tool configs
+471: - **CHANGELOG.md**, **LICENSE.md**, **CODE_OF_CONDUCT.md** — Meta docs
+472: - **Logs, coverage, media files** — Non-code assets
+473: 
+474: ### Using repomix output with AI
+475: 1. Run `npx repomix` to generate `repomix-output.xml`
+476: 2. Provide the file to an AI agent for full project context
+477: 3. The AI gets a complete, token-efficient project snapshot
+478: 4. Reference specific files by path when asking questions
+479: 
+480: **Note:** The `repomix-output.xml` is already generated and available in the project root.
+</file>
+
+<file path="repomix.config.ts">
+ 1: import { defineConfig } from 'repomix';
+ 2: export default defineConfig({
+ 3:   output: {
+ 4:     filePath: 'repomix-output.xml',
+ 5:     style: 'xml',
+ 6:     removeComments: true,
+ 7:     removeEmptyLines: true,
+ 8:     showLineNumbers: true,
+ 9:     topFilesLength: 20,
+10:   },
+11:   ignore: {
+12:     useGitignore: true,
+13:     useDefaultPatterns: true,
+14:     customPatterns: [
+15:       '**/dist/**',
+16:       '**/.next/**',
+17:       '**/out/**',
+18:       '**/.turbo/**',
+19:       '**/node_modules/**',
+20:       '**/.yarn/**',
+21:       '**/.pnp.*',
+22:       '**/.git/**',
+23:       '**/.vscode/**',
+24:       '**/.cursor/**',
+25:       '**/.agents/**',
+26:       '**/.figma/**',
+27:       '**/.vercel/**',
+28:       '**/images/**',
+29:       '**/response_image/**',
+30:       '**/scholar-flow-overleaf/**',
+31:       '**/*.png',
+32:       '**/*.jpg',
+33:       '**/*.jpeg',
+34:       '**/*.gif',
+35:       '**/*.svg',
+36:       '**/*.ico',
+37:       '**/*.pdf',
+38:       '**/*.docx',
+39:       '**/*.doc',
+40:       '**/*.zip',
+41:       '**/*.tar.gz',
+42:       '**/repomix-output.xml',
+43:       '**/CHANGELOG.md',
+44:       '**/LICENSE.md',
+45:       '**/CODE_OF_CONDUCT.md',
+46:       '**/CONTRIBUTING.md',
+47:       '**/SECURITY.md',
+48:       '**/*.log',
+49:       '**/coverage/**',
+50:       '**/apps/backend/node_modules/**',
+51:       '**/apps/frontend/node_modules/**',
+52:       '**/apps/backend/dist/**',
+53:     ],
+54:   },
+55:   include: [
+56:     '**/*.ts',
+57:     '**/*.tsx',
+58:     '**/*.js',
+59:     '**/*.jsx',
+60:     '**/*.css',
+61:     '**/*.scss',
+62:     '**/*.json',
+63:     '**/*.md',
+64:     '**/*.prisma',
+65:     '**/*.sql',
+66:     '**/*.yml',
+67:     '**/*.yaml',
+68:   ],
+69: });
 </file>
 
 <file path="apps/frontend/src/app/company/about/page.tsx">
@@ -147764,72 +148557,6 @@ This section contains the contents of the repository's files.
 10: }
 </file>
 
-<file path="package.json">
- 1: {
- 2:   "name": "scholar-flow",
- 3:   "version": "1.1.0",
- 4:   "description": "AI-Powered Research Paper Collaboration Hub",
- 5:   "private": true,
- 6:   "workspaces": [
- 7:     "apps/backend",
- 8:     "apps/frontend"
- 9:   ],
-10:   "scripts": {
-11:     "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev",
-12:     "dev:turbo": "turbo run dev",
-13:     "dev:backend": "yarn workspace @scholar-flow/backend dev",
-14:     "dev:frontend": "yarn workspace @scholar-flow/frontend dev",
-15:     "build": "turbo run build",
-16:     "test": "turbo run test",
-17:     "lint": "turbo run lint",
-18:     "type-check": "turbo run type-check",
-19:     "clean": "turbo run clean && rimraf node_modules",
-20:     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
-21:     "setup": "yarn install --immutable && yarn workspace @scholar-flow/backend prisma generate --sql",
-22:     "setup:clean": "yarn clean && yarn install && yarn workspace @scholar-flow/backend prisma generate --sql",
-23:     "db:migrate": "yarn workspace @scholar-flow/backend prisma migrate dev",
-24:     "db:generate": "yarn workspace @scholar-flow/backend prisma generate --sql",
-25:     "db:studio": "yarn workspace @scholar-flow/backend prisma studio",
-26:     "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.js",
-27:     "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force",
-28:     "repomix": "npx repomix"
-29:   },
-30:   "devDependencies": {
-31:     "@turbo/gen": "^2.5.5",
-32:     "@types/add": "^2",
-33:     "@types/node": "^20",
-34:     "@types/react-window": "^1",
-35:     "@types/sanitize-html": "^2.16.0",
-36:     "prettier": "^3.0.3",
-37:     "prisma": "^6.16.3",
-38:     "repomix": "^1.14.1",
-39:     "rimraf": "^5.0.5",
-40:     "turbo": "^2.5.8",
-41:     "typescript": "^5.2.2"
-42:   },
-43:   "license": "UNLICENSED",
-44:   "engines": {
-45:     "node": ">=22.0.0",
-46:     "yarn": ">=4.9.2"
-47:   },
-48:   "packageManager": "yarn@4.9.2",
-49:   "dependencies": {
-50:     "@prisma/client": "6.16.2",
-51:     "add": "^2.0.6",
-52:     "beasties": "^0.3.5",
-53:     "critters": "^0.0.25",
-54:     "lucide-react": "^0.542.0",
-55:     "motion": "^12.40.0",
-56:     "react": "^19.1.0",
-57:     "react-dom": "^19.1.0",
-58:     "react-window": "^1.8.11",
-59:     "sanitize-html": "^2.17.0",
-60:     "tiptap-extension-resizable-image": "^2.0.0",
-61:     "tiptap-resizable-image": "^1.6.5"
-62:   }
-63: }
-</file>
-
 <file path="apps/backend/prisma/schema.prisma">
   1: generator client {
   2:   provider        = "prisma-client-js"
@@ -175263,6 +175990,72 @@ This section contains the contents of the repository's files.
 514: Current focus: Phase 2 Auth & Onboarding Pages (5-6 pages)
 515: 
 516: Last updated: June 2026
+</file>
+
+<file path="package.json">
+ 1: {
+ 2:   "name": "scholar-flow",
+ 3:   "version": "1.1.0",
+ 4:   "description": "AI-Powered Research Paper Collaboration Hub",
+ 5:   "private": true,
+ 6:   "workspaces": [
+ 7:     "apps/backend",
+ 8:     "apps/frontend"
+ 9:   ],
+10:   "scripts": {
+11:     "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev",
+12:     "dev:turbo": "turbo run dev",
+13:     "dev:backend": "yarn workspace @scholar-flow/backend dev",
+14:     "dev:frontend": "yarn workspace @scholar-flow/frontend dev",
+15:     "build": "turbo run build",
+16:     "test": "turbo run test",
+17:     "lint": "turbo run lint",
+18:     "type-check": "turbo run type-check",
+19:     "clean": "turbo run clean && rimraf node_modules",
+20:     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
+21:     "setup": "yarn install --immutable && yarn workspace @scholar-flow/backend prisma generate --sql",
+22:     "setup:clean": "yarn clean && yarn install && yarn workspace @scholar-flow/backend prisma generate --sql",
+23:     "db:migrate": "yarn workspace @scholar-flow/backend prisma migrate dev",
+24:     "db:generate": "yarn workspace @scholar-flow/backend prisma generate --sql",
+25:     "db:studio": "yarn workspace @scholar-flow/backend prisma studio",
+26:     "db:seed": "yarn workspace @scholar-flow/backend ts-node prisma/seed.js",
+27:     "db:reset": "yarn workspace @scholar-flow/backend prisma migrate reset --force",
+28:     "repomix": "npx repomix"
+29:   },
+30:   "devDependencies": {
+31:     "@turbo/gen": "^2.5.5",
+32:     "@types/add": "^2",
+33:     "@types/node": "^20",
+34:     "@types/react-window": "^1",
+35:     "@types/sanitize-html": "^2.16.0",
+36:     "prettier": "^3.0.3",
+37:     "prisma": "^6.16.3",
+38:     "repomix": "^1.14.1",
+39:     "rimraf": "^5.0.5",
+40:     "turbo": "^2.5.8",
+41:     "typescript": "^5.2.2"
+42:   },
+43:   "license": "UNLICENSED",
+44:   "engines": {
+45:     "node": ">=22.0.0",
+46:     "yarn": ">=4.9.2"
+47:   },
+48:   "packageManager": "yarn@4.9.2",
+49:   "dependencies": {
+50:     "@prisma/client": "6.16.2",
+51:     "add": "^2.0.6",
+52:     "beasties": "^0.3.5",
+53:     "critters": "^0.0.25",
+54:     "lucide-react": "^0.542.0",
+55:     "motion": "^12.40.0",
+56:     "react": "^19.1.0",
+57:     "react-dom": "^19.1.0",
+58:     "react-window": "^1.8.11",
+59:     "sanitize-html": "^2.17.0",
+60:     "tiptap-extension-resizable-image": "^2.0.0",
+61:     "tiptap-resizable-image": "^1.6.5"
+62:   }
+63: }
 </file>
 
 <file path="apps/frontend/src/app/slides/SlidesPresentation.tsx">
@@ -209191,6 +209984,554 @@ This section contains the contents of the repository's files.
 1053: export default TeamSettingsPage;
 </file>
 
+<file path="figma-make/README.md">
+  1: # ScholarFlow - Figma Make UI Components
+  2: 
+  3: **Complete React UI Components for Figma Make AI**
+  4: 
+  5: All 102 pages are fully implemented and navigable. Just paste this into Figma Make and it works!
+  6: 
+  7: ---
+  8: 
+  9: ## 🚀 Quick Start
+ 10: 
+ 11: 1. Copy the entire `figma-make` folder
+ 12: 2. Paste into Figma Make AI
+ 13: 3. All components and navigation work automatically
+ 14: 
+ 15: For the Jira Kanban flow behind the 101-page rollout, see [KANBAN.md](KANBAN.md).
+ 16: 
+ 17: ---
+ 18: 
+ 19: ## 📁 Folder Structure
+ 20: 
+ 21: ```
+ 22: figma-make/
+ 23: ├── App.tsx                    # Main entry point - handles all routing
+ 24: ├── routes.tsx                 # Route definitions and helpers
+ 25: ├── DashboardRouter.tsx        # Dashboard routing logic
+ 26: ├── PAGE_LIST.md               # Complete page reference (102 pages)
+ 27: │
+ 28: ├── components/
+ 29: │   ├── index.ts               # Component barrel exports
+ 30: │   │
+ 31: │   ├── context/               # React Context providers
+ 32: │   │   ├── index.ts
+ 33: │   │   └── RoleContext.tsx    # Role persistence (researcher/admin/etc.)
+ 34: │   │
+ 35: │   ├── layout/                # Layout components
+ 36: │   │   ├── index.ts
+ 37: │   │   ├── AppSidebar.tsx     # Role-based sidebar navigation
+ 38: │   │   ├── AuthenticatedNavbar.tsx
+ 39: │   │   ├── DashboardLayout.tsx
+ 40: │   │   ├── Footer.tsx
+ 41: │   │   ├── Navbar.tsx
+ 42: │   │   └── PageContainer.tsx
+ 43: │   │
+ 44: │   ├── sections/              # Landing page sections
+ 45: │   │   ├── Comparison.tsx
+ 46: │   │   ├── CTA.tsx
+ 47: │   │   ├── FAQ.tsx
+ 48: │   │   ├── Features.tsx
+ 49: │   │   ├── Hero.tsx
+ 50: │   │   ├── HowItWorks.tsx
+ 51: │   │   ├── Integrations.tsx
+ 52: │   │   ├── Newsletter.tsx
+ 53: │   │   └── Testimonials.tsx
+ 54: │   │
+ 55: │   ├── form/                  # Form components
+ 56: │   │   └── ScholarFlowForm.tsx
+ 57: │   │
+ 58: │   ├── figma/                 # Figma-specific components
+ 59: │   │
+ 60: │   └── ui/                    # ShadCN-based UI primitives
+ 61: │       ├── index.ts
+ 62: │       ├── alert.tsx
+ 63: │       ├── avatar.tsx
+ 64: │       ├── badge.tsx
+ 65: │       ├── breadcrumb.tsx
+ 66: │       ├── button.tsx
+ 67: │       ├── button-group.tsx
+ 68: │       ├── card.tsx
+ 69: │       ├── card-variants.tsx
+ 70: │       ├── checkbox.tsx
+ 71: │       ├── collapsible.tsx
+ 72: │       ├── dialog.tsx
+ 73: │       ├── dropdown-menu.tsx
+ 74: │       ├── input.tsx
+ 75: │       ├── label.tsx
+ 76: │       ├── loading-spinner.tsx
+ 77: │       ├── loading-states.tsx
+ 78: │       ├── popover.tsx
+ 79: │       ├── progress.tsx
+ 80: │       ├── scroll-area.tsx
+ 81: │       ├── select.tsx
+ 82: │       ├── separator.tsx
+ 83: │       ├── sheet.tsx
+ 84: │       ├── skeleton.tsx
+ 85: │       ├── slider.tsx
+ 86: │       ├── switch.tsx
+ 87: │       ├── table.tsx
+ 88: │       ├── tabs.tsx
+ 89: │       ├── textarea.tsx
+ 90: │       ├── tooltip.tsx
+ 91: │       ├── cards/             # Card variants
+ 92: │       └── modal/             # Modal components
+ 93: │
+ 94: ├── pages/
+ 95: │   ├── index.ts               # Page barrel exports
+ 96: │   │
+ 97: │   │── Auth & Onboarding
+ 98: │   ├── LoginPage.tsx
+ 99: │   ├── RegisterPage.tsx
+100: │   ├── ForgotPasswordPage.tsx
+101: │   ├── ResetPasswordPage.tsx
+102: │   ├── VerifyEmailPage.tsx
+103: │   ├── OnboardingPage.tsx
+104: │   │
+105: │   │── Main Pages
+106: │   ├── DashboardPage.tsx
+107: │   ├── PaperDetailPage.tsx
+108: │   ├── ProfilePage.tsx
+109: │   ├── SettingsPage.tsx
+110: │   ├── PricingPage.tsx
+111: │   ├── FAQPage.tsx
+112: │   │
+113: │   │── Marketing Pages
+114: │   ├── FeaturesPage.tsx
+115: │   ├── HowItWorksPage.tsx
+116: │   │
+117: │   │── Utility Pages
+118: │   ├── ErrorPage.tsx
+119: │   ├── LoadingPage.tsx
+120: │   ├── NotFoundPage.tsx
+121: │   │
+122: │   ├── admin/                 # Admin pages (Phase 4-7)
+123: │   │   ├── index.ts
+124: │   │   ├── AdminAPIKeysPage.tsx
+125: │   │   ├── AdminAuditLogPage.tsx
+126: │   │   ├── AdminContentModerationPage.tsx
+127: │   │   ├── AdminPaymentsPage.tsx
+128: │   │   ├── AdminPlansPage.tsx
+129: │   │   ├── AdminReportsPage.tsx
+130: │   │   └── AdminWebhooksPage.tsx
+131: │   │
+132: │   ├── analytics/             # Analytics pages
+133: │   │   ├── index.ts
+134: │   │   ├── ExportAnalyticsPage.tsx
+135: │   │   ├── PersonalAnalyticsPage.tsx
+136: │   │   ├── UsageReportsPage.tsx
+137: │   │   └── WorkspaceAnalyticsPage.tsx
+138: │   │
+139: │   ├── company/               # Company pages
+140: │   │   ├── index.ts
+141: │   │   ├── AboutPage.tsx
+142: │   │   ├── CareersPage.tsx
+143: │   │   ├── ContactPage.tsx
+144: │   │   └── PressPage.tsx
+145: │   │
+146: │   ├── dashboard/             # Dashboard module pages
+147: │   │   ├── index.ts
+148: │   │   ├── ActivityLogPage.tsx
+149: │   │   ├── AIInsightsPage.tsx
+150: │   │   ├── AnalyticsPage.tsx
+151: │   │   ├── BillingPage.tsx
+152: │   │   ├── CollectionsPage.tsx
+153: │   │   ├── DiscussionsPage.tsx
+154: │   │   ├── EnhancedDashboardPage.tsx
+155: │   │   ├── GlobalSearchPage.tsx
+156: │   │   ├── HelpCenterPage.tsx
+157: │   │   ├── KeyboardShortcutsPage.tsx
+158: │   │   ├── NotificationsPage.tsx
+159: │   │   ├── PapersPage.tsx
+160: │   │   ├── RecentActivityPage.tsx
+161: │   │   ├── ResearchNotesPage.tsx
+162: │   │   ├── ResearchPage.tsx
+163: │   │   ├── TeamMembersPage.tsx
+164: │   │   ├── WorkspacesPage.tsx
+165: │   │   │
+166: │   │   ├── admin/             # Admin dashboard pages
+167: │   │   │   ├── index.ts
+168: │   │   │   ├── AdminOverviewPage.tsx
+169: │   │   │   ├── SubscriptionsPage.tsx
+170: │   │   │   ├── SystemSettingsPage.tsx
+171: │   │   │   └── UserManagementPage.tsx
+172: │   │   │
+173: │   │   ├── collections/       # Collections module
+174: │   │   │   ├── index.ts
+175: │   │   │   ├── CollectionDetailsPage.tsx
+176: │   │   │   ├── CreateCollectionPage.tsx
+177: │   │   │   └── SharedCollectionsPage.tsx
+178: │   │   │
+179: │   │   ├── papers/            # Papers module
+180: │   │   │   ├── index.ts
+181: │   │   │   ├── PaperDetailsPage.tsx
+182: │   │   │   ├── SearchPapersPage.tsx
+183: │   │   │   └── UploadPaperPage.tsx
+184: │   │   │
+185: │   │   ├── research/          # Research module
+186: │   │   │   ├── index.ts
+187: │   │   │   ├── AnnotationsPage.tsx
+188: │   │   │   ├── CitationsPage.tsx
+189: │   │   │   ├── PdfExtractionPage.tsx
+190: │   │   │   └── TextEditorPage.tsx
+191: │   │   │
+192: │   │   └── workspaces/        # Workspaces module
+193: │   │       ├── index.ts
+194: │   │       ├── CreateWorkspacePage.tsx
+195: │   │       ├── SharedWorkspacesPage.tsx
+196: │   │       └── WorkspaceDetailsPage.tsx
+197: │   │
+198: │   ├── discover/              # Discover page
+199: │   │   ├── index.ts
+200: │   │   └── DiscoverPage.tsx
+201: │   │
+202: │   ├── enterprise/            # Enterprise pages
+203: │   │   ├── index.ts
+204: │   │   ├── EnterprisePage.tsx
+205: │   │   ├── IntegrationsPage.tsx
+206: │   │   ├── SupportPage.tsx
+207: │   │   └── TeamsPage.tsx
+208: │   │
+209: │   ├── invitations/           # Invitation pages
+210: │   │   ├── index.ts
+211: │   │   └── InvitationResponsePage.tsx
+212: │   │
+213: │   ├── notifications/         # Notification pages
+214: │   │   ├── index.ts
+215: │   │   ├── NotificationCenterPage.tsx
+216: │   │   ├── NotificationHistoryPage.tsx
+217: │   │   └── NotificationSettingsPage.tsx
+218: │   │
+219: │   ├── onboarding/            # Onboarding flow
+220: │   │   ├── index.ts
+221: │   │   ├── OnboardingRolePage.tsx
+222: │   │   └── OnboardingWorkspacePage.tsx
+223: │   │
+224: │   ├── papers/                # Paper management
+225: │   │   ├── index.ts
+226: │   │   ├── ImportPapersPage.tsx
+227: │   │   └── PaperRelationsPage.tsx
+228: │   │
+229: │   ├── products/              # Product pages
+230: │   │   ├── index.ts
+231: │   │   ├── AIInsightsPage.tsx
+232: │   │   ├── CollaboratePage.tsx
+233: │   │   ├── CollectionsPage.tsx
+234: │   │   └── PapersPage.tsx
+235: │   │
+236: │   ├── research/              # Research tools
+237: │   │   ├── index.ts
+238: │   │   ├── CitationGraphPage.tsx
+239: │   │   └── ResearchMapPage.tsx
+240: │   │
+241: │   ├── resources/             # Resource pages
+242: │   │   ├── index.ts
+243: │   │   ├── APIPage.tsx
+244: │   │   ├── CommunityPage.tsx
+245: │   │   ├── DocsPage.tsx
+246: │   │   └── TutorialsPage.tsx
+247: │   │
+248: │   ├── search/                # Search pages
+249: │   │   ├── index.ts
+250: │   │   └── SearchHistoryPage.tsx
+251: │   │
+252: │   ├── security/              # Security pages
+253: │   │   ├── index.ts
+254: │   │   ├── ActiveSessionsPage.tsx
+255: │   │   ├── PrivacySettingsPage.tsx
+256: │   │   ├── SecurityDashboardPage.tsx
+257: │   │   └── TwoFactorSetupPage.tsx
+258: │   │
+259: │   ├── settings/              # Settings pages
+260: │   │   ├── index.ts
+261: │   │   ├── ExportDataPage.tsx
+262: │   │   └── IntegrationsSettingsPage.tsx
+263: │   │
+264: │   └── team/                  # Team pages
+265: │       ├── index.ts
+266: │       ├── CollaboratorProfilePage.tsx
+267: │       ├── TeamActivityPage.tsx
+268: │       ├── TeamInvitationsPage.tsx
+269: │       └── TeamSettingsPage.tsx
+270: │
+271: ├── styles/
+272: │   └── globals.css            # Tailwind + custom styles
+273: │
+274: └── guidelines/                # Design guidelines & docs
+275: ```
+276: 
+277: ---
+278: 
+279: ## 🎯 All 102 Pages
+280: 
+281: ### Auth & Onboarding (8 pages)
+282: 
+283: | Page                    | Path                    | Access      |
+284: | ----------------------- | ----------------------- | ----------- |
+285: | LoginPage               | `/login`                | Public      |
+286: | RegisterPage            | `/register`             | Public      |
+287: | ForgotPasswordPage      | `/forgot-password`      | Public      |
+288: | ResetPasswordPage       | `/reset-password`       | Email link  |
+289: | VerifyEmailPage         | `/verify-email`         | Email link  |
+290: | OnboardingPage          | `/onboarding`           | After login |
+291: | OnboardingRolePage      | `/onboarding/role`      | Onboarding  |
+292: | OnboardingWorkspacePage | `/onboarding/workspace` | Onboarding  |
+293: 
+294: ### Dashboard (4 pages)
+295: 
+296: | Page                  | Path                  | Access  |
+297: | --------------------- | --------------------- | ------- |
+298: | DashboardPage         | `/dashboard`          | Sidebar |
+299: | EnhancedDashboardPage | `/dashboard-enhanced` | Sidebar |
+300: | RecentActivityPage    | `/recent-activity`    | Sidebar |
+301: | ActivityLogPage       | `/activity-log`       | Sidebar |
+302: 
+303: ### Papers (7 pages)
+304: 
+305: | Page               | Path                    | Access        |
+306: | ------------------ | ----------------------- | ------------- |
+307: | PapersPage         | `/papers`               | Sidebar       |
+308: | UploadPaperPage    | `/papers/upload`        | Sidebar       |
+309: | SearchPapersPage   | `/papers/search`        | Sidebar       |
+310: | PaperDetailsPage   | `/papers/:id`           | Click paper   |
+311: | PaperDetailPage    | `/paper/:id`            | Paper card    |
+312: | ImportPapersPage   | `/papers/import`        | Sidebar       |
+313: | PaperRelationsPage | `/papers/:id/relations` | Paper details |
+314: 
+315: ### Collections (4 pages)
+316: 
+317: | Page                  | Path                  | Access  |
+318: | --------------------- | --------------------- | ------- |
+319: | CollectionsPage       | `/collections`        | Sidebar |
+320: | CreateCollectionPage  | `/collections/create` | Button  |
+321: | SharedCollectionsPage | `/collections/shared` | Sidebar |
+322: | CollectionDetailsPage | `/collections/:id`    | Click   |
+323: 
+324: ### Workspaces (4 pages)
+325: 
+326: | Page                 | Path                 | Access  |
+327: | -------------------- | -------------------- | ------- |
+328: | WorkspacesPage       | `/workspaces`        | Sidebar |
+329: | CreateWorkspacePage  | `/workspaces/create` | Button  |
+330: | SharedWorkspacesPage | `/workspaces/shared` | Sidebar |
+331: | WorkspaceDetailsPage | `/workspaces/:id`    | Click   |
+332: 
+333: ### Research (8 pages)
+334: 
+335: | Page              | Path                       | Access  |
+336: | ----------------- | -------------------------- | ------- |
+337: | ResearchPage      | `/research`                | Sidebar |
+338: | PdfExtractionPage | `/research/pdf-extraction` | Sidebar |
+339: | TextEditorPage    | `/research/editor`         | Sidebar |
+340: | CitationsPage     | `/research/citations`      | Sidebar |
+341: | AnnotationsPage   | `/research/annotations`    | Sidebar |
+342: | CitationGraphPage | `/research/citation-graph` | Pro+    |
+343: | ResearchMapPage   | `/research/map`            | Pro+    |
+344: | ResearchNotesPage | `/research-notes`          | Sidebar |
+345: 
+346: ### Notifications (4 pages)
+347: 
+348: | Page                     | Path                      | Access  |
+349: | ------------------------ | ------------------------- | ------- |
+350: | NotificationsPage        | `/notifications`          | Sidebar |
+351: | NotificationCenterPage   | `/notifications/center`   | Sidebar |
+352: | NotificationHistoryPage  | `/notifications/history`  | Sidebar |
+353: | NotificationSettingsPage | `/notifications/settings` | Sidebar |
+354: 
+355: ### Team (6 pages) - Team Lead+
+356: 
+357: | Page                    | Path                 | Access     |
+358: | ----------------------- | -------------------- | ---------- |
+359: | TeamMembersPage         | `/team`              | Sidebar    |
+360: | TeamInvitationsPage     | `/team/invitations`  | Sidebar    |
+361: | TeamActivityPage        | `/team/activity`     | Sidebar    |
+362: | TeamSettingsPage        | `/team/settings`     | Sidebar    |
+363: | CollaboratorProfilePage | `/collaborator/:id`  | Click name |
+364: | InvitationResponsePage  | `/invitation/:token` | Email      |
+365: 
+366: ### Security (4 pages)
+367: 
+368: | Page                  | Path                 | Access  |
+369: | --------------------- | -------------------- | ------- |
+370: | SecurityDashboardPage | `/security`          | Sidebar |
+371: | TwoFactorSetupPage    | `/security/2fa`      | Sidebar |
+372: | ActiveSessionsPage    | `/security/sessions` | Sidebar |
+373: | PrivacySettingsPage   | `/privacy`           | Sidebar |
+374: 
+375: ### Analytics (5 pages)
+376: 
+377: | Page                   | Path                   | Access     |
+378: | ---------------------- | ---------------------- | ---------- |
+379: | AnalyticsPage          | `/analytics`           | Sidebar    |
+380: | PersonalAnalyticsPage  | `/analytics/personal`  | Sidebar    |
+381: | WorkspaceAnalyticsPage | `/analytics/workspace` | Team Lead+ |
+382: | UsageReportsPage       | `/analytics/usage`     | Pro+       |
+383: | ExportAnalyticsPage    | `/analytics/export`    | Pro+       |
+384: 
+385: ### Search & Discovery (3 pages)
+386: 
+387: | Page              | Path              | Access       |
+388: | ----------------- | ----------------- | ------------ |
+389: | GlobalSearchPage  | `/search`         | Header/Cmd+K |
+390: | SearchHistoryPage | `/search/history` | Search menu  |
+391: | DiscoverPage      | `/discover`       | Sidebar      |
+392: 
+393: ### Help & Settings (6 pages)
+394: 
+395: | Page                  | Path               | Access    |
+396: | --------------------- | ------------------ | --------- |
+397: | HelpCenterPage        | `/help`            | Sidebar   |
+398: | KeyboardShortcutsPage | `/help/shortcuts`  | Sidebar   |
+399: | ProfilePage           | `/profile`         | User menu |
+400: | SettingsPage          | `/settings`        | User menu |
+401: | BillingPage           | `/billing`         | Sidebar   |
+402: | ExportDataPage        | `/settings/export` | Settings  |
+403: 
+404: ---
+405: 
+406: | IntegrationsSettingsPage | `/settings/integrations` | Settings |
+407: 
+408: ---
+409: 
+410: ### AI & Insights (2 pages)
+411: 
+412: | Page            | Path           | Access        |
+413: | --------------- | -------------- | ------------- |
+414: | AIInsightsPage  | `/ai-insights` | Sidebar       |
+415: | DiscussionsPage | `/discussions` | Paper details |
+416: 
+417: ### Admin (11 pages) - Admin Only
+418: 
+419: | Page                       | Path                   | Access  |
+420: | -------------------------- | ---------------------- | ------- |
+421: | AdminOverviewPage          | `/admin-overview`      | Sidebar |
+422: | UserManagementPage         | `/admin/users`         | Sidebar |
+423: | SubscriptionsPage          | `/admin/subscriptions` | Sidebar |
+424: | SystemSettingsPage         | `/admin/settings`      | Sidebar |
+425: | AdminReportsPage           | `/admin/reports`       | Sidebar |
+426: | AdminAuditLogPage          | `/admin/audit`         | Sidebar |
+427: | AdminPlansPage             | `/admin/plans`         | Sidebar |
+428: | AdminPaymentsPage          | `/admin/payments`      | Sidebar |
+429: | AdminWebhooksPage          | `/admin/webhooks`      | Sidebar |
+430: | AdminAPIKeysPage           | `/admin/api-keys`      | Sidebar |
+431: | AdminContentModerationPage | `/admin/moderation`    | Sidebar |
+432: 
+433: ### Marketing/Public (4 pages)
+434: 
+435: | Page           | Path            | Access        |
+436: | -------------- | --------------- | ------------- |
+437: | FeaturesPage   | `/features`     | Public navbar |
+438: | HowItWorksPage | `/how-it-works` | Public navbar |
+439: | PricingPage    | `/pricing`      | Public navbar |
+440: | FAQPage        | `/faq`          | Public navbar |
+441: 
+442: ### Products (4 pages)
+443: 
+444: | Page                   | Path                    | Access |
+445: | ---------------------- | ----------------------- | ------ |
+446: | PapersProductPage      | `/products/papers`      | Footer |
+447: | CollectionsProductPage | `/products/collections` | Footer |
+448: | CollaborateProductPage | `/products/collaborate` | Footer |
+449: | AIInsightsProductPage  | `/products/ai-insights` | Footer |
+450: 
+451: ### Resources (4 pages)
+452: 
+453: | Page          | Path                   | Access |
+454: | ------------- | ---------------------- | ------ |
+455: | DocsPage      | `/resources/docs`      | Footer |
+456: | TutorialsPage | `/resources/tutorials` | Footer |
+457: | APIPage       | `/resources/api`       | Footer |
+458: | CommunityPage | `/resources/community` | Footer |
+459: 
+460: ### Company (4 pages)
+461: 
+462: | Page        | Path               | Access |
+463: | ----------- | ------------------ | ------ |
+464: | AboutPage   | `/company/about`   | Footer |
+465: | CareersPage | `/company/careers` | Footer |
+466: | ContactPage | `/company/contact` | Footer |
+467: | PressPage   | `/company/press`   | Footer |
+468: 
+469: ### Enterprise (4 pages)
+470: 
+471: | Page             | Path                       | Access        |
+472: | ---------------- | -------------------------- | ------------- |
+473: | EnterprisePage   | `/enterprise`              | Public navbar |
+474: | TeamsPage        | `/enterprise/teams`        | Enterprise    |
+475: | IntegrationsPage | `/enterprise/integrations` | Enterprise    |
+476: | SupportPage      | `/enterprise/support`      | Enterprise    |
+477: 
+478: ### Utility (3 pages)
+479: 
+480: | Page         | Path         | Access        |
+481: | ------------ | ------------ | ------------- |
+482: | NotFoundPage | `/not-found` | 404           |
+483: | ErrorPage    | `/error`     | Error         |
+484: | LoadingPage  | `/loading`   | Loading state |
+485: 
+486: ---
+487: 
+488: ## 🔐 Role-Based Access
+489: 
+490: ### Roles
+491: 
+492: - **Researcher** - Basic access
+493: - **Pro Researcher** - + Citation Graph, Research Map, Usage Reports
+494: - **Team Lead** - + Team Management, Workspace Analytics
+495: - **Admin** - Full access including Admin panel
+496: 
+497: ### Role Persistence
+498: 
+499: The `RoleContext` ensures role persists when navigating between pages:
+500: 
+501: - Login as admin → navigate to `/papers` → still shows admin layout
+502: - Role only changes when explicitly visiting `/dashboard/admin`, `/dashboard/researcher`, etc.
+503: 
+504: ---
+505: 
+506: ## 🎨 Design System
+507: 
+508: - **Framework**: React + TypeScript
+509: - **Styling**: Tailwind CSS
+510: - **Components**: ShadCN UI (customized)
+511: - **Animations**: Framer Motion
+512: - **Icons**: Lucide React
+513: - **Forms**: React Hook Form + Zod
+514: 
+515: ---
+516: 
+517: ## 📱 Navigation
+518: 
+519: ### Sidebar Navigation
+520: 
+521: All authenticated pages use `DashboardLayout` with `AppSidebar`:
+522: 
+523: - Role-based menu items
+524: - Collapsible sections
+525: - Active state highlighting
+526: - Quick actions
+527: 
+528: ### Navigation Handler
+529: 
+530: ```tsx
+531: // All pages accept onNavigate prop
+532: interface PageProps {
+533:   onNavigate: (path: string) => void;
+534: }
+535: 
+536: // Usage in any page
+537: <Button onClick={() => onNavigate("/papers")}>Go to Papers</Button>;
+538: ```
+539: 
+540: ---
+541: 
+542: ## ✅ All 99 Pages Complete
+543: 
+544: **Last Updated:** November 30, 2025  
+545: **Author:** Md. Atikur Rahaman (GitHub: Atik203)
+</file>
+
 <file path="figma-make/components/layout/AppSidebar.tsx">
   1: "use client";
   2: import {
@@ -211307,554 +212648,6 @@ This section contains the contents of the repository's files.
 738:     </DashboardLayout>
 739:   );
 740: }
-</file>
-
-<file path="figma-make/README.md">
-  1: # ScholarFlow - Figma Make UI Components
-  2: 
-  3: **Complete React UI Components for Figma Make AI**
-  4: 
-  5: All 102 pages are fully implemented and navigable. Just paste this into Figma Make and it works!
-  6: 
-  7: ---
-  8: 
-  9: ## 🚀 Quick Start
- 10: 
- 11: 1. Copy the entire `figma-make` folder
- 12: 2. Paste into Figma Make AI
- 13: 3. All components and navigation work automatically
- 14: 
- 15: For the Jira Kanban flow behind the 101-page rollout, see [KANBAN.md](KANBAN.md).
- 16: 
- 17: ---
- 18: 
- 19: ## 📁 Folder Structure
- 20: 
- 21: ```
- 22: figma-make/
- 23: ├── App.tsx                    # Main entry point - handles all routing
- 24: ├── routes.tsx                 # Route definitions and helpers
- 25: ├── DashboardRouter.tsx        # Dashboard routing logic
- 26: ├── PAGE_LIST.md               # Complete page reference (102 pages)
- 27: │
- 28: ├── components/
- 29: │   ├── index.ts               # Component barrel exports
- 30: │   │
- 31: │   ├── context/               # React Context providers
- 32: │   │   ├── index.ts
- 33: │   │   └── RoleContext.tsx    # Role persistence (researcher/admin/etc.)
- 34: │   │
- 35: │   ├── layout/                # Layout components
- 36: │   │   ├── index.ts
- 37: │   │   ├── AppSidebar.tsx     # Role-based sidebar navigation
- 38: │   │   ├── AuthenticatedNavbar.tsx
- 39: │   │   ├── DashboardLayout.tsx
- 40: │   │   ├── Footer.tsx
- 41: │   │   ├── Navbar.tsx
- 42: │   │   └── PageContainer.tsx
- 43: │   │
- 44: │   ├── sections/              # Landing page sections
- 45: │   │   ├── Comparison.tsx
- 46: │   │   ├── CTA.tsx
- 47: │   │   ├── FAQ.tsx
- 48: │   │   ├── Features.tsx
- 49: │   │   ├── Hero.tsx
- 50: │   │   ├── HowItWorks.tsx
- 51: │   │   ├── Integrations.tsx
- 52: │   │   ├── Newsletter.tsx
- 53: │   │   └── Testimonials.tsx
- 54: │   │
- 55: │   ├── form/                  # Form components
- 56: │   │   └── ScholarFlowForm.tsx
- 57: │   │
- 58: │   ├── figma/                 # Figma-specific components
- 59: │   │
- 60: │   └── ui/                    # ShadCN-based UI primitives
- 61: │       ├── index.ts
- 62: │       ├── alert.tsx
- 63: │       ├── avatar.tsx
- 64: │       ├── badge.tsx
- 65: │       ├── breadcrumb.tsx
- 66: │       ├── button.tsx
- 67: │       ├── button-group.tsx
- 68: │       ├── card.tsx
- 69: │       ├── card-variants.tsx
- 70: │       ├── checkbox.tsx
- 71: │       ├── collapsible.tsx
- 72: │       ├── dialog.tsx
- 73: │       ├── dropdown-menu.tsx
- 74: │       ├── input.tsx
- 75: │       ├── label.tsx
- 76: │       ├── loading-spinner.tsx
- 77: │       ├── loading-states.tsx
- 78: │       ├── popover.tsx
- 79: │       ├── progress.tsx
- 80: │       ├── scroll-area.tsx
- 81: │       ├── select.tsx
- 82: │       ├── separator.tsx
- 83: │       ├── sheet.tsx
- 84: │       ├── skeleton.tsx
- 85: │       ├── slider.tsx
- 86: │       ├── switch.tsx
- 87: │       ├── table.tsx
- 88: │       ├── tabs.tsx
- 89: │       ├── textarea.tsx
- 90: │       ├── tooltip.tsx
- 91: │       ├── cards/             # Card variants
- 92: │       └── modal/             # Modal components
- 93: │
- 94: ├── pages/
- 95: │   ├── index.ts               # Page barrel exports
- 96: │   │
- 97: │   │── Auth & Onboarding
- 98: │   ├── LoginPage.tsx
- 99: │   ├── RegisterPage.tsx
-100: │   ├── ForgotPasswordPage.tsx
-101: │   ├── ResetPasswordPage.tsx
-102: │   ├── VerifyEmailPage.tsx
-103: │   ├── OnboardingPage.tsx
-104: │   │
-105: │   │── Main Pages
-106: │   ├── DashboardPage.tsx
-107: │   ├── PaperDetailPage.tsx
-108: │   ├── ProfilePage.tsx
-109: │   ├── SettingsPage.tsx
-110: │   ├── PricingPage.tsx
-111: │   ├── FAQPage.tsx
-112: │   │
-113: │   │── Marketing Pages
-114: │   ├── FeaturesPage.tsx
-115: │   ├── HowItWorksPage.tsx
-116: │   │
-117: │   │── Utility Pages
-118: │   ├── ErrorPage.tsx
-119: │   ├── LoadingPage.tsx
-120: │   ├── NotFoundPage.tsx
-121: │   │
-122: │   ├── admin/                 # Admin pages (Phase 4-7)
-123: │   │   ├── index.ts
-124: │   │   ├── AdminAPIKeysPage.tsx
-125: │   │   ├── AdminAuditLogPage.tsx
-126: │   │   ├── AdminContentModerationPage.tsx
-127: │   │   ├── AdminPaymentsPage.tsx
-128: │   │   ├── AdminPlansPage.tsx
-129: │   │   ├── AdminReportsPage.tsx
-130: │   │   └── AdminWebhooksPage.tsx
-131: │   │
-132: │   ├── analytics/             # Analytics pages
-133: │   │   ├── index.ts
-134: │   │   ├── ExportAnalyticsPage.tsx
-135: │   │   ├── PersonalAnalyticsPage.tsx
-136: │   │   ├── UsageReportsPage.tsx
-137: │   │   └── WorkspaceAnalyticsPage.tsx
-138: │   │
-139: │   ├── company/               # Company pages
-140: │   │   ├── index.ts
-141: │   │   ├── AboutPage.tsx
-142: │   │   ├── CareersPage.tsx
-143: │   │   ├── ContactPage.tsx
-144: │   │   └── PressPage.tsx
-145: │   │
-146: │   ├── dashboard/             # Dashboard module pages
-147: │   │   ├── index.ts
-148: │   │   ├── ActivityLogPage.tsx
-149: │   │   ├── AIInsightsPage.tsx
-150: │   │   ├── AnalyticsPage.tsx
-151: │   │   ├── BillingPage.tsx
-152: │   │   ├── CollectionsPage.tsx
-153: │   │   ├── DiscussionsPage.tsx
-154: │   │   ├── EnhancedDashboardPage.tsx
-155: │   │   ├── GlobalSearchPage.tsx
-156: │   │   ├── HelpCenterPage.tsx
-157: │   │   ├── KeyboardShortcutsPage.tsx
-158: │   │   ├── NotificationsPage.tsx
-159: │   │   ├── PapersPage.tsx
-160: │   │   ├── RecentActivityPage.tsx
-161: │   │   ├── ResearchNotesPage.tsx
-162: │   │   ├── ResearchPage.tsx
-163: │   │   ├── TeamMembersPage.tsx
-164: │   │   ├── WorkspacesPage.tsx
-165: │   │   │
-166: │   │   ├── admin/             # Admin dashboard pages
-167: │   │   │   ├── index.ts
-168: │   │   │   ├── AdminOverviewPage.tsx
-169: │   │   │   ├── SubscriptionsPage.tsx
-170: │   │   │   ├── SystemSettingsPage.tsx
-171: │   │   │   └── UserManagementPage.tsx
-172: │   │   │
-173: │   │   ├── collections/       # Collections module
-174: │   │   │   ├── index.ts
-175: │   │   │   ├── CollectionDetailsPage.tsx
-176: │   │   │   ├── CreateCollectionPage.tsx
-177: │   │   │   └── SharedCollectionsPage.tsx
-178: │   │   │
-179: │   │   ├── papers/            # Papers module
-180: │   │   │   ├── index.ts
-181: │   │   │   ├── PaperDetailsPage.tsx
-182: │   │   │   ├── SearchPapersPage.tsx
-183: │   │   │   └── UploadPaperPage.tsx
-184: │   │   │
-185: │   │   ├── research/          # Research module
-186: │   │   │   ├── index.ts
-187: │   │   │   ├── AnnotationsPage.tsx
-188: │   │   │   ├── CitationsPage.tsx
-189: │   │   │   ├── PdfExtractionPage.tsx
-190: │   │   │   └── TextEditorPage.tsx
-191: │   │   │
-192: │   │   └── workspaces/        # Workspaces module
-193: │   │       ├── index.ts
-194: │   │       ├── CreateWorkspacePage.tsx
-195: │   │       ├── SharedWorkspacesPage.tsx
-196: │   │       └── WorkspaceDetailsPage.tsx
-197: │   │
-198: │   ├── discover/              # Discover page
-199: │   │   ├── index.ts
-200: │   │   └── DiscoverPage.tsx
-201: │   │
-202: │   ├── enterprise/            # Enterprise pages
-203: │   │   ├── index.ts
-204: │   │   ├── EnterprisePage.tsx
-205: │   │   ├── IntegrationsPage.tsx
-206: │   │   ├── SupportPage.tsx
-207: │   │   └── TeamsPage.tsx
-208: │   │
-209: │   ├── invitations/           # Invitation pages
-210: │   │   ├── index.ts
-211: │   │   └── InvitationResponsePage.tsx
-212: │   │
-213: │   ├── notifications/         # Notification pages
-214: │   │   ├── index.ts
-215: │   │   ├── NotificationCenterPage.tsx
-216: │   │   ├── NotificationHistoryPage.tsx
-217: │   │   └── NotificationSettingsPage.tsx
-218: │   │
-219: │   ├── onboarding/            # Onboarding flow
-220: │   │   ├── index.ts
-221: │   │   ├── OnboardingRolePage.tsx
-222: │   │   └── OnboardingWorkspacePage.tsx
-223: │   │
-224: │   ├── papers/                # Paper management
-225: │   │   ├── index.ts
-226: │   │   ├── ImportPapersPage.tsx
-227: │   │   └── PaperRelationsPage.tsx
-228: │   │
-229: │   ├── products/              # Product pages
-230: │   │   ├── index.ts
-231: │   │   ├── AIInsightsPage.tsx
-232: │   │   ├── CollaboratePage.tsx
-233: │   │   ├── CollectionsPage.tsx
-234: │   │   └── PapersPage.tsx
-235: │   │
-236: │   ├── research/              # Research tools
-237: │   │   ├── index.ts
-238: │   │   ├── CitationGraphPage.tsx
-239: │   │   └── ResearchMapPage.tsx
-240: │   │
-241: │   ├── resources/             # Resource pages
-242: │   │   ├── index.ts
-243: │   │   ├── APIPage.tsx
-244: │   │   ├── CommunityPage.tsx
-245: │   │   ├── DocsPage.tsx
-246: │   │   └── TutorialsPage.tsx
-247: │   │
-248: │   ├── search/                # Search pages
-249: │   │   ├── index.ts
-250: │   │   └── SearchHistoryPage.tsx
-251: │   │
-252: │   ├── security/              # Security pages
-253: │   │   ├── index.ts
-254: │   │   ├── ActiveSessionsPage.tsx
-255: │   │   ├── PrivacySettingsPage.tsx
-256: │   │   ├── SecurityDashboardPage.tsx
-257: │   │   └── TwoFactorSetupPage.tsx
-258: │   │
-259: │   ├── settings/              # Settings pages
-260: │   │   ├── index.ts
-261: │   │   ├── ExportDataPage.tsx
-262: │   │   └── IntegrationsSettingsPage.tsx
-263: │   │
-264: │   └── team/                  # Team pages
-265: │       ├── index.ts
-266: │       ├── CollaboratorProfilePage.tsx
-267: │       ├── TeamActivityPage.tsx
-268: │       ├── TeamInvitationsPage.tsx
-269: │       └── TeamSettingsPage.tsx
-270: │
-271: ├── styles/
-272: │   └── globals.css            # Tailwind + custom styles
-273: │
-274: └── guidelines/                # Design guidelines & docs
-275: ```
-276: 
-277: ---
-278: 
-279: ## 🎯 All 102 Pages
-280: 
-281: ### Auth & Onboarding (8 pages)
-282: 
-283: | Page                    | Path                    | Access      |
-284: | ----------------------- | ----------------------- | ----------- |
-285: | LoginPage               | `/login`                | Public      |
-286: | RegisterPage            | `/register`             | Public      |
-287: | ForgotPasswordPage      | `/forgot-password`      | Public      |
-288: | ResetPasswordPage       | `/reset-password`       | Email link  |
-289: | VerifyEmailPage         | `/verify-email`         | Email link  |
-290: | OnboardingPage          | `/onboarding`           | After login |
-291: | OnboardingRolePage      | `/onboarding/role`      | Onboarding  |
-292: | OnboardingWorkspacePage | `/onboarding/workspace` | Onboarding  |
-293: 
-294: ### Dashboard (4 pages)
-295: 
-296: | Page                  | Path                  | Access  |
-297: | --------------------- | --------------------- | ------- |
-298: | DashboardPage         | `/dashboard`          | Sidebar |
-299: | EnhancedDashboardPage | `/dashboard-enhanced` | Sidebar |
-300: | RecentActivityPage    | `/recent-activity`    | Sidebar |
-301: | ActivityLogPage       | `/activity-log`       | Sidebar |
-302: 
-303: ### Papers (7 pages)
-304: 
-305: | Page               | Path                    | Access        |
-306: | ------------------ | ----------------------- | ------------- |
-307: | PapersPage         | `/papers`               | Sidebar       |
-308: | UploadPaperPage    | `/papers/upload`        | Sidebar       |
-309: | SearchPapersPage   | `/papers/search`        | Sidebar       |
-310: | PaperDetailsPage   | `/papers/:id`           | Click paper   |
-311: | PaperDetailPage    | `/paper/:id`            | Paper card    |
-312: | ImportPapersPage   | `/papers/import`        | Sidebar       |
-313: | PaperRelationsPage | `/papers/:id/relations` | Paper details |
-314: 
-315: ### Collections (4 pages)
-316: 
-317: | Page                  | Path                  | Access  |
-318: | --------------------- | --------------------- | ------- |
-319: | CollectionsPage       | `/collections`        | Sidebar |
-320: | CreateCollectionPage  | `/collections/create` | Button  |
-321: | SharedCollectionsPage | `/collections/shared` | Sidebar |
-322: | CollectionDetailsPage | `/collections/:id`    | Click   |
-323: 
-324: ### Workspaces (4 pages)
-325: 
-326: | Page                 | Path                 | Access  |
-327: | -------------------- | -------------------- | ------- |
-328: | WorkspacesPage       | `/workspaces`        | Sidebar |
-329: | CreateWorkspacePage  | `/workspaces/create` | Button  |
-330: | SharedWorkspacesPage | `/workspaces/shared` | Sidebar |
-331: | WorkspaceDetailsPage | `/workspaces/:id`    | Click   |
-332: 
-333: ### Research (8 pages)
-334: 
-335: | Page              | Path                       | Access  |
-336: | ----------------- | -------------------------- | ------- |
-337: | ResearchPage      | `/research`                | Sidebar |
-338: | PdfExtractionPage | `/research/pdf-extraction` | Sidebar |
-339: | TextEditorPage    | `/research/editor`         | Sidebar |
-340: | CitationsPage     | `/research/citations`      | Sidebar |
-341: | AnnotationsPage   | `/research/annotations`    | Sidebar |
-342: | CitationGraphPage | `/research/citation-graph` | Pro+    |
-343: | ResearchMapPage   | `/research/map`            | Pro+    |
-344: | ResearchNotesPage | `/research-notes`          | Sidebar |
-345: 
-346: ### Notifications (4 pages)
-347: 
-348: | Page                     | Path                      | Access  |
-349: | ------------------------ | ------------------------- | ------- |
-350: | NotificationsPage        | `/notifications`          | Sidebar |
-351: | NotificationCenterPage   | `/notifications/center`   | Sidebar |
-352: | NotificationHistoryPage  | `/notifications/history`  | Sidebar |
-353: | NotificationSettingsPage | `/notifications/settings` | Sidebar |
-354: 
-355: ### Team (6 pages) - Team Lead+
-356: 
-357: | Page                    | Path                 | Access     |
-358: | ----------------------- | -------------------- | ---------- |
-359: | TeamMembersPage         | `/team`              | Sidebar    |
-360: | TeamInvitationsPage     | `/team/invitations`  | Sidebar    |
-361: | TeamActivityPage        | `/team/activity`     | Sidebar    |
-362: | TeamSettingsPage        | `/team/settings`     | Sidebar    |
-363: | CollaboratorProfilePage | `/collaborator/:id`  | Click name |
-364: | InvitationResponsePage  | `/invitation/:token` | Email      |
-365: 
-366: ### Security (4 pages)
-367: 
-368: | Page                  | Path                 | Access  |
-369: | --------------------- | -------------------- | ------- |
-370: | SecurityDashboardPage | `/security`          | Sidebar |
-371: | TwoFactorSetupPage    | `/security/2fa`      | Sidebar |
-372: | ActiveSessionsPage    | `/security/sessions` | Sidebar |
-373: | PrivacySettingsPage   | `/privacy`           | Sidebar |
-374: 
-375: ### Analytics (5 pages)
-376: 
-377: | Page                   | Path                   | Access     |
-378: | ---------------------- | ---------------------- | ---------- |
-379: | AnalyticsPage          | `/analytics`           | Sidebar    |
-380: | PersonalAnalyticsPage  | `/analytics/personal`  | Sidebar    |
-381: | WorkspaceAnalyticsPage | `/analytics/workspace` | Team Lead+ |
-382: | UsageReportsPage       | `/analytics/usage`     | Pro+       |
-383: | ExportAnalyticsPage    | `/analytics/export`    | Pro+       |
-384: 
-385: ### Search & Discovery (3 pages)
-386: 
-387: | Page              | Path              | Access       |
-388: | ----------------- | ----------------- | ------------ |
-389: | GlobalSearchPage  | `/search`         | Header/Cmd+K |
-390: | SearchHistoryPage | `/search/history` | Search menu  |
-391: | DiscoverPage      | `/discover`       | Sidebar      |
-392: 
-393: ### Help & Settings (6 pages)
-394: 
-395: | Page                  | Path               | Access    |
-396: | --------------------- | ------------------ | --------- |
-397: | HelpCenterPage        | `/help`            | Sidebar   |
-398: | KeyboardShortcutsPage | `/help/shortcuts`  | Sidebar   |
-399: | ProfilePage           | `/profile`         | User menu |
-400: | SettingsPage          | `/settings`        | User menu |
-401: | BillingPage           | `/billing`         | Sidebar   |
-402: | ExportDataPage        | `/settings/export` | Settings  |
-403: 
-404: ---
-405: 
-406: | IntegrationsSettingsPage | `/settings/integrations` | Settings |
-407: 
-408: ---
-409: 
-410: ### AI & Insights (2 pages)
-411: 
-412: | Page            | Path           | Access        |
-413: | --------------- | -------------- | ------------- |
-414: | AIInsightsPage  | `/ai-insights` | Sidebar       |
-415: | DiscussionsPage | `/discussions` | Paper details |
-416: 
-417: ### Admin (11 pages) - Admin Only
-418: 
-419: | Page                       | Path                   | Access  |
-420: | -------------------------- | ---------------------- | ------- |
-421: | AdminOverviewPage          | `/admin-overview`      | Sidebar |
-422: | UserManagementPage         | `/admin/users`         | Sidebar |
-423: | SubscriptionsPage          | `/admin/subscriptions` | Sidebar |
-424: | SystemSettingsPage         | `/admin/settings`      | Sidebar |
-425: | AdminReportsPage           | `/admin/reports`       | Sidebar |
-426: | AdminAuditLogPage          | `/admin/audit`         | Sidebar |
-427: | AdminPlansPage             | `/admin/plans`         | Sidebar |
-428: | AdminPaymentsPage          | `/admin/payments`      | Sidebar |
-429: | AdminWebhooksPage          | `/admin/webhooks`      | Sidebar |
-430: | AdminAPIKeysPage           | `/admin/api-keys`      | Sidebar |
-431: | AdminContentModerationPage | `/admin/moderation`    | Sidebar |
-432: 
-433: ### Marketing/Public (4 pages)
-434: 
-435: | Page           | Path            | Access        |
-436: | -------------- | --------------- | ------------- |
-437: | FeaturesPage   | `/features`     | Public navbar |
-438: | HowItWorksPage | `/how-it-works` | Public navbar |
-439: | PricingPage    | `/pricing`      | Public navbar |
-440: | FAQPage        | `/faq`          | Public navbar |
-441: 
-442: ### Products (4 pages)
-443: 
-444: | Page                   | Path                    | Access |
-445: | ---------------------- | ----------------------- | ------ |
-446: | PapersProductPage      | `/products/papers`      | Footer |
-447: | CollectionsProductPage | `/products/collections` | Footer |
-448: | CollaborateProductPage | `/products/collaborate` | Footer |
-449: | AIInsightsProductPage  | `/products/ai-insights` | Footer |
-450: 
-451: ### Resources (4 pages)
-452: 
-453: | Page          | Path                   | Access |
-454: | ------------- | ---------------------- | ------ |
-455: | DocsPage      | `/resources/docs`      | Footer |
-456: | TutorialsPage | `/resources/tutorials` | Footer |
-457: | APIPage       | `/resources/api`       | Footer |
-458: | CommunityPage | `/resources/community` | Footer |
-459: 
-460: ### Company (4 pages)
-461: 
-462: | Page        | Path               | Access |
-463: | ----------- | ------------------ | ------ |
-464: | AboutPage   | `/company/about`   | Footer |
-465: | CareersPage | `/company/careers` | Footer |
-466: | ContactPage | `/company/contact` | Footer |
-467: | PressPage   | `/company/press`   | Footer |
-468: 
-469: ### Enterprise (4 pages)
-470: 
-471: | Page             | Path                       | Access        |
-472: | ---------------- | -------------------------- | ------------- |
-473: | EnterprisePage   | `/enterprise`              | Public navbar |
-474: | TeamsPage        | `/enterprise/teams`        | Enterprise    |
-475: | IntegrationsPage | `/enterprise/integrations` | Enterprise    |
-476: | SupportPage      | `/enterprise/support`      | Enterprise    |
-477: 
-478: ### Utility (3 pages)
-479: 
-480: | Page         | Path         | Access        |
-481: | ------------ | ------------ | ------------- |
-482: | NotFoundPage | `/not-found` | 404           |
-483: | ErrorPage    | `/error`     | Error         |
-484: | LoadingPage  | `/loading`   | Loading state |
-485: 
-486: ---
-487: 
-488: ## 🔐 Role-Based Access
-489: 
-490: ### Roles
-491: 
-492: - **Researcher** - Basic access
-493: - **Pro Researcher** - + Citation Graph, Research Map, Usage Reports
-494: - **Team Lead** - + Team Management, Workspace Analytics
-495: - **Admin** - Full access including Admin panel
-496: 
-497: ### Role Persistence
-498: 
-499: The `RoleContext` ensures role persists when navigating between pages:
-500: 
-501: - Login as admin → navigate to `/papers` → still shows admin layout
-502: - Role only changes when explicitly visiting `/dashboard/admin`, `/dashboard/researcher`, etc.
-503: 
-504: ---
-505: 
-506: ## 🎨 Design System
-507: 
-508: - **Framework**: React + TypeScript
-509: - **Styling**: Tailwind CSS
-510: - **Components**: ShadCN UI (customized)
-511: - **Animations**: Framer Motion
-512: - **Icons**: Lucide React
-513: - **Forms**: React Hook Form + Zod
-514: 
-515: ---
-516: 
-517: ## 📱 Navigation
-518: 
-519: ### Sidebar Navigation
-520: 
-521: All authenticated pages use `DashboardLayout` with `AppSidebar`:
-522: 
-523: - Role-based menu items
-524: - Collapsible sections
-525: - Active state highlighting
-526: - Quick actions
-527: 
-528: ### Navigation Handler
-529: 
-530: ```tsx
-531: // All pages accept onNavigate prop
-532: interface PageProps {
-533:   onNavigate: (path: string) => void;
-534: }
-535: 
-536: // Usage in any page
-537: <Button onClick={() => onNavigate("/papers")}>Go to Papers</Button>;
-538: ```
-539: 
-540: ---
-541: 
-542: ## ✅ All 99 Pages Complete
-543: 
-544: **Last Updated:** November 30, 2025  
-545: **Author:** Md. Atikur Rahaman (GitHub: Atik203)
 </file>
 
 <file path="docs/Chapter4-System-Design-Diagrams.md">
