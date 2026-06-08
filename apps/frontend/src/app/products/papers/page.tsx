@@ -1,140 +1,318 @@
-import { PageContainer, Section } from "@/components/layout/PageContainer";
-import { FileText, Upload, Search, Brain, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+"use client";
+
+import {
+  ArrowRight,
+  BookOpen,
+  Brain,
+  FileText,
+  Lightbulb,
+  Rocket,
+  Search,
+  Upload,
+  Zap,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { CardWithVariants } from "@/components/ui/card-variants";
 
 export default function ProductsPapersPage() {
   return (
     <>
-      <Section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-chart-1/5" />
-        <PageContainer className="relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <FileText className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Product</span>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Research{" "}
-              <span className="bg-gradient-to-r from-primary via-chart-1 to-purple-500 bg-clip-text text-transparent">
-                Papers
-              </span>
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-              Upload, organize, and analyze academic papers with AI-powered metadata extraction and semantic search.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/register">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-chart-1 text-white shadow-lg">
-                  Get Started
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              </Link>
-              <Link href="/how-it-works">
-                <Button size="lg" variant="outline">Learn More</Button>
-              </Link>
-            </div>
-          </motion.div>
-        </PageContainer>
-      </Section>
-
-      <Section className="bg-muted/30">
-        <PageContainer>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-4">Smart Paper Management</h2>
-              <p className="text-muted-foreground mb-6">
-                Our AI engine automatically extracts metadata, generates summaries, and creates semantic embeddings for every paper you upload.
-              </p>
-              <ul className="space-y-3">
-                {[
-                  "Automatic metadata extraction (title, authors, abstract)",
-                  "OCR for scanned PDFs with 99%+ accuracy",
-                  "Semantic chunking for precise search",
-                  "Full-text search across all documents",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-chart-1/20 rounded-2xl blur-2xl" />
-              <div className="relative p-8 rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                    <Upload className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">Upload Papers</div>
-                    <div className="text-sm text-muted-foreground">PDF, DOCX, TXT supported</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
-                    <Search className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">Semantic Search</div>
-                    <div className="text-sm text-muted-foreground">Find by meaning, not keywords</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                    <Brain className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">AI Summaries</div>
-                    <div className="text-sm text-muted-foreground">Key claims in seconds</div>
-                  </div>
-                </div>
+      {/* Hero Section */}
+      <section className="py-12 md:py-20">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                <FileText className="h-4 w-4" />
+                Research Papers Platform
               </div>
-            </div>
-          </div>
-        </PageContainer>
-      </Section>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
+                Your research library, supercharged
+              </h1>
+              <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
+                Upload, organize, and analyze academic papers with AI-powered
+                insights. Transform how you discover, read, and connect
+                research.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link href="/login">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
+                  >
+                    <Rocket className="h-5 w-5 mr-2" />
+                    Start free today
+                  </Button>
+                </Link>
+                <Link href="/demo">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                  >
+                    <Search className="h-5 w-5 mr-2" />
+                    See it in action
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
 
-      <Section>
-        <PageContainer>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Key Features</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to manage your research library efficiently.
-            </p>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <CardWithVariants
+                variant="elevated"
+                hover="glow"
+                padding="lg"
+                className="border-2 shadow-xl backdrop-blur-sm"
+              >
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Upload className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Smart Upload</h3>
+                      <p className="text-muted-foreground">
+                        Drag & drop PDFs or paste arXiv links. Metadata
+                        extracted automatically.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-chart-1/10">
+                      <Search className="h-6 w-6 text-chart-1" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">Semantic Search</h3>
+                      <p className="text-muted-foreground">
+                        Find papers by concepts, not just keywords. AI
+                        understands context.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-chart-2/10">
+                      <Brain className="h-6 w-6 text-chart-2" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">AI Summaries</h3>
+                      <p className="text-muted-foreground">
+                        Generate concise summaries and extract key insights
+                        instantly.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardWithVariants>
+            </motion.div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-16 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Everything you need for modern research
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              From discovery to analysis, our platform accelerates every step
+              of your research workflow.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: Upload, title: "Bulk Upload", desc: "Upload hundreds of papers at once with drag-and-drop." },
-              { icon: Search, title: "Full-Text Search", desc: "Search across all your papers with instant results." },
-              { icon: Brain, title: "AI Summaries", desc: "Get condensed summaries of any paper in seconds." },
-              { icon: Sparkles, title: "Smart Collections", desc: "Auto-organize papers by topic, author, or keyword." },
-              { icon: FileText, title: "Citation Export", desc: "Export citations in BibTeX, APA, MLA, and more." },
-              { icon: CheckCircle2, title: "Version Control", desc: "Track changes and annotations across versions." },
-            ].map((feature, i) => (
+              {
+                icon: FileText,
+                title: "Universal Import",
+                description:
+                  "Support for PDFs, URLs, DOIs, and direct database imports from arXiv, PubMed, IEEE.",
+                color: "primary",
+              },
+              {
+                icon: Search,
+                title: "Advanced Search",
+                description:
+                  "Full-text search, citation networks, author disambiguation, and topic clustering.",
+                color: "chart-1",
+              },
+              {
+                icon: BookOpen,
+                title: "Smart Organization",
+                description:
+                  "Auto-categorization, custom tags, folder hierarchies, and collaborative collections.",
+                color: "chart-2",
+              },
+              {
+                icon: Lightbulb,
+                title: "AI Insights",
+                description:
+                  "Research gap analysis, trend predictions, citation recommendations, and summary generation.",
+                color: "chart-3",
+              },
+              {
+                icon: Zap,
+                title: "Real-time Sync",
+                description:
+                  "Access your library anywhere. Cloud sync with offline reading capabilities.",
+                color: "chart-4",
+              },
+              {
+                icon: Brain,
+                title: "Citation Management",
+                description:
+                  "Auto-generate bibliographies in any format. Track impact and citation networks.",
+                color: "chart-5",
+              },
+            ].map(({ icon: Icon, title, description, color }, index) => (
               <motion.div
-                key={feature.title}
+                key={title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="p-6 rounded-2xl border border-border/50 bg-card/50 hover:border-primary/40 transition-all"
+                transition={{ delay: index * 0.1, duration: 0.6 }}
               >
-                <feature.icon className="h-8 w-8 text-primary mb-4" />
-                <h3 className="font-semibold mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                <CardWithVariants
+                  variant="default"
+                  hover="lift"
+                  padding="md"
+                  className="h-full bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-500 group"
+                >
+                  <div
+                    className={`p-3 rounded-lg bg-${color}/10 mb-4 w-fit group-hover:scale-110 transition-transform duration-200`}
+                  >
+                    <Icon className={`h-6 w-6 text-${color}`} />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                    {title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {description}
+                  </p>
+                </CardWithVariants>
               </motion.div>
             ))}
           </div>
-        </PageContainer>
-      </Section>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Get started in minutes
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Three simple steps to transform your research workflow
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Import & Upload",
+                description:
+                  "Drag and drop PDFs, paste URLs, or connect to academic databases. We handle the rest.",
+              },
+              {
+                step: "02",
+                title: "Organize & Discover",
+                description:
+                  "AI automatically categorizes papers and suggests related research you might have missed.",
+              },
+              {
+                step: "03",
+                title: "Analyze & Collaborate",
+                description:
+                  "Get AI insights, share with your team, and accelerate your research breakthroughs.",
+              },
+            ].map(({ step, title, description }, index) => (
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                className="text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-chart-1 text-primary-foreground font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                  {step}
+                </div>
+                <h3 className="font-semibold text-xl mb-2">{title}</h3>
+                <p className="text-muted-foreground">{description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background to-muted/20" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,theme(colors.primary/5),transparent_70%)]" />
+
+        <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Ready to supercharge your research?
+            </h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Join thousands of researchers already using ScholarFlow to
+              accelerate their work.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/login">
+                <Button
+                  size="lg"
+                  variant="gradient"
+                  className="btn-hover-glow btn-shine"
+                >
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Start Free Trial
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button
+                  size="lg"
+                  variant="outline"
+                >
+                  View Pricing
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </>
   );
 }
