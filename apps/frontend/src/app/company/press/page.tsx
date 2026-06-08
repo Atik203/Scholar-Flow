@@ -322,7 +322,7 @@ export default function CompanyPressPage() {
                       size="lg"
                       variant="outline"
                     >
-                      <Image className="h-5 w-5 mr-2" />
+                      <Image className="h-5 w-5 mr-2" aria-hidden="true" alt="" />
                       Brand Guidelines
                     </Button>
                   </Link>

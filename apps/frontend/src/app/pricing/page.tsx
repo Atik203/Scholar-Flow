@@ -21,6 +21,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CardWithVariants } from "@/components/ui/card-variants";
 
@@ -595,9 +596,11 @@ export default function PricingPage() {
                     &ldquo;{testimonials[currentTestimonialIndex].quote}&rdquo;
                   </p>
                   <div className="flex items-center gap-4">
-                    <img
+                    <Image
                       src={testimonials[currentTestimonialIndex].avatar}
                       alt={testimonials[currentTestimonialIndex].author}
+                      width={56}
+                      height={56}
                       className="h-14 w-14 rounded-full object-cover"
                     />
                     <div>
