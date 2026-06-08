@@ -13,11 +13,11 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 ## Phase 1: Static Marketing Pages (18-20 pages)
 
 ### 1.1 Design System Merge
-- [ ] Merge figma-make `globals.css` into `apps/frontend/src/app/globals.css`
-- [ ] Merge figma-make `_variables.scss` into `apps/frontend/src/styles/_variables.scss`
-- [ ] Merge figma-make `_keyframe-animations.scss` into `apps/frontend/src/styles/_keyframe-animations.scss`
-- [ ] Verify Tailwind v4 tokens are compatible with `@config` directive
-- [ ] Run `yarn type-check` and `yarn lint` after design system merge
+- [x] Merge figma-make `globals.css` into `apps/frontend/src/app/globals.css`
+- [x] Merge figma-make `_variables.scss` into `apps/frontend/src/styles/_variables.scss`
+- [x] Merge figma-make `_keyframe-animations.scss` into `apps/frontend/src/styles/_keyframe-animations.scss`
+- [x] Verify Tailwind v4 tokens are compatible with `@config` directive
+- [x] Run `yarn type-check` and `yarn lint` after design system merge
 
 ### 1.2 Layout Components
 - [ ] Replace `Navbar.tsx` with figma-make mega-dropdown navbar
