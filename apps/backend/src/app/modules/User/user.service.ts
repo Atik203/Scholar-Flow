@@ -4,7 +4,7 @@ import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
 import { StorageService } from "../papers/StorageService";
-import { UpdateProfileInput } from "./user.validation";
+import { UpdateOnboardingInput, UpdateProfileInput } from "./user.validation";
 
 const getAllFromDB = async (params: any, options: IPaginationOptions) => {
   // Use simple $queryRaw for basic user pagination - more efficient than QueryBuilder
@@ -73,7 +73,8 @@ const getMyProfile = async (user: IAuthUser) => {
   // Source: optimized single user profile query
   const users = await prisma.$queryRaw<any[]>`
     SELECT id, email, name, "firstName", "lastName", institution, "fieldOfStudy",
-           image, role, "createdAt", "updatedAt", "emailVerified"
+           image, role, "createdAt", "updatedAt", "emailVerified",
+           "onboardingCompleted", "onboardingStep"
     FROM "User"
     WHERE email = ${user?.email} AND "isDeleted" = false
     LIMIT 1
@@ -534,6 +535,53 @@ const getUserAnalytics = async (user: IAuthUser) => {
   }
 };
 
+const updateOnboarding = async (user: IAuthUser, data: UpdateOnboardingInput) => {
+  try {
+    const fields: string[] = [];
+    const values: any[] = [];
+
+    if (data.onboardingCompleted !== undefined) {
+      fields.push(`"onboardingCompleted" = $${fields.length + 1}`);
+      values.push(data.onboardingCompleted);
+    }
+    if (data.onboardingStep !== undefined) {
+      fields.push(`"onboardingStep" = $${fields.length + 1}`);
+      values.push(data.onboardingStep);
+    }
+    fields.push(`"updatedAt" = NOW()`);
+
+    if (fields.length === 0) {
+      throw new ApiError(400, "No valid onboarding fields provided");
+    }
+
+    await prisma.$queryRaw`
+      UPDATE "User"
+      SET "onboardingCompleted" = ${data.onboardingCompleted ?? false},
+          "onboardingStep" = ${data.onboardingStep ?? 0},
+          "updatedAt" = NOW()
+      WHERE id = ${user.id} AND "isDeleted" = false
+    `;
+
+    const users = await prisma.$queryRaw<any[]>`
+      SELECT id, email, name, "firstName", "lastName", image, role,
+             "onboardingCompleted", "onboardingStep"
+      FROM "User"
+      WHERE id = ${user.id} AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (users.length === 0) {
+      throw new ApiError(404, "User not found");
+    }
+
+    return users[0];
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    console.error("Error updating onboarding:", error);
+    throw new ApiError(500, "Failed to update onboarding status");
+  }
+};
+
 export const userService = {
   getAllFromDB,
   getMyProfile,
@@ -542,4 +590,5 @@ export const userService = {
   deleteAccount,
   uploadProfilePicture,
   getUserAnalytics,
+  updateOnboarding,
 };

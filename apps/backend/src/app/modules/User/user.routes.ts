@@ -7,7 +7,7 @@ import {
 } from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { userController } from "./user.controller";
-import { changePasswordSchema, updateProfileSchema } from "./user.validation";
+import { changePasswordSchema, updateOnboardingSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
 
@@ -516,6 +516,13 @@ router.get(
   authMiddleware,
   paperOperationLimiter,
   userController.getUserAnalytics
+);
+
+router.put(
+  "/onboarding",
+  authMiddleware,
+  validateRequestBody(updateOnboardingSchema),
+  userController.updateOnboarding
 );
 
 export const userRoutes = router;
