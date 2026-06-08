@@ -13,7 +13,7 @@ import {
   useSendEmailVerificationMutation,
   useVerifyEmailMutation,
 } from "@/redux/auth/authApi";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowRight, CheckCircle, Mail, Send, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
