@@ -29,6 +29,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: "ScholarFlow - AI-Powered Research Paper Hub",
   description:
     "ScholarFlow is an AI-powered platform for organizing, annotating, and collaborating on research papers. Streamline your academic workflow with intelligent document management, advanced search, and team collaboration features.",

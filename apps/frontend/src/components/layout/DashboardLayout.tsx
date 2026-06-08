@@ -18,6 +18,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -80,12 +81,14 @@ function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative h-10 w-10 rounded-full p-0 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
       >
-        <div className="h-9 w-9 aspect-square rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300 overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0">
+        <div className="h-9 w-9 aspect-square rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-300 overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0 relative">
           {user?.image ? (
-            <img
+            <Image
               src={user.image}
               alt={name}
-              className="h-full w-full object-cover rounded-full"
+              fill
+              className="object-cover rounded-full"
+              unoptimized
             />
           ) : (
             <span className="text-primary font-semibold text-sm">
@@ -110,12 +113,14 @@ function UserMenu() {
               className="absolute right-0 top-full mt-2 w-72 min-w-[18rem] bg-popover dark:bg-gray-800 border border-border dark:border-gray-700 rounded-lg shadow-xl z-50"
             >
               <div className="flex items-center justify-start gap-3 p-3 border-b border-border dark:border-gray-700">
-                <div className="h-10 w-10 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0 ring-2 ring-primary/20">
+                <div className="h-10 w-10 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-primary/10 flex-shrink-0 ring-2 ring-primary/20 relative">
                   {user?.image ? (
-                    <img
+                    <Image
                       src={user.image}
                       alt={name}
-                      className="h-full w-full object-cover rounded-full"
+                      fill
+                      className="object-cover rounded-full"
+                      unoptimized
                     />
                   ) : (
                     <span className="text-primary font-semibold text-sm">
