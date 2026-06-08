@@ -121,6 +121,10 @@ model User {
   emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
 
+  // Onboarding flow fields (Phase 2)
+  onboardingCompleted Boolean  @default(false)
+  onboardingStep      Int      @default(0)
+
   // Stripe subscription fields
   stripeCustomerId       String?   @unique
   stripeSubscriptionId   String?   @unique

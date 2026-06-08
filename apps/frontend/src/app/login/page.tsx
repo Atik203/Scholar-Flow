@@ -6,6 +6,9 @@ import {
   showLoadingToast,
 } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
+import { FloatingInput } from "@/components/customUI/form/FloatingInput";
+import { ToggleField } from "@/components/customUI/form/ToggleField";
+import { ScholarForm } from "@/components/customUI/form/ScholarFlowForm";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
 import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
 import { getCallbackUrl } from "@/lib/auth/redirects";
@@ -19,7 +22,6 @@ import {
   EyeOff,
   Github,
   Loader2,
-  Mail,
   Shield,
   Sparkles,
 } from "lucide-react";
@@ -27,7 +29,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -45,26 +47,21 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
-  // Check if already authenticated (but don't auto-redirect during login process)
-  // This prevents race conditions between login flow and auth guard
-  const { isLoading: authLoading, isAuthenticated } = useAuthRoute();
-
-  // If already authenticated and NOT in the middle of logging in, let useAuthRoute handle redirect
-  // The isLoading check ensures we don't interfere with active login attempts
+  const { isLoading: authLoading } = useAuthRoute();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  // Show loading state while checking authentication
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -75,8 +72,6 @@ export default function LoginPage() {
 
     try {
       const callbackUrl = getCallbackUrl(searchParams);
-
-      console.log("🔐 Starting credentials sign-in...");
       const result = await signInWithCredentials(
         data.email,
         data.password,
@@ -85,22 +80,15 @@ export default function LoginPage() {
 
       if (!result.success) {
         dismissToast(loadingToast);
-        console.error("❌ Sign-in error:", result.error);
         showAuthErrorToast(result.error || "Invalid email or password");
         return;
       }
 
-      console.log("✅ Sign-in successful, credentials stored in Redux");
       dismissToast(loadingToast);
       showAuthSuccessToast("Welcome back!");
-
-      // Redirect to callback URL or dashboard
-      const redirectUrl = callbackUrl || "/dashboard";
-      console.log("🚀 Redirecting to:", redirectUrl);
-      router.push(redirectUrl);
+      router.push(callbackUrl || "/dashboard");
     } catch (error) {
       dismissToast(loadingToast);
-      console.error("❌ Sign-in error:", error);
       showAuthErrorToast("An unexpected error occurred while signing in");
     } finally {
       setIsLoading(null);
@@ -113,12 +101,8 @@ export default function LoginPage() {
 
     try {
       const callbackUrl = getCallbackUrl(searchParams);
-      console.log(`🔐 Starting ${provider} OAuth sign-in...`);
-
-      // Redirect to OAuth provider (page will navigate away)
       signInWithOAuth(provider, callbackUrl);
     } catch (error) {
-      console.error(`${provider} sign-in error:`, error);
       showAuthErrorToast(`An error occurred while signing in with ${provider}`);
       setIsLoading(null);
     }
@@ -126,15 +110,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Left side - Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12">
         <div className="w-full max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Header */}
             <div className="text-center mb-8">
               <Link
                 href="/"
@@ -157,13 +139,12 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Social Login Buttons */}
             <div className="space-y-3 mb-6">
               <Button
                 onClick={() => handleSocialLogin("google")}
                 disabled={isLoading !== null}
                 variant="outline"
-                className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
                 size="lg"
               >
                 {isLoading === "google" ? (
@@ -195,7 +176,7 @@ export default function LoginPage() {
                 onClick={() => handleSocialLogin("github")}
                 disabled={isLoading !== null}
                 variant="outline"
-                className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full border-border hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
                 size="lg"
               >
                 {isLoading === "github" ? (
@@ -207,7 +188,6 @@ export default function LoginPage() {
               </Button>
             </div>
 
-            {/* Divider */}
             <div className="relative mb-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border" />
@@ -219,67 +199,53 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Email address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    {...register("email")}
-                    type="email"
-                    placeholder="name@example.com"
-                    className="w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <FloatingInput
+                {...register("email")}
+                label="Email address"
+                type="email"
+                required
+                error={!!errors.email}
+                helperText={errors.email?.message}
+              />
 
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    {...register("password")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    className="w-full pr-12 pl-4 py-3 border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-destructive text-sm mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
+              <div className="relative">
+                <FloatingInput
+                  {...register("password")}
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  error={!!errors.password}
+                  helperText={errors.password?.message}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    {...register("rememberMe")}
-                    type="checkbox"
-                    className="h-4 w-4 text-primary border-border rounded focus:ring-primary/50"
-                  />
-                  Remember me
-                </label>
+                <Controller
+                  name="rememberMe"
+                  control={control}
+                  render={({ field }) => (
+                    <ToggleField
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      label="Remember me"
+                      size="sm"
+                    />
+                  )}
+                />
                 <Link
                   href="/forgot-password"
                   className="text-sm text-primary hover:text-primary/80 transition-colors"
@@ -308,7 +274,6 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            {/* Footer */}
             <div className="mt-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
@@ -329,7 +294,6 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right side - Hero Image/Content */}
       <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-chart-1/10 to-primary/5" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,theme(colors.primary/20),transparent_50%)]" />
