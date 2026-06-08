@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { useResetPasswordMutation } from "@/redux/auth/authApi";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,

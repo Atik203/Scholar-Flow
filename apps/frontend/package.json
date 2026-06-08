@@ -66,7 +66,6 @@
     "docx-preview": "^0.3.6",
     "embla-carousel-react": "^8.6.0",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.23.12",
     "html-docx-js": "^0.3.1",
     "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
