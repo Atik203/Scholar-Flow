@@ -277,7 +277,7 @@ export default function ImportPapersPage() {
     reader.readAsText(file);
   };
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -285,9 +285,9 @@ export default function ImportPapersPage() {
     } else if (e.type === "dragleave") {
       setDragActive(false);
     }
-  }, []);
+  };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
@@ -295,7 +295,7 @@ export default function ImportPapersPage() {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileRead(e.dataTransfer.files[0]);
     }
-  }, []);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
