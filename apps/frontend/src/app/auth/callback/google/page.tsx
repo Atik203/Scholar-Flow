@@ -8,34 +8,35 @@ import {
 import { completeOAuthSignIn } from "@/lib/auth/authHelpers";
 import { useAppDispatch } from "@/redux/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-const GLOBAL_LOCK_STORAGE_KEY = "__sf_google_oauth_processing__";
-const GLOBAL_LOCK_WINDOW_PROP = "__sfGoogleOAuthProcessing";
+// Module-level lock survives React StrictMode unmount/remount
+let _moduleLock = false;
 
 const tryAcquireGlobalLock = (): boolean => {
   if (typeof window === "undefined") return true;
 
   const globalWindow = window as typeof window & Record<string, boolean>;
-  const lockInWindow = globalWindow[GLOBAL_LOCK_WINDOW_PROP] === true;
-  const lockInSession =
-    sessionStorage.getItem(GLOBAL_LOCK_STORAGE_KEY) === "true";
+  const lockInWindow = globalWindow.__sfGoogleOAuthProcessing === true;
+  const lockInStorage = sessionStorage.getItem("__sf_google_oauth_processing__") === "true";
 
-  if (lockInWindow || lockInSession) {
+  if (_moduleLock || lockInWindow || lockInStorage) {
     return false;
   }
 
-  globalWindow[GLOBAL_LOCK_WINDOW_PROP] = true;
-  sessionStorage.setItem(GLOBAL_LOCK_STORAGE_KEY, "true");
+  _moduleLock = true;
+  globalWindow.__sfGoogleOAuthProcessing = true;
+  sessionStorage.setItem("__sf_google_oauth_processing__", "true");
   return true;
 };
 
 const releaseGlobalLock = (): void => {
+  _moduleLock = false;
   if (typeof window === "undefined") return;
 
   const globalWindow = window as typeof window & Record<string, boolean>;
-  delete globalWindow[GLOBAL_LOCK_WINDOW_PROP];
-  sessionStorage.removeItem(GLOBAL_LOCK_STORAGE_KEY);
+  delete globalWindow.__sfGoogleOAuthProcessing;
+  sessionStorage.removeItem("__sf_google_oauth_processing__");
 };
 
 export default function GoogleCallbackPage() {
@@ -44,25 +45,9 @@ export default function GoogleCallbackPage() {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const hasProcessedRef = useRef(false);
 
   useEffect(() => {
-    let lockAcquired = tryAcquireGlobalLock();
-
-    if (!lockAcquired) {
-      console.log(
-        "🔒 [GLOBAL] Google OAuth already processing in another instance, skipping..."
-      );
-      return;
-    }
-
-    // Prevent duplicate processing at component level
-    if (hasProcessedRef.current || isProcessing) {
-      console.log(
-        "🔒 [LOCAL] Google OAuth callback already processing, skipping..."
-      );
-      releaseGlobalLock();
-      lockAcquired = false;
+    if (!tryAcquireGlobalLock()) {
       return;
     }
 
@@ -81,52 +66,25 @@ export default function GoogleCallbackPage() {
           return;
         }
 
-        // **CRITICAL DEDUPLICATION CHECK** - Prevent processing same code twice
-        const processedCodeKey = `oauth_processed_${code.substring(0, 10)}`;
-        const alreadyProcessed = localStorage.getItem(processedCodeKey);
+        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
 
-        if (alreadyProcessed) {
-          console.log("🔒 OAuth code already processed, skipping...");
-          const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
+        // Deduplicate: if this code was already processed, skip
+        const processedCodeKey = `oauth_processed_${code.substring(0, 10)}`;
+        if (localStorage.getItem(processedCodeKey)) {
           router.push(callbackUrl);
           return;
         }
 
-        hasProcessedRef.current = true;
         setIsProcessing(true);
         localStorage.setItem(processedCodeKey, Date.now().toString());
-
-        console.log("✅ OAuth processing lock acquired:", {
-          windowLock: true,
-          ref: hasProcessedRef.current,
-          storageKey: processedCodeKey,
-        });
 
         // Clean up old processed codes (older than 5 minutes)
         const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
         Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith("oauth_processed_")) {
-            const timestamp = parseInt(localStorage.getItem(key) || "0");
-            if (timestamp < fiveMinutesAgo) {
-              localStorage.removeItem(key);
-            }
+          if (key.startsWith("oauth_processed_") && parseInt(localStorage.getItem(key) || "0") < fiveMinutesAgo) {
+            localStorage.removeItem(key);
           }
         });
-
-        // Decode the state parameter to get the original callback URL
-        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
-
-        console.log("🔐 Processing Google OAuth callback...", {
-          hasCode: !!code,
-          callbackUrl,
-        });
-
-        if (errorParam) {
-          setError(`Google authentication failed: ${errorParam}`);
-          showAuthErrorToast(`Authentication failed: ${errorParam}`);
-          setTimeout(() => router.push("/login"), 2000);
-          return;
-        }
 
         showLoadingToast("Completing Google sign-in...");
 
@@ -140,30 +98,17 @@ export default function GoogleCallbackPage() {
           return;
         }
 
-        // Success!
-        console.log("✅ Google OAuth successful, redirecting to:", callbackUrl);
         showAuthSuccessToast("Successfully signed in with Google!");
-
         await new Promise((resolve) => setTimeout(resolve, 300));
         router.push(callbackUrl);
       } finally {
-        if (lockAcquired) {
-          releaseGlobalLock();
-          lockAcquired = false;
-        }
+        releaseGlobalLock();
       }
     };
 
     handleCallback();
-
-    return () => {
-      if (lockAcquired) {
-        releaseGlobalLock();
-        lockAcquired = false;
-      }
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
   if (error) {
     return (
