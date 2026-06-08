@@ -10,7 +10,7 @@ import { getCallbackUrl } from "@/lib/auth/redirects";
 import { setCredentials } from "@/redux/auth/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,

@@ -50,6 +50,7 @@
     "beasties": "^0.3.5",
     "critters": "^0.0.25",
     "lucide-react": "^0.542.0",
+    "motion": "^12.40.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-window": "^1.8.11",
