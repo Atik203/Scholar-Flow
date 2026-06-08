@@ -76,8 +76,8 @@ class TokenService {
 
     // Store the new token
     await prisma.$executeRaw`
-      INSERT INTO "UserToken" (id, "userId", "token", "type", "expiresAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${userId}, ${hashedToken}, ${tokenType}::"TokenType", ${tokenData.expiresAt}, NOW(), NOW(), false)
+      INSERT INTO "UserToken" (id, "userId", "token", "type", "expiresAt", "createdAt")
+      VALUES (gen_random_uuid(), ${userId}, ${hashedToken}, ${tokenType}::"TokenType", ${tokenData.expiresAt}, NOW())
     `;
 
     return tokenData.token;
