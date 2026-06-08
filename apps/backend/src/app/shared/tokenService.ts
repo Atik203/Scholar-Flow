@@ -5,7 +5,7 @@ import prisma from "./prisma";
 
 export interface TokenPayload {
   userId: string;
-  type: "password-reset" | "email-verification";
+  type: "password-reset" | "email-verification" | "magic-link";
   email: string;
 }
 
@@ -64,12 +64,12 @@ class TokenService {
    */
   async createAndStoreToken(
     userId: string,
-    type: "password-reset" | "email-verification"
+    type: "password-reset" | "email-verification" | "magic-link"
   ): Promise<string> {
     const tokenData = this.createTokenData();
     const hashedToken = await this.hashToken(tokenData.token);
     const tokenType =
-      type === "password-reset" ? "PASSWORD_RESET" : "EMAIL_VERIFICATION";
+      type === "password-reset" ? "PASSWORD_RESET" : type === "magic-link" ? "MAGIC_LINK" : "EMAIL_VERIFICATION";
 
     // Invalidate any existing tokens of the same type for this user
     await this.invalidateExistingTokens(userId, type);
@@ -88,11 +88,11 @@ class TokenService {
    */
   async validateToken(
     plainToken: string,
-    type: "password-reset" | "email-verification"
-  ): Promise<{ valid: boolean; userId?: string; email?: string }> {
+    type: "password-reset" | "email-verification" | "magic-link"
+  ): Promise<{ valid: boolean; userId?: string; email?: string; tokenId?: string }> {
     try {
       const tokenType =
-        type === "password-reset" ? "PASSWORD_RESET" : "EMAIL_VERIFICATION";
+        type === "password-reset" ? "PASSWORD_RESET" : type === "magic-link" ? "MAGIC_LINK" : "EMAIL_VERIFICATION";
 
       // Find the token in the database
       const tokens = await prisma.$queryRaw<
@@ -130,6 +130,7 @@ class TokenService {
         valid: true,
         userId: tokenRecord.userId,
         email: tokenRecord.email,
+        tokenId: tokenRecord.id,
       };
     } catch (error) {
       console.error("Error validating token:", error);
@@ -141,16 +142,12 @@ class TokenService {
    * Mark a token as used
    */
   async markTokenAsUsed(
-    token: string,
-    type: "password-reset" | "email-verification"
+    tokenId: string
   ): Promise<void> {
-    const tokenType =
-      type === "password-reset" ? "PASSWORD_RESET" : "EMAIL_VERIFICATION";
-
     await prisma.$executeRaw`
       UPDATE "UserToken"
       SET used = true
-      WHERE token = ${token} AND type = ${tokenType}::"TokenType"
+      WHERE id = ${tokenId}
     `;
   }
 
@@ -159,10 +156,10 @@ class TokenService {
    */
   async invalidateExistingTokens(
     userId: string,
-    type: "password-reset" | "email-verification"
+    type: "password-reset" | "email-verification" | "magic-link"
   ): Promise<void> {
     const tokenType =
-      type === "password-reset" ? "PASSWORD_RESET" : "EMAIL_VERIFICATION";
+      type === "password-reset" ? "PASSWORD_RESET" : type === "magic-link" ? "MAGIC_LINK" : "EMAIL_VERIFICATION";
 
     await prisma.$executeRaw`
       UPDATE "UserToken"

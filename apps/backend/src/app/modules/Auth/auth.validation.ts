@@ -206,6 +206,15 @@ export const userFiltersSchema = z.object({
   isDeleted: z.boolean().optional().default(false),
 });
 
+// Magic link validation
+export const magicLinkSendSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+export const magicLinkVerifySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
 // Export all validation schemas
 export const authValidation = {
   signInRequest: signInSchema,
@@ -225,6 +234,8 @@ export const authValidation = {
   sendEmailVerification: sendEmailVerificationSchema,
   createUser: createUserSchema,
   updateUser: updateUserSchema,
+  magicLinkSend: magicLinkSendSchema,
+  magicLinkVerify: magicLinkVerifySchema,
   jwtPayload: jwtPayloadSchema,
   pagination: paginationSchema,
   userFilters: userFiltersSchema,

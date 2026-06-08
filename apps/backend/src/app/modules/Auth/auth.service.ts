@@ -674,7 +674,9 @@ class AuthService {
       `;
 
       // Mark token as used
-      await tokenService.markTokenAsUsed(token, "password-reset");
+      if (tokenValidation.tokenId) {
+        await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+      }
 
       return { message: "Password has been reset successfully" };
     } catch (error) {
@@ -708,7 +710,9 @@ class AuthService {
       `;
 
       // Mark token as used
-      await tokenService.markTokenAsUsed(token, "email-verification");
+      if (tokenValidation.tokenId) {
+        await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+      }
 
       return { message: "Email verified successfully" };
     } catch (error) {
@@ -757,6 +761,75 @@ class AuthService {
       console.error("Error sending email verification:", error);
       throw new ApiError(500, "Failed to send verification email");
     }
+  }
+  /**
+   * Send magic link email for passwordless login
+   */
+  async sendMagicLink(email: string): Promise<{ message: string }> {
+    try {
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name
+        FROM "User"
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
+
+      if (users.length === 0) {
+        return {
+          message:
+            "If an account with that email exists, a magic link has been sent.",
+        };
+      }
+
+      const user = users[0];
+
+      const magicToken = await tokenService.createAndStoreToken(
+        user.id,
+        "magic-link"
+      );
+
+      await emailService.sendMagicLinkEmail({
+        email: user.email,
+        name: user.name || "User",
+        token: magicToken,
+        type: "magic-link",
+      });
+
+      return {
+        message:
+          "If an account with that email exists, a magic link has been sent.",
+      };
+    } catch (error) {
+      console.error("Error sending magic link:", error);
+      throw new ApiError(500, "Failed to send magic link");
+    }
+  }
+
+  /**
+   * Verify magic link token and sign user in
+   */
+  async verifyMagicLink(token: string): Promise<any> {
+    const tokenValidation = await tokenService.validateToken(
+      token,
+      "magic-link"
+    );
+
+    if (!tokenValidation.valid || !tokenValidation.userId) {
+      throw new ApiError(400, "Invalid or expired magic link");
+    }
+
+    const user = await this.getUserById(tokenValidation.userId);
+    if (!user) {
+      throw new ApiError(401, "User not found");
+    }
+
+    if (tokenValidation.tokenId) {
+      await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
 
