@@ -11,7 +11,7 @@ import { signInWithCredentials, signInWithOAuth } from "@/lib/auth/authHelpers";
 import { getCallbackUrl } from "@/lib/auth/redirects";
 import { useAppDispatch } from "@/redux/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
