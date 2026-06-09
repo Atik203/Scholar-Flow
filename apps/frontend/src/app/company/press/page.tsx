@@ -8,7 +8,7 @@ import {
   Download,
   ExternalLink,
   FileText,
-  Image,
+  Image as ImageIcon,
   Mail,
   Newspaper,
   Rocket,
@@ -322,7 +322,7 @@ export default function CompanyPressPage() {
                       size="lg"
                       variant="outline"
                     >
-                      <Image className="h-5 w-5 mr-2" aria-hidden="true" />
+                      <ImageIcon className="h-5 w-5 mr-2" aria-hidden="true" />
                       Brand Guidelines
                     </Button>
                   </Link>

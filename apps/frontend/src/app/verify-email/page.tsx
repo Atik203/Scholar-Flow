@@ -12,7 +12,7 @@ import { ArrowRight, CheckCircle, Loader2, Mail, Send, XCircle } from "lucide-re
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function VerifyEmailPage() {
@@ -29,7 +29,7 @@ export default function VerifyEmailPage() {
 
   const token = searchParams.get("token");
 
-  const doVerify = async (tokenToVerify: string) => {
+  const doVerify = useCallback(async (tokenToVerify: string) => {
     try {
       setIsVerifying(true);
       setIsError(false);
@@ -49,13 +49,13 @@ export default function VerifyEmailPage() {
     } finally {
       setIsVerifying(false);
     }
-  };
+  }, [verifyEmail]);
 
   useEffect(() => {
     if (token) {
       doVerify(token);
     }
-  }, [token]);
+  }, [token, doVerify]);
 
   const handleManualVerify = () => {
     if (!manualToken.trim()) {

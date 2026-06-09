@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
+import config from "../../config";
 import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import tokenService from "../../shared/tokenService";
@@ -787,6 +788,17 @@ class AuthService {
         user.id,
         "magic-link"
       );
+
+      const magicLinkUrl = `${config.frontend_url}/auth/callback/magic-link?token=${magicToken}`;
+
+      // In non-production, log magic link to console so devs can test without email
+      if (config.env !== "production") {
+        console.log(
+          "\n📧 MAGIC LINK (dev):",
+          magicLinkUrl,
+          "\n"
+        );
+      }
 
       await emailService.sendMagicLinkEmail({
         email: user.email,

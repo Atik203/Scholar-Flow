@@ -4,6 +4,7 @@ import { FloatingInput } from "@/components/customUI/form/FloatingInput";
 import { useUpdateOnboardingMutation } from "@/redux/auth/authApi";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,7 +12,6 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  Lightbulb,
   Pause,
   Play,
   PlayCircle,
@@ -19,94 +19,12 @@ import {
   Upload,
   Users,
   X,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-type OnboardingStep = "welcome" | "role" | "workspace" | "complete";
-
-interface RoleOption {
-  id: string;
-  name: string;
-  description: string;
-  features: string[];
-  icon: React.ElementType;
-  recommended?: boolean;
-}
-
-const roleOptions: RoleOption[] = [
-  {
-    id: "RESEARCHER",
-    name: "Researcher",
-    description: "Perfect for individual researchers getting started",
-    features: [
-      "Up to 10 papers per month",
-      "Basic AI summaries",
-      "Personal workspace",
-      "Community support",
-    ],
-    icon: BookOpen,
-  },
-  {
-    id: "PRO_RESEARCHER",
-    name: "Pro Researcher",
-    description: "For active researchers who need more power",
-    features: [
-      "Unlimited papers",
-      "Advanced AI insights",
-      "Team collaboration (5 members)",
-      "Priority support",
-      "Export capabilities",
-    ],
-    icon: Zap,
-    recommended: true,
-  },
-  {
-    id: "TEAM_LEAD",
-    name: "Team Lead",
-    description: "For research teams and lab managers",
-    features: [
-      "Everything in Pro",
-      "Unlimited team members",
-      "Team analytics",
-      "SSO integration",
-      "Dedicated account manager",
-    ],
-    icon: Users,
-  },
-];
-
-const roleSpecificTips: Record<string, { title: string; tips: string[] }> = {
-  RESEARCHER: {
-    title: "Tips for Individual Researchers",
-    tips: [
-      "Start by uploading your most important papers",
-      "Use tags to organize papers by topic or project",
-      "Try the AI summary feature to quickly understand new papers",
-      "Set up reading reminders to stay consistent",
-    ],
-  },
-  PRO_RESEARCHER: {
-    title: "Pro Features to Explore",
-    tips: [
-      "Connect with up to 5 collaborators in your workspace",
-      "Use advanced search to find papers by concept, not just keywords",
-      "Export your library to popular citation formats",
-      "Set up custom AI prompts for your research field",
-    ],
-  },
-  TEAM_LEAD: {
-    title: "Team Management Best Practices",
-    tips: [
-      "Create separate workspaces for different projects",
-      "Use team analytics to track research progress",
-      "Set up SSO for easy team member access",
-      "Assign paper review tasks to team members",
-    ],
-  },
-};
+type OnboardingStep = "welcome" | "workspace" | "complete";
 
 const videoTutorials = [
   {
@@ -150,11 +68,10 @@ const demoSteps = [
   { title: "Collaborate", description: "Share with your team", icon: Users },
 ];
 
-const steps: OnboardingStep[] = ["welcome", "role", "workspace", "complete"];
+const steps: OnboardingStep[] = ["welcome", "workspace", "complete"];
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>("welcome");
-  const [selectedRole, setSelectedRole] = useState<string>("");
   const [workspaceName, setWorkspaceName] = useState("");
   const [workspaceDescription, setWorkspaceDescription] = useState("");
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -175,7 +92,6 @@ export default function OnboardingPage() {
       try {
         const progress = JSON.parse(savedProgress);
         if (progress.step) setCurrentStep(progress.step);
-        if (progress.role) setSelectedRole(progress.role);
         if (progress.workspaceName) setWorkspaceName(progress.workspaceName);
         if (progress.workspaceDescription) setWorkspaceDescription(progress.workspaceDescription);
       } catch {
@@ -187,12 +103,11 @@ export default function OnboardingPage() {
   useEffect(() => {
     const progress = {
       step: currentStep,
-      role: selectedRole,
       workspaceName,
       workspaceDescription,
     };
     localStorage.setItem("scholarflow_onboarding", JSON.stringify(progress));
-  }, [currentStep, selectedRole, workspaceName, workspaceDescription]);
+  }, [currentStep, workspaceName, workspaceDescription]);
 
   const clearProgress = () => {
     localStorage.removeItem("scholarflow_onboarding");
@@ -216,7 +131,7 @@ export default function OnboardingPage() {
     try {
       await updateOnboarding({
         onboardingCompleted: true,
-        onboardingStep: 4,
+        onboardingStep: 3,
       }).unwrap();
       clearProgress();
       router.push("/dashboard");
@@ -224,10 +139,6 @@ export default function OnboardingPage() {
       clearProgress();
       router.push("/dashboard");
     }
-  };
-
-  const handleSkip = () => {
-    handleNext();
   };
 
   const handleVideoClick = (video: (typeof videoTutorials)[0]) => {
@@ -278,10 +189,12 @@ export default function OnboardingPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="relative aspect-video bg-black">
-                <img
+                <Image
                   src={selectedVideo.thumbnail}
                   alt={selectedVideo.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 768px"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Button
@@ -466,10 +379,12 @@ export default function OnboardingPage() {
                         onClick={() => handleVideoClick(video)}
                         className="group relative rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all"
                       >
-                        <img
+                        <Image
                           src={video.thumbnail}
                           alt={video.title}
-                          className="w-full h-20 object-cover group-hover:scale-105 transition-transform"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform"
+                          sizes="200px"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <PlayCircle className="h-8 w-8 text-white" />
@@ -480,123 +395,6 @@ export default function OnboardingPage() {
                       </button>
                     ))}
                   </div>
-                </div>
-              </motion.div>
-            )}
-
-            {currentStep === "role" && (
-              <motion.div
-                key="role"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-              >
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold tracking-tight mb-2">Choose your plan</h2>
-                  <p className="text-muted-foreground">Select the plan that best fits your research needs</p>
-                </div>
-
-                <div className="grid gap-4 mb-8">
-                  {roleOptions.map((role, index) => (
-                    <motion.div
-                      key={role.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setSelectedRole(role.id)}
-                        className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
-                          selectedRole === role.id
-                            ? "border-primary bg-primary/5 shadow-lg"
-                            : "border-border hover:border-primary/50 hover:bg-muted/50"
-                        }`}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              selectedRole === role.id
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
-                            }`}
-                          >
-                            <role.icon className="h-6 w-6" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold text-lg">{role.name}</h3>
-                              {role.recommended ? (
-                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                                  Recommended
-                                </span>
-                              ) : null}
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">{role.description}</p>
-                            <ul className="mt-3 grid grid-cols-2 gap-1">
-                              {role.features.map((feature) => (
-                                <li key={feature} className="flex items-center gap-2 text-sm">
-                                  <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                                  <span className="truncate">{feature}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div
-                            className={`h-6 w-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              selectedRole === role.id
-                                ? "border-primary bg-primary"
-                                : "border-muted-foreground"
-                            }`}
-                          >
-                            {selectedRole === role.id ? (
-                              <CheckCircle className="h-4 w-4 text-primary-foreground" />
-                            ) : null}
-                          </div>
-                        </div>
-                      </button>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <AnimatePresence>
-                  {selectedRole && roleSpecificTips[selectedRole] ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl"
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <Lightbulb className="h-4 w-4 text-primary" />
-                        <h4 className="font-medium text-sm">{roleSpecificTips[selectedRole].title}</h4>
-                      </div>
-                      <ul className="space-y-2">
-                        {roleSpecificTips[selectedRole].tips.map((tip, index) => (
-                          <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <CheckCircle className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                            {tip}
-                          </li>
-                        ))}
-                      </ul>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-
-                <div className="flex justify-between">
-                  <Button variant="ghost" onClick={handleBack}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-                  <Button
-                    size="lg"
-                    onClick={handleNext}
-                    disabled={!selectedRole}
-                    className="px-8 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
-                  >
-                    Continue
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
                 </div>
               </motion.div>
             )}
@@ -743,10 +541,12 @@ export default function OnboardingPage() {
                         onClick={() => handleVideoClick(video)}
                         className="group relative rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all text-left"
                       >
-                        <img
+                        <Image
                           src={video.thumbnail}
                           alt={video.title}
-                          className="w-full h-20 object-cover group-hover:scale-105 transition-transform"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform"
+                          sizes="200px"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <PlayCircle className="h-8 w-8 text-white" />
