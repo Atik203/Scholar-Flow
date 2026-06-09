@@ -8,9 +8,10 @@ export { Prisma, PrismaClient };
 const isDev = process.env.NODE_ENV !== "production";
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString =
+    process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL;
   if (!connectionString) {
-    throw new Error("DATABASE_URL is required for Prisma Client");
+    throw new Error("DATABASE_URL or DIRECT_DATABASE_URL is required");
   }
 
   const adapter = new PrismaPostgresAdapter({ connectionString });
