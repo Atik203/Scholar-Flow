@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../shared/prisma";
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
 import { aiService } from "../modules/AI/ai.service";

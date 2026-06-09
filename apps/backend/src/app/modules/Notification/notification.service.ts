@@ -1,4 +1,4 @@
-import { Prisma, NotificationType } from "@prisma/client";
+import { Prisma, NotificationType } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 
