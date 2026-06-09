@@ -19,6 +19,12 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    const commonOpts = {
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
+    };
+
     // Prefer explicit SMTP config if provided; fallback to Gmail app password
     if (
       config.smtp.host &&
@@ -33,6 +39,7 @@ class EmailService {
           user: config.smtp.user || config.emailSender.email,
           pass: config.smtp.password || config.emailSender.app_pass,
         },
+        ...commonOpts,
       });
     } else {
       this.transporter = nodemailer.createTransport({
@@ -41,6 +48,7 @@ class EmailService {
           user: config.emailSender.email,
           pass: config.emailSender.app_pass, // App-specific password
         },
+        ...commonOpts,
       });
     }
   }
