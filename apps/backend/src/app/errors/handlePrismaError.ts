@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../shared/prisma";
 import { TErrorSources, TGenericErrorResponse } from "../interfaces/error";
 
 const handlePrismaError = (

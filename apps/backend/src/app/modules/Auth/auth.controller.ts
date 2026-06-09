@@ -156,6 +156,8 @@ class AuthController {
             name: user.name,
             image: user.image,
             role: user.role,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
         },
       });
