@@ -1,5 +1,6 @@
 import type { TUser } from "../../types/user";
 import { apiSlice } from "../api/apiSlice";
+import { updateUser } from "./authSlice";
 
 export interface OAuthSignInRequest {
   profile: {
@@ -203,6 +204,21 @@ export const authApi = apiSlice.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.success && data.data) {
+            dispatch(
+              updateUser({
+                onboardingCompleted: data.data.onboardingCompleted,
+                onboardingStep: data.data.onboardingStep,
+              })
+            );
+          }
+        } catch {
+          // Mutation failed, nothing to update
+        }
+      },
     }),
   }),
 });
