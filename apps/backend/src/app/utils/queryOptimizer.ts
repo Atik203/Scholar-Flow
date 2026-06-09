@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../shared/prisma";
 
 /**
  * Query performance analyzer using EXPLAIN ANALYZE

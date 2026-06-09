@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../shared/prisma";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import config from "../../config";
