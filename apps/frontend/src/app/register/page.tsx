@@ -331,8 +331,10 @@ export default function RegisterPage() {
           user: result.data.user,
           accessToken: result.data.accessToken,
         }));
-        const callbackUrl = getCallbackUrl(searchParams);
-        router.push(callbackUrl || "/dashboard");
+        const onboardRedirect = result.data.user.onboardingCompleted
+          ? (getCallbackUrl(searchParams) || "/dashboard")
+          : "/onboarding";
+        router.push(onboardRedirect);
       } else {
         const signInResult = await signInWithCredentials(
           data.email,

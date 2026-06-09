@@ -2,6 +2,7 @@
 
 import { getRoleDashboardBasePath } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
+import { useOnboardingGuard } from "@/hooks/useAuthGuard";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -9,6 +10,8 @@ export default function DashboardIndex() {
   const router = useRouter();
   const pathname = usePathname();
   const { session, status } = useAuth();
+
+  useOnboardingGuard();
 
   useEffect(() => {
     if (status !== "unauthenticated") {
