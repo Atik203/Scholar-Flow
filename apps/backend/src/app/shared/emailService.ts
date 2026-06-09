@@ -12,13 +12,19 @@ interface TokenEmailData {
   email: string;
   name: string;
   token: string;
-  type: "password-reset" | "email-verification";
+  type: "password-reset" | "email-verification" | "magic-link";
 }
 
 class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    const commonOpts = {
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
+    };
+
     // Prefer explicit SMTP config if provided; fallback to Gmail app password
     if (
       config.smtp.host &&
@@ -33,6 +39,7 @@ class EmailService {
           user: config.smtp.user || config.emailSender.email,
           pass: config.smtp.password || config.emailSender.app_pass,
         },
+        ...commonOpts,
       });
     } else {
       this.transporter = nodemailer.createTransport({
@@ -41,6 +48,7 @@ class EmailService {
           user: config.emailSender.email,
           pass: config.emailSender.app_pass, // App-specific password
         },
+        ...commonOpts,
       });
     }
   }
@@ -366,6 +374,55 @@ class EmailService {
     await this.sendEmail({
       to: data.recipientEmail,
       subject: `${data.senderName} shared "${data.paperTitle}" with you - ScholarFlow`,
+      html,
+    });
+  }
+
+  /**
+   * Send magic link email for passwordless login
+   */
+  async sendMagicLinkEmail(data: TokenEmailData): Promise<void> {
+    const magicLinkUrl = `${config.frontend_url}/auth/callback/magic-link?token=${data.token}`;
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Sign in to ScholarFlow</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; padding: 20px; text-align: center; }
+            .content { padding: 20px; background: #f9fafb; }
+            .button { display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; font-weight: 600; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Sign in to ScholarFlow</h1>
+            </div>
+            <div class="content">
+              <p>Hello ${data.name},</p>
+              <p>Click the button below to sign in to your ScholarFlow account instantly.</p>
+              <a href="${magicLinkUrl}" class="button" role="button" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;margin:20px 0;font-weight:600;">Sign in to ScholarFlow</a>
+              <p>This link will expire in 15 minutes for security reasons.</p>
+              <p>If you didn't request this magic link, please ignore this email. Your account is safe.</p>
+              <p>Best regards,<br>The ScholarFlow Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: data.email,
+      subject: "Your sign-in link - ScholarFlow",
       html,
     });
   }

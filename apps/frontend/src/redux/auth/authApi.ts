@@ -1,5 +1,6 @@
 import type { TUser } from "../../types/user";
 import { apiSlice } from "../api/apiSlice";
+import { updateUser } from "./authSlice";
 
 export interface OAuthSignInRequest {
   profile: {
@@ -64,6 +65,14 @@ export interface SendVerificationRequest {
 export interface AuthMessageResponse {
   success: boolean;
   message: string;
+  data?: {
+    oauthOnly?: boolean;
+  };
+}
+
+export interface UpdateOnboardingRequest {
+  onboardingCompleted?: boolean;
+  onboardingStep?: number;
 }
 
 export const authApi = apiSlice.injectEndpoints({
@@ -183,6 +192,34 @@ export const authApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+
+    // Update onboarding status
+    updateOnboarding: builder.mutation<
+      { success: boolean; message: string; data: TUser },
+      UpdateOnboardingRequest
+    >({
+      query: (data) => ({
+        url: "/user/onboarding",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          if (data.success && data.data) {
+            dispatch(
+              updateUser({
+                onboardingCompleted: data.data.onboardingCompleted,
+                onboardingStep: data.data.onboardingStep,
+              })
+            );
+          }
+        } catch {
+          // Mutation failed, nothing to update
+        }
+      },
+    }),
   }),
 });
 
@@ -197,4 +234,5 @@ export const {
   useResetPasswordMutation,
   useVerifyEmailMutation,
   useSendEmailVerificationMutation,
+  useUpdateOnboardingMutation,
 } = authApi;

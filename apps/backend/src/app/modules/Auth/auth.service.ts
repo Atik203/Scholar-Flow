@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
+import config from "../../config";
 import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import tokenService from "../../shared/tokenService";
@@ -119,7 +120,7 @@ class AuthService {
     try {
       // Find user by email using $queryRaw for better performance
       const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name, image, password, role
+        SELECT id, email, name, image, password, role, "onboardingCompleted", "onboardingStep"
         FROM "User"
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
@@ -207,7 +208,7 @@ class AuthService {
       // Return the created user data using $queryRaw
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", institution, 
-               "fieldOfStudy", image, role, "createdAt"
+               "fieldOfStudy", image, role, "createdAt", "onboardingCompleted", "onboardingStep"
         FROM "User"
         WHERE id = ${userId}
         LIMIT 1
@@ -387,7 +388,8 @@ class AuthService {
     try {
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", image, role, password, 
-               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted",
+               "onboardingCompleted", "onboardingStep"
         FROM "User" 
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
@@ -403,7 +405,8 @@ class AuthService {
     try {
       const users = await prisma.$queryRaw<any[]>`
         SELECT id, email, name, "firstName", "lastName", image, role, password,
-               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted"
+               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted",
+               "onboardingCompleted", "onboardingStep"
         FROM "User" 
         WHERE id = ${id} AND "isDeleted" = false
         LIMIT 1
@@ -599,16 +602,14 @@ class AuthService {
    */
   async initiateForgotPassword(email: string) {
     try {
-      // Find user by email using $queryRaw
       const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name
+        SELECT id, email, name, password
         FROM "User"
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
       `;
 
       if (users.length === 0) {
-        // Don't reveal if user exists or not for security
         return {
           message:
             "If an account with that email exists, a password reset link has been sent.",
@@ -617,13 +618,19 @@ class AuthService {
 
       const user = users[0];
 
-      // Generate and store password reset token
+      if (!user.password) {
+        return {
+          message:
+            "This account uses OAuth (Google/GitHub) login. Please sign in with your OAuth provider instead of resetting a password.",
+          oauthOnly: true,
+        };
+      }
+
       const resetToken = await tokenService.createAndStoreToken(
         user.id,
         "password-reset"
       );
 
-      // Send password reset email
       await emailService.sendPasswordResetEmail({
         email: user.email,
         name: user.name || "User",
@@ -668,7 +675,9 @@ class AuthService {
       `;
 
       // Mark token as used
-      await tokenService.markTokenAsUsed(token, "password-reset");
+      if (tokenValidation.tokenId) {
+        await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+      }
 
       return { message: "Password has been reset successfully" };
     } catch (error) {
@@ -702,7 +711,9 @@ class AuthService {
       `;
 
       // Mark token as used
-      await tokenService.markTokenAsUsed(token, "email-verification");
+      if (tokenValidation.tokenId) {
+        await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+      }
 
       return { message: "Email verified successfully" };
     } catch (error) {
@@ -751,6 +762,86 @@ class AuthService {
       console.error("Error sending email verification:", error);
       throw new ApiError(500, "Failed to send verification email");
     }
+  }
+  /**
+   * Send magic link email for passwordless login
+   */
+  async sendMagicLink(email: string): Promise<{ message: string }> {
+    try {
+      const users = await prisma.$queryRaw<any[]>`
+        SELECT id, email, name
+        FROM "User"
+        WHERE email = ${email} AND "isDeleted" = false
+        LIMIT 1
+      `;
+
+      if (users.length === 0) {
+        return {
+          message:
+            "If an account with that email exists, a magic link has been sent.",
+        };
+      }
+
+      const user = users[0];
+
+      const magicToken = await tokenService.createAndStoreToken(
+        user.id,
+        "magic-link"
+      );
+
+      const magicLinkUrl = `${config.frontend_url}/auth/callback/magic-link?token=${magicToken}`;
+
+      // In non-production, log magic link to console so devs can test without email
+      if (config.env !== "production") {
+        console.log(
+          "\n📧 MAGIC LINK (dev):",
+          magicLinkUrl,
+          "\n"
+        );
+      }
+
+      await emailService.sendMagicLinkEmail({
+        email: user.email,
+        name: user.name || "User",
+        token: magicToken,
+        type: "magic-link",
+      });
+
+      return {
+        message:
+          "If an account with that email exists, a magic link has been sent.",
+      };
+    } catch (error) {
+      console.error("Error sending magic link:", error);
+      throw new ApiError(500, "Failed to send magic link");
+    }
+  }
+
+  /**
+   * Verify magic link token and sign user in
+   */
+  async verifyMagicLink(token: string): Promise<any> {
+    const tokenValidation = await tokenService.validateToken(
+      token,
+      "magic-link"
+    );
+
+    if (!tokenValidation.valid || !tokenValidation.userId) {
+      throw new ApiError(400, "Invalid or expired magic link");
+    }
+
+    const user = await this.getUserById(tokenValidation.userId);
+    if (!user) {
+      throw new ApiError(401, "User not found");
+    }
+
+    if (tokenValidation.tokenId) {
+      await tokenService.markTokenAsUsed(tokenValidation.tokenId);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
 

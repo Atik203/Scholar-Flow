@@ -58,6 +58,8 @@ class AuthController {
             name: user.name,
             image: user.image,
             role: user.role,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
           accessToken,
         },
@@ -124,6 +126,8 @@ class AuthController {
             fieldOfStudy: user.fieldOfStudy,
             role: user.role,
             createdAt: user.createdAt,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
           accessToken,
         },
@@ -152,6 +156,8 @@ class AuthController {
             name: user.name,
             image: user.image,
             role: user.role,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
           },
         },
       });
@@ -397,6 +403,7 @@ class AuthController {
         statusCode: 200,
         success: true,
         message: result.message,
+        data: { oauthOnly: result.oauthOnly || false },
       });
     }
   );
@@ -433,6 +440,71 @@ class AuthController {
         statusCode: 200,
         success: true,
         message: result.message,
+      });
+    }
+  );
+
+  /**
+   * Send magic link email for passwordless login
+   * POST /api/auth/magic-link/send
+   */
+  sendMagicLink: AsyncRequestHandler = catchAsync(
+    async (req: Request, res: Response) => {
+      const { email } = req.body;
+
+      const result = await authService.sendMagicLink(email);
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: result.message,
+      });
+    }
+  );
+
+  /**
+   * Verify magic link token and sign user in
+   * POST /api/auth/magic-link/verify
+   */
+  verifyMagicLink: AsyncRequestHandler = catchAsync(
+    async (req: Request, res: Response) => {
+      const { token } = req.body;
+
+      const user = await authService.verifyMagicLink(token);
+
+      const jwtSecret = process.env.NEXTAUTH_SECRET;
+      if (!jwtSecret) {
+        throw new AppError(500, "JWT secret not configured");
+      }
+
+      const accessToken = jwt.sign(
+        {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          image: user.image,
+        },
+        jwtSecret,
+        { expiresIn: "7d" }
+      );
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Signed in successfully",
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
+          },
+          accessToken,
+        },
       });
     }
   );

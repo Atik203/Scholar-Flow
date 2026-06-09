@@ -1,4 +1,4 @@
-import { AnnotationType } from "@prisma/client";
+import { AnnotationType } from "../../shared/prisma";
 import { z } from "zod";
 
 // Annotation anchor structure for PDF coordinates

@@ -8,34 +8,32 @@ import {
 import { completeOAuthSignIn } from "@/lib/auth/authHelpers";
 import { useAppDispatch } from "@/redux/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const GLOBAL_LOCK_STORAGE_KEY = "__sf_github_oauth_processing__";
-const GLOBAL_LOCK_WINDOW_PROP = "__sfGithubOAuthProcessing";
+const LOCK_KEY = "__sf_github_oauth_processing__";
 
 const tryAcquireGlobalLock = (): boolean => {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
 
-  const globalWindow = window as typeof window & Record<string, boolean>;
-  const lockInWindow = globalWindow[GLOBAL_LOCK_WINDOW_PROP] === true;
-  const lockInSession =
-    sessionStorage.getItem(GLOBAL_LOCK_STORAGE_KEY) === "true";
-
-  if (lockInWindow || lockInSession) {
+  if (sessionStorage.getItem(LOCK_KEY) === "true") {
     return false;
   }
 
-  globalWindow[GLOBAL_LOCK_WINDOW_PROP] = true;
-  sessionStorage.setItem(GLOBAL_LOCK_STORAGE_KEY, "true");
+  const globalWindow = window as typeof window & Record<string, boolean>;
+  if (globalWindow.__sfGithubOAuthProcessing === true) {
+    return false;
+  }
+
+  globalWindow.__sfGithubOAuthProcessing = true;
+  sessionStorage.setItem(LOCK_KEY, "true");
   return true;
 };
 
 const releaseGlobalLock = (): void => {
   if (typeof window === "undefined") return;
-
   const globalWindow = window as typeof window & Record<string, boolean>;
-  delete globalWindow[GLOBAL_LOCK_WINDOW_PROP];
-  sessionStorage.removeItem(GLOBAL_LOCK_STORAGE_KEY);
+  delete globalWindow.__sfGithubOAuthProcessing;
+  sessionStorage.removeItem(LOCK_KEY);
 };
 
 export default function GitHubCallbackPage() {
@@ -45,25 +43,24 @@ export default function GitHubCallbackPage() {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const hasProcessedRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const redirectToLogin = useCallback(() => {
+    router.push("/login?error=oauth_failed");
+  }, [router]);
 
   useEffect(() => {
-    let lockAcquired = tryAcquireGlobalLock();
+    let lockAcquired = false;
 
-    if (!lockAcquired) {
-      console.log(
-        "🔒 [GLOBAL] GitHub OAuth already processing in another instance, skipping..."
-      );
+    if (hasProcessedRef.current) return;
+
+    if (!tryAcquireGlobalLock()) {
+      redirectToLogin();
       return;
     }
 
-    if (hasProcessedRef.current || isProcessing) {
-      console.log(
-        "🔒 [LOCAL] GitHub OAuth callback already processing, skipping..."
-      );
-      releaseGlobalLock();
-      lockAcquired = false;
-      return;
-    }
+    lockAcquired = true;
+    hasProcessedRef.current = true;
 
     const handleCallback = async () => {
       try {
@@ -71,34 +68,29 @@ export default function GitHubCallbackPage() {
         const errorParam = searchParams?.get("error");
         const state = searchParams?.get("state");
 
+        if (errorParam) {
+          setError(`GitHub authentication failed: ${errorParam}`);
+          showAuthErrorToast(`Authentication failed: ${errorParam}`);
+          timeoutRef.current = setTimeout(() => router.push("/login"), 2000);
+          return;
+        }
+
         if (!code) {
-          if (errorParam) {
-            setError(`GitHub authentication failed: ${errorParam}`);
-            showAuthErrorToast(`Authentication failed: ${errorParam}`);
-            setTimeout(() => router.push("/login"), 2000);
-          }
+          setError("No authorization code received from GitHub");
+          timeoutRef.current = setTimeout(() => router.push("/login"), 3000);
           return;
         }
 
         const processedCodeKey = `oauth_processed_${code.substring(0, 10)}`;
         const alreadyProcessed = localStorage.getItem(processedCodeKey);
-
         if (alreadyProcessed) {
-          console.log("🔒 OAuth code already processed, skipping...");
           const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
           router.push(callbackUrl);
           return;
         }
 
-        hasProcessedRef.current = true;
         setIsProcessing(true);
         localStorage.setItem(processedCodeKey, Date.now().toString());
-
-        console.log("✅ OAuth processing lock acquired:", {
-          windowLock: true,
-          ref: hasProcessedRef.current,
-          storageKey: processedCodeKey,
-        });
 
         const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
         Object.keys(localStorage).forEach((key) => {
@@ -110,41 +102,28 @@ export default function GitHubCallbackPage() {
           }
         });
 
-        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
-
-        console.log("🔐 Processing GitHub OAuth callback...", {
-          hasCode: !!code,
-          callbackUrl,
-        });
-
-        if (errorParam) {
-          setError(`GitHub authentication failed: ${errorParam}`);
-          showAuthErrorToast(`Authentication failed: ${errorParam}`);
-          setTimeout(() => router.push("/login"), 2000);
-          return;
-        }
-
         showLoadingToast("Completing GitHub sign-in...");
 
         const result = await completeOAuthSignIn("github", code, dispatch);
 
         if (!result.success) {
-          console.error("❌ GitHub OAuth failed:", result.error);
           setError(result.error || "GitHub authentication failed");
           showAuthErrorToast(result.error || "Authentication failed");
-          setTimeout(() => router.push("/login"), 2000);
+          timeoutRef.current = setTimeout(() => router.push("/login"), 2000);
           return;
         }
 
-        console.log("✅ GitHub OAuth successful, redirecting to:", callbackUrl);
         showAuthSuccessToast("Successfully signed in with GitHub!");
-
         await new Promise((resolve) => setTimeout(resolve, 300));
-        router.push(callbackUrl);
+
+        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
+        const redirectTo = result.user?.onboardingCompleted
+          ? callbackUrl
+          : "/onboarding";
+        router.push(redirectTo);
       } finally {
         if (lockAcquired) {
           releaseGlobalLock();
-          lockAcquired = false;
         }
       }
     };
@@ -152,13 +131,14 @@ export default function GitHubCallbackPage() {
     handleCallback();
 
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       if (lockAcquired) {
         releaseGlobalLock();
-        lockAcquired = false;
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only run once on mount
+  }, [router, dispatch, searchParams, redirectToLogin]);
 
   if (error) {
     return (

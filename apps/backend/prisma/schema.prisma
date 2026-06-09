@@ -1,14 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  engineType      = "binary"
-  previewFeatures = ["postgresqlExtensions", "typedSql"]
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
-  // extensions = [pgvector] // Temporarily disabled for password migration
+  provider = "postgresql"
 }
 
 enum Role {
@@ -120,6 +116,10 @@ model User {
   role                   Role      @default(RESEARCHER)
   emailVerified          DateTime? // When email was verified
   emailVerificationToken String? // For email verification
+
+  // Onboarding flow fields (Phase 2)
+  onboardingCompleted Boolean  @default(false)
+  onboardingStep      Int      @default(0)
 
   // Stripe subscription fields
   stripeCustomerId       String?   @unique
@@ -753,6 +753,7 @@ model UserToken {
 enum TokenType {
   PASSWORD_RESET
   EMAIL_VERIFICATION
+  MAGIC_LINK
 }
 
 // Invitation/member status for collection sharing
