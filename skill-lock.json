@@ -156,6 +156,20 @@
       "sourceType": "local",
       "skillPath": "skills/turborepo-workspace/SKILL.md",
       "computedHash": "d2f838128deab1e29d6b8acdbba530a9d3197cee00850a6051674d2fdc76a832"
+    },
+
+    "prisma-compute": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-compute/SKILL.md",
+      "computedHash": "7565c92a77d9f149af48eacc07003d068c9ae728543c7490131625c5639252e0"
+    },
+    "prisma-driver-adapter-implementation": {
+      "source": "prisma/skills",
+      "sourceType": "github",
+      "skillPath": "prisma-driver-adapter-implementation/SKILL.md",
+      "computedHash": "2e00b0d05f0da23796f6d44684e19219b74cf993f8a2df6e5b044812f375bbc6"
     }
+   
   }
 }

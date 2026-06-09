@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import config from "../config";
-
-const prisma = new PrismaClient();
+import prisma from "../shared/prisma";
 
 /**
  * @swagger
