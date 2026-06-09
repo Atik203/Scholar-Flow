@@ -20,21 +20,19 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
-  Fingerprint,
   Github,
   Globe,
   Loader2,
   Mail,
   MapPin,
   Shield,
-  Smartphone,
   Sparkles,
   Wand2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
@@ -76,7 +74,6 @@ export default function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [showRecentLogins, setShowRecentLogins] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
@@ -92,12 +89,6 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && "PublicKeyCredential" in window) {
-      setBiometricAvailable(true);
-    }
-  }, []);
 
   if (authLoading) {
     return (
@@ -181,15 +172,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleBiometricAuth = () => {
-    setIsLoading("biometric");
-    showLoadingToast("Authenticating...");
-    setTimeout(() => {
-      setIsLoading(null);
-      showAuthSuccessToast("Welcome back!");
-    }, 2000);
-  };
-
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -256,31 +238,6 @@ export default function LoginPage() {
                   </p>
                 </div>
 
-                {biometricAvailable && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="mb-4"
-                  >
-                    <Button
-                      onClick={handleBiometricAuth}
-                      disabled={isLoading !== null}
-                      variant="outline"
-                      className="w-full border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-all duration-300"
-                    >
-                      {isLoading === "biometric" ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : (
-                        <Fingerprint className="h-5 w-5 mr-2 text-primary" />
-                      )}
-                      Sign in with Biometrics
-                      <Smartphone className="h-4 w-4 ml-2 text-muted-foreground" />
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Use Face ID, Touch ID, or Windows Hello
-                    </p>
-                  </motion.div>
-                )}
               </div>
 
               <div className="flex rounded-lg border border-border p-1 mb-6">
