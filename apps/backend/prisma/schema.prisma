@@ -1,14 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  engineType      = "binary"
-  previewFeatures = ["postgresqlExtensions", "typedSql"]
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
-  // extensions = [pgvector] // Temporarily disabled for password migration
+  provider = "postgresql"
 }
 
 enum Role {

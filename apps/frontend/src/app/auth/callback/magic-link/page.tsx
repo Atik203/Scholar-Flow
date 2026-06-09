@@ -1,11 +1,11 @@
 "use client";
 import { showAuthErrorToast, showAuthSuccessToast } from "@/components/providers/ToastProvider";
-import { handleAuthRedirect } from "@/lib/auth/redirects";
 import { setCredentials } from "@/redux/auth/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
+import type { TUser } from "@/types/user";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
 
@@ -43,19 +43,18 @@ export default function MagicLinkCallbackPage() {
         }
 
         if (data.data?.user && data.data?.accessToken) {
+          const user = data.data.user as TUser;
+
           dispatch(setCredentials({
-            user: data.data.user,
+            user,
             accessToken: data.data.accessToken,
           }));
           showAuthSuccessToast("Signed in successfully!");
 
-          const redirectUrl = handleAuthRedirect(
-            true,
-            undefined,
-            "/login",
-            data.data.user.role
-          );
-          router.replace(redirectUrl);
+          const redirectTo = user.onboardingCompleted
+            ? "/dashboard"
+            : "/onboarding";
+          router.replace(redirectTo);
         }
       } catch {
         showAuthErrorToast("Failed to verify magic link");

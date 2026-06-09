@@ -91,7 +91,7 @@ export async function completeOAuthSignIn(
   provider: "google" | "github",
   code: string,
   dispatch: AppDispatch
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; user?: TUser }> {
   try {
     console.log(`🔐 Completing ${provider} OAuth with code...`);
 
@@ -136,7 +136,7 @@ export async function completeOAuthSignIn(
       })
     );
 
-    return { success: true };
+    return { success: true, user: data.data.user };
   } catch (error) {
     console.error(`${provider} OAuth error:`, error);
     return {
