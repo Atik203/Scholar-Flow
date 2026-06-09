@@ -8,35 +8,32 @@ import {
 import { completeOAuthSignIn } from "@/lib/auth/authHelpers";
 import { useAppDispatch } from "@/redux/hooks";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-// Module-level lock survives React StrictMode unmount/remount
-let _moduleLock = false;
+const LOCK_KEY = "__sf_google_oauth_processing__";
 
 const tryAcquireGlobalLock = (): boolean => {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
 
-  const globalWindow = window as typeof window & Record<string, boolean>;
-  const lockInWindow = globalWindow.__sfGoogleOAuthProcessing === true;
-  const lockInStorage = sessionStorage.getItem("__sf_google_oauth_processing__") === "true";
-
-  if (_moduleLock || lockInWindow || lockInStorage) {
+  if (sessionStorage.getItem(LOCK_KEY) === "true") {
     return false;
   }
 
-  _moduleLock = true;
+  const globalWindow = window as typeof window & Record<string, boolean>;
+  if (globalWindow.__sfGoogleOAuthProcessing === true) {
+    return false;
+  }
+
   globalWindow.__sfGoogleOAuthProcessing = true;
-  sessionStorage.setItem("__sf_google_oauth_processing__", "true");
+  sessionStorage.setItem(LOCK_KEY, "true");
   return true;
 };
 
 const releaseGlobalLock = (): void => {
-  _moduleLock = false;
   if (typeof window === "undefined") return;
-
   const globalWindow = window as typeof window & Record<string, boolean>;
   delete globalWindow.__sfGoogleOAuthProcessing;
-  sessionStorage.removeItem("__sf_google_oauth_processing__");
+  sessionStorage.removeItem(LOCK_KEY);
 };
 
 export default function GoogleCallbackPage() {
@@ -45,11 +42,25 @@ export default function GoogleCallbackPage() {
   const dispatch = useAppDispatch();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const hasProcessedRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const redirectToLogin = useCallback(() => {
+    router.push("/login?error=oauth_failed");
+  }, [router]);
 
   useEffect(() => {
+    let lockAcquired = false;
+
+    if (hasProcessedRef.current) return;
+
     if (!tryAcquireGlobalLock()) {
+      redirectToLogin();
       return;
     }
+
+    lockAcquired = true;
+    hasProcessedRef.current = true;
 
     const handleCallback = async () => {
       try {
@@ -57,20 +68,23 @@ export default function GoogleCallbackPage() {
         const errorParam = searchParams?.get("error");
         const state = searchParams?.get("state");
 
-        if (!code) {
-          if (errorParam) {
-            setError(`Google authentication failed: ${errorParam}`);
-            showAuthErrorToast(`Authentication failed: ${errorParam}`);
-            setTimeout(() => router.push("/login"), 2000);
-          }
+        if (errorParam) {
+          setError(`Google authentication failed: ${errorParam}`);
+          showAuthErrorToast(`Authentication failed: ${errorParam}`);
+          timeoutRef.current = setTimeout(() => router.push("/login"), 2000);
           return;
         }
 
-        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
+        if (!code) {
+          setError("No authorization code received from Google");
+          timeoutRef.current = setTimeout(() => router.push("/login"), 3000);
+          return;
+        }
 
-        // Deduplicate: if this code was already processed, skip
         const processedCodeKey = `oauth_processed_${code.substring(0, 10)}`;
-        if (localStorage.getItem(processedCodeKey)) {
+        const alreadyProcessed = localStorage.getItem(processedCodeKey);
+        if (alreadyProcessed) {
+          const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
           router.push(callbackUrl);
           return;
         }
@@ -78,11 +92,13 @@ export default function GoogleCallbackPage() {
         setIsProcessing(true);
         localStorage.setItem(processedCodeKey, Date.now().toString());
 
-        // Clean up old processed codes (older than 5 minutes)
         const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
         Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith("oauth_processed_") && parseInt(localStorage.getItem(key) || "0") < fiveMinutesAgo) {
-            localStorage.removeItem(key);
+          if (key.startsWith("oauth_processed_")) {
+            const timestamp = parseInt(localStorage.getItem(key) || "0");
+            if (timestamp < fiveMinutesAgo) {
+              localStorage.removeItem(key);
+            }
           }
         });
 
@@ -91,24 +107,38 @@ export default function GoogleCallbackPage() {
         const result = await completeOAuthSignIn("google", code, dispatch);
 
         if (!result.success) {
-          console.error("❌ Google OAuth failed:", result.error);
           setError(result.error || "Google authentication failed");
           showAuthErrorToast(result.error || "Authentication failed");
-          setTimeout(() => router.push("/login"), 2000);
+          timeoutRef.current = setTimeout(() => router.push("/login"), 2000);
           return;
         }
 
         showAuthSuccessToast("Successfully signed in with Google!");
         await new Promise((resolve) => setTimeout(resolve, 300));
-        router.push(callbackUrl);
+
+        const callbackUrl = state ? decodeURIComponent(state) : "/dashboard";
+        const redirectTo = result.user?.onboardingCompleted
+          ? callbackUrl
+          : "/onboarding";
+        router.push(redirectTo);
       } finally {
-        releaseGlobalLock();
+        if (lockAcquired) {
+          releaseGlobalLock();
+        }
       }
     };
 
     handleCallback();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      if (lockAcquired) {
+        releaseGlobalLock();
+      }
+    };
+  }, [router, dispatch, searchParams, redirectToLogin]);
 
   if (error) {
     return (
