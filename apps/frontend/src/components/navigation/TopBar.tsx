@@ -20,7 +20,7 @@ const TopBar: React.FC = () => {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <Link
-          href="/profile"
+          href="/dashboard/profile"
           className="text-sm underline-offset-2 hover:underline"
         >
           Profile

@@ -62,11 +62,9 @@ export function validateCallbackUrl(
         "/dashboard/pro-researcher",
         "/dashboard/team-lead",
         "/dashboard/admin",
-        "/profile",
         "/papers",
         "/collections",
         "/collaborate",
-        "/settings",
       ];
 
       const isAllowed = allowedPaths.some(
@@ -179,11 +177,9 @@ export function getSmartRedirectUrl(
     "/dashboard/pro-researcher",
     "/dashboard/team-lead",
     "/dashboard/admin",
-    "/profile",
     "/papers",
     "/collections",
     "/collaborate",
-    "/settings",
   ];
   const isProtectedRoute = protectedRoutes.some(
     (route) => currentPath === route || currentPath.startsWith(route + "/")
