@@ -381,6 +381,7 @@ model Annotation {
   @@index([paperId, isDeleted, createdAt]) // For paper annotations sorted by date
   @@index([userId, isDeleted]) // For user's annotations
   @@index([parentId, isDeleted]) // For annotation threads
+  @@index([userId, paperId]) // For user's annotations on a specific paper
 }
 
 model AnnotationVersion {
@@ -781,6 +782,7 @@ model ResearchNote {
 
   @@index([userId, isDeleted, updatedAt]) // For user's notes sorted by update
   @@index([paperId, isDeleted]) // For paper-specific notes
+  @@index([paperId, userId]) // For notes on a paper filtered by user
   @@index([tags]) // For tag-based searches
 }
 
@@ -806,6 +808,7 @@ model CitationExport {
   @@index([userId, exportedAt]) // For user's export history
   @@index([paperId, format]) // For paper-specific exports
   @@index([collectionId, format]) // For collection exports
+  @@index([userId, isDeleted]) // For deletion-filtered user export queries
 }
 
 enum CitationFormat {
@@ -847,6 +850,7 @@ model DiscussionThread {
   @@index([userId, isDeleted]) // For user's discussions
   @@index([isResolved, isDeleted]) // For resolved/unresolved filtering
   @@index([isPinned, isDeleted]) // For pinned discussions
+  @@index([isPinned, createdAt(sort: Desc)]) // For pinned threads sorted by date
 }
 
 model DiscussionMessage {
@@ -896,6 +900,7 @@ model ActivityLogEntry {
   @@index([entity, entityId, createdAt]) // For entity-specific activity
   @@index([action, createdAt]) // For action-based filtering
   @@index([severity, createdAt]) // For severity-based filtering
+  @@index([userId, severity]) // For dashboard filtering by user + severity
 }
 
 enum ActivitySeverity {
@@ -955,6 +960,7 @@ model NewsletterSubscriber {
   isDeleted    Boolean  @default(false)
 
   @@index([isActive])
+  @@index([createdAt(sort: Desc)]) // For admin listing sorted by subscription date
 }
 
 model ContactSubmission {
@@ -969,6 +975,7 @@ model ContactSubmission {
   isDeleted Boolean                 @default(false)
 
   @@index([status, createdAt])
+  @@index([createdAt(sort: Desc)]) // For admin listing sorted by submission date
 }
 
 model PageContent {
