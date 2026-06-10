@@ -100,281 +100,86 @@ export class AnnotationService {
   }
 
   /**
-   * Get annotations for a paper using $queryRaw
-   * Source: Optimized annotation retrieval with filtering
+   * Get annotations for a paper using standard Prisma client with pagination
    */
   static async getPaperAnnotations(query: GetAnnotationsQuery) {
     try {
-      // Build base query based on filters
-      if (query.page !== undefined && query.type) {
-        // Filter by both page and type
-        const annotations = await prisma.$queryRaw<any[]>`
-          SELECT 
-            a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
-            a."parentId", a."createdAt", a."updatedAt",
-            json_build_object(
-              'id', u.id,
-              'name', u.name,
-              'email', u.email,
-              'image', u.image
-            ) as user,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', child_a.id,
-                    'text', child_a.text,
-                    'createdAt', child_a."createdAt",
-                    'updatedAt', child_a."updatedAt",
-                    'user', json_build_object(
-                      'id', child_u.id,
-                      'name', child_u.name,
-                      'email', child_u.email,
-                      'image', child_u.image
-                    )
-                  ) ORDER BY child_a."createdAt" ASC
-                )
-                FROM "Annotation" child_a
-                LEFT JOIN "User" child_u ON child_a."userId" = child_u.id
-                WHERE child_a."parentId" = a.id AND child_a."isDeleted" = false
-              ),
-              '[]'::json
-            ) as children,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', av.id,
-                    'version', av.version,
-                    'text', av.text,
-                    'timestamp', av.timestamp,
-                    'changedBy', json_build_object(
-                      'id', av_u.id,
-                      'name', av_u.name,
-                      'email', av_u.email
-                    )
-                  ) ORDER BY av.timestamp DESC
-                )
-                FROM (
-                  SELECT * FROM "AnnotationVersion" 
-                  WHERE "annotationId" = a.id 
-                  ORDER BY timestamp DESC 
-                  LIMIT 5
-                ) av
-                LEFT JOIN "User" av_u ON av."changedById" = av_u.id
-              ),
-              '[]'::json
-            ) as versions
-          FROM "Annotation" a
-          LEFT JOIN "User" u ON a."userId" = u.id
-          WHERE a."paperId" = ${query.paperId} 
-            AND a."isDeleted" = false
-            AND (a.anchor->>'page')::int = ${query.page}
-            AND a.type = ${query.type}::"AnnotationType"
-          ORDER BY a."createdAt" ASC
-        `;
-        return annotations;
-      } else if (query.page !== undefined) {
-        // Filter by page only
-        const annotations = await prisma.$queryRaw<any[]>`
-          SELECT 
-            a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
-            a."parentId", a."createdAt", a."updatedAt",
-            json_build_object(
-              'id', u.id,
-              'name', u.name,
-              'email', u.email,
-              'image', u.image
-            ) as user,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', child_a.id,
-                    'text', child_a.text,
-                    'createdAt', child_a."createdAt",
-                    'updatedAt', child_a."updatedAt",
-                    'user', json_build_object(
-                      'id', child_u.id,
-                      'name', child_u.name,
-                      'email', child_u.email,
-                      'image', child_u.image
-                    )
-                  ) ORDER BY child_a."createdAt" ASC
-                )
-                FROM "Annotation" child_a
-                LEFT JOIN "User" child_u ON child_a."userId" = child_u.id
-                WHERE child_a."parentId" = a.id AND child_a."isDeleted" = false
-              ),
-              '[]'::json
-            ) as children,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', av.id,
-                    'version', av.version,
-                    'text', av.text,
-                    'timestamp', av.timestamp,
-                    'changedBy', json_build_object(
-                      'id', av_u.id,
-                      'name', av_u.name,
-                      'email', av_u.email
-                    )
-                  ) ORDER BY av.timestamp DESC
-                )
-                FROM (
-                  SELECT * FROM "AnnotationVersion" 
-                  WHERE "annotationId" = a.id 
-                  ORDER BY timestamp DESC 
-                  LIMIT 5
-                ) av
-                LEFT JOIN "User" av_u ON av."changedById" = av_u.id
-              ),
-              '[]'::json
-            ) as versions
-          FROM "Annotation" a
-          LEFT JOIN "User" u ON a."userId" = u.id
-          WHERE a."paperId" = ${query.paperId} 
-            AND a."isDeleted" = false
-            AND (a.anchor->>'page')::int = ${query.page}
-          ORDER BY a."createdAt" ASC
-        `;
-        return annotations;
-      } else if (query.type) {
-        // Filter by type only
-        const annotations = await prisma.$queryRaw<any[]>`
-          SELECT 
-            a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
-            a."parentId", a."createdAt", a."updatedAt",
-            json_build_object(
-              'id', u.id,
-              'name', u.name,
-              'email', u.email,
-              'image', u.image
-            ) as user,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', child_a.id,
-                    'text', child_a.text,
-                    'createdAt', child_a."createdAt",
-                    'updatedAt', child_a."updatedAt",
-                    'user', json_build_object(
-                      'id', child_u.id,
-                      'name', child_u.name,
-                      'email', child_u.email,
-                      'image', child_u.image
-                    )
-                  ) ORDER BY child_a."createdAt" ASC
-                )
-                FROM "Annotation" child_a
-                LEFT JOIN "User" child_u ON child_a."userId" = child_u.id
-                WHERE child_a."parentId" = a.id AND child_a."isDeleted" = false
-              ),
-              '[]'::json
-            ) as children,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', av.id,
-                    'version', av.version,
-                    'text', av.text,
-                    'timestamp', av.timestamp,
-                    'changedBy', json_build_object(
-                      'id', av_u.id,
-                      'name', av_u.name,
-                      'email', av_u.email
-                    )
-                  ) ORDER BY av.timestamp DESC
-                )
-                FROM (
-                  SELECT * FROM "AnnotationVersion" 
-                  WHERE "annotationId" = a.id 
-                  ORDER BY timestamp DESC 
-                  LIMIT 5
-                ) av
-                LEFT JOIN "User" av_u ON av."changedById" = av_u.id
-              ),
-              '[]'::json
-            ) as versions
-          FROM "Annotation" a
-          LEFT JOIN "User" u ON a."userId" = u.id
-          WHERE a."paperId" = ${query.paperId} 
-            AND a."isDeleted" = false
-            AND a.type = ${query.type}::"AnnotationType"
-          ORDER BY a."createdAt" ASC
-        `;
-        return annotations;
-      } else {
-        // No filters - return all annotations for the paper
-        const annotations = await prisma.$queryRaw<any[]>`
-          SELECT 
-            a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
-            a."parentId", a."createdAt", a."updatedAt",
-            json_build_object(
-              'id', u.id,
-              'name', u.name,
-              'email', u.email,
-              'image', u.image
-            ) as user,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', child_a.id,
-                    'text', child_a.text,
-                    'createdAt', child_a."createdAt",
-                    'updatedAt', child_a."updatedAt",
-                    'user', json_build_object(
-                      'id', child_u.id,
-                      'name', child_u.name,
-                      'email', child_u.email,
-                      'image', child_u.image
-                    )
-                  ) ORDER BY child_a."createdAt" ASC
-                )
-                FROM "Annotation" child_a
-                LEFT JOIN "User" child_u ON child_a."userId" = child_u.id
-                WHERE child_a."parentId" = a.id AND child_a."isDeleted" = false
-              ),
-              '[]'::json
-            ) as children,
-            COALESCE(
-              (
-                SELECT json_agg(
-                  json_build_object(
-                    'id', av.id,
-                    'version', av.version,
-                    'text', av.text,
-                    'timestamp', av.timestamp,
-                    'changedBy', json_build_object(
-                      'id', av_u.id,
-                      'name', av_u.name,
-                      'email', av_u.email
-                    )
-                  ) ORDER BY av.timestamp DESC
-                )
-                FROM (
-                  SELECT * FROM "AnnotationVersion" 
-                  WHERE "annotationId" = a.id 
-                  ORDER BY timestamp DESC 
-                  LIMIT 5
-                ) av
-                LEFT JOIN "User" av_u ON av."changedById" = av_u.id
-              ),
-              '[]'::json
-            ) as versions
-          FROM "Annotation" a
-          LEFT JOIN "User" u ON a."userId" = u.id
-          WHERE a."paperId" = ${query.paperId} 
-            AND a."isDeleted" = false
-          ORDER BY a."createdAt" ASC
-        `;
-        return annotations;
+      const { paperId, page: pageFilter, type, limit = 50, pageNum = 1 } = query;
+      const skip = (pageNum - 1) * limit;
+
+      const where: Record<string, unknown> = {
+        paperId,
+        isDeleted: false,
+      };
+
+      // Filter by PDF page number stored in JSONB anchor
+      if (pageFilter !== undefined) {
+        where.anchor = { path: ['page'], equals: pageFilter };
       }
+      if (type) {
+        where.type = type;
+      }
+
+      const [annotations, total] = await Promise.all([
+        prisma.annotation.findMany({
+          where,
+          select: {
+            id: true,
+            paperId: true,
+            userId: true,
+            type: true,
+            anchor: true,
+            text: true,
+            version: true,
+            parentId: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+              select: { id: true, name: true, email: true, image: true },
+            },
+            children: {
+              where: { isDeleted: false },
+              orderBy: { createdAt: 'asc' },
+              select: {
+                id: true,
+                text: true,
+                createdAt: true,
+                updatedAt: true,
+                user: {
+                  select: { id: true, name: true, email: true, image: true },
+                },
+              },
+            },
+            versions: {
+              orderBy: { timestamp: 'desc' },
+              take: 5,
+              select: {
+                id: true,
+                version: true,
+                text: true,
+                timestamp: true,
+                changedBy: {
+                  select: { id: true, name: true, email: true },
+                },
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+          take: Math.min(limit, 100),
+          skip,
+        }),
+        prisma.annotation.count({ where }),
+      ]);
+
+      return {
+        annotations,
+        pagination: {
+          page: pageNum,
+          limit,
+          total,
+          totalPage: Math.ceil(total / limit),
+        },
+      };
     } catch (error) {
       console.error("Error fetching paper annotations:", error);
       throw new ApiError(500, "Failed to fetch annotations");
