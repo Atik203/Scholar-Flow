@@ -94,7 +94,7 @@ export default function AuthDebugPage() {
   const checkCookies = () => {
     const cookies = document.cookie.split(";").map((c) => c.trim());
     const sessionCookie = cookies.find((c) =>
-      c.startsWith("next-auth.session-token")
+      c.startsWith("better-auth.session_token") || c.startsWith("sf_auth=1")
     );
     alert(
       sessionCookie
@@ -189,7 +189,7 @@ export default function AuthDebugPage() {
               onClick={testCredentialsLogin}
               disabled={isLoading || !testEmail || !testPassword}
             >
-              {isLoading ? "Testing..." : "Test NextAuth Credentials"}
+              {isLoading ? "Testing..." : "Test Credentials Login"}
             </Button>
             <Button
               variant="outline"
