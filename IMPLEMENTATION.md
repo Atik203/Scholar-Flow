@@ -156,8 +156,8 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ### 3.3 Core Pages
 - [ ] Rewrite `/dashboard/(app)/page.tsx` (dashboard home with stats cards, activity feed)
-- [ ] Rewrite `/profile/page.tsx` (new profile with figma-make design)
-- [ ] Rewrite `/settings/page.tsx` (new settings with figma-make design)
+- [x] Rewrite `/dashboard/profile/page.tsx` (new profile with figma-make design, standalone `/profile` removed)
+- [x] Rewrite `/dashboard/settings/page.tsx` (new settings with figma-make design, standalone `/settings` removed)
 - [ ] Create `/dashboard/(admin)/users/page.tsx` (admin user management)
 - [ ] Create `/dashboard/(admin)/subscriptions/page.tsx` (admin subscriptions)
 - [ ] Create `/dashboard/(admin)/system/page.tsx` (admin system health)
