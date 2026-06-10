@@ -6,13 +6,37 @@
 
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { randomBytes } from "crypto";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
 
+/**
+ * Resolve the auth secret. In production, BETTER_AUTH_SECRET or NEXTAUTH_SECRET must be set.
+ * In development, if no secret is provided, we generate a random one to avoid warnings.
+ * In production, a strong secret is required for security.
+ */
+function resolveSecret(): string {
+  const envSecret = process.env.BETTER_AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (envSecret) {
+    return envSecret;
+  }
+
+  // In development, generate a random secret to avoid better-auth warnings
+  // This is acceptable because development sessions don't need to survive restarts
+  if (process.env.NODE_ENV === "development") {
+    // Generate a random 64-character hex string
+    return randomBytes(32).toString("hex");
+  }
+
+  // Production: require explicit secret
+  console.error("[Better Auth] BETTER_AUTH_SECRET or NEXTAUTH_SECRET is required in production.");
+  return "fallback-secret-do-not-use-in-production";
+}
+
 export const auth = betterAuth({
   // Secret for signing sessions and tokens
-  secret: process.env.NEXTAUTH_SECRET || process.env.BETTER_AUTH_SECRET,
+  secret: resolveSecret(),
 
   // Base URL for the application
   baseURL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",

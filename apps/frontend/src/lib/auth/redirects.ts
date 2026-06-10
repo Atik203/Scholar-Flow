@@ -166,7 +166,7 @@ export function getSmartRedirectUrl(
     if (userRole) {
       return getRoleDashboardUrl(userRole);
     }
-    // Fallback to generic dashboard (middleware will redirect to role-specific)
+    // Fallback to generic dashboard (proxy.ts will redirect to role-specific)
     return "/dashboard";
   }
 
@@ -208,7 +208,7 @@ export function getGetStartedUrl(
     if (userRole) {
       return getRoleDashboardUrl(userRole);
     }
-    // Fallback to generic dashboard (middleware will redirect to role-specific)
+    // Fallback to generic dashboard (proxy.ts will redirect to role-specific)
     return "/dashboard";
   }
 
