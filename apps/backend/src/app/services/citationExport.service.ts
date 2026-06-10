@@ -60,12 +60,20 @@ export class CitationExportService {
               },
             ],
           },
-          include: {
+          select: {
             papers: {
-              include: {
+              select: {
                 paper: {
-                  include: {
-                    uploader: true,
+                  select: {
+                    id: true,
+                    title: true,
+                    abstract: true,
+                    metadata: true,
+                    doi: true,
+                    createdAt: true,
+                    uploader: {
+                      select: { name: true },
+                    },
                   },
                 },
               },
@@ -98,8 +106,16 @@ export class CitationExportService {
               },
             ],
           },
-          include: {
-            uploader: true,
+          select: {
+            id: true,
+            title: true,
+            abstract: true,
+            metadata: true,
+            doi: true,
+            createdAt: true,
+            uploader: {
+              select: { name: true },
+            },
           },
         });
 

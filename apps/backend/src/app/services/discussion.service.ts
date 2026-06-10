@@ -433,6 +433,7 @@ export class DiscussionService {
             where: {
               isDeleted: false
             },
+            take: 50,
             include: {
               user: {
                 select: {
@@ -447,6 +448,7 @@ export class DiscussionService {
                 where: {
                   isDeleted: false
                 },
+                take: 20,
                 include: {
                   user: {
                     select: {
