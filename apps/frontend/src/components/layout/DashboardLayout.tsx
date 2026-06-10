@@ -156,7 +156,7 @@ function UserMenu() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
-                    router.push("/dashboard/profile");
+                    router.push("/profile");
                   }}
                   className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150"
                 >
@@ -167,7 +167,7 @@ function UserMenu() {
                 <button
                   onClick={() => {
                     setIsOpen(false);
-                    router.push("/dashboard/settings");
+                    router.push("/settings");
                   }}
                   className="w-full px-3 py-2 text-left text-sm rounded-md hover:bg-accent dark:hover:bg-gray-700 flex items-center gap-2 cursor-pointer transition-colors duration-150"
                 >

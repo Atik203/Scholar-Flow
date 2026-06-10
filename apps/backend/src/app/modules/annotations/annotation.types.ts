@@ -110,6 +110,8 @@ export const getAnnotationsQuerySchema = z.object({
   page: z.coerce.number().min(1).optional(),
   type: z.nativeEnum(AnnotationType).optional(),
   includeReplies: z.coerce.boolean().optional(),
+  pageNum: z.coerce.number().min(1).optional().default(1),
+  limit: z.coerce.number().min(1).max(100).optional().default(50),
 });
 
 export type CreateAnnotationInput = z.infer<typeof createAnnotationSchema>;
