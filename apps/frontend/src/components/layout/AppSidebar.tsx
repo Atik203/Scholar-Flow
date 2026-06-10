@@ -32,6 +32,7 @@ import {
   TextCursor,
   TrendingUp,
   Upload,
+  User,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -87,7 +88,19 @@ const getQuickAccessItems = (userRole: string): ResolvedSidebarItem[] => {
       title: "Billing",
       icon: CreditCard,
       minRole: USER_ROLES.RESEARCHER,
-      href: "/dashboard/billing", // Billing usually direct without role prefix
+      href: "/dashboard/billing",
+    },
+    {
+      title: "Profile",
+      icon: User,
+      minRole: USER_ROLES.RESEARCHER,
+      href: "/dashboard/profile",
+    },
+    {
+      title: "Settings",
+      icon: Settings,
+      minRole: USER_ROLES.RESEARCHER,
+      href: "/dashboard/settings",
     },
   ].filter((item) => hasRoleAccess(userRole, item.minRole));
 };
