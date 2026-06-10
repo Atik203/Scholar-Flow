@@ -1,6 +1,6 @@
 /**
- * Simple AuthProvider that handles auth initialization
- * Replaces NextAuth SessionProvider with Redux-based session management
+ * AuthProvider that handles auth initialization
+ * Syncs better-auth session with Redux-based session management
  */
 
 "use client";
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      // Sync the middleware cookie with persisted Redux state on app startup.
+      // Sync the proxy cookie with persisted Redux state on app startup.
       // This handles the case where a user has an existing session (from localStorage)
       // but the sf_auth cookie hasn't been set yet (e.g., after a browser restart).
       if (isAuthenticated && accessToken) {
@@ -95,11 +95,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       previousRoleRef.current !== fetchedRole;
 
     if (hadRoleChange) {
-      console.log("[AuthProvider] User role changed:", {
-        from: previousRoleRef.current,
-        to: fetchedRole,
-      });
-
       // Force invalidate all cached data to reflect role changes
       dispatch(
         apiSlice.util.invalidateTags(["User", "Collection", "Workspace"])

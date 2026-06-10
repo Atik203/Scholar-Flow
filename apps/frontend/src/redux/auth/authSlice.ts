@@ -33,7 +33,7 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
       state.isLoading = false;
-      // Set lightweight cookie so Next.js middleware can detect auth
+      // Set lightweight cookie so Next.js proxy can detect auth
       setAuthCookie();
     },
     clearCredentials: (state) => {
@@ -41,7 +41,7 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.isAuthenticated = false;
       state.isLoading = false;
-      // Clear the middleware auth cookie
+      // Clear the proxy auth cookie
       clearAuthCookie();
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
