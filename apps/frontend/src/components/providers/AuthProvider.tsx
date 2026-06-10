@@ -63,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!hasInitialized.current) {
       hasInitialized.current = true;
-      // Sync the middleware cookie with persisted Redux state on app startup.
+      // Sync the proxy cookie with persisted Redux state on app startup.
       // This handles the case where a user has an existing session (from localStorage)
       // but the sf_auth cookie hasn't been set yet (e.g., after a browser restart).
       if (isAuthenticated && accessToken) {
