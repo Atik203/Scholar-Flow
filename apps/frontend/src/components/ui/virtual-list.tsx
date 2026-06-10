@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import * as React from "react";
-import { FixedSizeList, FixedSizeListProps } from "react-window";
+import { FixedSizeList, FixedSizeListProps, ListChildComponentProps } from "react-window";
 
 export interface VirtualListProps<T = any>
   extends Omit<FixedSizeListProps, "children" | "itemCount" | "itemSize"> {
@@ -66,13 +66,7 @@ export const VirtualList = React.forwardRef<FixedSizeList, VirtualListProps>(
       );
     }
 
-    const Row = ({
-      index,
-      style,
-    }: {
-      index: number;
-      style: React.CSSProperties;
-    }) => (
+    const Row = ({ index, style }: any) => (
       <div style={style} className={cn("px-4", className)}>
         {renderItem(items[index], index)}
       </div>
@@ -112,13 +106,7 @@ export const VirtualTable = React.forwardRef<
 >(({ items, columns, itemHeight = 48, className, height = 400, width, ...props }, ref) => {
   const totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
 
-  const Row = ({
-    index,
-    style,
-  }: {
-    index: number;
-    style: React.CSSProperties;
-  }) => (
+  const Row = ({ index, style }: any) => (
     <div style={style} className={cn("flex border-b border-border", className)}>
       {columns.map((column) => (
         <div
