@@ -9,8 +9,7 @@ const protectedRoutes = [
   "/dashboard/pro-researcher",
   "/dashboard/team-lead",
   "/dashboard/admin",
-  "/profile",
-  "/settings",
+
 ];
 
 // Define auth routes that should redirect to dashboard if user is already logged in
