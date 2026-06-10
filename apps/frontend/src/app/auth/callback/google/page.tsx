@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  dismissToast,
   showAuthErrorToast,
   showAuthSuccessToast,
   showLoadingToast,
@@ -102,9 +103,11 @@ export default function GoogleCallbackPage() {
           }
         });
 
-        showLoadingToast("Completing Google sign-in...");
+        const loadingToastId = showLoadingToast("Completing Google sign-in...");
 
         const result = await completeOAuthSignIn("google", code, dispatch);
+
+        dismissToast(loadingToastId);
 
         if (!result.success) {
           setError(result.error || "Google authentication failed");

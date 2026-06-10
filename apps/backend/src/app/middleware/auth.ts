@@ -51,8 +51,7 @@ export const authMiddleware = async (
       console.log("Auth Middleware - Token email:", decoded.email);
     }
 
-    // Get user from database using $queryRaw for optimized lookup
-    // Source: optimized authentication middleware user lookup
+    // Get user from database using standard Prisma client
     const userId = decoded.sub || decoded.id;
     const userEmail = decoded.email;
 
@@ -60,84 +59,57 @@ export const authMiddleware = async (
       throw new ApiError(401, "Invalid token: missing user identifier");
     }
 
-    let users: any[] = [];
+    let user: Record<string, unknown> | null = null;
 
     if (userId) {
-      users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, role, "isDeleted"
-        FROM "User"
-        WHERE id = ${userId} AND "isDeleted" = false
-        LIMIT 1
-      `;
+      user = await prisma.user.findFirst({
+        where: { id: userId, isDeleted: false },
+        select: { id: true, email: true, role: true, isDeleted: true },
+      });
       if (DEBUG_AUTH) {
         console.log(
-          "Auth Middleware - Lookup by id result count:",
-          users?.length || 0
+          "Auth Middleware - Lookup by id result:",
+          user ? "found" : "not found"
         );
       }
 
       // Fallback to email if id lookup failed but email is present in token
-      if ((!users || users.length === 0) && userEmail) {
+      if (!user && userEmail) {
         if (DEBUG_AUTH) {
           console.log("Auth Middleware - Fallback to email lookup:", userEmail);
         }
-        users = await prisma.$queryRaw<any[]>`
-          SELECT id, email, role, "isDeleted"
-          FROM "User"
-          WHERE email = ${userEmail} AND "isDeleted" = false
-          LIMIT 1
-        `;
+        user = await prisma.user.findFirst({
+          where: { email: userEmail, isDeleted: false },
+          select: { id: true, email: true, role: true, isDeleted: true },
+        });
         if (DEBUG_AUTH) {
           console.log(
-            "Auth Middleware - Lookup by email result count:",
-            users?.length || 0
-          );
-        }
-
-        // If still no match, try case-insensitive email lookup
-        if (!users || users.length === 0) {
-          if (DEBUG_AUTH) {
-            console.log(
-              "Auth Middleware - Trying case-insensitive email lookup"
-            );
-          }
-          users = await prisma.$queryRaw<any[]>`
-            SELECT id, email, role, "isDeleted"
-            FROM "User"
-            WHERE LOWER(email) = LOWER(${userEmail}) AND "isDeleted" = false
-            LIMIT 1
-          `;
-          console.log(
-            "Auth Middleware - Case-insensitive lookup result count:",
-            users?.length || 0
+            "Auth Middleware - Lookup by email result:",
+            user ? "found" : "not found"
           );
         }
       }
     } else if (userEmail) {
       console.log("Auth Middleware - Primary email lookup:", userEmail);
-      users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, role, "isDeleted"
-        FROM "User"
-        WHERE email = ${userEmail} AND "isDeleted" = false
-        LIMIT 1
-      `;
+      user = await prisma.user.findFirst({
+        where: { email: userEmail, isDeleted: false },
+        select: { id: true, email: true, role: true, isDeleted: true },
+      });
       console.log(
-        "Auth Middleware - Lookup by email result count:",
-        users?.length || 0
+        "Auth Middleware - Lookup by email result:",
+        user ? "found" : "not found"
       );
     }
 
-    const user = users[0];
-
-    if (!user || user.isDeleted) {
+    if (!user) {
       throw new ApiError(401, AUTH_ERROR_MESSAGES.USER_NOT_FOUND);
     }
 
     req.user = {
-      userId: user.id,
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      userId: user.id as string,
+      id: user.id as string,
+      email: user.email as string,
+      role: user.role as string,
     };
 
     next();
