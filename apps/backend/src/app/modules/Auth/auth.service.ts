@@ -403,15 +403,10 @@ class AuthService {
 
   async getUserById(id: string) {
     try {
-      const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name, "firstName", "lastName", image, role, password,
-               "emailVerified", institution, "fieldOfStudy", "createdAt", "updatedAt", "isDeleted",
-               "onboardingCompleted", "onboardingStep"
-        FROM "User" 
-        WHERE id = ${id} AND "isDeleted" = false
-        LIMIT 1
-      `;
-      return users[0] || null;
+      const user = await prisma.user.findFirst({
+        where: { id, isDeleted: false },
+      });
+      return user;
     } catch (error) {
       console.error("Error getting user by ID:", error);
       throw new ApiError(500, "Failed to get user by ID");

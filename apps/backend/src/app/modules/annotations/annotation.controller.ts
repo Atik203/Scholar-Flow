@@ -65,11 +65,11 @@ export const annotationController = {
       return;
     }
 
-    const annotations = await AnnotationService.getPaperAnnotations(
+    const result = await AnnotationService.getPaperAnnotations(
       parsed.data
     );
 
-    sendSuccessResponse(res, annotations, "Annotations retrieved successfully");
+    sendPaginatedResponse(res, result.annotations, result.pagination, "Annotations retrieved successfully");
   }),
 
   /**
