@@ -12,7 +12,7 @@ export interface ActivityLogFilters {
   startDate?: Date;
   endDate?: Date;
   limit?: number;
-  offset?: number;
+  cursor?: string;
 }
 
 export interface ActivityLogEntry {
@@ -194,11 +194,15 @@ export class ActivityLogService {
               }
             }
           },
-          orderBy: {
-            createdAt: 'desc'
-          },
+          orderBy: [
+            { createdAt: 'desc' },
+            { id: 'desc' },
+          ],
           take: filters.limit || 50,
-          skip: filters.offset || 0
+          ...(filters.cursor ? {
+            cursor: { id: filters.cursor },
+            skip: 1,
+          } : {}),
         }),
         prisma.activityLogEntry.count({ where })
       ]);
@@ -336,27 +340,24 @@ export class ActivityLogService {
         })
       ]);
 
-      // Calculate trends (activities per day)
+      // Calculate trends (activities per day) using a single query
+      const allEntriesInRange = await prisma.activityLogEntry.findMany({
+        where,
+        select: { createdAt: true },
+      });
+
       const trends: { [key: string]: number } = {};
       for (let i = 0; i < days; i++) {
         const date = new Date();
         date.setDate(date.getDate() - i);
-        const dayStart = new Date(date);
-        dayStart.setHours(0, 0, 0, 0);
-        const dayEnd = new Date(date);
-        dayEnd.setHours(23, 59, 59, 999);
-
-        const dayActivities = await prisma.activityLogEntry.count({
-          where: {
-            ...where,
-            createdAt: {
-              gte: dayStart,
-              lte: dayEnd
-            }
-          }
-        });
-
-        trends[date.toISOString().split('T')[0]] = dayActivities;
+        const dayKey = date.toISOString().split('T')[0];
+        trends[dayKey] = 0;
+      }
+      for (const entry of allEntriesInRange) {
+        const dayKey = entry.createdAt.toISOString().split('T')[0];
+        if (trends[dayKey] !== undefined) {
+          trends[dayKey]++;
+        }
       }
 
       return {
@@ -396,7 +397,7 @@ export class ActivityLogService {
       let hasAccess = false;
 
       switch (entity) {
-        case 'paper':
+        case 'paper': {
           const paper = await prisma.paper.findFirst({
             where: {
               id: entityId,
@@ -418,8 +419,9 @@ export class ActivityLogService {
           });
           hasAccess = !!paper;
           break;
+        }
 
-        case 'collection':
+        case 'collection': {
           const collection = await prisma.collection.findFirst({
             where: {
               id: entityId,
@@ -440,8 +442,9 @@ export class ActivityLogService {
           });
           hasAccess = !!collection;
           break;
+        }
 
-        case 'workspace':
+        case 'workspace': {
           const workspace = await prisma.workspace.findFirst({
             where: {
               id: entityId,
@@ -461,8 +464,9 @@ export class ActivityLogService {
           });
           hasAccess = !!workspace;
           break;
+        }
 
-        case 'discussion':
+        case 'discussion': {
           const discussion = await prisma.discussionThread.findFirst({
             where: {
               id: entityId,
@@ -477,6 +481,7 @@ export class ActivityLogService {
           });
           hasAccess = !!discussion;
           break;
+        }
 
         default:
           hasAccess = false;

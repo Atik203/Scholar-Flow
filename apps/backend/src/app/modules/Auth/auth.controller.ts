@@ -343,12 +343,13 @@ class AuthController {
   /**
    * Get current user profile
    * GET /api/auth/me
+   * Uses req.user from authMiddleware (no redundant JWT verify or DB lookup)
    */
   getCurrentUser: AsyncRequestHandler = catchAsync(
     async (req: Request, res: Response) => {
-      const authHeader = req.headers.authorization;
+      const authReq = req as AuthRequest;
 
-      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      if (!authReq.user) {
         sendResponse(res, {
           statusCode: 401,
           success: false,
@@ -357,35 +358,41 @@ class AuthController {
         return;
       }
 
-      const token = authHeader.substring(7);
-      const jwtSecret = process.env.NEXTAUTH_SECRET;
+      // Fetch full user profile from DB using the id already verified by middleware
+      const user = await authService.getUserById(authReq.user.id);
 
-      if (!jwtSecret) {
+      if (!user) {
         sendResponse(res, {
-          statusCode: 500,
+          statusCode: 404,
           success: false,
-          message: "JWT secret not configured",
+          message: AUTH_ERROR_MESSAGES.USER_NOT_FOUND,
         });
         return;
       }
 
-      try {
-        const decoded = jwt.verify(token, jwtSecret) as any;
-        const user = await authService.validateJWTToken(decoded.sub);
-
-        sendResponse(res, {
-          statusCode: 200,
-          success: true,
-          message: "User profile retrieved successfully",
-          data: { user },
-        });
-      } catch (error) {
-        sendResponse(res, {
-          statusCode: 401,
-          success: false,
-          message: AUTH_ERROR_MESSAGES.INVALID_TOKEN,
-        });
-      }
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "User profile retrieved successfully",
+        data: {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            image: user.image,
+            role: user.role,
+            institution: user.institution,
+            fieldOfStudy: user.fieldOfStudy,
+            emailVerified: user.emailVerified,
+            onboardingCompleted: user.onboardingCompleted,
+            onboardingStep: user.onboardingStep,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+        },
+      });
     }
   );
 
