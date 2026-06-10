@@ -1,7 +1,7 @@
 /**
  * Auth cookie helpers.
  * We use a lightweight `sf_auth` cookie (value = "1") solely to signal
- * to the Next.js middleware that the user is authenticated.
+ * to the Next.js proxy (proxy.ts) that the user is authenticated.
  * The actual access token lives in Redux-Persist (localStorage).
  */
 

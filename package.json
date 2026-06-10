@@ -46,6 +46,11 @@
     "yarn": ">=4.9.2"
   },
   "packageManager": "yarn@4.9.2",
+  "resolutions": {
+    "prosemirror-model": "^1.25.0",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.38.0"
+  },
   "dependencies": {
     "@prisma/client": "^7.8.0",
     "add": "^2.0.6",
@@ -56,8 +61,6 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-window": "^1.8.11",
-    "sanitize-html": "^2.17.0",
-    "tiptap-extension-resizable-image": "^2.0.0",
-    "tiptap-resizable-image": "^1.6.5"
+    "sanitize-html": "^2.17.0"
   }
 }
