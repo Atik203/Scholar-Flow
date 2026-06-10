@@ -1,6 +1,6 @@
 /**
- * Simple AuthProvider that handles auth initialization
- * Replaces NextAuth SessionProvider with Redux-based session management
+ * AuthProvider that handles auth initialization
+ * Syncs better-auth session with Redux-based session management
  */
 
 "use client";
@@ -95,11 +95,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       previousRoleRef.current !== fetchedRole;
 
     if (hadRoleChange) {
-      console.log("[AuthProvider] User role changed:", {
-        from: previousRoleRef.current,
-        to: fetchedRole,
-      });
-
       // Force invalidate all cached data to reflect role changes
       dispatch(
         apiSlice.util.invalidateTags(["User", "Collection", "Workspace"])

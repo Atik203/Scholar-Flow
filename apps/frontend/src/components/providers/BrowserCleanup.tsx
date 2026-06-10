@@ -23,11 +23,11 @@ export function BrowserCleanup() {
       return;
     }
 
-    // Add a delay to ensure NextAuth has initialized
+    // Add a delay to ensure auth systems have initialized
     const timeoutId = setTimeout(() => {
       try {
-        // 1. Clear any orphaned NextAuth cookies
-        const cookiesToCheck = [
+        // 1. Clear any orphaned NextAuth cookies (legacy migration)
+        const legacyCookiesToCheck = [
           "next-auth.session-token",
           "__Secure-next-auth.session-token",
           "next-auth.callback-url",
@@ -36,15 +36,27 @@ export function BrowserCleanup() {
           "__Host-next-auth.csrf-token",
         ];
 
+        // 2. Clear any orphaned better-auth cookies
+        const cookiesToCheck = [
+          ...legacyCookiesToCheck,
+          "better-auth.session_token",
+          "__Secure-better-auth.session_token",
+          "better-auth.csrf_token",
+          "__Host-better-auth.csrf_token",
+        ];
+
         document.cookie.split(";").forEach((cookie) => {
           const [name] = cookie.split("=");
           const trimmedName = name.trim();
 
-          // Check if this is a NextAuth cookie
+          // Check if this is a legacy or current auth cookie
           if (
             trimmedName.includes("next-auth") ||
             trimmedName.includes("__Secure-next-auth") ||
-            trimmedName.includes("__Host-next-auth")
+            trimmedName.includes("__Host-next-auth") ||
+            trimmedName.includes("better-auth") ||
+            trimmedName.includes("__Secure-better-auth") ||
+            trimmedName.includes("__Host-better-auth")
           ) {
             // Get the cookie value to check if it's invalid/expired
             const cookieValue = document.cookie
@@ -102,7 +114,7 @@ export function BrowserCleanup() {
           console.error("[BrowserCleanup] Error during cleanup:", error);
         }
       }
-    }, 1000); // Delay 1 second to let NextAuth initialize
+    }, 1000); // Delay 1 second to let auth systems initialize
 
     return () => clearTimeout(timeoutId);
   }, [pathname]); // Run when pathname changes
