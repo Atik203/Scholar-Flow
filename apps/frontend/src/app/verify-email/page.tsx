@@ -251,7 +251,7 @@ export default function VerifyEmailPage() {
               </div>
 
               <div className="space-y-3">
-                <Link href="/profile">
+                <Link href="/dashboard/profile">
                   <Button className="w-full" size="lg">
                     Go to Profile
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -379,7 +379,7 @@ export default function VerifyEmailPage() {
           </div>
 
           <div className="mt-6 text-center">
-            <Link href="/profile" className="text-sm text-muted-foreground hover:text-primary">
+            <Link href="/dashboard/profile" className="text-sm text-muted-foreground hover:text-primary">
               &larr; Back to Profile
             </Link>
           </div>
