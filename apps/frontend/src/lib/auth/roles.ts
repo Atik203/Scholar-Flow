@@ -304,7 +304,7 @@ export const getNavigationItems = (userRole?: string) => {
   const adminItems: NavigationLink[] = [
     { label: "Admin", href: "/admin-overview", permission: "admin:dashboard" },
     { label: "Users", href: "/users", permission: "user:read" },
-    { label: "Settings", href: "/settings", permission: "admin:settings" },
+    { label: "Settings", href: "/dashboard/admin/settings", permission: "admin:settings" },
   ];
 
   let items = [...resolveNavigationLinks(userRole, baseItems)];
