@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Compiler optimizations for production performance
-  devIndicators: false,
+  reactCompiler: true,
   compiler: {
     // Remove console logs in production except errors and warnings
     removeConsole:
@@ -13,34 +13,28 @@ const nextConfig: NextConfig = {
         : false,
   },
 
-  // Note: SWC minification is enabled by default in Next.js 15+
+  // Note: SWC minification is enabled by default in Next.js 16+
   // No need to explicitly set swcMinify anymore
 
-  // Optimize package imports for better tree-shaking
-  modularizeImports: {
-    lodash: {
-      transform: "lodash/{{member}}",
-    },
-    "date-fns": {
-      transform: "date-fns/{{member}}",
-    },
-    "@radix-ui/react-icons": {
-      transform: "@radix-ui/react-icons/dist/{{member}}",
+  // Turbopack is default in Next.js 16 — no flags needed
+  turbopack: {
+    // Modularize imports for better tree-shaking
+    resolveAlias: {
+      lodash: {
+        browser: "lodash/{{member}}",
+      },
+      "date-fns": {
+        browser: "date-fns/{{member}}",
+      },
+      "@radix-ui/react-icons": {
+        browser: "@radix-ui/react-icons/dist/{{member}}",
+      },
     },
   },
 
   experimental: {
-    // Optimize specific package imports automatically
-    optimizePackageImports: [
-      "@radix-ui/react-dialog",
-      "@radix-ui/react-dropdown-menu",
-      "@radix-ui/react-popover",
-      "@radix-ui/react-select",
-      "@radix-ui/react-tabs",
-      "@radix-ui/react-tooltip",
-      "lucide-react",
-    ],
-    // CSS optimization disabled — breaks Tailwind CSS v4 utility classes in production
+    // Turbopack filesystem caching (beta) — faster dev restarts
+    turbopackFileSystemCacheForDev: true,
   },
 
   // Production error handling - hide error overlay in production
@@ -51,7 +45,7 @@ const nextConfig: NextConfig = {
   images: {
     // Use modern image formats for better compression
     formats: ["image/avif", "image/webp"],
-    // Cache optimized images for 60 seconds minimum
+    // Cache optimized images for 60 seconds minimum (overrides v16 default of 4hrs)
     minimumCacheTTL: 60,
     remotePatterns: [
       {

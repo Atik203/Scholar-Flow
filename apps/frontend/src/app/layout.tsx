@@ -105,7 +105,7 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS;
 
   return (
-    <html lang="en" suppressHydrationWarning data-lt-installed="true">
+    <html lang="en" suppressHydrationWarning data-lt-installed="true" data-scroll-behavior="smooth">
       <head>
         {/* Preconnect to external domains for faster resource loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

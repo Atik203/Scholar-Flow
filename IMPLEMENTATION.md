@@ -137,8 +137,10 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ### 3.1 Route Restructure
 - [ ] Create `/dashboard/(app)/layout.tsx` (single dashboard layout)
+  Note: params must be async (Next.js 16 requirement)
 - [ ] Create `/dashboard/(app)/page.tsx` (dashboard home)
 - [ ] Create `/dashboard/(admin)/layout.tsx` (admin-only layout, code-split)
+  Note: use LayoutProps type helper from next typegen
 - [ ] Create `/dashboard/(admin)/page.tsx` (admin overview)
 - [ ] Delete old `/dashboard/(roles)/` route groups (researcher, pro-researcher, team-lead, admin)
 - [ ] Update all links from `/dashboard/(roles)/...` to `/dashboard/(app)/...`
@@ -507,10 +509,54 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 2 Complete
+## Next.js 16 Upgrade (Complete)
+
+### Breaking changes resolved
+- [x] Async Request APIs — params/searchParams/cookies/headers all awaited
+- [x] middleware.ts → proxy.ts (auth guards preserved)
+- [x] revalidateTag updated to two-argument form
+- [x] next lint removed — scripts updated to eslint .
+- [x] images.domains → images.remotePatterns migration
+- [x] unstable_cacheLife/cacheTag → stable imports
+- [x] Turbopack flags removed from scripts (now default)
+- [x] next.config.ts turbopack moved to top-level
+- [x] React Compiler enabled (reactCompiler: true)
+- [x] next typegen run — PageProps/LayoutProps/RouteContext available
+
+### New capabilities available in v16
+- React Compiler: automatic memoization (do not add manual useMemo)
+- updateTag: immediate read-your-writes cache updates
+- refresh(): client router refresh from Server Actions
+- cacheLife/cacheTag: stable (no unstable_ prefix)
+- Turbopack filesystem caching: faster dev restarts
+- View Transitions API: available via React 19.2 ViewTransition
+- Activity component: background UI state preservation
+
+### better-auth migration (Complete)
+- [x] NextAuth.js v4 removed from dependencies
+- [x] better-auth installed and configured
+- [x] lib/auth/better-auth.ts created with OAuth providers
+- [x] API route: app/api/auth/[...auth]/route.ts
+- [x] proxy.ts created with auth guards (replaces middleware.ts)
+- [x] AuthProvider.tsx updated for better-auth session sync
+- [x] BrowserCleanup.tsx updated for better-auth cookies
+- [x] Old NextAuth files deleted: authOptions.ts, next-auth.d.ts, [...nextauth]/route.ts
+
+### Phase 3 notes (Next.js 16 impact)
+- Parallel route slots require default.tsx — stubs created ✅
+- Use PageProps<'/dashboard/(app)/[route]'> for all new pages
+- New dashboard pages are async by default (params are Promises)
+- proxy.ts matcher must be updated when new protected routes added
+- React Compiler enabled — do NOT add useMemo to new components
+
+---
+
+## Current Status: Phase 2 Complete, Next.js 16 upgrade complete
 
 Started: June 2026
 Completed: June 2026
+Completed phases: Phase 1 ✅, Phase 2 ✅, Next.js 16 upgrade ✅
 Current focus: Phase 3 Dashboard Shell & Core Pages (5-8 pages)
-
+Framework: Next.js 16, React 19.2, Turbopack default
+React Compiler: enabled (do not add manual memoization)
 Last updated: June 2026
