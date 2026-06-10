@@ -31,7 +31,7 @@ import {
 } from "tiptap-extension-resizable-image";
 
 const NodeView = (props: ResizableImageNodeViewRendererProps) => {
-  const editor = props.editor;
+  const editor = (props as any).editor;
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -84,14 +84,14 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
     (newPosition: { x: number; y: number }) => {
       // Update node attributes to persist position (use data-* keys)
       requestAnimationFrame(() => {
-        const { getPos } = props;
+        const { getPos } = props as any;
         if (typeof getPos === "function") {
           const pos = getPos();
           if (typeof pos === "number") {
             editor
               .chain()
               .focus()
-              .command(({ tr }) => {
+              .command(({ tr }: { tr: any }) => {
                 tr.setNodeMarkup(pos, undefined, {
                   ...props.node.attrs,
                   "data-position-x": newPosition.x,
