@@ -4,7 +4,11 @@ import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
 import { StorageService } from "../papers/StorageService";
-import { UpdateOnboardingInput, UpdateProfileInput } from "./user.validation";
+import {
+  UpdateOnboardingInput,
+  UpdatePreferencesInput,
+  UpdateProfileInput,
+} from "./user.validation";
 
 const getAllFromDB = async (params: any, options: IPaginationOptions) => {
   // Use simple $queryRaw for basic user pagination - more efficient than QueryBuilder
@@ -582,6 +586,240 @@ const updateOnboarding = async (user: IAuthUser, data: UpdateOnboardingInput) =>
   }
 };
 
+/**
+ * Get or create default user preferences (idempotent)
+ * Phase 3 - User preference data layer
+ */
+const getPreferences = async (user: IAuthUser) => {
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  try {
+    const existing = await prisma.$queryRaw<any[]>`
+      SELECT id, "userId", theme, language, timezone, "emailDigest",
+             "defaultCitationStyle", "compactMode", metadata,
+             "createdAt", "updatedAt"
+      FROM "UserPreference"
+      WHERE "userId" = ${user.id}
+      LIMIT 1
+    `;
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    // Create default preferences (idempotent via upsert)
+    const created = await prisma.$queryRaw<any[]>`
+      INSERT INTO "UserPreference" (id, "userId", theme, language, timezone,
+                                     "emailDigest", "defaultCitationStyle",
+                                     "compactMode", metadata, "createdAt", "updatedAt")
+      VALUES (gen_random_uuid()::text, ${user.id}, 'system', 'en', 'UTC',
+              true, 'APA', false, NULL, NOW(), NOW())
+      ON CONFLICT ("userId") DO UPDATE SET "updatedAt" = NOW()
+      RETURNING id, "userId", theme, language, timezone, "emailDigest",
+                "defaultCitationStyle", "compactMode", metadata,
+                "createdAt", "updatedAt"
+    `;
+
+    return created[0];
+  } catch (error) {
+    console.error("Error in getPreferences:", error);
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(500, "Failed to fetch user preferences");
+  }
+};
+
+/**
+ * Update user preferences (upsert semantics)
+ * Phase 3 - User preference data layer
+ */
+const updatePreferences = async (
+  user: IAuthUser,
+  payload: UpdatePreferencesInput
+) => {
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  try {
+    const existing = await prisma.$queryRaw<any[]>`
+      SELECT id FROM "UserPreference" WHERE "userId" = ${user.id} LIMIT 1
+    `;
+
+    if (existing.length === 0) {
+      // Insert with provided values (fall back to defaults)
+      const theme = payload.theme ?? "system";
+      const language = payload.language ?? "en";
+      const timezone = payload.timezone ?? "UTC";
+      const emailDigest = payload.emailDigest ?? true;
+      const defaultCitationStyle = payload.defaultCitationStyle ?? "APA";
+      const compactMode = payload.compactMode ?? false;
+      const metadata = payload.metadata
+        ? JSON.stringify(payload.metadata)
+        : null;
+
+      await prisma.$queryRaw`
+        INSERT INTO "UserPreference" (id, "userId", theme, language, timezone,
+                                       "emailDigest", "defaultCitationStyle",
+                                       "compactMode", metadata, "createdAt", "updatedAt")
+        VALUES (gen_random_uuid()::text, ${user.id}, ${theme}, ${language}, ${timezone},
+                ${emailDigest}, ${defaultCitationStyle}, ${compactMode},
+                ${metadata}::jsonb, NOW(), NOW())
+      `;
+    } else {
+      // Build dynamic update
+      const sets: string[] = [];
+      const params: any[] = [];
+      let idx = 1;
+      if (payload.theme !== undefined) {
+        sets.push(`theme = $${idx++}`);
+        params.push(payload.theme);
+      }
+      if (payload.language !== undefined) {
+        sets.push(`language = $${idx++}`);
+        params.push(payload.language);
+      }
+      if (payload.timezone !== undefined) {
+        sets.push(`timezone = $${idx++}`);
+        params.push(payload.timezone);
+      }
+      if (payload.emailDigest !== undefined) {
+        sets.push(`"emailDigest" = $${idx++}`);
+        params.push(payload.emailDigest);
+      }
+      if (payload.defaultCitationStyle !== undefined) {
+        sets.push(`"defaultCitationStyle" = $${idx++}`);
+        params.push(payload.defaultCitationStyle);
+      }
+      if (payload.compactMode !== undefined) {
+        sets.push(`"compactMode" = $${idx++}`);
+        params.push(payload.compactMode);
+      }
+      if (payload.metadata !== undefined) {
+        sets.push(`metadata = $${idx++}::jsonb`);
+        params.push(JSON.stringify(payload.metadata));
+      }
+
+      if (sets.length > 0) {
+        // Run conditional updates with separate tagged-template queries
+        // to satisfy the project's no-$executeRawUnsafe lint rule.
+        if (payload.theme !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET theme = ${payload.theme}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.language !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET language = ${payload.language}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.timezone !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET timezone = ${payload.timezone}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.emailDigest !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET "emailDigest" = ${payload.emailDigest}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.defaultCitationStyle !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET "defaultCitationStyle" = ${payload.defaultCitationStyle}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.compactMode !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET "compactMode" = ${payload.compactMode}, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+        if (payload.metadata !== undefined) {
+          await prisma.$executeRaw`
+            UPDATE "UserPreference"
+            SET metadata = ${JSON.stringify(payload.metadata)}::jsonb, "updatedAt" = NOW()
+            WHERE "userId" = ${user.id}
+          `;
+        }
+      }
+    }
+
+    // Return updated row
+    const updated = await prisma.$queryRaw<any[]>`
+      SELECT id, "userId", theme, language, timezone, "emailDigest",
+             "defaultCitationStyle", "compactMode", metadata,
+             "createdAt", "updatedAt"
+      FROM "UserPreference"
+      WHERE "userId" = ${user.id}
+      LIMIT 1
+    `;
+
+    if (updated.length === 0) {
+      throw new ApiError(500, "Failed to load preferences after update");
+    }
+
+    return updated[0];
+  } catch (error) {
+    console.error("Error in updatePreferences:", error);
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(500, "Failed to update user preferences");
+  }
+};
+
+/**
+ * Get user activity log (paginated)
+ * Phase 3 - Activity feed for dashboard home
+ */
+const getActivity = async (user: IAuthUser, options: IPaginationOptions) => {
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  const limit = options.limit || 10;
+  const page = options.page || 1;
+  const skip = (page - 1) * limit;
+
+  try {
+    const items = await prisma.$queryRaw<any[]>`
+      SELECT id, entity, "entityId", action, details, severity,
+             "workspaceId", "createdAt"
+      FROM "ActivityLogEntry"
+      WHERE "userId" = ${user.id} AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+      LIMIT ${limit} OFFSET ${skip}
+    `;
+
+    const totalResult = await prisma.$queryRaw<[{ count: bigint }]>`
+      SELECT COUNT(*) as count
+      FROM "ActivityLogEntry"
+      WHERE "userId" = ${user.id} AND "isDeleted" = false
+    `;
+
+    const total = Number(totalResult[0]?.count || 0);
+    const totalPage = Math.ceil(total / limit);
+
+    return {
+      result: items,
+      meta: { page, limit, total, totalPage },
+    };
+  } catch (error) {
+    console.error("Error in getActivity:", error);
+    throw new ApiError(500, "Failed to fetch user activity");
+  }
+};
+
 export const userService = {
   getAllFromDB,
   getMyProfile,
@@ -591,4 +829,7 @@ export const userService = {
   uploadProfilePicture,
   getUserAnalytics,
   updateOnboarding,
+  getPreferences,
+  updatePreferences,
+  getActivity,
 };

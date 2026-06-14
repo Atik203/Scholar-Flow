@@ -158,6 +158,47 @@ const updateOnboarding = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getPreferences = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getPreferences(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Preferences retrieved successfully!",
+    data: result,
+  });
+});
+
+const updatePreferences = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updatePreferences(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Preferences updated successfully!",
+    data: result,
+  });
+});
+
+const getActivity = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const options = {
+    page: Number(req.query.page) || 1,
+    limit: Number(req.query.limit) || 10,
+  };
+  const result = await userService.getActivity(user, options);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Activity retrieved successfully!",
+    data: result.result,
+    meta: result.meta,
+  });
+});
+
 export const userController: {
   getAllFromDB: AsyncRequestHandler;
   getMyProfile: AsyncRequestHandler;
@@ -167,6 +208,9 @@ export const userController: {
   uploadProfilePicture: AsyncRequestHandler;
   getUserAnalytics: AsyncRequestHandler;
   updateOnboarding: AsyncRequestHandler;
+  getPreferences: AsyncRequestHandler;
+  updatePreferences: AsyncRequestHandler;
+  getActivity: AsyncRequestHandler;
 } = {
   getAllFromDB,
   getMyProfile,
@@ -176,4 +220,7 @@ export const userController: {
   uploadProfilePicture,
   getUserAnalytics,
   updateOnboarding,
+  getPreferences,
+  updatePreferences,
+  getActivity,
 };

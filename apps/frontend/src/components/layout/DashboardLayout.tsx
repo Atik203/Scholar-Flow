@@ -11,6 +11,7 @@ import {
   Menu,
   Moon,
   Settings,
+  Shield,
   Sun,
   User,
   X,
@@ -28,6 +29,7 @@ import { USER_ROLES } from "@/lib/auth/roles";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  variant?: "app" | "admin";
 }
 
 // Role display names
@@ -39,7 +41,7 @@ const roleDisplayNames: Record<string, string> = {
 };
 
 // Use actual user info from Redux Auth state
-function UserMenu() {
+function UserMenu({ variant: _variant = "app" }: { variant?: "app" | "admin" }) {
   const { session } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -62,16 +64,7 @@ function UserMenu() {
   };
 
   const getDashboardPath = () => {
-    switch (role) {
-      case USER_ROLES.ADMIN:
-        return "/dashboard/admin";
-      case USER_ROLES.TEAM_LEAD:
-        return "/dashboard/team-lead";
-      case USER_ROLES.PRO_RESEARCHER:
-        return "/dashboard/pro-researcher";
-      default:
-        return "/dashboard"; // Fallback/default is just researcher, which is under /dashboard or /dashboard/researcher based on App layout. Usually it's /dashboard
-    }
+    return role === USER_ROLES.ADMIN ? "/dashboard/admin" : "/dashboard";
   };
 
   return (
@@ -239,7 +232,13 @@ function NotificationBell() {
 }
 
 // Breadcrumb component auto-generating from Next.js pathname
-function Breadcrumbs({ currentPath }: { currentPath?: string }) {
+function Breadcrumbs({
+  currentPath,
+  variant: _variant = "app",
+}: {
+  currentPath?: string;
+  variant?: "app" | "admin";
+}) {
   if (!currentPath) return null;
 
   const segments = currentPath.split("/").filter(Boolean);
@@ -365,7 +364,7 @@ function MobileNav() {
   );
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, variant = "app" }: DashboardLayoutProps) {
   const pathname = usePathname();
 
   return (
@@ -377,12 +376,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex w-full items-center justify-between px-3 sm:px-4">
               <div className="flex items-center gap-2 sm:gap-4">
                 <MobileNav />
-                <Breadcrumbs currentPath={pathname} />
+                <Breadcrumbs currentPath={pathname} variant={variant} />
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
                 <NotificationBell />
                 <ThemeToggle />
-                <UserMenu />
+                <UserMenu variant={variant} />
               </div>
             </div>
           </header>
@@ -397,19 +396,31 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Desktop Layout */}
       <div className="hidden lg:flex min-h-screen">
         <aside className="fixed left-0 top-0 z-30 h-screen w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm">
-          <AppSidebar />
+          <AppSidebar variant={variant} />
         </aside>
 
         <div className="flex-1 ml-72 flex flex-col min-h-screen">
-          <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-950/60 shadow-sm">
+          <header
+            className={`sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b ${
+              variant === "admin"
+                ? "border-red-200/60 dark:border-red-900/40"
+                : "border-gray-200 dark:border-gray-800"
+            } bg-white/95 dark:bg-gray-950/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-950/60 shadow-sm`}
+          >
             <div className="flex w-full items-center justify-between px-6">
               <div className="flex items-center gap-2">
-                <Breadcrumbs currentPath={pathname} />
+                {variant === "admin" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-red-100 dark:bg-red-950/40 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900">
+                    <Shield className="h-3 w-3" />
+                    Admin Console
+                  </span>
+                )}
+                <Breadcrumbs currentPath={pathname} variant={variant} />
               </div>
               <div className="flex items-center gap-2">
                 <NotificationBell />
                 <ThemeToggle />
-                <UserMenu />
+                <UserMenu variant={variant} />
               </div>
             </div>
           </header>

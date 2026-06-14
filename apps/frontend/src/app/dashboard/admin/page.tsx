@@ -1,7 +1,6 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -106,15 +105,14 @@ export default function AdminOverviewPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Shield className="h-8 w-8 text-red-500" />
-              Admin Dashboard
-            </h1>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <Shield className="h-8 w-8 text-red-500" />
+            Admin Dashboard
+          </h1>
             <p className="text-muted-foreground mt-2">
               System administration and user management overview.
             </p>
@@ -317,7 +315,6 @@ export default function AdminOverviewPage() {
             </CardContent>
           </Card>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
