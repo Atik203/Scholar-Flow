@@ -32,10 +32,12 @@ import React, { useState } from "react";
 
 interface WorkspaceSwitcherProps {
   currentWorkspaceId?: string;
+  variant?: "app" | "admin";
 }
 
 export function WorkspaceSwitcher({
   currentWorkspaceId,
+  variant: _variant = "app",
 }: WorkspaceSwitcherProps) {
   const { session } = useAuth();
   const { data, isLoading } = useListWorkspacesQuery({ scope: "all" });
