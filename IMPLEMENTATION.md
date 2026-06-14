@@ -139,9 +139,9 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 - [x] Create `/dashboard/(app)/layout.tsx` (single dashboard layout)
   Note: params must be async (Next.js 16 requirement)
 - [x] Create `/dashboard/(app)/page.tsx` (dashboard home)
-- [x] Create `/dashboard/(admin)/layout.tsx` (admin-only layout, code-split)
+- [x] Create `/dashboard/admin/layout.tsx` (admin-only layout, code-split; regular folder not route group)
   Note: use LayoutProps type helper from next typegen
-- [x] Create `/dashboard/(admin)/page.tsx` (admin overview)
+- [x] Create `/dashboard/admin/page.tsx` (admin overview)
 - [x] Delete old `/dashboard/(roles)/admin/` route group (replaced by `(admin)/`)
   Note: `(roles)/{researcher,pro-researcher,team-lead}/` retained for Phase 4 migration
 - [x] Update all links from `/dashboard/(roles)/...` to `/dashboard/(app)/...`
@@ -161,10 +161,10 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 - [x] Rewrite `/dashboard/(app)/page.tsx` (dashboard home with stats cards, quick actions, activity feed, recent papers, top collections)
 - [x] Rewrite `/dashboard/profile/page.tsx` (new profile with figma-make design, standalone `/profile` removed)
 - [x] Rewrite `/dashboard/settings/page.tsx` (new settings with figma-make design, standalone `/settings` removed)
-- [x] Create `/dashboard/(admin)/users/page.tsx` (admin user management, moved from `(roles)/admin/users`)
-- [x] Create `/dashboard/(admin)/subscriptions/page.tsx` (admin subscriptions, moved from `(roles)/admin/subscriptions`)
-- [x] Create `/dashboard/(admin)/system/page.tsx` (admin system health, moved from `(roles)/admin/system`)
-- [x] Create `/dashboard/(admin)/settings/page.tsx` (admin settings, moved from `(roles)/admin/settings`)
+- [x] Create `/dashboard/admin/users/page.tsx` (admin user management, moved from `(roles)/admin/users`)
+- [x] Create `/dashboard/admin/subscriptions/page.tsx` (admin subscriptions, moved from `(roles)/admin/subscriptions`)
+- [x] Create `/dashboard/admin/system/page.tsx` (admin system health, moved from `(roles)/admin/system`)
+- [x] Create `/dashboard/admin/settings/page.tsx` (admin settings, moved from `(roles)/admin/settings`)
 
 ### 3.4 Backend Migration
 - [x] Create `UserPreference` model in Prisma schema (id, userId unique, theme, language, timezone, emailDigest, defaultCitationStyle, compactMode, metadata, timestamps)
