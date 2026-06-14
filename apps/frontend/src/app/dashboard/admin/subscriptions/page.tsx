@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -95,13 +94,12 @@ export default function AdminSubscriptionsPage() {
 
   if (hasError) {
     return (
-      <DashboardLayout>
-        <div className="container mx-auto p-6">
-          <div className="flex items-center justify-center h-96">
-            <Card className="w-full max-w-md">
-              <CardContent className="pt-6">
-                <div className="flex flex-col items-center gap-4 text-center">
-                  <AlertCircle className="h-12 w-12 text-destructive" />
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center h-96">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4 text-center">
+                <AlertCircle className="h-12 w-12 text-destructive" />
                   <div>
                     <h3 className="font-semibold text-lg">
                       Failed to Load Data
@@ -116,15 +114,13 @@ export default function AdminSubscriptionsPage() {
             </Card>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               Subscription & Revenue Analytics
@@ -571,7 +567,6 @@ export default function AdminSubscriptionsPage() {
             )}
           </CardContent>
         </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

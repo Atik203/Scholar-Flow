@@ -20,6 +20,22 @@ export const getRoleSlug = (role?: string) => {
   return ROLE_SLUGS[role as keyof typeof ROLE_SLUGS] ?? DEFAULT_ROLE_SLUG;
 };
 
+/**
+ * New canonical dashboard base path (Phase 3+).
+ * - Admin → /dashboard/admin (admin console)
+ * - Everyone else → /dashboard (shared app home)
+ */
+export const getDashboardBasePath = (role?: string): string => {
+  if (role === USER_ROLES.ADMIN) {
+    return "/dashboard/admin";
+  }
+  return "/dashboard";
+};
+
+/**
+ * @deprecated Use getDashboardBasePath instead.
+ * Kept for backward-compat with legacy role-segmented URLs during migration.
+ */
 export const getRoleDashboardBasePath = (role?: string) =>
   `/dashboard/${getRoleSlug(role)}`;
 

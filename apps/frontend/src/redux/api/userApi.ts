@@ -187,6 +187,101 @@ export const userApi = apiSlice.injectEndpoints({
       query: () => "/user/analytics",
       providesTags: ["User"],
     }),
+
+    // Get user preferences (Phase 3)
+    getPreferences: builder.query<
+      {
+        success: boolean;
+        message: string;
+        data: {
+          id: string;
+          userId: string;
+          theme: "light" | "dark" | "system";
+          language: string;
+          timezone: string;
+          emailDigest: boolean;
+          defaultCitationStyle: string;
+          compactMode: boolean;
+          metadata: Record<string, unknown> | null;
+          createdAt: string;
+          updatedAt: string;
+        };
+      },
+      void
+    >({
+      query: () => "/user/preferences",
+      providesTags: ["UserPreferences"],
+    }),
+
+    // Update user preferences (Phase 3)
+    updatePreferences: builder.mutation<
+      {
+        success: boolean;
+        message: string;
+        data: {
+          id: string;
+          userId: string;
+          theme: "light" | "dark" | "system";
+          language: string;
+          timezone: string;
+          emailDigest: boolean;
+          defaultCitationStyle: string;
+          compactMode: boolean;
+          metadata: Record<string, unknown> | null;
+          createdAt: string;
+          updatedAt: string;
+        };
+      },
+      Partial<{
+        theme: "light" | "dark" | "system";
+        language: string;
+        timezone: string;
+        emailDigest: boolean;
+        defaultCitationStyle:
+          | "APA"
+          | "MLA"
+          | "CHICAGO"
+          | "HARVARD"
+          | "IEEE"
+          | "BIBTEX"
+          | "ENDNOTE";
+        compactMode: boolean;
+        metadata: Record<string, unknown>;
+      }>
+    >({
+      query: (data) => ({
+        url: "/user/preferences",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["UserPreferences"],
+    }),
+
+    // Get user activity feed (Phase 3)
+    getActivity: builder.query<
+      {
+        success: boolean;
+        message: string;
+        data: Array<{
+          id: string;
+          entity: string;
+          entityId: string;
+          action: string;
+          details: Record<string, unknown> | null;
+          severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+          workspaceId: string | null;
+          createdAt: string;
+        }>;
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { page?: number; limit?: number }
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/user/activity",
+        params: { page, limit },
+      }),
+      providesTags: ["UserActivity"],
+    }),
   }),
 });
 
@@ -197,5 +292,8 @@ export const {
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useUploadProfilePictureMutation,
+  useGetPreferencesQuery,
+  useUpdatePreferencesMutation,
+  useGetActivityQuery,
   useGetUserAnalyticsQuery,
 } = userApi;
