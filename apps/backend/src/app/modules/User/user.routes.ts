@@ -7,7 +7,7 @@ import {
 } from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { userController } from "./user.controller";
-import { changePasswordSchema, updateOnboardingSchema, updateProfileSchema } from "./user.validation";
+import { changePasswordSchema, updateOnboardingSchema, updatePreferencesSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
 
@@ -524,5 +524,91 @@ router.put(
   validateRequestBody(updateOnboardingSchema),
   userController.updateOnboarding
 );
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   get:
+ *     summary: Get User Preferences
+ *     description: Retrieve the current user's preferences. Creates a default record on first access.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Preferences retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get("/preferences", authMiddleware, userController.getPreferences);
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   put:
+ *     summary: Update User Preferences
+ *     description: Update the current user's preferences. All fields are optional.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               theme:
+ *                 type: string
+ *                 enum: [light, dark, system]
+ *               language:
+ *                 type: string
+ *               timezone:
+ *                 type: string
+ *               emailDigest:
+ *                 type: boolean
+ *               defaultCitationStyle:
+ *                 type: string
+ *                 enum: [APA, MLA, CHICAGO, HARVARD, IEEE, BIBTEX, ENDNOTE]
+ *               compactMode:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Preferences updated successfully
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.put(
+  "/preferences",
+  authMiddleware,
+  validateRequestBody(updatePreferencesSchema),
+  userController.updatePreferences
+);
+
+/**
+ * @swagger
+ * /api/user/activity:
+ *   get:
+ *     summary: Get User Activity Feed
+ *     description: Retrieve paginated activity entries for the current user.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Activity retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get("/activity", authMiddleware, userController.getActivity);
 
 export const userRoutes = router;

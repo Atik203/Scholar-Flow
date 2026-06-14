@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -56,13 +55,12 @@ export default function AdminSystemPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Database className="h-8 w-8 text-orange-600" />
-            System Health & Monitoring
-          </h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Database className="h-8 w-8 text-orange-600" />
+          System Health & Monitoring
+        </h1>
           <p className="text-muted-foreground mt-2">
             Monitor system performance and health status in real-time
           </p>
@@ -233,7 +231,6 @@ export default function AdminSystemPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
