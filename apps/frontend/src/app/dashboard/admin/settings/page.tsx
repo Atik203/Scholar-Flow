@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,13 +20,12 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Settings className="h-8 w-8 text-gray-600" />
-            System Settings
-          </h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Settings className="h-8 w-8 text-gray-600" />
+          System Settings
+        </h1>
           <p className="text-muted-foreground mt-2">
             Configure platform settings and preferences
           </p>
@@ -171,7 +169,6 @@ export default function AdminSettingsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

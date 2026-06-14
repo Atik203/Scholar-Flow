@@ -207,3 +207,8 @@ export type ContactSubmission = Prisma.ContactSubmissionModel
  * 
  */
 export type PageContent = Prisma.PageContentModel
+/**
+ * Model UserPreference
+ * 
+ */
+export type UserPreference = Prisma.UserPreferenceModel

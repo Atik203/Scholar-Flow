@@ -1,7 +1,6 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   showErrorToast,
   showSuccessToast,
@@ -191,13 +190,12 @@ export default function AdminUsersPage() {
   const meta = usersData?.meta;
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-600" />
-              User Management
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+            <Users className="h-8 w-8 text-blue-600" />
+            User Management
             </h1>
             <p className="text-muted-foreground mt-2">
               Manage user accounts, roles, and permissions
@@ -556,7 +554,6 @@ export default function AdminUsersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

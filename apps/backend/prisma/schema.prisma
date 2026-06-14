@@ -161,6 +161,9 @@ model User {
   discussionMessages DiscussionMessage[]
   activityLogEntries ActivityLogEntry[]
 
+  // Phase 3 - User preferences
+  preference UserPreference?
+
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   isDeleted         Boolean             @default(false)
@@ -990,5 +993,24 @@ model PageContent {
   isDeleted   Boolean  @default(false)
 
   @@index([slug, isPublished])
+}
+
+// -------- User Preferences (Phase 3) --------
+
+model UserPreference {
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme               String   @default("system") // light | dark | system
+  language            String   @default("en")
+  timezone            String   @default("UTC")
+  emailDigest         Boolean  @default(true)
+  defaultCitationStyle String  @default("APA")
+  compactMode         Boolean  @default(false)
+  metadata            Json?    @db.JsonB
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
 }
 
