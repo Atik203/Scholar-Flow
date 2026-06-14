@@ -69,7 +69,7 @@ const getQuickAccessItems = (userRole: string): ResolvedSidebarItem[] => {
       title: "Dashboard",
       icon: Home,
       minRole: USER_ROLES.RESEARCHER,
-      href: buildRoleScopedPath(userRole, ""),
+      href: "/dashboard",
     },
     {
       title: "Global Search",
@@ -82,7 +82,7 @@ const getQuickAccessItems = (userRole: string): ResolvedSidebarItem[] => {
       title: "AI Insights",
       icon: Brain,
       minRole: USER_ROLES.RESEARCHER,
-      href: buildRoleScopedPath(userRole, "/ai-insights"),
+      href: "/dashboard/ai-insights",
     },
     {
       title: "Billing",
@@ -111,9 +111,9 @@ const navigationItems: SidebarItem[] = [
     icon: FileText,
     minRole: USER_ROLES.RESEARCHER,
     items: [
-      { title: "All Papers", path: "/papers", icon: FileText, minRole: USER_ROLES.RESEARCHER },
-      { title: "Upload Paper", path: "/papers/upload", icon: Upload, minRole: USER_ROLES.RESEARCHER },
-      { title: "Search Papers", path: "/papers/search", icon: Search, minRole: USER_ROLES.RESEARCHER },
+      { title: "All Papers", path: "/dashboard/papers", icon: FileText, minRole: USER_ROLES.RESEARCHER },
+      { title: "Upload Paper", path: "/dashboard/papers/upload", icon: Upload, minRole: USER_ROLES.RESEARCHER },
+      { title: "Search Papers", path: "/dashboard/papers/search", icon: Search, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
@@ -121,9 +121,9 @@ const navigationItems: SidebarItem[] = [
     icon: BookOpen,
     minRole: USER_ROLES.RESEARCHER,
     items: [
-      { title: "My Collections", path: "/collections", icon: BookOpen, minRole: USER_ROLES.RESEARCHER },
-      { title: "Create Collection", path: "/collections/create", icon: Plus, minRole: USER_ROLES.RESEARCHER },
-      { title: "Shared Collections", path: "/collections/shared", icon: Users, minRole: USER_ROLES.RESEARCHER },
+      { title: "My Collections", path: "/dashboard/collections", icon: BookOpen, minRole: USER_ROLES.RESEARCHER },
+      { title: "Create Collection", path: "/dashboard/collections/create", icon: Plus, minRole: USER_ROLES.RESEARCHER },
+      { title: "Shared Collections", path: "/dashboard/collections/shared", icon: Users, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
@@ -131,9 +131,9 @@ const navigationItems: SidebarItem[] = [
     icon: Layers,
     minRole: USER_ROLES.RESEARCHER,
     items: [
-      { title: "My Workspaces", path: "/workspaces", icon: Layers, minRole: USER_ROLES.RESEARCHER },
-      { title: "Create Workspace", path: "/workspaces/create", icon: Plus, minRole: USER_ROLES.RESEARCHER },
-      { title: "Shared Workspaces", path: "/workspaces/shared", icon: Users, minRole: USER_ROLES.RESEARCHER },
+      { title: "My Workspaces", path: "/dashboard/workspaces", icon: Layers, minRole: USER_ROLES.RESEARCHER },
+      { title: "Create Workspace", path: "/dashboard/workspaces/create", icon: Plus, minRole: USER_ROLES.RESEARCHER },
+      { title: "Shared Workspaces", path: "/dashboard/workspaces/shared", icon: Users, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
@@ -141,8 +141,8 @@ const navigationItems: SidebarItem[] = [
     icon: Compass,
     minRole: USER_ROLES.RESEARCHER,
     items: [
-      { title: "Trending Papers", path: "/discover/trending", icon: TrendingUp, minRole: USER_ROLES.RESEARCHER },
-      { title: "Recommendations", path: "/discover/recommendations", icon: Sparkles, minRole: USER_ROLES.RESEARCHER },
+      { title: "Trending Papers", path: "/dashboard/discover/trending", icon: TrendingUp, minRole: USER_ROLES.RESEARCHER },
+      { title: "Recommendations", path: "/dashboard/discover/recommendations", icon: Sparkles, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
@@ -150,21 +150,21 @@ const navigationItems: SidebarItem[] = [
     icon: Microscope,
     minRole: USER_ROLES.RESEARCHER,
     items: [
-      { title: "PDF Text Extraction", path: "/research/pdf-extraction", icon: TextCursor, minRole: USER_ROLES.RESEARCHER },
-      { title: "Text Editor", path: "/research/editor", icon: FileText, minRole: USER_ROLES.RESEARCHER },
-      { title: "Citations", path: "/research/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
-      { title: "Annotations", path: "/research/annotations", icon: Highlighter, minRole: USER_ROLES.RESEARCHER },
+      { title: "PDF Text Extraction", path: "/dashboard/research/pdf-extraction", icon: TextCursor, minRole: USER_ROLES.RESEARCHER },
+      { title: "Text Editor", path: "/dashboard/research/editor", icon: FileText, minRole: USER_ROLES.RESEARCHER },
+      { title: "Citations", path: "/dashboard/research/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
+      { title: "Annotations", path: "/dashboard/research/annotations", icon: Highlighter, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
     title: "Notifications",
-    path: "/notifications",
+    path: "/dashboard/notifications",
     icon: Bell,
     minRole: USER_ROLES.RESEARCHER,
   },
   {
     title: "Analytics",
-    path: "/analytics",
+    path: "/dashboard/analytics",
     icon: BarChart3,
     minRole: USER_ROLES.RESEARCHER,
   },
@@ -173,25 +173,31 @@ const navigationItems: SidebarItem[] = [
 const adminFeatures: SidebarItem[] = [
   {
     title: "Admin Overview",
-    path: "/admin-overview",
+    path: "/dashboard/admin",
     icon: Shield,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "User Management",
-    path: "/users",
+    path: "/dashboard/admin/users",
     icon: Users,
     minRole: USER_ROLES.ADMIN,
   },
   {
     title: "Subscriptions",
-    path: "/subscriptions",
+    path: "/dashboard/admin/subscriptions",
     icon: CreditCard,
     minRole: USER_ROLES.ADMIN,
   },
   {
+    title: "System",
+    path: "/dashboard/admin/system",
+    icon: Shield,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
     title: "System Settings",
-    path: "/settings",
+    path: "/dashboard/admin/settings",
     icon: Settings,
     minRole: USER_ROLES.ADMIN,
   },
@@ -265,8 +271,10 @@ function CollapsibleSection({
 
 export function AppSidebar({
   onNavigate,
+  variant = "app",
 }: {
   onNavigate?: () => void;
+  variant?: "app" | "admin";
 }) {
   const { session } = useAuth();
   const pathname = usePathname();
@@ -280,7 +288,7 @@ export function AppSidebar({
       .filter((item) => hasRoleAccess(userRole, item.minRole))
       .map<ResolvedSidebarItem>((item) => {
         const { path = "", items: rawItems, ...rest } = item;
-        const href = buildRoleScopedPath(userRole, path);
+        const href = path;
         const resolvedItems = rawItems
           ?.filter((subItem) => hasRoleAccess(userRole, subItem.minRole))
           .map<ResolvedSidebarLink>((subItem) => {
@@ -288,7 +296,7 @@ export function AppSidebar({
             return {
               ...subRest,
               path: subPath,
-              href: buildRoleScopedPath(userRole, subPath),
+              href: subPath,
             };
           });
 
@@ -307,7 +315,7 @@ export function AppSidebar({
 
     return adminFeatures.map((item) => ({
       ...item,
-      href: buildRoleScopedPath(userRole, item.path || ""),
+      href: item.path || "",
     }));
   }, [userRole]);
 
@@ -324,7 +332,13 @@ export function AppSidebar({
       <div className="p-4 border-b border-gray-200 dark:border-gray-800">
         <Link href="/" onClick={onNavigate}>
           <div className="flex items-center gap-3">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
+            <div
+              className={`flex aspect-square size-8 items-center justify-center rounded-lg ${
+                variant === "admin"
+                  ? "bg-red-600 text-white"
+                  : "bg-primary text-primary-foreground"
+              } shadow-sm`}
+            >
               <Brain className="size-4" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -332,7 +346,7 @@ export function AppSidebar({
                 ScholarFlow
               </span>
               <span className="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
-                Research Hub
+                {variant === "admin" ? "Admin Console" : "Research Hub"}
               </span>
             </div>
           </div>
@@ -343,8 +357,8 @@ export function AppSidebar({
       <div
         className="flex-1 overflow-auto p-3 sidebar-scroll"
         style={{
-          scrollbarWidth: "none", // Firefox
-          msOverflowStyle: "none", // IE/Edge
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
         <style>{`
@@ -352,19 +366,29 @@ export function AppSidebar({
             display: none;
           }
         `}</style>
-        
-        {/* Workspace Switcher */}
-        <div className="mb-4">
-          <WorkspaceSwitcher />
-        </div>
 
-        {/* Admin Features (if applicable) */}
-        {resolvedAdminFeatures.length > 0 && (
+        {variant === "app" && (
           <div className="mb-4">
-            <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <WorkspaceSwitcher />
+          </div>
+        )}
+
+        {variant === "admin" ? (
+          <>
+            <div className="mb-4">
+              <Button
+                variant="ghost"
+                onClick={() => handleLinkClick("/dashboard")}
+                className="w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <Home className="mr-3 h-4 w-4" />
+                <span>Back to App</span>
+              </Button>
+            </div>
+            <h3 className="px-3 mb-2 text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
               Administration
             </h3>
-            <nav className="space-y-0.5">
+            <nav className="space-y-0.5 mb-4">
               {resolvedAdminFeatures.map((item) => {
                 const isActive = pathname === item.href;
                 return (
@@ -374,7 +398,7 @@ export function AppSidebar({
                     onClick={() => handleLinkClick(item.href)}
                     className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
                       isActive
-                        ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
+                        ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 font-medium"
                         : ""
                     }`}
                   >
@@ -384,94 +408,121 @@ export function AppSidebar({
                 );
               })}
             </nav>
-            <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
-          </div>
+          </>
+        ) : (
+          <>
+            {resolvedAdminFeatures.length > 0 && (
+              <div className="mb-4">
+                <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                  Administration
+                </h3>
+                <nav className="space-y-0.5">
+                  {resolvedAdminFeatures.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Button
+                        key={item.title}
+                        variant="ghost"
+                        onClick={() => handleLinkClick(item.href)}
+                        className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
+                          isActive
+                            ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
+                            : ""
+                        }`}
+                      >
+                        <item.icon className="mr-3 h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Button>
+                    );
+                  })}
+                </nav>
+                <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
+              </div>
+            )}
+
+            <div className="mb-4">
+              <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Quick Access
+              </h3>
+              <nav className="space-y-0.5">
+                {quickAccessItems.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (pathname.startsWith(`${item.href}/`) && item.href !== "/dashboard" && item.href !== "/dashboard/admin");
+
+                  return (
+                    <Button
+                      key={item.title}
+                      variant="ghost"
+                      onClick={() => handleLinkClick(item.href)}
+                      className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
+                        isActive
+                          ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-medium"
+                          : ""
+                      }`}
+                    >
+                      <item.icon className="mr-3 h-4 w-4" />
+                      <span>{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
+              </nav>
+              <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
+            </div>
+
+            <div className="mb-4">
+              <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                Features
+              </h3>
+              <nav className="space-y-0.5">
+                {resolvedNavigationItems.map((item) => {
+                  const sectionActive = item.items
+                    ? item.items.some((subItem) => pathname.startsWith(subItem.href))
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                  if (item.items && item.items.length > 0) {
+                    return (
+                      <CollapsibleSection
+                        key={item.title}
+                        item={item}
+                        isActive={sectionActive ?? false}
+                        pathname={pathname}
+                      />
+                    );
+                  }
+
+                  return (
+                    <Button
+                      key={item.title}
+                      variant="ghost"
+                      onClick={() => handleLinkClick(item.href)}
+                      className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
+                        sectionActive
+                          ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
+                          : ""
+                      }`}
+                    >
+                      <item.icon className="mr-3 h-4 w-4" />
+                      <span>{item.title}</span>
+                      {item.badge && (
+                        <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                          {item.badge}
+                        </span>
+                      )}
+                    </Button>
+                  );
+                })}
+              </nav>
+            </div>
+          </>
         )}
-
-        {/* Quick Access - Single item menus at top */}
-        <div className="mb-4">
-          <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-            Quick Access
-          </h3>
-          <nav className="space-y-0.5">
-            {quickAccessItems.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (pathname.startsWith(`${item.href}/`) && item.href !== "/dashboard" && item.href !== "/dashboard/admin" && item.href !== "/dashboard/researcher"); // Prevent root matching everything
-                
-              return (
-                <Button
-                  key={item.title}
-                  variant="ghost"
-                  onClick={() => handleLinkClick(item.href)}
-                  className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
-                    isActive
-                      ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary font-medium"
-                      : ""
-                  }`}
-                >
-                  <item.icon className="mr-3 h-4 w-4" />
-                  <span>{item.title}</span>
-                  {item.badge && (
-                    <span className="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
-                      {item.badge}
-                    </span>
-                  )}
-                </Button>
-              );
-            })}
-          </nav>
-          <div className="my-3 border-t border-gray-100 dark:border-gray-800" />
-        </div>
-
-        {/* Main Navigation - Multi-item menus */}
-        <div className="mb-4">
-          <h3 className="px-3 mb-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-            Features
-          </h3>
-          <nav className="space-y-0.5">
-            {resolvedNavigationItems.map((item) => {
-              const sectionActive = item.items
-                ? item.items.some((subItem) => pathname.startsWith(subItem.href))
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-              if (item.items && item.items.length > 0) {
-                return (
-                  <CollapsibleSection
-                    key={item.title}
-                    item={item}
-                    isActive={sectionActive ?? false}
-                    pathname={pathname}
-                  />
-                );
-              }
-
-              return (
-                <Button
-                  key={item.title}
-                  variant="ghost"
-                  onClick={() => handleLinkClick(item.href)}
-                  className={`w-full justify-start px-3 py-2.5 h-auto font-normal text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white transition-colors duration-200 ${
-                    sectionActive
-                      ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary"
-                      : ""
-                  }`}
-                >
-                  <item.icon className="mr-3 h-4 w-4" />
-                  <span>{item.title}</span>
-                  {item.badge && (
-                    <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                      {item.badge}
-                    </span>
-                  )}
-                </Button>
-              );
-            })}
-          </nav>
-        </div>
       </div>
 
-      {/* Footer */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-800">
         <div className="text-xs font-medium text-gray-500 dark:text-gray-400 text-center">
           © {new Date().getFullYear()} ScholarFlow

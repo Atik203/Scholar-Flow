@@ -21,6 +21,18 @@ export const updateOnboardingSchema = z.object({
   onboardingStep: z.number().int().min(0).max(4).optional(),
 });
 
+// User preferences (Phase 3)
+export const updatePreferencesSchema = z.object({
+  theme: z.enum(["light", "dark", "system"]).optional(),
+  language: z.string().min(2).max(10).optional(),
+  timezone: z.string().min(1).max(64).optional(),
+  emailDigest: z.boolean().optional(),
+  defaultCitationStyle: z.enum(["APA", "MLA", "CHICAGO", "HARVARD", "IEEE", "BIBTEX", "ENDNOTE"]).optional(),
+  compactMode: z.boolean().optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
+});
+
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type UpdateOnboardingInput = z.infer<typeof updateOnboardingSchema>;
+export type UpdatePreferencesInput = z.infer<typeof updatePreferencesSchema>;

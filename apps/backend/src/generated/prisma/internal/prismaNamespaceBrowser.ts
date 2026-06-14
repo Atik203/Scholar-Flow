@@ -88,7 +88,8 @@ export const ModelName = {
   Testimonial: 'Testimonial',
   NewsletterSubscriber: 'NewsletterSubscriber',
   ContactSubmission: 'ContactSubmission',
-  PageContent: 'PageContent'
+  PageContent: 'PageContent',
+  UserPreference: 'UserPreference'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -740,6 +741,23 @@ export const PageContentScalarFieldEnum = {
 } as const
 
 export type PageContentScalarFieldEnum = (typeof PageContentScalarFieldEnum)[keyof typeof PageContentScalarFieldEnum]
+
+
+export const UserPreferenceScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  theme: 'theme',
+  language: 'language',
+  timezone: 'timezone',
+  emailDigest: 'emailDigest',
+  defaultCitationStyle: 'defaultCitationStyle',
+  compactMode: 'compactMode',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserPreferenceScalarFieldEnum = (typeof UserPreferenceScalarFieldEnum)[keyof typeof UserPreferenceScalarFieldEnum]
 
 
 export const SortOrder = {
