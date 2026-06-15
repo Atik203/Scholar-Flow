@@ -120,7 +120,8 @@ export default function GitHubCallbackPage() {
         const redirectTo = result.user?.onboardingCompleted
           ? callbackUrl
           : "/onboarding";
-        router.push(redirectTo);
+        // Hard navigation ensures a fresh Redux + persisted-state rehydration
+        window.location.href = redirectTo;
       } finally {
         if (lockAcquired) {
           releaseGlobalLock();
