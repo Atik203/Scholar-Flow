@@ -355,6 +355,40 @@ export type EnumAnnotationTypeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAnnotationTypeFilter<$PrismaModel>
 }
 
+export type EnumCollectionVisibilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionVisibility | Prisma.EnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel> | $Enums.CollectionVisibility
+}
+
+export type EnumCollectionVisibilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionVisibility | Prisma.EnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionVisibilityWithAggregatesFilter<$PrismaModel> | $Enums.CollectionVisibility
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel>
+}
+
+export type EnumCollectionPaperStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionPaperStatus | Prisma.EnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel> | $Enums.CollectionPaperStatus
+}
+
+export type EnumCollectionPaperStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionPaperStatus | Prisma.EnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionPaperStatusWithAggregatesFilter<$PrismaModel> | $Enums.CollectionPaperStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel>
+}
+
 export type EnumCollectionPermissionFilter<$PrismaModel = never> = {
   equals?: $Enums.CollectionPermission | Prisma.EnumCollectionPermissionFieldRefInput<$PrismaModel>
   in?: $Enums.CollectionPermission[] | Prisma.ListEnumCollectionPermissionFieldRefInput<$PrismaModel>
@@ -867,6 +901,40 @@ export type NestedEnumAnnotationTypeWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAnnotationTypeFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAnnotationTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumCollectionVisibilityFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionVisibility | Prisma.EnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel> | $Enums.CollectionVisibility
+}
+
+export type NestedEnumCollectionVisibilityWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionVisibility | Prisma.EnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionVisibility[] | Prisma.ListEnumCollectionVisibilityFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionVisibilityWithAggregatesFilter<$PrismaModel> | $Enums.CollectionVisibility
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionVisibilityFilter<$PrismaModel>
+}
+
+export type NestedEnumCollectionPaperStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionPaperStatus | Prisma.EnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel> | $Enums.CollectionPaperStatus
+}
+
+export type NestedEnumCollectionPaperStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CollectionPaperStatus | Prisma.EnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CollectionPaperStatus[] | Prisma.ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCollectionPaperStatusWithAggregatesFilter<$PrismaModel> | $Enums.CollectionPaperStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCollectionPaperStatusFilter<$PrismaModel>
 }
 
 export type NestedEnumCollectionPermissionFilter<$PrismaModel = never> = {

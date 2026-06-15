@@ -37,6 +37,25 @@ export const CollectionPermission = {
 export type CollectionPermission = (typeof CollectionPermission)[keyof typeof CollectionPermission]
 
 
+export const CollectionVisibility = {
+  PRIVATE: 'PRIVATE',
+  TEAM: 'TEAM',
+  PUBLIC: 'PUBLIC'
+} as const
+
+export type CollectionVisibility = (typeof CollectionVisibility)[keyof typeof CollectionVisibility]
+
+
+export const CollectionPaperStatus = {
+  TO_READ: 'TO_READ',
+  READING: 'READING',
+  COMPLETED: 'COMPLETED',
+  ARCHIVED: 'ARCHIVED'
+} as const
+
+export type CollectionPaperStatus = (typeof CollectionPaperStatus)[keyof typeof CollectionPaperStatus]
+
+
 export const AnnotationType = {
   HIGHLIGHT: 'HIGHLIGHT',
   UNDERLINE: 'UNDERLINE',
