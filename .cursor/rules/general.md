@@ -7,18 +7,19 @@
 - Services use Prisma client from shared singleton; handle transactions explicitly when needed.
 - Zod for request body, param, and query validation; reject early on failure.
 
-## Database Operations — $queryRaw Critical Rule
-- CRITICAL: All database operations MUST use `$queryRaw` or `$executeRaw` instead of standard Prisma Client methods for optimal performance.
-- This applies to: SELECT, INSERT, UPDATE, DELETE, aggregation, complex joins.
-- Use template literal syntax for SQL injection prevention: `WHERE email = ${email}`
-- Use `prisma.$queryRaw<Type[]>` for proper typing.
-- Select only required fields; never use `SELECT *`.
-- Use `LIMIT ${limit} OFFSET ${skip}` for pagination; never return unbounded lists.
-- EXCEPTION — OAuth operations MUST keep standard Prisma Client upsert:
+## Database Operations
+- **Prefer Prisma ORM** (findMany, create, update, delete, upsert, count, etc.) for new database operations — typed queries provide better type safety, refactoring support, and readability.
+- **Keep existing `$queryRaw` / `$executeRaw` calls as-is** — do not rewrite working raw SQL unless there is a specific performance or correctness issue.
+- **When raw SQL is needed** (pgvector similarity, complex aggregations, CTEs not supported by Prisma):
+  - Use template literal syntax for SQL injection prevention: `WHERE email = ${email}`
+  - Use `prisma.$queryRaw<Type[]>` for proper typing.
+  - Select only required fields; never use `SELECT *`.
+  - Use `LIMIT ${limit} OFFSET ${skip}` for pagination; never return unbounded lists.
+- **EXCEPTION — OAuth operations MUST keep standard Prisma Client upsert:**
   - `createAccount()`
   - `createOrUpdateUser()`
   - `createOrUpdateUserWithOAuth()`
-  Changing these to raw queries causes P2002 unique constraint errors.
+  - Changing these to raw queries causes P2002 unique constraint errors.
 
 ## TypedSQL & Raw SQL Files
 - Raw SQL statements live in `apps/backend/prisma/sql/` with ONE statement per file.
