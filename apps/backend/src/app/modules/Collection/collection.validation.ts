@@ -6,7 +6,11 @@ export const createCollectionSchema = z.object({
     .min(1, "Collection name is required")
     .max(100, "Name too long"),
   description: z.string().max(500, "Description too long").optional(),
-  isPublic: z.boolean().optional().default(false),
+  isPublic: z.boolean().optional().default(false), // Deprecated: kept for backward compat
+  visibility: z.enum(["PRIVATE", "TEAM", "PUBLIC"]).optional().default("PRIVATE"),
+  tags: z.array(z.string().min(1).max(60)).max(20).optional(),
+  coverImage: z.string().url().optional(),
+  color: z.string().max(20).optional(),
   workspaceId: z.string().uuid("Invalid workspace ID format. Expected UUID."),
 });
 
@@ -18,6 +22,10 @@ export const updateCollectionSchema = z.object({
     .optional(),
   description: z.string().max(500, "Description too long").optional(),
   isPublic: z.boolean().optional(),
+  visibility: z.enum(["PRIVATE", "TEAM", "PUBLIC"]).optional(),
+  tags: z.array(z.string().min(1).max(60)).max(20).optional(),
+  coverImage: z.string().url().optional(),
+  color: z.string().max(20).optional(),
 });
 
 export const addPaperToCollectionSchema = z.object({
@@ -59,6 +67,12 @@ export const inviteActionSchema = z.object({
   action: z.enum(["accept", "decline"]),
 });
 
+// Phase 4: Update reading status or star a paper within a collection
+export const updateCollectionPaperSchema = z.object({
+  status: z.enum(["TO_READ", "READING", "COMPLETED", "ARCHIVED"]).optional(),
+  isStarred: z.boolean().optional(),
+});
+
 // Query parameters for listing collections
 export const listQuerySchema = z.object({
   page: z.string().optional(),
@@ -83,3 +97,6 @@ export type PaperCollectionParams = z.infer<typeof paperCollectionParamsSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 export type InviteActionInput = z.infer<typeof inviteActionSchema>;
 export type ListQueryParams = z.infer<typeof listQuerySchema>;
+export type UpdateCollectionPaperInput = z.infer<
+  typeof updateCollectionPaperSchema
+>;
