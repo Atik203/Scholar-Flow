@@ -1,8 +1,10 @@
+import type { Persistor } from "redux-persist";
 import { apiSlice } from "./api/apiSlice";
 import { clearCredentials } from "./auth/authSlice";
 import type { AppStore } from "./store";
 
 let storeRef: AppStore | null = null;
+let persistorRef: Persistor | null = null;
 
 export function setAppStore(store: AppStore) {
   storeRef = store;
@@ -10,6 +12,14 @@ export function setAppStore(store: AppStore) {
 
 export function getAppStore() {
   return storeRef;
+}
+
+export function setAppPersistor(persistor: Persistor) {
+  persistorRef = persistor;
+}
+
+export function getPersistor() {
+  return persistorRef;
 }
 
 export function resetAppState() {

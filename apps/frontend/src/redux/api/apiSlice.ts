@@ -55,12 +55,18 @@ const transformErrorResponse = (
 
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers, { getState, endpoint }) => {
     // Get token from Redux auth state
     const token = (getState() as RootState).auth.accessToken;
 
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
+    } else if (process.env.NODE_ENV !== "production") {
+      // Dev-only diagnostic: a request fired without a token usually means
+      // stale Redux state. Helps track down auth state bugs.
+      console.warn(
+        `[apiSlice] No accessToken for endpoint: ${String(endpoint)}`
+      );
     }
 
     return headers;
