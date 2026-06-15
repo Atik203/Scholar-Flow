@@ -18,6 +18,10 @@ export interface Paper {
   isDraft?: boolean;
   isPublished?: boolean;
   contentHtml?: string;
+  // Phase 4 metadata fields
+  tags?: string[];
+  language?: string | null;
+  citationCount?: number;
   createdAt: string;
   updatedAt: string;
   file?: {
@@ -56,6 +60,9 @@ export interface UpdatePaperMetadataRequest {
   abstract?: string;
   authors?: string[];
   year?: number;
+  tags?: string[];
+  language?: string;
+  citationCount?: number;
 }
 
 export type PaperSummaryTone =
@@ -176,6 +183,9 @@ export interface EditorPaper {
   isPublished: boolean;
   workspaceId: string;
   uploaderId: string;
+  tags?: string[];
+  language?: string | null;
+  citationCount?: number;
   createdAt: string;
   updatedAt: string;
 }
