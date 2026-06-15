@@ -163,6 +163,9 @@ export const paperService = {
           source: string | null;
           doi: string | null;
           processingStatus: string;
+          tags: string[];
+          language: string | null;
+          citationCount: number;
           createdAt: Date;
           updatedAt: Date;
           previewFileKey: string | null;
@@ -180,7 +183,8 @@ export const paperService = {
       WITH inserted_paper AS (
         INSERT INTO "Paper" (
           id, "workspaceId", "uploaderId", title, metadata, source,
-          "processingStatus", "createdAt", "updatedAt", "isDeleted"
+          "processingStatus", tags, language, "citationCount",
+          "createdAt", "updatedAt", "isDeleted"
         ) VALUES (
           gen_random_uuid(),
           ${workspaceId},
@@ -189,6 +193,9 @@ export const paperService = {
           ${JSON.stringify(metadata)}::jsonb,
           ${input.source || "upload"},
           'UPLOADED'::"PaperProcessingStatus",
+          ${(input as any).tags ?? []}::text[],
+          ${(input as any).language ?? null},
+          ${(input as any).citationCount ?? 0},
           NOW(),
           NOW(),
           false
@@ -203,6 +210,9 @@ export const paperService = {
           source,
           doi,
           "processingStatus",
+          tags,
+          language,
+          "citationCount",
           "createdAt",
           "updatedAt",
           "previewFileKey",
@@ -254,6 +264,9 @@ export const paperService = {
         p.source,
         p.doi,
         p."processingStatus",
+        p.tags,
+        p.language,
+        p."citationCount",
         p."createdAt",
         p."updatedAt",
         p."previewFileKey",
@@ -285,6 +298,9 @@ export const paperService = {
         source: createdRow.source,
         doi: createdRow.doi,
         processingStatus: createdRow.processingStatus,
+        tags: createdRow.tags || [],
+        language: createdRow.language,
+        citationCount: createdRow.citationCount || 0,
         createdAt: createdRow.createdAt,
         updatedAt: createdRow.updatedAt,
         previewFileKey: createdRow.previewFileKey,
@@ -376,7 +392,8 @@ export const paperService = {
     const [items, totalResult] = await Promise.all([
       prisma.$queryRaw<any[]>`
         SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
-               p.source, p.doi, p."processingStatus", p."createdAt", p."updatedAt",
+               p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
+               p."createdAt", p."updatedAt",
                pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
                pf."sizeBytes", pf."originalFilename", pf."extractedAt"
         FROM "Paper" p
@@ -405,6 +422,9 @@ export const paperService = {
       source: item.source,
       doi: item.doi,
       processingStatus: item.processingStatus,
+      tags: item.tags || [],
+      language: item.language,
+      citationCount: item.citationCount || 0,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       file: item.file_id
@@ -434,7 +454,8 @@ export const paperService = {
     const [items, totalResult] = await Promise.all([
       prisma.$queryRaw<any[]>`
         SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
-               p.source, p.doi, p."processingStatus", p."createdAt", p."updatedAt",
+               p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
+               p."createdAt", p."updatedAt",
                pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
                pf."sizeBytes", pf."originalFilename", pf."extractedAt"
         FROM "Paper" p
@@ -463,6 +484,9 @@ export const paperService = {
       source: item.source,
       doi: item.doi,
       processingStatus: item.processingStatus,
+      tags: item.tags || [],
+      language: item.language,
+      citationCount: item.citationCount || 0,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       file: item.file_id
@@ -487,7 +511,8 @@ export const paperService = {
   async getById(id: string) {
     const result = await prisma.$queryRaw<any[]>`
       SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
-             p.source, p.doi, p."processingStatus", p."createdAt", p."updatedAt",
+             p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
+             p."createdAt", p."updatedAt",
              p."previewFileKey", p."previewMimeType", p."originalMimeType",
              pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
              pf."sizeBytes", pf."originalFilename", pf."extractedAt"
@@ -510,6 +535,9 @@ export const paperService = {
       source: item.source,
       doi: item.doi,
       processingStatus: item.processingStatus,
+      tags: item.tags || [],
+      language: item.language,
+      citationCount: item.citationCount || 0,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       previewFileKey: item.previewFileKey,
@@ -556,12 +584,15 @@ export const paperService = {
       year: data.year !== undefined ? data.year : existingMeta.year,
     };
 
-    // Update with merged metadata
+    // Update with merged metadata and new phase 4 fields
     await prisma.$executeRaw`
       UPDATE "Paper" 
       SET title = ${data.title ?? existing[0].title},
           abstract = ${data.abstract ?? existing[0].abstract},
           metadata = ${JSON.stringify(mergedMeta)}::jsonb,
+          tags = ${data.tags ?? existing[0].tags ?? []}::text[],
+          language = ${data.language ?? existing[0].language ?? null},
+          "citationCount" = ${data.citationCount ?? existing[0].citationCount ?? 0},
           "updatedAt" = NOW()
       WHERE id = ${id}
     `;

@@ -6,6 +6,10 @@ type CollectionAggregateRow = {
   name: string;
   description: string | null;
   isPublic: boolean;
+  visibility: string; // Phase 4 field (backfilled from isPublic)
+  tags: string[]; // Phase 4 field
+  coverImage: string | null;
+  color: string | null;
   createdAt: Date;
   updatedAt: Date;
   ownerId: string;
@@ -83,6 +87,10 @@ export class CollectionService {
           c.name,
           c.description,
           c."isPublic",
+          c."visibility"::text,
+          c.tags,
+          c."coverImage",
+          c.color,
           c."createdAt",
           c."updatedAt",
           c."ownerId",
@@ -176,6 +184,10 @@ export class CollectionService {
             c.name,
             c.description,
             c."isPublic",
+            c."visibility"::text,
+            c.tags,
+            c."coverImage",
+            c.color,
             c."createdAt",
             c."updatedAt",
             c."ownerId",
@@ -196,6 +208,10 @@ export class CollectionService {
           a.name,
           a.description,
           a."isPublic",
+          a.visibility,
+          a.tags,
+          a."coverImage",
+          a.color,
           a."createdAt",
           a."updatedAt",
           a."ownerId",
@@ -295,6 +311,10 @@ export class CollectionService {
           c.name,
           c.description,
           c."isPublic",
+          c."visibility"::text,
+          c.tags,
+          c."coverImage",
+          c.color,
           c."createdAt",
           c."updatedAt",
           u.email as "ownerEmail",
