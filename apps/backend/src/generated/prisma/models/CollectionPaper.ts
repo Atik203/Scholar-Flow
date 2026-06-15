@@ -30,6 +30,8 @@ export type CollectionPaperMinAggregateOutputType = {
   paperId: string | null
   addedById: string | null
   addedAt: Date | null
+  status: $Enums.CollectionPaperStatus | null
+  isStarred: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -41,6 +43,8 @@ export type CollectionPaperMaxAggregateOutputType = {
   paperId: string | null
   addedById: string | null
   addedAt: Date | null
+  status: $Enums.CollectionPaperStatus | null
+  isStarred: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -52,6 +56,8 @@ export type CollectionPaperCountAggregateOutputType = {
   paperId: number
   addedById: number
   addedAt: number
+  status: number
+  isStarred: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -65,6 +71,8 @@ export type CollectionPaperMinAggregateInputType = {
   paperId?: true
   addedById?: true
   addedAt?: true
+  status?: true
+  isStarred?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -76,6 +84,8 @@ export type CollectionPaperMaxAggregateInputType = {
   paperId?: true
   addedById?: true
   addedAt?: true
+  status?: true
+  isStarred?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -87,6 +97,8 @@ export type CollectionPaperCountAggregateInputType = {
   paperId?: true
   addedById?: true
   addedAt?: true
+  status?: true
+  isStarred?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -171,6 +183,8 @@ export type CollectionPaperGroupByOutputType = {
   paperId: string
   addedById: string
   addedAt: Date
+  status: $Enums.CollectionPaperStatus
+  isStarred: boolean
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -203,6 +217,8 @@ export type CollectionPaperWhereInput = {
   paperId?: Prisma.StringFilter<"CollectionPaper"> | string
   addedById?: Prisma.StringFilter<"CollectionPaper"> | string
   addedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFilter<"CollectionPaper"> | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFilter<"CollectionPaper"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionPaper"> | boolean
@@ -217,6 +233,8 @@ export type CollectionPaperOrderByWithRelationInput = {
   paperId?: Prisma.SortOrder
   addedById?: Prisma.SortOrder
   addedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -235,6 +253,8 @@ export type CollectionPaperWhereUniqueInput = Prisma.AtLeast<{
   paperId?: Prisma.StringFilter<"CollectionPaper"> | string
   addedById?: Prisma.StringFilter<"CollectionPaper"> | string
   addedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFilter<"CollectionPaper"> | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFilter<"CollectionPaper"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionPaper"> | boolean
@@ -249,6 +269,8 @@ export type CollectionPaperOrderByWithAggregationInput = {
   paperId?: Prisma.SortOrder
   addedById?: Prisma.SortOrder
   addedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -266,6 +288,8 @@ export type CollectionPaperScalarWhereWithAggregatesInput = {
   paperId?: Prisma.StringWithAggregatesFilter<"CollectionPaper"> | string
   addedById?: Prisma.StringWithAggregatesFilter<"CollectionPaper"> | string
   addedAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionPaper"> | Date | string
+  status?: Prisma.EnumCollectionPaperStatusWithAggregatesFilter<"CollectionPaper"> | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolWithAggregatesFilter<"CollectionPaper"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionPaper"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionPaper"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"CollectionPaper"> | boolean
@@ -274,6 +298,8 @@ export type CollectionPaperScalarWhereWithAggregatesInput = {
 export type CollectionPaperCreateInput = {
   id?: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -288,6 +314,8 @@ export type CollectionPaperUncheckedCreateInput = {
   paperId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -296,6 +324,8 @@ export type CollectionPaperUncheckedCreateInput = {
 export type CollectionPaperUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -310,6 +340,8 @@ export type CollectionPaperUncheckedUpdateInput = {
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -321,6 +353,8 @@ export type CollectionPaperCreateManyInput = {
   paperId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -329,6 +363,8 @@ export type CollectionPaperCreateManyInput = {
 export type CollectionPaperUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -340,6 +376,8 @@ export type CollectionPaperUncheckedUpdateManyInput = {
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -366,6 +404,8 @@ export type CollectionPaperCountOrderByAggregateInput = {
   paperId?: Prisma.SortOrder
   addedById?: Prisma.SortOrder
   addedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -377,6 +417,8 @@ export type CollectionPaperMaxOrderByAggregateInput = {
   paperId?: Prisma.SortOrder
   addedById?: Prisma.SortOrder
   addedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -388,6 +430,8 @@ export type CollectionPaperMinOrderByAggregateInput = {
   paperId?: Prisma.SortOrder
   addedById?: Prisma.SortOrder
   addedAt?: Prisma.SortOrder
+  status?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -519,9 +563,15 @@ export type CollectionPaperUncheckedUpdateManyWithoutCollectionNestedInput = {
   deleteMany?: Prisma.CollectionPaperScalarWhereInput | Prisma.CollectionPaperScalarWhereInput[]
 }
 
+export type EnumCollectionPaperStatusFieldUpdateOperationsInput = {
+  set?: $Enums.CollectionPaperStatus
+}
+
 export type CollectionPaperCreateWithoutAddedByInput = {
   id?: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -534,6 +584,8 @@ export type CollectionPaperUncheckedCreateWithoutAddedByInput = {
   collectionId: string
   paperId: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -574,6 +626,8 @@ export type CollectionPaperScalarWhereInput = {
   paperId?: Prisma.StringFilter<"CollectionPaper"> | string
   addedById?: Prisma.StringFilter<"CollectionPaper"> | string
   addedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFilter<"CollectionPaper"> | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFilter<"CollectionPaper"> | boolean
   createdAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionPaper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionPaper"> | boolean
@@ -582,6 +636,8 @@ export type CollectionPaperScalarWhereInput = {
 export type CollectionPaperCreateWithoutPaperInput = {
   id?: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -594,6 +650,8 @@ export type CollectionPaperUncheckedCreateWithoutPaperInput = {
   collectionId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -628,6 +686,8 @@ export type CollectionPaperUpdateManyWithWhereWithoutPaperInput = {
 export type CollectionPaperCreateWithoutCollectionInput = {
   id?: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -640,6 +700,8 @@ export type CollectionPaperUncheckedCreateWithoutCollectionInput = {
   paperId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -676,6 +738,8 @@ export type CollectionPaperCreateManyAddedByInput = {
   collectionId: string
   paperId: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -684,6 +748,8 @@ export type CollectionPaperCreateManyAddedByInput = {
 export type CollectionPaperUpdateWithoutAddedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -696,6 +762,8 @@ export type CollectionPaperUncheckedUpdateWithoutAddedByInput = {
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -706,6 +774,8 @@ export type CollectionPaperUncheckedUpdateManyWithoutAddedByInput = {
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -716,6 +786,8 @@ export type CollectionPaperCreateManyPaperInput = {
   collectionId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -724,6 +796,8 @@ export type CollectionPaperCreateManyPaperInput = {
 export type CollectionPaperUpdateWithoutPaperInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -736,6 +810,8 @@ export type CollectionPaperUncheckedUpdateWithoutPaperInput = {
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -746,6 +822,8 @@ export type CollectionPaperUncheckedUpdateManyWithoutPaperInput = {
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -756,6 +834,8 @@ export type CollectionPaperCreateManyCollectionInput = {
   paperId: string
   addedById: string
   addedAt?: Date | string
+  status?: $Enums.CollectionPaperStatus
+  isStarred?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -764,6 +844,8 @@ export type CollectionPaperCreateManyCollectionInput = {
 export type CollectionPaperUpdateWithoutCollectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -776,6 +858,8 @@ export type CollectionPaperUncheckedUpdateWithoutCollectionInput = {
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -786,6 +870,8 @@ export type CollectionPaperUncheckedUpdateManyWithoutCollectionInput = {
   paperId?: Prisma.StringFieldUpdateOperationsInput | string
   addedById?: Prisma.StringFieldUpdateOperationsInput | string
   addedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.EnumCollectionPaperStatusFieldUpdateOperationsInput | $Enums.CollectionPaperStatus
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -799,6 +885,8 @@ export type CollectionPaperSelect<ExtArgs extends runtime.Types.Extensions.Inter
   paperId?: boolean
   addedById?: boolean
   addedAt?: boolean
+  status?: boolean
+  isStarred?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -813,6 +901,8 @@ export type CollectionPaperSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   paperId?: boolean
   addedById?: boolean
   addedAt?: boolean
+  status?: boolean
+  isStarred?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -827,6 +917,8 @@ export type CollectionPaperSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   paperId?: boolean
   addedById?: boolean
   addedAt?: boolean
+  status?: boolean
+  isStarred?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -841,12 +933,14 @@ export type CollectionPaperSelectScalar = {
   paperId?: boolean
   addedById?: boolean
   addedAt?: boolean
+  status?: boolean
+  isStarred?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type CollectionPaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "paperId" | "addedById" | "addedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionPaper"]>
+export type CollectionPaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "paperId" | "addedById" | "addedAt" | "status" | "isStarred" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionPaper"]>
 export type CollectionPaperInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection?: boolean | Prisma.CollectionDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.PaperDefaultArgs<ExtArgs>
@@ -876,6 +970,8 @@ export type $CollectionPaperPayload<ExtArgs extends runtime.Types.Extensions.Int
     paperId: string
     addedById: string
     addedAt: Date
+    status: $Enums.CollectionPaperStatus
+    isStarred: boolean
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1310,6 +1406,8 @@ export interface CollectionPaperFieldRefs {
   readonly paperId: Prisma.FieldRef<"CollectionPaper", 'String'>
   readonly addedById: Prisma.FieldRef<"CollectionPaper", 'String'>
   readonly addedAt: Prisma.FieldRef<"CollectionPaper", 'DateTime'>
+  readonly status: Prisma.FieldRef<"CollectionPaper", 'CollectionPaperStatus'>
+  readonly isStarred: Prisma.FieldRef<"CollectionPaper", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"CollectionPaper", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CollectionPaper", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"CollectionPaper", 'Boolean'>
