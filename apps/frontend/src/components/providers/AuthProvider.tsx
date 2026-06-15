@@ -32,7 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const lastSyncedUserVersion = useRef<string | null>(null);
   const previousRoleRef = useRef<string | null>(null);
 
-  const shouldFetchUser = Boolean(accessToken || isAuthenticated);
+  const shouldFetchUser = Boolean(accessToken && accessToken.length > 0);
 
   const { data: currentUserResponse } = useGetCurrentUserQuery(undefined, {
     skip: !shouldFetchUser,
@@ -45,7 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const fetchedUser = currentUserResponse?.data?.user;
   const fetchedUserVersionKey = fetchedUser
-    ? `${fetchedUser.id}:${fetchedUser.updatedAt ?? ""}:${fetchedUser.role ?? ""}`
+    ? `${fetchedUser.id}:${fetchedUser.updatedAt ?? ""}:${fetchedUser.role ?? ""}:${fetchedUser.email ?? ""}`
     : null;
   const currentUserId = currentUser?.id ?? null;
   const stableFetchedUser = useMemo(
