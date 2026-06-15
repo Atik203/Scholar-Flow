@@ -564,16 +564,64 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 3 Complete, Next.js 16 upgrade complete, release 1.2.2 shipped
+## Current Status: Phase 4 In Progress — Papers & Collections Foundation Complete
 
 Started: June 2026
 Completed: June 2026
 Completed phases: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Next.js 16 upgrade ✅
+Current phase: **Phase 4 ✅ A-E** (backend foundation done), **F-O** (frontend pages in progress)
 Latest release: **1.2.2** (2026-06-16) — see [CHANGELOG.md](./CHANGELOG.md)
 Current focus: Phase 4 — Papers & Collections (10-12 pages)
 Framework: Next.js 16, React 19.2, Turbopack default
 React Compiler: enabled (do not add manual memoization)
+
+**Animation library:** `motion` (v12.40.0, successor to framer-motion) — installed at root workspace.
+**Design system:** All dashboard pages MUST match figma-make designs exactly. Missing dynamic data drives schema/route updates.
+
 Last updated: 2026-06-16
+
+### Phase 4 — Subtask Progress
+
+#### ✅ A. Database Migration (pushed)
+- Added `CollectionVisibility` (PRIVATE/TEAM/PUBLIC) and `CollectionPaperStatus` (TO_READ/READING/COMPLETED/ARCHIVED) enums
+- Paper: added `tags String[]`, `language String?`, `citationCount Int @default(0)`
+- Collection: added `visibility` enum, `tags String[]`, `coverImage String?`, `color String?`
+- CollectionPaper: added `status` enum, `isStarred Boolean @default(false)`
+- `isPublic` preserved for backward compat; backfill synced `visibility` from `isPublic`
+- GIN indexes on `Paper.tags`, `Collection.tags`; composite indexes for visibility and status filters
+- Enabled `typedSql` preview feature in Prisma generator
+
+#### ✅ B. Backend Metadata Fields (pushed)
+- Paper validation/service/controller updated for `tags`, `language`, `citationCount`
+- Collection validation/service/controller updated for `visibility`, `tags`, `coverImage`, `color`
+- Added `PATCH /collections/:collectionId/papers/:paperId` for `status`/`isStarred`
+- All collection service raw SQL queries updated to include new fields
+
+#### ✅ C. AI Recommendations (pushed)
+- New `recommendation.service.ts`: AI-suggested collections, paper suggestions, recommended papers
+- Tag-based heuristic fallback when AI unavailable
+- Routes: `GET /recommendations/collections/suggested`, `/collections/:id/suggestions`, `/papers/recommended`
+
+#### ✅ D. Paper Importer (pushed)
+- DOI import via CrossRef API
+- arXiv import via arXiv API
+- URL import with PDF download to S3
+- BibTeX/RIS file parser for batch import
+- Zotero/Mendeley/EndNote stubs (coming in Phase 4C)
+- Import history endpoint
+
+#### ✅ E. RTK Query (pushed)
+- Extended `paperApi.ts` types with `tags`, `language`, `citationCount`
+- Extended `collectionApi.ts` types with `visibility`, `tags`, `coverImage`, `color`; added `updateCollectionPaper` mutation
+- New `importApi.ts` slice
+- New `recommendationApi.ts` slice
+- Added `Recommendation` and `Import` tag types
+
+#### 🚧 F-O. Frontend Pages (in progress)
+- [x] Created papers list page at `(app)/papers/page.tsx` matching figma-make design
+- [x] Created paper detail page at `(app)/papers/[id]/page.tsx`
+- [ ] Upload, search, import, editor, AI insights pages
+- [ ] Collections list, create, detail, shared pages
 
 ### Phase 3 Summary
 - New route group architecture: `(app)/` for all users, `(admin)/` for admins only
@@ -586,6 +634,17 @@ Last updated: 2026-06-16
 - Backward-compat redirects in `proxy.ts` for legacy role-segmented URLs
 - New helpers: `getDashboardBasePath(role)` (canonical), `getRoleDashboardBasePath` (deprecated)
 - Edge cases #1, #7, #8, #9, #10, #11, #12, #13, #14, #15, #20 addressed
+
+### Deferred to Later Phases
+- **Semantic search** (pgvector embeddings) → Phase 8
+- **Global multi-paper AI assistant** → Phase 8
+- **Zotero/Mendeley/EndNote OAuth import** → Phase 4C
+
+### For Next Phases (5-8)
+- All dashboard pages MUST match corresponding `figma-make/pages/dashboard/**` designs exactly
+- Any missing dynamic data in figma designs → add to schema, routes, and RTK Query
+- Use `motion` (already installed) for animations
+- Backend raw SQL pattern: `prisma.$queryRaw<Templated SQL>` for all DB operations
 
 ---
 
