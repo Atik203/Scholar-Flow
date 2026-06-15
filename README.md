@@ -4,11 +4,17 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue)](./docs/Release.md)
+[![Version](https://img.shields.io/badge/version-1.2.2-blue)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
+
+## 📦 Recent Releases
+
+- **1.2.2 (2026-06-16)** — Patch: fixed OAuth account-switching 401s and profile-picture reset on sign-in. See [CHANGELOG.md](./CHANGELOG.md).
+- **1.2.1** — Phase 3: dashboard shell, new admin pages, user preferences.
+- **1.2.0** — Phase 2: auth pages, onboarding flow.
 
 ## 🚀 Live Demo
 
@@ -17,7 +23,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## ✨ Features
 
-### � Rich Text Editing & Paper Management
+### 📝 Rich Text Editing & Paper Management
 
 - **Rich Text Editor**: Full-featured TipTap-based editor for research papers with advanced formatting, tables, lists, and more
 - **Auto-save & Drafts**: Debounced auto-save, manual save, and draft/publish workflow with real-time status
@@ -28,7 +34,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 - **Advanced Search**: Full-text search with filters (author, date, type, keywords)
 - **PDF Preview**: Secure in-app PDF viewer with responsive design
 
-### � Sharing & Collaboration
+### 🤝 Sharing & Collaboration
 
 - **Email Sharing**: Share papers via email with permission management (view/edit)
 - **Workspace Collaboration**: Invite users to collections and workspaces with role-based access
@@ -45,14 +51,14 @@ ScholarFlow is a modern research paper management and collaboration platform des
 - **Real-time Feedback**: Loading states, error handling, and success notifications
 - **Accessibility**: WCAG compliant with keyboard navigation support
 
-### � Billing & Subscription
+### 💳 Billing & Subscription
 
 - **Stripe Checkout**: Upgrade workspaces through secure hosted checkout with plan-aware metadata
 - **Customer Portal Access**: Manage billing details, cancel, or reactivate subscriptions from Stripe without support tickets
 - **Real-Time Sync**: Webhook-driven role updates keep dashboard permissions aligned with subscription status
 - **Billing Dashboard Entry**: Dedicated navigation item and refreshed auth session to surface plan changes instantly
 
-### �🔧 Admin Dashboard & System Monitoring
+### 🛠️ Admin Dashboard & System Monitoring
 
 - **Real-Time System Metrics**: Live monitoring with 10-second auto-refresh for CPU, memory, storage, and database
 - **Accurate CPU Tracking**: Intelligent CPU usage calculation using idle/total times from Node.js os module
@@ -73,12 +79,12 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ### Frontend
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 16 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + ShadCN UI
 - **State Management**: Redux Toolkit Query
 - **Forms**: React Hook Form + Zod validation
-- **Authentication**: NextAuth.js
+- **Authentication**: better-auth (Google OAuth, GitHub OAuth, email/password)
 
 ### Backend
 
@@ -102,7 +108,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 ```text
 Scholar-Flow/
 ├── apps/
-│   ├── frontend/          # Next.js 15 application
+│   ├── frontend/          # Next.js 16 application
 │   │   ├── src/app/       # App Router pages
 │   │   ├── components/    # Reusable UI components
 │   │   ├── lib/          # Utilities and configurations
@@ -229,12 +235,13 @@ yarn reset              # Reset node_modules and rebuild
 
 ## 📚 Documentation
 
-- [**API Documentation**](./docs/API.md) - Complete API reference
-- [**UI Design System**](./docs/UI_DESIGN.md) - Component guidelines
-- [**Development Guide**](./docs/DEVELOPMENT.md) - Setup and contribution guide
-
-- [**Release Notes**](./docs/Release.md) - Version history and changes
-- [**Roadmap**](./Roadmap.md) - Feature development timeline
+- [**Changelog**](./CHANGELOG.md) - Version history and release notes
+- [**Roadmap**](./IMPLEMENTATION.md) - Phase-by-phase implementation plan and current status
+- [**Setup Guide**](./docs/SETUP.md) - Environment setup, architecture overview
+- [**Development Guide**](./docs/DEVELOPMENT.md) - Project template, contribution workflow
+- [**Branch Flow**](./docs/BRANCH_FLOW.md) - Git branching strategy
+- [**Database Schema**](./docs/ERD.md) - ERD and relational schema reference
+- [**API Reference**](http://localhost:5000/api/docs) - Live Swagger UI when backend is running
 
 ## 🤝 Contributing
 

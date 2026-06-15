@@ -5,6 +5,7 @@ import config from "../../config";
 import emailService from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import tokenService from "../../shared/tokenService";
+import { Prisma } from "../../../generated/prisma/client";
 import {
   AUTH_ERROR_MESSAGES,
   Permission,
@@ -22,20 +23,36 @@ import {
 
 class AuthService {
   /**
-   * Create or update user using Prisma with role support
+   * Create or update user using Prisma with role support.
+   *
+   * Mirrors the OAuth variant's behaviour: on UPDATE we preserve any
+   * user-customised `name` or `image` and only fill them in when the
+   * existing value is empty. `role` is refreshed on every call so that
+   * server-driven role assignment (e.g. admin promotion) is honoured.
    */
   async createOrUpdateUser(userData: IUserData) {
     try {
       const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
+      const existingUser = await prisma.user.findUnique({
+        where: { email: userData.email },
+        select: { name: true, image: true },
+      });
+
+      const updateData: Prisma.UserUpdateInput = {
+        role: role as Prisma.UserUpdateInput["role"],
+      };
+      if (!existingUser?.name) {
+        updateData.name = userData.name ?? "";
+      }
+      if (!existingUser?.image) {
+        updateData.image = userData.image ?? "";
+      }
+
       const user = await prisma.user.upsert({
         where: { email: userData.email },
-        update: {
-          name: userData.name ?? "",
-          image: userData.image ?? "",
-          role: role as any,
-        },
+        update: updateData,
         create: {
           id: userId,
           email: userData.email,
@@ -53,17 +70,24 @@ class AuthService {
   }
 
   /**
-   * Create or update user with email verified for OAuth users
+   * Create or update user with email verified for OAuth users.
+   *
+   * On UPDATE we must NOT overwrite `name` or `image` if the user has already
+   * customised them (e.g. uploaded a custom avatar to S3 via the profile
+   * page). The OAuth provider's value is only used as a fallback when the
+   * existing field is empty. Role is also never downgraded on subsequent
+   * logins.
    */
   async createOrUpdateUserWithOAuth(userData: IUserData) {
     try {
       const userId = userData.id || randomUUID();
       const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
-      // First check if user exists and is deleted
+      // First check if user exists and is deleted, and capture the current
+      // name/image so we can preserve any user-uploaded custom values.
       const existingUser = await prisma.user.findUnique({
         where: { email: userData.email },
-        select: { id: true, isDeleted: true, role: true },
+        select: { id: true, isDeleted: true, role: true, name: true, image: true },
       });
 
       if (existingUser && existingUser.isDeleted) {
@@ -73,14 +97,25 @@ class AuthService {
         );
       }
 
+      // Build the update payload conditionally: only fill in name/image from
+      // the OAuth provider when the user has no custom value yet.
+      const updateData: {
+        name?: string;
+        image?: string;
+        emailVerified: Date;
+      } = {
+        emailVerified: new Date(), // Keep email verified for OAuth users
+      };
+      if (!existingUser?.name) {
+        updateData.name = userData.name ?? "";
+      }
+      if (!existingUser?.image) {
+        updateData.image = userData.image ?? "";
+      }
+
       const user = await prisma.user.upsert({
         where: { email: userData.email },
-        update: {
-          // Only update profile info, DO NOT update role on subsequent logins
-          name: userData.name ?? "",
-          image: userData.image ?? "",
-          emailVerified: new Date(), // Keep email verified for OAuth users
-        },
+        update: updateData,
         create: {
           id: userId,
           email: userData.email,

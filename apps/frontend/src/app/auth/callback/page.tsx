@@ -37,7 +37,8 @@ export default function AuthCallbackPage() {
         session.user.role
       );
 
-      router.replace(redirectUrl);
+      // Hard navigation ensures a fresh Redux + persisted-state rehydration
+      window.location.href = redirectUrl;
     }
 
     // If authentication failed, redirect back to login

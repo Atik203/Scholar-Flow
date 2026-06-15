@@ -564,15 +564,16 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 3 Complete, Next.js 16 upgrade complete
+## Current Status: Phase 3 Complete, Next.js 16 upgrade complete, release 1.2.2 shipped
 
 Started: June 2026
 Completed: June 2026
 Completed phases: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Next.js 16 upgrade ✅
+Latest release: **1.2.2** (2026-06-16) — see [CHANGELOG.md](./CHANGELOG.md)
 Current focus: Phase 4 — Papers & Collections (10-12 pages)
 Framework: Next.js 16, React 19.2, Turbopack default
 React Compiler: enabled (do not add manual memoization)
-Last updated: June 2026
+Last updated: 2026-06-16
 
 ### Phase 3 Summary
 - New route group architecture: `(app)/` for all users, `(admin)/` for admins only
@@ -585,3 +586,11 @@ Last updated: June 2026
 - Backward-compat redirects in `proxy.ts` for legacy role-segmented URLs
 - New helpers: `getDashboardBasePath(role)` (canonical), `getRoleDashboardBasePath` (deprecated)
 - Edge cases #1, #7, #8, #9, #10, #11, #12, #13, #14, #15, #20 addressed
+
+---
+
+## Release History
+
+Patch releases (1.2.1, 1.2.2, …) and all prior release notes are tracked in
+[CHANGELOG.md](./CHANGELOG.md). This document covers the planned phase
+roadmap and current status only.
