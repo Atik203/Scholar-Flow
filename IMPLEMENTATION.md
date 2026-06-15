@@ -644,7 +644,7 @@ Last updated: 2026-06-16
 - All dashboard pages MUST match corresponding `figma-make/pages/dashboard/**` designs exactly
 - Any missing dynamic data in figma designs → add to schema, routes, and RTK Query
 - Use `motion` (already installed) for animations
-- Backend raw SQL pattern: `prisma.$queryRaw<Templated SQL>` for all DB operations
+- **Database queries:** Prefer Prisma ORM (`findMany`, `create`, `update`, etc.) for new operations. Keep existing `$queryRaw` calls as-is — do not rewrite working raw SQL unless there is a specific reason. New code should default to Prisma typed queries for type safety and readability.
 
 ---
 
