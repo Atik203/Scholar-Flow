@@ -15,6 +15,7 @@ import {
   inviteMemberSchema,
   listQuerySchema,
   paperCollectionParamsSchema,
+  updateCollectionPaperSchema,
   updateCollectionSchema,
 } from "./collection.validation";
 
@@ -174,4 +175,14 @@ collectionRoutes.get(
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   collectionController.getMembers as any
+);
+
+// Phase 4: Update paper status/starred within a collection
+collectionRoutes.patch(
+  "/:collectionId/papers/:paperId",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(paperCollectionParamsSchema) as any,
+  validateRequestBody(updateCollectionPaperSchema) as any,
+  collectionController.updateCollectionPaper as any
 );

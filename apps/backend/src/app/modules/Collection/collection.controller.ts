@@ -32,7 +32,7 @@ export const collectionController = {
       throw new ApiError(400, `Validation failed: ${errorDetails}`);
     }
 
-    const { name, description, isPublic, workspaceId } = parsed.data;
+    const { name, description, isPublic, visibility, tags, coverImage, color, workspaceId } = parsed.data;
     const userId = authReq.user.id;
 
     const workspaceRows = await prisma.$queryRaw<
@@ -105,6 +105,10 @@ export const collectionController = {
           name: string;
           description: string | null;
           isPublic: boolean;
+          visibility: string;
+          tags: string[];
+          coverImage: string | null;
+          color: string | null;
           createdAt: Date;
           updatedAt: Date;
         }>
@@ -116,6 +120,10 @@ export const collectionController = {
           name,
           description,
           "isPublic",
+          visibility,
+          tags,
+          "coverImage",
+          color,
           "createdAt",
           "updatedAt",
           "isDeleted"
@@ -126,11 +134,15 @@ export const collectionController = {
           ${name},
           ${description ?? null},
           ${isPublic ?? false},
+          ${visibility ?? "PRIVATE"}::"CollectionVisibility",
+          ${tags ?? []}::text[],
+          ${coverImage ?? null},
+          ${color ?? null},
           NOW(),
           NOW(),
           false
         )
-        RETURNING id, "workspaceId", "ownerId", name, description, "isPublic", "createdAt", "updatedAt"
+        RETURNING id, "workspaceId", "ownerId", name, description, "isPublic", visibility, tags, "coverImage", color, "createdAt", "updatedAt"
       `;
 
       const collectionRow = collectionRows[0];
@@ -192,6 +204,10 @@ export const collectionController = {
         name: collectionRow.name,
         description: collectionRow.description,
         isPublic: collectionRow.isPublic,
+        visibility: collectionRow.visibility,
+        tags: collectionRow.tags || [],
+        coverImage: collectionRow.coverImage,
+        color: collectionRow.color,
         createdAt: collectionRow.createdAt,
         updatedAt: collectionRow.updatedAt,
         owner: owner
@@ -775,6 +791,10 @@ export const collectionController = {
         name: string;
         description: string | null;
         isPublic: boolean;
+        visibility: string;
+        tags: string[];
+        coverImage: string | null;
+        color: string | null;
         createdAt: Date;
         updatedAt: Date;
         ownerName: string | null;
@@ -790,6 +810,10 @@ export const collectionController = {
         c.name,
         c.description,
         c."isPublic",
+        c.visibility::text AS "visibility",
+        c.tags,
+        c."coverImage",
+        c.color,
         c."createdAt",
         c."updatedAt",
         u.name AS "ownerName",
@@ -907,6 +931,10 @@ export const collectionController = {
       name: collectionData.name,
       description: collectionData.description,
       isPublic: collectionData.isPublic,
+      visibility: collectionData.visibility,
+      tags: collectionData.tags || [],
+      coverImage: collectionData.coverImage,
+      color: collectionData.color,
       createdAt: collectionData.createdAt,
       updatedAt: collectionData.updatedAt,
       owner: {
@@ -966,7 +994,7 @@ export const collectionController = {
       );
     }
 
-    const { name, description, isPublic } = parsed.data;
+    const { name, description, isPublic, visibility, tags, coverImage, color } = parsed.data;
 
     // Build update statement dynamically
     const updateFields: string[] = [];
@@ -978,6 +1006,18 @@ export const collectionController = {
     }
     if (isPublic !== undefined) {
       updateFields.push("isPublic");
+    }
+    if (visibility !== undefined) {
+      updateFields.push("visibility");
+    }
+    if (tags !== undefined) {
+      updateFields.push("tags");
+    }
+    if (coverImage !== undefined) {
+      updateFields.push("coverImage");
+    }
+    if (color !== undefined) {
+      updateFields.push("color");
     }
 
     if (updateFields.length === 0) {
@@ -1010,6 +1050,42 @@ export const collectionController = {
         prisma.$executeRaw`
           UPDATE "Collection"
           SET "isPublic" = ${isPublic}, "updatedAt" = NOW()
+          WHERE id = ${id}
+        `
+      );
+    }
+    if (visibility !== undefined) {
+      updatePromises.push(
+        prisma.$executeRaw`
+          UPDATE "Collection"
+          SET visibility = ${visibility}::"CollectionVisibility", "updatedAt" = NOW()
+          WHERE id = ${id}
+        `
+      );
+    }
+    if (tags !== undefined) {
+      updatePromises.push(
+        prisma.$executeRaw`
+          UPDATE "Collection"
+          SET tags = ${tags}::text[], "updatedAt" = NOW()
+          WHERE id = ${id}
+        `
+      );
+    }
+    if (coverImage !== undefined) {
+      updatePromises.push(
+        prisma.$executeRaw`
+          UPDATE "Collection"
+          SET "coverImage" = ${coverImage}, "updatedAt" = NOW()
+          WHERE id = ${id}
+        `
+      );
+    }
+    if (color !== undefined) {
+      updatePromises.push(
+        prisma.$executeRaw`
+          UPDATE "Collection"
+          SET color = ${color}, "updatedAt" = NOW()
           WHERE id = ${id}
         `
       );
@@ -1628,5 +1704,68 @@ export const collectionController = {
       { page, limit, total, totalPage },
       "Collection papers retrieved successfully"
     );
+  }),
+
+  // Phase 4: Update reading status or star a paper within a collection
+  updateCollectionPaper: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
+    const { collectionId, paperId } = req.params;
+    const { status, isStarred } = req.body;
+    const userId = authReq.user.id;
+
+    // Check if the CollectionPaper relationship exists and user has access
+    const cpRows = await prisma.$queryRaw<Array<{ id: string; addedById: string }>>`
+      SELECT cp.id, cp."addedById"
+      FROM "CollectionPaper" cp
+      WHERE cp."collectionId" = ${collectionId}
+        AND cp."paperId" = ${paperId}
+        AND cp."isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (!cpRows.length) {
+      throw new ApiError(404, "Paper not found in this collection");
+    }
+
+    // Check permission: must be the owner of the collection or have EDIT permission
+    const hasPermission = await CollectionService.hasEditPermission(
+      collectionId,
+      userId
+    );
+    if (!hasPermission) {
+      throw new ApiError(
+        403,
+        "Access denied: You don't have edit permission for this collection"
+      );
+    }
+
+    // Build update dynamically based on provided fields
+    const setClauses: string[] = [];
+    setClauses.push(`"updatedAt" = NOW()`);
+
+    if (status !== undefined) {
+      setClauses.push(`status = ${status}::"CollectionPaperStatus"`);
+    }
+    if (isStarred !== undefined) {
+      setClauses.push(`"isStarred" = ${isStarred}`);
+    }
+
+    if (setClauses.length <= 1) {
+      throw new ApiError(400, "No fields to update");
+    }
+
+    const setSql = setClauses.join(", ");
+
+    await prisma.$executeRawUnsafe(`
+      UPDATE "CollectionPaper"
+      SET ${setSql}
+      WHERE id = ${cpRows[0].id}
+    `);
+
+    sendSuccessResponse(res, null, "Collection paper updated successfully");
   }),
 };

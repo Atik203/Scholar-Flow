@@ -35,6 +35,19 @@ export const uploadPaperSchema = z.object({
     )
     .optional(),
   source: z.string().optional(),
+  tags: z
+    .preprocess(
+      (v) => {
+        if (typeof v === "string") {
+          try { return JSON.parse(v); } catch { return undefined; }
+        }
+        return v;
+      },
+      z.array(z.string().min(1).max(60)).max(20).optional()
+    )
+    .optional(),
+  language: z.string().max(10).optional(),
+  citationCount: z.coerce.number().int().min(0).optional(),
 });
 
 export const listPapersQuerySchema = z.object({
@@ -61,6 +74,9 @@ export const updatePaperMetadataSchema = z.object({
         .optional()
     )
     .optional(),
+  tags: z.array(z.string().min(1).max(60)).max(20).optional(),
+  language: z.string().max(10).optional(),
+  citationCount: z.number().int().min(0).optional(),
 });
 
 export type UploadPaperInput = z.infer<typeof uploadPaperSchema>;
