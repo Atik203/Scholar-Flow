@@ -1,5 +1,77 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.2 — Patch: Auth reliability + admin sidebar unification (2026-06-16)
+
+**Release date:** 2026-06-16
+**Theme:** Patch release. No new features. Two production-impacting bugs fixed: (1) OAuth account switching lost user state and produced 401s from stale Redux-Persist, (2) every OAuth login reset the user's uploaded profile picture to the provider's avatar.
+
+---
+
+### 🐛 Critical bug fixes
+
+#### 1. OAuth account switching — stale Redux-Persist caused 401s and wrong user shown
+
+**Symptom:** After signing out of Google Account A and signing in with Google Account B, the dashboard showed a stale/generic user and the backend logged `Auth Middleware - Authorization header: undefined` followed by `GLOBAL ERROR HANDLER CAUGHT: 'Unauthorized access'`. Switching accounts appeared to "succeed" (toast shown) but the user data was wrong.
+
+**Root cause:** Three independent issues compounded:
+- `clearCredentials` on sign-out cleared in-memory Redux, but redux-persist's localStorage write was scheduled on a microtask that got killed by the subsequent `window.location.replace`. The next page rehydrated stale state.
+- The OAuth callback used soft navigation (`router.push` / `router.replace`) which kept the previous React tree mounted. `useGetCurrentUserQuery` and other dashboard queries could fire with the stale (or no) access token.
+- `useGetCurrentUserQuery` was gated only by `Boolean(accessToken || isAuthenticated)` — if Redux said `isAuthenticated: true` from a stale persist rehydration but the token was null, it fired a request with no `Authorization` header.
+
+**Fix:**
+- `apps/frontend/src/lib/auth/signout.ts` — full rewrite as a 7-step purge: reset RTK cache → `persistor.purge()` → `clearCredentials` → `flushPersistedState()` → `clearAuthCookie` → direct `document.cookie` clear for `better-auth.session_token` (and related) → best-effort `DELETE /api/auth/session/delete` (with 2s `AbortController` timeout) → `window.location.href` (hard nav).
+- `apps/frontend/src/redux/storeAccess.ts` — added `setAppPersistor` / `getPersistor` accessors; `ReduxProvider` now registers the persistor on mount.
+- `apps/frontend/src/lib/auth/authHelpers.ts` — both `signInWithCredentials` and `completeOAuthSignIn` now call `await flushAuthState()` (which awaits `persistor.flush()`) BEFORE returning, guaranteeing the new credentials are written to localStorage before the caller navigates.
+- `apps/frontend/src/app/auth/callback/{page,google/page,github/page}.tsx` — final `router.push` / `router.replace` on success replaced with `window.location.href` so the next page rehydrates from a freshly-written localStorage.
+- `apps/frontend/src/components/providers/AuthProvider.tsx` — `shouldFetchUser` tightened to `Boolean(accessToken && accessToken.length > 0)` (must be a non-empty string, not just truthy `isAuthenticated`). `fetchedUserVersionKey` now includes `email`, so account switches always trigger a `setCredentials` re-sync.
+- `apps/frontend/src/redux/api/apiSlice.ts` — added dev-only `console.warn` when a request fires without a token. This is the diagnostic that surfaced the bug; safe to keep (gated on `NODE_ENV !== 'production'`).
+
+**Removed:** The `authClient.signOut()` call from the sign-out flow. It was importing `authClient` from `authClient.ts`, whose transitive imports pulled server-only modules (`better-auth/next-js`, `node:crypto`) into the client bundle, breaking the client/server boundary. Clearing the better-auth cookies directly via `document.cookie` is sufficient and safe.
+
+#### 2. OAuth sign-in reset custom profile picture and name
+
+**Symptom:** A user who uploaded a custom avatar via the profile page (stored in S3) saw it replaced by the OAuth provider's avatar on every subsequent OAuth sign-in. Same bug affected `name`.
+
+**Root cause:** `apps/backend/src/app/modules/Auth/auth.service.ts:createOrUpdateUserWithOAuth` (and the parallel `createOrUpdateUser`) overwrote `name` and `image` on every upsert:
+
+```ts
+update: {
+  name: userData.name ?? "",
+  image: userData.image ?? "",
+  emailVerified: new Date(),
+}
+```
+
+**Fix:**
+- `createOrUpdateUserWithOAuth` now reads the existing user's `name` and `image` first, and only fills them in on update if the existing values are empty. `emailVerified` is always refreshed; `role` is preserved as before.
+- `createOrUpdateUser` (defense in depth — currently only called by tests, not by any sign-in flow) got the same treatment. Imported `Prisma.UserUpdateInput` for proper typing.
+
+**Behavior matrix:**
+
+| Scenario | Result |
+|---|---|
+| First OAuth sign-in (new user) | name + image = provider's values |
+| Returning user, no custom upload | name + image = provider's values (preserved from first login) |
+| Returning user, uploaded custom S3 image | image preserved ✅ |
+| Returning user, customized their name | name preserved ✅ |
+| Email verification timestamp | Always refreshed on every OAuth login |
+
+---
+
+### 🧪 Quality
+
+- `yarn type-check` — passes (both apps)
+- `yarn lint` (backend) — 0 errors
+- `yarn lint` (frontend) — pre-existing env issue with `eslint-config-next` resolution from root `node_modules`, unrelated to this release
+
+---
+
+### 🔜 What's next
+
+Phase 4 — Papers & Collections (10-12 pages): paper upload flow, paper list with grid/table view, paper detail with AI insights, collection CRUD, collection sharing.
+
+---
+
 ## Release 1.2.1 — Phase 3 of IMPLEMENTATION.md (Dashboard Shell & Core Pages)
 
 **Release date:** June 2026

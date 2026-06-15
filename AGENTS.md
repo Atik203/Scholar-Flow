@@ -138,6 +138,26 @@ NEVER bypass auth middleware on protected routes.
 NEVER store raw passwords — always bcrypt.
 Session validation: backend verifies JWT, frontend uses NextAuth session.
 
+### Auth-state persistence (learned the hard way in 1.2.2)
+
+After any auth-state dispatch (`setCredentials` / `clearCredentials`) and BEFORE any `window.location.href` navigation, you MUST `await persistor.flush()`. redux-persist schedules localStorage writes on a microtask; a hard navigation kills that microtask and the next page rehydrates stale state. The 401 cascade and "wrong user shown" bugs in 1.2.1 came from skipping this.
+
+- `apps/frontend/src/lib/authHelpers.ts:signInWithCredentials` and `:completeOAuthSignIn` both call `await flushAuthState()` before returning
+- `apps/frontend/src/lib/auth/signout.ts` is the canonical 7-step purge — copy that order, do not invent a new flow
+- OAuth callback pages MUST use `window.location.href` on success, not `router.push` / `router.replace` (soft nav keeps the old tree mounted)
+
+### better-auth client/server boundary
+
+`authClient` (from `lib/auth/authClient.ts`) transitively imports `better-auth/next-js` and `node:crypto` — both server-only. Never import `authClient` from any client-side auth utility (`signout.ts`, `authHelpers.ts`, etc.). Clear better-auth cookies via `document.cookie` directly. The ChunkLoadError in 1.2.2 came from violating this.
+
+### RTK Query auth-guard pattern
+
+`shouldFetchUser = Boolean(accessToken && accessToken.length > 0)` — never use `isAuthenticated` alone for guarding queries. Stale persist rehydration can leave `isAuthenticated: true` with `accessToken: null`. The dev-only `console.warn` in `apiSlice.ts:prepareHeaders` surfaces this and must stay.
+
+### OAuth profile preservation
+
+`createOrUpdateUserWithOAuth` and `createOrUpdateUser` must NEVER overwrite `name` or `image` on update — only fill them in if the existing value is empty. Custom uploads (S3) and renamed profiles belong to the user, not the OAuth provider. `emailVerified` is always refreshed.
+
 ---
 
 ## Stripe Rules (critical — production money flows)
