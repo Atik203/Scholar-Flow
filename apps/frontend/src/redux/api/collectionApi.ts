@@ -8,6 +8,10 @@ export interface Collection {
   name: string;
   description?: string;
   isPublic: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string | null;
+  color?: string | null;
   createdAt: string;
   updatedAt: string;
   owner: {
@@ -52,6 +56,10 @@ export interface CreateCollectionRequest {
   name: string;
   description?: string;
   isPublic?: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string;
+  color?: string;
   workspaceId: string;
 }
 
@@ -59,6 +67,10 @@ export interface UpdateCollectionRequest {
   name?: string;
   description?: string;
   isPublic?: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string;
+  color?: string;
 }
 
 export interface CollectionPaper {
@@ -405,6 +417,21 @@ export const collectionApi = apiSlice.injectEndpoints({
         "CollectionInvite",
       ],
     }),
+    // Phase 4: Update reading status or star a paper within a collection
+    updateCollectionPaper: builder.mutation<
+      void,
+      { collectionId: string; paperId: string; status?: "TO_READ" | "READING" | "COMPLETED" | "ARCHIVED"; isStarred?: boolean }
+    >({
+      query: ({ collectionId, paperId, ...data }) => ({
+        url: `/collections/${collectionId}/papers/${paperId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { collectionId }) => [
+        { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
+      ],
+    }),
   }),
 });
 
@@ -427,4 +454,6 @@ export const {
   useDeclineInviteMutation,
   useGetInvitesSentQuery,
   useGetInvitesReceivedQuery,
+  // Phase 4
+  useUpdateCollectionPaperMutation,
 } = collectionApi;
