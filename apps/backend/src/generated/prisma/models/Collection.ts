@@ -31,6 +31,9 @@ export type CollectionMinAggregateOutputType = {
   name: string | null
   description: string | null
   isPublic: boolean | null
+  visibility: $Enums.CollectionVisibility | null
+  coverImage: string | null
+  color: string | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -43,6 +46,9 @@ export type CollectionMaxAggregateOutputType = {
   name: string | null
   description: string | null
   isPublic: boolean | null
+  visibility: $Enums.CollectionVisibility | null
+  coverImage: string | null
+  color: string | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -55,6 +61,10 @@ export type CollectionCountAggregateOutputType = {
   name: number
   description: number
   isPublic: number
+  visibility: number
+  tags: number
+  coverImage: number
+  color: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -69,6 +79,9 @@ export type CollectionMinAggregateInputType = {
   name?: true
   description?: true
   isPublic?: true
+  visibility?: true
+  coverImage?: true
+  color?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -81,6 +94,9 @@ export type CollectionMaxAggregateInputType = {
   name?: true
   description?: true
   isPublic?: true
+  visibility?: true
+  coverImage?: true
+  color?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -93,6 +109,10 @@ export type CollectionCountAggregateInputType = {
   name?: true
   description?: true
   isPublic?: true
+  visibility?: true
+  tags?: true
+  coverImage?: true
+  color?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -178,6 +198,10 @@ export type CollectionGroupByOutputType = {
   name: string
   description: string | null
   isPublic: boolean
+  visibility: $Enums.CollectionVisibility
+  tags: string[]
+  coverImage: string | null
+  color: string | null
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -211,6 +235,10 @@ export type CollectionWhereInput = {
   name?: Prisma.StringFilter<"Collection"> | string
   description?: Prisma.StringNullableFilter<"Collection"> | string | null
   isPublic?: Prisma.BoolFilter<"Collection"> | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFilter<"Collection"> | $Enums.CollectionVisibility
+  tags?: Prisma.StringNullableListFilter<"Collection">
+  coverImage?: Prisma.StringNullableFilter<"Collection"> | string | null
+  color?: Prisma.StringNullableFilter<"Collection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Collection"> | boolean
@@ -229,6 +257,10 @@ export type CollectionOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  color?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -250,6 +282,10 @@ export type CollectionWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Collection"> | string
   description?: Prisma.StringNullableFilter<"Collection"> | string | null
   isPublic?: Prisma.BoolFilter<"Collection"> | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFilter<"Collection"> | $Enums.CollectionVisibility
+  tags?: Prisma.StringNullableListFilter<"Collection">
+  coverImage?: Prisma.StringNullableFilter<"Collection"> | string | null
+  color?: Prisma.StringNullableFilter<"Collection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Collection"> | boolean
@@ -268,6 +304,10 @@ export type CollectionOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
+  color?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -286,6 +326,10 @@ export type CollectionScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Collection"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Collection"> | string | null
   isPublic?: Prisma.BoolWithAggregatesFilter<"Collection"> | boolean
+  visibility?: Prisma.EnumCollectionVisibilityWithAggregatesFilter<"Collection"> | $Enums.CollectionVisibility
+  tags?: Prisma.StringNullableListFilter<"Collection">
+  coverImage?: Prisma.StringNullableWithAggregatesFilter<"Collection"> | string | null
+  color?: Prisma.StringNullableWithAggregatesFilter<"Collection"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Collection"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Collection"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Collection"> | boolean
@@ -296,6 +340,10 @@ export type CollectionCreateInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -314,6 +362,10 @@ export type CollectionUncheckedCreateInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -328,6 +380,10 @@ export type CollectionUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -346,6 +402,10 @@ export type CollectionUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -362,6 +422,10 @@ export type CollectionCreateManyInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -372,6 +436,10 @@ export type CollectionUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -384,6 +452,10 @@ export type CollectionUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -406,6 +478,10 @@ export type CollectionCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  coverImage?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -418,6 +494,9 @@ export type CollectionMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  coverImage?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -430,6 +509,9 @@ export type CollectionMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  coverImage?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -529,6 +611,19 @@ export type CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput = {
   deleteMany?: Prisma.CollectionScalarWhereInput | Prisma.CollectionScalarWhereInput[]
 }
 
+export type CollectionCreatetagsInput = {
+  set: string[]
+}
+
+export type EnumCollectionVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.CollectionVisibility
+}
+
+export type CollectionUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
 export type CollectionCreateNestedOneWithoutPapersInput = {
   create?: Prisma.XOR<Prisma.CollectionCreateWithoutPapersInput, Prisma.CollectionUncheckedCreateWithoutPapersInput>
   connectOrCreate?: Prisma.CollectionCreateOrConnectWithoutPapersInput
@@ -594,6 +689,10 @@ export type CollectionCreateWithoutOwnerInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -610,6 +709,10 @@ export type CollectionUncheckedCreateWithoutOwnerInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -655,6 +758,10 @@ export type CollectionScalarWhereInput = {
   name?: Prisma.StringFilter<"Collection"> | string
   description?: Prisma.StringNullableFilter<"Collection"> | string | null
   isPublic?: Prisma.BoolFilter<"Collection"> | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFilter<"Collection"> | $Enums.CollectionVisibility
+  tags?: Prisma.StringNullableListFilter<"Collection">
+  coverImage?: Prisma.StringNullableFilter<"Collection"> | string | null
+  color?: Prisma.StringNullableFilter<"Collection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Collection"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Collection"> | boolean
@@ -665,6 +772,10 @@ export type CollectionCreateWithoutWorkspaceInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -681,6 +792,10 @@ export type CollectionUncheckedCreateWithoutWorkspaceInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -721,6 +836,10 @@ export type CollectionCreateWithoutPapersInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -738,6 +857,10 @@ export type CollectionUncheckedCreateWithoutPapersInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -767,6 +890,10 @@ export type CollectionUpdateWithoutPapersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -784,6 +911,10 @@ export type CollectionUncheckedUpdateWithoutPapersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -797,6 +928,10 @@ export type CollectionCreateWithoutMembersInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -814,6 +949,10 @@ export type CollectionUncheckedCreateWithoutMembersInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -843,6 +982,10 @@ export type CollectionUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -860,6 +1003,10 @@ export type CollectionUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -873,6 +1020,10 @@ export type CollectionCreateWithoutCitationExportsInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -890,6 +1041,10 @@ export type CollectionUncheckedCreateWithoutCitationExportsInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -919,6 +1074,10 @@ export type CollectionUpdateWithoutCitationExportsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -936,6 +1095,10 @@ export type CollectionUncheckedUpdateWithoutCitationExportsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -949,6 +1112,10 @@ export type CollectionCreateWithoutDiscussionThreadsInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -966,6 +1133,10 @@ export type CollectionUncheckedCreateWithoutDiscussionThreadsInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -995,6 +1166,10 @@ export type CollectionUpdateWithoutDiscussionThreadsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1012,6 +1187,10 @@ export type CollectionUncheckedUpdateWithoutDiscussionThreadsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1026,6 +1205,10 @@ export type CollectionCreateManyOwnerInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1036,6 +1219,10 @@ export type CollectionUpdateWithoutOwnerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1052,6 +1239,10 @@ export type CollectionUncheckedUpdateWithoutOwnerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1067,6 +1258,10 @@ export type CollectionUncheckedUpdateManyWithoutOwnerInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1078,6 +1273,10 @@ export type CollectionCreateManyWorkspaceInput = {
   name: string
   description?: string | null
   isPublic?: boolean
+  visibility?: $Enums.CollectionVisibility
+  tags?: Prisma.CollectionCreatetagsInput | string[]
+  coverImage?: string | null
+  color?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1088,6 +1287,10 @@ export type CollectionUpdateWithoutWorkspaceInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1104,6 +1307,10 @@ export type CollectionUncheckedUpdateWithoutWorkspaceInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1119,6 +1326,10 @@ export type CollectionUncheckedUpdateManyWithoutWorkspaceInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  visibility?: Prisma.EnumCollectionVisibilityFieldUpdateOperationsInput | $Enums.CollectionVisibility
+  tags?: Prisma.CollectionUpdatetagsInput | string[]
+  coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1189,6 +1400,10 @@ export type CollectionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   name?: boolean
   description?: boolean
   isPublic?: boolean
+  visibility?: boolean
+  tags?: boolean
+  coverImage?: boolean
+  color?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1208,6 +1423,10 @@ export type CollectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   description?: boolean
   isPublic?: boolean
+  visibility?: boolean
+  tags?: boolean
+  coverImage?: boolean
+  color?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1222,6 +1441,10 @@ export type CollectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   description?: boolean
   isPublic?: boolean
+  visibility?: boolean
+  tags?: boolean
+  coverImage?: boolean
+  color?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1236,12 +1459,16 @@ export type CollectionSelectScalar = {
   name?: boolean
   description?: boolean
   isPublic?: boolean
+  visibility?: boolean
+  tags?: boolean
+  coverImage?: boolean
+  color?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type CollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "ownerId" | "name" | "description" | "isPublic" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collection"]>
+export type CollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "ownerId" | "name" | "description" | "isPublic" | "visibility" | "tags" | "coverImage" | "color" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collection"]>
 export type CollectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -1277,6 +1504,10 @@ export type $CollectionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     name: string
     description: string | null
     isPublic: boolean
+    visibility: $Enums.CollectionVisibility
+    tags: string[]
+    coverImage: string | null
+    color: string | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1715,6 +1946,10 @@ export interface CollectionFieldRefs {
   readonly name: Prisma.FieldRef<"Collection", 'String'>
   readonly description: Prisma.FieldRef<"Collection", 'String'>
   readonly isPublic: Prisma.FieldRef<"Collection", 'Boolean'>
+  readonly visibility: Prisma.FieldRef<"Collection", 'CollectionVisibility'>
+  readonly tags: Prisma.FieldRef<"Collection", 'String[]'>
+  readonly coverImage: Prisma.FieldRef<"Collection", 'String'>
+  readonly color: Prisma.FieldRef<"Collection", 'String'>
   readonly createdAt: Prisma.FieldRef<"Collection", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Collection", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"Collection", 'Boolean'>

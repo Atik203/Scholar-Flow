@@ -216,6 +216,9 @@ export const PaperScalarFieldEnum = {
   originalMimeType: 'originalMimeType',
   contentHtml: 'contentHtml',
   extractionVersion: 'extractionVersion',
+  tags: 'tags',
+  language: 'language',
+  citationCount: 'citationCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -311,6 +314,10 @@ export const CollectionScalarFieldEnum = {
   name: 'name',
   description: 'description',
   isPublic: 'isPublic',
+  visibility: 'visibility',
+  tags: 'tags',
+  coverImage: 'coverImage',
+  color: 'color',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -325,6 +332,8 @@ export const CollectionPaperScalarFieldEnum = {
   paperId: 'paperId',
   addedById: 'addedById',
   addedAt: 'addedAt',
+  status: 'status',
+  isStarred: 'isStarred',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
