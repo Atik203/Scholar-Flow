@@ -3349,6 +3349,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         args: [query: string, ...values: any[]],
         result: any
       }
+      $queryRawTyped: {
+        args: runtime.UnknownTypedSql,
+        result: JsonObject
+      }
     }
   }
 }
@@ -3475,6 +3479,9 @@ export const PaperScalarFieldEnum = {
   originalMimeType: 'originalMimeType',
   contentHtml: 'contentHtml',
   extractionVersion: 'extractionVersion',
+  tags: 'tags',
+  language: 'language',
+  citationCount: 'citationCount',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -3570,6 +3577,10 @@ export const CollectionScalarFieldEnum = {
   name: 'name',
   description: 'description',
   isPublic: 'isPublic',
+  visibility: 'visibility',
+  tags: 'tags',
+  coverImage: 'coverImage',
+  color: 'color',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -3584,6 +3595,8 @@ export const CollectionPaperScalarFieldEnum = {
   paperId: 'paperId',
   addedById: 'addedById',
   addedAt: 'addedAt',
+  status: 'status',
+  isStarred: 'isStarred',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -4217,6 +4230,34 @@ export type EnumAnnotationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'AnnotationType[]'
  */
 export type ListEnumAnnotationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AnnotationType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CollectionVisibility'
+ */
+export type EnumCollectionVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'CollectionVisibility[]'
+ */
+export type ListEnumCollectionVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionVisibility[]'>
+    
+
+
+/**
+ * Reference to a field of type 'CollectionPaperStatus'
+ */
+export type EnumCollectionPaperStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionPaperStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'CollectionPaperStatus[]'
+ */
+export type ListEnumCollectionPaperStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CollectionPaperStatus[]'>
     
 
 
