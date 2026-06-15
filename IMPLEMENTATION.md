@@ -564,15 +564,16 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 
 ---
 
-## Current Status: Phase 3 Complete, Next.js 16 upgrade complete
+## Current Status: Phase 3 Complete, Next.js 16 upgrade complete, release 1.2.2 shipped
 
 Started: June 2026
 Completed: June 2026
 Completed phases: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Next.js 16 upgrade ✅
+Latest release: **1.2.2** (2026-06-16) — see [CHANGELOG.md](./CHANGELOG.md)
 Current focus: Phase 4 — Papers & Collections (10-12 pages)
 Framework: Next.js 16, React 19.2, Turbopack default
 React Compiler: enabled (do not add manual memoization)
-Last updated: June 2026
+Last updated: 2026-06-16
 
 ### Phase 3 Summary
 - New route group architecture: `(app)/` for all users, `(admin)/` for admins only
@@ -588,54 +589,8 @@ Last updated: June 2026
 
 ---
 
-## Release 1.2.2 — Patch: Auth reliability + admin sidebar unification
+## Release History
 
-Started: 2026-06-16
-Completed: 2026-06-16
-No new phase scope. Patch release fixing two production-impacting bugs discovered after Phase 3 ship.
-
-### Bug fixes (no `[ ]` items — these were unplanned, post-release fixes)
-
-- [x] **OAuth account switching — stale Redux-Persist caused 401s and wrong user shown**
-  - Root cause: `clearCredentials` on sign-out didn't synchronously flush redux-persist; subsequent `window.location.replace` killed the microtask before localStorage was written
-  - Root cause: OAuth callback used soft nav (`router.push` / `router.replace`) so the previous React tree stayed mounted and queries fired with stale token
-  - Root cause: `useGetCurrentUserQuery` was gated only by `Boolean(accessToken || isAuthenticated)` — fired with no header when `isAuthenticated: true` from stale rehydration but `accessToken: null`
-  - Fix: full rewrite of `signout.ts` as 7-step purge; added `setAppPersistor` / `getPersistor` accessors in `storeAccess.ts`; `completeOAuthSignIn` and `signInWithCredentials` now `await persistor.flush()` before returning; OAuth callback pages use `window.location.href` on success; `AuthProvider` query guard tightened; `fetchedUserVersionKey` includes `email`; dev-only `console.warn` in `apiSlice` for missing-token requests
-  - Removed: `authClient.signOut()` from sign-out flow (it was pulling server-only modules `better-auth/next-js` + `node:crypto` into the client bundle via transitive import)
-
-- [x] **OAuth sign-in reset custom profile picture and name**
-  - Root cause: `createOrUpdateUserWithOAuth` (and parallel `createOrUpdateUser`) overwrote `name` and `image` on every upsert
-  - Fix: both methods now read existing `name` and `image` first, only fill in on update if existing values are empty; `emailVerified` always refreshed; `role` preserved on OAuth, refreshed on non-OAuth
-  - Imported `Prisma.UserUpdateInput` from `generated/prisma/client` for proper typing
-
-### Files changed
-
-**Frontend (auth reliability)**
-- `apps/frontend/src/lib/auth/signout.ts` — full rewrite
-- `apps/frontend/src/redux/storeAccess.ts` — persistor accessors
-- `apps/frontend/src/components/providers/ReduxProvider.tsx` — register persistor
-- `apps/frontend/src/lib/auth/authHelpers.ts` — `await persistor.flush()` after `setCredentials`
-- `apps/frontend/src/app/auth/callback/page.tsx` — `window.location.href` on success
-- `apps/frontend/src/app/auth/callback/google/page.tsx` — `window.location.href` on success
-- `apps/frontend/src/app/auth/callback/github/page.tsx` — `window.location.href` on success
-- `apps/frontend/src/components/providers/AuthProvider.tsx` — query guard + version key
-- `apps/frontend/src/redux/api/apiSlice.ts` — dev-only token warning
-
-**Backend (profile preservation)**
-- `apps/backend/src/app/modules/Auth/auth.service.ts` — `createOrUpdateUserWithOAuth` and `createOrUpdateUser` preserve custom `name` and `image`
-
-### Edge cases addressed
-- **#21** (auth state race): persistor must be flushed after every auth-state dispatch BEFORE any hard navigation
-- **#22** (better-auth client/server boundary): never import `authClient` from client-side auth utilities; clear better-auth cookies via `document.cookie` only
-- **#23** (OAuth upsert): user-customised profile fields must never be overwritten by OAuth provider values on subsequent sign-ins
-
-### Quality gates
-- `yarn type-check` — passes (both apps)
-- `yarn lint` (backend) — 0 errors
-- `yarn lint` (frontend) — pre-existing env issue, unrelated
-
-### Release artefacts
-- `package.json` (root, `apps/frontend`, `apps/backend`) — bumped to `1.2.2`
-- `CHANGELOG.md` — 1.2.2 entry prepended
-- `docs/Release.md` — 1.2.2 entry prepended
-- `README.md` — version badge updated to `1.2.2`
+Patch releases (1.2.1, 1.2.2, …) and all prior release notes are tracked in
+[CHANGELOG.md](./CHANGELOG.md). This document covers the planned phase
+roadmap and current status only.
