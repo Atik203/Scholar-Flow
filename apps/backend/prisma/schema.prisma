@@ -1,6 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
@@ -26,6 +27,21 @@ enum WorkspaceRole {
 enum CollectionPermission {
   VIEW // Read-only access - can view collection and papers
   EDIT // Full access - can edit, add/remove papers, delete collection
+}
+
+// Collection visibility for figma-make UI (replaces boolean isPublic in Phase 4 subtask B)
+enum CollectionVisibility {
+  PRIVATE // Only the owner can see this collection
+  TEAM // Anyone in the workspace can see this collection
+  PUBLIC // Anyone with a link can see this collection
+}
+
+// Reading status of a paper within a specific collection (figma-make design)
+enum CollectionPaperStatus {
+  TO_READ
+  READING
+  COMPLETED
+  ARCHIVED
 }
 
 enum AnnotationType {
@@ -118,8 +134,8 @@ model User {
   emailVerificationToken String? // For email verification
 
   // Onboarding flow fields (Phase 2)
-  onboardingCompleted Boolean  @default(false)
-  onboardingStep      Int      @default(0)
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
 
   // Stripe subscription fields
   stripeCustomerId       String?   @unique
@@ -272,6 +288,11 @@ model Paper {
   contentHtml       String? // Sanitized HTML content for rich text editor
   extractionVersion Int     @default(1) // Version for extraction algorithm
 
+  // Phase 4 - Enhanced metadata for figma-make UI
+  tags          String[] @default([]) // User-defined tags for filtering and grouping
+  language      String? // ISO language code (e.g., "en", "es", "fr")
+  citationCount Int      @default(0) // External citation count (populated on import/extraction)
+
   uploader          User               @relation("PaperUploader", fields: [uploaderId], references: [id])
   workspace         Workspace          @relation(fields: [workspaceId], references: [id])
   file              PaperFile?
@@ -301,6 +322,7 @@ model Paper {
   @@index([uploaderId, isDeleted]) // User's all papers (cross-workspace)
   @@index([isDraft, isDeleted]) // Filter draft papers
   @@index([doi, isDeleted]) // DOI lookups
+  @@index([tags]) // Tag-based filtering (figma-make UI)
 }
 
 model PaperFile {
@@ -406,12 +428,19 @@ model AnnotationVersion {
 }
 
 model Collection {
-  id          String  @id @default(uuid())
+  id          String               @id @default(uuid())
   workspaceId String
   ownerId     String
   name        String
   description String?
-  isPublic    Boolean @default(false)
+  // Deprecated: kept in Phase 4 subtask A to avoid breaking existing routes.
+  // Will be removed in subtask B once all queries are migrated to `visibility`.
+  isPublic    Boolean              @default(false)
+  // Phase 4 - figma-make UI: replaces isPublic with a 3-state enum
+  visibility  CollectionVisibility @default(PRIVATE)
+  tags        String[]             @default([]) // User-defined tags for filtering
+  coverImage  String? // S3 key or URL for the collection cover image
+  color       String? // UI accent color (e.g., "blue", "purple", "green", "orange", "pink")
 
   owner     User      @relation("CollectionOwner", fields: [ownerId], references: [id])
   workspace Workspace @relation(fields: [workspaceId], references: [id])
@@ -429,14 +458,19 @@ model Collection {
 
   @@index([workspaceId, isDeleted])
   @@index([ownerId, isDeleted, createdAt]) // Optimized for getUserCollections query
+  @@index([tags]) // Tag-based filtering (figma-make UI)
+  @@index([visibility, isDeleted]) // Visibility-filtered collection listings
 }
 
 model CollectionPaper {
-  id           String   @id @default(uuid())
+  id           String                @id @default(uuid())
   collectionId String
   paperId      String
   addedById    String
-  addedAt      DateTime @default(now())
+  addedAt      DateTime              @default(now())
+  // Phase 4 - figma-make UI: per-user reading status and star toggle
+  status       CollectionPaperStatus @default(TO_READ)
+  isStarred    Boolean               @default(false)
 
   collection Collection @relation(fields: [collectionId], references: [id])
   paper      Paper      @relation(fields: [paperId], references: [id])
@@ -450,6 +484,7 @@ model CollectionPaper {
   @@index([collectionId, isDeleted, addedAt]) // Collection's papers sorted by add date
   @@index([paperId, isDeleted]) // Paper's collections lookup
   @@index([addedById, isDeleted]) // Papers added by specific user
+  @@index([collectionId, status, isStarred, isDeleted]) // Filter by status/starred in figma-make collection detail
 }
 
 model CollectionMember {
@@ -998,19 +1033,18 @@ model PageContent {
 // -------- User Preferences (Phase 3) --------
 
 model UserPreference {
-  id                  String   @id @default(uuid())
-  userId              String   @unique
-  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  theme               String   @default("system") // light | dark | system
-  language            String   @default("en")
-  timezone            String   @default("UTC")
-  emailDigest         Boolean  @default(true)
-  defaultCitationStyle String  @default("APA")
-  compactMode         Boolean  @default(false)
-  metadata            Json?    @db.JsonB
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme                String   @default("system") // light | dark | system
+  language             String   @default("en")
+  timezone             String   @default("UTC")
+  emailDigest          Boolean  @default(true)
+  defaultCitationStyle String   @default("APA")
+  compactMode          Boolean  @default(false)
+  metadata             Json?    @db.JsonB
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@index([userId])
 }
-
