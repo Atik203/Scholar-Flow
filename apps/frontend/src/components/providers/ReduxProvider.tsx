@@ -1,7 +1,7 @@
 "use client";
 
 import { createPersistor, makeStore, type AppStore } from "@/redux/store";
-import { setAppStore } from "@/redux/storeAccess";
+import { setAppPersistor, setAppStore } from "@/redux/storeAccess";
 import { ReactNode, useRef } from "react";
 import { Provider } from "react-redux";
 import type { Persistor } from "redux-persist";
@@ -20,6 +20,7 @@ export function ReduxProvider({ children }: ReduxProviderProps) {
     storeRef.current = makeStore();
     persistorRef.current = createPersistor(storeRef.current);
     setAppStore(storeRef.current);
+    setAppPersistor(persistorRef.current);
   }
 
   return (
