@@ -5,6 +5,7 @@
 
 import { setCredentials } from "@/redux/auth/authSlice";
 import type { AppDispatch } from "@/redux/store";
+import { getPersistor } from "@/redux/storeAccess";
 import type { TUser } from "@/types/user";
 
 const API_BASE_URL =
@@ -57,6 +58,10 @@ export async function signInWithCredentials(
         accessToken: data.data.accessToken,
       })
     );
+
+    // Force the new auth state to localStorage so a subsequent hard navigation
+    // rehydrates the correct user/token instead of the previous account's.
+    await flushAuthState();
 
     return { success: true };
   } catch (error) {
@@ -136,6 +141,10 @@ export async function completeOAuthSignIn(
       })
     );
 
+    // Force the new auth state to localStorage so the upcoming hard navigation
+    // rehydrates the correct user/token instead of the previous account's.
+    await flushAuthState();
+
     return { success: true, user: data.data.user };
   } catch (error) {
     console.error(`${provider} OAuth error:`, error);
@@ -143,5 +152,22 @@ export async function completeOAuthSignIn(
       success: false,
       error: "An unexpected error occurred during authentication",
     };
+  }
+}
+
+/**
+ * Force redux-persist to write all pending state changes to localStorage.
+ * Must be called after any auth-state dispatch and BEFORE any hard navigation,
+ * otherwise the next page rehydrates from the old persisted state.
+ */
+async function flushAuthState(): Promise<void> {
+  const persistor = getPersistor();
+  if (!persistor) return;
+  try {
+    await persistor.flush();
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[authHelpers] persistor.flush failed:", error);
+    }
   }
 }
