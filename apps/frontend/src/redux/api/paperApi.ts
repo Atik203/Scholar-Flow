@@ -219,7 +219,7 @@ export const paperApi = apiSlice.injectEndpoints({
         formData.append("file", file);
         Object.entries(metadata).forEach(([key, value]) => {
           if (value !== undefined) {
-            if (key === "authors") {
+            if (key === "authors" || key === "tags") {
               formData.append(key, JSON.stringify(value));
             } else {
               formData.append(key, String(value));
