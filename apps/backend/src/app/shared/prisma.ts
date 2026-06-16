@@ -1,6 +1,7 @@
 import { PrismaClient } from "../../generated/prisma/client";
 import { Prisma } from "../../generated/prisma/client";
 import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
+import { prismaQueryInsights } from "@prisma/sqlcommenter-query-insights";
 
 export * from "../../generated/prisma/client";
 export { Prisma, PrismaClient };
@@ -18,6 +19,7 @@ const createPrismaClient = () => {
 
   return new PrismaClient({
     adapter,
+    comments: [prismaQueryInsights()],
     log: isDev
       ? [
           { emit: "event", level: "query" },
@@ -41,15 +43,10 @@ const prismaClient = globalForPrisma.prisma ?? createPrismaClient();
 if (isDev && !globalForPrisma.prisma) {
   prismaClient.$on("query" as never, (e: any) => {
     const duration = e.duration;
-    if (duration > 100) {
+    if (duration > 50) {
       console.warn(
-        `Slow query: ${e.query.substring(0, 100)}... took ${duration}ms`
+        `[SLOW QUERY] ${duration}ms | ${e.query.substring(0, 150)} | params: ${e.params?.substring(0, 80) || ""}`
       );
-      if (duration > 500) {
-        console.error(
-          `VERY slow query: ${e.query.substring(0, 100)}... took ${duration}ms - NEEDS OPTIMIZATION!`
-        );
-      }
     }
   });
 }

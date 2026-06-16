@@ -20,7 +20,7 @@ export default function CollectionsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedWorkspace, setSelectedWorkspace] = useState<string>("all");
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
+  const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
   const { data: myCollectionsData, isLoading } = useGetMyCollectionsQuery({ page: 1, limit: 50, workspaceId: selectedWorkspace === "all" ? undefined : selectedWorkspace });
   const { data: sharedData } = useGetSharedCollectionsQuery({ page: 1, limit: 50 });
 

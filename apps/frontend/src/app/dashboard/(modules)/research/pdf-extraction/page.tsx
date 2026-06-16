@@ -91,7 +91,6 @@ export default function PdfExtractionPage() {
     refetch: refetchPapers,
   } = useListPapersQuery({
     workspaceId: selectedWorkspaceId || undefined,
-    page: 1,
     limit: 100,
   });
 

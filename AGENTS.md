@@ -587,3 +587,49 @@ yarn repomix
 4. Reference specific files by path when asking questions
 
 **Note:** The `repomix-output.xml` is already generated and available in the project root.
+
+---
+
+## Query Performance Rules — Target: <50ms per Prisma query event
+
+### Verified Current State
+- Prisma singleton is already globalThis-cached in `apps/backend/src/app/shared/prisma.ts`. Do not rewrite it as a plain module-level `new PrismaClient`.
+- `PaperChunk.embedding` is enabled via `Unsupported("vector")`. HNSW index is created via migration.
+- There are two `paper.service.ts` files. Active file is `apps/backend/src/app/modules/papers/paper.service.ts` (imported by `paper.controller.ts`).
+- `@prisma/sqlcommenter-query-insights` is installed and wired into the singleton for Query Insights attribution.
+
+### Terminal Query-Time Visibility
+- The singleton registers a Prisma `$on('query')` listener in development.
+- Any query event over 50ms is logged to the terminal as:
+  `[SLOW QUERY] {duration}ms | {query first 150 chars} | params: {params first 80 chars}`
+- This logging is the primary measurement tool — do not remove it.
+- After each optimization, restart the backend and hit the affected endpoints; watch the terminal for slow-query warnings before/after.
+
+### Select Discipline
+- All list queries must use explicit `select`.
+- Never fetch `embedding` or binary file content in list views.
+- PaperChunk list views select `id, content, page, idx, paperId` only.
+
+### Relation Loading
+- Add `relationLoadStrategy: 'join'` only to `findMany` calls. It is invalid on `findFirst`, `create`, `update`, `upsert`.
+- Keep explicit `select` inside every `include`.
+
+### Pagination
+- Cursor-based pagination for papers, search, workspaces, notifications, and activity logs.
+- Keep offset pagination only where `skip` is bounded by a small constant (e.g., cursor exclusion `skip: 1`).
+
+### Indexes
+- New indexes use `CREATE INDEX CONCURRENTLY IF NOT EXISTS`.
+- Verify exact table/column case against `schema.prisma`.
+- HNSW vector index uses `vector_cosine_ops` with `m = 16, ef_construction = 64`.
+
+### Version Alignment
+- Keep `@prisma/client`, `prisma`, and `@prisma/adapter-*` on the same minor version.
+
+### Verification Workflow
+1. Apply one optimization at a time.
+2. Restart `yarn dev:backend`.
+3. Hit the affected endpoint(s) from the frontend or with `curl`.
+4. Check the terminal for `[SLOW QUERY]` output.
+5. Confirm duration dropped below 50ms before moving to the next fix.
+6. Run `yarn type-check` and `yarn lint` after each significant change.

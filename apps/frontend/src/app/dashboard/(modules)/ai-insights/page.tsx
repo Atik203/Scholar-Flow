@@ -23,7 +23,6 @@ export default function AiInsightsPage() {
     isLoading,
     error,
   } = useListPapersQuery({
-    page: 1,
     limit: 20,
   });
 

@@ -17,43 +17,47 @@ export class SearchService {
 
     const q = query.toLowerCase();
 
-    // 1. Search Papers
+    // 1. Search Papers (trigram similarity for fast ILIKE-style search)
     if (type === "all" || type === "papers") {
-      const andConditions: Prisma.PaperWhereInput[] = [
-        { isDeleted: false },
-        {
+      const workspaceFilter = workspaceId
+        ? Prisma.sql`AND p."workspaceId" = ${workspaceId}`
+        : Prisma.empty;
+
+      const items = await prisma.$queryRaw<any[]>`
+        SELECT
+          p.id,
+          p.title,
+          p.abstract,
+          p.metadata,
+          p.source,
+          p."workspaceId",
+          p."createdAt",
+          GREATEST(
+            COALESCE(similarity(p.title, ${q}), 0),
+            COALESCE(similarity(p.abstract, ${q}), 0)
+          ) AS "matchScore"
+        FROM "Paper" p
+        WHERE p."isDeleted" = false
+          AND (
+            p.title % ${q}
+            OR p.abstract % ${q}
+          )
+          ${workspaceFilter}
+        ORDER BY "matchScore" DESC, p."createdAt" DESC
+        LIMIT ${limit} OFFSET ${skip}
+      `;
+
+      const totalCount = await prisma.paper.count({
+        where: {
+          isDeleted: false,
+          workspaceId,
           OR: [
             { title: { contains: q, mode: "insensitive" } },
             { abstract: { contains: q, mode: "insensitive" } },
-            { source: { contains: q, mode: "insensitive" } },
-            { doi: { contains: q, mode: "insensitive" } }
-          ]
-        }
-      ];
+          ],
+        },
+      });
 
-      if (workspaceId) {
-        andConditions.push({ workspaceId });
-      }
-
-      const safePaperWhere: Prisma.PaperWhereInput = { AND: andConditions };
-
-      const [totalCount, items] = await Promise.all([
-        prisma.paper.count({ where: safePaperWhere }),
-        prisma.paper.findMany({
-          where: safePaperWhere,
-          take: limit,
-          skip,
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            title: true,
-            metadata: true,
-            source: true,
-            workspaceId: true,
-            createdAt: true,
-          }
-        }),
-      ]);
       results.papers = { total: totalCount, items };
     }
 
