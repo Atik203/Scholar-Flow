@@ -1,6 +1,6 @@
 import { PrismaClient } from "../../generated/prisma/client";
 import { Prisma } from "../../generated/prisma/client";
-import { PrismaPostgresAdapter } from "@prisma/adapter-ppg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { prismaQueryInsights } from "@prisma/sqlcommenter-query-insights";
 
 export * from "../../generated/prisma/client";
@@ -15,7 +15,7 @@ const createPrismaClient = () => {
     throw new Error("DATABASE_URL or DIRECT_DATABASE_URL is required");
   }
 
-  const adapter = new PrismaPostgresAdapter({ connectionString });
+  const adapter = new PrismaPg({ connectionString });
 
   return new PrismaClient({
     adapter,
