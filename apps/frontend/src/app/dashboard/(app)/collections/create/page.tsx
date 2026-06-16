@@ -35,7 +35,7 @@ export default function CreateCollectionPage() {
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [tags, setTags] = useState("");
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
+  const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
   const [createCollection, { isLoading }] = useCreateCollectionMutation();
   const workspaces = workspacesData?.data || [];
 

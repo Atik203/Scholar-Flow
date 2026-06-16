@@ -14,9 +14,14 @@ export const updateWorkspaceSchema = z.object({
 });
 
 export const listQuerySchema = z.object({
+  cursor: z.string().uuid().optional(),
+  limit: z.string().optional(),
+  scope: z.string().optional(),
+});
+
+export const invitationListQuerySchema = z.object({
   page: z.string().optional(),
   limit: z.string().optional(),
-  scope: z.enum(["all", "owned", "shared"]).optional(),
 });
 
 export const addMemberSchema = z

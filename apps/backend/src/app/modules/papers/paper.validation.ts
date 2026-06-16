@@ -52,7 +52,7 @@ export const uploadPaperSchema = z.object({
 
 export const listPapersQuerySchema = z.object({
   workspaceId: z.string().uuid().optional(), // Make optional since we filter by user
-  page: z.string().regex(/^\d+$/).transform(Number).optional(),
+  cursor: z.string().uuid().optional(), // Cursor-based pagination (paper id)
   limit: z.string().regex(/^\d+$/).transform(Number).optional(),
 });
 

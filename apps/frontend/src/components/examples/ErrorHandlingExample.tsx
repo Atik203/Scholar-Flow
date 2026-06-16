@@ -25,7 +25,7 @@ export const ExampleErrorHandlingUsage = () => {
     isError: papersError,
     error: papersErrorData,
     refetch: refetchPapers,
-  } = useListPapersQuery({ page: 1, limit: 10 });
+  } = useListPapersQuery({ limit: 10 });
 
   // Use query error handler
   const { errorMessage, errorDetails, retry, isRetryable } =
@@ -147,7 +147,7 @@ export const ExampleErrorHandlingUsage = () => {
             )}
           </div>
         )}
-        {papers && <p>Loaded {papers.meta.total} papers successfully</p>}
+        {papers && <p>Loaded {papers.items.length} papers successfully</p>}
       </div>
 
       {/* Upload with Error Handling */}

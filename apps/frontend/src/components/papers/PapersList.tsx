@@ -216,7 +216,6 @@ const PaperRow = memo(function PaperRow({
 });
 
 export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
-  const [page, setPage] = useState(1);
   const limit = 10;
 
   // Get papers (workspace-scoped if workspaceId provided)
@@ -227,7 +226,6 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
     error,
     refetch,
   } = useListPapersQuery({
-    page,
     limit,
     workspaceId,
   });
@@ -356,7 +354,6 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   }
 
   const papers = filteredPapers;
-  const meta = papersData?.meta;
 
   if (papers.length === 0) {
     const isSearching = searchTerm.trim().length > 0;
@@ -406,7 +403,7 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
         <CardDescription>
           {searchTerm.trim()
             ? `${papers.length} paper${papers.length !== 1 ? "s" : ""} found matching "${searchTerm}"`
-            : `${meta?.total} paper${meta?.total !== 1 ? "s" : ""} found`}
+            : `${papers.length} paper${papers.length !== 1 ? "s" : ""} found`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -441,32 +438,6 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
           </TableBody>
         </Table>
 
-        {/* Pagination */}
-        {meta && meta.totalPage > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-muted-foreground">
-              Page {meta.page} of {meta.totalPage} • {meta.total} total papers
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page - 1)}
-                disabled={page <= 1}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page + 1)}
-                disabled={page >= meta.totalPage}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
