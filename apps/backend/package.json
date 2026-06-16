@@ -1,6 +1,6 @@
 {
   "name": "@scholar-flow/backend",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
   "packageManager": "yarn@4.9.2",
