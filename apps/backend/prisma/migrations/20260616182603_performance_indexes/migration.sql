@@ -8,9 +8,6 @@ ON "Paper" USING GIN (title gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_paper_abstract_trgm
 ON "Paper" USING GIN (abstract gin_trgm_ops);
 
-CREATE INDEX IF NOT EXISTS idx_paper_authors_trgm
-ON "Paper" USING GIN (authors gin_trgm_ops);
-
 -- Paper list hot paths
 CREATE INDEX IF NOT EXISTS idx_paper_uploader_created
 ON "Paper"("createdAt" DESC, "uploaderId")
