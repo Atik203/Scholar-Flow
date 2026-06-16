@@ -28,10 +28,12 @@ export type AggregatePaper = {
 
 export type PaperAvgAggregateOutputType = {
   extractionVersion: number | null
+  citationCount: number | null
 }
 
 export type PaperSumAggregateOutputType = {
   extractionVersion: number | null
+  citationCount: number | null
 }
 
 export type PaperMinAggregateOutputType = {
@@ -52,6 +54,8 @@ export type PaperMinAggregateOutputType = {
   originalMimeType: string | null
   contentHtml: string | null
   extractionVersion: number | null
+  language: string | null
+  citationCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -75,6 +79,8 @@ export type PaperMaxAggregateOutputType = {
   originalMimeType: string | null
   contentHtml: string | null
   extractionVersion: number | null
+  language: string | null
+  citationCount: number | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -99,6 +105,9 @@ export type PaperCountAggregateOutputType = {
   originalMimeType: number
   contentHtml: number
   extractionVersion: number
+  tags: number
+  language: number
+  citationCount: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -108,10 +117,12 @@ export type PaperCountAggregateOutputType = {
 
 export type PaperAvgAggregateInputType = {
   extractionVersion?: true
+  citationCount?: true
 }
 
 export type PaperSumAggregateInputType = {
   extractionVersion?: true
+  citationCount?: true
 }
 
 export type PaperMinAggregateInputType = {
@@ -132,6 +143,8 @@ export type PaperMinAggregateInputType = {
   originalMimeType?: true
   contentHtml?: true
   extractionVersion?: true
+  language?: true
+  citationCount?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -155,6 +168,8 @@ export type PaperMaxAggregateInputType = {
   originalMimeType?: true
   contentHtml?: true
   extractionVersion?: true
+  language?: true
+  citationCount?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -179,6 +194,9 @@ export type PaperCountAggregateInputType = {
   originalMimeType?: true
   contentHtml?: true
   extractionVersion?: true
+  tags?: true
+  language?: true
+  citationCount?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -290,6 +308,9 @@ export type PaperGroupByOutputType = {
   originalMimeType: string | null
   contentHtml: string | null
   extractionVersion: number
+  tags: string[]
+  language: string | null
+  citationCount: number
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -337,6 +358,9 @@ export type PaperWhereInput = {
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
+  tags?: Prisma.StringNullableListFilter<"Paper">
+  language?: Prisma.StringNullableFilter<"Paper"> | string | null
+  citationCount?: Prisma.IntFilter<"Paper"> | number
   createdAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Paper"> | boolean
@@ -376,6 +400,9 @@ export type PaperOrderByWithRelationInput = {
   originalMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  language?: Prisma.SortOrderInput | Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -418,6 +445,9 @@ export type PaperWhereUniqueInput = Prisma.AtLeast<{
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
+  tags?: Prisma.StringNullableListFilter<"Paper">
+  language?: Prisma.StringNullableFilter<"Paper"> | string | null
+  citationCount?: Prisma.IntFilter<"Paper"> | number
   createdAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Paper"> | boolean
@@ -457,6 +487,9 @@ export type PaperOrderByWithAggregationInput = {
   originalMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  language?: Prisma.SortOrderInput | Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -489,6 +522,9 @@ export type PaperScalarWhereWithAggregatesInput = {
   originalMimeType?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
   contentHtml?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntWithAggregatesFilter<"Paper"> | number
+  tags?: Prisma.StringNullableListFilter<"Paper">
+  language?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
+  citationCount?: Prisma.IntWithAggregatesFilter<"Paper"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Paper"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Paper"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Paper"> | boolean
@@ -511,6 +547,9 @@ export type PaperCreateInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -550,6 +589,9 @@ export type PaperUncheckedCreateInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -585,6 +627,9 @@ export type PaperUpdateInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -624,6 +669,9 @@ export type PaperUncheckedUpdateInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -661,6 +709,9 @@ export type PaperCreateManyInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -683,6 +734,9 @@ export type PaperUpdateManyMutationInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -707,6 +761,9 @@ export type PaperUncheckedUpdateManyInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -720,6 +777,14 @@ export type PaperListRelationFilter = {
 
 export type PaperOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type PaperCountOrderByAggregateInput = {
@@ -741,6 +806,9 @@ export type PaperCountOrderByAggregateInput = {
   originalMimeType?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -748,6 +816,7 @@ export type PaperCountOrderByAggregateInput = {
 
 export type PaperAvgOrderByAggregateInput = {
   extractionVersion?: Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
 }
 
 export type PaperMaxOrderByAggregateInput = {
@@ -768,6 +837,8 @@ export type PaperMaxOrderByAggregateInput = {
   originalMimeType?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -791,6 +862,8 @@ export type PaperMinOrderByAggregateInput = {
   originalMimeType?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -798,6 +871,7 @@ export type PaperMinOrderByAggregateInput = {
 
 export type PaperSumOrderByAggregateInput = {
   extractionVersion?: Prisma.SortOrder
+  citationCount?: Prisma.SortOrder
 }
 
 export type PaperScalarRelationFilter = {
@@ -894,8 +968,17 @@ export type PaperUncheckedUpdateManyWithoutWorkspaceNestedInput = {
   deleteMany?: Prisma.PaperScalarWhereInput | Prisma.PaperScalarWhereInput[]
 }
 
+export type PaperCreatetagsInput = {
+  set: string[]
+}
+
 export type EnumPaperProcessingStatusFieldUpdateOperationsInput = {
   set?: $Enums.PaperProcessingStatus
+}
+
+export type PaperUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type PaperCreateNestedOneWithoutFileInput = {
@@ -1105,6 +1188,9 @@ export type PaperCreateWithoutUploaderInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1142,6 +1228,9 @@ export type PaperUncheckedCreateWithoutUploaderInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1208,6 +1297,9 @@ export type PaperScalarWhereInput = {
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
+  tags?: Prisma.StringNullableListFilter<"Paper">
+  language?: Prisma.StringNullableFilter<"Paper"> | string | null
+  citationCount?: Prisma.IntFilter<"Paper"> | number
   createdAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Paper"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Paper"> | boolean
@@ -1230,6 +1322,9 @@ export type PaperCreateWithoutWorkspaceInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1267,6 +1362,9 @@ export type PaperUncheckedCreateWithoutWorkspaceInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1328,6 +1426,9 @@ export type PaperCreateWithoutFileInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1366,6 +1467,9 @@ export type PaperUncheckedCreateWithoutFileInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1416,6 +1520,9 @@ export type PaperUpdateWithoutFileInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1454,6 +1561,9 @@ export type PaperUncheckedUpdateWithoutFileInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1488,6 +1598,9 @@ export type PaperCreateWithoutChunksInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1526,6 +1639,9 @@ export type PaperUncheckedCreateWithoutChunksInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1576,6 +1692,9 @@ export type PaperUpdateWithoutChunksInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1614,6 +1733,9 @@ export type PaperUncheckedUpdateWithoutChunksInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1648,6 +1770,9 @@ export type PaperCreateWithoutCitationsFromInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1686,6 +1811,9 @@ export type PaperUncheckedCreateWithoutCitationsFromInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1725,6 +1853,9 @@ export type PaperCreateWithoutCitationsToInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1763,6 +1894,9 @@ export type PaperUncheckedCreateWithoutCitationsToInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1813,6 +1947,9 @@ export type PaperUpdateWithoutCitationsFromInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1851,6 +1988,9 @@ export type PaperUncheckedUpdateWithoutCitationsFromInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1896,6 +2036,9 @@ export type PaperUpdateWithoutCitationsToInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1934,6 +2077,9 @@ export type PaperUncheckedUpdateWithoutCitationsToInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1968,6 +2114,9 @@ export type PaperCreateWithoutAnnotationsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2006,6 +2155,9 @@ export type PaperUncheckedCreateWithoutAnnotationsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2056,6 +2208,9 @@ export type PaperUpdateWithoutAnnotationsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2094,6 +2249,9 @@ export type PaperUncheckedUpdateWithoutAnnotationsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2128,6 +2286,9 @@ export type PaperCreateWithoutCollectionJoinsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2166,6 +2327,9 @@ export type PaperUncheckedCreateWithoutCollectionJoinsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2216,6 +2380,9 @@ export type PaperUpdateWithoutCollectionJoinsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2254,6 +2421,9 @@ export type PaperUncheckedUpdateWithoutCollectionJoinsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2288,6 +2458,9 @@ export type PaperCreateWithoutAiSummariesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2326,6 +2499,9 @@ export type PaperUncheckedCreateWithoutAiSummariesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2376,6 +2552,9 @@ export type PaperUpdateWithoutAiSummariesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2414,6 +2593,9 @@ export type PaperUncheckedUpdateWithoutAiSummariesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2448,6 +2630,9 @@ export type PaperCreateWithoutAiInsightThreadsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2486,6 +2671,9 @@ export type PaperUncheckedCreateWithoutAiInsightThreadsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2536,6 +2724,9 @@ export type PaperUpdateWithoutAiInsightThreadsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2574,6 +2765,9 @@ export type PaperUncheckedUpdateWithoutAiInsightThreadsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2608,6 +2802,9 @@ export type PaperCreateWithoutAiInsightMessagesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2646,6 +2843,9 @@ export type PaperUncheckedCreateWithoutAiInsightMessagesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2696,6 +2896,9 @@ export type PaperUpdateWithoutAiInsightMessagesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2734,6 +2937,9 @@ export type PaperUncheckedUpdateWithoutAiInsightMessagesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2768,6 +2974,9 @@ export type PaperCreateWithoutUsageEventInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2806,6 +3015,9 @@ export type PaperUncheckedCreateWithoutUsageEventInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2856,6 +3068,9 @@ export type PaperUpdateWithoutUsageEventInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2894,6 +3109,9 @@ export type PaperUncheckedUpdateWithoutUsageEventInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2928,6 +3146,9 @@ export type PaperCreateWithoutResearchNotesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -2966,6 +3187,9 @@ export type PaperUncheckedCreateWithoutResearchNotesInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3016,6 +3240,9 @@ export type PaperUpdateWithoutResearchNotesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3054,6 +3281,9 @@ export type PaperUncheckedUpdateWithoutResearchNotesInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3088,6 +3318,9 @@ export type PaperCreateWithoutCitationExportsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3126,6 +3359,9 @@ export type PaperUncheckedCreateWithoutCitationExportsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3176,6 +3412,9 @@ export type PaperUpdateWithoutCitationExportsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3214,6 +3453,9 @@ export type PaperUncheckedUpdateWithoutCitationExportsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3248,6 +3490,9 @@ export type PaperCreateWithoutDiscussionThreadsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3286,6 +3531,9 @@ export type PaperUncheckedCreateWithoutDiscussionThreadsInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3336,6 +3584,9 @@ export type PaperUpdateWithoutDiscussionThreadsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3374,6 +3625,9 @@ export type PaperUncheckedUpdateWithoutDiscussionThreadsInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3409,6 +3663,9 @@ export type PaperCreateManyUploaderInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3431,6 +3688,9 @@ export type PaperUpdateWithoutUploaderInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3468,6 +3728,9 @@ export type PaperUncheckedUpdateWithoutUploaderInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3504,6 +3767,9 @@ export type PaperUncheckedUpdateManyWithoutUploaderInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3527,6 +3793,9 @@ export type PaperCreateManyWorkspaceInput = {
   originalMimeType?: string | null
   contentHtml?: string | null
   extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -3549,6 +3818,9 @@ export type PaperUpdateWithoutWorkspaceInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3586,6 +3858,9 @@ export type PaperUncheckedUpdateWithoutWorkspaceInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3622,6 +3897,9 @@ export type PaperUncheckedUpdateManyWithoutWorkspaceInput = {
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3776,6 +4054,9 @@ export type PaperSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   originalMimeType?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
+  tags?: boolean
+  language?: boolean
+  citationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -3816,6 +4097,9 @@ export type PaperSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   originalMimeType?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
+  tags?: boolean
+  language?: boolean
+  citationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -3842,6 +4126,9 @@ export type PaperSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   originalMimeType?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
+  tags?: boolean
+  language?: boolean
+  citationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -3868,12 +4155,15 @@ export type PaperSelectScalar = {
   originalMimeType?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
+  tags?: boolean
+  language?: boolean
+  citationCount?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type PaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "uploaderId" | "title" | "abstract" | "metadata" | "source" | "doi" | "isDraft" | "isPublished" | "processingStatus" | "processingError" | "processedAt" | "previewFileKey" | "previewMimeType" | "originalMimeType" | "contentHtml" | "extractionVersion" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["paper"]>
+export type PaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "uploaderId" | "title" | "abstract" | "metadata" | "source" | "doi" | "isDraft" | "isPublished" | "processingStatus" | "processingError" | "processedAt" | "previewFileKey" | "previewMimeType" | "originalMimeType" | "contentHtml" | "extractionVersion" | "tags" | "language" | "citationCount" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["paper"]>
 export type PaperInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -3939,6 +4229,9 @@ export type $PaperPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     originalMimeType: string | null
     contentHtml: string | null
     extractionVersion: number
+    tags: string[]
+    language: string | null
+    citationCount: number
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -4398,6 +4691,9 @@ export interface PaperFieldRefs {
   readonly originalMimeType: Prisma.FieldRef<"Paper", 'String'>
   readonly contentHtml: Prisma.FieldRef<"Paper", 'String'>
   readonly extractionVersion: Prisma.FieldRef<"Paper", 'Int'>
+  readonly tags: Prisma.FieldRef<"Paper", 'String[]'>
+  readonly language: Prisma.FieldRef<"Paper", 'String'>
+  readonly citationCount: Prisma.FieldRef<"Paper", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Paper", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Paper", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"Paper", 'Boolean'>

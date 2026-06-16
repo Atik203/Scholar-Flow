@@ -15,6 +15,8 @@ import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
 import { notificationRoutes } from "../modules/Notification/notification.routes";
 import { publicRoutes } from "../modules/Public/public.routes";
 import { searchRoutes } from "../modules/Search/search.routes";
+import { recommendationRoutes } from "../modules/Recommendation/recommendation.routes";
+import { importRoutes } from "../modules/Import/import.routes";
 import { citationRoutes } from "./citation.routes";
 import { discussionRoutes } from "./discussion.routes";
 import { activityLogRoutes } from "./activityLog.routes";
@@ -56,6 +58,8 @@ router.use("/public", publicRoutes);
 
 // Phase 4 features
 router.use("/search", searchRoutes);
+router.use("/recommendations", recommendationRoutes);
+router.use("/import", importRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);

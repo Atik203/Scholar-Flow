@@ -18,6 +18,10 @@ export interface Paper {
   isDraft?: boolean;
   isPublished?: boolean;
   contentHtml?: string;
+  // Phase 4 metadata fields
+  tags?: string[];
+  language?: string | null;
+  citationCount?: number;
   createdAt: string;
   updatedAt: string;
   file?: {
@@ -47,6 +51,9 @@ export interface UploadPaperRequest {
   authors?: string[];
   year?: number;
   source?: string;
+  tags?: string[];
+  language?: string;
+  citationCount?: number;
   file: File;
 }
 
@@ -56,6 +63,9 @@ export interface UpdatePaperMetadataRequest {
   abstract?: string;
   authors?: string[];
   year?: number;
+  tags?: string[];
+  language?: string;
+  citationCount?: number;
 }
 
 export type PaperSummaryTone =
@@ -176,6 +186,9 @@ export interface EditorPaper {
   isPublished: boolean;
   workspaceId: string;
   uploaderId: string;
+  tags?: string[];
+  language?: string | null;
+  citationCount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -206,7 +219,7 @@ export const paperApi = apiSlice.injectEndpoints({
         formData.append("file", file);
         Object.entries(metadata).forEach(([key, value]) => {
           if (value !== undefined) {
-            if (key === "authors") {
+            if (key === "authors" || key === "tags") {
               formData.append(key, JSON.stringify(value));
             } else {
               formData.append(key, String(value));
