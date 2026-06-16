@@ -202,43 +202,43 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 ## Phase 4: Papers & Collections (10-12 pages)
 
 ### 4.1 Papers Pages
-- [ ] Rewrite `/dashboard/(app)/papers/page.tsx` (paper list, grid + table view)
-- [ ] Rewrite `/dashboard/(app)/papers/upload/page.tsx` (upload flow)
-- [ ] Rewrite `/dashboard/(app)/papers/[id]/page.tsx` (paper detail)
-- [ ] Rewrite `/dashboard/(app)/papers/search/page.tsx` (search)
-- [ ] Rewrite `/dashboard/(app)/papers/import/page.tsx` (import)
-- [ ] Rewrite `/dashboard/(app)/papers/editor/page.tsx` (TipTap editor)
-- [ ] Rewrite `/dashboard/(app)/papers/ai-insights/page.tsx` (AI insights)
-- [ ] Add AI insights sidebar to paper detail page
-- [ ] Add annotation toolbar to paper detail page
-- [ ] Add export actions (PDF/DOCX) to paper detail page
+- [x] Rewrite `/dashboard/(app)/papers/page.tsx` (paper list, grid + table view)
+- [x] Rewrite `/dashboard/(app)/papers/upload/page.tsx` (upload flow)
+- [x] Rewrite `/dashboard/(app)/papers/[id]/page.tsx` (paper detail)
+- [x] Rewrite `/dashboard/(app)/papers/search/page.tsx` (search)
+- [x] Rewrite `/dashboard/(app)/papers/import/page.tsx` (import)
+- [x] Rewrite `/dashboard/(app)/papers/editor/page.tsx` (editor)
+- [~] Rewrite `/dashboard/(app)/papers/ai-insights/page.tsx` (deferred to Phase 8)
+- [~] Add AI insights sidebar to paper detail page (deferred to Phase 8)
+- [~] Add annotation toolbar to paper detail page (deferred to Phase 8)
+- [~] Add export actions (PDF/DOCX) to paper detail page (API endpoints exist, UI deferred)
 
 ### 4.2 Collections Pages
-- [ ] Rewrite `/dashboard/(app)/collections/page.tsx` (collection list)
-- [ ] Rewrite `/dashboard/(app)/collections/create/page.tsx` (create)
-- [ ] Rewrite `/dashboard/(app)/collections/[id]/page.tsx` (collection detail)
-- [ ] Rewrite `/dashboard/(app)/collections/shared/page.tsx` (shared with me)
-- [ ] Add collection member invite flow
-- [ ] Add collection paper management UI
+- [x] Rewrite `/dashboard/(app)/collections/page.tsx` (collection list)
+- [x] Rewrite `/dashboard/(app)/collections/create/page.tsx` (create)
+- [x] Rewrite `/dashboard/(app)/collections/[id]/page.tsx` (collection detail)
+- [x] Rewrite `/dashboard/(app)/collections/shared/page.tsx` (shared with me)
+- [x] Add collection member invite flow
+- [x] Add collection paper management UI
 
 ### 4.3 Backend Migration
-- [ ] Add `tags` (String[]) to `Paper` model
-- [ ] Add `language` to `Paper` model
-- [ ] Add `tags` (String[]) to `Collection` model
-- [ ] Add `coverImage` to `Collection` model
-- [ ] Run `yarn db:generate` and `yarn db:migrate`
-- [ ] Update paper routes to handle tags and language
-- [ ] Update collection routes to handle tags and coverImage
+- [x] Add `tags` (String[]) to `Paper` model
+- [x] Add `language` to `Paper` model
+- [x] Add `tags` (String[]) to `Collection` model
+- [x] Add `coverImage` to `Collection` model
+- [x] Run `yarn db:generate` and `yarn db:migrate`
+- [x] Update paper routes to handle tags and language
+- [x] Update collection routes to handle tags and coverImage
 
 ### 4.4 Phase 4 QA
-- [ ] Paper upload flow works (multer → S3 → processing)
-- [ ] Paper list shows correct data (grid/table toggle)
-- [ ] Paper detail page loads with AI insights
-- [ ] Collection CRUD works end-to-end
-- [ ] Collection sharing via email works
-- [ ] `yarn type-check` passes
-- [ ] `yarn lint` passes
-- [ ] Update this file: mark all Phase 4 items as done
+- [x] Paper upload flow works (multer → S3 → processing)
+- [x] Paper list shows correct data (grid/table toggle)
+- [~] Paper detail page loads with AI insights (deferred to Phase 8)
+- [x] Collection CRUD works end-to-end
+- [x] Collection sharing via email works
+- [x] `yarn type-check` passes
+- [x] `yarn lint` passes
+- [x] Update this file: mark all Phase 4 items as done
 
 ---
 
@@ -569,7 +569,9 @@ Full migration from current design to figma-make design system. Phases 1-8 are f
 Started: June 2026
 Completed: June 2026
 Completed phases: Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Next.js 16 upgrade ✅
-Current phase: **Phase 4 ✅ A-E** (backend foundation done), **F-O** (frontend pages in progress)
+Current phase: **Phase 4** — Papers & Collections — complete except legacy cleanup
+Latest release: **1.2.2** (2026-06-16) — see [CHANGELOG.md](./CHANGELOG.md)
+Current focus: Phase 4 complete, ready for Phase 5
 Latest release: **1.2.2** (2026-06-16) — see [CHANGELOG.md](./CHANGELOG.md)
 Current focus: Phase 4 — Papers & Collections (10-12 pages)
 Framework: Next.js 16, React 19.2, Turbopack default
@@ -620,8 +622,15 @@ Last updated: 2026-06-16
 #### 🚧 F-O. Frontend Pages (in progress)
 - [x] Created papers list page at `(app)/papers/page.tsx` matching figma-make design
 - [x] Created paper detail page at `(app)/papers/[id]/page.tsx`
-- [ ] Upload, search, import, editor, AI insights pages
-- [ ] Collections list, create, detail, shared pages
+- [x] Created paper upload page at `(app)/papers/upload/page.tsx` (file/DOI/arXiv/URL)
+- [x] Created paper search page at `(app)/papers/search/page.tsx`
+- [x] Created paper editor page at `(app)/papers/editor/page.tsx`
+- [x] Created paper import page at `(app)/papers/import/page.tsx` (BibTeX/RIS)
+- [x] Created collections list page at `(app)/collections/page.tsx`
+- [x] Created collection detail page at `(app)/collections/[id]/page.tsx` (grid/list, star, bulk)
+- [x] Created collection create page at `(app)/collections/create/page.tsx` (wizard, color, visibility)
+- [x] Created shared collections page at `(app)/collections/shared/page.tsx`
+- [ ] Legacy route cleanup (delete old role-segmented re-exports from `(modules)/`)
 
 ### Phase 3 Summary
 - New route group architecture: `(app)/` for all users, `(admin)/` for admins only
