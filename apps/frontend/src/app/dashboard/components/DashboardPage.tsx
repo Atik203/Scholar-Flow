@@ -166,21 +166,18 @@ export default function DashboardPage() {
 
   // Fetch workspaces for selection
   const { data: workspacesData } = useListWorkspacesQuery({
-    page: 1,
     limit: 50,
     scope: "all",
   });
 
   // Get workspace-aware data
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
-    page: 1,
     limit: 10, // Get more recent papers for dashboard
     workspaceId: selectedWorkspaceId || undefined,
   });
 
   const { data: collectionsData, isLoading: collectionsLoading } =
     useGetMyCollectionsQuery({
-      page: 1,
       limit: 50,
       workspaceId: selectedWorkspaceId || undefined,
     });
@@ -194,7 +191,7 @@ export default function DashboardPage() {
   // Team Lead: workspace members data for collaboration metrics
   const { data: membersData, isLoading: membersLoading } =
     useListWorkspacesQuery(
-      { page: 1, limit: 50, scope: "all" },
+      { limit: 50, scope: "all" },
       { skip: user?.role !== USER_ROLES.TEAM_LEAD || !selectedWorkspaceId }
     );
 
@@ -224,7 +221,7 @@ export default function DashboardPage() {
   // Derived processing stats for overview widgets
   const processingStats = useMemo(() => {
     const items = papersData?.items || [];
-    const total = papersData?.meta?.total || items.length || 0;
+    const total = items.length || 0;
     const processed = items.filter(
       (p: any) => p.processingStatus === "PROCESSED"
     ).length;
@@ -275,7 +272,7 @@ export default function DashboardPage() {
 
   // Compute comprehensive workspace-aware stats
   const workspaceStats = useMemo(() => {
-    const totalPapers = papersData?.meta?.total || 0;
+    const totalPapers = papersData?.items?.length || 0;
     const recentPapers = papersData?.items || [];
     const totalCollections = collectionsData?.result?.length || 0;
     const availableWorkspaces = workspacesData?.data || [];
@@ -849,7 +846,7 @@ export default function DashboardPage() {
                   <Building2 className="h-4 w-4 text-purple-600" />
                 </div>
                 <div className="text-2xl font-bold">
-                  {workspacesData?.meta?.total || 0}
+                  {workspacesData?.data?.length || 0}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Active workspaces

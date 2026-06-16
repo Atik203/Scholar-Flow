@@ -9,7 +9,7 @@ const NotificationService = {
   async listNotifications(
     userId: string,
     limit: number,
-    skip: number,
+    cursor: string | undefined,
     query: {
       type?: string;
       read?: string;
@@ -38,9 +38,9 @@ const NotificationService = {
       prisma.notification.count({ where }),
       prisma.notification.findMany({
         where,
-        take: limit,
-        skip,
-        orderBy: { createdAt: "desc" },
+        take: limit + 1,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         include: {
           actor: {
             select: { name: true, image: true, firstName: true, lastName: true },
@@ -49,8 +49,11 @@ const NotificationService = {
       }),
     ]);
 
+    const hasMore = data.length > limit;
+    const sliced = hasMore ? data.slice(0, -1) : data;
+
     // Format the response slightly to match frontend expectations
-    const formattedData = data.map((n) => ({
+    const formattedData = sliced.map((n) => ({
       ...n,
       actor: n.actor
         ? {
@@ -64,7 +67,12 @@ const NotificationService = {
     }));
 
     return {
-      meta: { total, skip, limit },
+      meta: {
+        total,
+        limit,
+        nextCursor: hasMore ? formattedData[formattedData.length - 1].id : null,
+        hasMore,
+      },
       result: formattedData,
     };
   },

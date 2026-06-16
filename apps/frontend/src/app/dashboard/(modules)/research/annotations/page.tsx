@@ -39,7 +39,6 @@ export default function ResearchAnnotationsPage() {
     isLoading: papersLoading,
     isError: papersError,
   } = useListPapersQuery({
-    page: 1,
     limit: 50, // Get more papers for annotation
   });
 
