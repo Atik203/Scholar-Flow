@@ -40,7 +40,7 @@ This project supports multiple AI models with prefix caching:
 ## Product
 Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
 Target users: researchers, students, professors, academic teams.
-Version: 1.2.0 (20 releases, 803 commits) — Next.js 16, React 19.2, better-auth
+Version: 1.2.4 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
 
 Core features:
 - Research paper upload with AI metadata extraction (title/author/abstract)
@@ -86,7 +86,7 @@ File structure:
 
 ## Backend (apps/backend)
 Runtime: Node.js >=22, Express.js, TypeScript
-ORM: Prisma 6.16.3 (always use --sql flag: yarn db:generate)
+ORM: Prisma 7.8.0 (always use --sql flag: yarn db:generate)
 Database: PostgreSQL + pgvector extension
 Auth: JWT + bcrypt (refresh tokens, rate limiting)
 Storage: AWS S3 (presigned URLs only — never expose credentials)
@@ -288,7 +288,8 @@ Do not generate any code before completing steps 1-5.
 - Never run prisma db push in production
 - Never add console.log for debugging
 - Never install packages without user confirmation
-- Never touch .env files
+- Never touch .env.production files
+- Never commit .env or .env.production
 - Never call save on every TipTap keystroke
 - Never make raw fetch calls inside React components
 - Never skip Stripe webhook signature verification
@@ -594,9 +595,11 @@ yarn repomix
 
 ### Verified Current State
 - Prisma singleton is already globalThis-cached in `apps/backend/src/app/shared/prisma.ts`. Do not rewrite it as a plain module-level `new PrismaClient`.
+- Adapter is `@prisma/adapter-pg` (node-postgres TCP pooling). DO NOT switch back to `@prisma/adapter-ppg` (HTTP-based, no keep-alive, 1500-2500ms per query from Bangladesh to US East).
 - `PaperChunk.embedding` is enabled via `Unsupported("vector")`. HNSW index is created via migration.
 - There are two `paper.service.ts` files. Active file is `apps/backend/src/app/modules/papers/paper.service.ts` (imported by `paper.controller.ts`).
 - `@prisma/sqlcommenter-query-insights` is installed and wired into the singleton for Query Insights attribution.
+- `prisma/seed.js` was modified to import `PrismaPg` adapter + generated client instead of raw `@prisma/client` (Prisma 7 requires adapter for client instantiation).
 
 ### Terminal Query-Time Visibility
 - The singleton registers a Prisma `$on('query')` listener in development.
@@ -633,3 +636,86 @@ yarn repomix
 4. Check the terminal for `[SLOW QUERY]` output.
 5. Confirm duration dropped below 50ms before moving to the next fix.
 6. Run `yarn type-check` and `yarn lint` after each significant change.
+
+---
+
+## Local Development Database
+
+### Database Setup
+
+**Primary: Prisma Postgres (Cloud)** — used for both local dev and production
+- `DATABASE_URL` = Accelerate endpoint in `.env` (runtime queries via proxy)
+- `DIRECT_DATABASE_URL` = Direct PostgreSQL URL for migrations and adapter
+- No local database needed — Prisma Cloud manages it
+
+**Fallback: PostgreSQL 18 in WSL** (for offline dev or cloud issues)
+- Install: `sudo apt install -y postgresql-18 postgresql-18-pgvector`
+- Start:   `sudo pg_ctlcluster 18 main start`
+- Stop:    `sudo pg_ctlcluster 18 main stop`
+- Status:  `sudo pg_lsclusters`
+- Default port: 5432
+
+### Database Initialization (after fresh install)
+```bash
+# Create the database
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'admin';"
+sudo -u postgres psql -c "CREATE DATABASE scholarflow_dev;"
+
+# Enable required extensions
+sudo -u postgres psql -d scholarflow_dev -c "CREATE EXTENSION IF NOT EXISTS vector;"
+sudo -u postgres psql -d scholarflow_dev -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+# Run migrations (overriding DATABASE_URL for local introspection)
+DATABASE_URL="postgres://postgres:admin@localhost:5432/scholarflow_dev" yarn db:migrate
+
+# Generate client and seed
+yarn db:generate --sql
+DATABASE_URL="postgres://postgres:admin@localhost:5432/scholarflow_dev" yarn db:seed
+```
+
+### Environment Strategy
+- `.env` → Local development (`DIRECT_DATABASE_URL = postgres://postgres:admin@localhost:5432/scholarflow_dev`)
+- `.env.production` → Cloud/Production (`DIRECT_DATABASE_URL` points to Prisma Cloud or deployed DB)
+- The PG adapter picks up `DIRECT_DATABASE_URL` from whichever `.env` is loaded
+- Never commit `.env` or `.env.production` (already in `.gitignore`)
+
+### Migration Discipline
+- ALWAYS use `yarn db:migrate` — never `prisma db push`
+- Fresh local DB = all migrations apply cleanly → no drift
+- If drift appears locally: create reconciliation migration via `prisma migrate dev --create-only --name <name>`
+- If drift appears on cloud: create a reconciliation migration, do NOT reset
+- `prisma.config.ts` uses `DATABASE_URL` for migration, `DIRECT_DATABASE_URL` for directUrl
+- Run `yarn db:generate --sql` after every migration
+- When `prisma migrate dev` prompts for a new migration name (no pending migrations), press Ctrl+C and use `prisma migrate dev --create-only --name <name>` instead, then `prisma migrate deploy` to apply
+
+### Migration Drift (learned the hard way)
+The schema in `schema.prisma` has accumulated columns and tables that were added to the production database via `prisma db push` (bypassing migration history). This causes `ColumnNotFound` errors when migrating a new database. Detection:
+```bash
+# Compare current DB columns with schema
+psql "postgres://postgres:admin@localhost:5432/scholarflow_dev" -At -c "SELECT column_name FROM information_schema.columns WHERE table_name = '<ModelName>' AND table_schema = 'public' ORDER BY ordinal_position;"
+```
+Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `DATABASE_URL` pointing to the drift-free database. Review the generated SQL carefully — it may contain destructive operations (column drops, type changes) if the schema diverged. Apply with `prisma migrate deploy`.
+
+### Adapter Configuration
+- Adapter: `@prisma/adapter-pg` with `pg` driver (TCP connection pooling)
+- Connection: passes `DIRECT_DATABASE_URL` to adapter
+- Works with any standard `postgres://` URL (local, cloud, any provider)
+- Pooling: `pg` driver pools TCP connections natively (no extra config needed)
+- DO NOT use `@prisma/adapter-ppg` — no HTTP keep-alive, 1500ms+ per query with cloud DB latency from Bangladesh
+
+### Seed Script
+- Location: `apps/backend/prisma/seed.js` (CommonJS)
+- Script: `yarn db:seed` → runs `ts-node prisma/seed.js`
+- Uses `@prisma/adapter-pg` with `PrismaPg` adapter (imported from generated client)
+- Default password for all demo users: `password123`
+- Demo users: admin@scholarflow.com, researcher@scholarflow.com, pro.researcher@scholarflow.com, teamlead@scholarflow.com
+- Must override `DATABASE_URL` + `DIRECT_DATABASE_URL` to local URL when seeding local DB (WSL fallback) or Prisma Cloud URLs when seeding cloud DB
+
+### Performance Verification Workflow
+1. Ensure local PG18 is running: `sudo pg_ctlcluster 18 main start`
+2. Start backend: `yarn dev:backend`
+3. Hit any DB endpoint from dashboard or curl
+4. Terminal shows `[SLOW QUERY] {duration}ms` for any query >50ms
+5. On localhost: expect <10ms (vs 240ms to US East)
+6. On deployed US East backend: expect <50ms
+7. If >50ms with local DB, check for missing indexes or N+1 queries
