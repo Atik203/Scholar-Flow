@@ -1,6 +1,6 @@
 {
   "name": "@scholar-flow/backend",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
   "packageManager": "yarn@4.9.2",
@@ -17,7 +17,7 @@
     "db:generate": "prisma generate --sql",
     "db:generate:watch": "prisma generate --sql --watch",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "ts-node prisma/seed.js",
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
