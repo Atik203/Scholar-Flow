@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useListPapersQuery } from "@/redux/api/paperApi";
+import { useListPapersQuery, useLazyListPapersQuery } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -26,7 +26,7 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
@@ -59,19 +59,46 @@ export default function PapersPage() {
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [wsDropdownOpen, setWsDropdownOpen] = useState(false);
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
-  const { data: papersData, isLoading } = useListPapersQuery({
-    page: 1,
-    limit: 100,
+  const { data: workspacesData } = useListWorkspacesQuery({ limit: 50, scope: "all" });
+  const {
+    data: papersData,
+    isLoading,
+    isFetching,
+  } = useListPapersQuery({
+    limit: 20,
     workspaceId: selectedWorkspace || undefined,
   });
 
+  const [triggerLoadMore] = useLazyListPapersQuery();
+
+  const [allPapers, setAllPapers] = useState(papersData?.items || []);
+  const [currentCursor, setCurrentCursor] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    setAllPapers(papersData?.items || []);
+    setCurrentCursor(papersData?.meta?.nextCursor);
+  }, [papersData?.items, papersData?.meta?.nextCursor, selectedWorkspace]);
+
+  const handleLoadMore = async () => {
+    if (!currentCursor) return;
+    const result = await triggerLoadMore({
+      cursor: currentCursor,
+      limit: 20,
+      workspaceId: selectedWorkspace || undefined,
+    });
+    const nextData = result.data;
+    if (nextData?.items) {
+      setAllPapers((prev) => [...prev, ...nextData.items]);
+      setCurrentCursor(nextData.meta?.nextCursor ?? null);
+    }
+  };
+
   const workspaces = workspacesData?.data || [];
-  const papers = papersData?.items || [];
+  const papers = allPapers;
 
   const selectedWs = workspaces.find((w: any) => w.id === selectedWorkspace);
 
-  const totalPapers = papersData?.meta?.total || 0;
+  const totalPapers = papers.length;
   const processedPapers = papers.filter((p) => p.processingStatus === "PROCESSED").length;
   const processingPapers = papers.filter((p) => p.processingStatus === "PROCESSING").length;
   const totalSize = papers.reduce((acc, p) => acc + (p.file?.sizeBytes || 0), 0);
@@ -316,6 +343,17 @@ export default function PapersPage() {
                   </motion.div>
                 );
               })}
+            </div>
+          )}
+          {currentCursor && (
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={isFetching}
+              >
+                {isFetching ? "Loading..." : "Load More"}
+              </Button>
             </div>
           )}
         </CardContent>

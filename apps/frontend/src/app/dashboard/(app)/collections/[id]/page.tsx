@@ -24,7 +24,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ id:
 
   const { data: collection, isLoading } = useGetCollectionQuery(resolvedParams.id);
   const { data: papersData } = useGetCollectionPapersQuery({ collectionId: resolvedParams.id, page: 1, limit: 50 });
-  const { data: allPapers } = useListPapersQuery({ page: 1, limit: 100 });
+  const { data: allPapers } = useListPapersQuery({ limit: 100 });
   const [deleteCollection] = useDeleteCollectionMutation();
   const [inviteMember] = useInviteMemberMutation();
   const [removePaper] = useRemovePaperFromCollectionMutation();

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const listQuerySchema = z.object({
-  page: z.string().optional(),
+  cursor: z.string().uuid().optional(),
   limit: z.string().optional(),
   type: z.string().optional(),
   read: z.string().optional(),

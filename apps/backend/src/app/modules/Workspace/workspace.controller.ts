@@ -11,6 +11,7 @@ import {
   addMemberSchema,
   createWorkspaceSchema,
   inviteMemberSchema,
+  invitationListQuerySchema,
   listQuerySchema,
   memberParamsSchema,
   updateMemberRoleSchema,
@@ -23,20 +24,19 @@ export const workspaceController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
     const q = listQuerySchema.parse(req.query);
-    const page = parseInt((q.page as string) || "1", 10);
+    const cursor = q.cursor;
     const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
-    const skip = (page - 1) * limit;
     const scope = (q.scope as any) || "all";
     const result = await WorkspaceService.listUserWorkspaces(
       authReq.user.id,
       limit,
-      skip,
+      cursor,
       scope
     );
     sendPaginatedResponse(
       res,
       result.result,
-      { ...result.meta, page, limit },
+      result.meta,
       "Workspaces retrieved successfully"
     );
   }),
@@ -89,19 +89,18 @@ export const workspaceController = {
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
     const params = workspaceParamsSchema.parse(req.params);
     const q = listQuerySchema.parse(req.query);
-    const page = parseInt((q.page as string) || "1", 10);
+    const cursor = q.cursor;
     const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
-    const skip = (page - 1) * limit;
     const result = await WorkspaceService.listMembers(
       authReq.user.id,
       params.id,
       limit,
-      skip
+      cursor
     );
     sendPaginatedResponse(
       res,
       result.result,
-      { ...result.meta, page, limit },
+      result.meta,
       "Members retrieved"
     );
   }),
@@ -187,7 +186,7 @@ export const workspaceController = {
   getInvitationsSent: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const q = listQuerySchema.parse(req.query);
+    const q = invitationListQuerySchema.parse(req.query);
     const page = parseInt((q.page as string) || "1", 10);
     const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
     const skip = (page - 1) * limit;
@@ -208,7 +207,7 @@ export const workspaceController = {
   getInvitationsReceived: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const q = listQuerySchema.parse(req.query);
+    const q = invitationListQuerySchema.parse(req.query);
     const page = parseInt((q.page as string) || "1", 10);
     const limit = Math.min(50, parseInt((q.limit as string) || "10", 10));
     const skip = (page - 1) * limit;

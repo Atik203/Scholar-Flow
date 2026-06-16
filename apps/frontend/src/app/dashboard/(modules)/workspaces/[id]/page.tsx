@@ -99,12 +99,10 @@ export default function WorkspaceDetailPage() {
   const { data: membersData } = useListMembersQuery({ id });
   const { data: collectionsData } = useGetMyCollectionsQuery({
     workspaceId: id,
-    page: 1,
     limit: 10,
   });
   const { data: papersData } = useListPapersQuery({
     workspaceId: id,
-    page: 1,
     limit: 10,
   });
 
