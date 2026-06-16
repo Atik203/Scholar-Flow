@@ -51,6 +51,9 @@ export interface UploadPaperRequest {
   authors?: string[];
   year?: number;
   source?: string;
+  tags?: string[];
+  language?: string;
+  citationCount?: number;
   file: File;
 }
 
