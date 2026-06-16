@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.2.2-blue)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.4-blue)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
