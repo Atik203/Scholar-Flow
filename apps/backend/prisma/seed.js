@@ -1,7 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('../src/generated/prisma/client');
+const { PrismaPg } = require('@prisma/adapter-pg');
 const bcrypt = require('bcryptjs');
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 // Default password for all demo users
 const DEFAULT_PASSWORD = 'password123';

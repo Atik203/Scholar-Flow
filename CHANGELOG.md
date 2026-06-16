@@ -1,5 +1,36 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.4 — Prisma v7 Migration & Local Dev DB (2026-06-17)
+
+**Release date:** 2026-06-17
+**Theme:** Prisma ORM v7 upgrade, adapter optimization, local PostgreSQL for development, migration drift resolution.
+
+### Changed
+- **Prisma ORM v7.8.0** — upgraded from v6.16.3 across all packages (client, adapters, CLI)
+- **Adapter:** switched from `@prisma/adapter-ppg` (HTTP-based, 1500-2500ms latency) to `@prisma/adapter-pg` (TCP pooled, <50ms)
+- **Query performance:** added slow-query logging (>50ms threshold), cursor pagination on all list endpoints, explicit `select` on nested includes
+- **Search:** migrated from `ILIKE '%term%'` to pg_trgm similarity search
+
+### Fixed
+- **Migration drift:** 27 migrations now apply cleanly; reconciliation migration for schema drift caused by past `prisma db push` usage
+- **Seed script:** updated for Prisma v7 adapter requirement (`PrismaPg` + generated client)
+- **Script tag warning:** replaced raw `<script>` with `next/script` (Script component) in root layout
+
+### Infrastructure
+- **Local dev database:** PostgreSQL 18 in WSL with pgvector + pg_trgm extensions
+- **Environment strategy:** `.env` for local, `.env.production` for cloud
+- **Query Insights:** `@prisma/sqlcommenter-query-insights` wired into Prisma singleton
+
+### Schema
+- Added `onboardingCompleted`, `onboardingStep` to User
+- New tables: `Faq`, `Testimonial`, `NewsletterSubscriber`, `ContactSubmission`, `PageContent`, `UserPreference`
+- New enums: `NotificationType`, `ContactSubmissionStatus`; `MAGIC_LINK` added to `TokenType`
+- Notification model rebuilt (removed `payload`/`readAt`/`updatedAt`/`isDeleted`, added `title`/`message`/`read`/`starred`/`actionUrl`/`actorId`/`resourceId`)
+
+### Docs
+- `AGENTS.md`: Query Performance Rules, Local Development Database, Migration Drift sections
+- All documentation updated for Prisma v7 workflow
+
 ## Release 1.2.3 — Phase 4: Papers & Collections (2026-06-16)
 
 **Release date:** 2026-06-16
