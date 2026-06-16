@@ -24,7 +24,7 @@ import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { USER_ROLES, resolveRoleScopedHref } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
-import { useGetAllUsersQuery } from "@/redux/api/userApi";
+import { useGetAllUsersQuery } from "@/redux/api/adminApi";
 import {
   useListWorkspacesQuery,
   type Workspace,

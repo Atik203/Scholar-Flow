@@ -1,5 +1,38 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.3 — Phase 4: Papers & Collections (2026-06-16)
+
+**Release date:** 2026-06-16
+**Theme:** Full Phase 4 implementation — 10 new dashboard pages, schema migration (12 fields, 2 enums), AI recommendations, paper importer, CollectionPaper PATCH.
+
+### New Features
+- **Papers dashboard:** list (grid/table), upload (file/DOI/arXiv/URL with processing queue), search (keyword + status filter), editor (create/list), import (BibTeX/RIS parser)
+- **Collections dashboard:** list (workspace filter, color cards), create (2-step wizard, visibility, color), detail (grid/list, bulk select, star toggle, invite), shared (pending/sent invites)
+- **AI recommendations:** suggested collections, paper suggestions, recommended papers (tag-based fallback)
+- **Paper importer:** DOI (CrossRef), arXiv (arXiv API), URL (PDF download), BibTeX/RIS parser, Zotero/Mendeley/EndNote stubs
+- **CollectionPaper PATCH:** `PATCH /collections/:id/papers/:pid` for reading status + star toggle
+
+### Schema
+- `CollectionVisibility` (PRIVATE/TEAM/PUBLIC), `CollectionPaperStatus` (TO_READ/READING/COMPLETED/ARCHIVED) enums
+- Paper: `tags`, `language`, `citationCount`; Collection: `visibility`, `tags`, `coverImage`, `color`; CollectionPaper: `status`, `isStarred`
+- GIN indexes on Paper.tags, Collection.tags; composite indexes for visibility/status filtering
+- `isPublic` preserved for backward compat; backfill synced `visibility`
+
+### Bug Fixes
+- **Duplicate endpoint:** removed `getAllUsers` from `userApi` (conflicted with `adminApi`), migrated DashboardPage import
+- **Paper upload:** fixed `tags` array serialization in form data (was `String()` instead of `JSON.stringify()`)
+
+### Cleanup
+- Removed 81 legacy files: `(modules)/papers/`, `(modules)/collections/`, all role-segmented re-exports (`(roles)/admin/`, `(roles)/pro-researcher/`, `(roles)/researcher/`)
+- `proxy.ts` already redirects legacy role URLs → canonical `/dashboard/*` paths
+
+### Deferred
+- AI insights sidebar, annotation toolbar, export UI → Phase 8
+- Semantic search (pgvector) → Phase 8
+- Global multi-paper AI assistant → Phase 8
+
+---
+
 ## Release 1.2.2 — Patch: Auth reliability + admin sidebar unification (2026-06-16)
 
 **Release date:** 2026-06-16
