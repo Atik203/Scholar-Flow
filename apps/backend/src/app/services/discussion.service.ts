@@ -347,7 +347,10 @@ export class DiscussionService {
               orderBy: {
                 createdAt: 'desc'
               },
-              include: {
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
                 user: {
                   select: {
                     id: true,

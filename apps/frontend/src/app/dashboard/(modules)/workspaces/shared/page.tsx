@@ -45,7 +45,6 @@ export default function SharedWorkspacesPage() {
     isLoading,
     error,
   } = useListWorkspacesQuery({
-    page: 1,
     limit: 20,
     scope: "shared",
   });

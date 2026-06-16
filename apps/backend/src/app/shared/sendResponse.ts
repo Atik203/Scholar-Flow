@@ -1,12 +1,14 @@
 import { Response } from "express";
 
 export type TMeta = {
-  page: number;
+  page?: number;
   limit: number;
-  total: number;
-  totalPage: number;
+  total?: number;
+  totalPage?: number;
   hasNextPage?: boolean;
   hasPreviousPage?: boolean;
+  nextCursor?: string | null;
+  hasMore?: boolean;
 };
 
 interface IApiResponse<T> {
