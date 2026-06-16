@@ -17,7 +17,7 @@ export default function SearchPapersPage() {
   const [activeQuery, setActiveQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
-  const { data: papersData, isLoading } = useListPapersQuery({ page: 1, limit: 100 });
+  const { data: papersData, isLoading } = useListPapersQuery({ limit: 100 });
 
   const papers = papersData?.items || [];
 
