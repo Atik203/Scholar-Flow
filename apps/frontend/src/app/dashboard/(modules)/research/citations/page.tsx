@@ -32,7 +32,6 @@ export default function CitationsPage() {
     isLoading: isPapersLoading,
     error: papersError,
   } = useListPapersQuery({
-    page: 1,
     limit: 50,
   });
   const {
@@ -40,7 +39,6 @@ export default function CitationsPage() {
     isLoading: isCollectionsLoading,
     error: collectionsError,
   } = useGetMyCollectionsQuery({
-    page: 1,
     limit: 10,
   });
   const {

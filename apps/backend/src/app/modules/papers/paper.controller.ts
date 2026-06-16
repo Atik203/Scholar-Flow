@@ -127,19 +127,23 @@ export const paperController = {
       throw createPaperError.validationFailed(errorDetails);
     }
 
-    const { workspaceId, page, limit } = parsed.data;
+    const { workspaceId, cursor, limit } = parsed.data;
 
     // If workspaceId is explicitly provided and not empty, use workspace-scoped listing (for future workspace features)
     if (workspaceId && workspaceId.trim() !== "") {
       const results = await paperService.listByWorkspace(
         workspaceId,
-        page || 1,
-        limit || 10
+        limit || 10,
+        cursor
       );
       return sendPaginatedResponse(
         res,
         results.items,
-        results.meta,
+        {
+          limit: limit || 10,
+          nextCursor: results.nextCursor,
+          hasMore: results.hasMore,
+        },
         "Papers retrieved successfully"
       );
     }
@@ -152,14 +156,18 @@ export const paperController = {
 
     const results = await paperService.listByUser(
       authReq.user.id,
-      page || 1,
-      limit || 10
+      limit || 10,
+      cursor
     );
 
     sendPaginatedResponse(
       res,
       results.items,
-      results.meta,
+      {
+        limit: limit || 10,
+        nextCursor: results.nextCursor,
+        hasMore: results.hasMore,
+      },
       "Papers retrieved successfully"
     );
   }),

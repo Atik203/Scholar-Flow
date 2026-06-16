@@ -22,12 +22,10 @@ export default function CitationFormatsPage() {
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
 
   const { data: papersData } = useListPapersQuery({
-    page: 1,
     limit: 50,
   });
 
   const { data: collectionsData } = useGetMyCollectionsQuery({
-    page: 1,
     limit: 20,
   });
 
