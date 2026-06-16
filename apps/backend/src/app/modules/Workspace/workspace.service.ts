@@ -1,15 +1,20 @@
 import ApiError from "../../errors/ApiError";
-import prisma from "../../shared/prisma";
+import prisma, { Prisma } from "../../shared/prisma";
 
 export class WorkspaceService {
   static async listUserWorkspaces(
     userId: string,
     limit: number,
-    skip: number,
+    cursor: string | undefined,
     scope: "all" | "owned" | "shared" = "all"
   ) {
     const whereOwned = scope === "owned";
     const whereShared = scope === "shared";
+    const take = limit + 1;
+
+    const cursorFilter = cursor
+      ? Prisma.sql`AND fw."createdAt" < (SELECT "createdAt" FROM "Workspace" WHERE id = ${cursor})`
+      : Prisma.empty;
 
     const rows = await prisma.$queryRaw<any[]>`
       WITH filtered_workspaces AS (
@@ -46,26 +51,21 @@ export class WorkspaceService {
         WHERE "isDeleted" = false
         GROUP BY "workspaceId"
       ) paper_counts ON paper_counts."workspaceId" = fw.id
+      WHERE true
+        ${cursorFilter}
       ORDER BY fw."createdAt" DESC
-      LIMIT ${limit} OFFSET ${skip}
+      LIMIT ${take}
     `;
 
-    const totalRes = await prisma.$queryRaw<any[]>`
-      SELECT COUNT(*)::int as count
-      FROM "Workspace" w
-      JOIN "WorkspaceMember" m ON m."workspaceId" = w.id AND m."isDeleted" = false
-      WHERE m."userId" = ${userId}
-        AND w."isDeleted" = false
-        AND (${whereOwned} = false OR w."ownerId" = ${userId})
-        AND (${whereShared} = false OR w."ownerId" != ${userId})
-    `;
+    const hasMore = rows.length > limit;
+    const sliced = hasMore ? rows.slice(0, -1) : rows;
+
     return {
-      result: rows,
+      result: sliced,
       meta: {
-        page: skip / limit + 1,
         limit,
-        total: totalRes[0]?.count || 0,
-        totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+        nextCursor: hasMore ? sliced[sliced.length - 1].id : null,
+        hasMore,
       },
     };
   }
@@ -221,31 +221,35 @@ export class WorkspaceService {
     userId: string,
     id: string,
     limit: number,
-    skip: number
+    cursor: string | undefined
   ) {
     // Must be a member to view
     await this.getWorkspace(userId, id);
+
+    const take = limit + 1;
+    const cursorFilter = cursor
+      ? Prisma.sql`AND m."joinedAt" < (SELECT "joinedAt" FROM "WorkspaceMember" WHERE id = ${cursor})`
+      : Prisma.empty;
 
     const rows = await prisma.$queryRaw<any[]>`
       SELECT m.*, u.email, u.name
       FROM "WorkspaceMember" m
       JOIN "User" u ON u.id = m."userId"
       WHERE m."workspaceId" = ${id} AND m."isDeleted" = false
+        ${cursorFilter}
       ORDER BY m."joinedAt" DESC
-      LIMIT ${limit} OFFSET ${skip}
+      LIMIT ${take}
     `;
-    const totalRes = await prisma.$queryRaw<any[]>`
-      SELECT COUNT(*)::int as count
-      FROM "WorkspaceMember" m
-      WHERE m."workspaceId" = ${id} AND m."isDeleted" = false
-    `;
+
+    const hasMore = rows.length > limit;
+    const sliced = hasMore ? rows.slice(0, -1) : rows;
+
     return {
-      result: rows,
+      result: sliced,
       meta: {
-        page: skip / limit + 1,
         limit,
-        total: totalRes[0]?.count || 0,
-        totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+        nextCursor: hasMore ? sliced[sliced.length - 1].id : null,
+        hasMore,
       },
     };
   }

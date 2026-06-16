@@ -12,9 +12,8 @@ export const NotificationController = {
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
     const q = listQuerySchema.parse(req.query);
-    const page = parseInt((q.page as string) || "1", 10);
+    const cursor = q.cursor;
     const limit = Math.min(50, parseInt((q.limit as string) || "20", 10));
-    const skip = (page - 1) * limit;
 
     const queryParams = {
       type: q.type as string | undefined,
@@ -25,19 +24,14 @@ export const NotificationController = {
     const result = await NotificationService.listNotifications(
       authReq.user.id,
       limit,
-      skip,
+      cursor,
       queryParams
     );
 
     sendPaginatedResponse(
       res,
       result.result,
-      { 
-        ...result.meta, 
-        page, 
-        limit,
-        totalPage: Math.ceil(result.meta.total / limit)
-      },
+      result.meta,
       "Notifications retrieved successfully"
     );
   }),

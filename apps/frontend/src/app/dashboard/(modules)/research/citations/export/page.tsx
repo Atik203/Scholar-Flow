@@ -37,7 +37,6 @@ export default function CitationExportPage() {
     isLoading: isPapersLoading,
     error: papersError,
   } = useListPapersQuery({
-    page: 1,
     limit: 50,
   });
 
@@ -46,7 +45,6 @@ export default function CitationExportPage() {
     isLoading: isCollectionsLoading,
     error: collectionsError,
   } = useGetMyCollectionsQuery({
-    page: 1,
     limit: 20,
   });
 

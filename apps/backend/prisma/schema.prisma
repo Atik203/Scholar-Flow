@@ -350,7 +350,7 @@ model PaperChunk {
   idx        Int
   page       Int?
   content    String
-  // embedding  Unsupported("vector")? // pgvector column - temporarily disabled
+  embedding  Unsupported("vector")?
   tokenCount Int?
 
   paper Paper @relation(fields: [paperId], references: [id])
