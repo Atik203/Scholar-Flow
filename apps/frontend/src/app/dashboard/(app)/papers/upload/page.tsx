@@ -43,7 +43,7 @@ export default function UploadPaperPage() {
   const [tags, setTags] = useState("");
   const [language, setLanguage] = useState("");
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
+  const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
   const { data: collectionsData } = useGetMyCollectionsQuery({ page: 1, limit: 50 });
   const [uploadPaper] = useUploadPaperMutation();
   const [importDoi] = useImportByDOIMutation();

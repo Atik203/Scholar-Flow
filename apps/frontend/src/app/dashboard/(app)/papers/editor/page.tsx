@@ -19,7 +19,7 @@ export default function PaperEditorPage() {
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
+  const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
   const { data: editorData, isLoading } = useListEditorPapersQuery({});
   const [createEditorPaper] = useCreateEditorPaperMutation();
 
