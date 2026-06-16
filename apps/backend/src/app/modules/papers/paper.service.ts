@@ -3,7 +3,7 @@ import htmlDocx from "html-docx-js";
 import puppeteer from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
-import prisma from "../../shared/prisma";
+import prisma, { Prisma } from "../../shared/prisma";
 import {
   CreateEditorPaperInput,
   PublishDraftInput,
@@ -385,34 +385,30 @@ export const paperService = {
     return Number(result[0]?.count || 0);
   },
 
-  async listByUser(userId: string, page = 1, limit = 10) {
-    const skip = (page - 1) * limit;
+  async listByUser(userId: string, limit = 10, cursor?: string) {
+    const take = limit + 1;
 
-    // Use $queryRaw for performance per backend instructions
-    const [items, totalResult] = await Promise.all([
-      prisma.$queryRaw<any[]>`
-        SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
-               p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
-               p."createdAt", p."updatedAt",
-               pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
-               pf."sizeBytes", pf."originalFilename", pf."extractedAt"
-        FROM "Paper" p
-        LEFT JOIN "PaperFile" pf ON p.id = pf."paperId"
-        WHERE p."uploaderId" = ${userId} AND p."isDeleted" = false
-        ORDER BY p."createdAt" DESC
-        LIMIT ${limit} OFFSET ${skip}
-      `,
-      prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(*) as count
-        FROM "Paper"
-        WHERE "uploaderId" = ${userId} AND "isDeleted" = false
-      `,
-    ]);
+    const items = await prisma.$queryRaw<any[]>`
+      SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata,
+             p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
+             p."createdAt", p."updatedAt",
+             pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType",
+             pf."sizeBytes", pf."originalFilename", pf."extractedAt"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON p.id = pf."paperId"
+      WHERE p."uploaderId" = ${userId}
+        AND p."isDeleted" = false
+        ${cursor
+          ? Prisma.sql`AND p."createdAt" < (SELECT "createdAt" FROM "Paper" WHERE id = ${cursor})`
+          : Prisma.empty}
+      ORDER BY p."createdAt" DESC
+      LIMIT ${take}
+    `;
 
-    const total = Number(totalResult[0]?.count || 0);
+    const hasMore = items.length > limit;
+    const sliced = hasMore ? items.slice(0, -1) : items;
 
-    // Transform flat result to nested structure
-    const transformedItems = items.map((item) => ({
+    const transformedItems = sliced.map((item) => ({
       id: item.id,
       workspaceId: item.workspaceId,
       uploaderId: item.uploaderId,
@@ -442,39 +438,36 @@ export const paperService = {
 
     return {
       items: transformedItems,
-      meta: { page, limit, total, totalPage: Math.ceil(total / limit) },
+      nextCursor: hasMore ? transformedItems[transformedItems.length - 1].id : null,
+      hasMore,
     };
   },
 
   // Keep the workspace method for backward compatibility and future workspace sharing
-  async listByWorkspace(workspaceId: string, page = 1, limit = 10) {
-    const skip = (page - 1) * limit;
+  async listByWorkspace(workspaceId: string, limit = 10, cursor?: string) {
+    const take = limit + 1;
 
-    // Use $queryRaw for performance per backend instructions
-    const [items, totalResult] = await Promise.all([
-      prisma.$queryRaw<any[]>`
-        SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata, 
-               p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
-               p."createdAt", p."updatedAt",
-               pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
-               pf."sizeBytes", pf."originalFilename", pf."extractedAt"
-        FROM "Paper" p
-        LEFT JOIN "PaperFile" pf ON p.id = pf."paperId"
-        WHERE p."workspaceId" = ${workspaceId} AND p."isDeleted" = false
-        ORDER BY p."createdAt" DESC
-        LIMIT ${limit} OFFSET ${skip}
-      `,
-      prisma.$queryRaw<[{ count: bigint }]>`
-        SELECT COUNT(*) as count
-        FROM "Paper"
-        WHERE "workspaceId" = ${workspaceId} AND "isDeleted" = false
-      `,
-    ]);
+    const items = await prisma.$queryRaw<any[]>`
+      SELECT p.id, p."workspaceId", p."uploaderId", p.title, p.abstract, p.metadata,
+             p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
+             p."createdAt", p."updatedAt",
+             pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType",
+             pf."sizeBytes", pf."originalFilename", pf."extractedAt"
+      FROM "Paper" p
+      LEFT JOIN "PaperFile" pf ON p.id = pf."paperId"
+      WHERE p."workspaceId" = ${workspaceId}
+        AND p."isDeleted" = false
+        ${cursor
+          ? Prisma.sql`AND p."createdAt" < (SELECT "createdAt" FROM "Paper" WHERE id = ${cursor})`
+          : Prisma.empty}
+      ORDER BY p."createdAt" DESC
+      LIMIT ${take}
+    `;
 
-    const total = Number(totalResult[0]?.count || 0);
+    const hasMore = items.length > limit;
+    const sliced = hasMore ? items.slice(0, -1) : items;
 
-    // Transform flat result to nested structure
-    const transformedItems = items.map((item) => ({
+    const transformedItems = sliced.map((item) => ({
       id: item.id,
       workspaceId: item.workspaceId,
       uploaderId: item.uploaderId,
@@ -504,7 +497,8 @@ export const paperService = {
 
     return {
       items: transformedItems,
-      meta: { page, limit, total, totalPage: Math.ceil(total / limit) },
+      nextCursor: hasMore ? transformedItems[transformedItems.length - 1].id : null,
+      hasMore,
     };
   },
 

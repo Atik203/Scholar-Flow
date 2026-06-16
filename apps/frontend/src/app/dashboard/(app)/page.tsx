@@ -151,16 +151,15 @@ export default function DashboardHomePage() {
 
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     limit: 5,
-    page: 1,
   });
   const { data: collectionsData, isLoading: collectionsLoading } =
     useGetMyCollectionsQuery({ limit: 5, page: 1 });
   const { data: workspacesData, isLoading: workspacesLoading } =
-    useListWorkspacesQuery({ limit: 1, page: 1 });
+    useListWorkspacesQuery({ limit: 1 });
 
-  const totalPapers = papersData?.meta?.total ?? 0;
+  const totalPapers = papersData?.items?.length ?? 0;
   const totalCollections = collectionsData?.meta?.total ?? 0;
-  const totalWorkspaces = workspacesData?.meta?.total ?? 0;
+  const totalWorkspaces = workspacesData?.data?.length ?? 0;
   const recentPapers = papersData?.items ?? [];
   const recentCollections = (collectionsData?.result ?? []) as Array<{
     id: string;

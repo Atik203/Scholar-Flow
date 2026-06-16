@@ -29,7 +29,7 @@ export default function ImportPapersPage() {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: workspacesData } = useListWorkspacesQuery({ page: 1, limit: 50, scope: "all" });
+  const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
   const { data: historyData } = useGetImportHistoryQuery();
   const [importByFile] = useImportByFileMutation();
 

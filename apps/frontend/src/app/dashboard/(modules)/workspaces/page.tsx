@@ -47,17 +47,15 @@ export default function WorkspacesPage() {
   const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
   const { data: allData, isLoading: allLoading } = useListWorkspacesQuery({
-    page: 1,
     limit: 50,
     scope: "all",
   });
   const { data: ownedData, isLoading: ownedLoading } = useListWorkspacesQuery({
-    page: 1,
     limit: 50,
     scope: "owned",
   });
   const { data: sharedData, isLoading: sharedLoading } = useListWorkspacesQuery(
-    { page: 1, limit: 50, scope: "shared" }
+    { limit: 50, scope: "shared" }
   );
   const [createWorkspace, { isLoading: creating }] =
     useCreateWorkspaceMutation();

@@ -43,13 +43,13 @@ export const workspaceApi = apiSlice.injectEndpoints({
     listWorkspaces: builder.query<
       {
         data: Workspace[];
-        meta: { page: number; limit: number; total: number; totalPage: number };
+        meta: { limit: number; nextCursor?: string | null; hasMore?: boolean };
       },
-      { page?: number; limit?: number; scope?: "all" | "owned" | "shared" }
+      { cursor?: string; limit?: number; scope?: "all" | "owned" | "shared" }
     >({
-      query: ({ page = 1, limit = 10, scope = "all" } = {}) => ({
+      query: ({ cursor, limit = 10, scope = "all" } = {}) => ({
         url: `/workspaces`,
-        params: { page, limit, scope },
+        params: { ...(cursor && { cursor }), limit, scope },
       }),
       providesTags: (result) =>
         result?.data

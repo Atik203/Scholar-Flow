@@ -38,10 +38,9 @@ export interface Paper {
 export interface PaginatedPapersResponse {
   items: Paper[];
   meta: {
-    page: number;
     limit: number;
-    total: number;
-    totalPage: number;
+    nextCursor?: string | null;
+    hasMore?: boolean;
   };
 }
 
@@ -237,10 +236,13 @@ export const paperApi = apiSlice.injectEndpoints({
 
     listPapers: builder.query<
       PaginatedPapersResponse,
-      { page?: number; limit?: number; workspaceId?: string }
+      { cursor?: string; limit?: number; workspaceId?: string }
     >({
-      query: ({ page = 1, limit = 10, workspaceId }) => {
-        const params: any = { page, limit };
+      query: ({ cursor, limit = 10, workspaceId }) => {
+        const params: any = { limit };
+        if (cursor) {
+          params.cursor = cursor;
+        }
         // Only include workspaceId for dev/fallback mode
         if (workspaceId) {
           params.workspaceId = workspaceId;
@@ -580,6 +582,7 @@ export const paperApi = apiSlice.injectEndpoints({
 export const {
   useUploadPaperMutation,
   useListPapersQuery,
+  useLazyListPapersQuery,
   useGetPaperQuery,
   useGetPaperFileUrlQuery,
   useGetPaperPreviewUrlQuery,
