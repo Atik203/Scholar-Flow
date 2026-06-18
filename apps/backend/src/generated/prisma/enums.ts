@@ -184,7 +184,9 @@ export const CitationFormat = {
   MLA: 'MLA',
   IEEE: 'IEEE',
   CHICAGO: 'CHICAGO',
-  HARVARD: 'HARVARD'
+  HARVARD: 'HARVARD',
+  VANCOUVER: 'VANCOUVER',
+  ACS: 'ACS'
 } as const
 
 export type CitationFormat = (typeof CitationFormat)[keyof typeof CitationFormat]
