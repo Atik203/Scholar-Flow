@@ -65,6 +65,26 @@ export const CollectionPaperStatus = {
 export type CollectionPaperStatus = (typeof CollectionPaperStatus)[keyof typeof CollectionPaperStatus]
 
 
+export const NoteType = {
+  QUICK: 'QUICK',
+  LITERATURE: 'LITERATURE',
+  METHODOLOGY: 'METHODOLOGY',
+  FINDINGS: 'FINDINGS',
+  IDEA: 'IDEA'
+} as const
+
+export type NoteType = (typeof NoteType)[keyof typeof NoteType]
+
+
+export const NoteVisibility = {
+  PRIVATE: 'PRIVATE',
+  WORKSPACE: 'WORKSPACE',
+  PUBLIC: 'PUBLIC'
+} as const
+
+export type NoteVisibility = (typeof NoteVisibility)[keyof typeof NoteVisibility]
+
+
 export const AnnotationType = {
   HIGHLIGHT: 'HIGHLIGHT',
   UNDERLINE: 'UNDERLINE',

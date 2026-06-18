@@ -190,6 +190,16 @@ export type UserToken = Prisma.UserTokenModel
  */
 export type ResearchNote = Prisma.ResearchNoteModel
 /**
+ * Model Notebook
+ * 
+ */
+export type Notebook = Prisma.NotebookModel
+/**
+ * Model NotebookSection
+ * 
+ */
+export type NotebookSection = Prisma.NotebookSectionModel
+/**
  * Model CitationExport
  * 
  */
