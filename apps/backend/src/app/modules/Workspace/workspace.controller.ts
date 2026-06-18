@@ -16,6 +16,7 @@ import {
   memberParamsSchema,
   updateMemberRoleSchema,
   updateWorkspaceSchema,
+  updateWorkspaceSettingsSchema,
   workspaceParamsSchema,
 } from "./workspace.validation";
 
@@ -47,7 +48,8 @@ export const workspaceController = {
     const body = createWorkspaceSchema.parse(req.body);
     const workspace = await WorkspaceService.createWorkspace(
       authReq.user.id,
-      body.name
+      body.name,
+      { color: body.color, visibility: body.visibility }
     );
     sendSuccessResponse(res, workspace, "Workspace created", 201);
   }),
@@ -221,6 +223,105 @@ export const workspaceController = {
       result.result,
       { ...result.meta, page, limit },
       "Invitations received retrieved successfully"
+    );
+  }),
+
+  // ==========================================================================
+  // Phase 5 — Settings, Activity, Stats, Papers, Collections
+  // ==========================================================================
+
+  getSettings: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const settings = await WorkspaceService.getWorkspaceSettings(
+      authReq.user.id,
+      params.id
+    );
+    sendSuccessResponse(res, settings, "Workspace settings retrieved");
+  }),
+
+  updateSettings: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const body = updateWorkspaceSettingsSchema.parse(req.body);
+    const settings = await WorkspaceService.updateWorkspaceSettings(
+      authReq.user.id,
+      params.id,
+      body
+    );
+    sendSuccessResponse(res, settings, "Workspace settings updated");
+  }),
+
+  getStats: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const stats = await WorkspaceService.getWorkspaceStats(
+      authReq.user.id,
+      params.id
+    );
+    sendSuccessResponse(res, stats, "Workspace stats retrieved");
+  }),
+
+  getActivity: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const q = listQuerySchema.parse(req.query);
+    const limit = Math.min(100, parseInt((q.limit as string) || "30", 10));
+    const result = await WorkspaceService.getWorkspaceActivity(
+      authReq.user.id,
+      params.id,
+      limit,
+      q.cursor
+    );
+    sendPaginatedResponse(
+      res,
+      result.result,
+      result.meta,
+      "Workspace activity retrieved"
+    );
+  }),
+
+  getPapers: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const q = listQuerySchema.parse(req.query);
+    const limit = Math.min(50, parseInt((q.limit as string) || "20", 10));
+    const result = await WorkspaceService.getWorkspacePapers(
+      authReq.user.id,
+      params.id,
+      limit,
+      q.cursor
+    );
+    sendPaginatedResponse(
+      res,
+      result.result,
+      result.meta,
+      "Workspace papers retrieved"
+    );
+  }),
+
+  getCollections: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const params = workspaceParamsSchema.parse(req.params);
+    const q = listQuerySchema.parse(req.query);
+    const limit = Math.min(50, parseInt((q.limit as string) || "20", 10));
+    const result = await WorkspaceService.getWorkspaceCollections(
+      authReq.user.id,
+      params.id,
+      limit,
+      q.cursor
+    );
+    sendPaginatedResponse(
+      res,
+      result.result,
+      result.meta,
+      "Workspace collections retrieved"
     );
   }),
 };

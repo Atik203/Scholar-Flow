@@ -56,6 +56,7 @@ export const ModelName = {
   Workspace: 'Workspace',
   WorkspaceMember: 'WorkspaceMember',
   WorkspaceInvitation: 'WorkspaceInvitation',
+  WorkspaceSettings: 'WorkspaceSettings',
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
@@ -157,6 +158,8 @@ export const WorkspaceScalarFieldEnum = {
   name: 'name',
   description: 'description',
   ownerId: 'ownerId',
+  color: 'color',
+  visibility: 'visibility',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -195,6 +198,29 @@ export const WorkspaceInvitationScalarFieldEnum = {
 } as const
 
 export type WorkspaceInvitationScalarFieldEnum = (typeof WorkspaceInvitationScalarFieldEnum)[keyof typeof WorkspaceInvitationScalarFieldEnum]
+
+
+export const WorkspaceSettingsScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  color: 'color',
+  coverImageKey: 'coverImageKey',
+  iconKey: 'iconKey',
+  allowExternalSharing: 'allowExternalSharing',
+  allowDownload: 'allowDownload',
+  defaultMemberRole: 'defaultMemberRole',
+  requireApprovalForJoin: 'requireApprovalForJoin',
+  allowMemberInvites: 'allowMemberInvites',
+  allowPublicCollections: 'allowPublicCollections',
+  aiFeaturesEnabled: 'aiFeaturesEnabled',
+  enforce2FAForMembers: 'enforce2FAForMembers',
+  allowedEmailDomains: 'allowedEmailDomains',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type WorkspaceSettingsScalarFieldEnum = (typeof WorkspaceSettingsScalarFieldEnum)[keyof typeof WorkspaceSettingsScalarFieldEnum]
 
 
 export const PaperScalarFieldEnum = {

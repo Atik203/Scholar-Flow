@@ -70,18 +70,31 @@ export class WorkspaceService {
     };
   }
 
-  static async createWorkspace(ownerId: string, name: string) {
+  static async createWorkspace(
+    ownerId: string,
+    name: string,
+    options?: { color?: string; visibility?: string }
+  ) {
     // Create workspace and membership in a transaction
     try {
+      const color = options?.color && ["blue", "purple", "green", "orange", "pink"].includes(options.color) ? options.color : "blue";
+      const visibility = options?.visibility === "INVITE_ONLY" || options?.visibility === "PUBLIC" ? options.visibility : "PRIVATE";
+
       const workspace = await prisma.$queryRaw<any[]>`
-        INSERT INTO "Workspace" (id, name, "ownerId", "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${name}, ${ownerId}, now(), now(), false)
+        INSERT INTO "Workspace" (id, name, "ownerId", color, visibility, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${name}, ${ownerId}, ${color}, ${visibility}::"WorkspaceVisibility", now(), now(), false)
         RETURNING *
       `;
       const w = workspace[0];
       await prisma.$executeRaw`
         INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
         VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'OWNER', now(), now(), now(), false)
+      `;
+      // Create default WorkspaceSettings row
+      await prisma.$executeRaw`
+        INSERT INTO "WorkspaceSettings" (id, "workspaceId", color, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${w.id}, ${color}, now(), now(), false)
+        ON CONFLICT ("workspaceId") DO NOTHING
       `;
       await prisma.$executeRaw`
         INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
@@ -584,6 +597,287 @@ export class WorkspaceService {
       meta: {
         total: totalRes[0]?.count || 0,
         totalPage: Math.ceil((totalRes[0]?.count || 0) / limit),
+      },
+    };
+  }
+
+  // ==========================================================================
+  // Phase 5 — Workspace Settings, Activity, Stats, Papers, Collections
+  // ==========================================================================
+
+  /**
+   * Get WorkspaceSettings for a workspace. Returns null if no row exists.
+   */
+  static async getWorkspaceSettings(userId: string, workspaceId: string) {
+    await this.getWorkspace(userId, workspaceId);
+    return prisma.workspaceSettings.findUnique({ where: { workspaceId } });
+  }
+
+  /**
+   * Upsert WorkspaceSettings for a workspace. Caller must be the owner.
+   */
+  static async updateWorkspaceSettings(
+    userId: string,
+    workspaceId: string,
+    data: {
+      color?: string;
+      coverImageKey?: string | null;
+      iconKey?: string | null;
+      allowExternalSharing?: boolean;
+      allowDownload?: boolean;
+      defaultMemberRole?: string;
+      requireApprovalForJoin?: boolean;
+      allowMemberInvites?: boolean;
+      allowPublicCollections?: boolean;
+      aiFeaturesEnabled?: boolean;
+      enforce2FAForMembers?: boolean;
+      allowedEmailDomains?: string[];
+    }
+  ) {
+    const perm = await prisma.$queryRaw<any[]>`
+      SELECT m.role, w."ownerId"
+      FROM "WorkspaceMember" m JOIN "Workspace" w ON w.id = m."workspaceId"
+      WHERE m."userId" = ${userId} AND m."workspaceId" = ${workspaceId} AND m."isDeleted" = false AND w."isDeleted" = false
+      LIMIT 1
+    `;
+    const ctx = perm[0];
+    if (!ctx) throw new ApiError(403, "Not a member of this workspace");
+    if (ctx.role !== "OWNER" && ctx.ownerId !== userId) {
+      throw new ApiError(403, "Only workspace owner can update settings");
+    }
+
+    const updated = await prisma.workspaceSettings.upsert({
+      where: { workspaceId },
+      create: {
+        workspaceId,
+        color: data.color,
+        coverImageKey: data.coverImageKey,
+        iconKey: data.iconKey,
+        allowExternalSharing: data.allowExternalSharing,
+        allowDownload: data.allowDownload,
+        defaultMemberRole: data.defaultMemberRole as any,
+        requireApprovalForJoin: data.requireApprovalForJoin,
+        allowMemberInvites: data.allowMemberInvites,
+        allowPublicCollections: data.allowPublicCollections,
+        aiFeaturesEnabled: data.aiFeaturesEnabled,
+        enforce2FAForMembers: data.enforce2FAForMembers,
+        allowedEmailDomains: data.allowedEmailDomains ?? [],
+      },
+      update: {
+        ...(data.color !== undefined && { color: data.color }),
+        ...(data.coverImageKey !== undefined && { coverImageKey: data.coverImageKey }),
+        ...(data.iconKey !== undefined && { iconKey: data.iconKey }),
+        ...(data.allowExternalSharing !== undefined && { allowExternalSharing: data.allowExternalSharing }),
+        ...(data.allowDownload !== undefined && { allowDownload: data.allowDownload }),
+        ...(data.defaultMemberRole !== undefined && { defaultMemberRole: data.defaultMemberRole as any }),
+        ...(data.requireApprovalForJoin !== undefined && { requireApprovalForJoin: data.requireApprovalForJoin }),
+        ...(data.allowMemberInvites !== undefined && { allowMemberInvites: data.allowMemberInvites }),
+        ...(data.allowPublicCollections !== undefined && { allowPublicCollections: data.allowPublicCollections }),
+        ...(data.aiFeaturesEnabled !== undefined && { aiFeaturesEnabled: data.aiFeaturesEnabled }),
+        ...(data.enforce2FAForMembers !== undefined && { enforce2FAForMembers: data.enforce2FAForMembers }),
+        ...(data.allowedEmailDomains !== undefined && { allowedEmailDomains: data.allowedEmailDomains }),
+      },
+    });
+
+    // Keep denormalized color in sync
+    if (data.color) {
+      await prisma.workspace.update({
+        where: { id: workspaceId },
+        data: { color: data.color },
+      });
+    }
+
+    // Log activity
+    await prisma.activityLogEntry.create({
+      data: {
+        userId,
+        workspaceId,
+        entity: "WorkspaceSettings",
+        entityId: workspaceId,
+        action: "UPDATE",
+        severity: "INFO",
+      },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Get aggregated stats for a workspace (papers, collections, members, storage estimate).
+   */
+  static async getWorkspaceStats(userId: string, workspaceId: string) {
+    await this.getWorkspace(userId, workspaceId);
+
+    const [papers, collections, members] = await Promise.all([
+      prisma.paper.count({ where: { workspaceId, isDeleted: false } }),
+      prisma.collection.count({ where: { workspaceId, isDeleted: false } }),
+      prisma.workspaceMember.count({ where: { workspaceId, isDeleted: false } }),
+    ]);
+
+    // Storage estimate: ~250KB per paper, 50KB per collection (rough heuristic)
+    const storageBytes = papers * 250_000 + collections * 50_000;
+    const storageMB = Math.round(storageBytes / (1024 * 1024) * 10) / 10;
+
+    return {
+      papers,
+      collections,
+      members,
+      storage: storageMB < 1 ? `${Math.round(storageBytes / 1024)} KB` : `${storageMB} MB`,
+    };
+  }
+
+  /**
+   * Get activity log entries for a workspace (cursor paginated).
+   */
+  static async getWorkspaceActivity(
+    userId: string,
+    workspaceId: string,
+    limit: number,
+    cursor: string | undefined
+  ) {
+    await this.getWorkspace(userId, workspaceId);
+
+    const take = limit + 1;
+    const where: any = {
+      workspaceId,
+      isDeleted: false,
+    };
+    if (cursor) {
+      const cur = await prisma.activityLogEntry.findUnique({
+        where: { id: cursor },
+        select: { createdAt: true },
+      });
+      if (cur) where.createdAt = { lt: cur.createdAt };
+    }
+
+    const entries = await prisma.activityLogEntry.findMany({
+      where,
+      take,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    const hasMore = entries.length > limit;
+    const sliced = hasMore ? entries.slice(0, -1) : entries;
+
+    return {
+      result: sliced,
+      meta: {
+        limit,
+        hasMore,
+        nextCursor: hasMore ? sliced[sliced.length - 1].id : null,
+      },
+    };
+  }
+
+  /**
+   * Get papers in a workspace (cursor paginated, sorted by createdAt desc).
+   */
+  static async getWorkspacePapers(
+    userId: string,
+    workspaceId: string,
+    limit: number,
+    cursor: string | undefined
+  ) {
+    await this.getWorkspace(userId, workspaceId);
+
+    const take = limit + 1;
+    const where: any = { workspaceId, isDeleted: false };
+    if (cursor) {
+      const cur = await prisma.paper.findUnique({
+        where: { id: cursor },
+        select: { createdAt: true },
+      });
+      if (cur) where.createdAt = { lt: cur.createdAt };
+    }
+
+    const papers = await prisma.paper.findMany({
+      where,
+      take,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: {
+        id: true,
+        title: true,
+        abstract: true,
+        doi: true,
+        source: true,
+        createdAt: true,
+        uploader: { select: { id: true, name: true, firstName: true, lastName: true, image: true } },
+        _count: { select: { chunks: true } },
+      },
+    });
+
+    const hasMore = papers.length > limit;
+    const sliced = hasMore ? papers.slice(0, -1) : papers;
+
+    return {
+      result: sliced,
+      meta: {
+        limit,
+        hasMore,
+        nextCursor: hasMore ? sliced[sliced.length - 1].id : null,
+      },
+    };
+  }
+
+  /**
+   * Get collections in a workspace (cursor paginated, sorted by createdAt desc).
+   */
+  static async getWorkspaceCollections(
+    userId: string,
+    workspaceId: string,
+    limit: number,
+    cursor: string | undefined
+  ) {
+    await this.getWorkspace(userId, workspaceId);
+
+    const take = limit + 1;
+    const where: any = { workspaceId, isDeleted: false };
+    if (cursor) {
+      const cur = await prisma.collection.findUnique({
+        where: { id: cursor },
+        select: { createdAt: true },
+      });
+      if (cur) where.createdAt = { lt: cur.createdAt };
+    }
+
+    const collections = await prisma.collection.findMany({
+      where,
+      take,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        visibility: true,
+        color: true,
+        tags: true,
+        isPublic: true,
+        createdAt: true,
+        owner: { select: { id: true, name: true, firstName: true, lastName: true, image: true } },
+        _count: { select: { papers: { where: { isDeleted: false } } } },
+      },
+    });
+
+    const hasMore = collections.length > limit;
+    const sliced = hasMore ? collections.slice(0, -1) : collections;
+
+    return {
+      result: collections,
+      meta: {
+        limit,
+        hasMore,
+        nextCursor: hasMore ? sliced[sliced.length - 1].id : null,
       },
     };
   }
