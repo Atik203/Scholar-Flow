@@ -29,6 +29,8 @@ export type WorkspaceMinAggregateOutputType = {
   name: string | null
   description: string | null
   ownerId: string | null
+  color: string | null
+  visibility: $Enums.WorkspaceVisibility | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -39,6 +41,8 @@ export type WorkspaceMaxAggregateOutputType = {
   name: string | null
   description: string | null
   ownerId: string | null
+  color: string | null
+  visibility: $Enums.WorkspaceVisibility | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -49,6 +53,8 @@ export type WorkspaceCountAggregateOutputType = {
   name: number
   description: number
   ownerId: number
+  color: number
+  visibility: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -61,6 +67,8 @@ export type WorkspaceMinAggregateInputType = {
   name?: true
   description?: true
   ownerId?: true
+  color?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -71,6 +79,8 @@ export type WorkspaceMaxAggregateInputType = {
   name?: true
   description?: true
   ownerId?: true
+  color?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -81,6 +91,8 @@ export type WorkspaceCountAggregateInputType = {
   name?: true
   description?: true
   ownerId?: true
+  color?: true
+  visibility?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -164,6 +176,8 @@ export type WorkspaceGroupByOutputType = {
   name: string
   description: string | null
   ownerId: string
+  color: string
+  visibility: $Enums.WorkspaceVisibility
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -195,6 +209,8 @@ export type WorkspaceWhereInput = {
   name?: Prisma.StringFilter<"Workspace"> | string
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ownerId?: Prisma.StringFilter<"Workspace"> | string
+  color?: Prisma.StringFilter<"Workspace"> | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFilter<"Workspace"> | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Workspace"> | boolean
@@ -206,6 +222,7 @@ export type WorkspaceWhereInput = {
   activities?: Prisma.ActivityLogListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   activityLogEntries?: Prisma.ActivityLogEntryListRelationFilter
+  settings?: Prisma.XOR<Prisma.WorkspaceSettingsNullableScalarRelationFilter, Prisma.WorkspaceSettingsWhereInput> | null
   Subscription?: Prisma.SubscriptionListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
 }
@@ -215,6 +232,8 @@ export type WorkspaceOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -226,6 +245,7 @@ export type WorkspaceOrderByWithRelationInput = {
   activities?: Prisma.ActivityLogOrderByRelationAggregateInput
   discussionThreads?: Prisma.DiscussionThreadOrderByRelationAggregateInput
   activityLogEntries?: Prisma.ActivityLogEntryOrderByRelationAggregateInput
+  settings?: Prisma.WorkspaceSettingsOrderByWithRelationInput
   Subscription?: Prisma.SubscriptionOrderByRelationAggregateInput
   UsageEvent?: Prisma.UsageEventOrderByRelationAggregateInput
 }
@@ -238,6 +258,8 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Workspace"> | string
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ownerId?: Prisma.StringFilter<"Workspace"> | string
+  color?: Prisma.StringFilter<"Workspace"> | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFilter<"Workspace"> | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Workspace"> | boolean
@@ -249,6 +271,7 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   activities?: Prisma.ActivityLogListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   activityLogEntries?: Prisma.ActivityLogEntryListRelationFilter
+  settings?: Prisma.XOR<Prisma.WorkspaceSettingsNullableScalarRelationFilter, Prisma.WorkspaceSettingsWhereInput> | null
   Subscription?: Prisma.SubscriptionListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
 }, "id">
@@ -258,6 +281,8 @@ export type WorkspaceOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -274,6 +299,8 @@ export type WorkspaceScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Workspace"> | string | null
   ownerId?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
+  color?: Prisma.StringWithAggregatesFilter<"Workspace"> | string
+  visibility?: Prisma.EnumWorkspaceVisibilityWithAggregatesFilter<"Workspace"> | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Workspace"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Workspace"> | boolean
@@ -283,6 +310,8 @@ export type WorkspaceCreateInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -294,6 +323,7 @@ export type WorkspaceCreateInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -303,6 +333,8 @@ export type WorkspaceUncheckedCreateInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -313,6 +345,7 @@ export type WorkspaceUncheckedCreateInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -321,6 +354,8 @@ export type WorkspaceUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -332,6 +367,7 @@ export type WorkspaceUpdateInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -341,6 +377,8 @@ export type WorkspaceUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -351,6 +389,7 @@ export type WorkspaceUncheckedUpdateInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -360,6 +399,8 @@ export type WorkspaceCreateManyInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -369,6 +410,8 @@ export type WorkspaceUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -379,6 +422,8 @@ export type WorkspaceUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -399,6 +444,8 @@ export type WorkspaceCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -409,6 +456,8 @@ export type WorkspaceMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -419,6 +468,8 @@ export type WorkspaceMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -476,6 +527,10 @@ export type WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput = {
   deleteMany?: Prisma.WorkspaceScalarWhereInput | Prisma.WorkspaceScalarWhereInput[]
 }
 
+export type EnumWorkspaceVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.WorkspaceVisibility
+}
+
 export type WorkspaceCreateNestedOneWithoutMembersInput = {
   create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutMembersInput, Prisma.WorkspaceUncheckedCreateWithoutMembersInput>
   connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutMembersInput
@@ -502,6 +557,20 @@ export type WorkspaceUpdateOneRequiredWithoutInvitationsNestedInput = {
   upsert?: Prisma.WorkspaceUpsertWithoutInvitationsInput
   connect?: Prisma.WorkspaceWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutInvitationsInput, Prisma.WorkspaceUpdateWithoutInvitationsInput>, Prisma.WorkspaceUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type WorkspaceCreateNestedOneWithoutSettingsInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutSettingsInput, Prisma.WorkspaceUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutSettingsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneRequiredWithoutSettingsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutSettingsInput, Prisma.WorkspaceUncheckedCreateWithoutSettingsInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutSettingsInput
+  upsert?: Prisma.WorkspaceUpsertWithoutSettingsInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutSettingsInput, Prisma.WorkspaceUpdateWithoutSettingsInput>, Prisma.WorkspaceUncheckedUpdateWithoutSettingsInput>
 }
 
 export type WorkspaceCreateNestedOneWithoutPapersInput = {
@@ -616,6 +685,8 @@ export type WorkspaceCreateWithoutOwnerInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -626,6 +697,7 @@ export type WorkspaceCreateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -634,6 +706,8 @@ export type WorkspaceUncheckedCreateWithoutOwnerInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -644,6 +718,7 @@ export type WorkspaceUncheckedCreateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -682,6 +757,8 @@ export type WorkspaceScalarWhereInput = {
   name?: Prisma.StringFilter<"Workspace"> | string
   description?: Prisma.StringNullableFilter<"Workspace"> | string | null
   ownerId?: Prisma.StringFilter<"Workspace"> | string
+  color?: Prisma.StringFilter<"Workspace"> | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFilter<"Workspace"> | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Workspace"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Workspace"> | boolean
@@ -691,6 +768,8 @@ export type WorkspaceCreateWithoutMembersInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -701,6 +780,7 @@ export type WorkspaceCreateWithoutMembersInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -710,6 +790,8 @@ export type WorkspaceUncheckedCreateWithoutMembersInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -719,6 +801,7 @@ export type WorkspaceUncheckedCreateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -743,6 +826,8 @@ export type WorkspaceUpdateWithoutMembersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -753,6 +838,7 @@ export type WorkspaceUpdateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -762,6 +848,8 @@ export type WorkspaceUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -771,6 +859,7 @@ export type WorkspaceUncheckedUpdateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -779,6 +868,8 @@ export type WorkspaceCreateWithoutInvitationsInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -789,6 +880,7 @@ export type WorkspaceCreateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -798,6 +890,8 @@ export type WorkspaceUncheckedCreateWithoutInvitationsInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -807,6 +901,7 @@ export type WorkspaceUncheckedCreateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -831,6 +926,8 @@ export type WorkspaceUpdateWithoutInvitationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -841,6 +938,7 @@ export type WorkspaceUpdateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -850,10 +948,113 @@ export type WorkspaceUncheckedUpdateWithoutInvitationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
+  papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
+  UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutSettingsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  owner: Prisma.UserCreateNestedOneWithoutWorkspacesOwnedInput
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
+  papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
+  UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutSettingsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
+  papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
+  UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutSettingsInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutSettingsInput, Prisma.WorkspaceUncheckedCreateWithoutSettingsInput>
+}
+
+export type WorkspaceUpsertWithoutSettingsInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutSettingsInput, Prisma.WorkspaceUncheckedUpdateWithoutSettingsInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutSettingsInput, Prisma.WorkspaceUncheckedCreateWithoutSettingsInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutSettingsInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutSettingsInput, Prisma.WorkspaceUncheckedUpdateWithoutSettingsInput>
+}
+
+export type WorkspaceUpdateWithoutSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  owner?: Prisma.UserUpdateOneRequiredWithoutWorkspacesOwnedNestedInput
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
+  papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
+  UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutSettingsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
   collections?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -867,6 +1068,8 @@ export type WorkspaceCreateWithoutPapersInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -877,6 +1080,7 @@ export type WorkspaceCreateWithoutPapersInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -886,6 +1090,8 @@ export type WorkspaceUncheckedCreateWithoutPapersInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -895,6 +1101,7 @@ export type WorkspaceUncheckedCreateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -919,6 +1126,8 @@ export type WorkspaceUpdateWithoutPapersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -929,6 +1138,7 @@ export type WorkspaceUpdateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -938,6 +1148,8 @@ export type WorkspaceUncheckedUpdateWithoutPapersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -947,6 +1159,7 @@ export type WorkspaceUncheckedUpdateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -955,6 +1168,8 @@ export type WorkspaceCreateWithoutCollectionsInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -965,6 +1180,7 @@ export type WorkspaceCreateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -974,6 +1190,8 @@ export type WorkspaceUncheckedCreateWithoutCollectionsInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -983,6 +1201,7 @@ export type WorkspaceUncheckedCreateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1007,6 +1226,8 @@ export type WorkspaceUpdateWithoutCollectionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1017,6 +1238,7 @@ export type WorkspaceUpdateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1026,6 +1248,8 @@ export type WorkspaceUncheckedUpdateWithoutCollectionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1035,6 +1259,7 @@ export type WorkspaceUncheckedUpdateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1043,6 +1268,8 @@ export type WorkspaceCreateWithoutSubscriptionInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1054,6 +1281,7 @@ export type WorkspaceCreateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
 
@@ -1062,6 +1290,8 @@ export type WorkspaceUncheckedCreateWithoutSubscriptionInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1072,6 +1302,7 @@ export type WorkspaceUncheckedCreateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
@@ -1095,6 +1326,8 @@ export type WorkspaceUpdateWithoutSubscriptionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1106,6 +1339,7 @@ export type WorkspaceUpdateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
 
@@ -1114,6 +1348,8 @@ export type WorkspaceUncheckedUpdateWithoutSubscriptionInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1124,6 +1360,7 @@ export type WorkspaceUncheckedUpdateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
@@ -1131,6 +1368,8 @@ export type WorkspaceCreateWithoutUsageEventInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1142,6 +1381,7 @@ export type WorkspaceCreateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
 }
 
@@ -1150,6 +1390,8 @@ export type WorkspaceUncheckedCreateWithoutUsageEventInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1160,6 +1402,7 @@ export type WorkspaceUncheckedCreateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
 
@@ -1183,6 +1426,8 @@ export type WorkspaceUpdateWithoutUsageEventInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1194,6 +1439,7 @@ export type WorkspaceUpdateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
 }
 
@@ -1202,6 +1448,8 @@ export type WorkspaceUncheckedUpdateWithoutUsageEventInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1212,6 +1460,7 @@ export type WorkspaceUncheckedUpdateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
 
@@ -1219,6 +1468,8 @@ export type WorkspaceCreateWithoutActivitiesInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1229,6 +1480,7 @@ export type WorkspaceCreateWithoutActivitiesInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -1238,6 +1490,8 @@ export type WorkspaceUncheckedCreateWithoutActivitiesInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1247,6 +1501,7 @@ export type WorkspaceUncheckedCreateWithoutActivitiesInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1271,6 +1526,8 @@ export type WorkspaceUpdateWithoutActivitiesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1281,6 +1538,7 @@ export type WorkspaceUpdateWithoutActivitiesInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1290,6 +1548,8 @@ export type WorkspaceUncheckedUpdateWithoutActivitiesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1299,6 +1559,7 @@ export type WorkspaceUncheckedUpdateWithoutActivitiesInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1307,6 +1568,8 @@ export type WorkspaceCreateWithoutDiscussionThreadsInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1317,6 +1580,7 @@ export type WorkspaceCreateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -1326,6 +1590,8 @@ export type WorkspaceUncheckedCreateWithoutDiscussionThreadsInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1335,6 +1601,7 @@ export type WorkspaceUncheckedCreateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1359,6 +1626,8 @@ export type WorkspaceUpdateWithoutDiscussionThreadsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1369,6 +1638,7 @@ export type WorkspaceUpdateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1378,6 +1648,8 @@ export type WorkspaceUncheckedUpdateWithoutDiscussionThreadsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1387,6 +1659,7 @@ export type WorkspaceUncheckedUpdateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1395,6 +1668,8 @@ export type WorkspaceCreateWithoutActivityLogEntriesInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1405,6 +1680,7 @@ export type WorkspaceCreateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -1414,6 +1690,8 @@ export type WorkspaceUncheckedCreateWithoutActivityLogEntriesInput = {
   name: string
   description?: string | null
   ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1423,6 +1701,7 @@ export type WorkspaceUncheckedCreateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1447,6 +1726,8 @@ export type WorkspaceUpdateWithoutActivityLogEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1457,6 +1738,7 @@ export type WorkspaceUpdateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1466,6 +1748,8 @@ export type WorkspaceUncheckedUpdateWithoutActivityLogEntriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1475,6 +1759,7 @@ export type WorkspaceUncheckedUpdateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1483,6 +1768,8 @@ export type WorkspaceCreateManyOwnerInput = {
   id?: string
   name: string
   description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1492,6 +1779,8 @@ export type WorkspaceUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1502,6 +1791,7 @@ export type WorkspaceUpdateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1510,6 +1800,8 @@ export type WorkspaceUncheckedUpdateWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1520,6 +1812,7 @@ export type WorkspaceUncheckedUpdateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1528,6 +1821,8 @@ export type WorkspaceUncheckedUpdateManyWithoutOwnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1641,6 +1936,8 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   name?: boolean
   description?: boolean
   ownerId?: boolean
+  color?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1652,6 +1949,7 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   activities?: boolean | Prisma.Workspace$activitiesArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Workspace$discussionThreadsArgs<ExtArgs>
   activityLogEntries?: boolean | Prisma.Workspace$activityLogEntriesArgs<ExtArgs>
+  settings?: boolean | Prisma.Workspace$settingsArgs<ExtArgs>
   Subscription?: boolean | Prisma.Workspace$SubscriptionArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Workspace$UsageEventArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
@@ -1662,6 +1960,8 @@ export type WorkspaceSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   description?: boolean
   ownerId?: boolean
+  color?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1673,6 +1973,8 @@ export type WorkspaceSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   description?: boolean
   ownerId?: boolean
+  color?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1684,12 +1986,14 @@ export type WorkspaceSelectScalar = {
   name?: boolean
   description?: boolean
   ownerId?: boolean
+  color?: boolean
+  visibility?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "ownerId" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["workspace"]>
+export type WorkspaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "ownerId" | "color" | "visibility" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["workspace"]>
 export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   members?: boolean | Prisma.Workspace$membersArgs<ExtArgs>
@@ -1699,6 +2003,7 @@ export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   activities?: boolean | Prisma.Workspace$activitiesArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Workspace$discussionThreadsArgs<ExtArgs>
   activityLogEntries?: boolean | Prisma.Workspace$activityLogEntriesArgs<ExtArgs>
+  settings?: boolean | Prisma.Workspace$settingsArgs<ExtArgs>
   Subscription?: boolean | Prisma.Workspace$SubscriptionArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Workspace$UsageEventArgs<ExtArgs>
   _count?: boolean | Prisma.WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
@@ -1721,6 +2026,7 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     activities: Prisma.$ActivityLogPayload<ExtArgs>[]
     discussionThreads: Prisma.$DiscussionThreadPayload<ExtArgs>[]
     activityLogEntries: Prisma.$ActivityLogEntryPayload<ExtArgs>[]
+    settings: Prisma.$WorkspaceSettingsPayload<ExtArgs> | null
     Subscription: Prisma.$SubscriptionPayload<ExtArgs>[]
     UsageEvent: Prisma.$UsageEventPayload<ExtArgs>[]
   }
@@ -1729,6 +2035,8 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     name: string
     description: string | null
     ownerId: string
+    color: string
+    visibility: $Enums.WorkspaceVisibility
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -2134,6 +2442,7 @@ export interface Prisma__WorkspaceClient<T, Null = never, ExtArgs extends runtim
   activities<T extends Prisma.Workspace$activitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionThreads<T extends Prisma.Workspace$discussionThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$discussionThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogEntries<T extends Prisma.Workspace$activityLogEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$activityLogEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  settings<T extends Prisma.Workspace$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$settingsArgs<ExtArgs>>): Prisma.Prisma__WorkspaceSettingsClient<runtime.Types.Result.GetResult<Prisma.$WorkspaceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   Subscription<T extends Prisma.Workspace$SubscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$SubscriptionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   UsageEvent<T extends Prisma.Workspace$UsageEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$UsageEventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2169,6 +2478,8 @@ export interface WorkspaceFieldRefs {
   readonly name: Prisma.FieldRef<"Workspace", 'String'>
   readonly description: Prisma.FieldRef<"Workspace", 'String'>
   readonly ownerId: Prisma.FieldRef<"Workspace", 'String'>
+  readonly color: Prisma.FieldRef<"Workspace", 'String'>
+  readonly visibility: Prisma.FieldRef<"Workspace", 'WorkspaceVisibility'>
   readonly createdAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Workspace", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"Workspace", 'Boolean'>
@@ -2738,6 +3049,25 @@ export type Workspace$activityLogEntriesArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogEntryScalarFieldEnum | Prisma.ActivityLogEntryScalarFieldEnum[]
+}
+
+/**
+ * Workspace.settings
+ */
+export type Workspace$settingsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkspaceSettings
+   */
+  select?: Prisma.WorkspaceSettingsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkspaceSettings
+   */
+  omit?: Prisma.WorkspaceSettingsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkspaceSettingsInclude<ExtArgs> | null
+  where?: Prisma.WorkspaceSettingsWhereInput
 }
 
 /**
