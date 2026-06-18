@@ -426,9 +426,67 @@ export class CitationExportService {
         return this.formatChicago(citations);
       case "HARVARD":
         return this.formatHarvard(citations);
+      case "VANCOUVER":
+        return this.formatVancouver(citations);
+      case "ACS":
+        return this.formatACS(citations);
       default:
         throw new ApiError(400, "Unsupported citation format");
     }
+  }
+
+  // Phase 6 - Vancouver (medical / scientific, numbered)
+  private static formatVancouver(citations: CitationData[]): string {
+    return citations
+      .map((citation, idx) => {
+        const authors = citation.authors.join(", ");
+        const title = citation.title;
+        const journal = citation.journal || "";
+        const year = citation.year || "n.d.";
+        const parts: string[] = [];
+        parts.push(`${idx + 1}. ${authors}.`);
+        parts.push(`${title}.`);
+        if (journal) {
+          let j = `${journal}. ${year}`;
+          if (citation.volume) {
+            j += `;${citation.volume}`;
+            if (citation.issue) j += `(${citation.issue})`;
+          }
+          if (citation.pages) j += `:${citation.pages}`;
+          j += ".";
+          parts.push(j);
+        } else {
+          parts.push(`${year}.`);
+        }
+        if (citation.doi) parts.push(`doi:${citation.doi}.`);
+        return parts.join(" ");
+      })
+      .join("\n\n");
+  }
+
+  // Phase 6 - ACS (American Chemical Society)
+  private static formatACS(citations: CitationData[]): string {
+    return citations
+      .map((citation) => {
+        const authors = citation.authors.join("; ");
+        const title = citation.title;
+        const journal = citation.journal || "";
+        const year = citation.year || "n.d.";
+        let acs = `${authors}. ${title}. `;
+        if (journal) {
+          acs += `${journal} `;
+          if (citation.year) acs += `${year}`;
+          if (citation.volume) acs += `, ${citation.volume}`;
+          if (citation.issue) acs += ` (${citation.issue})`;
+          if (citation.pages) acs += `, ${citation.pages}`;
+          acs += ".";
+        } else {
+          acs += `${year}.`;
+        }
+        if (citation.doi) acs += ` DOI: ${citation.doi}.`;
+        return acs;
+      })
+      .join("\n\n");
   }
 
   private static formatBibTeX(citations: CitationData[]): string {
@@ -685,5 +743,96 @@ export class CitationExportService {
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
     return `${authors.slice(0, -1).join(", ")}, and ${authors[authors.length - 1]}`;
+  }
+
+  // Phase 6 - List of supported citation formats
+  static getFormats(): Array<{
+    name: string;
+    ext: string;
+    description: string;
+    popular: boolean;
+    premium: boolean;
+  }> {
+    return [
+      { name: "BIBTEX", ext: ".bib", description: "LaTeX bibliography format", popular: true, premium: false },
+      { name: "APA", ext: ".txt", description: "American Psychological Association 7th", popular: true, premium: false },
+      { name: "MLA", ext: ".txt", description: "Modern Language Association 9th", popular: false, premium: false },
+      { name: "IEEE", ext: ".txt", description: "Engineering & Computer Science", popular: true, premium: false },
+      { name: "CHICAGO", ext: ".txt", description: "Chicago Manual of Style", popular: false, premium: false },
+      { name: "HARVARD", ext: ".txt", description: "Harvard referencing style", popular: false, premium: false },
+      { name: "VANCOUVER", ext: ".txt", description: "Medical & scientific papers", popular: false, premium: false },
+      { name: "ACS", ext: ".txt", description: "American Chemical Society", popular: false, premium: false },
+      { name: "ENDNOTE", ext: ".enw", description: "EndNote import format", popular: false, premium: true }
+    ];
+  }
+
+  /**
+   * Manager view: lightweight list of all papers the user can cite.
+   * Used by /citations/manager to drive the selection list in the manager UI.
+   * Authors/year/journal are extracted from Paper.metadata JSON.
+   */
+  static async getManagerView(
+    req: AuthRequest,
+    options: { search?: string; limit?: number; offset?: number }
+  ): Promise<{
+    papers: Array<{
+      id: string;
+      title: string;
+      authors: string[];
+      year: number | null;
+      journal: string | null;
+      doi: string | null;
+      citationCount: number;
+    }>;
+    total: number;
+  }> {
+    const userId = req.user?.id;
+    if (!userId) throw new ApiError(401, "User not authenticated");
+
+    const limit = options.limit ?? 100;
+    const offset = options.offset ?? 0;
+    const where: any = { uploaderId: userId, isDeleted: false };
+    if (options.search) {
+      where.title = { contains: options.search, mode: "insensitive" };
+    }
+
+    const [papers, total] = await Promise.all([
+      prisma.paper.findMany({
+        where,
+        orderBy: { updatedAt: "desc" },
+        skip: offset,
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          metadata: true,
+          doi: true,
+          citationCount: true,
+          createdAt: true
+        }
+      }),
+      prisma.paper.count({ where })
+    ]);
+
+    return {
+      papers: papers.map((p) => {
+        const md = (p.metadata as any) || {};
+        return {
+          id: p.id,
+          title: p.title,
+          authors: this.parseAuthors(md.authors),
+          year:
+            typeof md.year === "number"
+              ? md.year
+              : typeof md.publicationYear === "number"
+                ? md.publicationYear
+                : null,
+          journal: md.journal || md.publication || null,
+          doi: p.doi || md.doi || null,
+          citationCount: p.citationCount ?? 0
+        };
+      }),
+      total
+    };
   }
 }
