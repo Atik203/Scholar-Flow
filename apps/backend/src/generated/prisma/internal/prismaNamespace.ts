@@ -389,6 +389,7 @@ export const ModelName = {
   Workspace: 'Workspace',
   WorkspaceMember: 'WorkspaceMember',
   WorkspaceInvitation: 'WorkspaceInvitation',
+  WorkspaceSettings: 'WorkspaceSettings',
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
@@ -438,7 +439,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -809,6 +810,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.WorkspaceInvitationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.WorkspaceInvitationCountAggregateOutputType> | number
+        }
+      }
+    }
+    WorkspaceSettings: {
+      payload: Prisma.$WorkspaceSettingsPayload<ExtArgs>
+      fields: Prisma.WorkspaceSettingsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WorkspaceSettingsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WorkspaceSettingsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        findFirst: {
+          args: Prisma.WorkspaceSettingsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WorkspaceSettingsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        findMany: {
+          args: Prisma.WorkspaceSettingsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        create: {
+          args: Prisma.WorkspaceSettingsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        createMany: {
+          args: Prisma.WorkspaceSettingsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WorkspaceSettingsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        delete: {
+          args: Prisma.WorkspaceSettingsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        update: {
+          args: Prisma.WorkspaceSettingsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        deleteMany: {
+          args: Prisma.WorkspaceSettingsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WorkspaceSettingsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WorkspaceSettingsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>[]
+        }
+        upsert: {
+          args: Prisma.WorkspaceSettingsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkspaceSettingsPayload>
+        }
+        aggregate: {
+          args: Prisma.WorkspaceSettingsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWorkspaceSettings>
+        }
+        groupBy: {
+          args: Prisma.WorkspaceSettingsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkspaceSettingsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WorkspaceSettingsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkspaceSettingsCountAggregateOutputType> | number
         }
       }
     }
@@ -3420,6 +3495,8 @@ export const WorkspaceScalarFieldEnum = {
   name: 'name',
   description: 'description',
   ownerId: 'ownerId',
+  color: 'color',
+  visibility: 'visibility',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -3458,6 +3535,29 @@ export const WorkspaceInvitationScalarFieldEnum = {
 } as const
 
 export type WorkspaceInvitationScalarFieldEnum = (typeof WorkspaceInvitationScalarFieldEnum)[keyof typeof WorkspaceInvitationScalarFieldEnum]
+
+
+export const WorkspaceSettingsScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  color: 'color',
+  coverImageKey: 'coverImageKey',
+  iconKey: 'iconKey',
+  allowExternalSharing: 'allowExternalSharing',
+  allowDownload: 'allowDownload',
+  defaultMemberRole: 'defaultMemberRole',
+  requireApprovalForJoin: 'requireApprovalForJoin',
+  allowMemberInvites: 'allowMemberInvites',
+  allowPublicCollections: 'allowPublicCollections',
+  aiFeaturesEnabled: 'aiFeaturesEnabled',
+  enforce2FAForMembers: 'enforce2FAForMembers',
+  allowedEmailDomains: 'allowedEmailDomains',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type WorkspaceSettingsScalarFieldEnum = (typeof WorkspaceSettingsScalarFieldEnum)[keyof typeof WorkspaceSettingsScalarFieldEnum]
 
 
 export const PaperScalarFieldEnum = {
@@ -4164,6 +4264,20 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'WorkspaceVisibility'
+ */
+export type EnumWorkspaceVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkspaceVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'WorkspaceVisibility[]'
+ */
+export type ListEnumWorkspaceVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkspaceVisibility[]'>
+    
+
+
+/**
  * Reference to a field of type 'WorkspaceRole'
  */
 export type EnumWorkspaceRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkspaceRole'>
@@ -4501,6 +4615,7 @@ export type GlobalOmitConfig = {
   workspace?: Prisma.WorkspaceOmit
   workspaceMember?: Prisma.WorkspaceMemberOmit
   workspaceInvitation?: Prisma.WorkspaceInvitationOmit
+  workspaceSettings?: Prisma.WorkspaceSettingsOmit
   paper?: Prisma.PaperOmit
   paperFile?: Prisma.PaperFileOmit
   paperChunk?: Prisma.PaperChunkOmit
