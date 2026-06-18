@@ -22,10 +22,14 @@ Schema: `CollectionVisibility` + `CollectionPaperStatus` enums, `tags`/`language
 Backend: AI recommendations service, paper importer (DOI/arXiv/URL/BibTeX/RIS), CollectionPaper PATCH endpoint. 81 legacy files removed.
 Deferred to Phase 8: AI insights sidebar, annotation toolbar, semantic search.
 
-## Phase 5: Workspaces & Team (next)
-- [ ] `/dashboard/(app)/workspaces` — list, create, detail, members, settings
-- [ ] `/dashboard/(app)/team` — overview, invitations, activity
-- [ ] `TeamActivity`, `WorkspaceSettings` models
+## Phase 5: Workspaces & Team ✅
+- [x] `/dashboard/(app)/workspaces` — list, create, detail, members, settings
+- [x] `/dashboard/(app)/team` — overview, invitations, activity
+- [x] `WorkspaceSettings` 1:1 model + `WorkspaceVisibility` enum
+- [x] `TeamActivity` reuses `ActivityLogEntry` (entity = "team")
+- [x] Team backend module (12 endpoints) with `requireTeamLead` middleware
+- [x] Resend email dispatcher (additive, Gmail fallback)
+- [x] 8 frontend pages with RTK Query, motion animations, Sonner toasts
 
 ## Phase 6: Discussions, Notes & Citations
 - [ ] `/dashboard/(app)/discussions` — list, thread, new
