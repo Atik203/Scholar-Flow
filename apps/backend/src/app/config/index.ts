@@ -52,6 +52,10 @@ export default {
     email: process.env.EMAIL,
     app_pass: process.env.APP_PASS,
   },
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+    fromAddress: process.env.RESEND_FROM_ADDRESS || process.env.EMAIL,
+  },
   smtp: {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined,
