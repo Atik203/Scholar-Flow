@@ -24,6 +24,13 @@ enum WorkspaceRole {
   OWNER // Full control, can delete workspace and transfer ownership
 }
 
+// Workspace visibility for figma-make UI (Phase 5)
+enum WorkspaceVisibility {
+  PRIVATE // Only members can see this workspace
+  INVITE_ONLY // Join by invitation only
+  PUBLIC // Anyone with a link can see this workspace
+}
+
 enum CollectionPermission {
   VIEW // Read-only access - can view collection and papers
   EDIT // Full access - can edit, add/remove papers, delete collection
@@ -209,6 +216,11 @@ model Workspace {
   discussionThreads  DiscussionThread[]
   activityLogEntries ActivityLogEntry[]
 
+  // Phase 5 - denormalized color and visibility for fast list/sort without settings join
+  color      String              @default("blue")
+  visibility WorkspaceVisibility @default(PRIVATE)
+  settings   WorkspaceSettings?
+
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   isDeleted    Boolean        @default(false)
@@ -216,6 +228,7 @@ model Workspace {
   UsageEvent   UsageEvent[]
 
   @@index([ownerId, isDeleted, createdAt]) // For user's active workspaces
+  @@index([isDeleted, visibility]) // For visibility-filtered listings
 }
 
 model WorkspaceMember {
@@ -260,6 +273,43 @@ model WorkspaceInvitation {
   @@unique([workspaceId, userId])
   @@index([workspaceId, status, isDeleted]) // For pending invitation lookups
   @@index([userId, status, isDeleted]) // For user's pending invitations
+}
+
+// Phase 5 - Workspace settings (1:1 with Workspace)
+// Source of truth for advanced workspace configuration.
+// Color and visibility are denormalized on Workspace for fast list rendering.
+model WorkspaceSettings {
+  id          String    @id @default(uuid())
+  workspaceId String    @unique
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Visual identity
+  color         String  @default("blue") // blue | purple | green | orange | pink
+  coverImageKey String? // S3 key for optional banner
+  iconKey       String? // S3 key for optional icon
+
+  // Privacy & sharing
+  allowExternalSharing Boolean @default(false)
+  allowDownload        Boolean @default(true)
+
+  // Member defaults
+  defaultMemberRole      WorkspaceRole @default(EDITOR)
+  requireApprovalForJoin Boolean       @default(false)
+
+  // Team feature toggles
+  allowMemberInvites     Boolean @default(true)
+  allowPublicCollections Boolean @default(true)
+  aiFeaturesEnabled      Boolean @default(true)
+
+  // Security
+  enforce2FAForMembers Boolean  @default(false)
+  allowedEmailDomains  String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([workspaceId, isDeleted])
 }
 
 model Paper {
@@ -345,7 +395,7 @@ model PaperFile {
 }
 
 model PaperChunk {
-  id         String @id @default(uuid())
+  id         String                 @id @default(uuid())
   paperId    String
   idx        Int
   page       Int?
