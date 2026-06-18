@@ -48,7 +48,8 @@ export const workspaceController = {
     const body = createWorkspaceSchema.parse(req.body);
     const workspace = await WorkspaceService.createWorkspace(
       authReq.user.id,
-      body.name
+      body.name,
+      { color: body.color, visibility: body.visibility }
     );
     sendSuccessResponse(res, workspace, "Workspace created", 201);
   }),
