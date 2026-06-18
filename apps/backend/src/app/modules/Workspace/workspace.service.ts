@@ -70,18 +70,31 @@ export class WorkspaceService {
     };
   }
 
-  static async createWorkspace(ownerId: string, name: string) {
+  static async createWorkspace(
+    ownerId: string,
+    name: string,
+    options?: { color?: string; visibility?: string }
+  ) {
     // Create workspace and membership in a transaction
     try {
+      const color = options?.color && ["blue", "purple", "green", "orange", "pink"].includes(options.color) ? options.color : "blue";
+      const visibility = options?.visibility === "INVITE_ONLY" || options?.visibility === "PUBLIC" ? options.visibility : "PRIVATE";
+
       const workspace = await prisma.$queryRaw<any[]>`
-        INSERT INTO "Workspace" (id, name, "ownerId", "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${name}, ${ownerId}, now(), now(), false)
+        INSERT INTO "Workspace" (id, name, "ownerId", color, visibility, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${name}, ${ownerId}, ${color}, ${visibility}::"WorkspaceVisibility", now(), now(), false)
         RETURNING *
       `;
       const w = workspace[0];
       await prisma.$executeRaw`
         INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
         VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'OWNER', now(), now(), now(), false)
+      `;
+      // Create default WorkspaceSettings row
+      await prisma.$executeRaw`
+        INSERT INTO "WorkspaceSettings" (id, "workspaceId", color, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${w.id}, ${color}, now(), now(), false)
+        ON CONFLICT ("workspaceId") DO NOTHING
       `;
       await prisma.$executeRaw`
         INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
