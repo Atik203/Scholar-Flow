@@ -365,6 +365,8 @@ export type UserWhereInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationListRelationFilter
   tokens?: Prisma.UserTokenListRelationFilter
   researchNotes?: Prisma.ResearchNoteListRelationFilter
+  notebooks?: Prisma.NotebookListRelationFilter
+  notebookSections?: Prisma.NotebookSectionListRelationFilter
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   discussionMessages?: Prisma.DiscussionMessageListRelationFilter
@@ -418,6 +420,8 @@ export type UserOrderByWithRelationInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationOrderByRelationAggregateInput
   tokens?: Prisma.UserTokenOrderByRelationAggregateInput
   researchNotes?: Prisma.ResearchNoteOrderByRelationAggregateInput
+  notebooks?: Prisma.NotebookOrderByRelationAggregateInput
+  notebookSections?: Prisma.NotebookSectionOrderByRelationAggregateInput
   citationExports?: Prisma.CitationExportOrderByRelationAggregateInput
   discussionThreads?: Prisma.DiscussionThreadOrderByRelationAggregateInput
   discussionMessages?: Prisma.DiscussionMessageOrderByRelationAggregateInput
@@ -474,6 +478,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   workspaceInvitesSent?: Prisma.WorkspaceInvitationListRelationFilter
   tokens?: Prisma.UserTokenListRelationFilter
   researchNotes?: Prisma.ResearchNoteListRelationFilter
+  notebooks?: Prisma.NotebookListRelationFilter
+  notebookSections?: Prisma.NotebookSectionListRelationFilter
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   discussionMessages?: Prisma.DiscussionMessageListRelationFilter
@@ -583,6 +589,8 @@ export type UserCreateInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -636,6 +644,8 @@ export type UserUncheckedCreateInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -689,6 +699,8 @@ export type UserUpdateInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -742,6 +754,8 @@ export type UserUncheckedUpdateInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1276,6 +1290,34 @@ export type UserUpdateOneRequiredWithoutResearchNotesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutResearchNotesInput, Prisma.UserUpdateWithoutResearchNotesInput>, Prisma.UserUncheckedUpdateWithoutResearchNotesInput>
 }
 
+export type UserCreateNestedOneWithoutNotebooksInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotebooksInput, Prisma.UserUncheckedCreateWithoutNotebooksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotebooksInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotebooksNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotebooksInput, Prisma.UserUncheckedCreateWithoutNotebooksInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotebooksInput
+  upsert?: Prisma.UserUpsertWithoutNotebooksInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotebooksInput, Prisma.UserUpdateWithoutNotebooksInput>, Prisma.UserUncheckedUpdateWithoutNotebooksInput>
+}
+
+export type UserCreateNestedOneWithoutNotebookSectionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotebookSectionsInput, Prisma.UserUncheckedCreateWithoutNotebookSectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotebookSectionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotebookSectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotebookSectionsInput, Prisma.UserUncheckedCreateWithoutNotebookSectionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotebookSectionsInput
+  upsert?: Prisma.UserUpsertWithoutNotebookSectionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotebookSectionsInput, Prisma.UserUpdateWithoutNotebookSectionsInput>, Prisma.UserUncheckedUpdateWithoutNotebookSectionsInput>
+}
+
 export type UserCreateNestedOneWithoutCitationExportsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutCitationExportsInput, Prisma.UserUncheckedCreateWithoutCitationExportsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutCitationExportsInput
@@ -1390,6 +1432,8 @@ export type UserCreateWithoutNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -1442,6 +1486,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1499,6 +1545,8 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -1551,6 +1599,8 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1619,6 +1669,8 @@ export type UserUpdateWithoutNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -1671,6 +1723,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1734,6 +1788,8 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -1786,6 +1842,8 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -1838,6 +1896,8 @@ export type UserCreateWithoutWorkspacesOwnedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -1890,6 +1950,8 @@ export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -1958,6 +2020,8 @@ export type UserUpdateWithoutWorkspacesOwnedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -2010,6 +2074,8 @@ export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2062,6 +2128,8 @@ export type UserCreateWithoutMembershipsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -2114,6 +2182,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2182,6 +2252,8 @@ export type UserUpdateWithoutMembershipsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -2234,6 +2306,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2286,6 +2360,8 @@ export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -2338,6 +2414,8 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2395,6 +2473,8 @@ export type UserCreateWithoutWorkspaceInvitesSentInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -2447,6 +2527,8 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2515,6 +2597,8 @@ export type UserUpdateWithoutWorkspaceInvitesReceivedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -2567,6 +2651,8 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2630,6 +2716,8 @@ export type UserUpdateWithoutWorkspaceInvitesSentInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -2682,6 +2770,8 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2734,6 +2824,8 @@ export type UserCreateWithoutUploadedPapersInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -2786,6 +2878,8 @@ export type UserUncheckedCreateWithoutUploadedPapersInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -2854,6 +2948,8 @@ export type UserUpdateWithoutUploadedPapersInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -2906,6 +3002,8 @@ export type UserUncheckedUpdateWithoutUploadedPapersInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -2958,6 +3056,8 @@ export type UserCreateWithoutAnnotationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -3010,6 +3110,8 @@ export type UserUncheckedCreateWithoutAnnotationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -3078,6 +3180,8 @@ export type UserUpdateWithoutAnnotationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -3130,6 +3234,8 @@ export type UserUncheckedUpdateWithoutAnnotationsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -3183,6 +3289,8 @@ export type UserCreateWithoutAnnotationVersionInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -3235,6 +3343,8 @@ export type UserUncheckedCreateWithoutAnnotationVersionInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -3303,6 +3413,8 @@ export type UserUpdateWithoutAnnotationVersionInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -3355,6 +3467,8 @@ export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -3406,6 +3520,8 @@ export type UserCreateWithoutCollectionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -3458,6 +3574,8 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -3526,6 +3644,8 @@ export type UserUpdateWithoutCollectionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -3578,6 +3698,8 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -3631,6 +3753,8 @@ export type UserCreateWithoutCollectionPaperInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -3683,6 +3807,8 @@ export type UserUncheckedCreateWithoutCollectionPaperInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -3751,6 +3877,8 @@ export type UserUpdateWithoutCollectionPaperInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -3803,6 +3931,8 @@ export type UserUncheckedUpdateWithoutCollectionPaperInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -3855,6 +3985,8 @@ export type UserCreateWithoutCollectionMemberInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -3907,6 +4039,8 @@ export type UserUncheckedCreateWithoutCollectionMemberInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -3963,6 +4097,8 @@ export type UserCreateWithoutCollectionInvitesSentInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -4015,6 +4151,8 @@ export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -4084,6 +4222,8 @@ export type UserUpdateWithoutCollectionMemberInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -4136,6 +4276,8 @@ export type UserUncheckedUpdateWithoutCollectionMemberInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -4198,6 +4340,8 @@ export type UserUpdateWithoutCollectionInvitesSentInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -4250,6 +4394,8 @@ export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -4302,6 +4448,8 @@ export type UserCreateWithoutSearchHistoryInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -4354,6 +4502,8 @@ export type UserUncheckedCreateWithoutSearchHistoryInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -4422,6 +4572,8 @@ export type UserUpdateWithoutSearchHistoryInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -4474,6 +4626,8 @@ export type UserUncheckedUpdateWithoutSearchHistoryInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -4526,6 +4680,8 @@ export type UserCreateWithoutAiInsightThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -4578,6 +4734,8 @@ export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -4646,6 +4804,8 @@ export type UserUpdateWithoutAiInsightThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -4698,6 +4858,8 @@ export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -4750,6 +4912,8 @@ export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -4802,6 +4966,8 @@ export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -4870,6 +5036,8 @@ export type UserUpdateWithoutAiInsightMessagesAuthoredInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -4922,6 +5090,8 @@ export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -4974,6 +5144,8 @@ export type UserCreateWithoutSubscriptionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -5026,6 +5198,8 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -5094,6 +5268,8 @@ export type UserUpdateWithoutSubscriptionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -5146,6 +5322,8 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -5198,6 +5376,8 @@ export type UserCreateWithoutPaymentsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -5250,6 +5430,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -5318,6 +5500,8 @@ export type UserUpdateWithoutPaymentsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -5370,6 +5554,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -5422,6 +5608,8 @@ export type UserCreateWithoutUsageEventsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -5474,6 +5662,8 @@ export type UserUncheckedCreateWithoutUsageEventsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -5542,6 +5732,8 @@ export type UserUpdateWithoutUsageEventsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -5594,6 +5786,8 @@ export type UserUncheckedUpdateWithoutUsageEventsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -5646,6 +5840,8 @@ export type UserCreateWithoutActivitiesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -5698,6 +5894,8 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -5766,6 +5964,8 @@ export type UserUpdateWithoutActivitiesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -5818,6 +6018,8 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -5870,6 +6072,8 @@ export type UserCreateWithoutAccountsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -5922,6 +6126,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -5990,6 +6196,8 @@ export type UserUpdateWithoutAccountsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -6042,6 +6250,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -6094,6 +6304,8 @@ export type UserCreateWithoutSessionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -6146,6 +6358,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -6214,6 +6428,8 @@ export type UserUpdateWithoutSessionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -6266,6 +6482,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -6318,6 +6536,8 @@ export type UserCreateWithoutTokensInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -6370,6 +6590,8 @@ export type UserUncheckedCreateWithoutTokensInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -6438,6 +6660,8 @@ export type UserUpdateWithoutTokensInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -6490,6 +6714,8 @@ export type UserUncheckedUpdateWithoutTokensInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -6542,6 +6768,8 @@ export type UserCreateWithoutResearchNotesInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -6594,6 +6822,8 @@ export type UserUncheckedCreateWithoutResearchNotesInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -6662,6 +6892,8 @@ export type UserUpdateWithoutResearchNotesInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -6714,6 +6946,472 @@ export type UserUncheckedUpdateWithoutResearchNotesInput = {
   workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotebooksInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotebooksInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperUncheckedCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventUncheckedCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceUncheckedCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotebooksInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotebooksInput, Prisma.UserUncheckedCreateWithoutNotebooksInput>
+}
+
+export type UserUpsertWithoutNotebooksInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotebooksInput, Prisma.UserUncheckedUpdateWithoutNotebooksInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotebooksInput, Prisma.UserUncheckedCreateWithoutNotebooksInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotebooksInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotebooksInput, Prisma.UserUncheckedUpdateWithoutNotebooksInput>
+}
+
+export type UserUpdateWithoutNotebooksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotebooksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUncheckedUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUncheckedUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutNotebookSectionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotebookSectionsInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperUncheckedCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventUncheckedCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceUncheckedCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotebookSectionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotebookSectionsInput, Prisma.UserUncheckedCreateWithoutNotebookSectionsInput>
+}
+
+export type UserUpsertWithoutNotebookSectionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotebookSectionsInput, Prisma.UserUncheckedUpdateWithoutNotebookSectionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotebookSectionsInput, Prisma.UserUncheckedCreateWithoutNotebookSectionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotebookSectionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotebookSectionsInput, Prisma.UserUncheckedUpdateWithoutNotebookSectionsInput>
+}
+
+export type UserUpdateWithoutNotebookSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUncheckedUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUncheckedUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -6767,6 +7465,8 @@ export type UserCreateWithoutCitationExportsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
@@ -6819,6 +7519,8 @@ export type UserUncheckedCreateWithoutCitationExportsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
@@ -6887,6 +7589,8 @@ export type UserUpdateWithoutCitationExportsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
@@ -6939,6 +7643,8 @@ export type UserUncheckedUpdateWithoutCitationExportsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -6991,6 +7697,8 @@ export type UserCreateWithoutDiscussionThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
@@ -7043,6 +7751,8 @@ export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
@@ -7111,6 +7821,8 @@ export type UserUpdateWithoutDiscussionThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
@@ -7163,6 +7875,8 @@ export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -7215,6 +7929,8 @@ export type UserCreateWithoutDiscussionMessagesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
@@ -7267,6 +7983,8 @@ export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
@@ -7335,6 +8053,8 @@ export type UserUpdateWithoutDiscussionMessagesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
@@ -7387,6 +8107,8 @@ export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
@@ -7439,6 +8161,8 @@ export type UserCreateWithoutActivityLogEntriesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -7491,6 +8215,8 @@ export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -7559,6 +8285,8 @@ export type UserUpdateWithoutActivityLogEntriesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -7611,6 +8339,8 @@ export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -7663,6 +8393,8 @@ export type UserCreateWithoutPreferenceInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
@@ -7715,6 +8447,8 @@ export type UserUncheckedCreateWithoutPreferenceInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
   tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
@@ -7783,6 +8517,8 @@ export type UserUpdateWithoutPreferenceInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
@@ -7835,6 +8571,8 @@ export type UserUncheckedUpdateWithoutPreferenceInput = {
   workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
   tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
   discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
@@ -7871,6 +8609,8 @@ export type UserCountOutputType = {
   workspaceInvitesSent: number
   tokens: number
   researchNotes: number
+  notebooks: number
+  notebookSections: number
   citationExports: number
   discussionThreads: number
   discussionMessages: number
@@ -7902,6 +8642,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   workspaceInvitesSent?: boolean | UserCountOutputTypeCountWorkspaceInvitesSentArgs
   tokens?: boolean | UserCountOutputTypeCountTokensArgs
   researchNotes?: boolean | UserCountOutputTypeCountResearchNotesArgs
+  notebooks?: boolean | UserCountOutputTypeCountNotebooksArgs
+  notebookSections?: boolean | UserCountOutputTypeCountNotebookSectionsArgs
   citationExports?: boolean | UserCountOutputTypeCountCitationExportsArgs
   discussionThreads?: boolean | UserCountOutputTypeCountDiscussionThreadsArgs
   discussionMessages?: boolean | UserCountOutputTypeCountDiscussionMessagesArgs
@@ -8071,6 +8813,20 @@ export type UserCountOutputTypeCountResearchNotesArgs<ExtArgs extends runtime.Ty
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountNotebooksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotebookWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotebookSectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotebookSectionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountCitationExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CitationExportWhereInput
 }
@@ -8161,6 +8917,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   workspaceInvitesSent?: boolean | Prisma.User$workspaceInvitesSentArgs<ExtArgs>
   tokens?: boolean | Prisma.User$tokensArgs<ExtArgs>
   researchNotes?: boolean | Prisma.User$researchNotesArgs<ExtArgs>
+  notebooks?: boolean | Prisma.User$notebooksArgs<ExtArgs>
+  notebookSections?: boolean | Prisma.User$notebookSectionsArgs<ExtArgs>
   citationExports?: boolean | Prisma.User$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.User$discussionThreadsArgs<ExtArgs>
   discussionMessages?: boolean | Prisma.User$discussionMessagesArgs<ExtArgs>
@@ -8267,6 +9025,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   workspaceInvitesSent?: boolean | Prisma.User$workspaceInvitesSentArgs<ExtArgs>
   tokens?: boolean | Prisma.User$tokensArgs<ExtArgs>
   researchNotes?: boolean | Prisma.User$researchNotesArgs<ExtArgs>
+  notebooks?: boolean | Prisma.User$notebooksArgs<ExtArgs>
+  notebookSections?: boolean | Prisma.User$notebookSectionsArgs<ExtArgs>
   citationExports?: boolean | Prisma.User$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.User$discussionThreadsArgs<ExtArgs>
   discussionMessages?: boolean | Prisma.User$discussionMessagesArgs<ExtArgs>
@@ -8304,6 +9064,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     workspaceInvitesSent: Prisma.$WorkspaceInvitationPayload<ExtArgs>[]
     tokens: Prisma.$UserTokenPayload<ExtArgs>[]
     researchNotes: Prisma.$ResearchNotePayload<ExtArgs>[]
+    notebooks: Prisma.$NotebookPayload<ExtArgs>[]
+    notebookSections: Prisma.$NotebookSectionPayload<ExtArgs>[]
     citationExports: Prisma.$CitationExportPayload<ExtArgs>[]
     discussionThreads: Prisma.$DiscussionThreadPayload<ExtArgs>[]
     discussionMessages: Prisma.$DiscussionMessagePayload<ExtArgs>[]
@@ -8750,6 +9512,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   workspaceInvitesSent<T extends Prisma.User$workspaceInvitesSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workspaceInvitesSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkspaceInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tokens<T extends Prisma.User$tokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   researchNotes<T extends Prisma.User$researchNotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$researchNotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ResearchNotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notebooks<T extends Prisma.User$notebooksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notebooksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotebookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notebookSections<T extends Prisma.User$notebookSectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notebookSectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotebookSectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   citationExports<T extends Prisma.User$citationExportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$citationExportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CitationExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionThreads<T extends Prisma.User$discussionThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$discussionThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionMessages<T extends Prisma.User$discussionMessagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$discussionMessagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -9702,6 +10466,54 @@ export type User$researchNotesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ResearchNoteScalarFieldEnum | Prisma.ResearchNoteScalarFieldEnum[]
+}
+
+/**
+ * User.notebooks
+ */
+export type User$notebooksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notebook
+   */
+  select?: Prisma.NotebookSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notebook
+   */
+  omit?: Prisma.NotebookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotebookInclude<ExtArgs> | null
+  where?: Prisma.NotebookWhereInput
+  orderBy?: Prisma.NotebookOrderByWithRelationInput | Prisma.NotebookOrderByWithRelationInput[]
+  cursor?: Prisma.NotebookWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotebookScalarFieldEnum | Prisma.NotebookScalarFieldEnum[]
+}
+
+/**
+ * User.notebookSections
+ */
+export type User$notebookSectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotebookSection
+   */
+  select?: Prisma.NotebookSectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NotebookSection
+   */
+  omit?: Prisma.NotebookSectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotebookSectionInclude<ExtArgs> | null
+  where?: Prisma.NotebookSectionWhereInput
+  orderBy?: Prisma.NotebookSectionOrderByWithRelationInput | Prisma.NotebookSectionOrderByWithRelationInput[]
+  cursor?: Prisma.NotebookSectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotebookSectionScalarFieldEnum | Prisma.NotebookSectionScalarFieldEnum[]
 }
 
 /**
