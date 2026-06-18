@@ -17,6 +17,9 @@ interface TokenEmailData {
 
 class EmailService {
   private transporter: nodemailer.Transporter;
+  private readonly useResend: boolean;
+  private readonly resendApiKey: string | undefined;
+  private readonly resendFrom: string | undefined;
 
   constructor() {
     const commonOpts = {
@@ -24,6 +27,12 @@ class EmailService {
       greetingTimeout: 5000,
       socketTimeout: 5000,
     };
+
+    // Resend is the preferred provider when RESEND_API_KEY is present.
+    // The transporter is still built so non-Resend send paths keep working.
+    this.useResend = !!config.resend?.apiKey;
+    this.resendApiKey = config.resend?.apiKey;
+    this.resendFrom = config.resend?.fromAddress;
 
     // Prefer explicit SMTP config if provided; fallback to Gmail app password
     if (
@@ -54,10 +63,16 @@ class EmailService {
   }
 
   /**
-   * Send a generic email
+   * Send a generic email.
+   * Dispatches via Resend when RESEND_API_KEY is set; falls back to SMTP/Gmail.
    */
   async sendEmail(options: EmailOptions): Promise<void> {
     try {
+      if (this.useResend && this.resendApiKey) {
+        await this._sendViaResend(options);
+        return;
+      }
+
       const mailOptions = {
         from: `"ScholarFlow" <${config.emailSender.email}>`,
         to: options.to,
@@ -73,6 +88,38 @@ class EmailService {
     } catch (error) {
       // Log but do not throw to avoid breaking main flows
       console.error("Error sending email:", (error as any)?.message || error);
+    }
+  }
+
+  /**
+   * Send an email via the Resend HTTP API.
+   * Uses the fetch API so we don't add a runtime dependency.
+   */
+  private async _sendViaResend(options: EmailOptions): Promise<void> {
+    const from = this.resendFrom || config.emailSender.email;
+    const fromHeader = `"ScholarFlow" <${from}>`;
+    const payload = {
+      from: fromHeader,
+      to: [options.to],
+      subject: options.subject,
+      html: options.html,
+      text: options.text || this.htmlToText(options.html),
+    };
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${this.resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Resend API ${res.status}: ${body}`);
+    }
+    if (config.env !== "production") {
+      const data = (await res.json()) as { id?: string };
+      console.log("Email sent via Resend:", data.id);
     }
   }
 
@@ -307,6 +354,70 @@ class EmailService {
     await this.sendEmail({
       to: data.email,
       subject: `You've been invited to "${data.workspaceName}" workspace - ScholarFlow`,
+      html,
+    });
+  }
+
+  /**
+   * Send team invitation email (Phase 5).
+   */
+  async sendTeamInvitationEmail(data: {
+    email: string;
+    name: string;
+    teamName: string;
+    inviterName: string;
+    role?: string;
+    message?: string;
+    invitationId?: string;
+  }): Promise<void> {
+    const inviteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/team/invitations`;
+
+    const messageBlock = data.message
+      ? `<p style="background:#f3f4f6;padding:12px 16px;border-radius:8px;font-style:italic;color:#374151;margin:16px 0;">"${data.message}"</p>`
+      : "";
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Team Invitation - ScholarFlow</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #7c3aed, #2563eb); color: white; padding: 24px 20px; text-align: center; }
+            .content { padding: 24px 20px; background: #f9fafb; }
+            .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+            .button { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #7c3aed, #2563eb); color: #ffffff; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600; }
+            .role-chip { display: inline-block; padding: 4px 10px; background: #ede9fe; color: #6d28d9; border-radius: 999px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin:0;font-size:24px;">Team Invitation</h1>
+            </div>
+            <div class="content">
+              <p>Hi ${data.name},</p>
+              <p><strong>${data.inviterName}</strong> has invited you to join the <strong>${data.teamName}</strong> team on ScholarFlow.</p>
+              ${data.role ? `<p>Role: <span class="role-chip">${data.role}</span></p>` : ""}
+              ${messageBlock}
+              <p>Click the button below to accept or decline the invitation:</p>
+              <a href="${inviteUrl}" class="button" role="button">Review Invitation</a>
+              <p style="color:#6b7280;font-size:14px;margin-top:24px;">If you don't have a ScholarFlow account yet, you'll be prompted to create one.</p>
+              <p>Best regards,<br>The ScholarFlow Team</p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await this.sendEmail({
+      to: data.email,
+      subject: `${data.inviterName} invited you to join ${data.teamName} on ScholarFlow`,
       html,
     });
   }

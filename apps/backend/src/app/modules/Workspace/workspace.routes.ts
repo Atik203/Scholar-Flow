@@ -13,6 +13,7 @@ import {
   memberParamsSchema,
   updateMemberRoleSchema,
   updateWorkspaceSchema,
+  updateWorkspaceSettingsSchema,
   workspaceParamsSchema,
 } from "./workspace.validation";
 
@@ -143,6 +144,59 @@ workspaceRoutes.get(
   rateLimiter,
   authMiddleware as any,
   workspaceController.getInvitationsReceived as any
+);
+
+// ----------------------------------------------------------------------------
+// Phase 5 — Settings, Activity, Stats, Papers, Collections
+// ----------------------------------------------------------------------------
+
+workspaceRoutes.get(
+  "/:id/settings",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getSettings as any
+);
+
+workspaceRoutes.patch(
+  "/:id/settings",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  validateRequestBody(updateWorkspaceSettingsSchema) as any,
+  workspaceController.updateSettings as any
+);
+
+workspaceRoutes.get(
+  "/:id/stats",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getStats as any
+);
+
+workspaceRoutes.get(
+  "/:id/activity",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getActivity as any
+);
+
+workspaceRoutes.get(
+  "/:id/papers",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getPapers as any
+);
+
+workspaceRoutes.get(
+  "/:id/collections",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getCollections as any
 );
 
 export default workspaceRoutes;

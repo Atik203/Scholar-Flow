@@ -17,6 +17,7 @@ import { publicRoutes } from "../modules/Public/public.routes";
 import { searchRoutes } from "../modules/Search/search.routes";
 import { recommendationRoutes } from "../modules/Recommendation/recommendation.routes";
 import { importRoutes } from "../modules/Import/import.routes";
+import { teamRoutes } from "../modules/Team/team.routes";
 import { citationRoutes } from "./citation.routes";
 import { discussionRoutes } from "./discussion.routes";
 import { activityLogRoutes } from "./activityLog.routes";
@@ -60,6 +61,9 @@ router.use("/public", publicRoutes);
 router.use("/search", searchRoutes);
 router.use("/recommendations", recommendationRoutes);
 router.use("/import", importRoutes);
+
+// Phase 5 features
+router.use("/team", teamRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);
