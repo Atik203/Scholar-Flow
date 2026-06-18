@@ -257,6 +257,98 @@ export const workspaceApi = apiSlice.injectEndpoints({
       providesTags: [{ type: "Workspace", id: "INVITES" }],
       keepUnusedDataFor: 0,
     }),
+
+    // Phase 5 — Workspace settings, activity, stats, papers, collections
+    getWorkspaceSettings: builder.query<any, string>({
+      query: (id) => `/workspaces/${id}/settings`,
+      transformResponse: (response: { data: any }) => response.data,
+      providesTags: (_res, _err, id) => [{ type: "Workspace", id: `${id}-settings` }],
+    }),
+
+    updateWorkspaceSettings: builder.mutation<
+      any,
+      {
+        id: string;
+        color?: string;
+        allowExternalSharing?: boolean;
+        allowDownload?: boolean;
+        defaultMemberRole?: string;
+        requireApprovalForJoin?: boolean;
+        allowMemberInvites?: boolean;
+        allowPublicCollections?: boolean;
+        aiFeaturesEnabled?: boolean;
+        enforce2FAForMembers?: boolean;
+        allowedEmailDomains?: string[];
+      }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/workspaces/${id}/settings`,
+        method: "PATCH",
+        body,
+      }),
+      transformResponse: (response: { data: any }) => response.data,
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-settings` },
+        { type: "Workspace", id },
+      ],
+    }),
+
+    getWorkspaceStats: builder.query<
+      { papers: number; collections: number; members: number; storage: string },
+      string
+    >({
+      query: (id) => `/workspaces/${id}/stats`,
+      transformResponse: (response: { data: any }) => response.data,
+      providesTags: (_res, _err, id) => [{ type: "Workspace", id: `${id}-stats` }],
+    }),
+
+    getWorkspaceActivity: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 30 }) => ({
+        url: `/workspaces/${id}/activity`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-activity` },
+      ],
+    }),
+
+    getWorkspacePapers: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 20 }) => ({
+        url: `/workspaces/${id}/papers`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-papers` },
+      ],
+    }),
+
+    getWorkspaceCollections: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 20 }) => ({
+        url: `/workspaces/${id}/collections`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-collections` },
+      ],
+    }),
   }),
 });
 
@@ -275,4 +367,10 @@ export const {
   useDeclineWorkspaceInvitationMutation,
   useGetWorkspaceInvitationsSentQuery,
   useGetWorkspaceInvitationsReceivedQuery,
+  useGetWorkspaceSettingsQuery,
+  useUpdateWorkspaceSettingsMutation,
+  useGetWorkspaceStatsQuery,
+  useGetWorkspaceActivityQuery,
+  useGetWorkspacePapersQuery,
+  useGetWorkspaceCollectionsQuery,
 } = workspaceApi;
