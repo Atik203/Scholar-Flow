@@ -1,5 +1,137 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.5 — Phase 5: Workspaces & Team (2026-06-19)
+
+**Release date:** 2026-06-19
+**Theme:** Full Phase 5 implementation — 8 new dashboard pages, `WorkspaceSettings` schema model, 14-endpoint Team module, role-based middleware, Resend email dispatcher, and 20 legacy route files removed (Phase 3 cleanup debt).
+
+---
+
+### ✨ Highlights
+
+- **8 new pages** matching the figma-make design exactly:
+  - `/dashboard/workspaces` — list with gradient cards, mini weekly-activity chart, 5-stat summary, search, All/Owned/Shared tabs
+  - `/dashboard/workspaces/create` — standalone form with 5-color theme picker
+  - `/dashboard/workspaces/shared` — 3 tabs (Shared With Me / Received Invites / Sent Invites)
+  - `/dashboard/workspaces/[id]` — 5 tabs (Overview / Collections / Papers / Members / Settings) + 4 modals (Invite / Edit / CreateCollection / Delete with typed confirmation)
+  - `/dashboard/team` — members list, search + role + status filters, action menu (View Profile / Change Role / Manage Workspaces / Remove), invite modal with role + permission description
+  - `/dashboard/team/invitations` — 3 stat cards, shareable invite link, 3-way type filter, 5-way status filter, Accept/Decline/Resend/Cancel actions
+  - `/dashboard/team/activity` — 4 stat cards (Papers / Comments / Active Members / Activity Score), members sidebar, activity feed with 8+ activity types, time-range filter
+  - `/dashboard/team/settings` — 6 tabs (General / Permissions / Notifications / Security / Integrations / Danger Zone) with 24+ toggles, save indicator, delete confirmation modal
+  - `/dashboard/team/collaborator/[id]` — public profile with cover image, follow/message/more menu, 3 tabs (Papers / Collections / Activity), copy-to-clipboard email
+- **WorkspaceSettings 1:1 model** — color, sharing, member defaults, security, allowed email domains; cascades on workspace delete
+- **WorkspaceVisibility enum** — `PRIVATE | INVITE_ONLY | PUBLIC` (denormalized on `Workspace` for fast list rendering)
+- **Team module (14 endpoints)** — gated by new `requireTeamLead` middleware; members, stats, activity, invitations (sent/received/cancel/resend), settings
+- **Workspace module extensions (6 new endpoints)** — `/settings`, `/activity`, `/stats`, `/papers`, `/collections`; keep `Workspace.color` in sync when settings change
+- **Resend email dispatcher (additive)** — all transactional emails now route through `Resend` when `RESEND_API_KEY` is set; falls back to existing Gmail SMTP transporter otherwise. No code changes required to keep using Gmail
+- **New `sendTeamInvitationEmail` method** — gradient header HTML, role chip, optional personal message, deep link to `/dashboard/team/invitations`
+- **Role-based middleware stack** — `requireRole(role)` factory with `requireTeamLead` / `requireAdmin` convenience wrappers; centralizes RBAC enforcement on the new `teamRoutes` group
+- **`AppSidebar` Team submenu** — collapsible group (min role `TEAM_LEAD`) with Members / Invitations / Activity / Team Settings items
+
+---
+
+### 🏗️ Backend
+
+#### Database (additive migration — no destructive ops)
+- New `WorkspaceSettings` model: `workspaceId` (unique FK, cascade delete), `color`, `coverImageKey`, `iconKey`, `allowExternalSharing`, `allowDownload`, `defaultMemberRole` (enum), `requireApprovalForJoin`, `allowMemberInvites`, `allowPublicCollections`, `aiFeaturesEnabled`, `enforce2FAForMembers`, `allowedEmailDomains` (string array)
+- New `WorkspaceVisibility` enum + denormalized `color` and `visibility` columns on `Workspace` for fast list rendering without settings join
+- Backfill: every existing workspace got a default `WorkspaceSettings` row and a default `color = 'blue'` value during the migration
+- New composite indexes: `Workspace(isDeleted, visibility)`, `WorkspaceSettings(workspaceId, isDeleted)`
+- `TeamActivity` does NOT need a new model — reuses `ActivityLogEntry` with `entity = "team"` (or `entityId = null` for global team events)
+
+#### API endpoints (new, 14 Team + 6 Workspace)
+- `GET    /api/team/members` — cursor paginated, filter by `search` / `role` / `status` (TEAM_LEAD+)
+- `GET    /api/team/members/:userId` — single member detail (TEAM_LEAD+)
+- `PATCH  /api/team/members/:userId` — change role (TEAM_LEAD+)
+- `DELETE /api/team/members/:userId` — soft-delete user (ADMIN only)
+- `GET    /api/team/stats` — total / active / inactive / pending / paper / collection counts
+- `GET    /api/team/activity` — cursor paginated `ActivityLogEntry` feed (entity, memberId, startDate, endDate filters)
+- `GET    /api/team/activity/summary` — counts by entity, by severity, recent 10, trends
+- `GET    /api/team/invitations/sent` — paginated sent invitations
+- `GET    /api/team/invitations/received` — paginated received invitations
+- `POST   /api/team/invitations` — send invitation; reuses `WorkspaceInvitation` table; sends email via Resend/Gmail
+- `DELETE /api/team/invitations/:id` — cancel pending invitation
+- `POST   /api/team/invitations/:id/resend` — re-send invitation email
+- `GET    /api/team/settings` — deep-merged with defaults from `UserPreference.metadata.teamSettings`
+- `PATCH  /api/team/settings` — partial update by category
+- `GET    /api/workspaces/:id/settings` — `WorkspaceSettings` row
+- `PATCH  /api/workspaces/:id/settings` — owner-only; syncs `Workspace.color` denormalized column
+- `GET    /api/workspaces/:id/stats` — papers, collections, members, storage estimate
+- `GET    /api/workspaces/:id/activity` — cursor paginated activity
+- `GET    /api/workspaces/:id/papers` — papers in workspace
+- `GET    /api/workspaces/:id/collections` — collections in workspace
+
+#### Files
+- `apps/backend/src/app/middleware/requireRole.ts` — typed `requireRole` factory + `requireTeamLead` / `requireAdmin` wrappers
+- `apps/backend/src/app/modules/Team/{team.controller,team.service,team.routes,team.validation}.ts` — new module
+- `apps/backend/src/app/modules/Workspace/workspace.{controller,service,validation,routes}.ts` — extended with 6 new endpoints + settings DTO
+- `apps/backend/src/app/shared/emailService.ts` — added `_sendViaResend` (HTTP fetch) + `sendTeamInvitationEmail`; dispatcher branches on `RESEND_API_KEY`
+- `apps/backend/src/app/config/index.ts` — `config.resend.{apiKey, fromAddress}` from env
+- `apps/backend/src/app/routes/index.ts` — `router.use("/team", teamRoutes)`
+- `apps/backend/prisma/schema.prisma` — `WorkspaceSettings` model + `WorkspaceVisibility` enum + denormalized fields
+- `apps/backend/prisma/migrations/20260618_phase5_workspace_settings/migration.sql` — additive migration
+
+---
+
+### 🎨 Frontend
+
+#### New RTK Query slice
+- `apps/frontend/src/redux/api/teamApi.ts` — 15 endpoints, 1 new tag type (`Team`); fully typed request/response shapes
+- `apps/frontend/src/redux/api/workspaceApi.ts` — 6 new endpoints (settings, activity, stats, papers, collections); `WorkspaceColor` / `WorkspaceVisibility` type exports
+- `apps/frontend/src/redux/api/apiSlice.ts` — added `"Team"` to `tagTypes`
+
+#### New components
+- `components/workspace/WorkspaceCard.tsx` — gradient header, owner badge, 3-stat grid, color picker (5 swatches), `getWorkspaceColor` helper
+- `components/team/RoleBadge.tsx` — admin/team-lead/member/viewer badges with role icons
+- `components/team/StatusDot.tsx` — active/pending/inactive/invited status indicators with pulse animation
+
+#### Updated
+- `components/layout/AppSidebar.tsx` — new `Team` collapsible submenu (Members / Invitations / Activity / Team Settings), `Mail` + `Clock` icons added
+- `redux/api/apiSlice.ts` — registered `Team` tag type
+
+#### Build cleanup (debt from Phase 3)
+- Removed `apps/frontend/src/app/dashboard/(modules)/workspaces/*` (5 files) — legacy duplicates of `(app)/workspaces/*`
+- Removed `apps/frontend/src/app/dashboard/(roles)/{admin,pro-researcher,team-lead}/workspaces/*` (15 files) — 1-line re-exports that were broken when `(modules)` was cleaned
+- This was a Phase 3 cleanup debt that the production build had been silently failing on
+
+---
+
+### 🧪 Quality
+
+- `yarn type-check` — passes (both apps)
+- `yarn build` — passes (both apps)
+- `yarn lint` (backend) — 0 new errors (1 pre-existing error in `collection.controller.ts` line 1763 unchanged)
+- `yarn lint` (frontend) — pre-existing env issue with `eslint-config-next` resolution from root `node_modules`, unrelated to this release
+- All 8 Phase 5 routes verified in the production build output:
+  ```
+  /dashboard/workspaces             ○ (Static)
+  /dashboard/workspaces/[id]        ƒ (Dynamic)
+  /dashboard/workspaces/create      ○ (Static)
+  /dashboard/workspaces/shared      ○ (Static)
+  /dashboard/team                   ○ (Static)
+  /dashboard/team/activity          ○ (Static)
+  /dashboard/team/collaborator/[id] ƒ (Dynamic)
+  /dashboard/team/invitations       ○ (Static)
+  /dashboard/team/settings          ○ (Static)
+  ```
+- 13 atomic commits pushed to `atik` branch — one per page (or grouping), reviewable independently
+
+---
+
+### 📦 Dependencies
+
+- **No new packages** added at root or in apps
+- Resend uses the built-in `fetch` API (no SDK dep)
+- All other dependencies unchanged
+
+---
+
+### 🔜 What's next
+
+Phase 6 — Discussions, Notes & Citations (3 pages: list/thread/new, notebook/detail/new, manager/export/history) + `Notebook` and `NotebookSection` models. The backend already has `DiscussionThread` and `DiscussionMessage` from Phase 2 — only the frontend pages and `Notebook` model are needed.
+
+---
+
 ## Release 1.2.4 — Prisma v7 Migration & Local Dev DB (2026-06-17)
 
 **Release date:** 2026-06-17
