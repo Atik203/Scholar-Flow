@@ -96,6 +96,12 @@ export const apiSlice = createApi({
     "SearchHistory",
     "Recommendation",
     "Import",
+    "Notebook",
+    "NotebookSection",
+    "Discussion",
+    "DiscussionMessage",
+    "Citation",
+    "CitationExport",
   ],
   // Performance optimizations
   keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)
