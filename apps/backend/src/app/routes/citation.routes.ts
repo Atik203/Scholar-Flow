@@ -20,6 +20,8 @@ const exportCitationsSchema = z.object({
         "IEEE",
         "CHICAGO",
         "HARVARD",
+        "VANCOUVER",
+        "ACS"
       ]),
       includeAbstract: z.boolean().optional().default(false),
       includeKeywords: z.boolean().optional().default(false),
@@ -108,6 +110,39 @@ const getExportHistorySchema = z.object({
  *       500:
  *         description: Internal server error
  */
+// Phase 6 - List of supported citation formats (placed BEFORE /:exportId catch-all)
+router.get(
+  "/formats",
+  authMiddleware,
+  async (_req, res, next) => {
+    try {
+      const data = CitationExportService.getFormats();
+      res.json({ success: true, data });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Phase 6 - Manager view: paper list for citation selection
+router.get(
+  "/manager",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const data = await CitationExportService.getManagerView(req, {
+        search:
+          typeof req.query.search === "string" ? req.query.search : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+        offset: req.query.offset ? Number(req.query.offset) : undefined
+      });
+      res.json({ success: true, data });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.post(
   "/export",
   authMiddleware,

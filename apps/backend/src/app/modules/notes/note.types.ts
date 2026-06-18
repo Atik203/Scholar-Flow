@@ -33,7 +33,21 @@ export const searchNotesSchema = z.object({
   limit: z.coerce.number().min(1).max(100).optional(),
 });
 
+// Phase 6 - Notebook-aware metadata update schema
+export const updateNoteMetadataSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  content: z.string().min(1).max(20000).optional(),
+  tags: z.array(z.string().min(1).max(50)).max(20).optional(),
+  noteType: z
+    .enum(["QUICK", "LITERATURE", "METHODOLOGY", "FINDINGS", "IDEA"])
+    .optional(),
+  visibility: z.enum(["PRIVATE", "WORKSPACE", "PUBLIC"]).optional(),
+  isStarred: z.boolean().optional(),
+  isPrivate: z.boolean().optional(),
+});
+
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;
 export type UpdateNoteInput = z.infer<typeof updateNoteSchema>;
 export type GetNotesQuery = z.infer<typeof getNotesQuerySchema>;
 export type SearchNotesQuery = z.infer<typeof searchNotesSchema>;
+export type UpdateNoteMetadataInput = z.infer<typeof updateNoteMetadataSchema>;

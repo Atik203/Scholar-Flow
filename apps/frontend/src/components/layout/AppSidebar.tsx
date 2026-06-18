@@ -19,11 +19,13 @@ import {
   Clock,
   Compass,
   CreditCard,
+  Edit3,
   FileText,
   Highlighter,
   Home,
   Layers,
   Mail,
+  MessageSquare,
   Microscope,
   Plus,
   Quote,
@@ -165,8 +167,26 @@ const navigationItems: SidebarItem[] = [
     items: [
       { title: "PDF Text Extraction", path: "/dashboard/research/pdf-extraction", icon: TextCursor, minRole: USER_ROLES.RESEARCHER },
       { title: "Text Editor", path: "/dashboard/research/editor", icon: FileText, minRole: USER_ROLES.RESEARCHER },
-      { title: "Citations", path: "/dashboard/research/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
+      { title: "Citations", path: "/dashboard/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
       { title: "Annotations", path: "/dashboard/research/annotations", icon: Highlighter, minRole: USER_ROLES.RESEARCHER },
+    ],
+  },
+  {
+    title: "Discussions",
+    icon: MessageSquare,
+    minRole: USER_ROLES.RESEARCHER,
+    items: [
+      { title: "All Discussions", path: "/dashboard/discussions", icon: MessageSquare, minRole: USER_ROLES.RESEARCHER },
+      { title: "New Discussion", path: "/dashboard/discussions/new", icon: Plus, minRole: USER_ROLES.RESEARCHER },
+    ],
+  },
+  {
+    title: "Notes",
+    icon: Edit3,
+    minRole: USER_ROLES.RESEARCHER,
+    items: [
+      { title: "All Notes", path: "/dashboard/notes", icon: BookOpen, minRole: USER_ROLES.RESEARCHER },
+      { title: "New Note", path: "/dashboard/notes/new", icon: Plus, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {

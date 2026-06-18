@@ -51,6 +51,22 @@ enum CollectionPaperStatus {
   ARCHIVED
 }
 
+// Phase 6 - Note type (matches figma ResearchNotesPage type filter)
+enum NoteType {
+  QUICK
+  LITERATURE
+  METHODOLOGY
+  FINDINGS
+  IDEA
+}
+
+// Phase 6 - Note visibility (matches figma visibility pills: Private / Workspace / Public)
+enum NoteVisibility {
+  PRIVATE
+  WORKSPACE
+  PUBLIC
+}
+
 enum AnnotationType {
   HIGHLIGHT // Yellow highlight over text
   UNDERLINE // Underline text
@@ -177,6 +193,10 @@ model User {
   // Token relations
   tokens        UserToken[]
   researchNotes ResearchNote[]
+
+  // Phase 6 - Notebook hierarchy
+  notebooks      Notebook[]
+  notebookSections NotebookSection[]
 
   // New Phase 2 features
   citationExports    CitationExport[]
@@ -861,8 +881,19 @@ model ResearchNote {
   tags      String[] // Array of tags
   isPrivate Boolean  @default(true)
 
-  user  User   @relation(fields: [userId], references: [id])
-  paper Paper? @relation(fields: [paperId], references: [id])
+  // Phase 6 - Optional notebook/section organization (matches figma ResearchNotesPage)
+  notebookId String?
+  sectionId  String?
+  noteType   NoteType       @default(QUICK)
+  visibility NoteVisibility @default(PRIVATE)
+  isStarred  Boolean        @default(false)
+  wordCount  Int            @default(0)
+  excerpt    String?
+
+  user     User              @relation(fields: [userId], references: [id])
+  paper    Paper?            @relation(fields: [paperId], references: [id])
+  notebook Notebook?         @relation(fields: [notebookId], references: [id], onDelete: SetNull)
+  section  NotebookSection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -872,6 +903,48 @@ model ResearchNote {
   @@index([paperId, isDeleted]) // For paper-specific notes
   @@index([paperId, userId]) // For notes on a paper filtered by user
   @@index([tags]) // For tag-based searches
+  @@index([notebookId, isDeleted, updatedAt]) // Phase 6: notebook-scoped note listing
+  @@index([sectionId, isDeleted]) // Phase 6: section-scoped note listing
+  @@index([noteType, isDeleted]) // Phase 6: type filter chip
+  @@index([userId, isStarred, isDeleted]) // Phase 6: starred notes
+}
+
+// Phase 6 - Notebook hierarchy (matches figma folders + IMPLEMENTATION.md)
+model Notebook {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  color       String   @default("blue") // blue|green|purple|orange|pink
+  isStarred   Boolean  @default(false)
+
+  user     User              @relation(fields: [userId], references: [id])
+  sections NotebookSection[]
+  notes    ResearchNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, isDeleted, updatedAt]) // For user's notebooks sorted by update
+}
+
+model NotebookSection {
+  id         String   @id @default(uuid())
+  notebookId String
+  userId     String
+  name       String
+  order      Int      @default(0)
+
+  notebook Notebook      @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+  notes    ResearchNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([notebookId, isDeleted, order]) // Sections within a notebook, ordered
 }
 
 // Citation Export System
@@ -907,6 +980,8 @@ enum CitationFormat {
   IEEE
   CHICAGO
   HARVARD
+  VANCOUVER
+  ACS
 }
 
 // Threaded Research Discussions
