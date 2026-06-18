@@ -10,6 +10,7 @@ import { billingRoutes } from "../modules/Billing/billing.routes";
 import { collectionRoutes } from "../modules/Collection/collection.routes";
 import { editorPaperRoutes, paperRoutes } from "../modules/papers/paper.routes";
 import { noteRoutes } from "../modules/notes/note.routes";
+import { notebookRoutes } from "../modules/Notebook/notebook.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
 import { notificationRoutes } from "../modules/Notification/notification.routes";
@@ -45,6 +46,7 @@ router.use("/collections", collectionRoutes);
 router.use("/workspaces", workspaceRoutes);
 router.use("/annotations", annotationRoutes);
 router.use("/notes", noteRoutes);
+router.use("/notebooks", notebookRoutes);
 
 // Phase 2 features
 router.use("/citations", citationRoutes);
