@@ -267,6 +267,69 @@ router.get(
  *       500:
  *         description: Internal server error
  */
+// Phase 6 - personal feed (must be BEFORE the /:threadId catch-all)
+router.get(
+  "/mine",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const result = await DiscussionService.getMyDiscussions(req, {
+        isResolved:
+          typeof req.query.isResolved === "string"
+            ? req.query.isResolved === "true"
+            : undefined,
+        isPinned:
+          typeof req.query.isPinned === "string"
+            ? req.query.isPinned === "true"
+            : undefined,
+        scope:
+          typeof req.query.scope === "string"
+            ? (req.query.scope as
+                | "all"
+                | "general"
+                | "workspace"
+                | "paper"
+                | "collection")
+            : undefined,
+        search:
+          typeof req.query.search === "string" ? req.query.search : undefined,
+        tags:
+          typeof req.query.tags === "string"
+            ? req.query.tags.split(",").filter(Boolean)
+            : [],
+        limit: req.query.limit ? Number(req.query.limit) : 20,
+        offset: req.query.offset ? Number(req.query.offset) : 0
+      });
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Phase 6 - create personal (general) thread
+router.post(
+  "/general",
+  authMiddleware,
+  validateRequest(
+    z.object({
+      body: z.object({
+        title: z.string().min(1).max(200),
+        content: z.string().min(1).max(5000),
+        tags: z.array(z.string().max(50)).optional().default([])
+      })
+    })
+  ),
+  async (req, res, next) => {
+    try {
+      const thread = await DiscussionService.createGeneralThread(req, req.body);
+      res.status(201).json({ success: true, data: thread });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.get(
   "/:threadId",
   authMiddleware,
@@ -352,6 +415,34 @@ router.put(
         success: true,
         data: thread
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Phase 6 - toggle pin
+router.patch(
+  "/:threadId/pin",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const result = await DiscussionService.togglePin(req, req.params.threadId);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// Phase 6 - toggle resolve
+router.patch(
+  "/:threadId/resolve",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const result = await DiscussionService.toggleResolve(req, req.params.threadId);
+      res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
