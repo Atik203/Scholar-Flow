@@ -20,8 +20,18 @@ export type ResearchNoteModel = runtime.Types.Result.DefaultSelection<Prisma.$Re
 
 export type AggregateResearchNote = {
   _count: ResearchNoteCountAggregateOutputType | null
+  _avg: ResearchNoteAvgAggregateOutputType | null
+  _sum: ResearchNoteSumAggregateOutputType | null
   _min: ResearchNoteMinAggregateOutputType | null
   _max: ResearchNoteMaxAggregateOutputType | null
+}
+
+export type ResearchNoteAvgAggregateOutputType = {
+  wordCount: number | null
+}
+
+export type ResearchNoteSumAggregateOutputType = {
+  wordCount: number | null
 }
 
 export type ResearchNoteMinAggregateOutputType = {
@@ -31,6 +41,13 @@ export type ResearchNoteMinAggregateOutputType = {
   title: string | null
   content: string | null
   isPrivate: boolean | null
+  notebookId: string | null
+  sectionId: string | null
+  noteType: $Enums.NoteType | null
+  visibility: $Enums.NoteVisibility | null
+  isStarred: boolean | null
+  wordCount: number | null
+  excerpt: string | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -43,6 +60,13 @@ export type ResearchNoteMaxAggregateOutputType = {
   title: string | null
   content: string | null
   isPrivate: boolean | null
+  notebookId: string | null
+  sectionId: string | null
+  noteType: $Enums.NoteType | null
+  visibility: $Enums.NoteVisibility | null
+  isStarred: boolean | null
+  wordCount: number | null
+  excerpt: string | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -56,12 +80,27 @@ export type ResearchNoteCountAggregateOutputType = {
   content: number
   tags: number
   isPrivate: number
+  notebookId: number
+  sectionId: number
+  noteType: number
+  visibility: number
+  isStarred: number
+  wordCount: number
+  excerpt: number
   createdAt: number
   updatedAt: number
   isDeleted: number
   _all: number
 }
 
+
+export type ResearchNoteAvgAggregateInputType = {
+  wordCount?: true
+}
+
+export type ResearchNoteSumAggregateInputType = {
+  wordCount?: true
+}
 
 export type ResearchNoteMinAggregateInputType = {
   id?: true
@@ -70,6 +109,13 @@ export type ResearchNoteMinAggregateInputType = {
   title?: true
   content?: true
   isPrivate?: true
+  notebookId?: true
+  sectionId?: true
+  noteType?: true
+  visibility?: true
+  isStarred?: true
+  wordCount?: true
+  excerpt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -82,6 +128,13 @@ export type ResearchNoteMaxAggregateInputType = {
   title?: true
   content?: true
   isPrivate?: true
+  notebookId?: true
+  sectionId?: true
+  noteType?: true
+  visibility?: true
+  isStarred?: true
+  wordCount?: true
+  excerpt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -95,6 +148,13 @@ export type ResearchNoteCountAggregateInputType = {
   content?: true
   tags?: true
   isPrivate?: true
+  notebookId?: true
+  sectionId?: true
+  noteType?: true
+  visibility?: true
+  isStarred?: true
+  wordCount?: true
+  excerpt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -139,6 +199,18 @@ export type ResearchNoteAggregateArgs<ExtArgs extends runtime.Types.Extensions.I
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ResearchNoteAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ResearchNoteSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ResearchNoteMinAggregateInputType
@@ -169,6 +241,8 @@ export type ResearchNoteGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   _count?: ResearchNoteCountAggregateInputType | true
+  _avg?: ResearchNoteAvgAggregateInputType
+  _sum?: ResearchNoteSumAggregateInputType
   _min?: ResearchNoteMinAggregateInputType
   _max?: ResearchNoteMaxAggregateInputType
 }
@@ -181,10 +255,19 @@ export type ResearchNoteGroupByOutputType = {
   content: string
   tags: string[]
   isPrivate: boolean
+  notebookId: string | null
+  sectionId: string | null
+  noteType: $Enums.NoteType
+  visibility: $Enums.NoteVisibility
+  isStarred: boolean
+  wordCount: number
+  excerpt: string | null
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
   _count: ResearchNoteCountAggregateOutputType | null
+  _avg: ResearchNoteAvgAggregateOutputType | null
+  _sum: ResearchNoteSumAggregateOutputType | null
   _min: ResearchNoteMinAggregateOutputType | null
   _max: ResearchNoteMaxAggregateOutputType | null
 }
@@ -215,11 +298,20 @@ export type ResearchNoteWhereInput = {
   content?: Prisma.StringFilter<"ResearchNote"> | string
   tags?: Prisma.StringNullableListFilter<"ResearchNote">
   isPrivate?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  notebookId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  sectionId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  noteType?: Prisma.EnumNoteTypeFilter<"ResearchNote"> | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFilter<"ResearchNote"> | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  wordCount?: Prisma.IntFilter<"ResearchNote"> | number
+  excerpt?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   isDeleted?: Prisma.BoolFilter<"ResearchNote"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   paper?: Prisma.XOR<Prisma.PaperNullableScalarRelationFilter, Prisma.PaperWhereInput> | null
+  notebook?: Prisma.XOR<Prisma.NotebookNullableScalarRelationFilter, Prisma.NotebookWhereInput> | null
+  section?: Prisma.XOR<Prisma.NotebookSectionNullableScalarRelationFilter, Prisma.NotebookSectionWhereInput> | null
 }
 
 export type ResearchNoteOrderByWithRelationInput = {
@@ -230,11 +322,20 @@ export type ResearchNoteOrderByWithRelationInput = {
   content?: Prisma.SortOrder
   tags?: Prisma.SortOrder
   isPrivate?: Prisma.SortOrder
+  notebookId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  noteType?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
+  wordCount?: Prisma.SortOrder
+  excerpt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
   paper?: Prisma.PaperOrderByWithRelationInput
+  notebook?: Prisma.NotebookOrderByWithRelationInput
+  section?: Prisma.NotebookSectionOrderByWithRelationInput
 }
 
 export type ResearchNoteWhereUniqueInput = Prisma.AtLeast<{
@@ -248,11 +349,20 @@ export type ResearchNoteWhereUniqueInput = Prisma.AtLeast<{
   content?: Prisma.StringFilter<"ResearchNote"> | string
   tags?: Prisma.StringNullableListFilter<"ResearchNote">
   isPrivate?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  notebookId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  sectionId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  noteType?: Prisma.EnumNoteTypeFilter<"ResearchNote"> | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFilter<"ResearchNote"> | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  wordCount?: Prisma.IntFilter<"ResearchNote"> | number
+  excerpt?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   isDeleted?: Prisma.BoolFilter<"ResearchNote"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   paper?: Prisma.XOR<Prisma.PaperNullableScalarRelationFilter, Prisma.PaperWhereInput> | null
+  notebook?: Prisma.XOR<Prisma.NotebookNullableScalarRelationFilter, Prisma.NotebookWhereInput> | null
+  section?: Prisma.XOR<Prisma.NotebookSectionNullableScalarRelationFilter, Prisma.NotebookSectionWhereInput> | null
 }, "id">
 
 export type ResearchNoteOrderByWithAggregationInput = {
@@ -263,12 +373,21 @@ export type ResearchNoteOrderByWithAggregationInput = {
   content?: Prisma.SortOrder
   tags?: Prisma.SortOrder
   isPrivate?: Prisma.SortOrder
+  notebookId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sectionId?: Prisma.SortOrderInput | Prisma.SortOrder
+  noteType?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
+  wordCount?: Prisma.SortOrder
+  excerpt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   _count?: Prisma.ResearchNoteCountOrderByAggregateInput
+  _avg?: Prisma.ResearchNoteAvgOrderByAggregateInput
   _max?: Prisma.ResearchNoteMaxOrderByAggregateInput
   _min?: Prisma.ResearchNoteMinOrderByAggregateInput
+  _sum?: Prisma.ResearchNoteSumOrderByAggregateInput
 }
 
 export type ResearchNoteScalarWhereWithAggregatesInput = {
@@ -282,6 +401,13 @@ export type ResearchNoteScalarWhereWithAggregatesInput = {
   content?: Prisma.StringWithAggregatesFilter<"ResearchNote"> | string
   tags?: Prisma.StringNullableListFilter<"ResearchNote">
   isPrivate?: Prisma.BoolWithAggregatesFilter<"ResearchNote"> | boolean
+  notebookId?: Prisma.StringNullableWithAggregatesFilter<"ResearchNote"> | string | null
+  sectionId?: Prisma.StringNullableWithAggregatesFilter<"ResearchNote"> | string | null
+  noteType?: Prisma.EnumNoteTypeWithAggregatesFilter<"ResearchNote"> | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityWithAggregatesFilter<"ResearchNote"> | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolWithAggregatesFilter<"ResearchNote"> | boolean
+  wordCount?: Prisma.IntWithAggregatesFilter<"ResearchNote"> | number
+  excerpt?: Prisma.StringNullableWithAggregatesFilter<"ResearchNote"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ResearchNote"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ResearchNote"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"ResearchNote"> | boolean
@@ -293,11 +419,18 @@ export type ResearchNoteCreateInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
   user: Prisma.UserCreateNestedOneWithoutResearchNotesInput
   paper?: Prisma.PaperCreateNestedOneWithoutResearchNotesInput
+  notebook?: Prisma.NotebookCreateNestedOneWithoutNotesInput
+  section?: Prisma.NotebookSectionCreateNestedOneWithoutNotesInput
 }
 
 export type ResearchNoteUncheckedCreateInput = {
@@ -308,6 +441,13 @@ export type ResearchNoteUncheckedCreateInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -319,11 +459,18 @@ export type ResearchNoteUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutResearchNotesNestedInput
   paper?: Prisma.PaperUpdateOneWithoutResearchNotesNestedInput
+  notebook?: Prisma.NotebookUpdateOneWithoutNotesNestedInput
+  section?: Prisma.NotebookSectionUpdateOneWithoutNotesNestedInput
 }
 
 export type ResearchNoteUncheckedUpdateInput = {
@@ -334,6 +481,13 @@ export type ResearchNoteUncheckedUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -347,6 +501,13 @@ export type ResearchNoteCreateManyInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -358,6 +519,11 @@ export type ResearchNoteUpdateManyMutationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -371,6 +537,13 @@ export type ResearchNoteUncheckedUpdateManyInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -394,9 +567,20 @@ export type ResearchNoteCountOrderByAggregateInput = {
   content?: Prisma.SortOrder
   tags?: Prisma.SortOrder
   isPrivate?: Prisma.SortOrder
+  notebookId?: Prisma.SortOrder
+  sectionId?: Prisma.SortOrder
+  noteType?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
+  wordCount?: Prisma.SortOrder
+  excerpt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+}
+
+export type ResearchNoteAvgOrderByAggregateInput = {
+  wordCount?: Prisma.SortOrder
 }
 
 export type ResearchNoteMaxOrderByAggregateInput = {
@@ -406,6 +590,13 @@ export type ResearchNoteMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   isPrivate?: Prisma.SortOrder
+  notebookId?: Prisma.SortOrder
+  sectionId?: Prisma.SortOrder
+  noteType?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
+  wordCount?: Prisma.SortOrder
+  excerpt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -418,9 +609,20 @@ export type ResearchNoteMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   content?: Prisma.SortOrder
   isPrivate?: Prisma.SortOrder
+  notebookId?: Prisma.SortOrder
+  sectionId?: Prisma.SortOrder
+  noteType?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
+  isStarred?: Prisma.SortOrder
+  wordCount?: Prisma.SortOrder
+  excerpt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+}
+
+export type ResearchNoteSumOrderByAggregateInput = {
+  wordCount?: Prisma.SortOrder
 }
 
 export type ResearchNoteCreateNestedManyWithoutUserInput = {
@@ -516,16 +718,115 @@ export type ResearchNoteUpdatetagsInput = {
   push?: string | string[]
 }
 
+export type EnumNoteTypeFieldUpdateOperationsInput = {
+  set?: $Enums.NoteType
+}
+
+export type EnumNoteVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.NoteVisibility
+}
+
+export type ResearchNoteCreateNestedManyWithoutNotebookInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput> | Prisma.ResearchNoteCreateWithoutNotebookInput[] | Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput | Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput[]
+  createMany?: Prisma.ResearchNoteCreateManyNotebookInputEnvelope
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+}
+
+export type ResearchNoteUncheckedCreateNestedManyWithoutNotebookInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput> | Prisma.ResearchNoteCreateWithoutNotebookInput[] | Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput | Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput[]
+  createMany?: Prisma.ResearchNoteCreateManyNotebookInputEnvelope
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+}
+
+export type ResearchNoteUpdateManyWithoutNotebookNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput> | Prisma.ResearchNoteCreateWithoutNotebookInput[] | Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput | Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput[]
+  upsert?: Prisma.ResearchNoteUpsertWithWhereUniqueWithoutNotebookInput | Prisma.ResearchNoteUpsertWithWhereUniqueWithoutNotebookInput[]
+  createMany?: Prisma.ResearchNoteCreateManyNotebookInputEnvelope
+  set?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  disconnect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  delete?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  update?: Prisma.ResearchNoteUpdateWithWhereUniqueWithoutNotebookInput | Prisma.ResearchNoteUpdateWithWhereUniqueWithoutNotebookInput[]
+  updateMany?: Prisma.ResearchNoteUpdateManyWithWhereWithoutNotebookInput | Prisma.ResearchNoteUpdateManyWithWhereWithoutNotebookInput[]
+  deleteMany?: Prisma.ResearchNoteScalarWhereInput | Prisma.ResearchNoteScalarWhereInput[]
+}
+
+export type ResearchNoteUncheckedUpdateManyWithoutNotebookNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput> | Prisma.ResearchNoteCreateWithoutNotebookInput[] | Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput | Prisma.ResearchNoteCreateOrConnectWithoutNotebookInput[]
+  upsert?: Prisma.ResearchNoteUpsertWithWhereUniqueWithoutNotebookInput | Prisma.ResearchNoteUpsertWithWhereUniqueWithoutNotebookInput[]
+  createMany?: Prisma.ResearchNoteCreateManyNotebookInputEnvelope
+  set?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  disconnect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  delete?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  update?: Prisma.ResearchNoteUpdateWithWhereUniqueWithoutNotebookInput | Prisma.ResearchNoteUpdateWithWhereUniqueWithoutNotebookInput[]
+  updateMany?: Prisma.ResearchNoteUpdateManyWithWhereWithoutNotebookInput | Prisma.ResearchNoteUpdateManyWithWhereWithoutNotebookInput[]
+  deleteMany?: Prisma.ResearchNoteScalarWhereInput | Prisma.ResearchNoteScalarWhereInput[]
+}
+
+export type ResearchNoteCreateNestedManyWithoutSectionInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput> | Prisma.ResearchNoteCreateWithoutSectionInput[] | Prisma.ResearchNoteUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutSectionInput | Prisma.ResearchNoteCreateOrConnectWithoutSectionInput[]
+  createMany?: Prisma.ResearchNoteCreateManySectionInputEnvelope
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+}
+
+export type ResearchNoteUncheckedCreateNestedManyWithoutSectionInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput> | Prisma.ResearchNoteCreateWithoutSectionInput[] | Prisma.ResearchNoteUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutSectionInput | Prisma.ResearchNoteCreateOrConnectWithoutSectionInput[]
+  createMany?: Prisma.ResearchNoteCreateManySectionInputEnvelope
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+}
+
+export type ResearchNoteUpdateManyWithoutSectionNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput> | Prisma.ResearchNoteCreateWithoutSectionInput[] | Prisma.ResearchNoteUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutSectionInput | Prisma.ResearchNoteCreateOrConnectWithoutSectionInput[]
+  upsert?: Prisma.ResearchNoteUpsertWithWhereUniqueWithoutSectionInput | Prisma.ResearchNoteUpsertWithWhereUniqueWithoutSectionInput[]
+  createMany?: Prisma.ResearchNoteCreateManySectionInputEnvelope
+  set?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  disconnect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  delete?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  update?: Prisma.ResearchNoteUpdateWithWhereUniqueWithoutSectionInput | Prisma.ResearchNoteUpdateWithWhereUniqueWithoutSectionInput[]
+  updateMany?: Prisma.ResearchNoteUpdateManyWithWhereWithoutSectionInput | Prisma.ResearchNoteUpdateManyWithWhereWithoutSectionInput[]
+  deleteMany?: Prisma.ResearchNoteScalarWhereInput | Prisma.ResearchNoteScalarWhereInput[]
+}
+
+export type ResearchNoteUncheckedUpdateManyWithoutSectionNestedInput = {
+  create?: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput> | Prisma.ResearchNoteCreateWithoutSectionInput[] | Prisma.ResearchNoteUncheckedCreateWithoutSectionInput[]
+  connectOrCreate?: Prisma.ResearchNoteCreateOrConnectWithoutSectionInput | Prisma.ResearchNoteCreateOrConnectWithoutSectionInput[]
+  upsert?: Prisma.ResearchNoteUpsertWithWhereUniqueWithoutSectionInput | Prisma.ResearchNoteUpsertWithWhereUniqueWithoutSectionInput[]
+  createMany?: Prisma.ResearchNoteCreateManySectionInputEnvelope
+  set?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  disconnect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  delete?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  connect?: Prisma.ResearchNoteWhereUniqueInput | Prisma.ResearchNoteWhereUniqueInput[]
+  update?: Prisma.ResearchNoteUpdateWithWhereUniqueWithoutSectionInput | Prisma.ResearchNoteUpdateWithWhereUniqueWithoutSectionInput[]
+  updateMany?: Prisma.ResearchNoteUpdateManyWithWhereWithoutSectionInput | Prisma.ResearchNoteUpdateManyWithWhereWithoutSectionInput[]
+  deleteMany?: Prisma.ResearchNoteScalarWhereInput | Prisma.ResearchNoteScalarWhereInput[]
+}
+
 export type ResearchNoteCreateWithoutUserInput = {
   id?: string
   title: string
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
   paper?: Prisma.PaperCreateNestedOneWithoutResearchNotesInput
+  notebook?: Prisma.NotebookCreateNestedOneWithoutNotesInput
+  section?: Prisma.NotebookSectionCreateNestedOneWithoutNotesInput
 }
 
 export type ResearchNoteUncheckedCreateWithoutUserInput = {
@@ -535,6 +836,13 @@ export type ResearchNoteUncheckedCreateWithoutUserInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -577,6 +885,13 @@ export type ResearchNoteScalarWhereInput = {
   content?: Prisma.StringFilter<"ResearchNote"> | string
   tags?: Prisma.StringNullableListFilter<"ResearchNote">
   isPrivate?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  notebookId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  sectionId?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
+  noteType?: Prisma.EnumNoteTypeFilter<"ResearchNote"> | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFilter<"ResearchNote"> | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFilter<"ResearchNote"> | boolean
+  wordCount?: Prisma.IntFilter<"ResearchNote"> | number
+  excerpt?: Prisma.StringNullableFilter<"ResearchNote"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ResearchNote"> | Date | string
   isDeleted?: Prisma.BoolFilter<"ResearchNote"> | boolean
@@ -588,10 +903,17 @@ export type ResearchNoteCreateWithoutPaperInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
   user: Prisma.UserCreateNestedOneWithoutResearchNotesInput
+  notebook?: Prisma.NotebookCreateNestedOneWithoutNotesInput
+  section?: Prisma.NotebookSectionCreateNestedOneWithoutNotesInput
 }
 
 export type ResearchNoteUncheckedCreateWithoutPaperInput = {
@@ -601,6 +923,13 @@ export type ResearchNoteUncheckedCreateWithoutPaperInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -632,6 +961,134 @@ export type ResearchNoteUpdateManyWithWhereWithoutPaperInput = {
   data: Prisma.XOR<Prisma.ResearchNoteUpdateManyMutationInput, Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperInput>
 }
 
+export type ResearchNoteCreateWithoutNotebookInput = {
+  id?: string
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  user: Prisma.UserCreateNestedOneWithoutResearchNotesInput
+  paper?: Prisma.PaperCreateNestedOneWithoutResearchNotesInput
+  section?: Prisma.NotebookSectionCreateNestedOneWithoutNotesInput
+}
+
+export type ResearchNoteUncheckedCreateWithoutNotebookInput = {
+  id?: string
+  userId: string
+  paperId?: string | null
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+}
+
+export type ResearchNoteCreateOrConnectWithoutNotebookInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput>
+}
+
+export type ResearchNoteCreateManyNotebookInputEnvelope = {
+  data: Prisma.ResearchNoteCreateManyNotebookInput | Prisma.ResearchNoteCreateManyNotebookInput[]
+  skipDuplicates?: boolean
+}
+
+export type ResearchNoteUpsertWithWhereUniqueWithoutNotebookInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  update: Prisma.XOR<Prisma.ResearchNoteUpdateWithoutNotebookInput, Prisma.ResearchNoteUncheckedUpdateWithoutNotebookInput>
+  create: Prisma.XOR<Prisma.ResearchNoteCreateWithoutNotebookInput, Prisma.ResearchNoteUncheckedCreateWithoutNotebookInput>
+}
+
+export type ResearchNoteUpdateWithWhereUniqueWithoutNotebookInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  data: Prisma.XOR<Prisma.ResearchNoteUpdateWithoutNotebookInput, Prisma.ResearchNoteUncheckedUpdateWithoutNotebookInput>
+}
+
+export type ResearchNoteUpdateManyWithWhereWithoutNotebookInput = {
+  where: Prisma.ResearchNoteScalarWhereInput
+  data: Prisma.XOR<Prisma.ResearchNoteUpdateManyMutationInput, Prisma.ResearchNoteUncheckedUpdateManyWithoutNotebookInput>
+}
+
+export type ResearchNoteCreateWithoutSectionInput = {
+  id?: string
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  user: Prisma.UserCreateNestedOneWithoutResearchNotesInput
+  paper?: Prisma.PaperCreateNestedOneWithoutResearchNotesInput
+  notebook?: Prisma.NotebookCreateNestedOneWithoutNotesInput
+}
+
+export type ResearchNoteUncheckedCreateWithoutSectionInput = {
+  id?: string
+  userId: string
+  paperId?: string | null
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  notebookId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+}
+
+export type ResearchNoteCreateOrConnectWithoutSectionInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  create: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput>
+}
+
+export type ResearchNoteCreateManySectionInputEnvelope = {
+  data: Prisma.ResearchNoteCreateManySectionInput | Prisma.ResearchNoteCreateManySectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type ResearchNoteUpsertWithWhereUniqueWithoutSectionInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  update: Prisma.XOR<Prisma.ResearchNoteUpdateWithoutSectionInput, Prisma.ResearchNoteUncheckedUpdateWithoutSectionInput>
+  create: Prisma.XOR<Prisma.ResearchNoteCreateWithoutSectionInput, Prisma.ResearchNoteUncheckedCreateWithoutSectionInput>
+}
+
+export type ResearchNoteUpdateWithWhereUniqueWithoutSectionInput = {
+  where: Prisma.ResearchNoteWhereUniqueInput
+  data: Prisma.XOR<Prisma.ResearchNoteUpdateWithoutSectionInput, Prisma.ResearchNoteUncheckedUpdateWithoutSectionInput>
+}
+
+export type ResearchNoteUpdateManyWithWhereWithoutSectionInput = {
+  where: Prisma.ResearchNoteScalarWhereInput
+  data: Prisma.XOR<Prisma.ResearchNoteUpdateManyMutationInput, Prisma.ResearchNoteUncheckedUpdateManyWithoutSectionInput>
+}
+
 export type ResearchNoteCreateManyUserInput = {
   id?: string
   paperId?: string | null
@@ -639,6 +1096,13 @@ export type ResearchNoteCreateManyUserInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -650,10 +1114,17 @@ export type ResearchNoteUpdateWithoutUserInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   paper?: Prisma.PaperUpdateOneWithoutResearchNotesNestedInput
+  notebook?: Prisma.NotebookUpdateOneWithoutNotesNestedInput
+  section?: Prisma.NotebookSectionUpdateOneWithoutNotesNestedInput
 }
 
 export type ResearchNoteUncheckedUpdateWithoutUserInput = {
@@ -663,6 +1134,13 @@ export type ResearchNoteUncheckedUpdateWithoutUserInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -675,6 +1153,13 @@ export type ResearchNoteUncheckedUpdateManyWithoutUserInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -687,6 +1172,13 @@ export type ResearchNoteCreateManyPaperInput = {
   content: string
   tags?: Prisma.ResearchNoteCreatetagsInput | string[]
   isPrivate?: boolean
+  notebookId?: string | null
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -698,10 +1190,17 @@ export type ResearchNoteUpdateWithoutPaperInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutResearchNotesNestedInput
+  notebook?: Prisma.NotebookUpdateOneWithoutNotesNestedInput
+  section?: Prisma.NotebookSectionUpdateOneWithoutNotesNestedInput
 }
 
 export type ResearchNoteUncheckedUpdateWithoutPaperInput = {
@@ -711,6 +1210,13 @@ export type ResearchNoteUncheckedUpdateWithoutPaperInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -723,6 +1229,165 @@ export type ResearchNoteUncheckedUpdateManyWithoutPaperInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ResearchNoteCreateManyNotebookInput = {
+  id?: string
+  userId: string
+  paperId?: string | null
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  sectionId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+}
+
+export type ResearchNoteUpdateWithoutNotebookInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  user?: Prisma.UserUpdateOneRequiredWithoutResearchNotesNestedInput
+  paper?: Prisma.PaperUpdateOneWithoutResearchNotesNestedInput
+  section?: Prisma.NotebookSectionUpdateOneWithoutNotesNestedInput
+}
+
+export type ResearchNoteUncheckedUpdateWithoutNotebookInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  paperId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ResearchNoteUncheckedUpdateManyWithoutNotebookInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  paperId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ResearchNoteCreateManySectionInput = {
+  id?: string
+  userId: string
+  paperId?: string | null
+  title: string
+  content: string
+  tags?: Prisma.ResearchNoteCreatetagsInput | string[]
+  isPrivate?: boolean
+  notebookId?: string | null
+  noteType?: $Enums.NoteType
+  visibility?: $Enums.NoteVisibility
+  isStarred?: boolean
+  wordCount?: number
+  excerpt?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+}
+
+export type ResearchNoteUpdateWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  user?: Prisma.UserUpdateOneRequiredWithoutResearchNotesNestedInput
+  paper?: Prisma.PaperUpdateOneWithoutResearchNotesNestedInput
+  notebook?: Prisma.NotebookUpdateOneWithoutNotesNestedInput
+}
+
+export type ResearchNoteUncheckedUpdateWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  paperId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+}
+
+export type ResearchNoteUncheckedUpdateManyWithoutSectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  paperId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  tags?: Prisma.ResearchNoteUpdatetagsInput | string[]
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  notebookId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteType?: Prisma.EnumNoteTypeFieldUpdateOperationsInput | $Enums.NoteType
+  visibility?: Prisma.EnumNoteVisibilityFieldUpdateOperationsInput | $Enums.NoteVisibility
+  isStarred?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  wordCount?: Prisma.IntFieldUpdateOperationsInput | number
+  excerpt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -738,11 +1403,20 @@ export type ResearchNoteSelect<ExtArgs extends runtime.Types.Extensions.Internal
   content?: boolean
   tags?: boolean
   isPrivate?: boolean
+  notebookId?: boolean
+  sectionId?: boolean
+  noteType?: boolean
+  visibility?: boolean
+  isStarred?: boolean
+  wordCount?: boolean
+  excerpt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }, ExtArgs["result"]["researchNote"]>
 
 export type ResearchNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -753,11 +1427,20 @@ export type ResearchNoteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   content?: boolean
   tags?: boolean
   isPrivate?: boolean
+  notebookId?: boolean
+  sectionId?: boolean
+  noteType?: boolean
+  visibility?: boolean
+  isStarred?: boolean
+  wordCount?: boolean
+  excerpt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }, ExtArgs["result"]["researchNote"]>
 
 export type ResearchNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -768,11 +1451,20 @@ export type ResearchNoteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   content?: boolean
   tags?: boolean
   isPrivate?: boolean
+  notebookId?: boolean
+  sectionId?: boolean
+  noteType?: boolean
+  visibility?: boolean
+  isStarred?: boolean
+  wordCount?: boolean
+  excerpt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }, ExtArgs["result"]["researchNote"]>
 
 export type ResearchNoteSelectScalar = {
@@ -783,23 +1475,36 @@ export type ResearchNoteSelectScalar = {
   content?: boolean
   tags?: boolean
   isPrivate?: boolean
+  notebookId?: boolean
+  sectionId?: boolean
+  noteType?: boolean
+  visibility?: boolean
+  isStarred?: boolean
+  wordCount?: boolean
+  excerpt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type ResearchNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "paperId" | "title" | "content" | "tags" | "isPrivate" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["researchNote"]>
+export type ResearchNoteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "paperId" | "title" | "content" | "tags" | "isPrivate" | "notebookId" | "sectionId" | "noteType" | "visibility" | "isStarred" | "wordCount" | "excerpt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["researchNote"]>
 export type ResearchNoteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }
 export type ResearchNoteIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }
 export type ResearchNoteIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   paper?: boolean | Prisma.ResearchNote$paperArgs<ExtArgs>
+  notebook?: boolean | Prisma.ResearchNote$notebookArgs<ExtArgs>
+  section?: boolean | Prisma.ResearchNote$sectionArgs<ExtArgs>
 }
 
 export type $ResearchNotePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -807,6 +1512,8 @@ export type $ResearchNotePayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
     paper: Prisma.$PaperPayload<ExtArgs> | null
+    notebook: Prisma.$NotebookPayload<ExtArgs> | null
+    section: Prisma.$NotebookSectionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -816,6 +1523,13 @@ export type $ResearchNotePayload<ExtArgs extends runtime.Types.Extensions.Intern
     content: string
     tags: string[]
     isPrivate: boolean
+    notebookId: string | null
+    sectionId: string | null
+    noteType: $Enums.NoteType
+    visibility: $Enums.NoteVisibility
+    isStarred: boolean
+    wordCount: number
+    excerpt: string | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1215,6 +1929,8 @@ export interface Prisma__ResearchNoteClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   paper<T extends Prisma.ResearchNote$paperArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchNote$paperArgs<ExtArgs>>): Prisma.Prisma__PaperClient<runtime.Types.Result.GetResult<Prisma.$PaperPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  notebook<T extends Prisma.ResearchNote$notebookArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchNote$notebookArgs<ExtArgs>>): Prisma.Prisma__NotebookClient<runtime.Types.Result.GetResult<Prisma.$NotebookPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  section<T extends Prisma.ResearchNote$sectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ResearchNote$sectionArgs<ExtArgs>>): Prisma.Prisma__NotebookSectionClient<runtime.Types.Result.GetResult<Prisma.$NotebookSectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1251,6 +1967,13 @@ export interface ResearchNoteFieldRefs {
   readonly content: Prisma.FieldRef<"ResearchNote", 'String'>
   readonly tags: Prisma.FieldRef<"ResearchNote", 'String[]'>
   readonly isPrivate: Prisma.FieldRef<"ResearchNote", 'Boolean'>
+  readonly notebookId: Prisma.FieldRef<"ResearchNote", 'String'>
+  readonly sectionId: Prisma.FieldRef<"ResearchNote", 'String'>
+  readonly noteType: Prisma.FieldRef<"ResearchNote", 'NoteType'>
+  readonly visibility: Prisma.FieldRef<"ResearchNote", 'NoteVisibility'>
+  readonly isStarred: Prisma.FieldRef<"ResearchNote", 'Boolean'>
+  readonly wordCount: Prisma.FieldRef<"ResearchNote", 'Int'>
+  readonly excerpt: Prisma.FieldRef<"ResearchNote", 'String'>
   readonly createdAt: Prisma.FieldRef<"ResearchNote", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ResearchNote", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"ResearchNote", 'Boolean'>
@@ -1671,6 +2394,44 @@ export type ResearchNote$paperArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.PaperInclude<ExtArgs> | null
   where?: Prisma.PaperWhereInput
+}
+
+/**
+ * ResearchNote.notebook
+ */
+export type ResearchNote$notebookArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notebook
+   */
+  select?: Prisma.NotebookSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notebook
+   */
+  omit?: Prisma.NotebookOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotebookInclude<ExtArgs> | null
+  where?: Prisma.NotebookWhereInput
+}
+
+/**
+ * ResearchNote.section
+ */
+export type ResearchNote$sectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the NotebookSection
+   */
+  select?: Prisma.NotebookSectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the NotebookSection
+   */
+  omit?: Prisma.NotebookSectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotebookSectionInclude<ExtArgs> | null
+  where?: Prisma.NotebookSectionWhereInput
 }
 
 /**

@@ -414,6 +414,8 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   UserToken: 'UserToken',
   ResearchNote: 'ResearchNote',
+  Notebook: 'Notebook',
+  NotebookSection: 'NotebookSection',
   CitationExport: 'CitationExport',
   DiscussionThread: 'DiscussionThread',
   DiscussionMessage: 'DiscussionMessage',
@@ -439,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2663,6 +2665,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Notebook: {
+      payload: Prisma.$NotebookPayload<ExtArgs>
+      fields: Prisma.NotebookFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NotebookFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NotebookFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        findFirst: {
+          args: Prisma.NotebookFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NotebookFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        findMany: {
+          args: Prisma.NotebookFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>[]
+        }
+        create: {
+          args: Prisma.NotebookCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        createMany: {
+          args: Prisma.NotebookCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NotebookCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>[]
+        }
+        delete: {
+          args: Prisma.NotebookDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        update: {
+          args: Prisma.NotebookUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        deleteMany: {
+          args: Prisma.NotebookDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NotebookUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NotebookUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>[]
+        }
+        upsert: {
+          args: Prisma.NotebookUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookPayload>
+        }
+        aggregate: {
+          args: Prisma.NotebookAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNotebook>
+        }
+        groupBy: {
+          args: Prisma.NotebookGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotebookGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NotebookCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotebookCountAggregateOutputType> | number
+        }
+      }
+    }
+    NotebookSection: {
+      payload: Prisma.$NotebookSectionPayload<ExtArgs>
+      fields: Prisma.NotebookSectionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NotebookSectionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NotebookSectionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        findFirst: {
+          args: Prisma.NotebookSectionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NotebookSectionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        findMany: {
+          args: Prisma.NotebookSectionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>[]
+        }
+        create: {
+          args: Prisma.NotebookSectionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        createMany: {
+          args: Prisma.NotebookSectionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NotebookSectionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>[]
+        }
+        delete: {
+          args: Prisma.NotebookSectionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        update: {
+          args: Prisma.NotebookSectionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        deleteMany: {
+          args: Prisma.NotebookSectionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NotebookSectionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NotebookSectionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>[]
+        }
+        upsert: {
+          args: Prisma.NotebookSectionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotebookSectionPayload>
+        }
+        aggregate: {
+          args: Prisma.NotebookSectionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNotebookSection>
+        }
+        groupBy: {
+          args: Prisma.NotebookSectionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotebookSectionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NotebookSectionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotebookSectionCountAggregateOutputType> | number
+        }
+      }
+    }
     CitationExport: {
       payload: Prisma.$CitationExportPayload<ExtArgs>
       fields: Prisma.CitationExportFieldRefs
@@ -3961,12 +4111,48 @@ export const ResearchNoteScalarFieldEnum = {
   content: 'content',
   tags: 'tags',
   isPrivate: 'isPrivate',
+  notebookId: 'notebookId',
+  sectionId: 'sectionId',
+  noteType: 'noteType',
+  visibility: 'visibility',
+  isStarred: 'isStarred',
+  wordCount: 'wordCount',
+  excerpt: 'excerpt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
 } as const
 
 export type ResearchNoteScalarFieldEnum = (typeof ResearchNoteScalarFieldEnum)[keyof typeof ResearchNoteScalarFieldEnum]
+
+
+export const NotebookScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  description: 'description',
+  color: 'color',
+  isStarred: 'isStarred',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type NotebookScalarFieldEnum = (typeof NotebookScalarFieldEnum)[keyof typeof NotebookScalarFieldEnum]
+
+
+export const NotebookSectionScalarFieldEnum = {
+  id: 'id',
+  notebookId: 'notebookId',
+  userId: 'userId',
+  name: 'name',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type NotebookSectionScalarFieldEnum = (typeof NotebookSectionScalarFieldEnum)[keyof typeof NotebookSectionScalarFieldEnum]
 
 
 export const CitationExportScalarFieldEnum = {
@@ -4446,6 +4632,34 @@ export type ListEnumTokenTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Pr
 
 
 /**
+ * Reference to a field of type 'NoteType'
+ */
+export type EnumNoteTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NoteType'>
+    
+
+
+/**
+ * Reference to a field of type 'NoteType[]'
+ */
+export type ListEnumNoteTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NoteType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'NoteVisibility'
+ */
+export type EnumNoteVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NoteVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'NoteVisibility[]'
+ */
+export type ListEnumNoteVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NoteVisibility[]'>
+    
+
+
+/**
  * Reference to a field of type 'CitationFormat'
  */
 export type EnumCitationFormatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CitationFormat'>
@@ -4640,6 +4854,8 @@ export type GlobalOmitConfig = {
   verificationToken?: Prisma.VerificationTokenOmit
   userToken?: Prisma.UserTokenOmit
   researchNote?: Prisma.ResearchNoteOmit
+  notebook?: Prisma.NotebookOmit
+  notebookSection?: Prisma.NotebookSectionOmit
   citationExport?: Prisma.CitationExportOmit
   discussionThread?: Prisma.DiscussionThreadOmit
   discussionMessage?: Prisma.DiscussionMessageOmit
