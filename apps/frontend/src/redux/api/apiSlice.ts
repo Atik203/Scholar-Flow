@@ -83,6 +83,7 @@ export const apiSlice = createApi({
     "CollectionMember",
     "CollectionInvite",
     "Workspace",
+    "Team",
     "User",
     "UserPreferences",
     "UserActivity",
