@@ -1,11 +1,16 @@
 import { apiSlice } from "./apiSlice";
 
+export type WorkspaceColor = "blue" | "purple" | "green" | "orange" | "pink";
+export type WorkspaceVisibility = "PRIVATE" | "INVITE_ONLY" | "PUBLIC";
+
 export interface Workspace {
   id: string;
   name: string;
   description?: string;
   ownerId: string;
   isPublic?: boolean;
+  color?: WorkspaceColor;
+  visibility?: WorkspaceVisibility;
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
@@ -63,7 +68,10 @@ export const workspaceApi = apiSlice.injectEndpoints({
           : [{ type: "Workspace" as const, id: "LIST" }],
     }),
 
-    createWorkspace: builder.mutation<Workspace, { name: string }>({
+    createWorkspace: builder.mutation<
+      Workspace,
+      { name: string; color?: WorkspaceColor; visibility?: WorkspaceVisibility }
+    >({
       query: (body) => ({ url: `/workspaces`, method: "POST", body }),
       transformResponse: (response: { data: Workspace }) => response.data,
       invalidatesTags: [{ type: "Workspace", id: "LIST" }],
