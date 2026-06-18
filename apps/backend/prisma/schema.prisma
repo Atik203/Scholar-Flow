@@ -980,6 +980,8 @@ enum CitationFormat {
   IEEE
   CHICAGO
   HARVARD
+  VANCOUVER
+  ACS
 }
 
 // Threaded Research Discussions
