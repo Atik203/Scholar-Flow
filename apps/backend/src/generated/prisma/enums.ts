@@ -29,6 +29,15 @@ export const WorkspaceRole = {
 export type WorkspaceRole = (typeof WorkspaceRole)[keyof typeof WorkspaceRole]
 
 
+export const WorkspaceVisibility = {
+  PRIVATE: 'PRIVATE',
+  INVITE_ONLY: 'INVITE_ONLY',
+  PUBLIC: 'PUBLIC'
+} as const
+
+export type WorkspaceVisibility = (typeof WorkspaceVisibility)[keyof typeof WorkspaceVisibility]
+
+
 export const CollectionPermission = {
   VIEW: 'VIEW',
   EDIT: 'EDIT'

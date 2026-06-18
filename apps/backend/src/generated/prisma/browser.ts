@@ -43,6 +43,11 @@ export type WorkspaceMember = Prisma.WorkspaceMemberModel
  */
 export type WorkspaceInvitation = Prisma.WorkspaceInvitationModel
 /**
+ * Model WorkspaceSettings
+ * 
+ */
+export type WorkspaceSettings = Prisma.WorkspaceSettingsModel
+/**
  * Model Paper
  * 
  */
