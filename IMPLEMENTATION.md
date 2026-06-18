@@ -24,12 +24,28 @@ Deferred to Phase 8: AI insights sidebar, annotation toolbar, semantic search.
 
 ## Phase 5: Workspaces & Team ✅
 - [x] `/dashboard/(app)/workspaces` — list, create, detail, members, settings
-- [x] `/dashboard/(app)/team` — overview, invitations, activity
-- [x] `WorkspaceSettings` 1:1 model + `WorkspaceVisibility` enum
+- [x] `/dashboard/(app)/workspaces/[id]` — Overview / Collections / Papers / Members / Settings tabs
+- [x] `/dashboard/(app)/workspaces/create` — standalone create page
+- [x] `/dashboard/(app)/workspaces/shared` — 3 tabs (Shared / Received / Sent)
+- [x] `/dashboard/(app)/team` — members list with filters, action menu, invite modal
+- [x] `/dashboard/(app)/team/invitations` — received + sent invitations, resend/cancel
+- [x] `/dashboard/(app)/team/activity` — 4 stat cards, members sidebar, activity feed
+- [x] `/dashboard/(app)/team/settings` — 6 tabs (General / Permissions / Notifications / Security / Integrations / Danger Zone)
+- [x] `/dashboard/(app)/team/collaborator/[id]` — public profile with cover, stats, follow/message
+- [x] `WorkspaceSettings` 1:1 model with color, sharing, member defaults, security fields
+- [x] `WorkspaceVisibility` enum (PRIVATE / INVITE_ONLY / PUBLIC)
+- [x] Denormalized `Workspace.color` and `Workspace.visibility` for fast list rendering
 - [x] `TeamActivity` reuses `ActivityLogEntry` (entity = "team")
-- [x] Team backend module (12 endpoints) with `requireTeamLead` middleware
-- [x] Resend email dispatcher (additive, Gmail fallback)
-- [x] 8 frontend pages with RTK Query, motion animations, Sonner toasts
+- [x] Team backend module — 14 endpoints (members, stats, activity, invitations, settings)
+- [x] `requireRole` / `requireTeamLead` / `requireAdmin` middleware (typed)
+- [x] Workspace module extensions — 6 new endpoints (settings, activity, stats, papers, collections)
+- [x] Resend email dispatcher (additive, Gmail fallback); new `sendTeamInvitationEmail`
+- [x] `teamApi` RTK Query slice — 15 endpoints with proper cache tags
+- [x] Workspace RTK extension — 6 new endpoints (settings, activity, stats, papers, collections)
+- [x] 8 new pages, 7 new components (`WorkspaceCard`, `RoleBadge`, `StatusDot`, etc.)
+- [x] `Team` submenu in `AppSidebar` (min role `TEAM_LEAD`)
+- [x] Color theme picker (5 swatches: blue/purple/green/orange/pink) backed by `WorkspaceSettings.color`
+- [x] 20 legacy route files removed (Phase 3 cleanup debt) — production build now passes for both apps
 
 ## Phase 6: Discussions, Notes & Citations
 - [ ] `/dashboard/(app)/discussions` — list, thread, new
@@ -61,7 +77,7 @@ Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code 
 - All mutations use Zod validation + rate limiting
 
 ## Current Status
-- **Release:** 1.2.4 (2026-06-17)
-- **Completed:** Phase 1-4, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 5 — Workspaces & Team
+- **Release:** 1.2.5 (2026-06-19)
+- **Completed:** Phase 1-5, Next.js 16 migration, better-auth migration, Prisma v7 migration
+- **Current:** Phase 6 — Discussions, Notes & Citations
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0

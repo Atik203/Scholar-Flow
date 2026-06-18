@@ -491,6 +491,22 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Authentication-related code requires minimum 90% test coverage.
 - Comprehensive integration tests required for all auth endpoints and flows.
 
+### Role-Based Access Control (Phase 5+)
+- Use the `requireRole(role)` factory from `apps/backend/src/app/middleware/requireRole.ts` for new RBAC routes. Convenience wrappers: `requireTeamLead`, `requireAdmin`.
+- Apply the middleware AFTER `authMiddleware` in the route chain (RBAC needs an authenticated user first).
+- Reject with `ApiError(403, "Insufficient permissions. Required: {role}, got: {userRole}")` — do not silently 200.
+- For per-resource ownership checks (e.g. "only the workspace owner can edit settings"), perform the check inside the service via raw SQL or Prisma where/select, not in the middleware.
+- For frontend role gating in `AppSidebar`, set `minRole: USER_ROLES.TEAM_LEAD` on the navigation item — `hasRoleAccess` handles the rest.
+- Use `lib/auth/roles.ts` constants (`USER_ROLES.RESEARCHER`, etc.) and `hasRoleAccess(userRole, requiredRole)` — never compare role strings directly.
+
+### Email Delivery (Phase 5+)
+- Transactional emails route through `emailService` in `apps/backend/src/app/shared/emailService.ts`.
+- Dispatcher priority: Resend (if `RESEND_API_KEY` is set in env) → existing SMTP/Gmail transporter.
+- Resend uses the built-in `fetch` API (`https://api.resend.com/emails`); no SDK dependency.
+- Never add new SMTP providers without keeping Gmail as the fallback — never break local dev for users without the env var.
+- New email templates are methods on `EmailService` (e.g. `sendTeamInvitationEmail(data)`); HTML is inlined in the method for now. If a template gets large, refactor to a `templates/` directory but keep the dispatcher call signature stable.
+- Email send failures are logged but NEVER thrown — the main flow (invitation, etc.) must complete even if email delivery fails. Surface failures via `console.error` in dev, silent in production.
+
 ### Workflow & Documentation Discipline
 - Follow phase discipline strictly; see `Roadmap.md` before starting new features.
 - Ship only in-phase work; defer out-of-scope requests unless they unblock the current milestone.
