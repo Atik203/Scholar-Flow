@@ -6,7 +6,7 @@ import { noteController } from "./note.controller";
 import {
   createNoteSchema,
   updateNoteSchema,
-  searchNotesSchema,
+  updateNoteMetadataSchema,
 } from "./note.types";
 
 export const noteRoutes: express.Router = express.Router();
@@ -59,4 +59,21 @@ noteRoutes.get(
   paperOperationLimiter,
   authMiddleware as any,
   noteController.search as any
+);
+
+// Phase 6 - Full read with metadata
+noteRoutes.get(
+  "/:id/full",
+  paperOperationLimiter,
+  authMiddleware as any,
+  noteController.getNoteFull as any
+);
+
+// Phase 6 - Metadata update (notebook-aware)
+noteRoutes.patch(
+  "/:id/metadata",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(updateNoteMetadataSchema) as any,
+  noteController.updateMetadata as any
 );
