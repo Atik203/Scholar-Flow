@@ -2,6 +2,14 @@ import { z } from "zod";
 
 export const createWorkspaceSchema = z.object({
   name: z.string().min(2).max(120),
+  color: z
+    .enum(["blue", "purple", "green", "orange", "pink"])
+    .optional()
+    .default("blue"),
+  visibility: z
+    .enum(["PRIVATE", "INVITE_ONLY", "PUBLIC"])
+    .optional()
+    .default("PRIVATE"),
 });
 
 export const workspaceParamsSchema = z.object({
