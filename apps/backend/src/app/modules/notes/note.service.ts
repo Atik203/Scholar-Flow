@@ -6,7 +6,16 @@ import {
   GetNotesQuery,
   SearchNotesQuery,
   UpdateNoteInput,
+  UpdateNoteMetadataInput,
 } from "./note.types";
+
+function deriveMeta(content: string): { wordCount: number; excerpt: string } {
+  const trimmed = content.trim();
+  const wordCount = trimmed.length === 0 ? 0 : trimmed.split(/\s+/).length;
+  const firstLine =
+    trimmed.split("\n").find((l) => l.trim().length > 0)?.trim() ?? "";
+  return { wordCount, excerpt: firstLine.slice(0, 200) };
+}
 
 export class NoteService {
   /**
@@ -604,5 +613,93 @@ export class NoteService {
       console.error("Error searching notes:", error);
       throw new ApiError(500, "Failed to search notes");
     }
+  }
+
+  // Phase 6 - Notebook-aware metadata update (Prisma)
+  // Keeps the existing $queryRaw path untouched per Query Performance Rules.
+  static async updateNoteMetadata(
+    noteId: string,
+    userId: string,
+    data: UpdateNoteMetadataInput
+  ) {
+    const existing = await prisma.researchNote.findFirst({
+      where: { id: noteId, userId, isDeleted: false },
+      select: { id: true, content: true },
+    });
+    if (!existing) throw new ApiError(404, "Note not found");
+
+    const patch: any = { updatedAt: new Date() };
+    if (data.title !== undefined) patch.title = data.title;
+    if (data.content !== undefined) {
+      patch.content = data.content;
+      const meta = deriveMeta(data.content);
+      patch.wordCount = meta.wordCount;
+      patch.excerpt = meta.excerpt;
+    }
+    if (data.tags !== undefined) patch.tags = data.tags;
+    if (data.noteType !== undefined) patch.noteType = data.noteType;
+    if (data.visibility !== undefined) {
+      patch.visibility = data.visibility;
+      patch.isPrivate = data.visibility === "PRIVATE";
+    }
+    if (data.isStarred !== undefined) patch.isStarred = data.isStarred;
+    if (data.isPrivate !== undefined) {
+      patch.isPrivate = data.isPrivate;
+      if (!data.visibility) {
+        patch.visibility = data.isPrivate ? "PRIVATE" : "WORKSPACE";
+      }
+    }
+
+    return prisma.researchNote.update({
+      where: { id: noteId },
+      data: patch,
+      select: {
+        id: true,
+        userId: true,
+        paperId: true,
+        title: true,
+        content: true,
+        tags: true,
+        isPrivate: true,
+        noteType: true,
+        visibility: true,
+        isStarred: true,
+        wordCount: true,
+        excerpt: true,
+        notebookId: true,
+        sectionId: true,
+        createdAt: true,
+        updatedAt: true,
+        paper: { select: { id: true, title: true } },
+      },
+    });
+  }
+
+  // Phase 6 - Notebook-aware full read (Prisma)
+  static async getNoteFull(noteId: string, userId: string) {
+    const note = await prisma.researchNote.findFirst({
+      where: { id: noteId, userId, isDeleted: false },
+      select: {
+        id: true,
+        userId: true,
+        paperId: true,
+        title: true,
+        content: true,
+        tags: true,
+        isPrivate: true,
+        noteType: true,
+        visibility: true,
+        isStarred: true,
+        wordCount: true,
+        excerpt: true,
+        notebookId: true,
+        sectionId: true,
+        createdAt: true,
+        updatedAt: true,
+        paper: { select: { id: true, title: true } },
+      },
+    });
+    if (!note) throw new ApiError(404, "Note not found");
+    return note;
   }
 }
