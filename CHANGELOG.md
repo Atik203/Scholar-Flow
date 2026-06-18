@@ -1,5 +1,70 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.6 — Phase 6: Discussions, Notes & Citations (2026-06-19)
+
+**Release date:** 2026-06-19
+**Theme:** Full Phase 6 implementation — `Notebook` / `NotebookSection` schema hierarchy, notebook-aware note metadata, general discussion threads, citation manager with 2 new formats (Vancouver + ACS), 7 new dashboard pages, 3 new RTK slices, and sidebar additions.
+
+---
+
+### ✨ Highlights
+
+- **New `Notebook` + `NotebookSection` schema models** — additive migration; `Notebook` has a `Default` auto-created on first list, `NotebookSection` cascades on notebook delete
+- **`NoteType` enum** — `QUICK | LITERATURE | METHODOLOGY | FINDINGS | IDEA` (matches figma ResearchNotesPage type filter)
+- **`NoteVisibility` enum** — `PRIVATE | WORKSPACE | PUBLIC` (matches figma visibility pills)
+- **`ResearchNote` extended** with nullable `notebookId`, `sectionId`, `noteType`, `visibility`, `isStarred`, `wordCount`, `excerpt`; 5 new composite indexes for notebook/section/type/star lookups; existing `$queryRaw` path kept intact per Query Performance Rules
+- **Backend `Notebook` module (13 endpoints)** — `GET/POST/PATCH/DELETE /notebooks`, full sections CRUD, `GET/POST /notebooks/:id/notes`, `PATCH /notebooks/notes/:id/move`; auto-creates a "My Notes" notebook + "General" section on first read
+- **Backend discussion enhancements** — `GET /discussions/mine` (union of threads I created + threads in my workspaces, with `scope/search/tags/isPinned/isResolved` filters, pinned-first ordering, lastReply preloaded), `POST /discussions/general` for personal threads, `PATCH /discussions/:id/pin` and `/:id/resolve` toggles (creator-only)
+- **Backend citation manager** — `GET /citations/formats` returns all 9 supported formats (added **Vancouver** and **ACS**), `GET /citations/manager` returns user's papers with authors/year/journal extracted from `Paper.metadata` JSON
+- **`CitationFormat` enum extended** with `VANCOUVER` and `ACS`; export route zod schema widened
+- **3 new RTK Query slices** — `notebookApi` (13 hooks), `discussionApi` (9 hooks), `citationApi` (5 hooks); proper granular cache tags (`Notebook` LIST + per-id, `NotebookSection` scoped per notebook, `Note` scoped per notebook, `Discussion` LIST + per-id, `Citation`, `CitationExport`)
+- **7 new dashboard pages matching figma-make exactly:**
+  - `/dashboard/discussions` — list with search/status/pinned/tags filter card, inline-expand thread preview, pin/resolve/delete actions, empty state, guidelines block
+  - `/dashboard/discussions/new` — RHF-free form (title, content, tags), uses `useCreateGeneralDiscussionMutation`
+  - `/dashboard/discussions/[id]` — header with pin/resolve toggles, top-level message list, inline reply input with Enter-to-send
+  - `/dashboard/notes` — 3-pane notebook (Notebooks | Notes List | Editor/Preview) with type-filter chips, star toggle, AI summary panel (disabled, ready for Phase 8)
+  - `/dashboard/notes/new` — full form (title, content, notebook/section pickers, type, visibility, tags)
+  - `/dashboard/notes/[id]` — read-only single-note view with "Open in editor" link
+  - `/dashboard/citations` — tabs for Papers / Graph / History; format grid (8 formats), paper selection list with checkboxes + search, live preview, AI Citation Finder card (PRO-gated, Phase 8), static SVG citation graph (PRO-gated; `// TODO Phase 8` to wire to `Citation` model), export history with delete
+- **Sidebar additions** — `Discussions` and `Notes` top-level groups (min role `RESEARCHER`); `Research > Citations` path updated from `/dashboard/research/citations` to `/dashboard/citations`
+- **Plain-text editor** for notes (matches figma); TipTap integration deferred to Phase 9 per locked-in plan
+
+### 🔧 Backend
+
+- 2 additive Prisma migrations:
+  - `20260619000000_phase6_notebook_hierarchy` — creates `Notebook`, `NotebookSection`, `NoteType`, `NoteVisibility`; extends `ResearchNote` with 7 nullable fields + 5 indexes
+  - `20260619000100_phase6_citation_formats` — adds `VANCOUVER` and `ACS` to `CitationFormat` enum
+- 2 new Zod-based controllers: `notebook.controller.ts`, `notebook.routes.ts`
+- `discussion.service.ts` extended: `createGeneralThread`, `getMyDiscussions`, `togglePin`, `toggleResolve`
+- `citationExport.service.ts` extended: `formatVancouver`, `formatACS`, `getFormats`, `getManagerView`
+- New `GET /citations/formats` and `GET /citations/manager` routes
+- `note.controller.ts` extended with `updateMetadata` + `getNoteFull` (Prisma-based, not breaking the existing `$queryRaw` path)
+
+### 🎨 Frontend
+
+- 3 new RTK Query slices: `notebookApi`, `discussionApi`, `citationApi`
+- `apiSlice.tagTypes` extended: `Notebook`, `NotebookSection`, `Discussion`, `DiscussionMessage`, `Citation`, `CitationExport`
+- 7 new pages (see above), all client components using RTK Query (no raw fetch in components)
+- `AppSidebar` updated with new top-level entries
+
+### ✅ Quality Gates
+
+- `yarn type-check` — clean for both apps
+- `yarn build` — succeeds for both apps; new routes appear in build output
+- `yarn lint` — clean for all Phase 6 files (one pre-existing backend error in `collection.controller.ts` unchanged, 14 pre-existing warnings unchanged)
+- `yarn test` — 13 new Notebook validation unit tests pass; 3 pre-existing test failures unchanged (unrelated to Phase 6: `ai-providers-smoke`, `paper.summary.service`, `auth-password-reset`)
+- 1 legacy stub removed: `apps/frontend/src/app/dashboard/(modules)/discussions/page.tsx` (pre-Phase 3 stub, no longer referenced)
+- `yarn db:generate --sql` clean
+
+### 🔮 Phase 7 / 8 / 9 Hooks Preserved
+
+- SSE notifications on new discussion messages → Phase 7
+- Real `Citation` model graph wiring + AI summary / AI Citation Finder enable → Phase 8
+- TipTap rich-text editor for notes → Phase 9
+- Team-shared notebooks (already supported via `visibility: WORKSPACE`) → Phase 8
+
+---
+
 ## Release 1.2.5 — Phase 5: Workspaces & Team (2026-06-19)
 
 **Release date:** 2026-06-19
