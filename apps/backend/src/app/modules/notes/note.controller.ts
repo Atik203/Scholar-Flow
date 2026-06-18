@@ -6,6 +6,7 @@ import {
   updateNoteSchema,
   getNotesQuerySchema,
   searchNotesSchema,
+  updateNoteMetadataSchema,
 } from "./note.types";
 import catchAsync from "../../shared/catchAsync";
 import { sendSuccessResponse, sendPaginatedResponse } from "../../shared/sendResponse";
@@ -211,5 +212,71 @@ export const noteController = {
       result.pagination,
       "Search results retrieved successfully"
     );
+  }),
+
+  /**
+   * Phase 6 - Notebook-aware metadata update (PATCH /notes/:id/metadata)
+   */
+  updateMetadata: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    const { id } = req.params;
+    const parsed = updateNoteMetadataSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid metadata",
+        errors: parsed.error.issues,
+      });
+      return;
+    }
+
+    try {
+      const note = await NoteService.updateNoteMetadata(id, userId, parsed.data);
+      sendSuccessResponse(res, note, "Note metadata updated");
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }),
+
+  /**
+   * Phase 6 - Full note read with Phase 6 fields
+   */
+  getNoteFull: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.id;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    const { id } = req.params;
+
+    try {
+      const note = await NoteService.getNoteFull(id, userId);
+      sendSuccessResponse(res, note, "Note retrieved");
+    } catch (error: any) {
+      res.status(error.statusCode || 500).json({
+        success: false,
+        message: error.message,
+      });
+    }
   }),
 };
