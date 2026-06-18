@@ -866,4 +866,244 @@ export class DiscussionService {
       console.error('Failed to log activity:', error);
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Phase 6 - General thread creation, mine feed, pin/resolve toggles
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a personal (general) discussion thread.
+   * Unlike paper/collection/workspace threads, this has no scope FK.
+   * Only the author can see it.
+   */
+  static async createGeneralThread(
+    req: AuthRequest,
+    data: { title: string; content: string; tags?: string[] }
+  ): Promise<any> {
+    const userId = req.user?.id;
+    if (!userId) throw new ApiError(401, 'User not authenticated');
+
+    try {
+      const thread = await prisma.discussionThread.create({
+        data: {
+          userId,
+          title: data.title,
+          content: data.content,
+          tags: data.tags || []
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              lastName: true,
+              image: true
+            }
+          },
+          _count: { select: { messages: true } }
+        }
+      });
+
+      await this.logActivity(userId, null, 'discussion', thread.id, 'created', {
+        title: data.title,
+        scope: 'general'
+      });
+
+      return thread;
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Failed to create general discussion thread');
+    }
+  }
+
+  /**
+   * Personal feed: union of (a) threads I created, (b) threads in workspaces
+   * I'm a member of. Pinned first, then most recent activity.
+   */
+  static async getMyDiscussions(
+    req: AuthRequest,
+    filters: {
+      isResolved?: boolean;
+      isPinned?: boolean;
+      scope?: 'all' | 'general' | 'workspace' | 'paper' | 'collection';
+      search?: string;
+      tags?: string[];
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<{ threads: any[]; total: number }> {
+    const userId = req.user?.id;
+    if (!userId) throw new ApiError(401, 'User not authenticated');
+
+    try {
+      // Find workspaces the user belongs to
+      const myWorkspaces = await prisma.workspaceMember.findMany({
+        where: { userId, isDeleted: false },
+        select: { workspaceId: true }
+      });
+      const workspaceIds = myWorkspaces.map((m) => m.workspaceId);
+
+      const where: any = {
+        isDeleted: false,
+        OR: [
+          { userId },
+          { workspaceId: { in: workspaceIds } }
+        ]
+      };
+
+      if (filters.isResolved !== undefined) {
+        where.isResolved = filters.isResolved;
+      }
+      if (filters.isPinned !== undefined) {
+        where.isPinned = filters.isPinned;
+      }
+      if (filters.search) {
+        where.OR = [
+          { userId, title: { contains: filters.search, mode: 'insensitive' } },
+          {
+            userId,
+            content: { contains: filters.search, mode: 'insensitive' }
+          },
+          {
+            workspaceId: { in: workspaceIds },
+            title: { contains: filters.search, mode: 'insensitive' }
+          },
+          {
+            workspaceId: { in: workspaceIds },
+            content: { contains: filters.search, mode: 'insensitive' }
+          }
+        ];
+      }
+      if (filters.tags && filters.tags.length > 0) {
+        where.tags = { hasSome: filters.tags };
+      }
+      if (filters.scope) {
+        switch (filters.scope) {
+          case 'general':
+            where.AND = [
+              { paperId: null },
+              { collectionId: null },
+              { workspaceId: null }
+            ];
+            break;
+          case 'workspace':
+            where.workspaceId = { not: null };
+            break;
+          case 'paper':
+            where.paperId = { not: null };
+            break;
+          case 'collection':
+            where.collectionId = { not: null };
+            break;
+        }
+      }
+
+      const limit = filters.limit ?? 20;
+      const offset = filters.offset ?? 0;
+
+      const [threads, total] = await Promise.all([
+        prisma.discussionThread.findMany({
+          where,
+          orderBy: [{ isPinned: 'desc' }, { updatedAt: 'desc' }],
+          skip: offset,
+          take: limit,
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                firstName: true,
+                lastName: true,
+                image: true
+              }
+            },
+            paper: { select: { id: true, title: true } },
+            collection: { select: { id: true, name: true } },
+            workspace: { select: { id: true, name: true } },
+            messages: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+              select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    firstName: true,
+                    lastName: true
+                  }
+                }
+              }
+            },
+            _count: { select: { messages: true } }
+          }
+        }),
+        prisma.discussionThread.count({ where })
+      ]);
+
+      return {
+        threads: threads.map((t) => ({
+          ...t,
+          lastReply: t.messages[0] ?? null
+        })),
+        total
+      };
+    } catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(500, 'Failed to fetch personal discussions');
+    }
+  }
+
+  /**
+   * Toggle the pinned flag. Only the thread creator can toggle.
+   */
+  static async togglePin(
+    req: AuthRequest,
+    threadId: string
+  ): Promise<{ id: string; isPinned: boolean }> {
+    const userId = req.user?.id;
+    if (!userId) throw new ApiError(401, 'User not authenticated');
+    const thread = await prisma.discussionThread.findFirst({
+      where: { id: threadId, isDeleted: false },
+      select: { id: true, userId: true, isPinned: true }
+    });
+    if (!thread) throw new ApiError(404, 'Discussion thread not found');
+    if (thread.userId !== userId) {
+      throw new ApiError(403, 'Only the thread creator can pin/unpin');
+    }
+    const updated = await prisma.discussionThread.update({
+      where: { id: threadId },
+      data: { isPinned: !thread.isPinned, updatedAt: new Date() },
+      select: { id: true, isPinned: true }
+    });
+    return updated;
+  }
+
+  /**
+   * Toggle the resolved flag. Only the thread creator can toggle.
+   */
+  static async toggleResolve(
+    req: AuthRequest,
+    threadId: string
+  ): Promise<{ id: string; isResolved: boolean }> {
+    const userId = req.user?.id;
+    if (!userId) throw new ApiError(401, 'User not authenticated');
+    const thread = await prisma.discussionThread.findFirst({
+      where: { id: threadId, isDeleted: false },
+      select: { id: true, userId: true, isResolved: true }
+    });
+    if (!thread) throw new ApiError(404, 'Discussion thread not found');
+    if (thread.userId !== userId) {
+      throw new ApiError(403, 'Only the thread creator can resolve/unresolve');
+    }
+    const updated = await prisma.discussionThread.update({
+      where: { id: threadId },
+      data: { isResolved: !thread.isResolved, updatedAt: new Date() },
+      select: { id: true, isResolved: true }
+    });
+    return updated;
+  }
 }
