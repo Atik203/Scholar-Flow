@@ -81,6 +81,8 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   UserToken: 'UserToken',
   ResearchNote: 'ResearchNote',
+  Notebook: 'Notebook',
+  NotebookSection: 'NotebookSection',
   CitationExport: 'CitationExport',
   DiscussionThread: 'DiscussionThread',
   DiscussionMessage: 'DiscussionMessage',
@@ -624,12 +626,48 @@ export const ResearchNoteScalarFieldEnum = {
   content: 'content',
   tags: 'tags',
   isPrivate: 'isPrivate',
+  notebookId: 'notebookId',
+  sectionId: 'sectionId',
+  noteType: 'noteType',
+  visibility: 'visibility',
+  isStarred: 'isStarred',
+  wordCount: 'wordCount',
+  excerpt: 'excerpt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
 } as const
 
 export type ResearchNoteScalarFieldEnum = (typeof ResearchNoteScalarFieldEnum)[keyof typeof ResearchNoteScalarFieldEnum]
+
+
+export const NotebookScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  description: 'description',
+  color: 'color',
+  isStarred: 'isStarred',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type NotebookScalarFieldEnum = (typeof NotebookScalarFieldEnum)[keyof typeof NotebookScalarFieldEnum]
+
+
+export const NotebookSectionScalarFieldEnum = {
+  id: 'id',
+  notebookId: 'notebookId',
+  userId: 'userId',
+  name: 'name',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type NotebookSectionScalarFieldEnum = (typeof NotebookSectionScalarFieldEnum)[keyof typeof NotebookSectionScalarFieldEnum]
 
 
 export const CitationExportScalarFieldEnum = {
