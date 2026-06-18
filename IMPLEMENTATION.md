@@ -47,11 +47,24 @@ Deferred to Phase 8: AI insights sidebar, annotation toolbar, semantic search.
 - [x] Color theme picker (5 swatches: blue/purple/green/orange/pink) backed by `WorkspaceSettings.color`
 - [x] 20 legacy route files removed (Phase 3 cleanup debt) — production build now passes for both apps
 
-## Phase 6: Discussions, Notes & Citations
-- [ ] `/dashboard/(app)/discussions` — list, thread, new
-- [ ] `/dashboard/(app)/notes` — notebook, detail, new
-- [ ] `/dashboard/(app)/citations` — manager, export, history
-- [ ] `Notebook`, `NotebookSection` models
+## Phase 6: Discussions, Notes & Citations ✅
+- [x] `/dashboard/(app)/discussions` — list, thread, new
+- [x] `/dashboard/(app)/notes` — notebook, detail, new
+- [x] `/dashboard/(app)/citations` — manager, export, history
+- [x] `Notebook`, `NotebookSection` models
+- [x] `NoteType` enum (QUICK / LITERATURE / METHODOLOGY / FINDINGS / IDEA)
+- [x] `NoteVisibility` enum (PRIVATE / WORKSPACE / PUBLIC)
+- [x] `ResearchNote` extended with `notebookId`, `sectionId`, `noteType`, `visibility`, `isStarred`, `wordCount`, `excerpt` (nullable FKs, additive)
+- [x] `CitationFormat` extended with `VANCOUVER` + `ACS` (2 new formats)
+- [x] Backend `/notebooks` module (13 endpoints, auto-creates default notebook on first read)
+- [x] Backend discussion enhancements: `getMyDiscussions`, `createGeneralThread`, `togglePin`, `toggleResolve`
+- [x] Backend citation manager: `getManagerView`, `getFormats`
+- [x] 3 new RTK slices: `notebookApi`, `discussionApi`, `citationApi`
+- [x] Sidebar: `Discussions` + `Notes` top-level (RESEARCHER); `Research > Citations` path updated to `/dashboard/citations`
+- [x] 13 new unit tests (Notebook validation schemas) all pass
+- [x] `yarn type-check` + `yarn build` + `yarn lint` clean for Phase 6 files
+Deferred to Phase 8: AI summary panel for notes (UI present, disabled), AI Citation Finder, real `Citation` model graph wiring.
+Deferred to Phase 9: TipTap rich-text editor (Phase 6 uses plain-text + markdown preview, matches figma).
 
 ## Phase 7: Analytics, Notifications & Admin
 - [ ] `/dashboard/(app)/analytics`, `/dashboard/(app)/notifications`
@@ -77,7 +90,7 @@ Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code 
 - All mutations use Zod validation + rate limiting
 
 ## Current Status
-- **Release:** 1.2.5 (2026-06-19)
-- **Completed:** Phase 1-5, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 6 — Discussions, Notes & Citations
+- **Release:** 1.2.6 (2026-06-19)
+- **Completed:** Phase 1-6, Next.js 16 migration, better-auth migration, Prisma v7 migration
+- **Current:** Phase 7 — Analytics, Notifications & Admin
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
