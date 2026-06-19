@@ -26,6 +26,7 @@ import { teamRoutes } from "../modules/Team/team.routes";
 import { citationRoutes } from "../modules/CitationExport/citationExport.routes";
 import { discussionRoutes } from "../modules/Discussion/discussion.routes";
 import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
+import { invitationRoutes } from "./invitation.routes";
 import healthRoutes from "./health.routes";
 
 const router: import("express").Router = express.Router();
@@ -72,4 +73,8 @@ router.use("/admin/reports", reportRoutes);
 router.use("/admin/audit-log", auditLogRoutes);
 router.use("/admin/webhooks", webhookRoutes);
 router.use("/analytics", analyticsRoutes);
+
+// Phase 9 — Public invitation endpoints
+router.use("/invitations", invitationRoutes);
+
 export default router;
