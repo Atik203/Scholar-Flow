@@ -6,7 +6,6 @@
  * achievements, productivity hours, and top papers.
  */
 
-import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 
 type TimeRange = "week" | "month" | "quarter" | "year";
