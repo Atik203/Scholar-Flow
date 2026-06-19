@@ -9,7 +9,7 @@ import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
-import { useGetCitationExportHistoryQuery } from "@/redux/api/phase2Api";
+import { useGetHistoryQuery as useGetCitationExportHistoryQuery } from "@/redux/api/citationApi";
 import { format } from "date-fns";
 import {
   ArrowLeft,
