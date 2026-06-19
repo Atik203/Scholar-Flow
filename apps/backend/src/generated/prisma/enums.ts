@@ -209,3 +209,112 @@ export const ContactSubmissionStatus = {
 } as const
 
 export type ContactSubmissionStatus = (typeof ContactSubmissionStatus)[keyof typeof ContactSubmissionStatus]
+
+
+export const AdminReportType = {
+  USAGE: 'USAGE',
+  FINANCIAL: 'FINANCIAL',
+  USER: 'USER',
+  CONTENT: 'CONTENT',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type AdminReportType = (typeof AdminReportType)[keyof typeof AdminReportType]
+
+
+export const AdminReportStatus = {
+  READY: 'READY',
+  GENERATING: 'GENERATING',
+  SCHEDULED: 'SCHEDULED',
+  FAILED: 'FAILED'
+} as const
+
+export type AdminReportStatus = (typeof AdminReportStatus)[keyof typeof AdminReportStatus]
+
+
+export const AdminReportFormat = {
+  CSV: 'CSV',
+  JSON: 'JSON'
+} as const
+
+export type AdminReportFormat = (typeof AdminReportFormat)[keyof typeof AdminReportFormat]
+
+
+export const SystemAlertSeverity = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  CRITICAL: 'CRITICAL'
+} as const
+
+export type SystemAlertSeverity = (typeof SystemAlertSeverity)[keyof typeof SystemAlertSeverity]
+
+
+export const SystemAlertCategory = {
+  USER: 'USER',
+  BILLING: 'BILLING',
+  SECURITY: 'SECURITY',
+  STORAGE: 'STORAGE',
+  PROCESSING: 'PROCESSING',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type SystemAlertCategory = (typeof SystemAlertCategory)[keyof typeof SystemAlertCategory]
+
+
+export const WebhookEndpointStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  ERROR: 'ERROR'
+} as const
+
+export type WebhookEndpointStatus = (typeof WebhookEndpointStatus)[keyof typeof WebhookEndpointStatus]
+
+
+export const WebhookDeliveryStatus = {
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  PENDING: 'PENDING'
+} as const
+
+export type WebhookDeliveryStatus = (typeof WebhookDeliveryStatus)[keyof typeof WebhookDeliveryStatus]
+
+
+export const ApiKeyStatus = {
+  ACTIVE: 'ACTIVE',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type ApiKeyStatus = (typeof ApiKeyStatus)[keyof typeof ApiKeyStatus]
+
+
+export const ContentReportType = {
+  PAPER: 'PAPER',
+  COMMENT: 'COMMENT',
+  COLLECTION: 'COLLECTION',
+  PROFILE: 'PROFILE'
+} as const
+
+export type ContentReportType = (typeof ContentReportType)[keyof typeof ContentReportType]
+
+
+export const ContentReportReason = {
+  SPAM: 'SPAM',
+  HARASSMENT: 'HARASSMENT',
+  COPYRIGHT: 'COPYRIGHT',
+  INAPPROPRIATE: 'INAPPROPRIATE',
+  MISINFORMATION: 'MISINFORMATION',
+  OTHER: 'OTHER'
+} as const
+
+export type ContentReportReason = (typeof ContentReportReason)[keyof typeof ContentReportReason]
+
+
+export const ContentReportStatus = {
+  PENDING: 'PENDING',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  RESOLVED: 'RESOLVED',
+  DISMISSED: 'DISMISSED'
+} as const
+
+export type ContentReportStatus = (typeof ContentReportStatus)[keyof typeof ContentReportStatus]
