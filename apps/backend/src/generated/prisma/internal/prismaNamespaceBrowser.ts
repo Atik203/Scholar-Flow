@@ -826,6 +826,7 @@ export const UserPreferenceScalarFieldEnum = {
   defaultCitationStyle: 'defaultCitationStyle',
   compactMode: 'compactMode',
   metadata: 'metadata',
+  notificationPreferences: 'notificationPreferences',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
