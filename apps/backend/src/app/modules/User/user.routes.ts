@@ -7,7 +7,7 @@ import {
 } from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { userController } from "./user.controller";
-import { changePasswordSchema, updateOnboardingSchema, updatePreferencesSchema, updateProfileSchema } from "./user.validation";
+import { changePasswordSchema, exportDataSchema, privacySettingsSchema, twoFactorSetupSchema, updateOnboardingSchema, updatePreferencesSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
 
@@ -610,5 +610,19 @@ router.put(
  *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.get("/activity", authMiddleware, userController.getActivity);
+
+// Phase 8 — Export, Security, 2FA, Privacy
+router.post("/export", authMiddleware, validateRequestBody(exportDataSchema), userController.exportData);
+
+router.get("/sessions", authMiddleware, userController.getSessions);
+router.delete("/sessions/:id", authMiddleware, userController.terminateSession);
+
+router.get("/2fa/status", authMiddleware, userController.getTwoFactorStatus);
+router.post("/2fa/generate", authMiddleware, userController.generateTwoFactorSecret);
+router.post("/2fa/verify", authMiddleware, validateRequestBody(twoFactorSetupSchema), userController.verifyTwoFactor);
+router.post("/2fa/disable", authMiddleware, userController.disableTwoFactor);
+
+router.get("/privacy", authMiddleware, userController.getPrivacySettings);
+router.put("/privacy", authMiddleware, validateRequestBody(privacySettingsSchema), userController.updatePrivacySettings);
 
 export const userRoutes = router;
