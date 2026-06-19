@@ -136,12 +136,22 @@ if (config.env !== "production") {
 import { performanceMonitor } from "./app/middleware/performanceMonitor";
 app.use(performanceMonitor as unknown as RequestHandler);
 
+// Cache control for GET API responses (Phase 9 Lighthouse optimization)
+const cacheControlMiddleware: import("express").RequestHandler = (req, res, next) => {
+  if (req.method === "GET" && req.path.startsWith("/api/")) {
+    res.set("Cache-Control", "private, max-age=30");
+    res.set("Vary", "Authorization");
+  }
+  next();
+};
+app.use(cacheControlMiddleware);
+
 // Root endpoint
 const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.1.5",
+    version: "1.2.9",
     documentation: "/docs",
     api: "/api",
     health: "/health",
