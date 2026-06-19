@@ -8,6 +8,13 @@ import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { performanceMonitor } from "../../middleware/performanceMonitor";
 import { rateLimiter } from "../../middleware/rateLimiter";
 import { adminController } from "./admin.controller";
+import {
+  adminApiKeysController,
+  adminModerationController,
+  adminPaymentsController,
+  adminPlansController,
+  systemAlertsController,
+} from "./extendedControllers";
 
 const router = express.Router();
 
@@ -542,6 +549,164 @@ router.delete(
   requireAdmin,
   rateLimiter,
   adminController.permanentlyDeleteUser
+);
+
+// ============================================================================
+// Phase 7 - extended admin endpoints
+// ============================================================================
+
+/**
+ * Plans (read)
+ */
+router.get(
+  "/plans",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.list as any
+);
+
+/**
+ * Payments (read + refund)
+ */
+router.get(
+  "/payments",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPaymentsController.list as any
+);
+
+router.post(
+  "/payments/:id/refund",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPaymentsController.refund as any
+);
+
+/**
+ * API Keys (CRUD)
+ */
+router.get(
+  "/api-keys",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.list as any
+);
+router.get(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.get as any
+);
+router.post(
+  "/api-keys",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.create as any
+);
+router.patch(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.update as any
+);
+router.post(
+  "/api-keys/:id/revoke",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.revoke as any
+);
+router.delete(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.remove as any
+);
+
+/**
+ * Content Moderation queue
+ */
+router.get(
+  "/moderation/reports",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.list as any
+);
+router.get(
+  "/moderation/reports/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.get as any
+);
+router.post(
+  "/moderation/reports",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.create as any
+);
+router.post(
+  "/moderation/reports/:id/assign",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.assign as any
+);
+router.post(
+  "/moderation/reports/:id/resolve",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.resolve as any
+);
+router.post(
+  "/moderation/reports/:id/dismiss",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.dismiss as any
+);
+
+/**
+ * System alerts
+ */
+router.get(
+  "/alerts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.list as any
+);
+router.get(
+  "/alerts/counts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.counts as any
+);
+router.post(
+  "/alerts/:id/resolve",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.resolve as any
+);
+router.post(
+  "/alerts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.create as any
 );
 
 const adminRoutes: import("express").Router = router;
