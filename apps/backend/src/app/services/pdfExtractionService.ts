@@ -1,5 +1,5 @@
 import pdf from "pdf-parse";
-import { StorageService } from "../modules/papers/StorageService";
+import { StorageService } from "../modules/Papers/storage.service";
 import prisma from "../shared/prisma";
 
 export interface PDFExtractionResult {
