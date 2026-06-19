@@ -7,7 +7,6 @@
 
 import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
-import ApiError from "../../errors/ApiError";
 
 const escapeCsv = (v: unknown): string => {
   if (v === null || v === undefined) return "";
