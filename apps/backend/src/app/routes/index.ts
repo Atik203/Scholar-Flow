@@ -12,6 +12,7 @@ import { editorPaperRoutes, paperRoutes } from "../modules/papers/paper.routes";
 import { noteRoutes } from "../modules/notes/note.routes";
 import { notebookRoutes } from "../modules/Notebook/notebook.routes";
 import { reportRoutes } from "../modules/Reports/report.routes";
+import { auditLogRoutes } from "../modules/AuditLog/auditLog.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
 import { notificationRoutes } from "../modules/Notification/notification.routes";
@@ -70,6 +71,7 @@ router.use("/team", teamRoutes);
 
 // Phase 7 features
 router.use("/admin/reports", reportRoutes);
+router.use("/admin/audit-log", auditLogRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);
