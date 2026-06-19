@@ -14,6 +14,7 @@ import { notebookRoutes } from "../modules/Notebook/notebook.routes";
 import { reportRoutes } from "../modules/Reports/report.routes";
 import { auditLogRoutes } from "../modules/AuditLog/auditLog.routes";
 import { webhookRoutes } from "../modules/Webhooks/webhook.routes";
+import { analyticsRoutes } from "../modules/Analytics/analytics.routes";
 import { userRoutes } from "../modules/User/user.routes";
 import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
 import { notificationRoutes } from "../modules/Notification/notification.routes";
@@ -74,6 +75,7 @@ router.use("/team", teamRoutes);
 router.use("/admin/reports", reportRoutes);
 router.use("/admin/audit-log", auditLogRoutes);
 router.use("/admin/webhooks", webhookRoutes);
+router.use("/analytics", analyticsRoutes);
 
 // Legacy flat routes (will be refactored into modules)
 // router.use("/papers", papersRouter);
