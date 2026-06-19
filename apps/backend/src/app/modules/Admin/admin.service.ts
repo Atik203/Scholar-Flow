@@ -4,7 +4,7 @@
  */
 
 import os from "os";
-import AppError from "../../errors/AppError";
+import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
 import { ADMIN_ERROR_MESSAGES } from "./admin.constant";
 import {
@@ -131,7 +131,7 @@ class AdminService {
       };
     } catch (error) {
       console.error("Error fetching system stats:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
     }
   }
 
@@ -213,7 +213,7 @@ class AdminService {
       };
     } catch (error) {
       console.error("Error fetching recent users:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.USERS_FETCH_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.USERS_FETCH_FAILED);
     }
   }
 
@@ -258,7 +258,7 @@ class AdminService {
       return growthData;
     } catch (error) {
       console.error("Error fetching growth data:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.GROWTH_DATA_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.GROWTH_DATA_FAILED);
     }
   }
 
@@ -293,7 +293,7 @@ class AdminService {
       return distribution.sort((a, b) => b.count - a.count);
     } catch (error) {
       console.error("Error fetching role distribution:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
     }
   }
 
@@ -341,7 +341,7 @@ class AdminService {
       };
     } catch (error) {
       console.error("Error fetching paper stats:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
     }
   }
 
@@ -401,7 +401,7 @@ class AdminService {
       };
     } catch (error) {
       console.error("Error checking system health:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.HEALTH_CHECK_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.HEALTH_CHECK_FAILED);
     }
   }
 
@@ -569,7 +569,7 @@ class AdminService {
       };
     } catch (error) {
       console.error("Error fetching system metrics:", error);
-      throw new AppError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
     }
   }
 }

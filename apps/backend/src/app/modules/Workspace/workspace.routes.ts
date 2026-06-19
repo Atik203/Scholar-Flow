@@ -6,7 +6,7 @@ import {
   validateRequestBody,
   validateRequestParams,
 } from "../../middleware/validateRequest";
-import workspaceController from "./workspace.controller";
+import { workspaceController } from "./workspace.controller";
 import {
   createWorkspaceSchema,
   inviteMemberSchema,

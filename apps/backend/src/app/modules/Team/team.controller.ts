@@ -6,7 +6,7 @@ import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
-import TeamService from "./team.service";
+import { TeamService } from "./team.service";
 import {
   inviteTeamMemberSchema,
   listTeamInvitationsSchema,

@@ -47,7 +47,6 @@ export interface AdminReportCreate {
 }
 
 export const adminReportsApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminReport"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listReports: builder.query<

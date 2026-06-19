@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
-import NotificationService from "./notification.service";
+import { notificationService } from "./notification.service";
 import { listQuerySchema, notificationIdSchema } from "./notification.validation";
 
 export const NotificationController = {
@@ -21,7 +21,7 @@ export const NotificationController = {
       starred: q.starred as string | undefined,
     };
 
-    const result = await NotificationService.listNotifications(
+    const result = await notificationService.listNotifications(
       authReq.user.id,
       limit,
       cursor,
@@ -40,7 +40,7 @@ export const NotificationController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
-    const result = await NotificationService.getUnreadCount(authReq.user.id);
+    const result = await notificationService.getUnreadCount(authReq.user.id);
     sendSuccessResponse(res, result, "Unread count retrieved");
   }),
 
@@ -49,7 +49,7 @@ export const NotificationController = {
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
     const { id } = notificationIdSchema.parse(req.params);
-    const result = await NotificationService.markAsRead(authReq.user.id, id);
+    const result = await notificationService.markAsRead(authReq.user.id, id);
     sendSuccessResponse(res, result, "Notification marked as read");
   }),
 
@@ -58,7 +58,7 @@ export const NotificationController = {
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
     const { id } = notificationIdSchema.parse(req.params);
-    const result = await NotificationService.toggleStarred(authReq.user.id, id);
+    const result = await notificationService.toggleStarred(authReq.user.id, id);
     sendSuccessResponse(res, result, "Notification star toggled");
   }),
 
@@ -66,7 +66,7 @@ export const NotificationController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
-    const result = await NotificationService.markAllAsRead(authReq.user.id);
+    const result = await notificationService.markAllAsRead(authReq.user.id);
     sendSuccessResponse(res, result, "All notifications marked as read");
   }),
 
@@ -75,7 +75,7 @@ export const NotificationController = {
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
     const { id } = notificationIdSchema.parse(req.params);
-    const result = await NotificationService.deleteNotification(authReq.user.id, id);
+    const result = await notificationService.deleteNotification(authReq.user.id, id);
     sendSuccessResponse(res, result, "Notification deleted");
   }),
 
@@ -88,7 +88,7 @@ export const NotificationController = {
       throw new ApiError(400, "Ids must be an array");
     }
 
-    const result = await NotificationService.deleteBulk(authReq.user.id, ids);
+    const result = await notificationService.deleteBulk(authReq.user.id, ids);
     sendSuccessResponse(res, result, "Notifications deleted");
   }),
 };
