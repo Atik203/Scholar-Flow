@@ -10,6 +10,8 @@ import {
 import { useAuth } from "@/redux/auth/useAuth";
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
+  AlertTriangle,
   BarChart3,
   Bell,
   BookOpen,
@@ -19,10 +21,16 @@ import {
   Clock,
   Compass,
   CreditCard,
+  Crown,
+  Download,
   Edit3,
+  FileSpreadsheet,
   FileText,
+  Flag,
   Highlighter,
+  History,
   Home,
+  Key,
   Layers,
   Mail,
   MessageSquare,
@@ -38,6 +46,8 @@ import {
   Upload,
   User,
   Users,
+  Wallet,
+  Webhook,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -191,15 +201,24 @@ const navigationItems: SidebarItem[] = [
   },
   {
     title: "Notifications",
-    path: "/dashboard/notifications",
     icon: Bell,
     minRole: USER_ROLES.RESEARCHER,
+    items: [
+      { title: "Center", path: "/dashboard/notifications/center", icon: Bell, minRole: USER_ROLES.RESEARCHER },
+      { title: "History", path: "/dashboard/notifications/history", icon: Clock, minRole: USER_ROLES.RESEARCHER },
+      { title: "Settings", path: "/dashboard/notifications/settings", icon: Settings, minRole: USER_ROLES.RESEARCHER },
+    ],
   },
   {
     title: "Analytics",
-    path: "/dashboard/analytics",
     icon: BarChart3,
     minRole: USER_ROLES.RESEARCHER,
+    items: [
+      { title: "Personal", path: "/dashboard/analytics/personal", icon: TrendingUp, minRole: USER_ROLES.RESEARCHER },
+      { title: "Workspace", path: "/dashboard/analytics/workspace", icon: Users, minRole: USER_ROLES.TEAM_LEAD },
+      { title: "Usage", path: "/dashboard/analytics/usage", icon: BarChart3, minRole: USER_ROLES.PRO_RESEARCHER },
+      { title: "Export", path: "/dashboard/analytics/export", icon: Download, minRole: USER_ROLES.PRO_RESEARCHER },
+    ],
   },
 ];
 
@@ -211,7 +230,7 @@ const adminFeatures: SidebarItem[] = [
     minRole: USER_ROLES.ADMIN,
   },
   {
-    title: "User Management",
+    title: "Users",
     path: "/dashboard/admin/users",
     icon: Users,
     minRole: USER_ROLES.ADMIN,
@@ -223,9 +242,57 @@ const adminFeatures: SidebarItem[] = [
     minRole: USER_ROLES.ADMIN,
   },
   {
-    title: "System",
+    title: "Plans",
+    path: "/dashboard/admin/plans",
+    icon: Crown,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Payments",
+    path: "/dashboard/admin/payments",
+    icon: Wallet,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Reports",
+    path: "/dashboard/admin/reports",
+    icon: FileSpreadsheet,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Audit Log",
+    path: "/dashboard/admin/audit",
+    icon: History,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Webhooks",
+    path: "/dashboard/admin/webhooks",
+    icon: Webhook,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "API Keys",
+    path: "/dashboard/admin/api-keys",
+    icon: Key,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Moderation",
+    path: "/dashboard/admin/moderation",
+    icon: Flag,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Alerts",
+    path: "/dashboard/admin/alerts",
+    icon: AlertTriangle,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "System Health",
     path: "/dashboard/admin/system",
-    icon: Shield,
+    icon: Activity,
     minRole: USER_ROLES.ADMIN,
   },
   {
