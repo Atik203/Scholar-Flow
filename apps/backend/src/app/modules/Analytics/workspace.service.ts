@@ -4,7 +4,6 @@
  * Team Lead+ only. Aggregates analytics for a single workspace.
  */
 
-import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 
