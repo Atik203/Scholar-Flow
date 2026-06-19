@@ -5,12 +5,18 @@ export interface TeamMember {
   name: string;
   email: string;
   image?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
   role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
   joinedAt: string;
+  createdAt: string;
   lastActive?: string;
   status: "active" | "pending" | "inactive" | "invited";
+  institution?: string | null;
+  fieldOfStudy?: string | null;
   workspaces?: { id: string; name: string; role: string }[];
   workspaceCount?: number;
+  _count?: { papers: number; collections: number; memberships?: number };
 }
 
 export interface TeamInvitation {
@@ -49,8 +55,8 @@ export interface TeamActivityItem {
   entity: string;
   entityId: string;
   action: string;
-  details?: any;
-  metadata?: any;
+  details?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
   severity: "INFO" | "WARNING" | "ERROR" | "CRITICAL";
   createdAt: string;
   user?: {
@@ -62,6 +68,14 @@ export interface TeamActivityItem {
     role?: string;
   } | null;
   workspace?: { id: string; name: string } | null;
+}
+
+export interface TeamActivitySummary {
+  totalActivities: number;
+  activitiesByType: Record<string, number>;
+  activitiesBySeverity: Record<string, number>;
+  recentActivities: TeamActivityItem[];
+  trends: Record<string, number>;
 }
 
 export interface TeamSettings {
@@ -116,9 +130,9 @@ export const teamApi = apiSlice.injectEndpoints({
           : [{ type: "Team" as const, id: "LIST" }],
     }),
 
-    getTeamMember: builder.query<any, string>({
+    getTeamMember: builder.query<TeamMember, string>({
       query: (id) => `/team/members/${id}`,
-      transformResponse: (r: { data: any }) => r.data,
+      transformResponse: (r: { data: TeamMember }) => r.data,
       providesTags: (_r, _e, id) => [{ type: "Team", id }],
     }),
 
@@ -186,13 +200,14 @@ export const teamApi = apiSlice.injectEndpoints({
     }),
 
     getTeamActivitySummary: builder.query<
-      any,
+      TeamActivitySummary,
       { days?: number }
     >({
       query: ({ days = 7 } = {}) => ({
         url: "/team/activity/summary",
         params: { days },
       }),
+      transformResponse: (r: { data: TeamActivitySummary }) => r.data,
       providesTags: [{ type: "Team", id: "ACTIVITY_SUMMARY" }],
     }),
 

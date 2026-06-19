@@ -107,4 +107,3 @@ export const adminApiKeysService = {
   },
 };
 
-export default adminApiKeysService;

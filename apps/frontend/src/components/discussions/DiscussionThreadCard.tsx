@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import type { DiscussionThread } from "@/redux/api/discussionApi";
 import {
   MessageSquare,
   Pin,
@@ -32,57 +33,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-interface DiscussionThread {
-  id: string;
-  title: string;
-  content: string;
-  isResolved: boolean;
-  isPinned: boolean;
-  tags: string[];
-  createdAt: string;
-  updatedAt: string;
-  author: {
-    id: string;
-    name: string;
-    firstName?: string;
-    lastName?: string;
-    image?: string;
-  };
-  user: {
-    id: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    image?: string;
-  };
-  paper?: {
-    id: string;
-    title: string;
-  };
-  collection?: {
-    id: string;
-    name: string;
-  };
-  workspace?: {
-    id: string;
-    name: string;
-  };
-  _count: {
-    messages: number;
-  };
-  messages?: Array<{
-    id: string;
-    content: string;
-    createdAt: string;
-    author: {
-      id: string;
-      name: string;
-      firstName?: string;
-      lastName?: string;
-      image?: string;
-    };
-  }>;
-}
+type MessageAuthor = DiscussionThread["author"];
 
 interface DiscussionThreadCardProps {
   thread: DiscussionThread;
@@ -313,7 +264,7 @@ export function DiscussionThreadCard({
           <div className="mt-3 p-2 bg-muted rounded-md">
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
               <User className="h-3 w-3" />
-              <span>{getUserDisplayName(thread.messages[0].author)}</span>
+              <span>{getUserDisplayName(thread.messages[0]?.user || thread.author)}</span>
               <span>•</span>
               <span>{formatDistanceToNow(new Date(thread.messages[0].createdAt), { addSuffix: true })}</span>
             </div>

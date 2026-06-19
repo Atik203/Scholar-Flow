@@ -3,11 +3,11 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
-import adminApiKeysService from "./adminApiKeys.service";
-import adminModerationService from "./adminModeration.service";
-import adminPaymentsService from "./adminPayments.service";
-import adminPlansService from "./adminPlans.service";
-import systemAlertsService from "./systemAlerts.service";
+import { adminApiKeysService } from "./adminApiKeys.service";
+import { adminModerationService } from "./adminModeration.service";
+import { adminPaymentsService } from "./adminPayments.service";
+import { adminPlansService } from "./adminPlans.service";
+import { systemAlertsService } from "./systemAlerts.service";
 
 // Plans
 export const adminPlansController = {

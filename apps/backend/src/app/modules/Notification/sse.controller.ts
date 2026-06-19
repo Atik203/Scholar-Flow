@@ -9,7 +9,7 @@
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AuthRequest } from "../../middleware/auth";
-import notificationBroadcaster from "./broadcast";
+import { notificationBroadcaster } from "./broadcast";
 
 /**
  * Verify a JWT either from the Authorization header (set by authMiddleware)
@@ -102,4 +102,3 @@ export const notificationSseController = {
   },
 };
 
-export default notificationSseController;

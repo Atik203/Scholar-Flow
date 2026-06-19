@@ -1,8 +1,6 @@
-import { getRoleSlug } from "@/lib/auth/roles";
 import { NextResponse } from "next/server";
 
 // Define protected routes that require authentication
-// Phase 3: Single dashboard root + admin subroute
 const protectedRoutes = ["/dashboard"];
 
 // Define auth routes that should redirect to dashboard if user is already logged in
@@ -19,23 +17,34 @@ const publicRoutes = [
   "/faq",
   "/terms",
   "/privacy",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/onboarding",
   "/papers",
   "/collections",
   "/workspaces",
   "/research",
-  "/collaborations",
   "/collaborate",
   "/ai-insights",
   "/products",
+  "/resources",
   "/company",
-];
-
-// Legacy role-segmented dashboard prefixes that need to redirect
-// to the new (app)/ route group after Phase 3 restructure.
-const legacyRoleSegments = [
-  "/dashboard/researcher",
-  "/dashboard/pro-researcher",
-  "/dashboard/team-lead",
+  "/enterprise",
+  "/careers",
+  "/integrations",
+  "/support",
+  "/press",
+  "/legal",
+  "/license",
+  "/security",
+  "/simple",
+  "/slides",
+  "/teams-feature",
+  "/test-button",
+  "/test-session",
+  "/debug-auth",
+  "/dev",
 ];
 
 // Helper function to check if route matches pattern
@@ -51,12 +60,6 @@ function isAuthenticated(request: Request): boolean {
   return hasSfAuth || hasBetterAuth;
 }
 
-// Helper to extract role from cookies (if available)
-function getRoleFromCookies(request: Request): string | undefined {
-  const cookieHeader = request.headers.get("cookie") || "";
-  return undefined;
-}
-
 export function proxy(request: Request) {
   const url = new URL(request.url);
   const { pathname } = url;
@@ -66,7 +69,6 @@ export function proxy(request: Request) {
   };
 
   const authenticated = isAuthenticated(request);
-  const userRole = getRoleFromCookies(request);
 
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();
@@ -80,8 +82,7 @@ export function proxy(request: Request) {
     return NextResponse.next();
   }
 
-  // Backward-compat: rewrite legacy role-segmented URLs to the new shared
-  // (app)/ route group. /dashboard/admin is preserved (still an admin route).
+  // Backward-compat: redirect legacy role-segmented URLs to shared dashboard
   if (pathname === "/dashboard/researcher" || pathname.startsWith("/dashboard/researcher/")) {
     const tail = pathname.slice("/dashboard/researcher".length);
     return createRedirect(`/dashboard${tail}${url.search}`);
@@ -101,9 +102,7 @@ export function proxy(request: Request) {
     if (callbackUrl) {
       return createRedirect(callbackUrl);
     }
-    const roleSlug = getRoleSlug(userRole);
-    const dashboardPath = `/dashboard/${roleSlug}`;
-    return createRedirect(dashboardPath);
+    return createRedirect("/dashboard");
   }
 
   if (!authenticated && matchesRoute(protectedRoutes, pathname)) {

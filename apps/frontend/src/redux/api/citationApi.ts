@@ -107,6 +107,16 @@ export const citationApi = apiSlice.injectEndpoints({
       query: (id) => ({ url: `/citations/${id}`, method: "DELETE" }),
       invalidatesTags: ["CitationExport"],
     }),
+
+    downloadExport: builder.query<
+      { content: string; format: string; filename: string },
+      string
+    >({
+      query: (id) => ({ url: `/citations/${id}/download` }),
+      transformResponse: (response: {
+        data: { content: string; format: string; filename: string };
+      }) => response.data,
+    }),
   }),
 });
 
@@ -116,4 +126,5 @@ export const {
   useExportCitationsMutation,
   useGetHistoryQuery,
   useDeleteExportMutation,
+  useLazyDownloadExportQuery,
 } = citationApi;

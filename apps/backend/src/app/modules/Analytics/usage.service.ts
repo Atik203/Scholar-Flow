@@ -115,4 +115,3 @@ export const usageReportsService = {
   },
 };
 
-export default usageReportsService;
