@@ -100,4 +100,3 @@ export const systemAlertsService = {
   },
 };
 
-export default systemAlertsService;

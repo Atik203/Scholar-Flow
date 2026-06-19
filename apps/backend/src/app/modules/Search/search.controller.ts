@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
-import SearchService from "./search.service";
+import { SearchService } from "./search.service";
 import { globalSearchQuerySchema, searchHistoryQuerySchema, saveSearchHistorySchema } from "./search.validation";
 
 export const SearchController = {

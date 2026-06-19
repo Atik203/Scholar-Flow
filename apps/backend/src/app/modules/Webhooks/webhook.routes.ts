@@ -1,7 +1,7 @@
 import express from "express";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
-import webhookController from "./webhook.controller";
+import { webhookController } from "./webhook.controller";
 
 const router: import("express").Router = express.Router();
 
