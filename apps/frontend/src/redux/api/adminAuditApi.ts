@@ -39,7 +39,6 @@ export interface AuditSummary {
 }
 
 export const adminAuditApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminAudit"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listAuditEntries: builder.query<

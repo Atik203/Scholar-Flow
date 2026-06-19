@@ -6,7 +6,7 @@ import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
-import WorkspaceService from "./workspace.service";
+import { WorkspaceService } from "./workspace.service";
 import {
   addMemberSchema,
   createWorkspaceSchema,

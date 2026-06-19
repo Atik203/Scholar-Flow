@@ -307,4 +307,3 @@ const ACHIEVEMENTS = [
   },
 ];
 
-export default personalAnalyticsService;

@@ -127,7 +127,7 @@ const formatTimeAgo = (dateString: string) => {
 const getActivityDescription = (activity: TeamActivityItem) => {
   const target = activity.entityId ? (
     <span className="font-medium text-foreground">
-      {activity.metadata?.title || activity.entityId.slice(0, 8)}
+      {(activity.metadata?.title as string) || activity.entityId.slice(0, 8)}
     </span>
   ) : null;
   const t = activity.action?.toLowerCase() || "";

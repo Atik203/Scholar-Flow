@@ -11,7 +11,7 @@ import {
 } from "../../shared/sendResponse";
 import { aiSummaryCache } from "../AI/ai.cache";
 import { aiService } from "../AI/ai.service";
-import { StorageService } from "./StorageService";
+import { StorageService } from "./storage.service";
 import { createPaperError } from "./paper.errors";
 import {
   editorPaperService,

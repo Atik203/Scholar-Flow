@@ -110,6 +110,7 @@ export const apiSlice = createApi({
     "AdminApiKey",
     "AdminModeration",
     "SystemAlert",
+    "ActivityLog",
   ],
   // Performance optimizations
   keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)
