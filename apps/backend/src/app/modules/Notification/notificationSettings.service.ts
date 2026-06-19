@@ -165,5 +165,4 @@ export const notificationSettingsService = {
   },
 };
 
-export default notificationSettingsService;
 export { DEFAULT_PREFERENCES };

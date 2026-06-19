@@ -1,8 +1,8 @@
 import express from "express";
 import { authMiddleware } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
-import NotificationController from "./notification.controller";
-import notificationSettingsController from "./notificationSettings.controller";
+import { NotificationController } from "./notification.controller";
+import { notificationSettingsController } from "./notificationSettings.controller";
 import { notificationSseController } from "./sse.controller";
 
 const router: import("express").Router = express.Router();

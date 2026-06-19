@@ -5,7 +5,7 @@ import {
   requireTeamLead,
 } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
-import analyticsController from "./analytics.controller";
+import { analyticsController } from "./analytics.controller";
 
 const router: import("express").Router = express.Router();
 
