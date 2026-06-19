@@ -5,7 +5,6 @@
  * UsageReportsPage and ExportAnalyticsPage.
  */
 
-import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 
 type TimeRange = "week" | "month" | "quarter" | "year";
