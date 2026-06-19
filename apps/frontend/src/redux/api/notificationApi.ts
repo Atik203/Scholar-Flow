@@ -57,8 +57,38 @@ export interface BaseNotificationResponse {
   data: AppNotification;
 }
 
+export type NotificationCategory =
+  | "PAPERS"
+  | "DISCUSSIONS"
+  | "COLLECTIONS"
+  | "WORKSPACE"
+  | "TEAM"
+  | "BILLING"
+  | "SECURITY"
+  | "ACHIEVEMENT"
+  | "SYSTEM";
+
+export interface CategoryChannelSetting {
+  email: boolean;
+  push: boolean;
+  inApp: boolean;
+}
+
+export interface NotificationPreferences {
+  channels: { inApp: boolean; email: boolean; push: boolean };
+  categories: Record<NotificationCategory, CategoryChannelSetting>;
+  quietHours: {
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+    days: string[];
+  };
+  digestFrequency: "instant" | "daily" | "weekly";
+  muteAll: boolean;
+}
+
 export const notificationApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["Notification"] })
+  .enhanceEndpoints({ addTagTypes: ["Notification", "NotificationSettings"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       getNotifications: builder.query<
@@ -132,6 +162,26 @@ export const notificationApi = apiSlice
         }),
         invalidatesTags: ["Notification"],
       }),
+
+      getNotificationSettings: builder.query<
+        { success: boolean; message: string; data: NotificationPreferences },
+        void
+      >({
+        query: () => "/notifications/settings",
+        providesTags: [{ type: "NotificationSettings", id: "ME" }],
+      }),
+
+      updateNotificationSettings: builder.mutation<
+        { success: boolean; message: string; data: NotificationPreferences },
+        Partial<NotificationPreferences>
+      >({
+        query: (body) => ({
+          url: "/notifications/settings",
+          method: "PUT",
+          body,
+        }),
+        invalidatesTags: [{ type: "NotificationSettings", id: "ME" }],
+      }),
     }),
   });
 
@@ -143,4 +193,6 @@ export const {
   useToggleStarredMutation,
   useDeleteNotificationMutation,
   useDeleteBulkNotificationsMutation,
+  useGetNotificationSettingsQuery,
+  useUpdateNotificationSettingsMutation,
 } = notificationApi;
