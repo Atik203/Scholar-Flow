@@ -4,98 +4,203 @@
 **Design system:** All dashboard pages must match `figma-make/pages/dashboard/**` exactly.
 **Animation:** `motion` (v12.40.0) installed at root.
 **DB policy:** Prefer Prisma ORM for new code; keep existing `$queryRaw` as-is.
+**Page coverage:** 98/102 figma-make (96.1%)
 
 ---
 
 ## Phase 1: Static Marketing Pages ✅
-18-20 pages: homepage sections, products (4), resources (4), company (4), enterprise (4), standalone (3). Backend: Faq/Testimonial/NewsletterSubscriber/ContactSubmission/PageContent models + routes.
+18-20 static pages — products (4), resources (4), company (4), enterprise (4), standalone (3). Backend: Faq/Testimonial/NewsletterSubscriber/ContactSubmission/PageContent models.
 
 ## Phase 2: Auth & Onboarding ✅
-5 auth pages (login/register/forgot/reset/verify), onboarding flow, 7 form components, onboarding fields on User model.
+Login/Register/Forgot/Reset/Verify pages, onboarding flow, 7 form components, better-auth + JWT backend, onboarding fields on User.
 
 ## Phase 3: Dashboard Shell ✅
-Route restructure (`(app)/` + `(admin)/`), DashboardLayout variants, AppSidebar, core pages (dashboard home, profile, settings, admin pages), UserPreference model, user/activity endpoint.
+Route restructure to `(app)/` + `(modules)/` route groups, DashboardLayout with AppSidebar, core pages (home, profile, settings), UserPreference model.
 
 ## Phase 4: Papers & Collections ✅
-10 pages: papers list/upload/detail/search/import/editor + collections list/create/detail/shared.
-Schema: `CollectionVisibility` + `CollectionPaperStatus` enums, `tags`/`language`/`citationCount` on Paper, `visibility`/`tags`/`coverImage`/`color` on Collection, `status`/`isStarred` on CollectionPaper.
-Backend: AI recommendations service, paper importer (DOI/arXiv/URL/BibTeX/RIS), CollectionPaper PATCH endpoint. 81 legacy files removed.
-Deferred to Phase 8: AI insights sidebar, annotation toolbar, semantic search.
+Papers CRUD (upload/detail/search/import/editor) + Collections CRUD (create/detail/shared). AI recommendations service, paper importer (DOI/arXiv/URL/BibTeX/RIS), CollectionPaper status/star tracking.
 
 ## Phase 5: Workspaces & Team ✅
-- [x] `/dashboard/(app)/workspaces` — list, create, detail, members, settings
-- [x] `/dashboard/(app)/workspaces/[id]` — Overview / Collections / Papers / Members / Settings tabs
-- [x] `/dashboard/(app)/workspaces/create` — standalone create page
-- [x] `/dashboard/(app)/workspaces/shared` — 3 tabs (Shared / Received / Sent)
-- [x] `/dashboard/(app)/team` — members list with filters, action menu, invite modal
-- [x] `/dashboard/(app)/team/invitations` — received + sent invitations, resend/cancel
-- [x] `/dashboard/(app)/team/activity` — 4 stat cards, members sidebar, activity feed
-- [x] `/dashboard/(app)/team/settings` — 6 tabs (General / Permissions / Notifications / Security / Integrations / Danger Zone)
-- [x] `/dashboard/(app)/team/collaborator/[id]` — public profile with cover, stats, follow/message
-- [x] `WorkspaceSettings` 1:1 model with color, sharing, member defaults, security fields
-- [x] `WorkspaceVisibility` enum (PRIVATE / INVITE_ONLY / PUBLIC)
-- [x] Denormalized `Workspace.color` and `Workspace.visibility` for fast list rendering
-- [x] `TeamActivity` reuses `ActivityLogEntry` (entity = "team")
-- [x] Team backend module — 14 endpoints (members, stats, activity, invitations, settings)
-- [x] `requireRole` / `requireTeamLead` / `requireAdmin` middleware (typed)
-- [x] Workspace module extensions — 6 new endpoints (settings, activity, stats, papers, collections)
-- [x] Resend email dispatcher (additive, Gmail fallback); new `sendTeamInvitationEmail`
-- [x] `teamApi` RTK Query slice — 15 endpoints with proper cache tags
-- [x] Workspace RTK extension — 6 new endpoints (settings, activity, stats, papers, collections)
-- [x] 8 new pages, 7 new components (`WorkspaceCard`, `RoleBadge`, `StatusDot`, etc.)
-- [x] `Team` submenu in `AppSidebar` (min role `TEAM_LEAD`)
-- [x] Color theme picker (5 swatches: blue/purple/green/orange/pink) backed by `WorkspaceSettings.color`
-- [x] 20 legacy route files removed (Phase 3 cleanup debt) — production build now passes for both apps
+Workspaces (list/create/detail/members/settings) + Team (members/invitations/activity/settings/collaborator profile). WorkspaceSettings 1:1 model, WorkspaceVisibility enum, RBAC middleware (requireRole/requireTeamLead/requireAdmin), Resend email dispatcher.
 
 ## Phase 6: Discussions, Notes & Citations ✅
-- [x] `/dashboard/(app)/discussions` — list, thread, new
-- [x] `/dashboard/(app)/notes` — notebook, detail, new
-- [x] `/dashboard/(app)/citations` — manager, export, history
-- [x] `Notebook`, `NotebookSection` models
-- [x] `NoteType` enum (QUICK / LITERATURE / METHODOLOGY / FINDINGS / IDEA)
-- [x] `NoteVisibility` enum (PRIVATE / WORKSPACE / PUBLIC)
-- [x] `ResearchNote` extended with `notebookId`, `sectionId`, `noteType`, `visibility`, `isStarred`, `wordCount`, `excerpt` (nullable FKs, additive)
-- [x] `CitationFormat` extended with `VANCOUVER` + `ACS` (2 new formats)
-- [x] Backend `/notebooks` module (13 endpoints, auto-creates default notebook on first read)
-- [x] Backend discussion enhancements: `getMyDiscussions`, `createGeneralThread`, `togglePin`, `toggleResolve`
-- [x] Backend citation manager: `getManagerView`, `getFormats`
-- [x] 3 new RTK slices: `notebookApi`, `discussionApi`, `citationApi`
-- [x] Sidebar: `Discussions` + `Notes` top-level (RESEARCHER); `Research > Citations` path updated to `/dashboard/citations`
-- [x] 13 new unit tests (Notebook validation schemas) all pass
-- [x] `yarn type-check` + `yarn build` + `yarn lint` clean for Phase 6 files
-Deferred to Phase 8: AI summary panel for notes (UI present, disabled), AI Citation Finder, real `Citation` model graph wiring.
-Deferred to Phase 9: TipTap rich-text editor (Phase 6 uses plain-text + markdown preview, matches figma).
+Discussions (threaded, pin/resolve), Notebook hierarchy (sections + ordering), 5 NoteTypes, 9 citation formats (VANCOUVER + ACS added), 3 new RTK slices.
 
 ## Phase 7: Analytics, Notifications & Admin ✅
-- [x] `/dashboard/(app)/analytics` (personal, workspace, usage, export)
-- [x] `/dashboard/(app)/notifications` (center, history, settings)
-- [x] Admin: reports, audit log, plans, payments, webhooks, API keys, moderation, alerts
-- [x] `AdminReport`, `SystemAlert`, `WebhookEndpoint`, `WebhookDelivery`, `ApiKey`, `ContentReport` models
-- [x] Real SSE notification broadcaster + `useNotificationStream` hook + `NotificationBell` popover
-- [x] Persisted notification settings (channels, categories, quiet hours)
+Real SSE notification broadcaster, persisted notification settings, 6 new Prisma models (AdminReport/SystemAlert/WebhookEndpoint/WebhookDelivery/ApiKey/ContentReport), 8 admin pages, 7 analytics pages, NotificationBell popover.
 
 ## Phase 8: Architecture Stabilization & Production Hardening ✅
-- [x] Stream A: Architecture Normalization — unified entry points (server.ts canonical), removed dead errorHandler.ts + AppError.ts + auth.controller.new.ts + Paper/ module, renamed 3 modules to PascalCase, migrated 3 routes into modules, standardized exports to named-only
-- [x] Stream B: Database Refinement — added Notification[userId, starred] index, deprecation annotations on Collection.isPublic
-- [x] Stream C: Frontend System Consolidation — killed phase2Api separate RTK instance (16 endpoints migrated), fixed all any types (6 endpoints), removed 6 redundant enhanceEndpoints calls, added ActivityLog tagType
-- [x] Stream D: UX Polish — added shared EmptyState + ErrorState components, fixed proxy.ts (28 missing public routes, dead getRoleFromCookies removed, dashboard redirect bug fixed)
-- [x] Stream E: Performance — collapsed auth middleware double-query into single OR query
-- [x] Phase 8 Features: added 14 missing figma-make pages (onboarding sub-pages, security dashboard/2FA/sessions/privacy, help center/shortcuts, settings export/integrations, citation graph, research map), 4 new backend endpoints (user export, sessions, 2FA, privacy), 2 new RTK hooks (usage export, audit export), sidebar updated with Security + Help sections
+Unified entry points (server.ts), removed dead code (errorHandler.ts/AppError.ts/auth.controller.new.ts/Paper/ module), killed phase2Api RTK instance, fixed all `any` types, renamed modules to PascalCase, standardized to named exports, collapsed auth double-query, added EmptyState/ErrorState components, fixed proxy.ts (28 missing routes).
 
 ## Phase 9: Polish & Performance ✅
-- [x] Stream A: Remaining pages — Enhanced Dashboard, Recent Activity, Paper Relations, Invitation Response (public), Resources Index, 3 path redirects
-- [x] Stream B: Invitation backend — public GET /invitations/:token + POST accept/decline with auth
-- [x] Stream C: Code splitting — Suspense in (app)/layout.tsx, loading.tsx for admin/analytics/discover/ai-insights, React.lazy expanded, ResponsiveTable component
-- [x] Stream D: Accessibility — eslint-plugin-jsx-a11y installed, 18 WCAG 2.1 AA rules, 0 lint errors
-- [x] Stream E: Lighthouse — Cache-Control: private, max-age=30 on GET API responses, Vary: Authorization header
-- [ ] Stream F: Deferred — comprehensive test suites and responsive audit (existing 7 backend tests, mobile hook present)
+8 remaining pages + invitation public backend (GET/POST /api/invitations/:token), eslint-plugin-jsx-a11y with 18 WCAG 2.1 AA rules (0 errors), route-level code splitting (Suspense + loading.tsx for 4 route groups), ResponsiveTable component, Cache-Control headers on API responses.
 
-## Phase 10: Future
-- Full test suite (backend + frontend integration + e2e)
-- Responsive audit across all 98 pages
-- Real-time collaboration (WebSocket)
-- AI features expansion (global AI assistant)
-- Performance budgets and bundle analysis
+---
+
+## 🔥 Phase 10 — FINAL PHASE: AI, Editor, Collaboration & Enterprise
+
+This is the **final phase**. Scholar-Flow ships as a production-grade, AI-powered academic SaaS platform after Phase 10.
+
+---
+
+### 10.1 — Remaining Pages + Responsive Audit + Test Suite
+
+#### 10.1A: Final 4 figma-make pages
+| # | Page | Path | Notes |
+|---|------|------|-------|
+| 10 | EnhancedDashboardPage | `/dashboard-enhanced` | Rich dashboard with all widgets |
+| 11 | RecentActivityPage | `/recent-activity` | Dedicated activity hub |
+| 17 | PaperDetailPage | `/paper/:id` | Singular path alias |
+| 45 | InvitationResponsePage | `/invitation/:token` | Accept/decline flow |
+
+#### 10.1B: Responsive audit (all 98 pages)
+- Test every page at 375px / 768px / 1024px / 1440px
+- Fix sidebar collapse on mobile
+- Fix table overflow with horizontal scroll
+- Fix modal/dialog sizing on small screens
+- Verify `useIsMobile()` hook usage consistency
+
+#### 10.1C: Comprehensive test suite
+- Backend: Auth flows, Paper CRUD, Billing webhook idempotency, S3 presigned URLs, Workspace invitation workflow, Notification broadcast/SSE, Admin report generation
+- Frontend: Component tests (EmptyState/ErrorState/DataTable/NotificationBell), RTK Query cache invalidation, Auth flow integration
+
+---
+
+### 10.2 — TipTap Editor Enhancement (CORE FEATURE)
+
+The rich text editor is Scholar-Flow's most critical differentiation. Phase 10 makes it a world-class academic writing tool.
+
+#### 10.2A: LaTeX Integration
+- [ ] Inline LaTeX rendering (`$...$`) via KaTeX
+- [ ] Block LaTeX rendering (`$$...$$` or `\[...\]` or `\begin{}...\end{}`)
+- [ ] LaTeX auto-complete (commands, environments, brackets)
+- [ ] Live preview panel (source ↔ rendered toggle)
+- [ ] Export LaTeX as standalone `.tex` document
+
+#### 10.2B: LaTeX Compilation
+- [ ] Server-side LaTeX → PDF compilation (via `latexmk` or `tectonic` on backend)
+- [ ] Real-time compilation status indicator in editor
+- [ ] Error overlay: jump to error line in editor
+- [ ] Compilation log viewer
+- [ ] Download compiled PDF directly from editor
+
+#### 10.2C: Advanced Editor Features
+- [ ] Track changes / suggest mode (collaborative editing primer)
+- [ ] Comments on text ranges (annotation integration)
+- [ ] Citation insertion (search + insert from Citation manager)
+- [ ] Table of Contents auto-generation
+- [ ] Cross-reference manager (figures, tables, equations, sections)
+- [ ] Template system (pre-built paper templates: IEEE, ACM, Springer, arXiv preprints)
+- [ ] Word count + reading time + character count live display
+- [ ] Split view (source Markdown ↔ rendered HTML)
+- [ ] Full-screen distraction-free mode
+- [ ] Version history / snapshots (revert to previous versions)
+
+#### 10.2D: Editor Export
+- [ ] PDF export with LaTeX-quality typesetting (server-side rendering)
+- [ ] DOCX export with proper formatting (headings, images, equations as MathML)
+- [ ] HTML export (self-contained, standalone)
+- [ ] Markdown export (with YAML front matter)
+- [ ] Export with citation bibliography (BibTeX/APA/MLA/IEEE/etc.)
+
+#### 10.2E: Multi-File Projects
+- [ ] Project view: main.tex + chapters/ + figures/ + bibliography.bib
+- [ ] File tree in editor sidebar
+- [ ] Cross-file references and includes
+- [ ] Upload supporting files (images, data, supplementary)
+
+---
+
+### 10.3 — Global AI Features (SITE-WIDE)
+
+AI is woven throughout Scholar-Flow — not just a chatbot, but a research assistant embedded in every workflow.
+
+#### 10.3A: Global AI Assistant
+- [ ] Floating AI chat widget (accessible from any page via Cmd+J)
+- [ ] Context-aware: AI knows which paper/collection/workspace you're viewing
+- [ ] Multi-model support (OpenAI GPT-4o, Google Gemini 2.5, Anthropic Claude)
+- [ ] Model selection in user settings
+- [ ] Chat history persisted per user (AIConversation model)
+- [ ] "Ask about this paper" contextual button on every paper detail page
+
+#### 10.3B: AI Paper Features
+- [ ] **AI Summarizer** — one-click paper summary (abstract + key findings + methodology)
+- [ ] **AI Key Points** — extract 5-10 key claims/findings from a paper
+- [ ] **AI Q&A** — ask natural language questions about a paper, get cited answers
+- [ ] **AI Comparator** — compare 2+ papers side-by-side, identify agreements/disagreements
+- [ ] **AI Literature Review** — given a collection of papers, generate a synthesis/review draft
+- [ ] **AI Translation** — translate paper abstract/sections to other languages
+
+#### 10.3C: AI Citation & Discovery
+- [ ] **AI Citation Finder** — "Find papers that cite this" or "Find related papers"
+- [ ] **AI Citation Graph** — build visual citation networks, highlight influential nodes
+- [ ] **AI Research Gap Analyzer** — analyze a collection and identify uncovered research areas
+- [ ] **AI Trend Detector** — identify emerging topics in the user's field
+- [ ] **Semantic Search** — search across all papers by meaning, not keywords (pgvector already configured)
+
+#### 10.3D: AI Writing Assistant
+- [ ] **AI Draft Generator** — generate paper sections from an outline + collection of references
+- [ ] **AI Rewriter** — improve clarity, fix grammar, adjust academic tone
+- [ ] **AI Outline Generator** — generate a paper outline from a topic/title
+- [ ] **AI Abstract Generator** — generate an abstract from paper content
+- [ ] **AI Title Suggester** — suggest impactful paper titles
+
+#### 10.3E: AI Notebook
+- [ ] **AI Note Summarizer** — summarize a long research note into bullet points
+- [ ] **AI Note Connector** — find connections between notes across notebooks
+- [ ] **AI Flashcards** — generate study flashcards from notes
+- [ ] **AI Quiz Generator** — create quiz questions from a notebook section
+
+---
+
+### 10.4 — Real-Time Collaboration (WebSocket)
+
+#### 10.4A: WebSocket Infrastructure
+- [ ] `socket.io` or raw WebSocket server on backend
+- [ ] Room-based channels: per workspace, per paper, per discussion
+- [ ] JWT authentication on WebSocket handshake
+- [ ] Presence system: show who's online in a workspace
+- [ ] Typing indicators in discussions and editor
+
+#### 10.4B: Co-Editing
+- [ ] Collaborative TipTap editor (Y.js or operational transform)
+- [ ] Cursor presence (see other users' cursors in editor)
+- [ ] Conflict resolution (last-write-wins with awareness)
+- [ ] Edit permissions (view-only, comment-only, full edit)
+
+#### 10.4C: Real-Time Features
+- [ ] Live discussion chat (replaces polling)
+- [ ] Real-time notification delivery (replace SSE with WebSocket push)
+- [ ] Live activity feed
+- [ ] Real-time annotation sync on PDFs
+
+---
+
+### 10.5 — Enterprise & Production Polish
+
+#### 10.5A: Enterprise Features
+- [ ] SSO/SAML integration (Okta, Azure AD, Google Workspace)
+- [ ] EnterpriseLicense model (seats, expiration, usage tracking)
+- [ ] Audit compliance exports (GDPR/CCPA data export)
+- [ ] Custom branding (logo, colors) per workspace
+- [ ] IP whitelisting for workspace access
+- [ ] Advanced rate limiting per plan tier
+
+#### 10.5B: Performance & Bundle
+- [ ] Lighthouse audit all 98 pages (target 90+ score)
+- [ ] Bundle analysis with `@next/bundle-analyzer`
+- [ ] Optimize heavy dependencies (motion, lucide-react tree-shaking)
+- [ ] Image optimization audit (all images use `next/image`)
+- [ ] Core Web Vitals pass (LCP < 2.5s, FID < 100ms, CLS < 0.1)
+
+#### 10.5C: Production Readiness
+- [ ] Error boundary on every route segment
+- [ ] Rate limiting audit on all mutation endpoints
+- [ ] CORS hardening (strict origin list per environment)
+- [ ] Security headers audit (CSP, HSTS, X-Frame-Options, etc.)
+- [ ] Health check endpoints (liveness, readiness, detailed)
+- [ ] Database backup strategy documentation
+- [ ] Deployment runbook / CI/CD pipeline documentation
 
 ---
 
@@ -107,10 +212,22 @@ Deferred to Phase 9: TipTap rich-text editor (Phase 6 uses plain-text + markdown
 - Additive migrations only; never drop pgvector columns
 - Stripe webhooks must be idempotent
 - All mutations use Zod validation + rate limiting
+- `eslint-plugin-jsx-a11y` enforced (18 WCAG 2.1 AA rules)
 
 ## Current Status
 - **Release:** 1.2.9 (2026-06-20)
 - **Completed:** Phase 1-9, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 10 — Future (tests, responsive, collaboration, AI)
+- **Current:** Phase 10 — FINAL PHASE (AI, Editor Enhancement, Collaboration, Enterprise)
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
 - **Page Coverage:** 98/102 figma-make (96.1%)
+
+## Phase 10 Sub-Phases
+
+| Sub-Phase | Focus | Est. Effort |
+|-----------|-------|-------------|
+| 10.1 | Remaining pages + responsive + tests | 1 week |
+| 10.2 | TipTap Editor Enhancement (LaTeX + compilation) | 2-3 weeks |
+| 10.3 | Global AI Features (site-wide assistant + paper AI) | 2-3 weeks |
+| 10.4 | Real-Time Collaboration (WebSocket + co-editing) | 2 weeks |
+| 10.5 | Enterprise + Production Polish | 1 week |
+| **Total** | **Final Phase** | **8-11 weeks** |
