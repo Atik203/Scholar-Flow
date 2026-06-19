@@ -92,7 +92,13 @@ export const ModelName = {
   NewsletterSubscriber: 'NewsletterSubscriber',
   ContactSubmission: 'ContactSubmission',
   PageContent: 'PageContent',
-  UserPreference: 'UserPreference'
+  UserPreference: 'UserPreference',
+  AdminReport: 'AdminReport',
+  SystemAlert: 'SystemAlert',
+  WebhookEndpoint: 'WebhookEndpoint',
+  WebhookDelivery: 'WebhookDelivery',
+  ApiKey: 'ApiKey',
+  ContentReport: 'ContentReport'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -826,11 +832,132 @@ export const UserPreferenceScalarFieldEnum = {
   defaultCitationStyle: 'defaultCitationStyle',
   compactMode: 'compactMode',
   metadata: 'metadata',
+  notificationPreferences: 'notificationPreferences',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type UserPreferenceScalarFieldEnum = (typeof UserPreferenceScalarFieldEnum)[keyof typeof UserPreferenceScalarFieldEnum]
+
+
+export const AdminReportScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  type: 'type',
+  status: 'status',
+  format: 'format',
+  fileSize: 'fileSize',
+  generatedAt: 'generatedAt',
+  schedule: 'schedule',
+  nextRunAt: 'nextRunAt',
+  recipients: 'recipients',
+  enabled: 'enabled',
+  config: 'config',
+  resultKey: 'resultKey',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AdminReportScalarFieldEnum = (typeof AdminReportScalarFieldEnum)[keyof typeof AdminReportScalarFieldEnum]
+
+
+export const SystemAlertScalarFieldEnum = {
+  id: 'id',
+  category: 'category',
+  severity: 'severity',
+  title: 'title',
+  message: 'message',
+  metadata: 'metadata',
+  resolved: 'resolved',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SystemAlertScalarFieldEnum = (typeof SystemAlertScalarFieldEnum)[keyof typeof SystemAlertScalarFieldEnum]
+
+
+export const WebhookEndpointScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  url: 'url',
+  description: 'description',
+  secretHash: 'secretHash',
+  secretPrefix: 'secretPrefix',
+  events: 'events',
+  status: 'status',
+  lastTriggered: 'lastTriggered',
+  totalDeliveries: 'totalDeliveries',
+  failedDeliveries: 'failedDeliveries',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type WebhookEndpointScalarFieldEnum = (typeof WebhookEndpointScalarFieldEnum)[keyof typeof WebhookEndpointScalarFieldEnum]
+
+
+export const WebhookDeliveryScalarFieldEnum = {
+  id: 'id',
+  endpointId: 'endpointId',
+  event: 'event',
+  payload: 'payload',
+  status: 'status',
+  statusCode: 'statusCode',
+  responseBody: 'responseBody',
+  durationMs: 'durationMs',
+  attempts: 'attempts',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt'
+} as const
+
+export type WebhookDeliveryScalarFieldEnum = (typeof WebhookDeliveryScalarFieldEnum)[keyof typeof WebhookDeliveryScalarFieldEnum]
+
+
+export const ApiKeyScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  keyHash: 'keyHash',
+  keyPrefix: 'keyPrefix',
+  description: 'description',
+  scopes: 'scopes',
+  status: 'status',
+  rateLimit: 'rateLimit',
+  createdById: 'createdById',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  lastUsedAt: 'lastUsedAt',
+  totalRequests: 'totalRequests',
+  isDeleted: 'isDeleted'
+} as const
+
+export type ApiKeyScalarFieldEnum = (typeof ApiKeyScalarFieldEnum)[keyof typeof ApiKeyScalarFieldEnum]
+
+
+export const ContentReportScalarFieldEnum = {
+  id: 'id',
+  contentType: 'contentType',
+  contentId: 'contentId',
+  contentTitle: 'contentTitle',
+  contentPreview: 'contentPreview',
+  reporterId: 'reporterId',
+  reason: 'reason',
+  description: 'description',
+  status: 'status',
+  assignedToId: 'assignedToId',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById',
+  action: 'action',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type ContentReportScalarFieldEnum = (typeof ContentReportScalarFieldEnum)[keyof typeof ContentReportScalarFieldEnum]
 
 
 export const SortOrder = {

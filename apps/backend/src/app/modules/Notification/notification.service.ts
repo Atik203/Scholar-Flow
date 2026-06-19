@@ -1,6 +1,7 @@
 import { Prisma, NotificationType } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
+import notificationBroadcaster from "./broadcast";
 
 const NotificationService = {
   /**
@@ -167,7 +168,9 @@ const NotificationService = {
   },
 
   /**
-   * Internal helper to create a notification (called by other services)
+   * Internal helper to create a notification (called by other services).
+   * After persisting, broadcasts the new notification to the user's open SSE
+   * connections via the in-process broadcaster.
    */
   async createNotification(data: {
     userId: string;
@@ -187,7 +190,41 @@ const NotificationService = {
       },
     });
 
-    // TODO: Emit SSE event to the specific userId
+    try {
+      notificationBroadcaster.publish(data.userId, {
+        type: "notification.created",
+        id: notification.id,
+        data: {
+          id: notification.id,
+          userId: notification.userId,
+          type: notification.type,
+          title: notification.title,
+          message: notification.message,
+          read: notification.read,
+          starred: notification.starred,
+          actionUrl: notification.actionUrl,
+          actorId: notification.actorId,
+          resourceId: notification.resourceId,
+          createdAt: notification.createdAt,
+          actor: notification.actor
+            ? {
+                name:
+                  notification.actor.name ||
+                  `${notification.actor.firstName || ""} ${
+                    notification.actor.lastName || ""
+                  }`.trim() ||
+                  "Unknown",
+                image: notification.actor.image,
+              }
+            : undefined,
+        },
+      });
+    } catch (err) {
+      // Broadcast failures must never break notification creation.
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[Notification] SSE broadcast failed:", err);
+      }
+    }
 
     return notification;
   },
