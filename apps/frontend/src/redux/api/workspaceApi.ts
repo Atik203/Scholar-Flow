@@ -3,6 +3,21 @@ import { apiSlice } from "./apiSlice";
 export type WorkspaceColor = "blue" | "purple" | "green" | "orange" | "pink";
 export type WorkspaceVisibility = "PRIVATE" | "INVITE_ONLY" | "PUBLIC";
 
+export interface WorkspaceSettings {
+  color: WorkspaceColor;
+  coverImageKey?: string | null;
+  iconKey?: string | null;
+  allowExternalSharing: boolean;
+  allowDownload: boolean;
+  defaultMemberRole: "VIEWER" | "EDITOR" | "MANAGER" | "OWNER";
+  requireApprovalForJoin: boolean;
+  allowMemberInvites: boolean;
+  allowPublicCollections: boolean;
+  aiFeaturesEnabled: boolean;
+  enforce2FAForMembers: boolean;
+  allowedEmailDomains: string[];
+}
+
 export interface Workspace {
   id: string;
   name: string;
@@ -259,20 +274,20 @@ export const workspaceApi = apiSlice.injectEndpoints({
     }),
 
     // Phase 5 — Workspace settings, activity, stats, papers, collections
-    getWorkspaceSettings: builder.query<any, string>({
+    getWorkspaceSettings: builder.query<WorkspaceSettings, string>({
       query: (id) => `/workspaces/${id}/settings`,
-      transformResponse: (response: { data: any }) => response.data,
+      transformResponse: (response: { data: WorkspaceSettings }) => response.data,
       providesTags: (_res, _err, id) => [{ type: "Workspace", id: `${id}-settings` }],
     }),
 
     updateWorkspaceSettings: builder.mutation<
-      any,
+      WorkspaceSettings,
       {
         id: string;
-        color?: string;
+        color?: WorkspaceColor;
         allowExternalSharing?: boolean;
         allowDownload?: boolean;
-        defaultMemberRole?: string;
+        defaultMemberRole?: "VIEWER" | "EDITOR" | "MANAGER" | "OWNER";
         requireApprovalForJoin?: boolean;
         allowMemberInvites?: boolean;
         allowPublicCollections?: boolean;
@@ -286,7 +301,7 @@ export const workspaceApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      transformResponse: (response: { data: any }) => response.data,
+      transformResponse: (response: { data: WorkspaceSettings }) => response.data,
       invalidatesTags: (_res, _err, { id }) => [
         { type: "Workspace", id: `${id}-settings` },
         { type: "Workspace", id },
