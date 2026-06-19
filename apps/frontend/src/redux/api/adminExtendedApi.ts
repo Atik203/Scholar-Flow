@@ -116,7 +116,6 @@ export interface AdminApiKey {
 }
 
 export const adminApiKeysApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminApiKey"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listApiKeys: builder.query<
@@ -252,7 +251,6 @@ export interface ContentReport {
 }
 
 export const adminModerationApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminModeration"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listReports: builder.query<
@@ -394,7 +392,6 @@ export interface SystemAlert {
 }
 
 export const systemAlertsApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["SystemAlert"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listAlerts: builder.query<
