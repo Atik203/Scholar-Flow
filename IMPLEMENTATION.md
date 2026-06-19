@@ -66,10 +66,13 @@ Deferred to Phase 8: AI insights sidebar, annotation toolbar, semantic search.
 Deferred to Phase 8: AI summary panel for notes (UI present, disabled), AI Citation Finder, real `Citation` model graph wiring.
 Deferred to Phase 9: TipTap rich-text editor (Phase 6 uses plain-text + markdown preview, matches figma).
 
-## Phase 7: Analytics, Notifications & Admin
-- [ ] `/dashboard/(app)/analytics`, `/dashboard/(app)/notifications`
-- [ ] Admin: analytics, revenue, reports, users, webhooks, moderation
-- [ ] `AdminReport`, `SystemAlert` models; SSE notifications
+## Phase 7: Analytics, Notifications & Admin ✅
+- [x] `/dashboard/(app)/analytics` (personal, workspace, usage, export)
+- [x] `/dashboard/(app)/notifications` (center, history, settings)
+- [x] Admin: reports, audit log, plans, payments, webhooks, API keys, moderation, alerts
+- [x] `AdminReport`, `SystemAlert`, `WebhookEndpoint`, `WebhookDelivery`, `ApiKey`, `ContentReport` models
+- [x] Real SSE notification broadcaster + `useNotificationStream` hook + `NotificationBell` popover
+- [x] Persisted notification settings (channels, categories, quiet hours)
 
 ## Phase 8: Advanced Features
 - [ ] Global AI assistant, discover/trending, integrations, advanced search
@@ -90,7 +93,7 @@ Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code 
 - All mutations use Zod validation + rate limiting
 
 ## Current Status
-- **Release:** 1.2.6 (2026-06-19)
-- **Completed:** Phase 1-6, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 7 — Analytics, Notifications & Admin
+- **Release:** 1.2.7 (2026-06-19)
+- **Completed:** Phase 1-7, Next.js 16 migration, better-auth migration, Prisma v7 migration
+- **Current:** Phase 8 — Advanced Features (AI assistant, discover, integrations, enterprise)
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0

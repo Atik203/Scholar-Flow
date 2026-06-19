@@ -18,8 +18,11 @@ import {
   useGetSystemHealthQuery,
   useGetSystemStatsQuery,
 } from "@/redux/api/adminApi";
+import { useGetAlertCountsQuery, useListAlertsQuery, useResolveAlertMutation } from "@/redux/api/adminExtendedApi";
 import {
   Activity,
+  AlertTriangle,
+  Bell,
   Database,
   Download,
   FileText,
@@ -28,6 +31,7 @@ import {
   Shield,
   Users,
 } from "lucide-react";
+import Link from "next/link";
 import { Suspense, lazy } from "react";
 
 // Lazy load heavy components for code splitting and better performance
@@ -95,6 +99,11 @@ export default function AdminOverviewPage() {
     });
 
   const { data: paperStats } = useGetPaperStatsQuery();
+
+  // Phase 7 - System Alerts widget
+  const { data: alertCounts } = useGetAlertCountsQuery();
+  const { data: recentAlerts } = useListAlertsQuery({ resolved: false, limit: 5 });
+  const [resolveAlert] = useResolveAlertMutation();
 
   const handleExportUsers = () => {
     showSuccessToast("Export Data", "User data export started");
@@ -315,6 +324,71 @@ export default function AdminOverviewPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Phase 7 - System Alerts widget */}
+        <Card>
+          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                System Alerts
+              </CardTitle>
+              <CardDescription>
+                Auto-generated alerts from system monitoring
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {alertCounts && alertCounts.data.critical > 0 && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600">
+                  <AlertTriangle className="h-3 w-3" />
+                  {alertCounts.data.critical} critical
+                </span>
+              )}
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard/admin/alerts">View all</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!recentAlerts || recentAlerts.data.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No unresolved alerts.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {recentAlerts.data.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border"
+                  >
+                    <AlertTriangle
+                      className={`h-4 w-4 flex-shrink-0 ${
+                        a.severity === "CRITICAL"
+                          ? "text-red-500"
+                          : a.severity === "WARNING"
+                            ? "text-amber-500"
+                            : "text-blue-500"
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{a.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {a.message}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => resolveAlert(a.id)}
+                    >
+                      Resolve
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
     </div>
   );
 }

@@ -227,3 +227,33 @@ export type PageContent = Prisma.PageContentModel
  * 
  */
 export type UserPreference = Prisma.UserPreferenceModel
+/**
+ * Model AdminReport
+ * 
+ */
+export type AdminReport = Prisma.AdminReportModel
+/**
+ * Model SystemAlert
+ * 
+ */
+export type SystemAlert = Prisma.SystemAlertModel
+/**
+ * Model WebhookEndpoint
+ * 
+ */
+export type WebhookEndpoint = Prisma.WebhookEndpointModel
+/**
+ * Model WebhookDelivery
+ * 
+ */
+export type WebhookDelivery = Prisma.WebhookDeliveryModel
+/**
+ * Model ApiKey
+ * 
+ */
+export type ApiKey = Prisma.ApiKeyModel
+/**
+ * Model ContentReport
+ * 
+ */
+export type ContentReport = Prisma.ContentReportModel

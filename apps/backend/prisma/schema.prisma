@@ -214,6 +214,14 @@ model User {
   CollectionPaper   CollectionPaper[]
   CollectionMember  CollectionMember[]
 
+  // Phase 7 - admin / moderation / alerts / api keys
+  adminReportsCreated    AdminReport[]    @relation("AdminReportCreator")
+  resolvedSystemAlerts   SystemAlert[]    @relation("SystemAlertResolver")
+  apiKeysCreated         ApiKey[]         @relation("ApiKeyCreator")
+  contentReportsFiled    ContentReport[]  @relation("ContentReporter")
+  contentReportsAssigned ContentReport[]  @relation("ContentReportAssignee")
+  contentReportsResolved ContentReport[]  @relation("ContentReportResolver")
+
   // Optimized indexes for common query patterns
   @@index([isDeleted, createdAt]) // For listing active users sorted by creation
   @@index([role, isDeleted, createdAt]) // For role-filtered queries
@@ -1168,8 +1176,245 @@ model UserPreference {
   defaultCitationStyle String   @default("APA")
   compactMode          Boolean  @default(false)
   metadata             Json?    @db.JsonB
+  // Phase 7 - Notification preferences (channels, categories, quiet hours)
+  notificationPreferences Json? @db.JsonB
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   @@index([userId])
+}
+
+// ============================================================================
+// Phase 7 - Analytics, Notifications & Admin
+// ============================================================================
+
+// -------- Admin Reports --------
+
+enum AdminReportType {
+  USAGE
+  FINANCIAL
+  USER
+  CONTENT
+  SYSTEM
+}
+
+enum AdminReportStatus {
+  READY
+  GENERATING
+  SCHEDULED
+  FAILED
+}
+
+enum AdminReportFormat {
+  CSV
+  JSON
+}
+
+model AdminReport {
+  id          String             @id @default(uuid())
+  name        String
+  description String?
+  type        AdminReportType
+  status      AdminReportStatus  @default(READY)
+  format      AdminReportFormat  @default(CSV)
+  fileSize    String?
+  generatedAt DateTime?
+  // Scheduling
+  schedule    String? // cron-like expression
+  nextRunAt   DateTime?
+  recipients  String[]           @default([])
+  enabled     Boolean            @default(true)
+  // Config (filters, columns, etc.)
+  config      Json?              @db.JsonB
+  // Last result cached on disk
+  resultKey   String? // S3 key for the generated report file
+  createdById String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  isDeleted   Boolean            @default(false)
+
+  createdBy User @relation("AdminReportCreator", fields: [createdById], references: [id])
+
+  @@index([type, status, generatedAt])
+  @@index([nextRunAt, enabled])
+  @@index([createdById, isDeleted])
+}
+
+// -------- System Alerts --------
+
+enum SystemAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum SystemAlertCategory {
+  USER
+  BILLING
+  SECURITY
+  STORAGE
+  PROCESSING
+  SYSTEM
+}
+
+model SystemAlert {
+  id           String              @id @default(uuid())
+  category     SystemAlertCategory
+  severity     SystemAlertSeverity @default(INFO)
+  title        String
+  message      String
+  metadata     Json?               @db.JsonB
+  resolved     Boolean             @default(false)
+  resolvedAt   DateTime?
+  resolvedById String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  resolvedBy User? @relation("SystemAlertResolver", fields: [resolvedById], references: [id])
+
+  @@index([category, createdAt])
+  @@index([resolved, createdAt])
+  @@index([severity, resolved])
+}
+
+// -------- Outbound Webhook Endpoints --------
+
+enum WebhookEndpointStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum WebhookDeliveryStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+model WebhookEndpoint {
+  id               String                @id @default(uuid())
+  name             String
+  url              String
+  description      String?
+  // Stored as HMAC-SHA256(secret + WEBHOOK_PEPPER); raw secret only returned on create
+  secretHash       String
+  // First 8 chars of the raw secret for display (e.g., "whsec_xx")
+  secretPrefix     String
+  events           String[]              @default([])
+  status           WebhookEndpointStatus @default(ACTIVE)
+  lastTriggered    DateTime?
+  totalDeliveries  Int                   @default(0)
+  failedDeliveries Int                   @default(0)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  isDeleted        Boolean               @default(false)
+
+  deliveries WebhookDelivery[]
+
+  @@index([status, isDeleted])
+}
+
+model WebhookDelivery {
+  id           String                @id @default(uuid())
+  endpointId   String
+  event        String
+  payload      Json                  @db.JsonB
+  status       WebhookDeliveryStatus
+  statusCode   Int?
+  responseBody String?               @db.Text
+  durationMs   Int?
+  attempts     Int                   @default(1)
+  createdAt    DateTime              @default(now())
+  completedAt  DateTime?
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, createdAt])
+  @@index([status, createdAt])
+}
+
+// -------- API Keys --------
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model ApiKey {
+  id            String      @id @default(uuid())
+  name          String
+  // Hashed (HMAC-SHA256 with API_KEY_PEPPER); raw key only returned on create
+  keyHash       String      @unique
+  // First 12 chars of the raw key for display (e.g., "sf_live_abcd")
+  keyPrefix     String
+  description   String?
+  scopes        String[]    @default([])
+  status        ApiKeyStatus @default(ACTIVE)
+  rateLimit     Int         @default(1000) // requests per hour
+  createdById   String
+  createdAt     DateTime    @default(now())
+  expiresAt     DateTime?
+  lastUsedAt    DateTime?
+  totalRequests Int         @default(0)
+  isDeleted     Boolean     @default(false)
+
+  createdBy User @relation("ApiKeyCreator", fields: [createdById], references: [id])
+
+  @@index([status, isDeleted])
+  @@index([keyPrefix])
+  @@index([createdById, isDeleted])
+}
+
+// -------- Content Moderation --------
+
+enum ContentReportType {
+  PAPER
+  COMMENT
+  COLLECTION
+  PROFILE
+}
+
+enum ContentReportReason {
+  SPAM
+  HARASSMENT
+  COPYRIGHT
+  INAPPROPRIATE
+  MISINFORMATION
+  OTHER
+}
+
+enum ContentReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+model ContentReport {
+  id             String              @id @default(uuid())
+  contentType    ContentReportType
+  contentId      String
+  contentTitle   String?
+  contentPreview String?             @db.Text
+  reporterId     String
+  reason         ContentReportReason
+  description    String?             @db.Text
+  status         ContentReportStatus @default(PENDING)
+  assignedToId   String?
+  resolvedAt     DateTime?
+  resolvedById   String?
+  action         String? // approved | removed | warning | suspended
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  isDeleted      Boolean             @default(false)
+
+  reporter   User  @relation("ContentReporter", fields: [reporterId], references: [id])
+  assignedTo User? @relation("ContentReportAssignee", fields: [assignedToId], references: [id])
+  resolvedBy User? @relation("ContentReportResolver", fields: [resolvedById], references: [id])
+
+  @@index([status, createdAt])
+  @@index([contentType, contentId])
+  @@index([reporterId, createdAt])
+  @@index([assignedToId, status])
 }
