@@ -883,4 +883,3 @@ export class WorkspaceService {
   }
 }
 
-export default WorkspaceService;

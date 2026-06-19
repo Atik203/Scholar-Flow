@@ -89,4 +89,3 @@ export const webhookController = {
   }),
 };
 
-export default webhookController;

@@ -1,9 +1,9 @@
 import { Prisma, NotificationType } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
-import notificationBroadcaster from "./broadcast";
+import { notificationBroadcaster } from "./broadcast";
 
-const NotificationService = {
+export const notificationService = {
   /**
    * List notifications for a user with pagination and filtering
    */
@@ -230,4 +230,3 @@ const NotificationService = {
   },
 };
 
-export default NotificationService;
