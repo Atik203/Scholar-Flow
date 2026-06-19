@@ -199,6 +199,107 @@ const getActivity = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const exportData = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const { format } = req.body as { format: "csv" | "json" };
+  const result = await userService.exportData(user.id, format || "csv");
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Data exported successfully",
+    data: result,
+  });
+});
+
+const getSessions = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getSessions(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Sessions retrieved successfully",
+    data: result,
+  });
+});
+
+const terminateSession = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.terminateSession(user.id, req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Session terminated successfully",
+    data: result,
+  });
+});
+
+const getTwoFactorStatus = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getTwoFactorStatus(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA status retrieved",
+    data: result,
+  });
+});
+
+const generateTwoFactorSecret = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.generateTwoFactor(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA secret generated",
+    data: result,
+  });
+});
+
+const verifyTwoFactor = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const { token } = req.body as { token: string };
+  const result = await userService.verifyTwoFactor(user.id, token);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA verified successfully",
+    data: result,
+  });
+});
+
+const disableTwoFactor = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.disableTwoFactor(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA disabled successfully",
+    data: result,
+  });
+});
+
+const getPrivacySettings = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getPrivacySettings(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Privacy settings retrieved",
+    data: result,
+  });
+});
+
+const updatePrivacySettings = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updatePrivacySettings(user.id, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Privacy settings updated",
+    data: result,
+  });
+});
+
 export const userController: {
   getAllFromDB: AsyncRequestHandler;
   getMyProfile: AsyncRequestHandler;
@@ -211,6 +312,15 @@ export const userController: {
   getPreferences: AsyncRequestHandler;
   updatePreferences: AsyncRequestHandler;
   getActivity: AsyncRequestHandler;
+  exportData: AsyncRequestHandler;
+  getSessions: AsyncRequestHandler;
+  terminateSession: AsyncRequestHandler;
+  getTwoFactorStatus: AsyncRequestHandler;
+  generateTwoFactorSecret: AsyncRequestHandler;
+  verifyTwoFactor: AsyncRequestHandler;
+  disableTwoFactor: AsyncRequestHandler;
+  getPrivacySettings: AsyncRequestHandler;
+  updatePrivacySettings: AsyncRequestHandler;
 } = {
   getAllFromDB,
   getMyProfile,
@@ -223,4 +333,13 @@ export const userController: {
   getPreferences,
   updatePreferences,
   getActivity,
+  exportData,
+  getSessions,
+  terminateSession,
+  getTwoFactorStatus,
+  generateTwoFactorSecret,
+  verifyTwoFactor,
+  disableTwoFactor,
+  getPrivacySettings,
+  updatePrivacySettings,
 };
