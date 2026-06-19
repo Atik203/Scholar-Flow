@@ -1,5 +1,134 @@
 # Scholar-Flow Release Notes
 
+## Release 1.2.7 — Phase 7: Analytics, Notifications & Admin (2026-06-19)
+
+**Release date:** 2026-06-19
+**Theme:** Full Phase 7 implementation — real-time SSE notifications, persisted notification preferences, 7 new dashboard pages (Analytics & Notifications sub-routes), 8 new admin pages (Reports, Audit Log, Plans, Payments, Webhooks, API Keys, Moderation, Alerts), 6 new Prisma models, 8 new RTK Query slices, and a `NotificationBell` popover wired to the live event stream.
+
+---
+
+### ✨ Highlights
+
+- **Real SSE notification broadcaster** — in-process `EventEmitter` publishes `notification.created` events to the recipient's open SSE connections, with per-user connection cap (5) and automatic cleanup on disconnect. Replaces the previous stub at `/notifications/stream` (which only sent a `connected` event). Replaceable with Redis pub/sub for multi-node without changing the public surface
+- **JWT in query param fallback for SSE** — EventSource can't send custom headers, so the SSE controller also reads `?token=` as a fallback when the `Authorization` header is missing
+- **Persisted notification settings** — `UserPreference.notificationPreferences Json?` stores a 9-category × 3-channel grid (Email / Push / In-app) plus quiet hours, digest frequency, and a global mute-all toggle. New `GET/PUT /notifications/settings` endpoints with Zod validation; controller defaults returned when a user has no row yet
+- **6 new Prisma models (purely additive — no drops, no vector column risk):**
+  - `AdminReport` — name/description/type/status/format, scheduling (`schedule`, `nextRunAt`, `recipients`, `enabled`), config JSON, `resultKey` for S3
+  - `SystemAlert` — `category` (USER/BILLING/SECURITY/STORAGE/PROCESSING/SYSTEM), `severity` (INFO/WARNING/CRITICAL), `metadata`, `resolved`/`resolvedAt`/`resolvedById`
+  - `WebhookEndpoint` — outbound webhook config with `secretHash` (HMAC-SHA256 + `WEBHOOK_PEPPER`), `secretPrefix` for display, `events[]`, `status`, delivery counters
+  - `WebhookDelivery` — `endpointId` (cascade), `event`, `payload` (JSONB), `status`, `statusCode`, `responseBody`, `durationMs`, `attempts`
+  - `ApiKey` — `keyHash` (HMAC-SHA256), `keyPrefix`, `scopes[]`, `status` (ACTIVE/REVOKED/EXPIRED), `rateLimit`, `lastUsedAt`, `totalRequests`
+  - `ContentReport` — `contentType`/`contentId`, `contentTitle`/`contentPreview`, `reason` (SPAM/HARASSMENT/COPYRIGHT/INAPPROPRIATE/MISINFORMATION/OTHER), `status` (PENDING/UNDER_REVIEW/RESOLVED/DISMISSED), `assignedToId`, `resolvedAt`, `action`
+  - 6 new back-relations on `User`: `adminReportsCreated`, `resolvedSystemAlerts`, `apiKeysCreated`, `contentReportsFiled`, `contentReportsAssigned`, `contentReportsResolved`
+- **Reports module (7 endpoints)** — full CRUD + synchronous `POST /admin/reports/:id/generate` that returns the file inline (CSV or JSON) with `Content-Disposition: attachment`. Capped at 10k rows per generation. PDF generation deferred to a follow-on release with a proper PDF library
+- **Audit log module (4 endpoints)** — wraps existing `ActivityLogEntry` with admin filters (userId/workspaceId/entity/entityId/action/severity/startDate/endDate/search), a `GET /admin/audit-log/summary` aggregation (counts by severity + top entities + top actors), and CSV/JSON export
+- **Outbound Webhooks module (10 endpoints)** — CRUD for endpoints, `POST /:id/rotate-secret` (raw secret returned exactly once, then re-hashed), `POST /:id/test` (writes a `webhook.test` PENDING delivery), `GET /:id/deliveries` (paginated timeline), `POST /deliveries/:id/retry`. Real outbound HTTP deferred; v1 records the delivery with stub response
+- **11-event registry** (`/admin/webhooks/event-types`) — `user.created|updated|deleted`, `paper.uploaded|processed`, `collection.created`, `workspace.member_joined`, `subscription.created|cancelled`, `payment.failed`, `system.alert`. Grouped by category in the admin UI
+- **Admin extensions (24 new endpoints)** — `GET /admin/plans` (plans + active subscribers + MRR), `GET /admin/payments` + `POST /payments/:id/refund` (refund marks `Payment.status=REFUNDED` and writes an audit entry), `ApiKey` CRUD with one-time key reveal, `ContentReport` queue with `assign`/`resolve`/`dismiss` actions, `SystemAlert` list + `counts` + `resolve`
+- **Analytics module (6 endpoints)** — `GET /analytics/personal?timeRange=` (papers/annotations/discussions/reading minutes/streak/lastSevenDays/productivity hours/weekly activity/top papers/achievements catalog), `POST /personal/reading-session` + `PATCH /:eventId` (start/stop reading-time tracking via `UsageEvent`), `GET /workspace/:id` (Team Lead+), `GET /usage` (Pro+), `GET /usage/export?format=csv|json` (Pro+)
+- **`ReadingSession` reused, not duplicated** — extends existing `UsageEvent` with `kind = "reading_session"` and `units = minutes`; no new table, existing `[userId, createdAt]` index covers the query
+- **Achievements catalog** is a static list served from the backend in v1 (matches the 6 figma entries); persistence layer (`UserAchievement`) deferred — easy to add without breaking the API
+- **7 new dashboard pages matching figma-make exactly:**
+  - `/dashboard/analytics` — default landing (renders personal)
+  - `/dashboard/analytics/personal` — 4 stat cards (Papers Read / Annotations / Discussions / Reading Time) + Reading Streak tile + 6-tile Achievements grid + Top Papers list + TimeRangeSelector + Export button
+  - `/dashboard/analytics/workspace` — Team Lead+; workspace selector + 4 team stat cards + Top Members leaderboard (auto-picks the user's first workspace)
+  - `/dashboard/analytics/usage` — Pro+ only; 4 usage cards (API calls / Storage / Papers / AI credits) + Feature Usage bar chart + Daily Activity bar chart + Pro-gate for non-Pro
+  - `/dashboard/analytics/export` — Pro+ only; 3-step wizard (Data → Format → Download)
+  - `/dashboard/notifications` — default landing (renders center)
+  - `/dashboard/notifications/center` — real-time list with bulk actions + mute toggle + unread badge, auto-refreshes via SSE
+  - `/dashboard/notifications/history` — paginated archive with date-range picker
+  - `/dashboard/notifications/settings` — 9×3 channel grid + global toggles + quiet hours (start/end/days) + digest frequency + sticky save bar
+- **8 new admin pages:**
+  - `/dashboard/admin/reports` — stats + filterable table + Create dialog (name/type/format) + Generate (downloads CSV/JSON inline)
+  - `/dashboard/admin/audit` — severity tabs (All/Info/Warning/Error/Critical) + summary cards + paginated timeline + CSV/JSON export
+  - `/dashboard/admin/plans` — plan cards with active subscribers + MRR
+  - `/dashboard/admin/payments` — searchable table with status badges + Refund action
+  - `/dashboard/admin/webhooks` — endpoint cards + deliveries + Create dialog (event-type picker) + Rotate secret + Test fire
+  - `/dashboard/admin/api-keys` — key list with one-time secret reveal on create + Revoke
+  - `/dashboard/admin/moderation` — status tabs + queue with Resolve/Dismiss actions
+  - `/dashboard/admin/alerts` — severity stats + filterable list + Resolve action
+- **Admin overview enhancement** — new `SystemAlerts` widget at the bottom of `/dashboard/admin` showing the 5 most recent unresolved alerts with inline Resolve; "View all" link to `/dashboard/admin/alerts`; critical count badge
+- **AppSidebar overhaul:**
+  - `Analytics` is now a nested submenu with 4 children: Personal (all roles) / Workspace (TEAM_LEAD+) / Usage (PRO_RESEARCHER+) / Export (PRO_RESEARCHER+)
+  - `Notifications` is now a nested submenu with 3 children: Center / History / Settings
+  - `adminFeatures` extended to **13 flat items**: Overview, Users, Subscriptions, Plans, Payments, Reports, Audit Log, Webhooks, API Keys, Moderation, Alerts, System Health, System Settings
+  - All nested submenu items use the existing `CollapsibleSection` component (Phase 5 pattern); submenu state auto-opens when a child is active
+- **`NotificationBell` popover** — top-bar bell with unread count badge, click-to-open popover showing 8 most recent notifications, click-to-mark-read, "Mark all read" button, "View all" link, and links to settings. Reuses the same hook as the center page
+- **`useNotificationStream` hook** — EventSource-based SSE consumer with exponential-backoff reconnect (1s → 30s), JWT in query param, `Notification` cache invalidation on each event, optional callback for callers (Bell + Center page both use it)
+- **`NotificationStreamProvider`** — single mount at `(app)/layout.tsx` level so the SSE connection is shared across all dashboard pages; per-tab reconnect storm prevented
+- **Shared components extracted** — `PageHeader` (gradient icon + title + description + actions), `StatCard` (icon tile + value + trend), `TimeRangeSelector` (week/month/quarter/year), `NotificationList` (reused by both center and history pages)
+- **Old pages deleted** — `(modules)/notifications/page.tsx`, `(modules)/notifications/settings/page.tsx`, `(modules)/analytics/page.tsx` removed. `(roles)/pro-researcher/analytics/page.tsx` and `(roles)/team-lead/analytics/page.tsx` updated to re-export from the new `(app)/analytics/personal` page; `(roles)/admin/analytics/page.tsx` likewise
+
+### 🔧 Backend
+
+- **6 new additive Prisma models** (single migration, no destructive ops): `AdminReport`, `SystemAlert`, `WebhookEndpoint`, `WebhookDelivery`, `ApiKey`, `ContentReport` — all with proper indexes, no enum value changes, no vector column risk
+- **10 new enums:** `AdminReportType`, `AdminReportStatus`, `AdminReportFormat`, `SystemAlertSeverity`, `SystemAlertCategory`, `WebhookEndpointStatus`, `WebhookDeliveryStatus`, `ApiKeyStatus`, `ContentReportType`, `ContentReportReason`, `ContentReportStatus`
+- **1 new field on `UserPreference`:** `notificationPreferences Json?` (default shape auto-applied on first read)
+- **6 new back-relations on `User`** (no schema-level changes to existing fields)
+- **7 new backend modules:**
+  - `apps/backend/src/app/modules/Notification/` — `broadcast.ts` (EventEmitter), `sse.controller.ts` (SSE handler), `notificationSettings.service.ts` + `.controller.ts` + `.validation.ts`
+  - `apps/backend/src/app/modules/Reports/` — `report.service.ts` (CRUD + sync CSV/JSON generation, 10k row cap), `report.controller.ts`, `report.validation.ts`, `report.routes.ts`
+  - `apps/backend/src/app/modules/AuditLog/` — `auditLog.service.ts` (wraps `ActivityLogEntry`), `auditLog.controller.ts`, `auditLog.validation.ts`, `auditLog.routes.ts`
+  - `apps/backend/src/app/modules/Webhooks/` — `webhook.service.ts`, `webhook.controller.ts`, `webhook.validation.ts`, `webhook.routes.ts`, `secrets.ts` (HMAC-SHA256 helpers), `eventTypes.ts` (11-event registry)
+  - `apps/backend/src/app/modules/Analytics/` — `personal.service.ts` (papers/annotations/discussions/streak/achievements), `workspace.service.ts`, `usage.service.ts` (CSV/JSON export), `analytics.controller.ts`, `analytics.routes.ts`
+  - Extended `apps/backend/src/app/modules/Admin/` with `adminPlans.service.ts`, `adminPayments.service.ts`, `adminApiKeys.service.ts`, `adminModeration.service.ts`, `systemAlerts.service.ts`, `extendedControllers.ts`, and 24 new route handlers in `admin.routes.ts`
+- **6 new route mount points** in `apps/backend/src/app/routes/index.ts`:
+  - `/admin/reports` — `reportRoutes`
+  - `/admin/audit-log` — `auditLogRoutes`
+  - `/admin/webhooks` — `webhookRoutes`
+  - `/analytics` — `analyticsRoutes`
+  - All admin routes gated by `authMiddleware` + `requireAdmin`; analytics workspace by `requireTeamLead`; analytics usage + export by `requireProResearcher`; notifications by `authMiddleware` + `rateLimiter`
+- **Schema & service approach:** New code paths use Prisma ORM (per `Query Performance Rules`); existing `$queryRaw` calls (admin stats, revenue analytics, audit log wrapper) are kept as-is. Secrets/API keys/webhook secrets use HMAC-SHA256 with a server-side `WEBHOOK_PEPPER` env var; raw values returned exactly once on creation, then re-hashed
+
+### 🎨 Frontend
+
+- **8 new RTK Query slices** in `apps/frontend/src/redux/api/`:
+  - `analyticsApi.ts` — 5 hooks (personal, workspace, usage, start/stop reading session)
+  - `adminReportsApi.ts` — 6 hooks (list/get/create/update/delete/generate)
+  - `adminAuditApi.ts` — 2 hooks (list, summary)
+  - `adminWebhooksApi.ts` — 10 hooks (event-types, list/get/create/update/rotate-secret/delete/test, list-deliveries, retry-delivery)
+  - `adminExtendedApi.ts` — bundles plans, payments, api-keys, moderation, system-alerts slices (16 hooks total) with surgical cache tag sub-namespacing (`AdminApiKey:LIST`, `AdminModeration:LIST`, `SystemAlert:COUNTS`)
+  - Extended `notificationApi.ts` with `useGetNotificationSettingsQuery` + `useUpdateNotificationSettingsMutation`
+  - Extended `apiSlice.tagTypes` with: `NotificationSettings`, `Analytics`, `AdminReport`, `AdminAudit`, `AdminWebhook`, `AdminApiKey`, `AdminModeration`, `SystemAlert`
+- **1 new SSE consumer hook** — `apps/frontend/src/hooks/useNotificationStream.ts` (EventSource + exponential-backoff reconnect + JWT-in-query + RTK cache invalidation + toast notification on each event)
+- **1 new provider** — `apps/frontend/src/components/providers/NotificationStreamProvider.tsx` (mounts the hook once at the layout level)
+- **1 new enhanced bell** — `apps/frontend/src/components/notifications/NotificationBell.tsx` (popover with recent notifications, mark-read, "view all" link, unread badge)
+- **5 new shared components** in `apps/frontend/src/components/`:
+  - `analytics/StatCard.tsx` — icon tile + value + trend delta + gradient
+  - `analytics/TimeRangeSelector.tsx` — week/month/quarter/year with chevron
+  - `customUI/PageHeader.tsx` — gradient icon + title + description + actions slot (used by all Phase 7 pages)
+  - `notifications/NotificationList.tsx` — shared list rendering with type icons, bulk select, search, type/read filters (used by center + history)
+  - `providers/NotificationStreamProvider.tsx` — wraps the `(app)` layout children
+- **15 new pages** across `(app)/analytics/*` (5), `(app)/notifications/*` (3), `(app)/admin/*` (8)
+- **3 old pages deleted** — `(modules)/notifications/page.tsx`, `(modules)/notifications/settings/page.tsx`, `(modules)/analytics/page.tsx`; their `(roles)/*` re-exports updated
+- **AppSidebar.tsx** rewritten:
+  - `Analytics` and `Notifications` are now `SidebarItem` with `items: SidebarLink[]` (matches existing `Papers` / `Collections` / `Team` pattern)
+  - `adminFeatures` extended from 5 to 13 flat items
+  - New icon imports: `Activity`, `AlertTriangle`, `Crown`, `FileSpreadsheet`, `Flag`, `History`, `Key`, `Wallet`, `Webhook`
+- **`(app)/layout.tsx`** wraps children in `<NotificationStreamProvider>` so a single SSE connection is shared across all dashboard pages
+
+### ✅ Quality Gates
+
+- `yarn type-check` — clean for both apps
+- `yarn build` — succeeds for both apps; all 15 new pages appear in build output
+- `yarn lint` — clean for all Phase 7 files (one pre-existing error in `collection.controller.ts:1763` unchanged, 19 pre-existing warnings unchanged)
+- `yarn db:generate --sql` — clean; client regenerated for the 6 new models + 10 new enums + 1 new field
+- No new test failures (existing test suite unchanged)
+- All migrations are additive — no column drops, no enum value changes, no vector column risk
+- The `prisma migrate dev` flow regenerates a single migration file containing all 6 new models + 10 new enums when run against a live DB
+
+### 🔮 Phase 8 / 9 Hooks Preserved
+
+- `UserAchievement` model for persisting achievement progress → Phase 8
+- `AIConversation` / `Integration` / `EnterpriseLicense` models — none of these conflict with the 6 new Phase 7 models
+- Real outbound HTTP delivery for webhooks + retry-with-backoff → Phase 8
+- PDF report generation (Bull/BullMQ for async) → Phase 8
+- Redis pub/sub for SSE multi-node broadcast → Phase 8 (drop-in `BroadcastChannel` interface already designed)
+- `SystemAlert.category` enum leaves room for future alert types (AI failures, search latency, integration errors)
+- `ApiKey.rateLimit` field is in place for the Phase 8 API gateway
+
+---
+
 ## Release 1.2.6 — Phase 6: Discussions, Notes & Citations (2026-06-19)
 
 **Release date:** 2026-06-19
