@@ -3,7 +3,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { NotificationStreamProvider } from "@/components/providers/NotificationStreamProvider";
 import { useOnboardingGuard } from "@/hooks/useAuthGuard";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, Suspense } from "react";
 
 export default function AppDashboardLayout({ children }: PropsWithChildren) {
   const { isLoading } = useOnboardingGuard();
@@ -18,7 +18,17 @@ export default function AppDashboardLayout({ children }: PropsWithChildren) {
 
   return (
     <NotificationStreamProvider>
-      <DashboardLayout variant="app">{children}</DashboardLayout>
+      <DashboardLayout variant="app">
+        <Suspense
+          fallback={
+            <div className="min-h-[60vh] flex items-center justify-center">
+              <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
+      </DashboardLayout>
     </NotificationStreamProvider>
   );
 }
