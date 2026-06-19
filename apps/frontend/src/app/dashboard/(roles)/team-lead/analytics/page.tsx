@@ -1,1 +1,1 @@
-export { default } from "../../../(modules)/analytics/page";
+export { default } from "../../../(app)/analytics/personal/page";
