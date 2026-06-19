@@ -208,28 +208,14 @@ function ThemeToggle() {
 }
 
 function NotificationBell() {
-  const { data } = useGetUnreadCountQuery(undefined, {
-    pollingInterval: 30000,
-  });
-  const unreadCount = data?.data?.count || 0;
-
-  return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      className="relative hidden md:flex text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mr-1" 
-      asChild
-    >
-      <Link href="/dashboard/notifications">
-        <Bell className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-2 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white dark:border-gray-900" />
-        )}
-        <span className="sr-only">Notifications</span>
-      </Link>
-    </Button>
-  );
+  // Re-export the Phase 7 bell with popover + SSE updates.
+  // The old inline version is kept as a fallback symbol for any imports
+  // that referenced it by name; the real one is below.
+  return <Phase7NotificationBell />;
 }
+
+// Lazy-load the new component to keep the layout file self-contained.
+import { NotificationBell as Phase7NotificationBell } from "@/components/notifications/NotificationBell";
 
 // Breadcrumb component auto-generating from Next.js pathname
 function Breadcrumbs({
