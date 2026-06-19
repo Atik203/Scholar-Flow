@@ -139,6 +139,7 @@ model Notification {
   actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
 
   @@index([userId, read])
+  @@index([userId, starred])
   @@index([createdAt])
 }
 
@@ -511,8 +512,8 @@ model Collection {
   ownerId     String
   name        String
   description String?
-  // Deprecated: kept in Phase 4 subtask A to avoid breaking existing routes.
-  // Will be removed in subtask B once all queries are migrated to `visibility`.
+  // @deprecated Phase 4: kept for backward compat, will be removed in Phase 9.
+  // Prefer `visibility` field (CollectionVisibility enum) instead.
   isPublic    Boolean              @default(false)
   // Phase 4 - figma-make UI: replaces isPublic with a 3-state enum
   visibility  CollectionVisibility @default(PRIVATE)
