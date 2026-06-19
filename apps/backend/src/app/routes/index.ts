@@ -30,7 +30,6 @@ import healthRoutes from "./health.routes";
 
 // Legacy route handlers (to be migrated into feature modules under app/modules/*)
 // Placeholder imports for other route groups can be added as they are modularized
-// import papersRouter from "../../routes/papers"; // TODO: migrate into app/modules/Paper
 
 const router: import("express").Router = express.Router();
 
