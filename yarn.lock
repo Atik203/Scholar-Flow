@@ -6174,6 +6174,7 @@ __metadata:
     "@tiptap/pm": "npm:^3.26.0"
     "@tiptap/react": "npm:^3.26.0"
     "@tiptap/starter-kit": "npm:^3.26.0"
+    "@types/eslint-plugin-jsx-a11y": "npm:^6"
     "@types/file-saver": "npm:^2"
     "@types/html-docx-js": "npm:^0"
     "@types/lodash.throttle": "npm:^4.1.9"
@@ -6194,6 +6195,7 @@ __metadata:
     embla-carousel-react: "npm:^8.6.0"
     eslint: "npm:^9"
     eslint-config-next: "npm:^16.2.9"
+    eslint-plugin-jsx-a11y: "npm:^6.10.2"
     file-saver: "npm:^2.0.5"
     html-docx-js: "npm:^0.3.1"
     html2canvas: "npm:^1.4.1"
@@ -8040,6 +8042,15 @@ __metadata:
   version: 3.0.2
   resolution: "@types/d3-timer@npm:3.0.2"
   checksum: 10c0/c644dd9571fcc62b1aa12c03bcad40571553020feeb5811f1d8a937ac1e65b8a04b759b4873aef610e28b8714ac71c9885a4d6c127a048d95118f7e5b506d9e1
+  languageName: node
+  linkType: hard
+
+"@types/eslint-plugin-jsx-a11y@npm:^6":
+  version: 6.10.1
+  resolution: "@types/eslint-plugin-jsx-a11y@npm:6.10.1"
+  dependencies:
+    eslint: "npm:^9"
+  checksum: 10c0/fe2ce003279f046225fc8ce5ea9b621254f0b6cf6577ea03da4cdd436c6780a7e1565308c2b3406851f5bb6abda0e9e2694f75dc462d8915f031854b10824012
   languageName: node
   linkType: hard
 
@@ -12271,7 +12282,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-jsx-a11y@npm:^6.10.0":
+"eslint-plugin-jsx-a11y@npm:^6.10.0, eslint-plugin-jsx-a11y@npm:^6.10.2":
   version: 6.10.2
   resolution: "eslint-plugin-jsx-a11y@npm:6.10.2"
   dependencies:
