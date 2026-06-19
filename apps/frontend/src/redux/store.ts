@@ -10,7 +10,6 @@ import {
   REHYDRATE,
 } from "redux-persist";
 import { apiSlice } from "./api/apiSlice";
-import { phase2Api } from "./api/phase2Api";
 import authReducer from "./auth/authSlice";
 
 // Create a noop storage for SSR
@@ -59,7 +58,6 @@ const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
-  [phase2Api.reducerPath]: phase2Api.reducer,
 });
 
 export const makeStore = () => {
@@ -94,7 +92,7 @@ export const makeStore = () => {
             "api.config",
           ],
         },
-      }).concat(apiSlice.middleware, phase2Api.middleware),
+      }).concat(apiSlice.middleware),
     devTools: process.env.NODE_ENV !== "production",
   });
 };

@@ -99,7 +99,6 @@ export interface UsageReport {
 }
 
 export const analyticsApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["Analytics"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       getPersonalAnalytics: builder.query<

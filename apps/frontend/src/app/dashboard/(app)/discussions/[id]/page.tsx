@@ -52,7 +52,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
   if (isLoading) {
     return <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20" />)}</div>;
   }
-  if (!data?.data) {
+  if (!data) {
     return (
       <div className="text-center py-20 space-y-4">
         <MessageSquare className="h-12 w-12 mx-auto text-muted-foreground" />
@@ -62,7 +62,7 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
     );
   }
 
-  const thread = data.data;
+  const thread = data;
   const messages = (thread.messages || []).filter((m: any) => !m.parentId);
   const userName = "You";
 

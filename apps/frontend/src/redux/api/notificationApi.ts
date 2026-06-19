@@ -88,7 +88,6 @@ export interface NotificationPreferences {
 }
 
 export const notificationApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["Notification", "NotificationSettings"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       getNotifications: builder.query<

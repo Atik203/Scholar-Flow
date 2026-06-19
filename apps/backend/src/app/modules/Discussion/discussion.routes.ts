@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { DiscussionService } from "../services/discussion.service";
-import { authMiddleware } from "../middleware/auth";
-import { validateRequest } from "../middleware/validateRequest";
+import { DiscussionService } from "../../services/discussion.service";
+import { authMiddleware } from "../../middleware/auth";
+import { validateRequest } from "../../middleware/validateRequest";
 import { z } from "zod";
 
 const router: Router = Router();

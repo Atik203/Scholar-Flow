@@ -51,7 +51,7 @@ export const authMiddleware = async (
       console.log("Auth Middleware - Token email:", decoded.email);
     }
 
-    // Get user from database using standard Prisma client
+    // Get user from database with single OR query (optimized from two-round-trip fallback)
     const userId = decoded.sub || decoded.id;
     const userEmail = decoded.email;
 
@@ -59,46 +59,22 @@ export const authMiddleware = async (
       throw new ApiError(401, "Invalid token: missing user identifier");
     }
 
-    let user: Record<string, unknown> | null = null;
+    const orConditions: Record<string, unknown>[] = [];
 
     if (userId) {
-      user = await prisma.user.findFirst({
-        where: { id: userId, isDeleted: false },
-        select: { id: true, email: true, role: true, isDeleted: true },
-      });
-      if (DEBUG_AUTH) {
-        console.log(
-          "Auth Middleware - Lookup by id result:",
-          user ? "found" : "not found"
-        );
-      }
+      orConditions.push({ id: userId, isDeleted: false });
+    }
+    if (userEmail) {
+      orConditions.push({ email: userEmail, isDeleted: false });
+    }
 
-      // Fallback to email if id lookup failed but email is present in token
-      if (!user && userEmail) {
-        if (DEBUG_AUTH) {
-          console.log("Auth Middleware - Fallback to email lookup:", userEmail);
-        }
-        user = await prisma.user.findFirst({
-          where: { email: userEmail, isDeleted: false },
-          select: { id: true, email: true, role: true, isDeleted: true },
-        });
-        if (DEBUG_AUTH) {
-          console.log(
-            "Auth Middleware - Lookup by email result:",
-            user ? "found" : "not found"
-          );
-        }
-      }
-    } else if (userEmail) {
-      console.log("Auth Middleware - Primary email lookup:", userEmail);
-      user = await prisma.user.findFirst({
-        where: { email: userEmail, isDeleted: false },
-        select: { id: true, email: true, role: true, isDeleted: true },
-      });
-      console.log(
-        "Auth Middleware - Lookup by email result:",
-        user ? "found" : "not found"
-      );
+    const user = await prisma.user.findFirst({
+      where: { OR: orConditions },
+      select: { id: true, email: true, role: true, isDeleted: true },
+    });
+
+    if (DEBUG_AUTH) {
+      console.log("Auth Middleware - User lookup result:", user ? "found" : "not found");
     }
 
     if (!user) {

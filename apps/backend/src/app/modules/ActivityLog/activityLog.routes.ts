@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { ActivityLogService } from "../services/activityLog.service";
-import { authMiddleware } from "../middleware/auth";
-import { validateRequest } from "../middleware/validateRequest";
+import { ActivityLogService } from "../../services/activityLog.service";
+import { authMiddleware } from "../../middleware/auth";
+import { validateRequest } from "../../middleware/validateRequest";
 import { z } from "zod";
 
 const router: Router = Router();

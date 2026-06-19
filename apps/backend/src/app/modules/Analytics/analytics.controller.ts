@@ -3,9 +3,9 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendSuccessResponse } from "../../shared/sendResponse";
-import personalAnalyticsService from "./personal.service";
-import usageReportsService from "./usage.service";
-import workspaceAnalyticsService from "./workspace.service";
+import { personalAnalyticsService } from "./personal.service";
+import { usageReportsService } from "./usage.service";
+import { workspaceAnalyticsService } from "./workspace.service";
 
 export const analyticsController = {
   personal: catchAsync(async (req: Request, res: Response) => {

@@ -2,7 +2,7 @@ import { Prisma } from "../shared/prisma";
 import mammoth from "mammoth";
 import pdf from "pdf-parse";
 import { aiService } from "../modules/AI/ai.service";
-import { StorageService } from "../modules/papers/StorageService";
+import { StorageService } from "../modules/Papers/storage.service";
 import prisma from "../shared/prisma";
 import { docxToPdfService } from "./docxToPdfService";
 

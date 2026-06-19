@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { z } from "zod";
-import { authMiddleware } from "../middleware/auth";
-import { validateRequest } from "../middleware/validateRequest";
-import { CitationExportService } from "../services/citationExport.service";
+import { authMiddleware } from "../../middleware/auth";
+import { validateRequest } from "../../middleware/validateRequest";
+import { CitationExportService } from "../../services/citationExport.service";
 
 const router: Router = Router();
 

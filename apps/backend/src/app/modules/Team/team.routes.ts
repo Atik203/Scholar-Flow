@@ -5,7 +5,7 @@ import { rateLimiter } from "../../middleware/rateLimiter";
 import { requireRole, requireTeamLead } from "../../middleware/requireRole";
 import { validateRequestBody, validateRequestParams } from "../../middleware/validateRequest";
 import { USER_ROLES } from "../Auth/auth.constant";
-import teamController from "./team.controller";
+import { teamController } from "./team.controller";
 import {
   inviteTeamMemberSchema,
   teamInvitationParamsSchema,

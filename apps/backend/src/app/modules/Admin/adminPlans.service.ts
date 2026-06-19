@@ -54,4 +54,3 @@ export const adminPlansService = {
   },
 };
 
-export default adminPlansService;
