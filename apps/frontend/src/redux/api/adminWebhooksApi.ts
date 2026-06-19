@@ -44,7 +44,6 @@ export interface WebhookEventDescriptor {
 }
 
 export const adminWebhooksApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminWebhook"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listEventTypes: builder.query<
