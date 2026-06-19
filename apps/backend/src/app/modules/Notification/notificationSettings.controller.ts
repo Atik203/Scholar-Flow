@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendSuccessResponse } from "../../shared/sendResponse";
-import notificationSettingsService from "./notificationSettings.service";
+import { notificationSettingsService } from "./notificationSettings.service";
 import { notificationSettingsUpdateSchema } from "./notificationSettings.validation";
 
 export const notificationSettingsController = {

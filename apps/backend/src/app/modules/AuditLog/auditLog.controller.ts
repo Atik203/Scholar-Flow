@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
-import auditLogService from "./auditLog.service";
+import { auditLogService } from "./auditLog.service";
 import {
   createAuditEntrySchema,
   exportAuditLogQuerySchema,
