@@ -93,7 +93,7 @@ Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code 
 - All mutations use Zod validation + rate limiting
 
 ## Current Status
-- **Release:** 1.3.0 (2026-06-19)
+- **Release:** 1.2.7 (2026-06-19)
 - **Completed:** Phase 1-7, Next.js 16 migration, better-auth migration, Prisma v7 migration
 - **Current:** Phase 8 — Advanced Features (AI assistant, discover, integrations, enterprise)
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
