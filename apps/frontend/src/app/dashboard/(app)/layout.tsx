@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { NotificationStreamProvider } from "@/components/providers/NotificationStreamProvider";
 import { useOnboardingGuard } from "@/hooks/useAuthGuard";
 import { PropsWithChildren } from "react";
 
@@ -15,5 +16,9 @@ export default function AppDashboardLayout({ children }: PropsWithChildren) {
     );
   }
 
-  return <DashboardLayout variant="app">{children}</DashboardLayout>;
+  return (
+    <NotificationStreamProvider>
+      <DashboardLayout variant="app">{children}</DashboardLayout>
+    </NotificationStreamProvider>
+  );
 }
