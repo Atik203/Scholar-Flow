@@ -74,9 +74,13 @@ Deferred to Phase 9: TipTap rich-text editor (Phase 6 uses plain-text + markdown
 - [x] Real SSE notification broadcaster + `useNotificationStream` hook + `NotificationBell` popover
 - [x] Persisted notification settings (channels, categories, quiet hours)
 
-## Phase 8: Advanced Features
-- [ ] Global AI assistant, discover/trending, integrations, advanced search
-- [ ] `AIConversation`, `SearchQuery`, `Integration`, `EnterpriseLicense` models
+## Phase 8: Architecture Stabilization & Production Hardening ✅
+- [x] Stream A: Architecture Normalization — unified entry points (server.ts canonical), removed dead errorHandler.ts + AppError.ts + auth.controller.new.ts + Paper/ module, renamed 3 modules to PascalCase, migrated 3 routes into modules, standardized exports to named-only
+- [x] Stream B: Database Refinement — added Notification[userId, starred] index, deprecation annotations on Collection.isPublic
+- [x] Stream C: Frontend System Consolidation — killed phase2Api separate RTK instance (16 endpoints migrated), fixed all any types (6 endpoints), removed 6 redundant enhanceEndpoints calls, added ActivityLog tagType
+- [x] Stream D: UX Polish — added shared EmptyState + ErrorState components, fixed proxy.ts (28 missing public routes, dead getRoleFromCookies removed, dashboard redirect bug fixed)
+- [x] Stream E: Performance — collapsed auth middleware double-query into single OR query
+- [x] Phase 8 Features: added 14 missing figma-make pages (onboarding sub-pages, security dashboard/2FA/sessions/privacy, help center/shortcuts, settings export/integrations, citation graph, research map), 4 new backend endpoints (user export, sessions, 2FA, privacy), 2 new RTK hooks (usage export, audit export), sidebar updated with Security + Help sections
 
 ## Phase 9: Polish & Performance
 Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code splitting, tests.
@@ -93,7 +97,7 @@ Animations, responsive audit, accessibility (WCAG 2.1 AA), Lighthouse 90+, code 
 - All mutations use Zod validation + rate limiting
 
 ## Current Status
-- **Release:** 1.2.7 (2026-06-19)
-- **Completed:** Phase 1-7, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 8 — Advanced Features (AI assistant, discover, integrations, enterprise)
+- **Release:** 1.2.8 (2026-06-20)
+- **Completed:** Phase 1-8, Next.js 16 migration, better-auth migration, Prisma v7 migration
+- **Current:** Phase 9 — Polish & Performance
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
