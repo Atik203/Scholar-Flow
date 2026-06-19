@@ -36,3 +36,22 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type UpdateOnboardingInput = z.infer<typeof updateOnboardingSchema>;
 export type UpdatePreferencesInput = z.infer<typeof updatePreferencesSchema>;
+
+export const exportDataSchema = z.object({
+  format: z.enum(["csv", "json"]).default("csv"),
+});
+
+export const privacySettingsSchema = z.object({
+  profileVisibility: z.enum(["public", "private", "team"]).optional(),
+  showActivity: z.boolean().optional(),
+  allowDataSharing: z.boolean().optional(),
+  showInDiscover: z.boolean().optional(),
+});
+
+export const twoFactorSetupSchema = z.object({
+  token: z.string().length(6),
+});
+
+export type ExportDataInput = z.infer<typeof exportDataSchema>;
+export type PrivacySettingsInput = z.infer<typeof privacySettingsSchema>;
+export type TwoFactorSetupInput = z.infer<typeof twoFactorSetupSchema>;
