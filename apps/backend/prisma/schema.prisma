@@ -1168,6 +1168,8 @@ model UserPreference {
   defaultCitationStyle String   @default("APA")
   compactMode          Boolean  @default(false)
   metadata             Json?    @db.JsonB
+  // Phase 7 - Notification preferences (channels, categories, quiet hours)
+  notificationPreferences Json? @db.JsonB
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
