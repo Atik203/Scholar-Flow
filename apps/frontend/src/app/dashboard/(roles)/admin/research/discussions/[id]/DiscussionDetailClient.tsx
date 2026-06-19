@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { useGetDiscussionThreadQuery } from "@/redux/api/phase2Api";
+import { useGetDiscussionQuery as useGetDiscussionThreadQuery } from "@/redux/api/discussionApi";
 import { ArrowLeft, MessageSquare, Pin, CheckCircle, Reply, MoreHorizontal, Edit, Trash2, Flag } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -154,8 +154,8 @@ export default function DiscussionDetailClient({ threadId }: DiscussionDetailCli
 
           {/* Replies */}
           <div className="space-y-4">
-            <h3 className="font-medium">Replies ({discussion.messages.length})</h3>
-            {discussion.messages.map((message: any) => (
+            <h3 className="font-medium">Replies ({discussion.messages?.length || 0})</h3>
+            {discussion.messages?.map((message: any) => (
               <Card key={message.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -239,7 +239,7 @@ export default function DiscussionDetailClient({ threadId }: DiscussionDetailCli
               <div>
                 <div className="text-sm font-medium">Participants</div>
                 <div className="text-sm text-muted-foreground">
-                  {discussion.participants.length} members
+                  {discussion.participants?.length || 0} members
                 </div>
               </div>
               <div>
@@ -269,7 +269,7 @@ export default function DiscussionDetailClient({ threadId }: DiscussionDetailCli
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {discussion.participants.map((participant: any) => (
+                {discussion.participants?.map((participant: any) => (
                   <div key={participant.id} className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
                       {participant.name.split(' ').map((n: string) => n[0]).join('')}

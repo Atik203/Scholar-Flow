@@ -2,9 +2,9 @@ import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import config from "../../config";
-import emailService from "../../shared/emailService";
+import { emailService } from "../../shared/emailService";
 import prisma from "../../shared/prisma";
-import tokenService from "../../shared/tokenService";
+import { tokenService } from "../../shared/tokenService";
 import { Prisma } from "../../../generated/prisma/client";
 import {
   AUTH_ERROR_MESSAGES,

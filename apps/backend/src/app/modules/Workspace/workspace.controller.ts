@@ -6,7 +6,7 @@ import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
-import WorkspaceService from "./workspace.service";
+import { WorkspaceService } from "./workspace.service";
 import {
   addMemberSchema,
   createWorkspaceSchema,
@@ -323,6 +323,24 @@ export const workspaceController = {
       result.meta,
       "Workspace collections retrieved"
     );
+  }),
+
+  // Phase 9 — Public invitation endpoints
+  getInvitationByToken: catchAsync(async (req: Request, res: Response) => {
+    const result = await WorkspaceService.getInvitationByToken(req.params.token);
+    sendSuccessResponse(res, result, "Invitation details retrieved");
+  }),
+
+  acceptInvitationByToken: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    const result = await WorkspaceService.acceptInvitationByToken(authReq.user.id, req.params.token);
+    sendSuccessResponse(res, result, "Invitation accepted");
+  }),
+
+  declineInvitationByToken: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as any;
+    const result = await WorkspaceService.declineInvitationByToken(authReq.user.id, req.params.token);
+    sendSuccessResponse(res, result, "Invitation declined");
   }),
 };
 

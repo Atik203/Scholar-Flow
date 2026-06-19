@@ -5,7 +5,7 @@
 
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import AppError from "../../errors/AppError";
+import ApiError from "../../errors/ApiError";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { AsyncRequestHandler } from "../../types/express";
@@ -67,7 +67,7 @@ interface UserData {
 function generateAccessToken(user: UserData): string {
   const jwtSecret = process.env.NEXTAUTH_SECRET;
   if (!jwtSecret) {
-    throw new AppError(500, "JWT secret not configured");
+    throw new ApiError(500, "JWT secret not configured");
   }
 
   return jwt.sign(
@@ -98,7 +98,7 @@ export const initiateGoogleOAuth: AsyncRequestHandler = catchAsync(
     const redirectUri = `${frontendUrl}/auth/callback/google`;
 
     if (!googleClientId) {
-      throw new AppError(500, "Google OAuth not configured");
+      throw new ApiError(500, "Google OAuth not configured");
     }
 
     const googleAuthUrl = new URL(
@@ -132,7 +132,7 @@ export const initiateGitHubOAuth: AsyncRequestHandler = catchAsync(
     const redirectUri = `${frontendUrl}/auth/callback/github`;
 
     if (!githubClientId) {
-      throw new AppError(500, "GitHub OAuth not configured");
+      throw new ApiError(500, "GitHub OAuth not configured");
     }
 
     const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
@@ -156,7 +156,7 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
     const code = req.body.code || (req.query.code as string);
 
     if (!code) {
-      throw new AppError(400, "Authorization code is required");
+      throw new ApiError(400, "Authorization code is required");
     }
 
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -165,7 +165,7 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
     const redirectUri = `${frontendUrl}/auth/callback/google`;
 
     if (!googleClientId || !googleClientSecret) {
-      throw new AppError(500, "Google OAuth not configured");
+      throw new ApiError(500, "Google OAuth not configured");
     }
 
     // Exchange code for tokens
@@ -202,7 +202,7 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
         error: errorData,
         redirectUri,
       });
-      throw new AppError(401, errorMessage);
+      throw new ApiError(401, errorMessage);
     }
 
     const tokens = (await tokenResponse.json()) as GoogleTokenResponse;
@@ -216,7 +216,7 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
     );
 
     if (!profileResponse.ok) {
-      throw new AppError(401, "Failed to fetch user profile");
+      throw new ApiError(401, "Failed to fetch user profile");
     }
 
     const profile = (await profileResponse.json()) as GoogleProfile;
@@ -272,7 +272,7 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
     const code = req.body.code || (req.query.code as string);
 
     if (!code) {
-      throw new AppError(400, "Authorization code is required");
+      throw new ApiError(400, "Authorization code is required");
     }
 
     const githubClientId = process.env.GITHUB_CLIENT_ID;
@@ -281,7 +281,7 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
     const redirectUri = `${frontendUrl}/auth/callback/github`;
 
     if (!githubClientId || !githubClientSecret) {
-      throw new AppError(500, "GitHub OAuth not configured");
+      throw new ApiError(500, "GitHub OAuth not configured");
     }
 
     // Exchange code for tokens
@@ -323,14 +323,14 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
         error: errorData,
         redirectUri,
       });
-      throw new AppError(401, errorMessage);
+      throw new ApiError(401, errorMessage);
     }
 
     const tokens = (await tokenResponse.json()) as GitHubTokenResponse;
 
     if (tokens.error) {
       console.error("❌ GitHub OAuth error in token response:", tokens);
-      throw new AppError(401, tokens.error_description || "OAuth failed");
+      throw new ApiError(401, tokens.error_description || "OAuth failed");
     }
 
     // Get user profile
@@ -342,7 +342,7 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
     });
 
     if (!profileResponse.ok) {
-      throw new AppError(401, "Failed to fetch user profile");
+      throw new ApiError(401, "Failed to fetch user profile");
     }
 
     const profile = (await profileResponse.json()) as GitHubProfile;

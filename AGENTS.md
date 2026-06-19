@@ -40,7 +40,7 @@ This project supports multiple AI models with prefix caching:
 ## Product
 Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
 Target users: researchers, students, professors, academic teams.
-Version: 1.2.6 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
+Version: 1.2.9 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
 
 Core features:
 - Research paper upload with AI metadata extraction (title/author/abstract)

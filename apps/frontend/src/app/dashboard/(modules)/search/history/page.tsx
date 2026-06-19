@@ -53,10 +53,10 @@ export default function SearchHistoryPage() {
                     <div className="font-medium truncate pr-4">{item.query}</div>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
                       <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}</span>
-                      {item.filters?.type && (
+                      {Boolean(item.filters?.type) && (
                         <>
                           <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                          <span className="capitalize">Type: {item.filters.type}</span>
+                          <span className="capitalize">Type: {String(item.filters?.type)}</span>
                         </>
                       )}
                     </div>

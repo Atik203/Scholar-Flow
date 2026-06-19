@@ -4,10 +4,10 @@ export type DiscussionScope = "all" | "general" | "workspace" | "paper" | "colle
 
 export interface DiscussionAuthor {
   id: string;
-  name?: string | null;
-  firstName?: string | null;
-  lastName?: string | null;
-  image?: string | null;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  image?: string;
 }
 
 export interface DiscussionMessage {
@@ -37,13 +37,15 @@ export interface DiscussionThread {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  author: DiscussionAuthor;
   user: DiscussionAuthor;
-  paper?: { id: string; title: string } | null;
-  collection?: { id: string; name: string } | null;
-  workspace?: { id: string; name: string } | null;
-  lastReply?: LastReply | null;
-  _count?: { messages: number };
+  paper?: { id: string; title: string };
+  collection?: { id: string; name: string };
+  workspace?: { id: string; name: string };
+  lastReply?: LastReply;
+  _count: { messages: number };
   messages?: DiscussionMessage[];
+  participants?: DiscussionAuthor[];
 }
 
 export interface CreateGeneralDiscussionRequest {
@@ -85,6 +87,33 @@ export interface ListMineQuery {
   offset?: number;
 }
 
+export type ActivitySeverity = "INFO" | "WARNING" | "ERROR" | "CRITICAL";
+
+export interface ActivityLogEntry {
+  id: string;
+  entity: string;
+  entityId: string;
+  action: string;
+  details?: Record<string, unknown>;
+  severity: ActivitySeverity;
+  createdAt: string;
+  user?: DiscussionAuthor | null;
+  workspace?: { id: string; name: string } | null;
+}
+
+export interface ActivityLogFilters {
+  userId?: string;
+  workspaceId?: string;
+  entity?: string;
+  entityId?: string;
+  action?: string;
+  severity?: ActivitySeverity;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export const discussionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Personal feed (Phase 6)
@@ -118,9 +147,41 @@ export const discussionApi = apiSlice.injectEndpoints({
           : [{ type: "Discussion" as const, id: "LIST" }],
     }),
 
-    getDiscussion: builder.query<{ data: DiscussionThread }, string>({
+    listAllDiscussions: builder.query<
+      { threads: DiscussionThread[]; total: number },
+      {
+        paperId?: string;
+        collectionId?: string;
+        workspaceId?: string;
+        isResolved?: boolean;
+        isPinned?: boolean;
+        tags?: string[];
+        limit?: number;
+        offset?: number;
+      }
+    >({
+      query: (params = {}) => ({
+        url: "/discussions",
+        params,
+      }),
+      transformResponse: (response: {
+        data: { threads: DiscussionThread[]; total: number };
+      }) => response.data,
+      providesTags: (result) =>
+        result?.threads
+          ? [
+              ...result.threads.map((t) => ({
+                type: "Discussion" as const,
+                id: t.id,
+              })),
+              { type: "Discussion" as const, id: "LIST" },
+            ]
+          : [{ type: "Discussion" as const, id: "LIST" }],
+    }),
+
+    getDiscussion: builder.query<DiscussionThread, string>({
       query: (id) => `/discussions/${id}`,
-      transformResponse: (response: { data: DiscussionThread }) => response,
+      transformResponse: (response: { data: DiscussionThread }) => response.data,
       providesTags: (result, error, id) => [
         { type: "Discussion", id },
       ],
@@ -213,11 +274,78 @@ export const discussionApi = apiSlice.injectEndpoints({
         { type: "DiscussionMessage" as const, id: `THREAD-${threadId}` },
       ],
     }),
+
+    updateMessage: builder.mutation<
+      { data: DiscussionMessage },
+      { messageId: string; content: string }
+    >({
+      query: ({ messageId, content }) => ({
+        url: `/discussions/messages/${messageId}`,
+        method: "PUT",
+        body: { content },
+      }),
+      transformResponse: (response: { data: DiscussionMessage }) => response,
+      invalidatesTags: ["DiscussionMessage"],
+    }),
+
+    deleteMessage: builder.mutation<{ success: boolean }, string>({
+      query: (messageId) => ({
+        url: `/discussions/messages/${messageId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["DiscussionMessage"],
+    }),
+
+    // Activity Log
+    getActivityLog: builder.query<
+      { entries: ActivityLogEntry[]; total: number },
+      ActivityLogFilters
+    >({
+      query: (filters) => ({ url: "/activity-log", params: filters }),
+      providesTags: ["ActivityLog"],
+    }),
+
+    getActivitySummary: builder.query<
+      {
+        totalActivities: number;
+        activitiesByType: { [key: string]: number };
+        activitiesBySeverity: { [key: string]: number };
+        recentActivities: ActivityLogEntry[];
+        trends: { [key: string]: number };
+      },
+      { workspaceId?: string; days?: number }
+    >({
+      query: ({ workspaceId, days = 7 } = {}) => ({
+        url: "/activity-log/summary",
+        params: { workspaceId, days },
+      }),
+      providesTags: ["ActivityLog"],
+    }),
+
+    getEntityActivity: builder.query<
+      ActivityLogEntry[],
+      { entity: string; entityId: string }
+    >({
+      query: ({ entity, entityId }) => ({
+        url: `/activity-log/entity/${entity}/${entityId}`,
+      }),
+      providesTags: (result, error, { entity, entityId }) => [
+        { type: "ActivityLog", id: `${entity}-${entityId}` },
+      ],
+    }),
+
+    exportActivityLog: builder.query<
+      { content: string; filename: string },
+      ActivityLogFilters & { format?: "json" | "csv" }
+    >({
+      query: (filters) => ({ url: "/activity-log/export", params: filters }),
+    }),
   }),
 });
 
 export const {
   useListMyDiscussionsQuery,
+  useListAllDiscussionsQuery,
   useGetDiscussionQuery,
   useCreateGeneralDiscussionMutation,
   useCreateDiscussionMutation,
@@ -226,4 +354,10 @@ export const {
   useTogglePinMutation,
   useToggleResolveMutation,
   useCreateMessageMutation,
+  useUpdateMessageMutation,
+  useDeleteMessageMutation,
+  useGetActivityLogQuery,
+  useGetActivitySummaryQuery,
+  useGetEntityActivityQuery,
+  useLazyExportActivityLogQuery,
 } = discussionApi;

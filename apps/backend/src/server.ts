@@ -69,9 +69,19 @@ app.use(
 app.use(compression() as unknown as RequestHandler);
 
 // CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000",
+  "https://scholar-flow-ai.vercel.app",
+];
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }) as unknown as RequestHandler
 );
@@ -126,12 +136,22 @@ if (config.env !== "production") {
 import { performanceMonitor } from "./app/middleware/performanceMonitor";
 app.use(performanceMonitor as unknown as RequestHandler);
 
+// Cache control for GET API responses (Phase 9 Lighthouse optimization)
+const cacheControlMiddleware: import("express").RequestHandler = (req, res, next) => {
+  if (req.method === "GET" && req.path.startsWith("/api/")) {
+    res.set("Cache-Control", "private, max-age=30");
+    res.set("Vary", "Authorization");
+  }
+  next();
+};
+app.use(cacheControlMiddleware);
+
 // Root endpoint
 const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.1.5",
+    version: "1.2.9",
     documentation: "/docs",
     api: "/api",
     health: "/health",

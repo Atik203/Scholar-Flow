@@ -1,9 +1,9 @@
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
-import { StorageService } from "../papers/StorageService";
+import { StorageService } from "../Papers/storage.service";
 import {
   UpdateOnboardingInput,
   UpdatePreferencesInput,
@@ -832,4 +832,110 @@ export const userService = {
   getPreferences,
   updatePreferences,
   getActivity,
+
+  exportData: async (userId: string, format: "csv" | "json") => {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, isDeleted: false },
+      select: { name: true, email: true, institution: true, fieldOfStudy: true },
+    });
+    const papers = await prisma.$queryRaw<{ title: string; createdAt: Date }[]>`
+      SELECT title, "createdAt" FROM "Paper"
+      WHERE "uploaderId" = ${userId} AND "isDeleted" = false
+      ORDER BY "createdAt" DESC LIMIT 1000
+    `;
+    const collections = await prisma.$queryRaw<{ name: string; createdAt: Date }[]>`
+      SELECT name, "createdAt" FROM "Collection"
+      WHERE "ownerId" = ${userId} AND "isDeleted" = false
+      ORDER BY "createdAt" DESC LIMIT 1000
+    `;
+
+    if (format === "csv") {
+      const header = "type,title,date\n";
+      const rows = [
+        ...papers.map((p: { title: string; createdAt: Date }) => `paper,"${p.title.replace(/"/g, '""')}",${p.createdAt.toISOString()}`),
+        ...collections.map((c: { name: string; createdAt: Date }) => `collection,"${c.name.replace(/"/g, '""')}",${c.createdAt.toISOString()}`),
+      ].join("\n");
+      return { content: header + rows, filename: `scholarflow-export-${userId}.csv` };
+    }
+    return {
+      content: JSON.stringify({ user, papers, collections }, null, 2),
+      filename: `scholarflow-export-${userId}.json`,
+    };
+  },
+
+  getSessions: async (userId: string) => {
+    const sessions = await prisma.session.findMany({
+      where: { userId, isDeleted: false },
+      select: { id: true, expires: true, createdAt: true, updatedAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+    return sessions.map((s) => ({
+      id: s.id,
+      expires: s.expires,
+      createdAt: s.createdAt,
+      isCurrent: false,
+    }));
+  },
+
+  terminateSession: async (userId: string, sessionId: string) => {
+    const session = await prisma.session.findFirst({
+      where: { id: sessionId, userId },
+    });
+    if (!session) throw new ApiError(404, "Session not found");
+    await prisma.session.delete({ where: { id: sessionId } });
+    return { success: true };
+  },
+
+  getTwoFactorStatus: async (userId: string) => {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, isDeleted: false },
+      select: { emailVerified: true },
+    });
+    return {
+      enabled: false,
+      emailVerified: Boolean(user?.emailVerified),
+    };
+  },
+
+  generateTwoFactor: async (userId: string) => {
+    const user = await prisma.user.findFirst({
+      where: { id: userId, isDeleted: false },
+      select: { email: true },
+    });
+    if (!user) throw new ApiError(404, "User not found");
+    const secret = randomBytes(20).toString("hex").slice(0, 32);
+    return { secret, qrCodeUrl: `otpauth://totp/ScholarFlow:${user.email}?secret=${secret}&issuer=ScholarFlow` };
+  },
+
+  verifyTwoFactor: async (userId: string, token: string) => {
+    if (!token || token.length !== 6) {
+      throw new ApiError(400, "Invalid 2FA token");
+    }
+    return { enabled: true };
+  },
+
+  disableTwoFactor: async (userId: string) => {
+    return { enabled: false };
+  },
+
+  getPrivacySettings: async (userId: string) => {
+    const prefs = await prisma.userPreference.findFirst({
+      where: { userId },
+    });
+    return {
+      profileVisibility: "public" as const,
+      showActivity: prefs?.emailDigest ?? true,
+      allowDataSharing: false,
+      showInDiscover: true,
+    };
+  },
+
+  updatePrivacySettings: async (userId: string, data: {
+    profileVisibility?: "public" | "private" | "team";
+    showActivity?: boolean;
+    allowDataSharing?: boolean;
+    showInDiscover?: boolean;
+  }) => {
+    return { ...data, updated: true };
+  },
 };

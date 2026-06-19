@@ -95,4 +95,3 @@ export const adminPaymentsService = {
   },
 };
 
-export default adminPaymentsService;

@@ -4,12 +4,12 @@ import {
   getAvailableRoutes,
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
-import { annotationRoutes } from "../modules/annotations/annotation.routes";
+import { annotationRoutes } from "../modules/Annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { billingRoutes } from "../modules/Billing/billing.routes";
 import { collectionRoutes } from "../modules/Collection/collection.routes";
-import { editorPaperRoutes, paperRoutes } from "../modules/papers/paper.routes";
-import { noteRoutes } from "../modules/notes/note.routes";
+import { editorPaperRoutes, paperRoutes } from "../modules/Papers/paper.routes";
+import { noteRoutes } from "../modules/Notes/note.routes";
 import { notebookRoutes } from "../modules/Notebook/notebook.routes";
 import { reportRoutes } from "../modules/Reports/report.routes";
 import { auditLogRoutes } from "../modules/AuditLog/auditLog.routes";
@@ -23,14 +23,11 @@ import { searchRoutes } from "../modules/Search/search.routes";
 import { recommendationRoutes } from "../modules/Recommendation/recommendation.routes";
 import { importRoutes } from "../modules/Import/import.routes";
 import { teamRoutes } from "../modules/Team/team.routes";
-import { citationRoutes } from "./citation.routes";
-import { discussionRoutes } from "./discussion.routes";
-import { activityLogRoutes } from "./activityLog.routes";
+import { citationRoutes } from "../modules/CitationExport/citationExport.routes";
+import { discussionRoutes } from "../modules/Discussion/discussion.routes";
+import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
+import { invitationRoutes } from "./invitation.routes";
 import healthRoutes from "./health.routes";
-
-// Legacy route handlers (to be migrated into feature modules under app/modules/*)
-// Placeholder imports for other route groups can be added as they are modularized
-// import papersRouter from "../../routes/papers"; // TODO: migrate into app/modules/Paper
 
 const router: import("express").Router = express.Router();
 
@@ -77,7 +74,7 @@ router.use("/admin/audit-log", auditLogRoutes);
 router.use("/admin/webhooks", webhookRoutes);
 router.use("/analytics", analyticsRoutes);
 
-// Legacy flat routes (will be refactored into modules)
-// router.use("/papers", papersRouter);
+// Phase 9 — Public invitation endpoints
+router.use("/invitations", invitationRoutes);
 
 export default router;

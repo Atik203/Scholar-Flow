@@ -274,4 +274,3 @@ export const auditLogService = {
   },
 };
 
-export default auditLogService;

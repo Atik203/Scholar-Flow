@@ -99,7 +99,6 @@ export interface UsageReport {
 }
 
 export const analyticsApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["Analytics"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       getPersonalAnalytics: builder.query<
@@ -157,6 +156,16 @@ export const analyticsApi = apiSlice
         }),
         providesTags: ["Analytics"],
       }),
+
+      exportUsageAnalytics: builder.query<
+        { content: string; filename: string; format: string },
+        { format?: "csv" | "json" }
+      >({
+        query: ({ format = "csv" } = {}) => ({
+          url: "/analytics/usage/export",
+          params: { format },
+        }),
+      }),
     }),
   });
 
@@ -166,4 +175,5 @@ export const {
   useStopReadingSessionMutation,
   useGetWorkspaceAnalyticsQuery,
   useGetUsageReportQuery,
+  useLazyExportUsageAnalyticsQuery,
 } = analyticsApi;

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import AppError from "../../errors/AppError";
+import ApiError from "../../errors/ApiError";
 import { AuthRequest } from "../../middleware/auth";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
@@ -32,7 +32,7 @@ class AuthController {
       // Generate JWT access token
       const jwtSecret = process.env.NEXTAUTH_SECRET;
       if (!jwtSecret) {
-        throw new AppError(500, "JWT secret not configured");
+        throw new ApiError(500, "JWT secret not configured");
       }
 
       const accessToken = jwt.sign(
@@ -96,7 +96,7 @@ class AuthController {
       // Generate JWT access token for immediate login after registration
       const jwtSecret = process.env.NEXTAUTH_SECRET;
       if (!jwtSecret) {
-        throw new AppError(500, "JWT secret not configured");
+        throw new ApiError(500, "JWT secret not configured");
       }
 
       const accessToken = jwt.sign(
@@ -174,7 +174,7 @@ class AuthController {
       const roleData = req.body as IRoleUpdateData;
       const adminUserId = req.user?.id;
       if (!adminUserId) {
-        throw new AppError(401, "User not authenticated");
+        throw new ApiError(401, "User not authenticated");
       }
 
       const updatedUser = await authService.updateUserRole(
@@ -203,7 +203,7 @@ class AuthController {
       const filters = req.query as IUserFilters;
       const requestingUserId = req.user?.id;
       if (!requestingUserId) {
-        throw new AppError(401, "User not authenticated");
+        throw new ApiError(401, "User not authenticated");
       }
 
       const users = await authService.getAllUsers(requestingUserId, filters);
@@ -481,7 +481,7 @@ class AuthController {
 
       const jwtSecret = process.env.NEXTAUTH_SECRET;
       if (!jwtSecret) {
-        throw new AppError(500, "JWT secret not configured");
+        throw new ApiError(500, "JWT secret not configured");
       }
 
       const accessToken = jwt.sign(

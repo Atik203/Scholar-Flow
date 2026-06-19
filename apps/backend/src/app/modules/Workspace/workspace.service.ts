@@ -881,6 +881,73 @@ export class WorkspaceService {
       },
     };
   }
+
+  // Public invitation endpoints (Phase 9)
+  static async getInvitationByToken(invitationId: string) {
+    const inv = await prisma.$queryRaw<any[]>`
+      SELECT wi.id, wi.role, wi.status, wi."workspaceId",
+             w.name as "workspaceName",
+             inviter.name as "inviterName", inviter.email as "inviterEmail",
+             inviter."firstName", inviter."lastName"
+      FROM "WorkspaceInvitation" wi
+      JOIN "Workspace" w ON w.id = wi."workspaceId"
+      JOIN "User" inviter ON inviter.id = wi."invitedById"
+      WHERE wi.id = ${invitationId} AND wi."isDeleted" = false AND wi.status = 'PENDING'
+    `;
+    if (!inv[0]) throw new ApiError(404, "Invitation not found or already processed");
+    return {
+      id: inv[0].id,
+      workspaceName: inv[0].workspaceName,
+      inviterName: inv[0].firstName && inv[0].lastName
+        ? `${inv[0].firstName} ${inv[0].lastName}`
+        : inv[0].inviterName || inv[0].inviterEmail,
+      role: inv[0].role,
+      workspaceId: inv[0].workspaceId,
+    };
+  }
+
+  static async acceptInvitationByToken(userId: string, invitationId: string) {
+    const inv = await prisma.$queryRaw<any[]>`
+      SELECT id, role, "workspaceId", "userId", status
+      FROM "WorkspaceInvitation"
+      WHERE id = ${invitationId} AND "isDeleted" = false
+    `;
+    if (!inv[0]) throw new ApiError(404, "Invitation not found");
+    if (inv[0].userId !== userId) throw new ApiError(403, "This invitation is not for your account");
+    if (inv[0].status !== "PENDING") throw new ApiError(400, "Invitation already processed");
+
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET status = 'ACCEPTED', "acceptedAt" = now()
+        WHERE id = ${invitationId}
+      `;
+      await tx.$executeRaw`
+        INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${inv[0].workspaceId}, ${userId}, ${inv[0].role}, now(), now(), now(), false)
+        ON CONFLICT ("workspaceId", "userId") DO UPDATE SET role = ${inv[0].role}, "isDeleted" = false, "joinedAt" = now()
+      `;
+      await tx.$executeRaw`
+        INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${userId}, ${inv[0].workspaceId}, 'Workspace', ${inv[0].workspaceId}, 'JOIN', now(), now(), false)
+      `;
+    });
+    return { success: true };
+  }
+
+  static async declineInvitationByToken(userId: string, invitationId: string) {
+    const inv = await prisma.$queryRaw<any[]>`
+      SELECT id, "userId", status FROM "WorkspaceInvitation"
+      WHERE id = ${invitationId} AND "isDeleted" = false
+    `;
+    if (!inv[0]) throw new ApiError(404, "Invitation not found");
+    if (inv[0].userId !== userId) throw new ApiError(403, "This invitation is not for your account");
+    if (inv[0].status !== "PENDING") throw new ApiError(400, "Invitation already processed");
+
+    await prisma.$queryRaw`
+      UPDATE "WorkspaceInvitation" SET status = 'DECLINED', "declinedAt" = now()
+      WHERE id = ${invitationId}
+    `;
+    return { success: true };
+  }
 }
 
-export default WorkspaceService;

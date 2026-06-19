@@ -246,4 +246,3 @@ export class SearchService {
   }
 }
 
-export default SearchService;

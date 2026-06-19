@@ -14,7 +14,7 @@ export interface SearchResultItem {
   name?: string;
   description?: string;
   abstract?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   source?: string;
   createdAt?: string;
   isPublic?: boolean;
@@ -40,14 +40,29 @@ export interface GlobalSearchResponse {
 export interface SearchHistory {
   id: string;
   query: string;
-  filters: any;
+  filters: Record<string, unknown>;
   createdAt: string;
 }
 
 export interface SearchHistoryResponse {
   success: boolean;
-  meta: any;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+  };
   data: SearchHistory[];
+}
+
+export interface SaveSearchQueryRequest {
+  query: string;
+  filters?: Record<string, unknown>;
+  results?: Record<string, unknown>;
+}
+
+export interface SaveSearchQueryResponse {
+  success: boolean;
+  data: SearchHistory;
 }
 
 export interface DiscoveryResponse {
@@ -82,7 +97,10 @@ export const searchApi = apiSlice.injectEndpoints({
       providesTags: ['SearchHistory']
     }),
     
-    saveSearchQuery: builder.mutation<any, { query: string; filters?: any; results?: any }>({
+    saveSearchQuery: builder.mutation<
+      SaveSearchQueryResponse,
+      SaveSearchQueryRequest
+    >({
       query: (body) => ({
         url: '/search/history',
         method: 'POST',

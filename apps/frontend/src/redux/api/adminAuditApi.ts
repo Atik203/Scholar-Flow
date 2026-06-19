@@ -39,7 +39,6 @@ export interface AuditSummary {
 }
 
 export const adminAuditApi = apiSlice
-  .enhanceEndpoints({ addTagTypes: ["AdminAudit"] })
   .injectEndpoints({
     endpoints: (builder) => ({
       listAuditEntries: builder.query<
@@ -82,10 +81,22 @@ export const adminAuditApi = apiSlice
         query: (params) => ({ url: "/admin/audit-log/summary", params }),
         providesTags: [{ type: "AdminAudit", id: "SUMMARY" }],
       }),
+
+      exportAuditLog: builder.query<
+        { content: string; filename: string },
+        {
+          startDate?: string;
+          endDate?: string;
+          format?: "csv" | "json";
+        }
+      >({
+        query: (params) => ({ url: "/admin/audit-log/export", params }),
+      }),
     }),
   });
 
 export const {
   useListAuditEntriesQuery,
   useGetAuditSummaryQuery,
+  useLazyExportAuditLogQuery,
 } = adminAuditApi;
