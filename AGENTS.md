@@ -224,7 +224,7 @@ Before starting any task, identify which services are involved,
 then read these files first (one read per session):
 
 Billing/Stripe task:
-  → apps/backend/src/app/ (billing or webhook routes)
+  → apps/backend/src/app/modules/Billing/ (billing or webhook routes)
   → check for stripe.webhooks.constructEvent usage
 
 S3/upload task:
@@ -234,23 +234,34 @@ S3/upload task:
 Auth task:
   → apps/frontend/lib/auth/better-auth.ts (better-auth config)
   → apps/frontend/proxy.ts (auth guards, matcher array)
-  → apps/backend/src/app/ (auth middleware, JWT verification)
+  → apps/backend/src/app/middleware/auth.ts (JWT verification)
 
 pgvector/search task:
   → apps/backend/prisma/schema.prisma (vector column definition)
   → apps/backend/src/app/ (search routes using queryRaw)
 
 TipTap/editor task:
-  → apps/frontend/components/ (editor components)
+  → apps/frontend/components/tiptap-templates/ (editor components)
   → check auto-save debounce and S3 image upload handler
 
 RTK Query task:
-  → apps/frontend/redux/ (relevant slice)
+  → apps/frontend/src/redux/api/ (relevant slice)
   → check providesTags and invalidatesTags
 
 Admin task:
-  → apps/backend/src/app/ (admin routes, metrics calculation)
+  → apps/backend/src/app/modules/Admin/ (admin routes, metrics calculation)
   → check admin role middleware
+
+Notification/Analytics task (Phase 7):
+  → apps/backend/src/app/modules/Notification/ (broadcast, SSE, settings)
+  → apps/backend/src/app/modules/Analytics/ (personal, workspace, usage, export)
+  → apps/backend/src/app/modules/Reports/ (admin reports + CSV/JSON gen)
+  → apps/backend/src/app/modules/AuditLog/ (admin audit + export)
+  → apps/backend/src/app/modules/Webhooks/ (outbound webhooks + deliveries)
+  → apps/frontend/src/hooks/useNotificationStream.ts (SSE consumer)
+  → apps/frontend/src/components/notifications/ (bell + list components)
+  → apps/frontend/src/components/analytics/ (PageHeader, StatCard, etc.)
+  → check notificationBroadcaster usage and NotificationStreamProvider mount
 
 Cache/revalidation task:
   → Check if updateTag or revalidateTag('tag','max') is appropriate
@@ -264,9 +275,9 @@ Prisma/DB task:
 
 ## Before Implementing Anything
 1. State the goal in one sentence
-2. List all services involved (S3, Stripe, pgvector, Auth, TipTap, Admin)
+2. List all services involved (S3, Stripe, pgvector, Auth, TipTap, Admin, SSE, Analytics)
 3. List exact files you will read
-4. Identify risks: breaking webhooks, losing vectors, auth bypass, S3 exposure
+4. Identify risks: breaking webhooks, losing vectors, auth bypass, S3 exposure, SSE leaks
 5. State your implementation approach
 6. THEN write code
 
@@ -550,17 +561,18 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Do not work on items from future phases unless explicitly requested
 - Mark completed items as `[x]` after implementation
 
-**Current Status:** Phase 6 Complete, Next.js 16 upgrade complete
+**Current Status:** Phase 7 Complete (Release 1.2.7), Next.js 16 upgrade complete
 - Phase 1 ✅ (Static Marketing Pages — 18-20 pages done)
 - Phase 2 ✅ (Auth & Onboarding Pages — 5-6 pages done)
 - Phase 3 ✅ (Dashboard Shell & Core Pages)
 - Phase 4 ✅ (Papers & Collections)
 - Phase 5 ✅ (Workspaces & Team)
 - Phase 6 ✅ (Discussions, Notes & Citations — Notebook hierarchy, 7 new pages, 2 new citation formats, 3 new RTK slices)
+- Phase 7 ✅ (Analytics, Notifications & Admin — Real SSE broadcaster, 8 new admin pages, 7 new user-facing pages, 8 new RTK slices, persisted notification settings, `useNotificationStream` hook + `NotificationBell` popover, 6 new Prisma models)
 - Next.js 16 migration ✅ (Async APIs, proxy.ts, React Compiler, Turbopack default)
 - better-auth migration ✅ (replaced NextAuth.js v4)
 - Prisma v7 migration ✅ (driver adapter required)
-- Current focus: Phase 7 — Analytics, Notifications & Admin
+- Current focus: Phase 8 — Advanced Features (AI assistant, discover, integrations, enterprise)
 - Framework: Next.js 16, React 19.2, Turbopack default
 - React Compiler: enabled (do not add manual memoization)
 
