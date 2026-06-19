@@ -60,6 +60,7 @@ export type UserPreferenceCountAggregateOutputType = {
   defaultCitationStyle: number
   compactMode: number
   metadata: number
+  notificationPreferences: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -102,6 +103,7 @@ export type UserPreferenceCountAggregateInputType = {
   defaultCitationStyle?: true
   compactMode?: true
   metadata?: true
+  notificationPreferences?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -189,6 +191,7 @@ export type UserPreferenceGroupByOutputType = {
   defaultCitationStyle: string
   compactMode: boolean
   metadata: runtime.JsonValue | null
+  notificationPreferences: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   _count: UserPreferenceCountAggregateOutputType | null
@@ -224,6 +227,7 @@ export type UserPreferenceWhereInput = {
   defaultCitationStyle?: Prisma.StringFilter<"UserPreference"> | string
   compactMode?: Prisma.BoolFilter<"UserPreference"> | boolean
   metadata?: Prisma.JsonNullableFilter<"UserPreference">
+  notificationPreferences?: Prisma.JsonNullableFilter<"UserPreference">
   createdAt?: Prisma.DateTimeFilter<"UserPreference"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserPreference"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -239,6 +243,7 @@ export type UserPreferenceOrderByWithRelationInput = {
   defaultCitationStyle?: Prisma.SortOrder
   compactMode?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationPreferences?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -257,6 +262,7 @@ export type UserPreferenceWhereUniqueInput = Prisma.AtLeast<{
   defaultCitationStyle?: Prisma.StringFilter<"UserPreference"> | string
   compactMode?: Prisma.BoolFilter<"UserPreference"> | boolean
   metadata?: Prisma.JsonNullableFilter<"UserPreference">
+  notificationPreferences?: Prisma.JsonNullableFilter<"UserPreference">
   createdAt?: Prisma.DateTimeFilter<"UserPreference"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UserPreference"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -272,6 +278,7 @@ export type UserPreferenceOrderByWithAggregationInput = {
   defaultCitationStyle?: Prisma.SortOrder
   compactMode?: Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
+  notificationPreferences?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserPreferenceCountOrderByAggregateInput
@@ -292,6 +299,7 @@ export type UserPreferenceScalarWhereWithAggregatesInput = {
   defaultCitationStyle?: Prisma.StringWithAggregatesFilter<"UserPreference"> | string
   compactMode?: Prisma.BoolWithAggregatesFilter<"UserPreference"> | boolean
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"UserPreference">
+  notificationPreferences?: Prisma.JsonNullableWithAggregatesFilter<"UserPreference">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"UserPreference"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"UserPreference"> | Date | string
 }
@@ -305,6 +313,7 @@ export type UserPreferenceCreateInput = {
   defaultCitationStyle?: string
   compactMode?: boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPreferenceInput
@@ -320,6 +329,7 @@ export type UserPreferenceUncheckedCreateInput = {
   defaultCitationStyle?: string
   compactMode?: boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -333,6 +343,7 @@ export type UserPreferenceUpdateInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPreferenceNestedInput
@@ -348,6 +359,7 @@ export type UserPreferenceUncheckedUpdateInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -362,6 +374,7 @@ export type UserPreferenceCreateManyInput = {
   defaultCitationStyle?: string
   compactMode?: boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -375,6 +388,7 @@ export type UserPreferenceUpdateManyMutationInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -389,6 +403,7 @@ export type UserPreferenceUncheckedUpdateManyInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -408,6 +423,7 @@ export type UserPreferenceCountOrderByAggregateInput = {
   defaultCitationStyle?: Prisma.SortOrder
   compactMode?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
+  notificationPreferences?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -479,6 +495,7 @@ export type UserPreferenceCreateWithoutUserInput = {
   defaultCitationStyle?: string
   compactMode?: boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -492,6 +509,7 @@ export type UserPreferenceUncheckedCreateWithoutUserInput = {
   defaultCitationStyle?: string
   compactMode?: boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -521,6 +539,7 @@ export type UserPreferenceUpdateWithoutUserInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -534,6 +553,7 @@ export type UserPreferenceUncheckedUpdateWithoutUserInput = {
   defaultCitationStyle?: Prisma.StringFieldUpdateOperationsInput | string
   compactMode?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  notificationPreferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -550,6 +570,7 @@ export type UserPreferenceSelect<ExtArgs extends runtime.Types.Extensions.Intern
   defaultCitationStyle?: boolean
   compactMode?: boolean
   metadata?: boolean
+  notificationPreferences?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -565,6 +586,7 @@ export type UserPreferenceSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   defaultCitationStyle?: boolean
   compactMode?: boolean
   metadata?: boolean
+  notificationPreferences?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -580,6 +602,7 @@ export type UserPreferenceSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   defaultCitationStyle?: boolean
   compactMode?: boolean
   metadata?: boolean
+  notificationPreferences?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -595,11 +618,12 @@ export type UserPreferenceSelectScalar = {
   defaultCitationStyle?: boolean
   compactMode?: boolean
   metadata?: boolean
+  notificationPreferences?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserPreferenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "theme" | "language" | "timezone" | "emailDigest" | "defaultCitationStyle" | "compactMode" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["userPreference"]>
+export type UserPreferenceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "theme" | "language" | "timezone" | "emailDigest" | "defaultCitationStyle" | "compactMode" | "metadata" | "notificationPreferences" | "createdAt" | "updatedAt", ExtArgs["result"]["userPreference"]>
 export type UserPreferenceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -625,6 +649,7 @@ export type $UserPreferencePayload<ExtArgs extends runtime.Types.Extensions.Inte
     defaultCitationStyle: string
     compactMode: boolean
     metadata: runtime.JsonValue | null
+    notificationPreferences: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["userPreference"]>
@@ -1060,6 +1085,7 @@ export interface UserPreferenceFieldRefs {
   readonly defaultCitationStyle: Prisma.FieldRef<"UserPreference", 'String'>
   readonly compactMode: Prisma.FieldRef<"UserPreference", 'Boolean'>
   readonly metadata: Prisma.FieldRef<"UserPreference", 'Json'>
+  readonly notificationPreferences: Prisma.FieldRef<"UserPreference", 'Json'>
   readonly createdAt: Prisma.FieldRef<"UserPreference", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"UserPreference", 'DateTime'>
 }
