@@ -7,13 +7,37 @@
  */
 
 import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { AuthRequest } from "../../middleware/auth";
 import notificationBroadcaster from "./broadcast";
 
+/**
+ * Verify a JWT either from the Authorization header (set by authMiddleware)
+ * or from a `?token=` query param (used by EventSource which cannot send
+ * custom headers). In production the token is set via httpOnly cookies or
+ * the Authorization header; the query-param path is a fallback for SSE.
+ */
+function tryReadTokenUserId(req: Request): string | null {
+  const authReq = req as AuthRequest;
+  if (authReq.user?.id) return authReq.user.id;
+  if (authReq.user?.userId) return authReq.user.userId;
+
+  const tokenParam = typeof req.query.token === "string" ? req.query.token : null;
+  if (!tokenParam) return null;
+
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) return null;
+  try {
+    const decoded = jwt.verify(tokenParam, secret) as { sub?: string; id?: string };
+    return decoded.sub || decoded.id || null;
+  } catch {
+    return null;
+  }
+}
+
 export const notificationSseController = {
   stream: (req: Request, res: Response): void => {
-    const authReq = req as AuthRequest;
-    const userId = authReq.user?.id || authReq.user?.userId;
+    const userId = tryReadTokenUserId(req);
     if (!userId) {
       res.status(401).json({ success: false, message: "Unauthorized" });
       return;

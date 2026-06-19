@@ -93,6 +93,7 @@ export const apiSlice = createApi({
     "Admin",
     "Note",
     "Notification",
+    "NotificationSettings",
     "SearchHistory",
     "Recommendation",
     "Import",
@@ -102,6 +103,13 @@ export const apiSlice = createApi({
     "DiscussionMessage",
     "Citation",
     "CitationExport",
+    "Analytics",
+    "AdminReport",
+    "AdminAudit",
+    "AdminWebhook",
+    "AdminApiKey",
+    "AdminModeration",
+    "SystemAlert",
   ],
   // Performance optimizations
   keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)
