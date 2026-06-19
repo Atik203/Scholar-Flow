@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
-import emailService from "../../shared/emailService";
+import { emailService } from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,

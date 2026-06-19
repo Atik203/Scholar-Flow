@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useExportCitationsMutation } from "@/redux/api/phase2Api";
+import { useExportCitationsMutation } from "@/redux/api/citationApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";

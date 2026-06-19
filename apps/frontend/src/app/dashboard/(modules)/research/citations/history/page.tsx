@@ -12,10 +12,10 @@ import { Input } from "@/components/ui/input";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { buildRoleScopedPath } from "@/lib/auth/roles";
 import {
-  useDeleteCitationExportMutation,
-  useGetCitationExportHistoryQuery,
-  useLazyDownloadCitationExportQuery,
-} from "@/redux/api/phase2Api";
+  useDeleteExportMutation as useDeleteCitationExportMutation,
+  useGetHistoryQuery as useGetCitationExportHistoryQuery,
+  useLazyDownloadExportQuery as useLazyDownloadCitationExportQuery,
+} from "@/redux/api/citationApi";
 import { format } from "date-fns";
 import {
   ArrowLeft,

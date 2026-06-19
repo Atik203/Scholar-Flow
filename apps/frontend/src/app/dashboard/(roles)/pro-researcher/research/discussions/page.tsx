@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { CreateDiscussionDialog } from "@/components/discussions/CreateDiscussionDialog";
 import { DiscussionThreadCard } from "@/components/discussions/DiscussionThreadCard";
-import { useGetDiscussionThreadsQuery } from "@/redux/api/phase2Api";
+import { useListAllDiscussionsQuery as useGetDiscussionThreadsQuery } from "@/redux/api/discussionApi";
 import { MessageSquare, Plus, Search, Filter, ArrowLeft, Layers, Pin, CheckCircle } from "lucide-react";
 import Link from "next/link";
 

@@ -109,11 +109,34 @@ export interface InviteMemberRequest {
   permission?: CollectionPermission;
 }
 
+export interface CollectionStats {
+  total: number;
+  totalPapers: number;
+  publicCount: number;
+  privateCount: number;
+  teamCount: number;
+  recentCount: number;
+  byVisibility: {
+    PRIVATE: number;
+    TEAM: number;
+    PUBLIC: number;
+  };
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+}
+
 export const collectionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // Get user's collections
     getMyCollections: builder.query<
-      { result: Collection[]; meta: any },
+      { result: Collection[]; meta: PaginationMeta },
       { page?: number; limit?: number; workspaceId?: string }
     >({
       query: ({ page = 1, limit = 10, workspaceId } = {}) => {
@@ -246,14 +269,14 @@ export const collectionApi = apiSlice.injectEndpoints({
     }),
 
     // Get collection statistics
-    getCollectionStats: builder.query<any, void>({
+    getCollectionStats: builder.query<CollectionStats, void>({
       query: () => "/collections/stats",
-      transformResponse: (response: { data: any }) => response.data,
+      transformResponse: (response: { data: CollectionStats }) => response.data,
     }),
 
     // Invites sent by the authenticated user
     getInvitesSent: builder.query<
-      { result: any[]; meta: any },
+      { result: CollectionMember[]; meta: PaginationMeta },
       { page?: number; limit?: number } | void
     >({
       query: ({ page = 1, limit = 10 } = {}) => ({
@@ -389,7 +412,7 @@ export const collectionApi = apiSlice.injectEndpoints({
     }),
 
     // Accept an invite
-    acceptInvite: builder.mutation<any, string>({
+    acceptInvite: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
         url: `/collections/${id}/accept`,
         method: "POST",
@@ -404,7 +427,7 @@ export const collectionApi = apiSlice.injectEndpoints({
     }),
 
     // Decline an invite
-    declineInvite: builder.mutation<any, string>({
+    declineInvite: builder.mutation<{ success: boolean }, string>({
       query: (id) => ({
         url: `/collections/${id}/decline`,
         method: "POST",
