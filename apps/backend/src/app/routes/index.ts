@@ -23,13 +23,10 @@ import { searchRoutes } from "../modules/Search/search.routes";
 import { recommendationRoutes } from "../modules/Recommendation/recommendation.routes";
 import { importRoutes } from "../modules/Import/import.routes";
 import { teamRoutes } from "../modules/Team/team.routes";
-import { citationRoutes } from "./citation.routes";
-import { discussionRoutes } from "./discussion.routes";
-import { activityLogRoutes } from "./activityLog.routes";
+import { citationRoutes } from "../modules/CitationExport/citationExport.routes";
+import { discussionRoutes } from "../modules/Discussion/discussion.routes";
+import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
 import healthRoutes from "./health.routes";
-
-// Legacy route handlers (to be migrated into feature modules under app/modules/*)
-// Placeholder imports for other route groups can be added as they are modularized
 
 const router: import("express").Router = express.Router();
 
@@ -75,8 +72,4 @@ router.use("/admin/reports", reportRoutes);
 router.use("/admin/audit-log", auditLogRoutes);
 router.use("/admin/webhooks", webhookRoutes);
 router.use("/analytics", analyticsRoutes);
-
-// Legacy flat routes (will be refactored into modules)
-// router.use("/papers", papersRouter);
-
 export default router;
