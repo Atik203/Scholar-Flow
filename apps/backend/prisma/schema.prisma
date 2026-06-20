@@ -205,6 +205,9 @@ model User {
   discussionMessages DiscussionMessage[]
   activityLogEntries ActivityLogEntry[]
 
+  // Phase 10 — Paper version history
+  paperVersions PaperVersion[]
+
   // Phase 3 - User preferences
   preference UserPreference?
 
@@ -393,6 +396,7 @@ model Paper {
   updatedAt  DateTime     @updatedAt
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
+  PaperVersion PaperVersion[]
 
   // Optimized indexes for common query patterns
   @@index([processingStatus, createdAt]) // For processing status dashboards
@@ -440,6 +444,24 @@ model PaperChunk {
 
   @@unique([paperId, idx])
   @@index([paperId])
+}
+
+model PaperVersion {
+  id           String   @id @default(uuid())
+  paperId      String
+  contentHtml  String
+  title        String?
+  version      Int
+  savedAt      DateTime @default(now())
+  savedById    String?
+  sizeBytes    Int?
+
+  paper        Paper?   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  savedBy      User?    @relation(fields: [savedById], references: [id], onDelete: SetNull)
+
+  @@unique([paperId, version])
+  @@index([paperId, savedAt(sort: Desc)])
+  @@index([savedById])
 }
 
 model Citation {

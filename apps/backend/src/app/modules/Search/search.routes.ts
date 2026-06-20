@@ -15,4 +15,7 @@ router.get("/recommendations", authMiddleware as any, SearchController.getRecomm
 // Global Search
 router.get("/", authMiddleware as any, SearchController.globalSearch as any);
 
+// Semantic Search (pgvector)
+router.get("/semantic", authMiddleware as any, SearchController.semanticSearch as any);
+
 export const searchRoutes = router;

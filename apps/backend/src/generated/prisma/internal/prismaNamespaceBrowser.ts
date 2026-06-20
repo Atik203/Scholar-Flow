@@ -60,6 +60,7 @@ export const ModelName = {
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
+  PaperVersion: 'PaperVersion',
   Citation: 'Citation',
   Annotation: 'Annotation',
   AnnotationVersion: 'AnnotationVersion',
@@ -293,6 +294,20 @@ export const PaperChunkScalarFieldEnum = {
 } as const
 
 export type PaperChunkScalarFieldEnum = (typeof PaperChunkScalarFieldEnum)[keyof typeof PaperChunkScalarFieldEnum]
+
+
+export const PaperVersionScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  contentHtml: 'contentHtml',
+  title: 'title',
+  version: 'version',
+  savedAt: 'savedAt',
+  savedById: 'savedById',
+  sizeBytes: 'sizeBytes'
+} as const
+
+export type PaperVersionScalarFieldEnum = (typeof PaperVersionScalarFieldEnum)[keyof typeof PaperVersionScalarFieldEnum]
 
 
 export const CitationScalarFieldEnum = {

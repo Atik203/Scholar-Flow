@@ -18,6 +18,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // TipTap Extensions
 import { Highlight } from "@tiptap/extension-highlight";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { CharacterCount } from "@tiptap/extension-character-count";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -67,7 +68,11 @@ import {
   useGetEditorPaperQuery,
   usePublishDraftMutation,
   useUpdateEditorContentMutation,
+  useGetPaperVersionsQuery,
+  useRestorePaperVersionMutation,
 } from "@/redux/api/paperApi";
+
+import { VersionHistoryDialog } from "./VersionHistoryDialog";
 
 // Components
 import { ShareModal } from "./ShareModal";
@@ -88,6 +93,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [title, setTitle] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
   const isMobile = useIsMobile();
 
   // Redux hooks
@@ -158,6 +164,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       Subscript,
       LatexInline,
       LatexBlock,
+      CharacterCount,
       // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
     content: "",
@@ -545,9 +552,41 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
                 className="min-h-[500px] focus-within:outline-none"
               />
             </div>
+
+            {/* Status Bar: Word count + Version history */}
+            <div className="px-6 py-2 border-t text-xs text-muted-foreground flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span>
+                  {editor?.storage?.characterCount?.words?.() ?? 0} words
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  {editor?.storage?.characterCount?.characters?.() ?? 0} characters
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  ~{Math.max(1, Math.ceil((editor?.storage?.characterCount?.words?.() ?? 0) / 200))} min read
+                </span>
+              </div>
+              <button
+                className="text-primary hover:underline"
+                onClick={() => setIsVersionDialogOpen(true)}
+              >
+                Version History
+              </button>
+            </div>
           </EditorContext.Provider>
         </CardContent>
       </Card>
+
+      {/* Version History Dialog */}
+      {isVersionDialogOpen && (
+        <VersionHistoryDialog
+          paperId={paperId}
+          open={isVersionDialogOpen}
+          onClose={() => setIsVersionDialogOpen(false)}
+        />
+      )}
 
       {/* Auto-save indicator */}
       {isSaving && (
