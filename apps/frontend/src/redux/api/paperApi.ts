@@ -165,6 +165,27 @@ export interface AiProvidersResponse {
   providers: AiProviderStatus[];
 }
 
+export interface PaperVersion {
+  id: string;
+  version: number;
+  title: string | null;
+  savedAt: string;
+  savedById: string | null;
+  sizeBytes: number | null;
+  savedBy?: { name: string | null; image: string | null } | null;
+}
+
+export type PaperVersionsResponse = PaperVersion[];
+
+export interface PaperVersionDetail {
+  id: string;
+  paperId: string;
+  contentHtml: string;
+  title: string | null;
+  version: number;
+  savedAt: string;
+}
+
 // Editor-specific interfaces
 export interface CreateEditorPaperRequest {
   workspaceId: string;
@@ -601,6 +622,39 @@ export const paperApi = apiSlice.injectEndpoints({
         response.data,
       providesTags: ["AIProvider"],
     }),
+
+    // Paper version history
+    getPaperVersions: builder.query<PaperVersionsResponse, string>({
+      query: (paperId) => `/editor/${paperId}/versions`,
+      transformResponse: (response: { data: { versions: PaperVersion[] } }) =>
+        response.data.versions,
+      providesTags: (result, error, paperId) => [
+        { type: "Paper", id: paperId },
+      ],
+    }),
+
+    getPaperVersion: builder.query<
+      PaperVersionDetail,
+      { paperId: string; versionId: string }
+    >({
+      query: ({ paperId, versionId }) =>
+        `/editor/${paperId}/versions/${versionId}`,
+      transformResponse: (response: { data: PaperVersionDetail }) =>
+        response.data,
+    }),
+
+    restorePaperVersion: builder.mutation<
+      unknown,
+      { paperId: string; versionId: string }
+    >({
+      query: ({ paperId, versionId }) => ({
+        url: `/editor/${paperId}/versions/${versionId}/restore`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { paperId }) => [
+        { type: "Paper", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -633,4 +687,7 @@ export const {
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
   useGetAiProvidersQuery,
+  useGetPaperVersionsQuery,
+  useGetPaperVersionQuery,
+  useRestorePaperVersionMutation,
 } = paperApi;
