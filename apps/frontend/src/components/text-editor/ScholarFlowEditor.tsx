@@ -6,11 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 import {
   AlertCircle,
+  Bookmark,
   Clock,
   Download,
   FileText,
   Maximize,
   Minimize,
+  Quote,
   Save,
   Send,
   Share2,
@@ -57,6 +59,9 @@ import { LatexBlock } from "@/components/tiptap-node/latex-block/latex-block-ext
 import { LatexInlineButton } from "@/components/tiptap-ui/latex-inline-button/latex-inline-button";
 import { LatexBlockButton } from "@/components/tiptap-ui/latex-block-button/latex-block-button";
 
+// Citation Extension
+import { CitationNode } from "@/components/tiptap-node/citation-node/citation-node";
+
 // Hooks
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -75,6 +80,9 @@ import {
 } from "@/redux/api/paperApi";
 
 import { VersionHistoryDialog } from "./VersionHistoryDialog";
+
+// Citation
+import { CitationSearchDialog } from "./CitationSearchDialog";
 
 // Components
 import { ShareModal } from "./ShareModal";
@@ -96,6 +104,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [title, setTitle] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isCitationDialogOpen, setIsCitationDialogOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
 
@@ -167,6 +176,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       Subscript,
       LatexInline,
       LatexBlock,
+      CitationNode,
       CharacterCount,
       // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
@@ -556,6 +566,20 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <ToolbarSeparator />
 
               <ToolbarGroup>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCitationDialogOpen(true)}
+                  title="Insert Citation"
+                >
+                  <Bookmark className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Cite</span>
+                </Button>
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
                 <ResizableImageUploadButton text="Image" />
               </ToolbarGroup>
 
@@ -606,6 +630,22 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           onClose={() => setIsVersionDialogOpen(false)}
         />
       )}
+
+      {/* Citation Search Dialog */}
+      <CitationSearchDialog
+        open={isCitationDialogOpen}
+        onOpenChange={setIsCitationDialogOpen}
+        editor={editor}
+        existingPaperIds={
+          editor
+            ? (editor.getJSON().content as any[])
+                ?.flatMap((n) =>
+                  n.type === "citation" ? [n.attrs?.paperId as string] : []
+                )
+                .filter(Boolean) ?? []
+            : []
+        }
+      />
 
       {/* Auto-save indicator */}
       {isSaving && (
