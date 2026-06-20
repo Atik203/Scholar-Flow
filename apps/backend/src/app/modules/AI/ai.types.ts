@@ -1,4 +1,9 @@
-export type ProviderName = "openai" | "gemini" | "heuristic";
+export type ProviderName =
+  | "openai"
+  | "gemini"
+  | "claude"
+  | "deepseek"
+  | "heuristic";
 
 export interface AiMetadata {
   title?: string;
@@ -90,9 +95,17 @@ export interface AiMetadataExtractionResult {
   rawResponse?: unknown;
 }
 
+export interface ProviderModel {
+  value: string;
+  label: string;
+  description: string;
+  provider: string;
+}
+
 export interface ProviderStatus {
   provider: ProviderName;
   configured: boolean;
+  models: ProviderModel[];
   lastError?: string;
 }
 
