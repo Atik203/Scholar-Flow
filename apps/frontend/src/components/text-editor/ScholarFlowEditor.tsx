@@ -9,6 +9,8 @@ import {
   Clock,
   Download,
   FileText,
+  Maximize,
+  Minimize,
   Save,
   Send,
   Share2,
@@ -94,6 +96,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [title, setTitle] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
 
   // Redux hooks
@@ -279,21 +282,22 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      // Ctrl+S / Cmd+S → save
       if ((event.ctrlKey || event.metaKey) && event.key === "s") {
-        event.preventDefault(); // Prevent browser's default save behavior
+        event.preventDefault();
         handleSave();
+      }
+      // Esc → exit fullscreen
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
       }
     };
 
-    // Add the event listener to the document
     document.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSave]); // Re-bind when handleSave changes
+  }, [handleSave, isFullscreen]);
 
   // Publish draft
   const handlePublish = async () => {
@@ -474,11 +478,25 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
+
+          <Button
+            onClick={() => setIsFullscreen((f) => !f)}
+            variant="ghost"
+            size="sm"
+            title={isFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Editor */}
-      <Card>
+      <div className={isFullscreen ? "fixed inset-0 z-50 bg-background overflow-auto p-4" : ""}>
+      <Card className={isFullscreen ? "max-w-5xl mx-auto" : ""}>
         <CardContent className="p-0">
           <EditorContext.Provider value={{ editor }}>
             {/* Toolbar */}
@@ -578,6 +596,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           </EditorContext.Provider>
         </CardContent>
       </Card>
+      </div> {/* fullscreen wrapper */}
 
       {/* Version History Dialog */}
       {isVersionDialogOpen && (
