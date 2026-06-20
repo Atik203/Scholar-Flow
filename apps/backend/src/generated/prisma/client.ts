@@ -85,6 +85,11 @@ export type PaperFile = Prisma.PaperFileModel
  */
 export type PaperChunk = Prisma.PaperChunkModel
 /**
+ * Model PaperVersion
+ * 
+ */
+export type PaperVersion = Prisma.PaperVersionModel
+/**
  * Model Citation
  * 
  */

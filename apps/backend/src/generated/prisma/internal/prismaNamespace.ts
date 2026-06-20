@@ -393,6 +393,7 @@ export const ModelName = {
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
+  PaperVersion: 'PaperVersion',
   Citation: 'Citation',
   Annotation: 'Annotation',
   AnnotationVersion: 'AnnotationVersion',
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1114,6 +1115,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PaperChunkCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PaperChunkCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperVersion: {
+      payload: Prisma.$PaperVersionPayload<ExtArgs>
+      fields: Prisma.PaperVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        findMany: {
+          args: Prisma.PaperVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        create: {
+          args: Prisma.PaperVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        createMany: {
+          args: Prisma.PaperVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        update: {
+          args: Prisma.PaperVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperVersion>
+        }
+        groupBy: {
+          args: Prisma.PaperVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperVersionCountAggregateOutputType> | number
         }
       }
     }
@@ -4224,6 +4299,20 @@ export const PaperChunkScalarFieldEnum = {
 export type PaperChunkScalarFieldEnum = (typeof PaperChunkScalarFieldEnum)[keyof typeof PaperChunkScalarFieldEnum]
 
 
+export const PaperVersionScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  contentHtml: 'contentHtml',
+  title: 'title',
+  version: 'version',
+  savedAt: 'savedAt',
+  savedById: 'savedById',
+  sizeBytes: 'sizeBytes'
+} as const
+
+export type PaperVersionScalarFieldEnum = (typeof PaperVersionScalarFieldEnum)[keyof typeof PaperVersionScalarFieldEnum]
+
+
 export const CitationScalarFieldEnum = {
   id: 'id',
   sourcePaperId: 'sourcePaperId',
@@ -5558,6 +5647,7 @@ export type GlobalOmitConfig = {
   paper?: Prisma.PaperOmit
   paperFile?: Prisma.PaperFileOmit
   paperChunk?: Prisma.PaperChunkOmit
+  paperVersion?: Prisma.PaperVersionOmit
   citation?: Prisma.CitationOmit
   annotation?: Prisma.AnnotationOmit
   annotationVersion?: Prisma.AnnotationVersionOmit
