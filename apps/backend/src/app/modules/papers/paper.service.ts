@@ -1245,6 +1245,21 @@ export const editorPaperService = {
   ) {
     const sanitizedContent = sanitizeHtml(input.content, sanitizeOptions);
 
+    // Save a version snapshot before overwriting
+    const current = await prisma.$queryRaw<Array<{ contentHtml: string; title: string | null }>>`
+      SELECT "contentHtml", title FROM "Paper"
+      WHERE id = ${paperId} AND "uploaderId" = ${userId} AND "isDeleted" = false
+      LIMIT 1
+    `;
+    if (current.length > 0 && current[0].contentHtml) {
+      await paperVersionService
+        .saveVersion(paperId, current[0].contentHtml, current[0].title, userId)
+        .catch((e) => {
+          // Version save failure is non-fatal — log and continue
+          console.error("[PaperService] Failed to save version:", e.message);
+        });
+    }
+
     const result = await prisma.$executeRaw`
       UPDATE "Paper" 
       SET 
@@ -1727,3 +1742,86 @@ export async function ensureDevUserAndWorkspace(devEmail?: string) {
 
   return { user, workspace };
 }
+
+// ============================================================================
+// Paper Version History Service
+// ============================================================================
+const MAX_VERSIONS = 50;
+
+export const paperVersionService = {
+  async saveVersion(
+    paperId: string,
+    contentHtml: string,
+    title: string | null,
+    userId: string | null
+  ) {
+    const latest = await prisma.paperVersion.findFirst({
+      where: { paperId },
+      orderBy: { version: "desc" },
+      select: { version: true },
+    });
+    const nextVersion = (latest?.version ?? 0) + 1;
+
+    await prisma.paperVersion.create({
+      data: {
+        paperId,
+        contentHtml,
+        title,
+        version: nextVersion,
+        savedById: userId,
+        sizeBytes: Buffer.byteLength(contentHtml, "utf8"),
+      },
+    });
+
+    // Prune old versions beyond MAX_VERSIONS
+    const versionsToKeep = await prisma.paperVersion.findMany({
+      where: { paperId },
+      orderBy: { version: "desc" },
+      select: { id: true },
+      take: MAX_VERSIONS,
+    });
+    const keepIds = versionsToKeep.map((v) => v.id);
+
+    await prisma.paperVersion.deleteMany({
+      where: {
+        paperId,
+        id: { notIn: keepIds },
+      },
+    });
+  },
+
+  async listVersions(paperId: string) {
+    return prisma.paperVersion.findMany({
+      where: { paperId },
+      orderBy: { version: "desc" },
+      select: {
+        id: true,
+        version: true,
+        title: true,
+        savedAt: true,
+        savedById: true,
+        sizeBytes: true,
+        savedBy: { select: { name: true, image: true } },
+      },
+      take: 20,
+    });
+  },
+
+  async getVersion(versionId: string) {
+    return prisma.paperVersion.findUnique({
+      where: { id: versionId },
+      select: {
+        id: true,
+        paperId: true,
+        contentHtml: true,
+        title: true,
+        version: true,
+        savedAt: true,
+      },
+    });
+  },
+
+  async deleteVersion(versionId: string) {
+    return prisma.paperVersion.delete({ where: { id: versionId } });
+  },
+};
