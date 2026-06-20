@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import prisma from "../../shared/prisma";
-import { StorageService } from "../Papers/storage.service";
+import { StorageService } from "../papers/storage.service";
 
 const storage = new StorageService();
 
