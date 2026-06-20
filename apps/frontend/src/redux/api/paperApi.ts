@@ -148,6 +148,23 @@ export interface PaperInsightsResponse {
   threads: AIInsightThread[];
 }
 
+export interface AiProviderModel {
+  value: string;
+  label: string;
+  description: string;
+  provider: string;
+}
+
+export interface AiProviderStatus {
+  provider: string;
+  configured: boolean;
+  models: AiProviderModel[];
+}
+
+export interface AiProvidersResponse {
+  providers: AiProviderStatus[];
+}
+
 // Editor-specific interfaces
 export interface CreateEditorPaperRequest {
   workspaceId: string;
@@ -576,6 +593,14 @@ export const paperApi = apiSlice.injectEndpoints({
         { type: "Paper", id: paperId },
       ],
     }),
+
+    // AI provider status — returns available providers + models for dynamic UI
+    getAiProviders: builder.query<AiProvidersResponse, void>({
+      query: () => "/papers/ai/providers",
+      transformResponse: (response: { data: AiProvidersResponse }) =>
+        response.data,
+      providesTags: ["AIProvider"],
+    }),
   }),
 });
 
@@ -607,4 +632,5 @@ export const {
   // AI Insights endpoints
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
+  useGetAiProvidersQuery,
 } = paperApi;

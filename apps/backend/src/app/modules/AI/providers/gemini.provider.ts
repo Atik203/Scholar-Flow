@@ -187,13 +187,159 @@ export class GeminiProvider extends BaseAiProvider {
   }
 
   protected async performExtraction(
-    _input: AiMetadataExtractionInput
+    input: AiMetadataExtractionInput
   ): Promise<AiMetadataExtractionResult> {
-    throw new AiError(
-      503,
-      "Gemini metadata extraction not yet implemented",
-      "AI_PROVIDER_UNAVAILABLE"
-    );
+    if (!this.apiKey) {
+      throw new AiError(
+        503,
+        "Gemini provider not configured",
+        "AI_PROVIDER_DISABLED"
+      );
+    }
+
+    const model = DEFAULT_MODEL;
+    const systemPrompt = `You are an academic metadata extraction expert. Extract the following fields from the provided paper text. Respond ONLY with a valid JSON object matching this TypeScript type: { "title"?: string; "abstract"?: string; "authors"?: string[]; "year"?: number; "doi"?: string; "keywords"?: string[]; "confidence"?: number }. If a field cannot be determined, omit it. Use the original title if supplied and no better title is found.`;
+
+    let promptText = `Extract metadata from this paper text:\n\n${input.text.slice(0, 16000)}`;
+    if (input.originalTitle?.trim()) {
+      promptText += `\n\n(Original filename/title: ${input.originalTitle})`;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.requestTimeoutMs);
+
+    try {
+      let response: Awaited<ReturnType<typeof fetch>>;
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [
+                    {
+                      text: [systemPrompt, promptText]
+                        .filter(Boolean)
+                        .join("\n\n"),
+                    },
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 800,
+                topP: 0.9,
+                topK: 40,
+                responseMimeType: "application/json",
+              },
+            }),
+            signal: controller.signal,
+          }
+        );
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Gemini API error: ${response.status} - ${errorText}`
+        );
+      }
+
+      const data = (await response.json()) as {
+        candidates?: Array<{
+          content?: { parts?: Array<{ text?: string }> };
+        }>;
+      };
+
+      const parts = Array.isArray(data.candidates?.[0]?.content?.parts)
+        ? data.candidates[0].content.parts
+            .map((part) => part?.text || "")
+            .filter((text) => Boolean(text))
+        : [];
+
+      const combined = stripJsonFences(parts.join("\n")).trim();
+
+      if (!combined) {
+        throw new Error("Gemini returned empty extraction response");
+      }
+
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(combined);
+      } catch {
+        throw new Error(
+          `Gemini extraction response was not valid JSON: ${combined.slice(0, 200)}`
+        );
+      }
+
+      const title =
+        typeof parsed.title === "string" && parsed.title.trim()
+          ? parsed.title.trim()
+          : undefined;
+      const abstract =
+        typeof parsed.abstract === "string" && parsed.abstract.trim()
+          ? parsed.abstract.trim()
+          : undefined;
+      const year =
+        typeof parsed.year === "number" && parsed.year > 1000
+          ? parsed.year
+          : undefined;
+      const doi =
+        typeof parsed.doi === "string" && parsed.doi.trim()
+          ? parsed.doi.trim()
+          : undefined;
+
+      const metadata = {
+        title,
+        abstract,
+        authors: normalizeList(parsed.authors, 10),
+        year,
+        doi,
+        keywords: normalizeList(parsed.keywords, 8),
+        source: "gemini",
+        confidence:
+          typeof parsed.confidence === "number" ? parsed.confidence : 0.6,
+      };
+
+      return {
+        provider: this.name,
+        metadata,
+        rawResponse: data,
+      };
+    } catch (error) {
+      if (error instanceof AiError) {
+        throw error;
+      }
+
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new AiError(
+          504,
+          "Gemini extraction request timed out",
+          "AI_PROVIDER_TIMEOUT"
+        );
+      }
+
+      if (error instanceof Error) {
+        throw new AiError(
+          502,
+          error.message,
+          "AI_PROVIDER_ERROR",
+          error.stack
+        );
+      }
+
+      throw new AiError(
+        502,
+        "Gemini metadata extraction failed",
+        "AI_PROVIDER_ERROR"
+      );
+    }
   }
 
   protected async performSummary(
