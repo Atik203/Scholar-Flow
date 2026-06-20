@@ -228,6 +228,28 @@ editorPaperRoutes.delete(
   editorPaperController.deleteEditorPaper as any
 );
 
+// Version history
+editorPaperRoutes.get(
+  "/:id/versions",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersions as any
+);
+
+editorPaperRoutes.get(
+  "/:id/versions/:versionId",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersion as any
+);
+
+editorPaperRoutes.post(
+  "/:id/versions/:versionId/restore",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.restoreVersion as any
+);
+
 // Upload image for editor
 editorPaperRoutes.post(
   "/upload-image",

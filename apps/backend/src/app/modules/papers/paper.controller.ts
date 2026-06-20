@@ -18,6 +18,7 @@ import {
   ensureDevUserAndWorkspace,
   exportService,
   paperService,
+  paperVersionService,
 } from "./paper.service";
 import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
@@ -1324,5 +1325,37 @@ export const editorPaperController = {
       console.error("[EditorPaperController] Image upload failed:", error);
       throw new ApiError(500, "Failed to upload image");
     }
+  }),
+
+  // List versions for an editor paper
+  getVersions: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { id } = req.params;
+    const versions = await paperVersionService.listVersions(id);
+    sendSuccessResponse(res, { versions }, "Versions retrieved");
+  }),
+
+  // Get a specific version's content
+  getVersion: catchAsync(async (req: Request, res: Response) => {
+    const { versionId } = req.params;
+    const version = await paperVersionService.getVersion(versionId);
+    if (!version) throw new ApiError(404, "Version not found");
+    sendSuccessResponse(res, version, "Version retrieved");
+  }),
+
+  // Restore to a specific version
+  restoreVersion: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { id, versionId } = req.params;
+    const version = await paperVersionService.getVersion(versionId);
+    if (!version || version.paperId !== id) {
+      throw new ApiError(404, "Version not found");
+    }
+    const result = await editorPaperService.updateEditorContent(
+      id,
+      { content: version.contentHtml, title: version.title ?? undefined },
+      authReq.user?.id ?? ""
+    );
+    sendSuccessResponse(res, result, "Version restored");
   }),
 };

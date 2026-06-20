@@ -37,6 +37,7 @@
     "@reduxjs/toolkit": "^2.8.2",
     "@stripe/stripe-js": "^8.0.0",
     "@tiptap/core": "^3.26.0",
+    "@tiptap/extension-character-count": "^3.27.1",
     "@tiptap/extension-color": "^3.5.1",
     "@tiptap/extension-highlight": "^3.5.1",
     "@tiptap/extension-horizontal-rule": "^3.5.1",
