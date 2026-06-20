@@ -58,8 +58,8 @@ function ShortcutSection({ title, shortcuts }: ShortcutSectionProps) {
         <CardHeader>
           <CardTitle className="text-base">{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <table className="w-full text-sm">
+        <CardContent className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[400px]">
             <thead>
               <tr className="border-b text-left">
                 <th className="pb-3 font-medium text-muted-foreground w-1/2">
