@@ -101,7 +101,9 @@ export const getApiStatus = async (req: Request, res: Response) => {
         provider,
         configured:
           (provider === "openai" && !!config.openai.apiKey) ||
-          (provider === "gemini" && !!config.gemini.apiKey),
+          (provider === "gemini" && !!config.gemini.apiKey) ||
+          (provider === "claude" && !!config.claude.apiKey) ||
+          (provider === "deepseek" && !!config.deepseek.apiKey),
       })
     );
 
