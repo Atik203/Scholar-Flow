@@ -92,6 +92,28 @@ export const SearchController = {
     const result = await SearchService.getRecommendations(authReq.user.id, 10);
     sendSuccessResponse(res, result, "Recommendations retrieved successfully");
   }),
+
+  semanticSearch: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const q = (req.query.q as string) || "";
+    const limit = Math.min(20, parseInt((req.query.limit as string) || "10", 10));
+    const workspaceId = req.query.workspaceId as string | undefined;
+
+    if (!q.trim()) {
+      throw new ApiError(400, "Query parameter 'q' is required");
+    }
+
+    const result = await SearchService.semanticSearch(
+      authReq.user.id,
+      q,
+      limit,
+      workspaceId
+    );
+
+    sendSuccessResponse(res, result, "Semantic search completed");
+  }),
 };
 
 export default SearchController;
