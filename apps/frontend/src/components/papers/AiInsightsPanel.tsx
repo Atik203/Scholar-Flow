@@ -27,9 +27,10 @@ import { cn } from "@/lib/utils";
 import {
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
+  useGetAiProvidersQuery,
 } from "@/redux/api/paperApi";
 import { Bot, MessageCircle, Send, User } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface AiInsightsPanelProps {
   paperId: string;
@@ -42,41 +43,6 @@ interface ChatMessage {
   content: string;
   timestamp: string;
 }
-
-const AI_MODELS = [
-  // OpenAI Models
-  {
-    value: "gpt-4o-mini",
-    label: "GPT-4o Mini (OpenAI - Fast & Affordable)",
-    description: "Quick responses, good for basic questions",
-    provider: "OpenAI",
-  },
-  {
-    value: "gpt-3.5-turbo",
-    label: "GPT-3.5 Turbo (OpenAI - Balanced)",
-    description: "Good balance of speed and quality",
-    provider: "OpenAI",
-  },
-  {
-    value: "gpt-4o",
-    label: "GPT-4o (OpenAI - Premium)",
-    description: "Best quality responses for complex analysis",
-    provider: "OpenAI",
-  },
-  // Google Gemini Models (Free - Primary Choice)
-  {
-    value: "gemini-2.5-flash-lite",
-    label: "Gemini 2.5 Flash Lite (Primary - Free)",
-    description: "Latest lightweight Google AI model, very fast and free",
-    provider: "Google",
-  },
-  {
-    value: "gemini-2.5-flash",
-    label: "Gemini 2.5 Flash (Google - Free)",
-    description: "Enhanced Google AI model with improved capabilities",
-    provider: "Google",
-  },
-];
 
 export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
   const [prompt, setPrompt] = useState("");
@@ -92,6 +58,20 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
 
   const [generateInsight, { isLoading: isGenerating }] =
     useGeneratePaperInsightMutation();
+
+  const { data: aiProvidersData } = useGetAiProvidersQuery();
+
+  const availableModels =
+    aiProvidersData?.providers?.flatMap((p) => p.models) ?? [];
+
+  useEffect(() => {
+    if (
+      availableModels.length > 0 &&
+      !availableModels.find((m) => m.value === selectedModel)
+    ) {
+      setSelectedModel(availableModels[0].value);
+    }
+  }, [availableModels, selectedModel]);
 
   // Get current thread messages
   const currentThread = insightsData?.threads?.find(
@@ -198,7 +178,7 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
                 <SelectValue placeholder="Select AI Model" />
               </SelectTrigger>
               <SelectContent>
-                {AI_MODELS.map((model) => (
+                {availableModels.map((model) => (
                   <SelectItem key={model.value} value={model.value}>
                     <div className="flex flex-col">
                       <span className="font-medium">{model.label}</span>

@@ -40,6 +40,14 @@ paperRoutes.get(
   paperController.list as any
 );
 
+// Get available AI providers and their models (before /:id to avoid route conflict)
+paperRoutes.get(
+  "/ai/providers",
+  paperListLimiter,
+  authMiddleware as any,
+  paperController.getAiProviders as any
+);
+
 // Get single paper (protected, but allow dev fallback)
 paperRoutes.get(
   "/:id",
