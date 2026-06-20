@@ -70,6 +70,12 @@ export default {
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,
   },
+  claude: {
+    apiKey: process.env.ANTHROPIC_API_KEY,
+  },
+  deepseek: {
+    apiKey: process.env.DEEPSEEK_API_KEY,
+  },
   ai: {
     featuresEnabled: parseBoolean(process.env.AI_FEATURES_ENABLED, true),
     requestTimeoutMs: parseNumber(process.env.AI_REQUEST_TIMEOUT_MS, 15000),
@@ -120,6 +126,11 @@ export default {
   docxToPdf: {
     engine: process.env.DOCX_TO_PDF_ENGINE || "soffice",
     gotenbergUrl: process.env.GOTENBERG_URL,
+    quality: (process.env.DOCX_TO_PDF_QUALITY || "print") as
+      | "draft"
+      | "screen"
+      | "print"
+      | "prepress",
     // Optional timeout in ms for external requests
     requestTimeoutMs: process.env.GOTENBERG_TIMEOUT_MS
       ? Number(process.env.GOTENBERG_TIMEOUT_MS)

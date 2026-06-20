@@ -12,20 +12,30 @@ import type {
   AiMetadataExtractionResult,
   AiSummaryRequest,
   AiSummaryResult,
+  ProviderModel,
   ProviderName,
   ProviderStatus,
 } from "./ai.types";
 import { GeminiProvider } from "./providers/gemini.provider";
 import { OpenAiProvider } from "./providers/openai.provider";
+import { ClaudeProvider } from "./providers/claude.provider";
+import { DeepSeekProvider } from "./providers/deepseek.provider";
 
 const providers: Record<ProviderName, BaseAiProvider | null> = {
   openai: new OpenAiProvider(config.openai.apiKey, config.ai.requestTimeoutMs),
   gemini: new GeminiProvider(config.gemini.apiKey, config.ai.requestTimeoutMs),
+  claude: new ClaudeProvider(config.claude.apiKey, config.ai.requestTimeoutMs),
+  deepseek: new DeepSeekProvider(
+    config.deepseek.apiKey,
+    config.ai.requestTimeoutMs
+  ),
   heuristic: null,
 };
 
 const isKnownProvider = (value: string): value is ProviderName =>
-  ["openai", "gemini", "heuristic"].includes(value as ProviderName);
+  ["openai", "gemini", "claude", "deepseek", "heuristic"].includes(
+    value as ProviderName
+  );
 
 type MetadataPersistOptions = {
   paperId: string;
@@ -264,13 +274,97 @@ const runInsightHeuristics = (input: AiInsightRequest): AiInsightResult => {
   };
 };
 
+const PROVIDER_MODEL_MAP: Record<string, ProviderModel[]> = {
+  openai: [
+    {
+      value: "gpt-4o-mini",
+      label: "GPT-4o Mini (OpenAI - Fast & Affordable)",
+      description: "Quick responses, good for basic questions",
+      provider: "OpenAI",
+    },
+    {
+      value: "gpt-3.5-turbo",
+      label: "GPT-3.5 Turbo (OpenAI - Balanced)",
+      description: "Good balance of speed and quality",
+      provider: "OpenAI",
+    },
+    {
+      value: "gpt-4o",
+      label: "GPT-4o (OpenAI - Premium)",
+      description: "Best quality responses for complex analysis",
+      provider: "OpenAI",
+    },
+  ],
+  gemini: [
+    {
+      value: "gemini-2.5-flash-lite",
+      label: "Gemini 2.5 Flash Lite (Google - Fast & Free)",
+      description: "Latest lightweight Google AI model, very fast",
+      provider: "Google",
+    },
+    {
+      value: "gemini-2.5-flash",
+      label: "Gemini 2.5 Flash (Google - Enhanced Free)",
+      description: "Enhanced Google AI model with improved capabilities",
+      provider: "Google",
+    },
+  ],
+  claude: [
+    {
+      value: "claude-3-5-sonnet-latest",
+      label: "Claude 3.5 Sonnet (Anthropic - Best Balance)",
+      description: "Excellent reasoning, coding, and analysis",
+      provider: "Anthropic",
+    },
+    {
+      value: "claude-3-5-haiku-latest",
+      label: "Claude 3.5 Haiku (Anthropic - Fastest)",
+      description: "Quick responses for simpler tasks",
+      provider: "Anthropic",
+    },
+    {
+      value: "claude-3-opus-latest",
+      label: "Claude 3 Opus (Anthropic - Most Powerful)",
+      description: "Best for complex multi-step reasoning",
+      provider: "Anthropic",
+    },
+  ],
+  deepseek: [
+    {
+      value: "deepseek-chat",
+      label: "DeepSeek-V3 (DeepSeek - Primary)",
+      description: "Strong all-around performance at low cost",
+      provider: "DeepSeek",
+    },
+    {
+      value: "deepseek-reasoner",
+      label: "DeepSeek-R1 (DeepSeek - Reasoning)",
+      description: "Advanced reasoning for complex analysis",
+      provider: "DeepSeek",
+    },
+  ],
+};
+
+const EMPTY_MODELS: ProviderModel[] = [];
+
+const ALL_PROVIDERS: ProviderName[] = [
+  "openai",
+  "gemini",
+  "claude",
+  "deepseek",
+];
+
 export const aiService = {
   getProviderStatuses(): ProviderStatus[] {
-    return ["gemini", "openai"].map((provider) => {
-      const instance = providers[provider as ProviderName];
+    return ALL_PROVIDERS.map((provider) => {
+      const instance = providers[provider];
+      const configured = Boolean(instance?.isEnabled());
       return {
-        provider: provider as ProviderName,
-        configured: Boolean(instance?.isEnabled()),
+        provider,
+        configured,
+        models: configured
+          ? PROVIDER_MODEL_MAP[provider] ?? EMPTY_MODELS
+          : EMPTY_MODELS,
       };
     });
   },
