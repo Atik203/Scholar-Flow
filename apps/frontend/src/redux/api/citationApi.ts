@@ -1,5 +1,18 @@
 import { apiSlice } from "./apiSlice";
 
+export interface CitationRecord {
+  id: string;
+  context: string | null;
+  location: string | null;
+  createdAt: string;
+  targetPaper: {
+    id: string;
+    title: string;
+    metadata: Record<string, unknown>;
+    doi: string | null;
+  };
+}
+
 export type CitationFormatName =
   | "BIBTEX"
   | "ENDNOTE"
@@ -117,6 +130,27 @@ export const citationApi = apiSlice.injectEndpoints({
         data: { content: string; format: string; filename: string };
       }) => response.data,
     }),
+
+    // Phase 10 — Citation insertion into editor
+    createCitation: builder.mutation<
+      CitationRecord,
+      { sourcePaperId: string; targetPaperId: string; context?: string; location?: string }
+    >({
+      query: (body) => ({ url: "/citations/insert", method: "POST", body }),
+      transformResponse: (response: { data: CitationRecord }) => response.data,
+      invalidatesTags: ["Citation"],
+    }),
+
+    getPaperCitations: builder.query<CitationRecord[], string>({
+      query: (sourcePaperId) => `/citations/paper/${sourcePaperId}`,
+      transformResponse: (response: { data: CitationRecord[] }) => response.data,
+      providesTags: ["Citation"],
+    }),
+
+    deleteCitation: builder.mutation<void, string>({
+      query: (id) => ({ url: `/citations/insert/${id}`, method: "DELETE" }),
+      invalidatesTags: ["Citation"],
+    }),
   }),
 });
 
@@ -127,4 +161,7 @@ export const {
   useGetHistoryQuery,
   useDeleteExportMutation,
   useLazyDownloadExportQuery,
+  useCreateCitationMutation,
+  useGetPaperCitationsQuery,
+  useDeleteCitationMutation,
 } = citationApi;
