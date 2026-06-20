@@ -15,7 +15,7 @@ jest.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: mockGetSignedUrl,
 }));
 
-import { StorageService } from "../app/modules/Papers/storage.service";
+import { StorageService } from "../app/modules/papers/storage.service";
 
 describe("StorageService", () => {
   let storage: StorageService;

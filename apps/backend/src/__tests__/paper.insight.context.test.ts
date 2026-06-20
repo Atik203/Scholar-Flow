@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
 import { aiService } from "../app/modules/AI/ai.service";
-import { paperService } from "../app/modules/Papers/paper.service";
+import { paperService } from "../app/modules/papers/paper.service";
 
 // Mock the AI service to capture the context being passed
 jest.mock("../app/modules/AI/ai.service");
