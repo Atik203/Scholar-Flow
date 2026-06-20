@@ -1004,6 +1004,12 @@ export const paperController = {
       );
     }
   }),
+
+  // Get available AI providers and their models for dynamic UI
+  getAiProviders: catchAsync(async (_req: Request, res: Response) => {
+    const statuses = aiService.getProviderStatuses();
+    sendSuccessResponse(res, { providers: statuses }, "AI providers retrieved");
+  }),
 };
 
 // Editor-specific controller functions
