@@ -859,3 +859,18 @@ html {
 .tiptap-image-upload-icon-container {
   margin-bottom: 0.75rem;
 }
+
+/* Prevent iOS zoom on mobile form inputs */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
