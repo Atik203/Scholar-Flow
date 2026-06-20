@@ -118,6 +118,18 @@ export const searchApi = apiSlice.injectEndpoints({
       query: () => '/search/recommendations',
       keepUnusedDataFor: 300,
     }),
+
+    semanticSearch: builder.query<
+      { results: Array<{ id: string; paperId: string; content: string; title: string | null; distance: number }>; fallback: string | null },
+      { q: string; limit?: number; workspaceId?: string }
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams({ q: params.q });
+        if (params.limit) queryParams.append('limit', params.limit.toString());
+        if (params.workspaceId) queryParams.append('workspaceId', params.workspaceId);
+        return `/search/semantic?${queryParams.toString()}`;
+      },
+    }),
   }),
 });
 
@@ -128,4 +140,5 @@ export const {
   useSaveSearchQueryMutation,
   useGetTrendingQuery,
   useGetRecommendationsQuery,
+  useSemanticSearchQuery,
 } = searchApi;

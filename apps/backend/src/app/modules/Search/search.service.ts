@@ -244,5 +244,98 @@ export class SearchService {
       orderBy: { createdAt: "desc" }
     });
   }
+
+  /**
+   * Semantic vector search across paper chunks (pgvector).
+   * Generates query embedding via OpenAI, then L2 distance search.
+   */
+  static async semanticSearch(
+    userId: string,
+    query: string,
+    limit = 10,
+    workspaceId?: string
+  ) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return { results: [], fallback: "OPENAI_KEY_MISSING" };
+    }
+
+    // 1. Generate query embedding
+    let queryVector: number[];
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch(
+        "https://api.openai.com/v1/embeddings",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: query.trim().slice(0, 8000),
+          }),
+          signal: controller.signal,
+        }
+      );
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        return { results: [], fallback: "EMBEDDING_FAILED" };
+      }
+
+      const data = (await response.json()) as {
+        data: Array<{ embedding: number[] }>;
+      };
+      queryVector = data.data[0]?.embedding;
+      if (!queryVector || queryVector.length !== 1536) {
+        return { results: [], fallback: "EMBEDDING_FAILED" };
+      }
+    } catch {
+      return { results: [], fallback: "EMBEDDING_FAILED" };
+    }
+
+    // 2. Vector similarity search
+    const vectorStr = `[${queryVector.join(",")}]`;
+
+    const workspaceFilter = workspaceId
+      ? Prisma.sql`AND p."workspaceId" = ${workspaceId}`
+      : Prisma.empty;
+
+    const results = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        paperId: string;
+        idx: number;
+        page: number | null;
+        content: string;
+        distance: number;
+        title: string | null;
+      }>
+    >`
+      SELECT
+        c.id,
+        c."paperId",
+        c.idx,
+        c.page,
+        c.content,
+        c.embedding <-> ${vectorStr}::vector AS distance,
+        p.title
+      FROM "PaperChunk" c
+      JOIN "Paper" p ON p.id = c."paperId"
+        AND p."isDeleted" = false
+        AND p."uploaderId" = ${userId}
+        ${workspaceFilter}
+      WHERE c.embedding IS NOT NULL
+        AND c."isDeleted" = false
+      ORDER BY c.embedding <-> ${vectorStr}::vector
+      LIMIT ${limit}
+    `;
+
+    return { results, fallback: null };
+  }
 }
 
