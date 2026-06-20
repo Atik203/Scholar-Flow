@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, jest } from "@jest/globals";
-import { paperService } from "../app/modules/Papers/paper.service";
+import { paperService } from "../app/modules/papers/paper.service";
 import prisma from "../app/shared/prisma";
 
 describe("paperService summary helpers", () => {

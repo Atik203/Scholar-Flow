@@ -10,7 +10,7 @@ jest.mock("../app/shared/prisma", () => {
   return { __esModule: true, default: mockPrisma, Prisma: actual.Prisma };
 });
 
-import { paperService } from "../app/modules/Papers/paper.service";
+import { paperService } from "../app/modules/papers/paper.service";
 
 describe("paperService", () => {
   beforeEach(() => {

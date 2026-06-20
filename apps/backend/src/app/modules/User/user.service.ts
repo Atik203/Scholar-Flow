@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
-import { StorageService } from "../Papers/storage.service";
+import { StorageService } from "../papers/storage.service";
 import {
   UpdateOnboardingInput,
   UpdatePreferencesInput,
