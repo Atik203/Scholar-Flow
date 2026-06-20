@@ -1,6 +1,9 @@
 @import "../styles/_variables.css";
 @import "../styles/_keyframe-animations.css";
 
+/* KaTeX math rendering */
+@import "katex/dist/katex.min.css";
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
