@@ -48,6 +48,12 @@ import { ResizableImageWithPopover } from "@/components/tiptap-node/resizable-im
 import "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover.scss";
 import "tiptap-extension-resizable-image/styles.css";
 
+// LaTeX Extensions
+import { LatexInline } from "@/components/tiptap-node/latex-inline/latex-inline-extension";
+import { LatexBlock } from "@/components/tiptap-node/latex-block/latex-block-extension";
+import { LatexInlineButton } from "@/components/tiptap-ui/latex-inline-button/latex-inline-button";
+import { LatexBlockButton } from "@/components/tiptap-ui/latex-block-button/latex-block-button";
+
 // Hooks
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -150,6 +156,8 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       Typography,
       Superscript,
       Subscript,
+      LatexInline,
+      LatexBlock,
       // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
     content: "",
@@ -511,6 +519,13 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
                 <TextAlignButton align="center" />
                 <TextAlignButton align="right" />
                 <TextAlignButton align="justify" />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <LatexInlineButton />
+                <LatexBlockButton />
               </ToolbarGroup>
 
               <ToolbarSeparator />
