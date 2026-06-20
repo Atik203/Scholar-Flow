@@ -379,6 +379,7 @@ export type PaperWhereInput = {
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
+  PaperVersion?: Prisma.PaperVersionListRelationFilter
 }
 
 export type PaperOrderByWithRelationInput = {
@@ -421,6 +422,7 @@ export type PaperOrderByWithRelationInput = {
   citationExports?: Prisma.CitationExportOrderByRelationAggregateInput
   discussionThreads?: Prisma.DiscussionThreadOrderByRelationAggregateInput
   UsageEvent?: Prisma.UsageEventOrderByRelationAggregateInput
+  PaperVersion?: Prisma.PaperVersionOrderByRelationAggregateInput
 }
 
 export type PaperWhereUniqueInput = Prisma.AtLeast<{
@@ -466,6 +468,7 @@ export type PaperWhereUniqueInput = Prisma.AtLeast<{
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
+  PaperVersion?: Prisma.PaperVersionListRelationFilter
 }, "id" | "doi">
 
 export type PaperOrderByWithAggregationInput = {
@@ -568,6 +571,7 @@ export type PaperCreateInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateInput = {
@@ -608,6 +612,7 @@ export type PaperUncheckedCreateInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUpdateInput = {
@@ -648,6 +653,7 @@ export type PaperUpdateInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateInput = {
@@ -688,6 +694,7 @@ export type PaperUncheckedUpdateInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateManyInput = {
@@ -1001,6 +1008,22 @@ export type PaperUpdateOneRequiredWithoutChunksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PaperUpdateToOneWithWhereWithoutChunksInput, Prisma.PaperUpdateWithoutChunksInput>, Prisma.PaperUncheckedUpdateWithoutChunksInput>
 }
 
+export type PaperCreateNestedOneWithoutPaperVersionInput = {
+  create?: Prisma.XOR<Prisma.PaperCreateWithoutPaperVersionInput, Prisma.PaperUncheckedCreateWithoutPaperVersionInput>
+  connectOrCreate?: Prisma.PaperCreateOrConnectWithoutPaperVersionInput
+  connect?: Prisma.PaperWhereUniqueInput
+}
+
+export type PaperUpdateOneWithoutPaperVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.PaperCreateWithoutPaperVersionInput, Prisma.PaperUncheckedCreateWithoutPaperVersionInput>
+  connectOrCreate?: Prisma.PaperCreateOrConnectWithoutPaperVersionInput
+  upsert?: Prisma.PaperUpsertWithoutPaperVersionInput
+  disconnect?: Prisma.PaperWhereInput | boolean
+  delete?: Prisma.PaperWhereInput | boolean
+  connect?: Prisma.PaperWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaperUpdateToOneWithWhereWithoutPaperVersionInput, Prisma.PaperUpdateWithoutPaperVersionInput>, Prisma.PaperUncheckedUpdateWithoutPaperVersionInput>
+}
+
 export type PaperCreateNestedOneWithoutCitationsFromInput = {
   create?: Prisma.XOR<Prisma.PaperCreateWithoutCitationsFromInput, Prisma.PaperUncheckedCreateWithoutCitationsFromInput>
   connectOrCreate?: Prisma.PaperCreateOrConnectWithoutCitationsFromInput
@@ -1200,6 +1223,7 @@ export type PaperCreateWithoutUploaderInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutUploaderInput = {
@@ -1239,6 +1263,7 @@ export type PaperUncheckedCreateWithoutUploaderInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutUploaderInput = {
@@ -1334,6 +1359,7 @@ export type PaperCreateWithoutWorkspaceInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutWorkspaceInput = {
@@ -1373,6 +1399,7 @@ export type PaperUncheckedCreateWithoutWorkspaceInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutWorkspaceInput = {
@@ -1438,6 +1465,7 @@ export type PaperCreateWithoutFileInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutFileInput = {
@@ -1477,6 +1505,7 @@ export type PaperUncheckedCreateWithoutFileInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutFileInput = {
@@ -1532,6 +1561,7 @@ export type PaperUpdateWithoutFileInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutFileInput = {
@@ -1571,6 +1601,7 @@ export type PaperUncheckedUpdateWithoutFileInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutChunksInput = {
@@ -1610,6 +1641,7 @@ export type PaperCreateWithoutChunksInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutChunksInput = {
@@ -1649,6 +1681,7 @@ export type PaperUncheckedCreateWithoutChunksInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutChunksInput = {
@@ -1704,6 +1737,7 @@ export type PaperUpdateWithoutChunksInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutChunksInput = {
@@ -1732,6 +1766,183 @@ export type PaperUncheckedUpdateWithoutChunksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   file?: Prisma.PaperFileUncheckedUpdateOneWithoutPaperNestedInput
+  citationsFrom?: Prisma.CitationUncheckedUpdateManyWithoutSourcePaperNestedInput
+  citationsTo?: Prisma.CitationUncheckedUpdateManyWithoutTargetPaperNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutPaperNestedInput
+  collectionJoins?: Prisma.CollectionPaperUncheckedUpdateManyWithoutPaperNestedInput
+  aiSummaries?: Prisma.AISummaryUncheckedUpdateManyWithoutPaperNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutPaperNestedInput
+  aiInsightMessages?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutPaperNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
+  UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
+}
+
+export type PaperCreateWithoutPaperVersionInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  metadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string | null
+  doi?: string | null
+  isDraft?: boolean
+  isPublished?: boolean
+  processingStatus?: $Enums.PaperProcessingStatus
+  processingError?: string | null
+  processedAt?: Date | string | null
+  previewFileKey?: string | null
+  previewMimeType?: string | null
+  originalMimeType?: string | null
+  contentHtml?: string | null
+  extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  uploader: Prisma.UserCreateNestedOneWithoutUploadedPapersInput
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutPapersInput
+  file?: Prisma.PaperFileCreateNestedOneWithoutPaperInput
+  chunks?: Prisma.PaperChunkCreateNestedManyWithoutPaperInput
+  citationsFrom?: Prisma.CitationCreateNestedManyWithoutSourcePaperInput
+  citationsTo?: Prisma.CitationCreateNestedManyWithoutTargetPaperInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutPaperInput
+  collectionJoins?: Prisma.CollectionPaperCreateNestedManyWithoutPaperInput
+  aiSummaries?: Prisma.AISummaryCreateNestedManyWithoutPaperInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutPaperInput
+  aiInsightMessages?: Prisma.AIInsightMessageCreateNestedManyWithoutPaperInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
+  UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+}
+
+export type PaperUncheckedCreateWithoutPaperVersionInput = {
+  id?: string
+  workspaceId: string
+  uploaderId: string
+  title: string
+  abstract?: string | null
+  metadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string | null
+  doi?: string | null
+  isDraft?: boolean
+  isPublished?: boolean
+  processingStatus?: $Enums.PaperProcessingStatus
+  processingError?: string | null
+  processedAt?: Date | string | null
+  previewFileKey?: string | null
+  previewMimeType?: string | null
+  originalMimeType?: string | null
+  contentHtml?: string | null
+  extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  file?: Prisma.PaperFileUncheckedCreateNestedOneWithoutPaperInput
+  chunks?: Prisma.PaperChunkUncheckedCreateNestedManyWithoutPaperInput
+  citationsFrom?: Prisma.CitationUncheckedCreateNestedManyWithoutSourcePaperInput
+  citationsTo?: Prisma.CitationUncheckedCreateNestedManyWithoutTargetPaperInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutPaperInput
+  collectionJoins?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutPaperInput
+  aiSummaries?: Prisma.AISummaryUncheckedCreateNestedManyWithoutPaperInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutPaperInput
+  aiInsightMessages?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutPaperInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
+  UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+}
+
+export type PaperCreateOrConnectWithoutPaperVersionInput = {
+  where: Prisma.PaperWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaperCreateWithoutPaperVersionInput, Prisma.PaperUncheckedCreateWithoutPaperVersionInput>
+}
+
+export type PaperUpsertWithoutPaperVersionInput = {
+  update: Prisma.XOR<Prisma.PaperUpdateWithoutPaperVersionInput, Prisma.PaperUncheckedUpdateWithoutPaperVersionInput>
+  create: Prisma.XOR<Prisma.PaperCreateWithoutPaperVersionInput, Prisma.PaperUncheckedCreateWithoutPaperVersionInput>
+  where?: Prisma.PaperWhereInput
+}
+
+export type PaperUpdateToOneWithWhereWithoutPaperVersionInput = {
+  where?: Prisma.PaperWhereInput
+  data: Prisma.XOR<Prisma.PaperUpdateWithoutPaperVersionInput, Prisma.PaperUncheckedUpdateWithoutPaperVersionInput>
+}
+
+export type PaperUpdateWithoutPaperVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  doi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  processingStatus?: Prisma.EnumPaperProcessingStatusFieldUpdateOperationsInput | $Enums.PaperProcessingStatus
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  uploader?: Prisma.UserUpdateOneRequiredWithoutUploadedPapersNestedInput
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutPapersNestedInput
+  file?: Prisma.PaperFileUpdateOneWithoutPaperNestedInput
+  chunks?: Prisma.PaperChunkUpdateManyWithoutPaperNestedInput
+  citationsFrom?: Prisma.CitationUpdateManyWithoutSourcePaperNestedInput
+  citationsTo?: Prisma.CitationUpdateManyWithoutTargetPaperNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutPaperNestedInput
+  collectionJoins?: Prisma.CollectionPaperUpdateManyWithoutPaperNestedInput
+  aiSummaries?: Prisma.AISummaryUpdateManyWithoutPaperNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutPaperNestedInput
+  aiInsightMessages?: Prisma.AIInsightMessageUpdateManyWithoutPaperNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
+  UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+}
+
+export type PaperUncheckedUpdateWithoutPaperVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  uploaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  doi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  processingStatus?: Prisma.EnumPaperProcessingStatusFieldUpdateOperationsInput | $Enums.PaperProcessingStatus
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  file?: Prisma.PaperFileUncheckedUpdateOneWithoutPaperNestedInput
+  chunks?: Prisma.PaperChunkUncheckedUpdateManyWithoutPaperNestedInput
   citationsFrom?: Prisma.CitationUncheckedUpdateManyWithoutSourcePaperNestedInput
   citationsTo?: Prisma.CitationUncheckedUpdateManyWithoutTargetPaperNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutPaperNestedInput
@@ -1782,6 +1993,7 @@ export type PaperCreateWithoutCitationsFromInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutCitationsFromInput = {
@@ -1821,6 +2033,7 @@ export type PaperUncheckedCreateWithoutCitationsFromInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutCitationsFromInput = {
@@ -1865,6 +2078,7 @@ export type PaperCreateWithoutCitationsToInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutCitationsToInput = {
@@ -1904,6 +2118,7 @@ export type PaperUncheckedCreateWithoutCitationsToInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutCitationsToInput = {
@@ -1959,6 +2174,7 @@ export type PaperUpdateWithoutCitationsFromInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutCitationsFromInput = {
@@ -1998,6 +2214,7 @@ export type PaperUncheckedUpdateWithoutCitationsFromInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUpsertWithoutCitationsToInput = {
@@ -2048,6 +2265,7 @@ export type PaperUpdateWithoutCitationsToInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutCitationsToInput = {
@@ -2087,6 +2305,7 @@ export type PaperUncheckedUpdateWithoutCitationsToInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutAnnotationsInput = {
@@ -2126,6 +2345,7 @@ export type PaperCreateWithoutAnnotationsInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutAnnotationsInput = {
@@ -2165,6 +2385,7 @@ export type PaperUncheckedCreateWithoutAnnotationsInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutAnnotationsInput = {
@@ -2220,6 +2441,7 @@ export type PaperUpdateWithoutAnnotationsInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutAnnotationsInput = {
@@ -2259,6 +2481,7 @@ export type PaperUncheckedUpdateWithoutAnnotationsInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutCollectionJoinsInput = {
@@ -2298,6 +2521,7 @@ export type PaperCreateWithoutCollectionJoinsInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutCollectionJoinsInput = {
@@ -2337,6 +2561,7 @@ export type PaperUncheckedCreateWithoutCollectionJoinsInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutCollectionJoinsInput = {
@@ -2392,6 +2617,7 @@ export type PaperUpdateWithoutCollectionJoinsInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutCollectionJoinsInput = {
@@ -2431,6 +2657,7 @@ export type PaperUncheckedUpdateWithoutCollectionJoinsInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutAiSummariesInput = {
@@ -2470,6 +2697,7 @@ export type PaperCreateWithoutAiSummariesInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutAiSummariesInput = {
@@ -2509,6 +2737,7 @@ export type PaperUncheckedCreateWithoutAiSummariesInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutAiSummariesInput = {
@@ -2564,6 +2793,7 @@ export type PaperUpdateWithoutAiSummariesInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutAiSummariesInput = {
@@ -2603,6 +2833,7 @@ export type PaperUncheckedUpdateWithoutAiSummariesInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutAiInsightThreadsInput = {
@@ -2642,6 +2873,7 @@ export type PaperCreateWithoutAiInsightThreadsInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutAiInsightThreadsInput = {
@@ -2681,6 +2913,7 @@ export type PaperUncheckedCreateWithoutAiInsightThreadsInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutAiInsightThreadsInput = {
@@ -2736,6 +2969,7 @@ export type PaperUpdateWithoutAiInsightThreadsInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutAiInsightThreadsInput = {
@@ -2775,6 +3009,7 @@ export type PaperUncheckedUpdateWithoutAiInsightThreadsInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutAiInsightMessagesInput = {
@@ -2814,6 +3049,7 @@ export type PaperCreateWithoutAiInsightMessagesInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutAiInsightMessagesInput = {
@@ -2853,6 +3089,7 @@ export type PaperUncheckedCreateWithoutAiInsightMessagesInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutAiInsightMessagesInput = {
@@ -2908,6 +3145,7 @@ export type PaperUpdateWithoutAiInsightMessagesInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutAiInsightMessagesInput = {
@@ -2947,6 +3185,7 @@ export type PaperUncheckedUpdateWithoutAiInsightMessagesInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutUsageEventInput = {
@@ -2986,6 +3225,7 @@ export type PaperCreateWithoutUsageEventInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutUsageEventInput = {
@@ -3025,6 +3265,7 @@ export type PaperUncheckedCreateWithoutUsageEventInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutUsageEventInput = {
@@ -3080,6 +3321,7 @@ export type PaperUpdateWithoutUsageEventInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutUsageEventInput = {
@@ -3119,6 +3361,7 @@ export type PaperUncheckedUpdateWithoutUsageEventInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutResearchNotesInput = {
@@ -3158,6 +3401,7 @@ export type PaperCreateWithoutResearchNotesInput = {
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutResearchNotesInput = {
@@ -3197,6 +3441,7 @@ export type PaperUncheckedCreateWithoutResearchNotesInput = {
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutResearchNotesInput = {
@@ -3252,6 +3497,7 @@ export type PaperUpdateWithoutResearchNotesInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutResearchNotesInput = {
@@ -3291,6 +3537,7 @@ export type PaperUncheckedUpdateWithoutResearchNotesInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutCitationExportsInput = {
@@ -3330,6 +3577,7 @@ export type PaperCreateWithoutCitationExportsInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutCitationExportsInput = {
@@ -3369,6 +3617,7 @@ export type PaperUncheckedCreateWithoutCitationExportsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutCitationExportsInput = {
@@ -3424,6 +3673,7 @@ export type PaperUpdateWithoutCitationExportsInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutCitationExportsInput = {
@@ -3463,6 +3713,7 @@ export type PaperUncheckedUpdateWithoutCitationExportsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutDiscussionThreadsInput = {
@@ -3502,6 +3753,7 @@ export type PaperCreateWithoutDiscussionThreadsInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
 }
 
 export type PaperUncheckedCreateWithoutDiscussionThreadsInput = {
@@ -3541,6 +3793,7 @@ export type PaperUncheckedCreateWithoutDiscussionThreadsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
 }
 
 export type PaperCreateOrConnectWithoutDiscussionThreadsInput = {
@@ -3596,6 +3849,7 @@ export type PaperUpdateWithoutDiscussionThreadsInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutDiscussionThreadsInput = {
@@ -3635,6 +3889,7 @@ export type PaperUncheckedUpdateWithoutDiscussionThreadsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateManyUploaderInput = {
@@ -3700,6 +3955,7 @@ export type PaperUpdateWithoutUploaderInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutUploaderInput = {
@@ -3739,6 +3995,7 @@ export type PaperUncheckedUpdateWithoutUploaderInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateManyWithoutUploaderInput = {
@@ -3830,6 +4087,7 @@ export type PaperUpdateWithoutWorkspaceInput = {
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateWithoutWorkspaceInput = {
@@ -3869,6 +4127,7 @@ export type PaperUncheckedUpdateWithoutWorkspaceInput = {
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -3915,6 +4174,7 @@ export type PaperCountOutputType = {
   citationExports: number
   discussionThreads: number
   UsageEvent: number
+  PaperVersion: number
 }
 
 export type PaperCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3930,6 +4190,7 @@ export type PaperCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   citationExports?: boolean | PaperCountOutputTypeCountCitationExportsArgs
   discussionThreads?: boolean | PaperCountOutputTypeCountDiscussionThreadsArgs
   UsageEvent?: boolean | PaperCountOutputTypeCountUsageEventArgs
+  PaperVersion?: boolean | PaperCountOutputTypeCountPaperVersionArgs
 }
 
 /**
@@ -4026,6 +4287,13 @@ export type PaperCountOutputTypeCountUsageEventArgs<ExtArgs extends runtime.Type
   where?: Prisma.UsageEventWhereInput
 }
 
+/**
+ * PaperCountOutputType without action
+ */
+export type PaperCountOutputTypeCountPaperVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaperVersionWhereInput
+}
+
 
 export type PaperSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4067,6 +4335,7 @@ export type PaperSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   citationExports?: boolean | Prisma.Paper$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Paper$discussionThreadsArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Paper$UsageEventArgs<ExtArgs>
+  PaperVersion?: boolean | Prisma.Paper$PaperVersionArgs<ExtArgs>
   _count?: boolean | Prisma.PaperCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["paper"]>
 
@@ -4172,6 +4441,7 @@ export type PaperInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   citationExports?: boolean | Prisma.Paper$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Paper$discussionThreadsArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Paper$UsageEventArgs<ExtArgs>
+  PaperVersion?: boolean | Prisma.Paper$PaperVersionArgs<ExtArgs>
   _count?: boolean | Prisma.PaperCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PaperIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4201,6 +4471,7 @@ export type $PaperPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     citationExports: Prisma.$CitationExportPayload<ExtArgs>[]
     discussionThreads: Prisma.$DiscussionThreadPayload<ExtArgs>[]
     UsageEvent: Prisma.$UsageEventPayload<ExtArgs>[]
+    PaperVersion: Prisma.$PaperVersionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4636,6 +4907,7 @@ export interface Prisma__PaperClient<T, Null = never, ExtArgs extends runtime.Ty
   citationExports<T extends Prisma.Paper$citationExportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$citationExportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CitationExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionThreads<T extends Prisma.Paper$discussionThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$discussionThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   UsageEvent<T extends Prisma.Paper$UsageEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$UsageEventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  PaperVersion<T extends Prisma.Paper$PaperVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$PaperVersionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5394,6 +5666,30 @@ export type Paper$UsageEventArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.UsageEventScalarFieldEnum | Prisma.UsageEventScalarFieldEnum[]
+}
+
+/**
+ * Paper.PaperVersion
+ */
+export type Paper$PaperVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaperVersion
+   */
+  select?: Prisma.PaperVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaperVersion
+   */
+  omit?: Prisma.PaperVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaperVersionInclude<ExtArgs> | null
+  where?: Prisma.PaperVersionWhereInput
+  orderBy?: Prisma.PaperVersionOrderByWithRelationInput | Prisma.PaperVersionOrderByWithRelationInput[]
+  cursor?: Prisma.PaperVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaperVersionScalarFieldEnum | Prisma.PaperVersionScalarFieldEnum[]
 }
 
 /**
