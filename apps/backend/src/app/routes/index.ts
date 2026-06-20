@@ -4,12 +4,12 @@ import {
   getAvailableRoutes,
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
-import { annotationRoutes } from "../modules/Annotations/annotation.routes";
+import { annotationRoutes } from "../modules/annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { billingRoutes } from "../modules/Billing/billing.routes";
 import { collectionRoutes } from "../modules/Collection/collection.routes";
-import { editorPaperRoutes, paperRoutes } from "../modules/Papers/paper.routes";
-import { noteRoutes } from "../modules/Notes/note.routes";
+import { editorPaperRoutes, paperRoutes } from "../modules/papers/paper.routes";
+import { noteRoutes } from "../modules/notes/note.routes";
 import { notebookRoutes } from "../modules/Notebook/notebook.routes";
 import { reportRoutes } from "../modules/Reports/report.routes";
 import { auditLogRoutes } from "../modules/AuditLog/auditLog.routes";
