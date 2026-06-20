@@ -16,13 +16,13 @@ export function useMediaQuery(query: string): boolean {
   return matches;
 }
 
-// Common breakpoint hooks
+// Common breakpoint hooks (consistent with Tailwind: mobile < 768px)
 export function useIsMobile(): boolean {
-  return useMediaQuery("(max-width: 768px)");
+  return useMediaQuery("(max-width: 767px)");
 }
 
 export function useIsTablet(): boolean {
-  return useMediaQuery("(min-width: 769px) and (max-width: 1024px)");
+  return useMediaQuery("(min-width: 768px) and (max-width: 1024px)");
 }
 
 export function useIsDesktop(): boolean {
