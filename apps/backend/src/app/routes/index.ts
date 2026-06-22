@@ -28,6 +28,7 @@ import { teamRoutes } from "../modules/Team/team.routes";
 import { citationRoutes } from "../modules/CitationExport/citationExport.routes";
 import { discussionRoutes } from "../modules/Discussion/discussion.routes";
 import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
+import { exportRoutes } from "../modules/Export/export.routes";
 import { invitationRoutes } from "./invitation.routes";
 import healthRoutes from "./health.routes";
 
@@ -84,5 +85,8 @@ router.use("/ai-chat", aiConversationRoutes);
 
 // Phase 10 — AI Tools (rewriter, comparator, translator)
 router.use("/ai", aiToolsRoutes);
+
+// Phase 10 — Export (LaTeX compilation, DOCX/DOC/MD → PDF)
+router.use("/export", exportRoutes);
 
 export default router;
