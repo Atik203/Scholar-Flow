@@ -1,11 +1,28 @@
 # Scholar-Flow Release Notes
 
-## Release 1.3.0-rc1 — Phase 10: FINAL PHASE (2026-06-22)
+## Release 1.3.0-rc1 — Phase 10: FINAL PHASE (2026-10-01)
 
-**Release date:** 2026-06-22
-**Theme:** AI features, real-time collaboration, editor enhancements, production hardening.
+**Release date:** 2026-10-01
+**Theme:** AI features, real-time collaboration, editor enhancements, production hardening, paper upload/import overhaul.
 
 ---
+
+### 2026-10-01 — Paper Upload & Import Overhaul
+
+- **DOI Import now downloads PDF**: After CrossRef metadata fetch, automatically searches Unpaywall and Semantic Scholar for open-access PDF. If found, downloads to S3 and triggers text extraction.
+- **arXiv Import now downloads PDF**: Automatically downloads from `https://arxiv.org/pdf/{id}.pdf`, uploads to S3, triggers extraction. No more metadata-only.
+- **URL Import — metadata extraction**: Fetches source page HTML to extract `citation_*` meta tags (title, authors, DOI, abstract). Falls back to CrossRef enrichment. Better filenames for titles.
+- **Auto-extraction on import**: All import methods now call `queueDocumentExtraction` to trigger text processing immediately (with graceful fallback when Redis unavailable).
+- **Smart URL Import**: New `POST /import/smart-url` endpoint auto-detects source from URL:
+  - IEEE Xplore → scrape metadata + try PDF download
+  - Semantic Scholar → API for metadata + OA PDF
+  - ResearchGate → extract DOI → CrossRef
+  - Google Scholar → follow article link → download
+  - arXiv → redirect to arXiv import path
+  - Direct PDF → download directly
+- **Frontend**: New "Smart URL" tab on upload page. All imports redirect to paper detail page on success. Shows PDF availability status.
+- **Test suite**: 15 tests across 3 suites (paper-crud, billing-subscription, paper.service) — all passing with mocked Prisma.
+- **SSO/SAML deferred**: Enterprise SSO moved to post-Phase 10 roadmap.
 
 ### AI Features
 
