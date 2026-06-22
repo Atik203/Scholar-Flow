@@ -94,7 +94,7 @@ app.use(
 // Rate limiting (typing relaxed for dev boot)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // TESTING: Increased from 100 to 1000 requests per windowMs
+  max: 300,
   message: "Too many requests from this IP, please try again later.",
 });
 // Cast to any to avoid TS overload mismatch while bootstrapping
