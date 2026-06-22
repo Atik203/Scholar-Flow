@@ -6210,6 +6210,7 @@ __metadata:
     "@tiptap/pm": "npm:^3.26.0"
     "@tiptap/react": "npm:^3.26.0"
     "@tiptap/starter-kit": "npm:^3.26.0"
+    "@tiptap/y-tiptap": "npm:^3.0.5"
     "@types/eslint-plugin-jsx-a11y": "npm:^6"
     "@types/file-saver": "npm:^2"
     "@types/html-docx-js": "npm:^0"
@@ -6276,6 +6277,8 @@ __metadata:
     tw-animate-css: "npm:^1.3.7"
     typescript: "npm:^5"
     uuid: "npm:^13.0.0"
+    y-prosemirror: "npm:^1.3.7"
+    y-protocols: "npm:^1.0.7"
     yjs: "npm:^13.6.31"
     zod: "npm:^3.22.4"
   languageName: unknown
@@ -7831,6 +7834,21 @@ __metadata:
     "@tiptap/extensions": "npm:^3.26.0"
     "@tiptap/pm": "npm:^3.26.0"
   checksum: 10c0/0f71112a03dc56b91ced7b366b98a8e6ee1fe649684d262556f0895c093d16942307e6d3f2b51b7a8baaa00621d67b43bad8b4845c156a75d5e22dfb09674a3d
+  languageName: node
+  linkType: hard
+
+"@tiptap/y-tiptap@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "@tiptap/y-tiptap@npm:3.0.5"
+  dependencies:
+    lib0: "npm:^0.2.100"
+  peerDependencies:
+    prosemirror-model: ^1.7.1
+    prosemirror-state: ^1.2.3
+    prosemirror-view: ^1.9.10
+    y-protocols: ^1.0.1
+    yjs: ^13.5.38
+  checksum: 10c0/87b2092c428b5d58b4b96456e5f926b08e7f0caeafe27a060172ee30c9f0cdeb0848baae1427339eb86542c9f7d246cffbdd4758c5566948567bfd682bba8387
   languageName: node
   linkType: hard
 
@@ -16974,7 +16992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lib0@npm:^0.2.99":
+"lib0@npm:^0.2.100, lib0@npm:^0.2.109, lib0@npm:^0.2.85, lib0@npm:^0.2.99":
   version: 0.2.117
   resolution: "lib0@npm:0.2.117"
   dependencies:
@@ -24832,6 +24850,32 @@ __metadata:
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 10c0/366ae4783eec6100f8a02dff02ac907bf29f9a00b82ac0264b4d8b832ead18306797e283cf19de776538babfdcb2101375ec5646b59f08c52128ac4ab812ed0e
+  languageName: node
+  linkType: hard
+
+"y-prosemirror@npm:^1.3.7":
+  version: 1.3.7
+  resolution: "y-prosemirror@npm:1.3.7"
+  dependencies:
+    lib0: "npm:^0.2.109"
+  peerDependencies:
+    prosemirror-model: ^1.7.1
+    prosemirror-state: ^1.2.3
+    prosemirror-view: ^1.9.10
+    y-protocols: ^1.0.1
+    yjs: ^13.5.38
+  checksum: 10c0/4f544af2be316b28cc25f12ed5d1658b34eb9b6194479cafadd63074baf890c0fb6688dc67a7ec9d869187676ce72c1efed220f002e84418f5fbf790c5060d5f
+  languageName: node
+  linkType: hard
+
+"y-protocols@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "y-protocols@npm:1.0.7"
+  dependencies:
+    lib0: "npm:^0.2.85"
+  peerDependencies:
+    yjs: ^13.0.0
+  checksum: 10c0/70e14ab50b9200e97602c5effc3e14ae4ea0f51479a1628569af7cc12a6739fbc02484335828f5c508a4bf6fa0c3ef5ae1c17e13346b7a6093abeb9627f59021
   languageName: node
   linkType: hard
 
