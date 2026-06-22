@@ -2,6 +2,7 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { BrowserCleanup } from "@/components/providers/BrowserCleanup";
+import { FloatingAiAssistant } from "@/components/ai-assistant/FloatingAiAssistant";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
@@ -158,6 +159,7 @@ export default function RootLayout({
             <ThemeProvider>
               <ConditionalLayout>{children}</ConditionalLayout>
               <ToastProvider />
+              <FloatingAiAssistant />
             </ThemeProvider>
           </AuthProvider>
         </ReduxProvider>

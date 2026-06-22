@@ -658,6 +658,61 @@ export const aiService = {
   async invalidateSummaryCache(paperId: string) {
     await aiSummaryCache.invalidate(paperId);
   },
+
+  // Phase 10 — AI Key Points extraction
+  async generateKeyPoints(request: AiInsightRequest): Promise<string[]> {
+    const sanitizedHistory = sanitizeInsightHistory(request.history);
+    const normalizedRequest: AiInsightRequest = {
+      ...request,
+      prompt: `Extract 5-10 key claims, findings, or contributions from this paper. Return ONLY a JSON array of strings, each being a concise key point, without numbering or bullet points. Example: ["First key finding", "Second key finding"]`,
+      context: request.context || "",
+      history: sanitizedHistory,
+    };
+
+    const hasContext = normalizedRequest.context.trim().length > 0;
+    if (!hasContext) {
+      return ["No paper content available for key points extraction. Please ensure the paper has been processed."];
+    }
+
+    if (!config.ai.featuresEnabled) {
+      return ["AI features are currently disabled. Enable them in settings to extract key points."];
+    }
+
+    const providerInstances = getProviderInstances();
+    const errors: string[] = [];
+
+    for (const provider of providerInstances) {
+      if (
+        !provider.isEnabled() ||
+        typeof provider.generateInsights !== "function"
+      ) {
+        continue;
+      }
+
+      try {
+        const result = await provider.generateInsights(normalizedRequest);
+        if (result) {
+          const content = result.message?.content || "";
+          try {
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed)) return parsed.slice(0, 10).map(String);
+          } catch {
+            return content
+              .split(/\n|•|-|\d+\./)
+              .map((s) => s.replace(/^[\s"[\]]+|[\s"\]]+$/g, "").trim())
+              .filter((s) => s.length > 10)
+              .slice(0, 10);
+          }
+        }
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : String(error ?? "Unknown");
+        errors.push(errorMsg);
+      }
+    }
+
+    return [`AI key points extraction failed: ${errors.join("; ") || "No AI provider available"}`];
+  },
 };
 
 const shouldReplaceValue = (currentValue?: string | null) => {
