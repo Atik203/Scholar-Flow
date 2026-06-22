@@ -16,6 +16,8 @@ import { useGetAiProvidersQuery } from "@/redux/api/paperApi";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Bot,
+  Check,
+  Copy,
   MessageCircle,
   Plus,
   Send,
@@ -25,6 +27,9 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 
 interface Message {
   id: string;
@@ -55,6 +60,39 @@ function getToken(): string | null {
   return null;
 }
 
+const MODEL_LABELS: Record<string, string> = {
+  "gpt-4o": "GPT-4o",
+  "gpt-4o-mini": "GPT-4o Mini",
+  "gpt-3.5-turbo": "GPT-3.5",
+  "gemini-2.5-flash-lite": "Gemini Flash",
+  "gemini-2.5-pro": "Gemini Pro",
+  "claude-3-5-sonnet-latest": "Claude Sonnet",
+  "claude-3-5-haiku-latest": "Claude Haiku",
+  "claude-3-opus-latest": "Claude Opus",
+  "deepseek-chat": "DeepSeek V3",
+  "deepseek-reasoner": "DeepSeek R1",
+};
+
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-6 w-6 p-0 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      onClick={handleCopy}
+      title="Copy message"
+    >
+      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+    </Button>
+  );
+}
+
 export function FloatingAiAssistant() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
@@ -73,7 +111,6 @@ export function FloatingAiAssistant() {
     availableModels[0]?.value ?? "gemini-2.5-flash-lite"
   );
 
-  // Cmd+J / Ctrl+J shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "j") {
@@ -86,7 +123,6 @@ export function FloatingAiAssistant() {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // Load conversations
   useEffect(() => {
     if (!open) return;
     setLoadingConvs(true);
@@ -101,7 +137,6 @@ export function FloatingAiAssistant() {
       .finally(() => setLoadingConvs(false));
   }, [open]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -200,27 +235,25 @@ export function FloatingAiAssistant() {
 
   return (
     <>
-      {/* FAB button */}
       {!open && (
         <motion.button
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition-all flex items-center justify-center"
           onClick={() => { setOpen(true); setMinimized(false); }}
-          title="AI Assistant (⌘J)"
+          title="AI Assistant (Ctrl+J)"
         >
           <Sparkles className="h-6 w-6" />
         </motion.button>
       )}
 
-      {/* Chat panel */}
       <AnimatePresence>
         {open && !minimized && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-24px)] shadow-2xl rounded-xl border bg-card"
+            className="fixed bottom-6 right-6 z-50 w-[420px] max-w-[calc(100vw-24px)] shadow-2xl rounded-xl border bg-card"
           >
             <Card className="border-0 shadow-none">
               <CardHeader className="flex flex-row items-center justify-between p-3 border-b space-y-0">
@@ -246,7 +279,6 @@ export function FloatingAiAssistant() {
 
               <CardContent className="p-0">
                 <div className="flex h-[500px]">
-                  {/* Sidebar */}
                   <div className="w-36 border-r bg-muted/20 flex flex-col">
                     <div className="p-2 border-b">
                       <Select value={selectedModel} onValueChange={setSelectedModel}>
@@ -295,7 +327,6 @@ export function FloatingAiAssistant() {
                     </ScrollArea>
                   </div>
 
-                  {/* Main chat */}
                   <div className="flex-1 flex flex-col">
                     <ScrollArea className="flex-1 p-3" ref={scrollRef}>
                       {messages.length === 0 ? (
@@ -310,24 +341,40 @@ export function FloatingAiAssistant() {
                             <div
                               key={msg.id}
                               className={cn(
-                                "text-sm p-2.5 rounded-lg max-w-[90%]",
+                                "text-sm p-2.5 rounded-lg max-w-[95%] group relative",
                                 msg.role === "user"
                                   ? "bg-primary text-primary-foreground ml-auto"
-                                  : "bg-muted"
+                                  : "bg-muted pr-7"
                               )}
                             >
-                              <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                              {msg.role === "assistant" ? (
+                                <div className="ai-message prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted-foreground/10 prose-pre:border prose-pre:rounded-lg">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    rehypePlugins={[rehypeHighlight]}
+                                  >
+                                    {msg.content}
+                                  </ReactMarkdown>
+                                </div>
+                              ) : (
+                                <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                              )}
+                              {msg.role === "assistant" && (
+                                <CopyButton content={msg.content} />
+                              )}
                               {msg.model && (
-                                <p className="text-[10px] opacity-50 mt-1">{msg.model}</p>
+                                <p className="text-[10px] opacity-40 mt-1">
+                                  {MODEL_LABELS[msg.model] || msg.model}
+                                </p>
                               )}
                             </div>
                           ))}
                           {loading && (
                             <div className="text-sm p-2.5 rounded-lg bg-muted max-w-[90%]">
                               <div className="flex gap-1">
-                                <span className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                                <span className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                                <span className="h-2 w-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
                               </div>
                             </div>
                           )}
@@ -335,7 +382,6 @@ export function FloatingAiAssistant() {
                       )}
                     </ScrollArea>
 
-                    {/* Input */}
                     <div className="p-3 border-t flex gap-2">
                       <Input
                         value={input}
@@ -356,7 +402,6 @@ export function FloatingAiAssistant() {
         )}
       </AnimatePresence>
 
-      {/* Minimized bar */}
       <AnimatePresence>
         {open && minimized && (
           <motion.div
