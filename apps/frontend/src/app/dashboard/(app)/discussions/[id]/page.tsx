@@ -20,6 +20,7 @@ import { ArrowLeft, CheckCircle, Hash, Loader2, MessageSquare, Pin, Send } from 
 import Link from "next/link";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { use, useState } from "react";
+import { LiveDiscussionFeed } from "@/components/discussions/LiveDiscussionFeed";
 
 function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
 
@@ -155,6 +156,8 @@ export default function DiscussionDetailPage({ params }: { params: Promise<{ id:
           ))
         )}
       </div>
+
+      <LiveDiscussionFeed room={`discussion:${id}`} />
 
       <Card>
         <CardContent className="pt-6">
