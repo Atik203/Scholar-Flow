@@ -924,6 +924,59 @@ export const paperController = {
     }
   }),
 
+  // Phase 10 — AI Key Points extraction
+  generateKeyPoints: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const { id: paperId } = params.data;
+    const body = req.body || {};
+    const model = body.model as string | undefined;
+
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      paperRecord
+    );
+
+    try {
+      const keyPoints = await aiService.generateKeyPoints({
+        paperId,
+        prompt: "Extract key findings",
+        context: source.text || "",
+        ...(model && { model }),
+      });
+
+      sendSuccessResponse(
+        res,
+        { keyPoints },
+        "Key points extracted successfully"
+      );
+    } catch (error) {
+      console.error("[PaperController] Key points extraction failed:", error);
+      if (error instanceof ApiError) throw error;
+      throw createPaperError.insightGenerationFailed(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }),
+
   // Get insight conversation history for a paper
   getInsightHistory: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
