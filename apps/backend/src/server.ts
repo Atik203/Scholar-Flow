@@ -54,6 +54,7 @@ app.use(
         frameSrc: ["'self'"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
+        reportUri: "/api/csp-report",
       },
     },
     hsts: {
@@ -77,6 +78,7 @@ app.use(compression() as unknown as RequestHandler);
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000",
   "https://scholar-flow-ai.vercel.app",
+  process.env.WS_URL || "http://localhost:5001",
 ];
 app.use(
   cors({
@@ -87,6 +89,9 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["X-Response-Time"],
     credentials: true,
   }) as unknown as RequestHandler
 );
@@ -171,6 +176,10 @@ setupSwagger(app);
 app.get("/health", healthCheck as unknown as RequestHandler);
 // Support health check under /api as well (useful when deployed behind a rewrite to /api/$1)
 app.get("/api/health", healthCheck as unknown as RequestHandler);
+
+// CSP violation report endpoint (needs JSON parser before it)
+import { cspReportHandler } from "./app/modules/Security/cspReport.route";
+app.post("/api/csp-report", cspReportHandler as unknown as RequestHandler);
 
 // API routes
 app.use("/api", router);
