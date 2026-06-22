@@ -161,7 +161,7 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.2.9",
+    version: "1.3.0-rc1",
     documentation: "/docs",
     api: "/api",
     health: "/health",
