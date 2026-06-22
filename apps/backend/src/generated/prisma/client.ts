@@ -140,6 +140,16 @@ export type AIInsightThread = Prisma.AIInsightThreadModel
  */
 export type AIInsightMessage = Prisma.AIInsightMessageModel
 /**
+ * Model AIConversation
+ * 
+ */
+export type AIConversation = Prisma.AIConversationModel
+/**
+ * Model AIConversationMessage
+ * 
+ */
+export type AIConversationMessage = Prisma.AIConversationMessageModel
+/**
  * Model Plan
  * 
  */

@@ -71,6 +71,8 @@ export const ModelName = {
   AISummary: 'AISummary',
   AIInsightThread: 'AIInsightThread',
   AIInsightMessage: 'AIInsightMessage',
+  AIConversation: 'AIConversation',
+  AIConversationMessage: 'AIConversationMessage',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -465,6 +467,35 @@ export const AIInsightMessageScalarFieldEnum = {
 } as const
 
 export type AIInsightMessageScalarFieldEnum = (typeof AIInsightMessageScalarFieldEnum)[keyof typeof AIInsightMessageScalarFieldEnum]
+
+
+export const AIConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  model: 'model',
+  workspaceId: 'workspaceId',
+  context: 'context',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationScalarFieldEnum = (typeof AIConversationScalarFieldEnum)[keyof typeof AIConversationScalarFieldEnum]
+
+
+export const AIConversationMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationMessageScalarFieldEnum = (typeof AIConversationMessageScalarFieldEnum)[keyof typeof AIConversationMessageScalarFieldEnum]
 
 
 export const PlanScalarFieldEnum = {
