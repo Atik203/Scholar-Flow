@@ -5,10 +5,12 @@
   "private": true,
   "workspaces": [
     "apps/backend",
-    "apps/frontend"
+    "apps/frontend",
+    "apps/socket-server"
   ],
   "scripts": {
-    "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev",
+    "dev": "yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev & yarn workspace @scholar-flow/socket-server dev",
+    "dev:all": "yarn dev",
     "dev:turbo": "turbo run dev",
     "dev:backend": "yarn workspace @scholar-flow/backend dev",
     "dev:frontend": "yarn workspace @scholar-flow/frontend dev",
