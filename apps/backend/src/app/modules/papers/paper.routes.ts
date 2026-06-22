@@ -166,6 +166,14 @@ paperRoutes.get(
   paperController.getInsightHistory as any
 );
 
+// Phase 10 — AI Key Points extraction
+paperRoutes.post(
+  "/:id/key-points",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.generateKeyPoints as any
+);
+
 // Editor-specific routes
 export const editorPaperRoutes: express.Router = express.Router();
 
