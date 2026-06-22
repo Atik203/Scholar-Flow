@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
 import { authMiddleware } from "../../middleware/auth";
+import { AuthenticatedRequest } from "../../interfaces/common";
 import { validateRequest } from "../../middleware/validateRequest";
 import { CitationExportService } from "../../services/citationExport.service";
+import { citationInsertService } from "../../services/citationInsert.service";
 
 const router: Router = Router();
 
@@ -353,5 +355,57 @@ router.get("/:exportId/download", authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
+
+// --- Phase 10: Citation insertion into editor ---
+
+router.post(
+  "/insert",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const user = (req as AuthenticatedRequest).user!;
+      const { sourcePaperId, targetPaperId, context, location } = req.body || {};
+      if (!sourcePaperId || !targetPaperId) {
+        res.status(400).json({ success: false, message: "sourcePaperId and targetPaperId required" });
+        return;
+      }
+      const citation = await citationInsertService.insertCitation({
+        sourcePaperId,
+        targetPaperId,
+        context,
+        location,
+      });
+      res.json({ success: true, data: citation });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.get(
+  "/paper/:sourcePaperId",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const citations = await citationInsertService.listCitationsForPaper(req.params.sourcePaperId);
+      res.json({ success: true, data: citations });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  "/insert/:id",
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      await citationInsertService.deleteCitation(req.params.id);
+      res.json({ success: true, data: null });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 export { router as citationRoutes };

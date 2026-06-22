@@ -14,8 +14,12 @@ import {
   AlignLeft,
   AlignRight,
   Copy,
+  GripHorizontal,
+  Image as ImageIcon,
   Move,
   Trash2,
+  Type,
+  WrapText,
 } from "lucide-react";
 import React, {
   useCallback,
@@ -30,254 +34,246 @@ import {
   ResizableImageNodeViewRendererProps,
 } from "tiptap-extension-resizable-image";
 
+type WrapMode = "inline" | "break";
+
 const NodeView = (props: ResizableImageNodeViewRendererProps) => {
   const editor = (props as any).editor;
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-
-  // Get position from node attributes, fallback to (0,0)
-  const dataPosX = props.node.attrs["data-position-x"] as
-    | number
-    | string
-    | undefined;
-  const dataPosY = props.node.attrs["data-position-y"] as
-    | number
-    | string
-    | undefined;
-  const position = useMemo(
-    () => ({
-      x: Number(dataPosX ?? 0) || 0,
-      y: Number(dataPosY ?? 0) || 0,
-    }),
-    [dataPosX, dataPosY]
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [caption, setCaption] = useState<string>(
+    (props.node.attrs["data-caption"] as string) || ""
   );
+  const [wrapMode, setWrapMode] = useState<WrapMode>(
+    (props.node.attrs["data-wrap"] as WrapMode) || "inline"
+  );
+
+  const posX = Number(props.node.attrs["data-position-x"] ?? 0) || 0;
+  const posY = Number(props.node.attrs["data-position-y"] ?? 0) || 0;
+  const align =
+    (props.node.attrs["data-align"] as string) || "center";
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragFrameRef = useRef<number>(0);
 
-  const setTextAlign = useCallback(
-    (textAlign: string) => {
-      // Use requestAnimationFrame to avoid flushSync issues
-      requestAnimationFrame(() => {
-        editor.chain().focus().setTextAlign(textAlign).run();
+  // ================================================================
+  // Attribute update helper — persists all image metadata
+  // ================================================================
+  const updateAttrs = useCallback(
+    (attrs: Record<string, unknown>) => {
+      const { getPos } = props as any;
+      if (typeof getPos !== "function") return;
+      const pos = getPos();
+      if (typeof pos !== "number") return;
+
+      editor
+        .chain()
+        .focus()
+        .command(({ tr }: { tr: any }) => {
+          tr.setNodeMarkup(pos, undefined, {
+            ...props.node.attrs,
+            ...attrs,
+          });
+          return true;
+        })
+        .run();
+    },
+    [editor, props]
+  );
+
+  // ================================================================
+  // Drag handlers — GPU-accelerated with requestAnimationFrame
+  // ================================================================
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragging(true);
+      setDragOffset({
+        x: e.clientX - posX,
+        y: e.clientY - posY,
       });
     },
-    [editor]
+    [posX, posY]
   );
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleDrag = (e: MouseEvent) => {
+      if (dragFrameRef.current) return; // throttle to 60fps
+      dragFrameRef.current = requestAnimationFrame(() => {
+        const nx = Math.max(-200, Math.min(e.clientX - dragOffset.x, window.innerWidth - 200));
+        const ny = Math.max(-200, Math.min(e.clientY - dragOffset.y, window.innerHeight - 200));
+        updateAttrs({
+          "data-position-x": Math.round(nx),
+          "data-position-y": Math.round(ny),
+        });
+        dragFrameRef.current = 0;
+      });
+    };
+
+    const handleUp = () => {
+      setIsDragging(false);
+      if (dragFrameRef.current) {
+        cancelAnimationFrame(dragFrameRef.current);
+        dragFrameRef.current = 0;
+      }
+    };
+
+    document.addEventListener("mousemove", handleDrag, { passive: true });
+    document.addEventListener("mouseup", handleUp, { once: true });
+
+    return () => {
+      document.removeEventListener("mousemove", handleDrag);
+      document.removeEventListener("mouseup", handleUp);
+      if (dragFrameRef.current) {
+        cancelAnimationFrame(dragFrameRef.current);
+      }
+    };
+  }, [isDragging, dragOffset, updateAttrs]);
+
+  // ================================================================
+  // Alignment, caption, wrap
+  // ================================================================
+  const setAlignment = useCallback(
+    (value: string) => {
+      updateAttrs({ "data-align": value });
+    },
+    [updateAttrs]
+  );
+
+  const saveCaption = useCallback(() => {
+    const trimmed = caption.trim();
+    updateAttrs({ "data-caption": trimmed || null });
+  }, [caption, updateAttrs]);
+
+  const toggleWrap = useCallback(() => {
+    const next: WrapMode = wrapMode === "inline" ? "break" : "inline";
+    setWrapMode(next);
+    updateAttrs({ "data-wrap": next });
+  }, [wrapMode, updateAttrs]);
 
   const copyImageUrl = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(props.node.attrs.src);
-      showSuccessToast("Image URL copied to clipboard");
-    } catch (error) {
-      showErrorToast("Failed to copy image URL");
+      showSuccessToast("Image URL copied");
+    } catch {
+      showErrorToast("Failed to copy");
     }
   }, [props.node.attrs.src]);
 
   const deleteImage = useCallback(() => {
-    // Use requestAnimationFrame to avoid flushSync issues
     requestAnimationFrame(() => {
       editor.chain().focus().deleteSelection().run();
     });
   }, [editor]);
 
-  const updatePosition = useCallback(
-    (newPosition: { x: number; y: number }) => {
-      // Update node attributes to persist position (use data-* keys)
-      requestAnimationFrame(() => {
-        const { getPos } = props as any;
-        if (typeof getPos === "function") {
-          const pos = getPos();
-          if (typeof pos === "number") {
-            editor
-              .chain()
-              .focus()
-              .command(({ tr }: { tr: any }) => {
-                tr.setNodeMarkup(pos, undefined, {
-                  ...props.node.attrs,
-                  "data-position-x": newPosition.x,
-                  "data-position-y": newPosition.y,
-                });
-                return true;
-              })
-              .run();
-          }
-        }
-      });
-    },
-    [editor, props]
-  );
-
   const resetPosition = useCallback(() => {
-    updatePosition({ x: 0, y: 0 });
-  }, [updatePosition]);
+    updateAttrs({ "data-position-x": 0, "data-position-y": 0 });
+  }, [updateAttrs]);
 
-  const handleDragStart = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.target !== e.currentTarget) return; // Only allow dragging from the drag handle
-
-      e.preventDefault();
-      setIsDragging(true);
-      setDragStart({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
-      });
-    },
-    [position]
-  );
-
-  const handleDrag = useCallback(
-    (e: MouseEvent) => {
-      if (!isDragging) return;
-
-      const newPosition = {
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      };
-
-      // Constrain to reasonable bounds
-      const maxX = window.innerWidth - 200;
-      const maxY = window.innerHeight - 200;
-
-      const constrainedPosition = {
-        x: Math.max(0, Math.min(newPosition.x, maxX)),
-        y: Math.max(0, Math.min(newPosition.y, maxY)),
-      };
-
-      updatePosition(constrainedPosition);
-    },
-    [isDragging, dragStart, updatePosition]
-  );
-
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  // Add global mouse event listeners for dragging
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleDrag);
-      document.addEventListener("mouseup", handleDragEnd);
-
-      return () => {
-        document.removeEventListener("mousemove", handleDrag);
-        document.removeEventListener("mouseup", handleDragEnd);
-      };
-    }
-  }, [isDragging, handleDrag, handleDragEnd]);
+  // Build style
+  const imageStyle: React.CSSProperties = {
+    display: wrapMode === "break" ? "block" : "inline-block",
+    marginLeft: align === "center" && wrapMode === "break" ? "auto" : undefined,
+    marginRight: align === "center" && wrapMode === "break" ? "auto" : undefined,
+    transform: `translate(${posX}px, ${posY}px)`,
+    transition: isDragging ? "none" : "transform 0.15s ease-out",
+    willChange: isDragging ? "transform" : "auto",
+    position: "relative",
+    cursor: isDragging ? "grabbing" : "grab",
+    zIndex: isDragging ? 1000 : 1,
+    textAlign: wrapMode === "break" ? (align as React.CSSProperties["textAlign"]) : undefined,
+  };
 
   return (
     <NodeViewWrapper
-      className={`image-component ${isDragging ? "dragging" : ""}`}
+      className={`scholar-image ${isDragging ? "is-dragging" : ""} wrap-${wrapMode}`}
       data-drag-handle
       ref={containerRef}
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        transition: isDragging ? "none" : "transform 0.2s ease",
-        position: isDragging ? "relative" : "static",
-        zIndex: isDragging ? 1000 : "auto",
-      }}
+      style={imageStyle}
     >
       <Popover>
         <PopoverTrigger asChild>
           <div
-            style={{
-              display: "inline-flex",
-              cursor: "pointer",
-              position: "relative",
-            }}
+            className="image-body"
+            onMouseDown={handleDragStart}
+            style={{ display: "inline-block", position: "relative", outline: "none" }}
           >
-            {/* Drag Handle */}
-            <div
-              className="drag-handle"
-              onMouseDown={handleDragStart}
-              style={{
-                position: "absolute",
-                top: "4px",
-                left: "4px",
-                background: "rgba(59, 130, 246, 0.9)",
-                color: "white",
-                borderRadius: "4px",
-                padding: "4px",
-                cursor: "move",
-                zIndex: 10,
-                opacity: 0.7,
-                transition: "opacity 0.2s ease",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.7")}
-              title="Drag to move image"
-            >
-              <Move className="h-3 w-3" />
+            {/* Drag indicator overlay */}
+            <div className="image-drag-overlay">
+              <GripHorizontal className="h-4 w-4" />
             </div>
+
+            {/* Resize handles are provided by ResizableImageComponent */}
             <ResizableImageComponent {...props} />
+
+            {/* Caption */}
+            {caption && (
+              <figcaption
+                className="image-caption-display"
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                {caption}
+              </figcaption>
+            )}
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-2" side="bottom" align="center">
-          <div className="flex flex-col gap-2">
-            {/* Text Alignment Controls */}
+
+        <PopoverContent className="w-64 p-3" side="bottom" align="center" sideOffset={8}>
+          <div className="space-y-2">
+            {/* Caption input */}
+            <div className="flex items-center gap-1.5">
+              <Type className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <input
+                type="text"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                onBlur={saveCaption}
+                onKeyDown={(e) => e.key === "Enter" && saveCaption()}
+                placeholder="Add caption..."
+                className="flex-1 text-xs border rounded px-2 py-1 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                onMouseDown={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Alignment */}
             <div className="flex items-center gap-1">
-              <span className="text-sm text-gray-600 mr-2">Align:</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTextAlign("left")}
-                className="h-8 w-8 p-0"
-                title="Align Left"
-              >
-                <AlignLeft className="h-4 w-4" />
+              <span className="text-xs text-muted-foreground mr-1 w-10">Align:</span>
+              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("left")} title="Left">
+                <AlignLeft className="h-3.5 w-3.5" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTextAlign("center")}
-                className="h-8 w-8 p-0"
-                title="Align Center"
-              >
-                <AlignCenter className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("center")} title="Center">
+                <AlignCenter className="h-3.5 w-3.5" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setTextAlign("right")}
-                className="h-8 w-8 p-0"
-                title="Align Right"
-              >
-                <AlignRight className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("right")} title="Right">
+                <AlignRight className="h-3.5 w-3.5" />
               </Button>
             </div>
 
-            {/* Image Actions */}
-            <div className="flex items-center gap-1 pt-2 border-t">
+            {/* Wrap mode */}
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-muted-foreground mr-1 w-10">Wrap:</span>
               <Button
-                variant="outline"
+                variant={wrapMode === "inline" ? "default" : "outline"}
                 size="sm"
-                onClick={copyImageUrl}
-                className="flex items-center gap-2 text-xs"
+                className="h-7 text-xs"
+                onClick={toggleWrap}
               >
-                <Copy className="h-3 w-3" />
-                Copy URL
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={deleteImage}
-                className="flex items-center gap-2 text-xs"
-              >
-                <Trash2 className="h-3 w-3" />
-                Delete
+                <WrapText className="h-3.5 w-3.5 mr-1" />
+                {wrapMode === "inline" ? "Inline" : "Break"}
               </Button>
             </div>
 
-            {/* Reset Position */}
-            <div className="flex items-center gap-1 pt-2 border-t">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetPosition}
-                className="flex items-center gap-2 text-xs"
-              >
-                <Move className="h-3 w-3" />
-                Reset Position
+            <div className="border-t pt-2 flex items-center gap-1 flex-wrap">
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={copyImageUrl}>
+                <Copy className="h-3 w-3 mr-1" /> Copy
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={resetPosition}>
+                <Move className="h-3 w-3 mr-1" /> Reset
+              </Button>
+              <Button variant="destructive" size="sm" className="h-7 text-xs" onClick={deleteImage}>
+                <Trash2 className="h-3 w-3 mr-1" /> Delete
               </Button>
             </div>
           </div>
@@ -289,35 +285,42 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
 
 export const ResizableImageWithPopover = ResizableImage.extend({
   addAttributes() {
-    // Inherit attributes from parent ResizableImage and add position attributes
     return {
       ...this.parent?.(),
       "data-position-x": {
         default: 0,
-        parseHTML: (element) =>
-          parseFloat(element.getAttribute("data-position-x") || "0"),
-        renderHTML: (attributes) => {
-          return {
-            "data-position-x": attributes["data-position-x"],
-          };
-        },
+        parseHTML: (el) => parseFloat(el.getAttribute("data-position-x") || "0"),
+        renderHTML: (attrs) => ({ "data-position-x": attrs["data-position-x"] }),
       },
       "data-position-y": {
         default: 0,
-        parseHTML: (element) =>
-          parseFloat(element.getAttribute("data-position-y") || "0"),
-        renderHTML: (attributes) => {
-          return {
-            "data-position-y": attributes["data-position-y"],
-          };
+        parseHTML: (el) => parseFloat(el.getAttribute("data-position-y") || "0"),
+        renderHTML: (attrs) => ({ "data-position-y": attrs["data-position-y"] }),
+      },
+      "data-align": {
+        default: "center",
+        parseHTML: (el) => el.getAttribute("data-align") || "center",
+        renderHTML: (attrs) => ({ "data-align": attrs["data-align"] }),
+      },
+      "data-caption": {
+        default: null,
+        parseHTML: (el) => el.getAttribute("data-caption") || null,
+        renderHTML: (attrs) => {
+          if (!attrs["data-caption"]) return {};
+          return { "data-caption": attrs["data-caption"] };
         },
+      },
+      "data-wrap": {
+        default: "inline",
+        parseHTML: (el) => el.getAttribute("data-wrap") || "inline",
+        renderHTML: (attrs) => ({ "data-wrap": attrs["data-wrap"] }),
       },
     };
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer((props) =>
-      NodeView(props as unknown as ResizableImageNodeViewRendererProps)
+    return ReactNodeViewRenderer(
+      (props) => NodeView(props as unknown as ResizableImageNodeViewRendererProps)
     );
   },
 });

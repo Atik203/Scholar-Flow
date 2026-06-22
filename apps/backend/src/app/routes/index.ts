@@ -4,6 +4,7 @@ import {
   getAvailableRoutes,
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
+import { aiConversationRoutes } from "../modules/AIChat/aiConversation.routes";
 import { annotationRoutes } from "../modules/annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
 import { billingRoutes } from "../modules/Billing/billing.routes";
@@ -76,5 +77,8 @@ router.use("/analytics", analyticsRoutes);
 
 // Phase 9 — Public invitation endpoints
 router.use("/invitations", invitationRoutes);
+
+// Phase 10 — Global AI chat assistant
+router.use("/ai-chat", aiConversationRoutes);
 
 export default router;
