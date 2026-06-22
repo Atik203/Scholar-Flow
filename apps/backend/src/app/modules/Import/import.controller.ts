@@ -39,6 +39,16 @@ export const importController = {
     sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title }, "Paper imported via URL", 201);
   }),
 
+  importBySmartURL: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { url, workspaceId } = req.body;
+    if (!url || !workspaceId) {
+      throw new ApiError(400, "url and workspaceId are required");
+    }
+    const result = await ImportService.importBySmartURL(url, workspaceId, authReq.user.id);
+    sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title, hasPdf: result.hasPdf }, "Paper imported via Smart URL", 201);
+  }),
+
   importByFile: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     const { content, format, workspaceId } = req.body;
