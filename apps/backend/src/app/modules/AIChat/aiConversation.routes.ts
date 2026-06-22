@@ -6,7 +6,7 @@ import { sendSuccessResponse } from "../../shared/sendResponse";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import { aiConversationService } from "./aiConversation.service";
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 router.get(
   "/",

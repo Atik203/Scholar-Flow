@@ -6119,6 +6119,7 @@ __metadata:
     ts-node-dev: "npm:^2.0.0"
     typescript: "npm:^5.3.3"
     winston: "npm:^3.11.0"
+    yjs: "npm:^13.6.31"
     zod: "npm:^3.22.4"
   languageName: unknown
   linkType: soft
@@ -6154,6 +6155,8 @@ __metadata:
     "@testing-library/react": "npm:^16.3.0"
     "@tiptap/core": "npm:^3.26.0"
     "@tiptap/extension-character-count": "npm:^3.27.1"
+    "@tiptap/extension-collaboration": "npm:^3.27.1"
+    "@tiptap/extension-collaboration-cursor": "npm:2.26.2"
     "@tiptap/extension-color": "npm:^3.5.1"
     "@tiptap/extension-highlight": "npm:^3.5.1"
     "@tiptap/extension-horizontal-rule": "npm:^3.5.1"
@@ -6237,6 +6240,7 @@ __metadata:
     tw-animate-css: "npm:^1.3.7"
     typescript: "npm:^5"
     uuid: "npm:^13.0.0"
+    yjs: "npm:^13.6.31"
     zod: "npm:^3.22.4"
   languageName: unknown
   linkType: soft
@@ -7294,6 +7298,28 @@ __metadata:
   peerDependencies:
     "@tiptap/core": 3.26.0
   checksum: 10c0/2bdf924936dd76b53de0d6a5b5bef2e4526ec2a19fa278dae05db56ced704958d6174a877546e653963e85f71b037dec109591d6aad3fddb149bd37b2526bd0e
+  languageName: node
+  linkType: hard
+
+"@tiptap/extension-collaboration-cursor@npm:2.26.2":
+  version: 2.26.2
+  resolution: "@tiptap/extension-collaboration-cursor@npm:2.26.2"
+  peerDependencies:
+    "@tiptap/core": ^2.7.0
+    y-prosemirror: ^1.2.11
+  checksum: 10c0/e65abbb9dce6cba9b79dfb618045b71c3f4d622cb682a3cbb5574b6532c8d25cd88044ff401925b8701df57b4205996ccf38a11122a0b4b7f449584b4a7e2a04
+  languageName: node
+  linkType: hard
+
+"@tiptap/extension-collaboration@npm:^3.27.1":
+  version: 3.27.1
+  resolution: "@tiptap/extension-collaboration@npm:3.27.1"
+  peerDependencies:
+    "@tiptap/core": 3.27.1
+    "@tiptap/pm": 3.27.1
+    "@tiptap/y-tiptap": ^3.0.5
+    yjs: ^13
+  checksum: 10c0/0a39cca1a8ef393e87f1f39f7883034b6613d0d720140cd1b157d939d0fd8375a3bfc255d949c7533144dd050bce31c126dd47b76f38542e219a87cf854243e0
   languageName: node
   linkType: hard
 
@@ -14965,6 +14991,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"isomorphic.js@npm:^0.2.4":
+  version: 0.2.5
+  resolution: "isomorphic.js@npm:0.2.5"
+  checksum: 10c0/7cd268c8e58146a8160c8cd16596291fd1fbf3e8799a325f269accda9dc1238806e371ccef0b66fe2ad957209230c55997248d8b6d02cf2d7c575ffeb759c789
+  languageName: node
+  linkType: hard
+
 "istanbul-lib-coverage@npm:^3.0.0, istanbul-lib-coverage@npm:^3.2.0":
   version: 3.2.2
   resolution: "istanbul-lib-coverage@npm:3.2.2"
@@ -16490,6 +16523,19 @@ __metadata:
     prelude-ls: "npm:^1.2.1"
     type-check: "npm:~0.4.0"
   checksum: 10c0/effb03cad7c89dfa5bd4f6989364bfc79994c2042ec5966cb9b95990e2edee5cd8969ddf42616a0373ac49fac1403437deaf6e9050fbbaa3546093a59b9ac94e
+  languageName: node
+  linkType: hard
+
+"lib0@npm:^0.2.99":
+  version: 0.2.117
+  resolution: "lib0@npm:0.2.117"
+  dependencies:
+    isomorphic.js: "npm:^0.2.4"
+  bin:
+    0ecdsa-generate-keypair: bin/0ecdsa-generate-keypair.js
+    0gentesthtml: bin/gentesthtml.js
+    0serve: bin/0serve.js
+  checksum: 10c0/d1b9205890d5d0cbd95ffdb0d6df6f9fd2c315b89e195fc9b015f3778046fb34bc12e94205ccf410a3073b836444045dcef6671fa2f6d5a7f70ebf8b6b0c0616
   languageName: node
   linkType: hard
 
@@ -23448,6 +23494,15 @@ __metadata:
     buffer-crc32: "npm:~0.2.3"
     fd-slicer: "npm:~1.1.0"
   checksum: 10c0/f265002af7541b9ec3589a27f5fb8f11cf348b53cc15e2751272e3c062cd73f3e715bc72d43257de71bbaecae446c3f1b14af7559e8ab0261625375541816422
+  languageName: node
+  linkType: hard
+
+"yjs@npm:^13.6.31":
+  version: 13.6.31
+  resolution: "yjs@npm:13.6.31"
+  dependencies:
+    lib0: "npm:^0.2.99"
+  checksum: 10c0/201a523c0360b349719410475f179105dce7b9d926d6087bea86dba2ceb39ba6450c5d5fba4ab6de97d2750ddade12d2d36e4500f01585976f930d5eb8d8d1de
   languageName: node
   linkType: hard
 

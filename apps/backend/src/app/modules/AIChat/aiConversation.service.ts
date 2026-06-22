@@ -106,7 +106,7 @@ export const aiConversationService = {
 
     // Generate AI response
     const aiResp = await generateAiResponse(
-      [...(conv.messages || []).map((m) => ({ role: m.role, content: m.content })), { role: "user", content }],
+      [...(conv.messages || []).map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })), { role: "user", content }],
       conv.model ?? undefined
     );
 
