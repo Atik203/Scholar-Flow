@@ -92,11 +92,12 @@ apps/backend/prisma/           → Schema + migrations
 ```
 
 ## Current Phase
-Phase 10 — FINAL PHASE (95% Complete)
+Phase 10 — FINAL PHASE (~98% Complete, Release 1.3.0-rc1)
 - Next.js 16 upgrade ✅
 - better-auth migration ✅
 - Prisma v7 migration ✅
-- Current focus: Deployment docs, version sync, production hardening
+- Paper upload/import overhaul ✅
+- Current: Release 1.3.0-rc1 — deployment docs, version sync, production hardening
 
 ## Resources
 - GitHub: https://github.com/Atik203/Scholar-Flow
