@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
 
 function getAuthToken(): string | null {
   try {
