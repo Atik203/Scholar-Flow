@@ -6,6 +6,7 @@ import express, {
   RequestHandler,
   Response,
 } from "express";
+import http from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -43,6 +44,8 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         connectSrc: [
           "'self'",
+          "ws://localhost:5000",
+          "wss://localhost:5000",
           "https://api.openai.com",
           "https://generativelanguage.googleapis.com",
         ],
@@ -178,9 +181,15 @@ app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
+  // Phase 10 — WebSocket server
+  const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
+
+  const httpServer = http.createServer(app);
+  setupWebSocket(httpServer);
+
   // Start server with graceful fallback & diagnostics
   const startServer = (desiredPort: number, attempt = 0) => {
-    const server = app.listen(desiredPort, () => {
+    const server = httpServer.listen(desiredPort, () => {
       console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
       console.log(
         "[Boot] DATABASE_URL present:",

@@ -64,6 +64,7 @@
     "redis": "^4.6.11",
     "sanitize-html": "^2.17.0",
     "sharp": "^0.34.3",
+    "socket.io": "^4.8.3",
     "sslcommerz-lts": "^1.0.3",
     "stripe": "^19.0.0",
     "supertest": "^7.1.4",
