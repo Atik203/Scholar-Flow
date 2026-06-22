@@ -98,15 +98,16 @@ export function PdfViewerFallback({
           </div>
         )}
         <iframe
-          key={retryCount} // Force re-render on retry
+          key={retryCount}
           src={`${fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
           className="w-full h-96"
           onError={handleIframeError}
           onLoad={handleIframeLoad}
           title="PDF Preview"
+          loading="lazy"
           style={{ 
             border: 'none',
-            minHeight: '384px' // Ensure minimum height
+            minHeight: '384px'
           }}
         />
         <div className="absolute top-2 right-2 flex gap-2">
