@@ -7,8 +7,8 @@
 ```
 Project-Info/
 ├── apps/
-│   ├── frontend/          # Next.js 15 + React 19 + TypeScript
-│   └── backend/           # Node.js + Express + Prisma + PostgreSQL
+│   ├── frontend/          # Next.js 16 + React 19.2 + TypeScript
+│   └── backend/           # Node.js + Express + Prisma 7.8 + PostgreSQL + WebSocket
 ├── packages/
 │   └── shared/            # Shared utilities (ready for expansion)
 ├── docs/                  # Documentation
@@ -19,10 +19,12 @@ Project-Info/
 
 **Frontend (Next.js App)**
 
-- ⚡ Next.js 15 with App Router
+- ⚡ Next.js 16 with App Router (Turbopack default)
 - 🎨 Tailwind CSS + ShadCN UI components
-- 🔐 NextAuth.js for authentication
+- 🔐 better-auth for authentication (Google/GitHub/email)
 - 🏪 Redux Toolkit Query for state management
+- 🔗 socket.io-client for real-time collaboration
+- 📝 TipTap rich text editor with LaTeX, citations, version history
 - 📱 Fully responsive design
 - 🎯 TypeScript for type safety
 
@@ -140,7 +142,7 @@ cd apps/backend && yarn dev     # Backend only
 ### ✅ Completed Features
 
 - **🏗️ Complete Project Structure**: Monorepo with frontend and backend
-- **🔐 Authentication System**: NextAuth.js setup with JWT sessions
+- **🔐 Authentication System**: better-auth with JWT sessions + OAuth
 - **📊 Database Schema**: Complete Prisma schema with all models
 - **🎨 UI Components**: Basic UI components with Tailwind CSS
 - **📡 API Structure**: Express routes with proper middleware
@@ -269,7 +271,16 @@ The project is ready for testing:
    - Implement subscription logic
 
 5. **Real-time Features**
-   - Add WebSocket for live collaboration
+   - Add WebSocket for live collaboration (socket.io — Phase 10 ✅)
+
+### WebSocket / Real-Time Features (Phase 10)
+
+- **Server**: socket.io attached to the Express HTTP server
+- **Auth**: JWT token verification on WebSocket handshake
+- **Rooms**: `paper:{id}`, `discussion:{id}`, `workspace:{id}`
+- **Events**: presence tracking, typing indicators, live chat, Y.js document sync
+- **Run**: WebSocket auto-starts with `yarn dev:backend` — no separate process needed
+- **Production**: Ensure `FRONTEND_URL` points to your deployed frontend (CORS whitelist)
    - Implement real-time annotations
 
 ## 🐛 Troubleshooting
