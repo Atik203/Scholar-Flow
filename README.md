@@ -12,7 +12,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 📦 Recent Releases
 
-- **1.3.0-rc1 (2026-06-22)** — Phase 10: AI assistant, WebSocket collab, editor templates, live chat, error boundaries. See [CHANGELOG.md](./CHANGELOG.md).
+- **1.3.0-rc1 (2026-10-01)** — Phase 10: AI assistant, WebSocket collab, editor templates, paper upload/import overhaul, smart URL import (IEEE/ResearchGate/Google Scholar/Semantic Scholar). See [CHANGELOG.md](./CHANGELOG.md).
 - **1.2.9** — Phase 9: WCAG 2.1 AA, code splitting, 8 final pages, invitation backend.
 - **1.2.8** — Phase 8: Architecture stabilization, 14 new pages, removed dead code.
 
