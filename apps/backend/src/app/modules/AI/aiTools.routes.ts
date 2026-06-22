@@ -120,4 +120,54 @@ router.post(
   })
 );
 
+// Generate a literature review from a collection of papers
+router.post(
+  "/literature-review",
+  authMiddleware as any,
+  aiGenerationLimiter as any,
+  catchAsync(async (req, res) => {
+    const { paperIds, topic, instructions } = req.body || {};
+
+    if (!paperIds || !Array.isArray(paperIds) || paperIds.length === 0) {
+      res.status(400).json({ success: false, message: "At least one paperId is required" });
+      return;
+    }
+
+    const { default: prisma } = await import("../../shared/prisma");
+    const papers = await prisma.paper.findMany({
+      where: { id: { in: paperIds.slice(0, 20) } },
+      select: { id: true, title: true, abstract: true },
+    });
+
+    if (papers.length === 0) {
+      res.status(404).json({ success: false, message: "No papers found" });
+      return;
+    }
+
+    const paperTexts = papers
+      .map(
+        (p, i) =>
+          `Paper ${i + 1}: "${p.title}"\nAbstract: ${p.abstract || "No abstract available."}`
+      )
+      .join("\n\n");
+
+    const prompt = `Generate a concise literature review synthesizing the following ${papers.length} papers${topic ? ` on the topic of "${topic}"` : ""}. ${instructions || "Structure with: Introduction, Thematic Analysis, Critical Evaluation, Research Gaps, and Conclusion."}\n\n${paperTexts}`;
+
+    const { aiService } = await import("../AI/ai.service");
+    const result = await aiService.generateInsight({
+      paperId: "lit-review",
+      prompt,
+      context: paperTexts,
+    });
+
+    sendSuccessResponse(res, {
+      topic: topic || "General",
+      paperCount: papers.length,
+      papers: papers.map((p) => ({ id: p.id, title: p.title })),
+      review: result.message.content,
+      provider: result.provider,
+    }, "Literature review generated");
+  })
+);
+
 export const aiToolsRoutes = router;

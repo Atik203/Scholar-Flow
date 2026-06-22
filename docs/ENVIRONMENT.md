@@ -1,6 +1,6 @@
 # Scholar-Flow Environment Setup Guide
 
-This guide explains all environment variables for both backend (Express + Prisma) and frontend (Next.js + NextAuth), where to get them, and how to configure them for development and production.
+This guide explains all environment variables for both backend (Express + Prisma 7.8 + socket.io) and frontend (Next.js 16 + better-auth), where to get them, and how to configure them for development and production.
 
 ## Locations and Quick Start
 
@@ -77,10 +77,10 @@ Required unless marked optional.
     - How: Use your provider’s credentials (e.g., SendGrid, Mailgun)
 
 - AI Providers & Feature Flags
-  - OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEAK_API_KEY
-    - How: Generate from respective provider consoles (OpenAI, Google AI Studio, DeepSeek). Leave blank to disable that provider.
+  - OPENAI_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, DEEPSEEK_API_KEY
+    - How: Generate from respective provider consoles (OpenAI, Google AI Studio, Anthropic Console, DeepSeek). Leave blank to disable that provider.
   - AI_PROVIDER_FALLBACK_ORDER
-    - What: Comma-separated priority list (e.g., `openai,gemini,deepseek`). The orchestrator uses the first configured provider.
+    - What: Comma-separated priority list (e.g., `openai,gemini,claude,deepseek`). The orchestrator uses the first configured provider.
   - AI_FEATURES_ENABLED
     - What: Master switch for backend AI features. Set to `false` to bypass all AI enrichments.
   - AI_REQUEST_TIMEOUT_MS
@@ -122,12 +122,12 @@ Required unless marked optional.
 Required unless marked optional. These run in Next.js (some are public via NEXT*PUBLIC*\*).
 
 - NEXTAUTH_URL
-  - What: Site URL for NextAuth
+  - What: Site URL for better-auth callback
   - Dev: `http://localhost:3000`
 
 - NEXTAUTH_SECRET
-  - What: Must match backend/auth validator secret usage (used by Auth.js JWT)
-  - How: Generate via Node crypto (same as above)
+  - What: better-auth secret for session encryption
+  - How: Generate via `openssl rand -base64 32`
 
 - NEXT_PUBLIC_API_BASE_URL
   - What: Base URL for calling backend API in the browser
