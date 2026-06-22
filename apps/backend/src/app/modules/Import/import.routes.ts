@@ -14,6 +14,9 @@ importRoutes.post("/arxiv", paperUploadLimiter, authMiddleware as any, importCon
 // URL import (download PDF)
 importRoutes.post("/url", paperUploadLimiter, authMiddleware as any, importController.importByURL as any);
 
+// Smart URL import (detects IEEE/ResearchGate/Google Scholar/arXiv/Semantic Scholar)
+importRoutes.post("/smart-url", paperUploadLimiter, authMiddleware as any, importController.importBySmartURL as any);
+
 // File import (BibTeX/RIS)
 importRoutes.post("/file", paperUploadLimiter, authMiddleware as any, importController.importByFile as any);
 
