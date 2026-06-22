@@ -63,6 +63,55 @@ router.post(
   })
 );
 
+router.post(
+  "/:id/messages/stream",
+  authMiddleware as any,
+  catchAsync(async (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    const { content } = req.body || {};
+    if (!content) {
+      res.status(400).json({ success: false, message: "Content is required" });
+      return;
+    }
+
+    // SSE headers
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders();
+
+    const sendSSE = (event: string, data: unknown) => {
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    };
+
+    let aborted = false;
+    req.on("close", () => { aborted = true; });
+
+    try {
+      await aiConversationService.streamMessage(
+        req.params.id,
+        authReq.user!.id,
+        content,
+        (token: string, done: boolean) => {
+          if (aborted) return;
+          if (done) {
+            sendSSE("done", { content: token });
+            res.end();
+          } else {
+            sendSSE("token", { token });
+          }
+        }
+      );
+    } catch (err: any) {
+      if (!aborted) {
+        sendSSE("error", { message: err?.message || "Stream failed" });
+        res.end();
+      }
+    }
+  })
+);
+
 router.delete(
   "/:id",
   authMiddleware as any,
