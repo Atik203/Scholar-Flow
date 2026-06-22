@@ -13,6 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetAiProvidersQuery } from "@/redux/api/paperApi";
+import {
+  useListConversationsQuery,
+  useCreateConversationMutation,
+  useGetConversationQuery,
+  useDeleteConversationMutation,
+  useSendMessageMutation,
+} from "@/redux/api/aiChatApi";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Bot,
@@ -37,28 +44,6 @@ interface Message {
   content: string;
   model?: string;
   createdAt: string;
-}
-
-interface Conversation {
-  id: string;
-  title?: string | null;
-  model?: string | null;
-  updatedAt: string;
-  _count?: { messages: number };
-}
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
-
-function getToken(): string | null {
-  try {
-    const store = (window as any).__REDUX_STORE__;
-    if (store) {
-      const state = store.getState();
-      return state.auth?.accessToken || null;
-    }
-  } catch {}
-  return null;
 }
 
 const MODEL_LABELS: Record<string, string> = {
@@ -97,12 +82,10 @@ function CopyButton({ content }: { content: string }) {
 export function FloatingAiAssistant() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingConvs, setLoadingConvs] = useState(false);
+  const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { data: providersData } = useGetAiProvidersQuery();
@@ -111,6 +94,18 @@ export function FloatingAiAssistant() {
   const [selectedModel, setSelectedModel] = useState(
     availableModels[0]?.value ?? "gemini-2.5-flash-lite"
   );
+
+  const { data: conversations = [], isLoading: loadingConvs } = useListConversationsQuery(undefined, {
+    skip: !open,
+  });
+
+  const { data: activeConversation, isLoading: loadingMsgs } = useGetConversationQuery(activeConvId ?? "", {
+    skip: !activeConvId,
+  });
+
+  const [createConversation] = useCreateConversationMutation();
+  const [deleteConversation] = useDeleteConversationMutation();
+  const [sendMessageMutation] = useSendMessageMutation();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -125,73 +120,44 @@ export function FloatingAiAssistant() {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    setLoadingConvs(true);
-    fetch(`${API_BASE}/ai-chat`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        setConversations(d.data?.conversations || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoadingConvs(false));
-  }, [open]);
+    if (activeConversation) {
+      setLocalMessages(activeConversation.messages ?? []);
+    } else if (!activeConvId) {
+      setLocalMessages([]);
+    }
+  }, [activeConversation, activeConvId]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [localMessages]);
 
   const startNewChat = async () => {
-    setLoading(true);
     try {
-      const r = await fetch(`${API_BASE}/ai-chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ title: "New Research Chat", model: selectedModel }),
-      });
-      const d = await r.json();
-      if (d.data) {
-        setConversations((prev) => [d.data, ...prev]);
-        setActiveConvId(d.data.id);
-        setMessages([]);
-      }
-    } catch {} finally { setLoading(false); }
+      const conv = await createConversation({
+        title: "New Research Chat",
+        model: selectedModel,
+      }).unwrap();
+      setActiveConvId(conv.id);
+      setLocalMessages([]);
+    } catch {}
   };
 
-  const loadConversation = async (id: string) => {
-    setActiveConvId(id);
-    setLoading(true);
-    try {
-      const r = await fetch(`${API_BASE}/ai-chat/${id}`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      const d = await r.json();
-      setMessages(d.data?.messages || []);
-    } catch {} finally { setLoading(false); }
-  };
-
-  const deleteConversation = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    await fetch(`${API_BASE}/ai-chat/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
-    setConversations((prev) => prev.filter((c) => c.id !== id));
-    if (activeConvId === id) {
-      setActiveConvId(null);
-      setMessages([]);
-    }
+    try {
+      await deleteConversation(id).unwrap();
+      if (activeConvId === id) {
+        setActiveConvId(null);
+        setLocalMessages([]);
+      }
+    } catch {}
   };
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || loading) return;
+    if (!trimmed || sending) return;
 
     const convId = activeConvId;
     if (!convId) {
@@ -205,34 +171,26 @@ export function FloatingAiAssistant() {
       content: trimmed,
       createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, userMsg]);
+    setLocalMessages((prev) => [...prev, userMsg]);
     setInput("");
-    setLoading(true);
+    setSending(true);
 
     try {
-      const r = await fetch(`${API_BASE}/ai-chat/${convId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
+      const result = await sendMessageMutation({ convId, content: trimmed }).unwrap();
+      setLocalMessages((prev) => [
+        ...prev,
+        {
+          id: result.id,
+          role: "assistant",
+          content: result.content,
+          model: result.model,
+          createdAt: new Date().toISOString(),
         },
-        body: JSON.stringify({ content: trimmed }),
-      });
-      const d = await r.json();
-      if (d.data) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: d.data.id,
-            role: "assistant",
-            content: d.data.content,
-            model: d.data.model,
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-      }
-    } catch {} finally { setLoading(false); }
-  }, [input, loading, activeConvId]);
+      ]);
+    } catch {} finally {
+      setSending(false);
+    }
+  }, [input, sending, activeConvId, createConversation, selectedModel, sendMessageMutation]);
 
   return (
     <>
@@ -307,7 +265,7 @@ export function FloatingAiAssistant() {
                         conversations.map((c) => (
                           <button
                             key={c.id}
-                            onClick={() => loadConversation(c.id)}
+                            onClick={() => setActiveConvId(c.id)}
                             className={cn(
                               "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between",
                               activeConvId === c.id && "bg-accent"
@@ -317,7 +275,7 @@ export function FloatingAiAssistant() {
                               {c.title || "New Chat"}
                             </span>
                             <button
-                              onClick={(e) => deleteConversation(c.id, e)}
+                              onClick={(e) => handleDeleteConversation(c.id, e)}
                               className="opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0 text-muted-foreground hover:text-destructive"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -330,7 +288,12 @@ export function FloatingAiAssistant() {
 
                   <div className="flex-1 flex flex-col">
                     <ScrollArea className="flex-1 p-3" ref={scrollRef}>
-                      {messages.length === 0 ? (
+                      {loadingMsgs ? (
+                        <div className="space-y-3 p-2">
+                          <Skeleton className="h-12 w-3/4" />
+                          <Skeleton className="h-20 w-full" />
+                        </div>
+                      ) : localMessages.length === 0 ? (
                         <div className="text-center text-muted-foreground py-12">
                           <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
                           <p className="text-sm font-medium">Ask me anything about your research</p>
@@ -338,7 +301,7 @@ export function FloatingAiAssistant() {
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          {messages.map((msg) => (
+                          {localMessages.map((msg) => (
                             <div
                               key={msg.id}
                               className={cn(
@@ -370,7 +333,7 @@ export function FloatingAiAssistant() {
                               )}
                             </div>
                           ))}
-                          {loading && (
+                          {sending && (
                             <div className="text-sm p-2.5 rounded-lg bg-muted max-w-[90%]">
                               <div className="flex gap-1">
                                 <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -391,7 +354,7 @@ export function FloatingAiAssistant() {
                         placeholder="Ask about your research..."
                         className="flex-1 text-sm h-8"
                       />
-                      <Button size="sm" className="h-8" onClick={sendMessage} disabled={!input.trim() || loading}>
+                      <Button size="sm" className="h-8" onClick={sendMessage} disabled={!input.trim() || sending}>
                         <Send className="h-3.5 w-3.5" />
                       </Button>
                     </div>
