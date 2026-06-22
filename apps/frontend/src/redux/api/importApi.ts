@@ -4,6 +4,13 @@ export interface ImportResult {
   paper: { id: string; title: string; source: string; doi?: string };
   source: string;
   externalId?: string;
+  hasPdf?: boolean;
+}
+
+export interface SmartImportResult {
+  id: string;
+  title: string;
+  hasPdf: boolean;
 }
 
 export interface ImportHistoryItem {
@@ -32,8 +39,13 @@ export const importApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Paper", "Import"],
     }),
 
-    importByURL: builder.mutation<{ id: string; title: string }, { url: string; workspaceId: string }>({
+    importByURL: builder.mutation<SmartImportResult, { url: string; workspaceId: string }>({
       query: (body) => ({ url: "/import/url", method: "POST", body }),
+      invalidatesTags: ["Paper", "Import"],
+    }),
+
+    importBySmartURL: builder.mutation<SmartImportResult, { url: string; workspaceId: string }>({
+      query: (body) => ({ url: "/import/smart-url", method: "POST", body }),
       invalidatesTags: ["Paper", "Import"],
     }),
 
@@ -54,6 +66,7 @@ export const {
   useImportByDOIMutation,
   useImportByArxivMutation,
   useImportByURLMutation,
+  useImportBySmartURLMutation,
   useImportByFileMutation,
   useGetImportHistoryQuery,
 } = importApi;
