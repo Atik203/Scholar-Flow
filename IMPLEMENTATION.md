@@ -282,21 +282,48 @@ AI is woven throughout Scholar-Flow — not just a chatbot, but a research assis
 
 ### 🔴 Not Yet Started
 
-| Task | Priority | Notes |
-|------|----------|-------|
-| Lighthouse audit (target 90+ all pages) | Medium | Needs runtime browser audit |
-| Comprehensive test suite (auth, paper CRUD, billing, S3, WebSocket) | Medium | Backend + frontend tests |
-| AI streaming (SSE / chunked responses) | Low | All AI calls are request→response currently |
-| DOCX-to-PDF server-side LaTeX compilation | Low | latexmk/tectonic backend for academic typesetting |
-| Multi-file LaTeX projects (main.tex + chapters) | Low | File tree in editor sidebar |
-| SSO/SAML integration (Okta, Azure AD) | Low | Enterprise feature |
-| Bundle analysis + Core Web Vitals optimization | Low | @next/bundle-analyzer |
+| Task | Priority | Effort | Notes |
+|------|----------|--------|-------|
+| Lighthouse audit (target 90+ all pages) | Medium | 2-4h | Needs runtime browser audit |
+| Comprehensive test suite (auth, paper CRUD, billing, S3, WebSocket) | Medium | 1-2w | Backend + frontend tests |
+| AI streaming (SSE / chunked responses) | Low | 1-2d | All AI calls are request→response currently |
+| DOCX-to-PDF server-side LaTeX compilation | Low | 2-3d | latexmk/tectonic backend for academic typesetting |
+| Multi-file LaTeX projects (main.tex + chapters) | Low | 3-5d | File tree in editor sidebar |
+| SSO/SAML integration (Okta, Azure AD) | Low | 1-2w | Enterprise feature |
+| Bundle analysis + Core Web Vitals optimization | Low | 2-4h | @next/bundle-analyzer |
 
 ### 🟡 Partially Complete
 
-| Task | Done | Missing |
-|------|------|---------|
-| CSP/CORS | Helmet + CSP directives set | Strict origin CORS for production; CSP report-only mode testing |
-| AI chat | Markdown rendering, copy, model selector | RTK Query migration (currently raw fetch), context injection from pages |
-| Collaboration | Y.js sync via socket.io | Cursor presence awareness, offline queue, conflict resolution |
-| Rate limiting | 15+ limiters applied | Production thresholds (currently TESTING values 10x higher)
+| Task | Done | Missing | Effort |
+|------|------|---------|--------|
+| CSP/CORS | Helmet + CSP directives set | Strict origin CORS for production; CSP report-only mode testing | 1h |
+| AI chat | Markdown rendering, copy, model selector | RTK Query migration (currently raw fetch), context injection from pages | 2-4h |
+| Collaboration | Y.js sync via socket.io | Cursor presence awareness, offline queue, conflict resolution | 4-8h |
+| Rate limiting | 16 limiters applied | Production thresholds (currently TESTING values 10x higher) | 1h |
+
+### 🟢 Completed Post-Audit
+
+| Task | Status |
+|------|--------|
+| `NEXT_PUBLIC_WS_URL` added to all 6 env files | ✅ |
+| Socket.io files use `NEXT_PUBLIC_WS_URL` instead of `API_BASE_URL` | ✅ |
+| `apps/socket-server/` package created for Render Free deployment | ✅ |
+| `docs/DEPLOY.md` with free + production deployment guides | ✅ |
+| CSP connectSrc derives from `WS_URL` env var | ✅ |
+| AGENTS.md, README.md, CLAUDE.md, CHANGELOG.md updated | ✅ |
+| Backend `.env.example` merged vars + placeholder fixes | ✅ |
+| Frontend `.env.production` feature flags | ✅ |
+
+---
+
+## Deployment Architecture
+
+```
+Frontend (Vercel) ──HTTP──▶ REST API (Vercel) ──DB──▶ Prisma Cloud
+       │                                                            
+       │ WebSocket                                                  
+       ▼                                                            
+WebSocket Server (Render Free) — socket.io only, no DB          
+```
+
+See [`docs/DEPLOY.md`](../docs/DEPLOY.md) for step-by-step setup.

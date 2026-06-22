@@ -252,6 +252,15 @@ Admin task:
   → apps/backend/src/app/modules/Admin/ (admin routes, metrics calculation)
   → check admin role middleware
 
+WebSocket/Collaboration task (Phase 10):
+  → apps/socket-server/src/server.ts (Render-deployed WebSocket server)
+  → apps/backend/src/app/modules/WebSocket/socketServer.ts (in-app socket.io setup)
+  → apps/frontend/src/lib/yjs/useCollabSync.ts (Y.js + socket.io provider)
+  → apps/frontend/src/hooks/useDiscussionSocket.ts (live discussion hook)
+  → apps/frontend/src/components/discussions/LiveDiscussionFeed.tsx
+  → check NEXT_PUBLIC_WS_URL env var in all .env files
+  → verify socket.io JWT auth handshake matches backend JWT_SECRET
+
 Notification/Analytics task (Phase 7):
   → apps/backend/src/app/modules/Notification/ (broadcast, SSE, settings)
   → apps/backend/src/app/modules/Analytics/ (personal, workspace, usage, export)
@@ -561,7 +570,7 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Do not work on items from future phases unless explicitly requested
 - Mark completed items as `[x]` after implementation
 
-**Current Status:** Phase 7 Complete (Release 1.2.7), Next.js 16 upgrade complete
+**Current Status:** Phase 10 — FINAL PHASE (95% Complete, Release 1.3.0-rc1)
 - Phase 1 ✅ (Static Marketing Pages — 18-20 pages done)
 - Phase 2 ✅ (Auth & Onboarding Pages — 5-6 pages done)
 - Phase 3 ✅ (Dashboard Shell & Core Pages)
@@ -569,11 +578,14 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Phase 5 ✅ (Workspaces & Team)
 - Phase 6 ✅ (Discussions, Notes & Citations — Notebook hierarchy, 7 new pages, 2 new citation formats, 3 new RTK slices)
 - Phase 7 ✅ (Analytics, Notifications & Admin — Real SSE broadcaster, 8 new admin pages, 7 new user-facing pages, 8 new RTK slices, persisted notification settings, `useNotificationStream` hook + `NotificationBell` popover, 6 new Prisma models)
+- Phase 8 ✅ (Architecture stabilization — unified entry points, removed dead code, fixed `any` types, standardized exports, 14 new pages)
+- Phase 9 ✅ (Polish & Performance — 8 remaining pages, invitation backend, WCAG 2.1 AA, code splitting, Cache-Control headers)
+- Phase 10 🔄 (95% complete — AI features, editor templates, WebSocket collab, live chat, error boundaries, rate limiting)
 - Next.js 16 migration ✅ (Async APIs, proxy.ts, React Compiler, Turbopack default)
 - better-auth migration ✅ (replaced NextAuth.js v4)
 - Prisma v7 migration ✅ (driver adapter required)
-- Current focus: Phase 8 — Advanced Features (AI assistant, discover, integrations, enterprise)
-- Framework: Next.js 16, React 19.2, Turbopack default
+- Current focus: Phase 10 final polish — deployment docs, version sync, production hardening
+- Framework: Next.js 16, React 19.2, Turbopack default, Prisma 7.8.0
 - React Compiler: enabled (do not add manual memoization)
 
 ---
