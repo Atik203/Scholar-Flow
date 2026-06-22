@@ -84,6 +84,9 @@ import { VersionHistoryDialog } from "./VersionHistoryDialog";
 // Citation
 import { CitationSearchDialog } from "./CitationSearchDialog";
 
+// Templates
+import { TemplateSelector } from "./TemplateSelector";
+
 // Components
 import { ShareModal } from "./ShareModal";
 
@@ -581,6 +584,10 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
 
               <ToolbarGroup>
                 <ResizableImageUploadButton text="Image" />
+              </ToolbarGroup>
+
+              <ToolbarGroup>
+                <TemplateSelector editor={editor} />
               </ToolbarGroup>
 
               <Spacer />
