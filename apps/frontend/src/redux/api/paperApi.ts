@@ -615,6 +615,21 @@ export const paperApi = apiSlice.injectEndpoints({
       ],
     }),
 
+    // Phase 10 — AI Key Points extraction
+    extractKeyPoints: builder.mutation<
+      { keyPoints: string[] },
+      { paperId: string; model?: string }
+    >({
+      query: ({ paperId, model }) => ({
+        url: `/papers/${paperId}/key-points`,
+        method: "POST",
+        body: model ? { model } : {},
+      }),
+      transformResponse: (response: {
+        data: { keyPoints: string[] };
+      }) => response.data,
+    }),
+
     // AI provider status — returns available providers + models for dynamic UI
     getAiProviders: builder.query<AiProvidersResponse, void>({
       query: () => "/papers/ai/providers",
@@ -690,4 +705,5 @@ export const {
   useGetPaperVersionsQuery,
   useGetPaperVersionQuery,
   useRestorePaperVersionMutation,
+  useExtractKeyPointsMutation,
 } = paperApi;
