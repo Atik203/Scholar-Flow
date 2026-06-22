@@ -143,3 +143,37 @@ export const billingSubscriptionLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Phase 10 — Rate limiting for mutation-heavy endpoints
+export const workspaceMutationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // workspace create/update/delete per 15 minutes
+  message: {
+    success: false,
+    message: "Too many workspace operations. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const collectionMutationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // collection CRUD per 15 minutes
+  message: {
+    success: false,
+    message: "Too many collection operations. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const aiGenerationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 200, // AI generation requests per hour
+  message: {
+    success: false,
+    message: "AI generation limit reached. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
