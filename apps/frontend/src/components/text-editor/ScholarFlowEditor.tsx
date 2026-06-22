@@ -67,6 +67,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lib
 import { handleImageUpload } from "@/lib/tiptap-utils";
+import TurndownService from "turndown";
 
 // Redux API
 import {
@@ -382,6 +383,33 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     }
   };
 
+  const handleExportMd = () => {
+    if (!editor) return;
+    try {
+      const html = editor.getHTML();
+      const turndown = new TurndownService({
+        headingStyle: "atx",
+        codeBlockStyle: "fenced",
+      });
+      const markdown = turndown.turndown(html);
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title || "paper"}.md`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showSuccessToast("Markdown exported successfully!");
+    } catch (error: any) {
+      showErrorToast(
+        "Failed to export Markdown",
+        error?.message || "Unknown error"
+      );
+    }
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -481,6 +509,15 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           >
             <FileText className="h-4 w-4 mr-2" />
             {isExportingDocx ? "Exporting..." : "DOCX"}
+          </Button>
+
+          <Button
+            onClick={handleExportMd}
+            variant="outline"
+            size="sm"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            MD
           </Button>
 
           <Button
