@@ -5,18 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import { useUploadPaperMutation } from "@/redux/api/paperApi";
-import { useImportByDOIMutation, useImportByArxivMutation, useImportByURLMutation } from "@/redux/api/importApi";
-import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
+import { useImportByDOIMutation, useImportByArxivMutation, useImportByURLMutation, useImportBySmartURLMutation } from "@/redux/api/importApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, BookOpen, Brain, Building2, Check, CheckCircle, FileText, Globe, Link2, Loader2, Plus, Search, Sparkles, Upload, X, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, CheckCircle, FileText, Globe, Link2, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useRef } from "react";
 
 function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
 
-type UploadMethod = "file" | "doi" | "arxiv" | "url";
+type UploadMethod = "file" | "doi" | "arxiv" | "url" | "smart-url";
 type ProcessingStage = "idle" | "uploading" | "extracting" | "analyzing" | "complete" | "error";
 
 interface FileUpload { id: string; file: File; progress: number; stage: ProcessingStage; paperId?: string; error?: string; }
@@ -24,7 +23,7 @@ interface FileUpload { id: string; file: File; progress: number; stage: Processi
 const stages = [
   { key: "uploading", label: "Uploading", icon: Upload },
   { key: "extracting", label: "Extracting", icon: FileText },
-  { key: "analyzing", label: "AI Analysis", icon: Brain },
+  { key: "analyzing", label: "AI Analysis", icon: Sparkles },
   { key: "complete", label: "Complete", icon: CheckCircle },
 ];
 
@@ -38,17 +37,18 @@ export default function UploadPaperPage() {
   const [doiInput, setDoiInput] = useState("");
   const [arxivInput, setArxivInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
+  const [smartUrlInput, setSmartUrlInput] = useState("");
   const [isImporting, setIsImporting] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState("");
   const [tags, setTags] = useState("");
   const [language, setLanguage] = useState("");
 
   const { data: workspacesData } = useListWorkspacesQuery({limit: 50, scope: "all" });
-  const { data: collectionsData } = useGetMyCollectionsQuery({ page: 1, limit: 50 });
   const [uploadPaper] = useUploadPaperMutation();
   const [importDoi] = useImportByDOIMutation();
   const [importArxiv] = useImportByArxivMutation();
   const [importUrl] = useImportByURLMutation();
+  const [importSmartUrl] = useImportBySmartURLMutation();
 
   const workspaces = workspacesData?.data || [];
 
@@ -92,14 +92,18 @@ export default function UploadPaperPage() {
 
   const removeUpload = (id: string) => { setUploads((prev) => prev.filter((u) => u.id !== id)); };
 
+  const goToPaper = (paperId: string) => {
+    router.push(`/dashboard/papers/${paperId}`);
+  };
+
   const handleDoiImport = async () => {
     if (!doiInput.trim() || !selectedWorkspace) { showErrorToast("DOI and workspace required"); return; }
     setIsImporting(true);
     try {
-      await importDoi({ doi: doiInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast("Paper imported via DOI");
+      const result = await importDoi({ doi: doiInput.trim(), workspaceId: selectedWorkspace }).unwrap();
+      showSuccessToast(result.hasPdf ? "Paper imported via DOI with PDF" : "Paper metadata imported (no OA PDF available)");
       setDoiInput("");
-      router.push("/dashboard/papers");
+      goToPaper(result.paper.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "DOI import failed"); }
     setIsImporting(false);
   };
@@ -108,10 +112,10 @@ export default function UploadPaperPage() {
     if (!arxivInput.trim() || !selectedWorkspace) { showErrorToast("arXiv ID and workspace required"); return; }
     setIsImporting(true);
     try {
-      await importArxiv({ arxivId: arxivInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast("Paper imported via arXiv");
+      const result = await importArxiv({ arxivId: arxivInput.trim(), workspaceId: selectedWorkspace }).unwrap();
+      showSuccessToast(result.hasPdf ? "Paper imported via arXiv with PDF" : "Paper metadata imported (PDF download failed)");
       setArxivInput("");
-      router.push("/dashboard/papers");
+      goToPaper(result.paper.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "arXiv import failed"); }
     setIsImporting(false);
   };
@@ -120,11 +124,23 @@ export default function UploadPaperPage() {
     if (!urlInput.trim() || !selectedWorkspace) { showErrorToast("URL and workspace required"); return; }
     setIsImporting(true);
     try {
-      await importUrl({ url: urlInput.trim(), workspaceId: selectedWorkspace }).unwrap();
+      const result = await importUrl({ url: urlInput.trim(), workspaceId: selectedWorkspace }).unwrap();
       showSuccessToast("Paper imported via URL");
       setUrlInput("");
-      router.push("/dashboard/papers");
+      goToPaper(result.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "URL import failed"); }
+    setIsImporting(false);
+  };
+
+  const handleSmartUrlImport = async () => {
+    if (!smartUrlInput.trim() || !selectedWorkspace) { showErrorToast("URL and workspace required"); return; }
+    setIsImporting(true);
+    try {
+      const result = await importSmartUrl({ url: smartUrlInput.trim(), workspaceId: selectedWorkspace }).unwrap();
+      showSuccessToast(result.hasPdf ? "Paper imported with PDF from " + new URL(smartUrlInput).hostname : "Paper metadata imported (PDF not available)");
+      setSmartUrlInput("");
+      goToPaper(result.id);
+    } catch (e: any) { showErrorToast(e?.data?.message || "Import failed"); }
     setIsImporting(false);
   };
 
@@ -151,13 +167,14 @@ export default function UploadPaperPage() {
         <div className="flex gap-1">
           {[
             { key: "file", label: "Upload File", icon: Upload },
+            { key: "smart-url", label: "Smart URL", icon: Search },
             { key: "doi", label: "Import DOI", icon: Link2 },
             { key: "arxiv", label: "arXiv ID", icon: BookOpen },
-            { key: "url", label: "From URL", icon: Globe },
+            { key: "url", label: "Direct URL", icon: Globe },
           ].map((method) => (
             <motion.button key={method.key} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               onClick={() => setUploadMethod(method.key as UploadMethod)}
-              className={cn("flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+              className={cn("flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-sm font-medium transition-all",
                 uploadMethod === method.key ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-muted")}>
               <method.icon className="h-4 w-4" />{method.label}
             </motion.button>
@@ -185,6 +202,30 @@ export default function UploadPaperPage() {
         </div>
       </div>
 
+      {/* Smart URL Import */}
+      {uploadMethod === "smart-url" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2"><Search className="h-5 w-5" />Smart URL Import</CardTitle>
+            <p className="text-sm text-muted-foreground">Paste a URL from any supported site — we auto-detect the source</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input placeholder="https://ieeexplore.ieee.org/document/... or https://arxiv.org/abs/..." value={smartUrlInput} onChange={(e) => setSmartUrlInput(e.target.value)} className="flex-1" />
+              <Button onClick={handleSmartUrlImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}Import</Button>
+            </div>
+            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+              <span className="px-2 py-1 bg-muted rounded">arXiv</span>
+              <span className="px-2 py-1 bg-muted rounded">IEEE Xplore</span>
+              <span className="px-2 py-1 bg-muted rounded">Semantic Scholar</span>
+              <span className="px-2 py-1 bg-muted rounded">ResearchGate</span>
+              <span className="px-2 py-1 bg-muted rounded">Google Scholar</span>
+              <span className="px-2 py-1 bg-muted rounded">Direct PDF link</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* File Upload */}
       {uploadMethod === "file" && (
         <motion.div
@@ -210,6 +251,7 @@ export default function UploadPaperPage() {
               <Input placeholder="10.48550/arXiv.1706.03762" value={doiInput} onChange={(e) => setDoiInput(e.target.value)} className="flex-1" />
               <Button onClick={handleDoiImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}Import</Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">Automatically searches Unpaywall and Semantic Scholar for the full PDF</p>
           </CardContent>
         </Card>
       )}
@@ -222,18 +264,20 @@ export default function UploadPaperPage() {
               <Input placeholder="1706.03762" value={arxivInput} onChange={(e) => setArxivInput(e.target.value)} className="flex-1" />
               <Button onClick={handleArxivImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookOpen className="mr-2 h-4 w-4" />}Import</Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">Automatically downloads the PDF from arXiv.org</p>
           </CardContent>
         </Card>
       )}
 
       {uploadMethod === "url" && (
         <Card>
-          <CardHeader><CardTitle className="text-lg">Import from URL</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">Import from Direct URL</CardTitle></CardHeader>
           <CardContent>
             <div className="flex gap-2">
               <Input placeholder="https://example.com/paper.pdf" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} className="flex-1" />
               <Button onClick={handleUrlImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Globe className="mr-2 h-4 w-4" />}Import</Button>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">For direct PDF links. Use &ldquo;Smart URL&rdquo; for IEEE/ResearchGate/Google Scholar</p>
           </CardContent>
         </Card>
       )}
