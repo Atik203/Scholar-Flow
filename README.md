@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.2.4-blue)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.0--rc1-blue)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
@@ -12,9 +12,9 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 📦 Recent Releases
 
-- **1.2.2 (2026-06-16)** — Patch: fixed OAuth account-switching 401s and profile-picture reset on sign-in. See [CHANGELOG.md](./CHANGELOG.md).
-- **1.2.1** — Phase 3: dashboard shell, new admin pages, user preferences.
-- **1.2.0** — Phase 2: auth pages, onboarding flow.
+- **1.3.0-rc1 (2026-10-01)** — Phase 10: AI assistant, WebSocket collab, editor templates, paper upload/import overhaul, smart URL import (IEEE/ResearchGate/Google Scholar/Semantic Scholar). See [CHANGELOG.md](./CHANGELOG.md).
+- **1.2.9** — Phase 9: WCAG 2.1 AA, code splitting, 8 final pages, invitation backend.
+- **1.2.8** — Phase 8: Architecture stabilization, 14 new pages, removed dead code.
 
 ## 🚀 Live Demo
 
@@ -38,6 +38,24 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 - **Email Sharing**: Share papers via email with permission management (view/edit)
 - **Workspace Collaboration**: Invite users to collections and workspaces with role-based access
+- **Real-Time Collaboration**: WebSocket-powered co-editing with Y.js, cursor presence, live discussion chat with typing indicators
+
+### 🤖 AI-Powered Features (Phase 10)
+
+- **Global AI Assistant**: Floating chat widget (Cmd+J) with markdown rendering, code highlighting, 4 providers (OpenAI/Gemini/Claude/DeepSeek)
+- **AI Paper Tools**: Key Points extraction, Rewriter, Comparator, Literature Review, Translator
+- **AI Summarizer**: One-click paper summaries with configurable tone, audience, and word limits
+- **Semantic Search**: pgvector-powered meaning search across all papers
+- **AI Metadata**: Automatic title, author, abstract extraction from PDFs
+
+### 📝 Rich Text Editing
+
+- **TipTap Editor**: Full-featured with LaTeX math (KaTeX), citations, 7 paper templates (IEEE/ACM/Springer/arXiv)
+- **Version History**: Auto-snapshot before save, keep 50 versions, restore any version
+- **Word Count + Reading Time**: Live stats in editor status bar
+- **Full-Screen Mode**: Distraction-free writing with Esc to exit
+- **Image Upload**: Drag-and-drop with alignment, captions, text wrap
+- **Export**: PDF, DOCX, Markdown with one click
 
 - **Multiple Auth Options**: Google OAuth, GitHub OAuth, and email/password
 - **Secure Sessions**: JWT-based authentication with refresh tokens
@@ -126,8 +144,8 @@ Scholar-Flow/
 
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL 15+
+- Node.js 22+
+- PostgreSQL 15+ with pgvector extension
 - Yarn Berry (v4)
 - AWS S3 account (for file storage)
 

@@ -60,6 +60,7 @@ export const ModelName = {
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
+  PaperVersion: 'PaperVersion',
   Citation: 'Citation',
   Annotation: 'Annotation',
   AnnotationVersion: 'AnnotationVersion',
@@ -70,6 +71,8 @@ export const ModelName = {
   AISummary: 'AISummary',
   AIInsightThread: 'AIInsightThread',
   AIInsightMessage: 'AIInsightMessage',
+  AIConversation: 'AIConversation',
+  AIConversationMessage: 'AIConversationMessage',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -295,6 +298,20 @@ export const PaperChunkScalarFieldEnum = {
 export type PaperChunkScalarFieldEnum = (typeof PaperChunkScalarFieldEnum)[keyof typeof PaperChunkScalarFieldEnum]
 
 
+export const PaperVersionScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  contentHtml: 'contentHtml',
+  title: 'title',
+  version: 'version',
+  savedAt: 'savedAt',
+  savedById: 'savedById',
+  sizeBytes: 'sizeBytes'
+} as const
+
+export type PaperVersionScalarFieldEnum = (typeof PaperVersionScalarFieldEnum)[keyof typeof PaperVersionScalarFieldEnum]
+
+
 export const CitationScalarFieldEnum = {
   id: 'id',
   sourcePaperId: 'sourcePaperId',
@@ -450,6 +467,35 @@ export const AIInsightMessageScalarFieldEnum = {
 } as const
 
 export type AIInsightMessageScalarFieldEnum = (typeof AIInsightMessageScalarFieldEnum)[keyof typeof AIInsightMessageScalarFieldEnum]
+
+
+export const AIConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  model: 'model',
+  workspaceId: 'workspaceId',
+  context: 'context',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationScalarFieldEnum = (typeof AIConversationScalarFieldEnum)[keyof typeof AIConversationScalarFieldEnum]
+
+
+export const AIConversationMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationMessageScalarFieldEnum = (typeof AIConversationMessageScalarFieldEnum)[keyof typeof AIConversationMessageScalarFieldEnum]
 
 
 export const PlanScalarFieldEnum = {

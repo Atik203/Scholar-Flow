@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useUpdatePaperMetadataMutation } from "@/redux/api/paperApi";
+import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, Bot, Calendar, Edit, Eye, FileText, Highlighter, Loader2, MessageSquare, Save, Sparkles, StickyNote, Trash2, X,
+  ArrowLeft, Bot, Calendar, Edit, Eye, FileText, Highlighter, Loader2, MessageSquare, Save, Sparkles, StickyNote, Trash2, Users, X,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -114,15 +115,21 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           <Button variant="outline" size="sm" asChild><Link href={`/dashboard/papers/${paper.id}/annotations`}><Highlighter className="mr-2 h-4 w-4" />Annotate</Link></Button>
           <Button variant="outline" size="sm"><Bot className="mr-2 h-4 w-4" />AI Insight</Button>
           <Button variant="outline" size="sm"><FileText className="mr-2 h-4 w-4" />Export</Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/dashboard/papers/${paper.id}/collaborate`}><Users className="mr-2 h-4 w-4" />Collaborate</Link>
+          </Button>
         </div>
       </motion.div>
+
+      {/* AI Key Points */}
+      <KeyPointsCard paperId={paper.id} />
 
       {/* PDF Preview */}
       {showPreview && previewUrlData?.data?.url && (
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-lg">Preview</CardTitle></CardHeader>
           <CardContent>
-            <iframe src={previewUrlData.data.url} className="w-full h-[600px] border rounded-lg" title="PDF Preview" />
+            <iframe src={previewUrlData.data.url} className="w-full h-[600px] border rounded-lg" title="PDF Preview" loading="lazy" />
           </CardContent>
         </Card>
       )}

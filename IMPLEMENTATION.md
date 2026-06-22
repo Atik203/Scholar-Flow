@@ -215,19 +215,99 @@ AI is woven throughout Scholar-Flow — not just a chatbot, but a research assis
 - `eslint-plugin-jsx-a11y` enforced (18 WCAG 2.1 AA rules)
 
 ## Current Status
-- **Release:** 1.2.9 (2026-06-20)
-- **Completed:** Phase 1-9, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Phase 10 — FINAL PHASE (AI, Editor Enhancement, Collaboration, Enterprise)
+- **Release:** 1.3.0-rc1 (2026-10-01)
+- **Completed:** Phase 1-10, Next.js 16 migration, better-auth migration, Prisma v7 migration
+- **Current:** Release 1.3.0-rc1 — FINAL PHASE complete (~98%)
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
 - **Page Coverage:** 98/102 figma-make (96.1%)
+- **Branch:** `atik` (Release 1.3.0-rc1)
 
 ## Phase 10 Sub-Phases
 
-| Sub-Phase | Focus | Est. Effort |
-|-----------|-------|-------------|
-| 10.1 | Remaining pages + responsive + tests | 1 week |
-| 10.2 | TipTap Editor Enhancement (LaTeX + compilation) | 2-3 weeks |
-| 10.3 | Global AI Features (site-wide assistant + paper AI) | 2-3 weeks |
-| 10.4 | Real-Time Collaboration (WebSocket + co-editing) | 2 weeks |
-| 10.5 | Enterprise + Production Polish | 1 week |
-| **Total** | **Final Phase** | **8-11 weeks** |
+| Sub-Phase | Focus | Est. Effort | Status |
+|-----------|-------|-------------|--------|
+| 10.1 | Remaining pages + responsive + tests | 1 week | ✅ Complete |
+| 10.2 | TipTap Editor Enhancement (LaTeX + compilation) | 2-3 weeks | ✅ Complete |
+| 10.3 | Global AI Features (site-wide assistant + paper AI) | 2-3 weeks | ✅ Complete |
+| 10.4 | Real-Time Collaboration (WebSocket + co-editing) | 2 weeks | ✅ Complete |
+| 10.5 | Enterprise + Production Polish | 1 week | ✅ Complete |
+| **Total** | **Final Phase** | **8-11 weeks** | **~98% Complete** |
+
+---
+
+## Phase 10 Completed Features
+
+### 10.1 — Remaining Pages + Responsive
+- [x] EnhancedDashboard page with dynamic widgets/stats/charts
+- [x] Responsive audit: unified `useIsMobile` (max-width: 767px), dialog overflow fixes, table scroll, iOS input zoom fix
+
+### 10.2 — TipTap Editor Enhancement
+- [x] LaTeX math: `LatexInline` and `LatexBlock` custom TipTap nodes with KaTeX rendering, live editing, toolbar buttons
+- [x] Word count + character count + reading time in editor status bar
+- [x] Full-screen distraction-free mode (toggle button, Esc to exit)
+- [x] Version history / snapshots: `PaperVersion` model, auto-snapshot before save, keep 50 versions, restore support
+- [x] Image upload: MS Word/Google Docs-style (smooth drag, alignment, caption, text wrap)
+- [x] Citation insertion: search dialog from toolbar, `CitationNode` TipTap extension, CRUD endpoints
+- [x] Editor templates (IEEE, ACM, Springer, arXiv, Thesis, Literature Review)
+- [x] PDF, DOCX, and Markdown export
+
+### 10.3 — Global AI Features
+- [x] Floating AI chat assistant (Cmd+J, model selector, conversation persistence via `AIConversation` model)
+- [x] Markdown rendering with syntax-highlighted code blocks and copy-to-clipboard
+- [x] AI Key Points extraction (POST /papers/:id/key-points + KeyPointsCard component)
+- [x] AI Summarizer (existing, cached)
+- [x] AI Q&A / Insight threads (existing)
+- [x] AI Rewriter, Comparator, Translator, Literature Review (POST /api/ai/*)
+- [x] Multi-provider support: OpenAI (GPT-4o), Gemini (Flash/Pro), Claude (Sonnet/Haiku/Opus), DeepSeek (V3/R1)
+- [x] Dynamic AI model selector populated from backend provider status
+- [x] Semantic search via pgvector embeddings (OpenAI text-embedding-3-small)
+
+### 10.4 — Real-Time Collaboration
+- [x] WebSocket server (socket.io) with JWT auth on handshake
+- [x] Room-based channels: `paper:`, `discussion:`, `workspace:`
+- [x] Presence tracking (online/offline, member counts)
+- [x] Typing indicators (start/stop broadcasts)
+- [x] Y.js collaborative editing (socket.io sync provider, `/papers/[id]/collaborate` page)
+- [x] Live discussion chat via WebSocket (real-time messages, typing indicators, presence)
+
+### 10.5 — Enterprise & Production Polish
+- [x] Error boundaries on dashboard route segments
+- [x] Rate limiting: 15+ dedicated limiters (auth, paper, billing, workspace, collection, AI generation)
+- [x] CORS hardening + CSP security headers via Helmet
+- [x] `LiveDiscussionFeed` component with real-time WebSocket delivery
+
+---
+
+## Phase 10 Remaining Tasks (Gap Report)
+
+### 🔴 Future Task (Post-Phase 10)
+
+| Task | Priority | Effort | Notes |
+|------|----------|--------|-------|
+| SSO/SAML integration (Okta, Azure AD) | Low | 1-2w | Enterprise feature — deferred to post-Phase 10 release |
+
+### 🟢 Completed in This Session
+
+| Task | Status |
+|------|--------|
+| **AI streaming (SSE)** | ✅ Backend SSE endpoint + frontend stream consumer with OpenAI `stream: true` + non-streaming fallback |
+| **Cursor presence awareness + offline queue** | ✅ AwarenessBridge class bridging socket.io ↔ CollaborationCursor, y-indexeddb persistence, localStorage snapshot fallback, pending-updates offline queue flushed on reconnect |
+| **DOCX-to-PDF LaTeX compilation** | ✅ latex.service.ts (auto-detects tectonic/pdflatex/xelatex/lualatex), export.routes.ts (status, compile, upload+convert) |
+| **Multi-file LaTeX projects** | ✅ latexProject.service.ts (CRUD in Paper.metadata JSONB), LatexFileTree.tsx sidebar component with inline compile |
+| **Lighthouse audit (code-level fixes)** | ✅ CLS fix (qr code img w/h), loading=lazy on PDF iframes |
+| **Comprehensive test suite** | ✅ 3 test files (paper-crud, billing-subscription, paper.service) — 15 tests, all passing. Mocked Prisma, covers CRUD + subscription lifecycle |
+| **Paper upload/import fix + smart URL** | ✅ DOI/arXiv now download PDF (Unpaywall/Semantic Scholar/arXiv direct), URL import extracts source page metadata, Smart URL import supports IEEE/ResearchGate/Google Scholar/Semantic Scholar auto-detection, all imports auto-trigger extraction |
+
+---
+
+## Deployment Architecture
+
+```
+Frontend (Vercel) ──HTTP──▶ REST API (Vercel) ──DB──▶ Prisma Cloud
+       │                                                            
+       │ WebSocket                                                  
+       ▼                                                            
+WebSocket Server (Render Free) — socket.io only, no DB          
+```
+
+See [`docs/DEPLOY.md`](../docs/DEPLOY.md) for step-by-step setup.

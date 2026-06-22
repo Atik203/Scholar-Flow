@@ -6,9 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 import {
   AlertCircle,
+  Bookmark,
   Clock,
   Download,
   FileText,
+  Maximize,
+  Minimize,
+  Quote,
   Save,
   Send,
   Share2,
@@ -18,6 +22,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // TipTap Extensions
 import { Highlight } from "@tiptap/extension-highlight";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { CharacterCount } from "@tiptap/extension-character-count";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -48,11 +53,21 @@ import { ResizableImageWithPopover } from "@/components/tiptap-node/resizable-im
 import "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover.scss";
 import "tiptap-extension-resizable-image/styles.css";
 
+// LaTeX Extensions
+import { LatexInline } from "@/components/tiptap-node/latex-inline/latex-inline-extension";
+import { LatexBlock } from "@/components/tiptap-node/latex-block/latex-block-extension";
+import { LatexInlineButton } from "@/components/tiptap-ui/latex-inline-button/latex-inline-button";
+import { LatexBlockButton } from "@/components/tiptap-ui/latex-block-button/latex-block-button";
+
+// Citation Extension
+import { CitationNode } from "@/components/tiptap-node/citation-node/citation-node";
+
 // Hooks
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lib
 import { handleImageUpload } from "@/lib/tiptap-utils";
+import TurndownService from "turndown";
 
 // Redux API
 import {
@@ -61,7 +76,17 @@ import {
   useGetEditorPaperQuery,
   usePublishDraftMutation,
   useUpdateEditorContentMutation,
+  useGetPaperVersionsQuery,
+  useRestorePaperVersionMutation,
 } from "@/redux/api/paperApi";
+
+import { VersionHistoryDialog } from "./VersionHistoryDialog";
+
+// Citation
+import { CitationSearchDialog } from "./CitationSearchDialog";
+
+// Templates
+import { TemplateSelector } from "./TemplateSelector";
 
 // Components
 import { ShareModal } from "./ShareModal";
@@ -82,6 +107,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [title, setTitle] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isCitationDialogOpen, setIsCitationDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
 
   // Redux hooks
@@ -150,6 +178,10 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       Typography,
       Superscript,
       Subscript,
+      LatexInline,
+      LatexBlock,
+      CitationNode,
+      CharacterCount,
       // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
     content: "",
@@ -264,21 +296,22 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      // Ctrl+S / Cmd+S → save
       if ((event.ctrlKey || event.metaKey) && event.key === "s") {
-        event.preventDefault(); // Prevent browser's default save behavior
+        event.preventDefault();
         handleSave();
+      }
+      // Esc → exit fullscreen
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
       }
     };
 
-    // Add the event listener to the document
     document.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSave]); // Re-bind when handleSave changes
+  }, [handleSave, isFullscreen]);
 
   // Publish draft
   const handlePublish = async () => {
@@ -346,6 +379,33 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       showErrorToast(
         "Failed to export DOCX",
         error?.data?.message || "Unknown error"
+      );
+    }
+  };
+
+  const handleExportMd = () => {
+    if (!editor) return;
+    try {
+      const html = editor.getHTML();
+      const turndown = new TurndownService({
+        headingStyle: "atx",
+        codeBlockStyle: "fenced",
+      });
+      const markdown = turndown.turndown(html);
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title || "paper"}.md`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showSuccessToast("Markdown exported successfully!");
+    } catch (error: any) {
+      showErrorToast(
+        "Failed to export Markdown",
+        error?.message || "Unknown error"
       );
     }
   };
@@ -452,6 +512,15 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           </Button>
 
           <Button
+            onClick={handleExportMd}
+            variant="outline"
+            size="sm"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            MD
+          </Button>
+
+          <Button
             onClick={() => setIsShareModalOpen(true)}
             variant="outline"
             size="sm"
@@ -459,11 +528,25 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
+
+          <Button
+            onClick={() => setIsFullscreen((f) => !f)}
+            variant="ghost"
+            size="sm"
+            title={isFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Editor */}
-      <Card>
+      <div className={isFullscreen ? "fixed inset-0 z-50 bg-background overflow-auto p-4" : ""}>
+      <Card className={isFullscreen ? "max-w-5xl mx-auto" : ""}>
         <CardContent className="p-0">
           <EditorContext.Provider value={{ editor }}>
             {/* Toolbar */}
@@ -516,7 +599,32 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <ToolbarSeparator />
 
               <ToolbarGroup>
+                <LatexInlineButton />
+                <LatexBlockButton />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCitationDialogOpen(true)}
+                  title="Insert Citation"
+                >
+                  <Bookmark className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Cite</span>
+                </Button>
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
                 <ResizableImageUploadButton text="Image" />
+              </ToolbarGroup>
+
+              <ToolbarGroup>
+                <TemplateSelector editor={editor} />
               </ToolbarGroup>
 
               <Spacer />
@@ -530,9 +638,58 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
                 className="min-h-[500px] focus-within:outline-none"
               />
             </div>
+
+            {/* Status Bar: Word count + Version history */}
+            <div className="px-6 py-2 border-t text-xs text-muted-foreground flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span>
+                  {editor?.storage?.characterCount?.words?.() ?? 0} words
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  {editor?.storage?.characterCount?.characters?.() ?? 0} characters
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  ~{Math.max(1, Math.ceil((editor?.storage?.characterCount?.words?.() ?? 0) / 200))} min read
+                </span>
+              </div>
+              <button
+                className="text-primary hover:underline"
+                onClick={() => setIsVersionDialogOpen(true)}
+              >
+                Version History
+              </button>
+            </div>
           </EditorContext.Provider>
         </CardContent>
       </Card>
+      </div> {/* fullscreen wrapper */}
+
+      {/* Version History Dialog */}
+      {isVersionDialogOpen && (
+        <VersionHistoryDialog
+          paperId={paperId}
+          open={isVersionDialogOpen}
+          onClose={() => setIsVersionDialogOpen(false)}
+        />
+      )}
+
+      {/* Citation Search Dialog */}
+      <CitationSearchDialog
+        open={isCitationDialogOpen}
+        onOpenChange={setIsCitationDialogOpen}
+        editor={editor}
+        existingPaperIds={
+          editor
+            ? (editor.getJSON().content as any[])
+                ?.flatMap((n) =>
+                  n.type === "citation" ? [n.attrs?.paperId as string] : []
+                )
+                .filter(Boolean) ?? []
+            : []
+        }
+      />
 
       {/* Auto-save indicator */}
       {isSaving && (

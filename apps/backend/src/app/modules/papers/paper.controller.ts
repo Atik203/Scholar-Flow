@@ -18,6 +18,7 @@ import {
   ensureDevUserAndWorkspace,
   exportService,
   paperService,
+  paperVersionService,
 } from "./paper.service";
 import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
@@ -923,6 +924,59 @@ export const paperController = {
     }
   }),
 
+  // Phase 10 — AI Key Points extraction
+  generateKeyPoints: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const { id: paperId } = params.data;
+    const body = req.body || {};
+    const model = body.model as string | undefined;
+
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      paperRecord
+    );
+
+    try {
+      const keyPoints = await aiService.generateKeyPoints({
+        paperId,
+        prompt: "Extract key findings",
+        context: source.text || "",
+        ...(model && { model }),
+      });
+
+      sendSuccessResponse(
+        res,
+        { keyPoints },
+        "Key points extracted successfully"
+      );
+    } catch (error) {
+      console.error("[PaperController] Key points extraction failed:", error);
+      if (error instanceof ApiError) throw error;
+      throw createPaperError.insightGenerationFailed(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }),
+
   // Get insight conversation history for a paper
   getInsightHistory: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
@@ -1003,6 +1057,12 @@ export const paperController = {
         error instanceof Error ? error.message : String(error)
       );
     }
+  }),
+
+  // Get available AI providers and their models for dynamic UI
+  getAiProviders: catchAsync(async (_req: Request, res: Response) => {
+    const statuses = aiService.getProviderStatuses();
+    sendSuccessResponse(res, { providers: statuses }, "AI providers retrieved");
   }),
 };
 
@@ -1318,5 +1378,37 @@ export const editorPaperController = {
       console.error("[EditorPaperController] Image upload failed:", error);
       throw new ApiError(500, "Failed to upload image");
     }
+  }),
+
+  // List versions for an editor paper
+  getVersions: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { id } = req.params;
+    const versions = await paperVersionService.listVersions(id);
+    sendSuccessResponse(res, { versions }, "Versions retrieved");
+  }),
+
+  // Get a specific version's content
+  getVersion: catchAsync(async (req: Request, res: Response) => {
+    const { versionId } = req.params;
+    const version = await paperVersionService.getVersion(versionId);
+    if (!version) throw new ApiError(404, "Version not found");
+    sendSuccessResponse(res, version, "Version retrieved");
+  }),
+
+  // Restore to a specific version
+  restoreVersion: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    const { id, versionId } = req.params;
+    const version = await paperVersionService.getVersion(versionId);
+    if (!version || version.paperId !== id) {
+      throw new ApiError(404, "Version not found");
+    }
+    const result = await editorPaperService.updateEditorContent(
+      id,
+      { content: version.contentHtml, title: version.title ?? undefined },
+      authReq.user?.id ?? ""
+    );
+    sendSuccessResponse(res, result, "Version restored");
   }),
 };

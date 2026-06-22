@@ -40,6 +40,14 @@ paperRoutes.get(
   paperController.list as any
 );
 
+// Get available AI providers and their models (before /:id to avoid route conflict)
+paperRoutes.get(
+  "/ai/providers",
+  paperListLimiter,
+  authMiddleware as any,
+  paperController.getAiProviders as any
+);
+
 // Get single paper (protected, but allow dev fallback)
 paperRoutes.get(
   "/:id",
@@ -158,6 +166,14 @@ paperRoutes.get(
   paperController.getInsightHistory as any
 );
 
+// Phase 10 — AI Key Points extraction
+paperRoutes.post(
+  "/:id/key-points",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.generateKeyPoints as any
+);
+
 // Editor-specific routes
 export const editorPaperRoutes: express.Router = express.Router();
 
@@ -218,6 +234,28 @@ editorPaperRoutes.delete(
   paperOperationLimiter,
   authMiddleware as any,
   editorPaperController.deleteEditorPaper as any
+);
+
+// Version history
+editorPaperRoutes.get(
+  "/:id/versions",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersions as any
+);
+
+editorPaperRoutes.get(
+  "/:id/versions/:versionId",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersion as any
+);
+
+editorPaperRoutes.post(
+  "/:id/versions/:versionId/restore",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.restoreVersion as any
 );
 
 // Upload image for editor

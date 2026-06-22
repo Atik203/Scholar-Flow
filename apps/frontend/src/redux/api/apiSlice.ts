@@ -90,6 +90,8 @@ export const apiSlice = createApi({
     "Annotation",
     "ProcessingStatus",
     "AIInsight",
+    "AIProvider",
+    "AIChat",
     "Admin",
     "Note",
     "Notification",

@@ -1,6 +1,12 @@
 @import "../styles/_variables.css";
 @import "../styles/_keyframe-animations.css";
 
+/* KaTeX math rendering */
+@import "katex/dist/katex.min.css";
+
+/* Highlight.js for AI chat code blocks */
+@import "highlight.js/styles/github-dark.css";
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -858,4 +864,35 @@ html {
 
 .tiptap-image-upload-icon-container {
   margin-bottom: 0.75rem;
+}
+
+/* Prevent iOS zoom on mobile form inputs */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* Phase 10 — Citation node in TipTap editor */
+.citation-node {
+  display: inline;
+  color: hsl(var(--primary));
+  font-weight: 600;
+  font-size: 0.85em;
+  vertical-align: super;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  text-decoration: none;
+}
+.citation-node:hover {
+  color: hsl(var(--primary) / 0.8);
+  text-decoration: underline;
 }

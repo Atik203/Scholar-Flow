@@ -6,6 +6,7 @@ import express, {
   RequestHandler,
   Response,
 } from "express";
+import http from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -43,12 +44,17 @@ app.use(
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         connectSrc: [
           "'self'",
+          process.env.WS_URL || "ws://localhost:5001",
+          (process.env.WS_URL || "ws://localhost:5001").replace("http", "ws"),
           "https://api.openai.com",
           "https://generativelanguage.googleapis.com",
+          "https://api.anthropic.com",
+          "https://api.deepseek.com",
         ],
         frameSrc: ["'self'"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
+        reportUri: "/api/csp-report",
       },
     },
     hsts: {
@@ -72,6 +78,7 @@ app.use(compression() as unknown as RequestHandler);
 const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000",
   "https://scholar-flow-ai.vercel.app",
+  process.env.WS_URL || "http://localhost:5001",
 ];
 app.use(
   cors({
@@ -82,6 +89,9 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["X-Response-Time"],
     credentials: true,
   }) as unknown as RequestHandler
 );
@@ -89,7 +99,7 @@ app.use(
 // Rate limiting (typing relaxed for dev boot)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // TESTING: Increased from 100 to 1000 requests per windowMs
+  max: 300,
   message: "Too many requests from this IP, please try again later.",
 });
 // Cast to any to avoid TS overload mismatch while bootstrapping
@@ -151,7 +161,7 @@ const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.2.9",
+    version: "1.3.0-rc1",
     documentation: "/docs",
     api: "/api",
     health: "/health",
@@ -167,6 +177,10 @@ app.get("/health", healthCheck as unknown as RequestHandler);
 // Support health check under /api as well (useful when deployed behind a rewrite to /api/$1)
 app.get("/api/health", healthCheck as unknown as RequestHandler);
 
+// CSP violation report endpoint (needs JSON parser before it)
+import { cspReportHandler } from "./app/modules/Security/cspReport.route";
+app.post("/api/csp-report", cspReportHandler as unknown as RequestHandler);
+
 // API routes
 app.use("/api", router);
 
@@ -178,9 +192,15 @@ app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
+  // Phase 10 — WebSocket server
+  const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
+
+  const httpServer = http.createServer(app);
+  setupWebSocket(httpServer);
+
   // Start server with graceful fallback & diagnostics
   const startServer = (desiredPort: number, attempt = 0) => {
-    const server = app.listen(desiredPort, () => {
+    const server = httpServer.listen(desiredPort, () => {
       console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
       console.log(
         "[Boot] DATABASE_URL present:",

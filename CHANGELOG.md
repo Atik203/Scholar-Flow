@@ -1,5 +1,74 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.0-rc1 — Phase 10: FINAL PHASE (2026-10-01)
+
+**Release date:** 2026-10-01
+**Theme:** AI features, real-time collaboration, editor enhancements, production hardening, paper upload/import overhaul.
+
+---
+
+### 2026-10-01 — Paper Upload & Import Overhaul
+
+- **DOI Import now downloads PDF**: After CrossRef metadata fetch, automatically searches Unpaywall and Semantic Scholar for open-access PDF. If found, downloads to S3 and triggers text extraction.
+- **arXiv Import now downloads PDF**: Automatically downloads from `https://arxiv.org/pdf/{id}.pdf`, uploads to S3, triggers extraction. No more metadata-only.
+- **URL Import — metadata extraction**: Fetches source page HTML to extract `citation_*` meta tags (title, authors, DOI, abstract). Falls back to CrossRef enrichment. Better filenames for titles.
+- **Auto-extraction on import**: All import methods now call `queueDocumentExtraction` to trigger text processing immediately (with graceful fallback when Redis unavailable).
+- **Smart URL Import**: New `POST /import/smart-url` endpoint auto-detects source from URL:
+  - IEEE Xplore → scrape metadata + try PDF download
+  - Semantic Scholar → API for metadata + OA PDF
+  - ResearchGate → extract DOI → CrossRef
+  - Google Scholar → follow article link → download
+  - arXiv → redirect to arXiv import path
+  - Direct PDF → download directly
+- **Frontend**: New "Smart URL" tab on upload page. All imports redirect to paper detail page on success. Shows PDF availability status.
+- **Test suite**: 15 tests across 3 suites (paper-crud, billing-subscription, paper.service) — all passing with mocked Prisma.
+- **SSO/SAML deferred**: Enterprise SSO moved to post-Phase 10 roadmap.
+
+### AI Features
+
+- **Global AI Floating Assistant**: Cmd+J chat widget with markdown rendering, syntax-highlighted code blocks, copy-to-clipboard. 4 providers (OpenAI GPT-4o, Gemini Flash/Pro, Claude Sonnet/Haiku/Opus, DeepSeek V3/R1). Dynamic model selector from backend provider status. Conversations persisted to `AIConversation` + `AIConversationMessage` models.
+- **AI Key Points**: `POST /papers/:id/key-points` extracts 5-10 key claims from paper content. `KeyPointsCard` component on paper detail page.
+- **AI Rewriter**: `POST /api/ai/rewrite` — configurable tone, preserves meaning.
+- **AI Comparator**: `POST /api/ai/compare` — side-by-side analysis of two papers.
+- **AI Translator**: `POST /api/ai/translate` — translate to any language.
+- **AI Literature Review**: `POST /api/ai/literature-review` — synthesize multiple papers.
+- **Semantic Search**: pgvector embeddings via OpenAI `text-embedding-3-small` (1536-dim), batched at 20 chunks/API call.
+
+### Editor Enhancements
+
+- **LaTeX Math**: `LatexInline` and `LatexBlock` custom TipTap nodes with KaTeX rendering, click-to-edit, toolbar buttons.
+- **Citation Insertion**: Search dialog from toolbar → `CitationNode` TipTap inline node. CRUD endpoints: `POST /citations/insert`, `GET /citations/paper/:id`.
+- **Version History**: `PaperVersion` model, auto-snapshot before each save, keep 50 versions, restore support, `VersionHistoryDialog` UI.
+- **Word Count + Reading Time**: Live stats in editor status bar via `CharacterCount` extension.
+- **Full-Screen Mode**: Toggle via toolbar button, Esc to exit, Ctrl+S still saves.
+- **Image Upload**: MS Word/Google Docs-style handling — smooth drag, alignment, caption, text wrap modes.
+- **Template System**: 7 pre-built templates (IEEE, ACM, Springer, arXiv, Thesis, Literature Review, Blank) with `TemplateSelector` in toolbar.
+- **Markdown Export**: `turndown`-based client-side export, downloadable `.md` file.
+
+### Real-Time Collaboration (WebSocket)
+
+- **WebSocket Server**: `socket.io` with JWT auth on handshake. `apps/socket-server/` for Render Free deployment. Room-based channels: `paper:`, `discussion:`, `workspace:`.
+- **Y.js Collaborative Editing**: `useCollabSync` hook with socket.io sync provider. `/papers/[id]/collaborate` page with `Collaboration` extension.
+- **Live Discussion Chat**: `LiveDiscussionFeed` component with real-time messages, typing indicators, online presence count. `useDiscussionSocket` hook.
+- **Presence System**: Online/offline tracking, member counts, typing start/stop broadcasts.
+
+### Production Hardening
+
+- **Error Boundaries**: `/dashboard/error.tsx` covers all authenticated routes. `error.tsx` at root for catch-all.
+- **Rate Limiting**: 16 dedicated limiters (auth, paper, billing, workspace, collection, AI generation). Added `workspaceMutationLimiter`, `collectionMutationLimiter`, `aiGenerationLimiter`.
+- **CORS/CSP**: Helmet with strict CSP directives. CORS restricted to `FRONTEND_URL`. Anthropic/DeepSeek API domains whitelisted.
+- **WebSocket CSP**: `connectSrc` derives from `WS_URL` env var for production WebSocket connections.
+- **Deployment**: `docs/DEPLOY.md` with step-by-step guides for Vercel + Render Free ($0/mo) and Oracle Cloud Always Free ($0 forever).
+
+### Env + Config
+
+- Added `NEXT_PUBLIC_WS_URL` to all 6 env files for WebSocket base URL isolation.
+- Added `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY` to all env files (with typo fix from `DEEPSEAK`).
+- Added `DOCX_TO_PDF_ENGINE`, `DOCX_TO_PDF_QUALITY` with `soffice` default and 4 quality modes.
+- Fixed `.env.example` merged vars bug and placeholder values.
+
+---
+
 ## Release 1.2.9 — Phase 9: Polish, Performance & Final Pages (2026-06-20)
 
 **Release date:** 2026-06-20

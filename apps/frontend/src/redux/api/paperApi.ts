@@ -148,6 +148,44 @@ export interface PaperInsightsResponse {
   threads: AIInsightThread[];
 }
 
+export interface AiProviderModel {
+  value: string;
+  label: string;
+  description: string;
+  provider: string;
+}
+
+export interface AiProviderStatus {
+  provider: string;
+  configured: boolean;
+  models: AiProviderModel[];
+}
+
+export interface AiProvidersResponse {
+  providers: AiProviderStatus[];
+}
+
+export interface PaperVersion {
+  id: string;
+  version: number;
+  title: string | null;
+  savedAt: string;
+  savedById: string | null;
+  sizeBytes: number | null;
+  savedBy?: { name: string | null; image: string | null } | null;
+}
+
+export type PaperVersionsResponse = PaperVersion[];
+
+export interface PaperVersionDetail {
+  id: string;
+  paperId: string;
+  contentHtml: string;
+  title: string | null;
+  version: number;
+  savedAt: string;
+}
+
 // Editor-specific interfaces
 export interface CreateEditorPaperRequest {
   workspaceId: string;
@@ -576,6 +614,62 @@ export const paperApi = apiSlice.injectEndpoints({
         { type: "Paper", id: paperId },
       ],
     }),
+
+    // Phase 10 — AI Key Points extraction
+    extractKeyPoints: builder.mutation<
+      { keyPoints: string[] },
+      { paperId: string; model?: string }
+    >({
+      query: ({ paperId, model }) => ({
+        url: `/papers/${paperId}/key-points`,
+        method: "POST",
+        body: model ? { model } : {},
+      }),
+      transformResponse: (response: {
+        data: { keyPoints: string[] };
+      }) => response.data,
+    }),
+
+    // AI provider status — returns available providers + models for dynamic UI
+    getAiProviders: builder.query<AiProvidersResponse, void>({
+      query: () => "/papers/ai/providers",
+      transformResponse: (response: { data: AiProvidersResponse }) =>
+        response.data,
+      providesTags: ["AIProvider"],
+    }),
+
+    // Paper version history
+    getPaperVersions: builder.query<PaperVersionsResponse, string>({
+      query: (paperId) => `/editor/${paperId}/versions`,
+      transformResponse: (response: { data: { versions: PaperVersion[] } }) =>
+        response.data.versions,
+      providesTags: (result, error, paperId) => [
+        { type: "Paper", id: paperId },
+      ],
+    }),
+
+    getPaperVersion: builder.query<
+      PaperVersionDetail,
+      { paperId: string; versionId: string }
+    >({
+      query: ({ paperId, versionId }) =>
+        `/editor/${paperId}/versions/${versionId}`,
+      transformResponse: (response: { data: PaperVersionDetail }) =>
+        response.data,
+    }),
+
+    restorePaperVersion: builder.mutation<
+      unknown,
+      { paperId: string; versionId: string }
+    >({
+      query: ({ paperId, versionId }) => ({
+        url: `/editor/${paperId}/versions/${versionId}/restore`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, { paperId }) => [
+        { type: "Paper", id: paperId },
+      ],
+    }),
   }),
 });
 
@@ -607,4 +701,9 @@ export const {
   // AI Insights endpoints
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
+  useGetAiProvidersQuery,
+  useGetPaperVersionsQuery,
+  useGetPaperVersionQuery,
+  useRestorePaperVersionMutation,
+  useExtractKeyPointsMutation,
 } = paperApi;

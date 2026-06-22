@@ -85,6 +85,11 @@ export type PaperFile = Prisma.PaperFileModel
  */
 export type PaperChunk = Prisma.PaperChunkModel
 /**
+ * Model PaperVersion
+ * 
+ */
+export type PaperVersion = Prisma.PaperVersionModel
+/**
  * Model Citation
  * 
  */
@@ -134,6 +139,16 @@ export type AIInsightThread = Prisma.AIInsightThreadModel
  * 
  */
 export type AIInsightMessage = Prisma.AIInsightMessageModel
+/**
+ * Model AIConversation
+ * 
+ */
+export type AIConversation = Prisma.AIConversationModel
+/**
+ * Model AIConversationMessage
+ * 
+ */
+export type AIConversationMessage = Prisma.AIConversationMessageModel
 /**
  * Model Plan
  * 

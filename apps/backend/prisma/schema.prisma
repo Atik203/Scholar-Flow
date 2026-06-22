@@ -205,6 +205,12 @@ model User {
   discussionMessages DiscussionMessage[]
   activityLogEntries ActivityLogEntry[]
 
+  // Phase 10 — Paper version history
+  paperVersions PaperVersion[]
+
+  // Phase 10 — Global AI assistant conversations
+  aiConversations AIConversation[]
+
   // Phase 3 - User preferences
   preference UserPreference?
 
@@ -393,6 +399,7 @@ model Paper {
   updatedAt  DateTime     @updatedAt
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
+  PaperVersion PaperVersion[]
 
   // Optimized indexes for common query patterns
   @@index([processingStatus, createdAt]) // For processing status dashboards
@@ -440,6 +447,24 @@ model PaperChunk {
 
   @@unique([paperId, idx])
   @@index([paperId])
+}
+
+model PaperVersion {
+  id           String   @id @default(uuid())
+  paperId      String
+  contentHtml  String
+  title        String?
+  version      Int
+  savedAt      DateTime @default(now())
+  savedById    String?
+  sizeBytes    Int?
+
+  paper        Paper?   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  savedBy      User?    @relation(fields: [savedById], references: [id], onDelete: SetNull)
+
+  @@unique([paperId, version])
+  @@index([paperId, savedAt(sort: Desc)])
+  @@index([savedById])
 }
 
 model Citation {
@@ -661,6 +686,41 @@ model AIInsightMessage {
 
   @@index([threadId, createdAt], map: "idx_ai_insight_msg_thread")
   @@index([paperId, createdAt], map: "idx_ai_insight_msg_paper")
+}
+
+// Phase 10 — Global AI Assistant (floating chat)
+model AIConversation {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String?
+  model       String?  // e.g. "gpt-4o-mini", "gemini-2.5-flash-lite"
+  workspaceId String?
+  context     Json?    @db.JsonB // { type: "paper"|"collection"|"workspace", id: "...", title: "..." }
+
+  user      User                 @relation(fields: [userId], references: [id])
+  messages  AIConversationMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model AIConversationMessage {
+  id             String  @id @default(uuid())
+  conversationId String
+  role           String  // "user" | "assistant"
+  content        String
+  model          String? // which model generated this response
+  tokensUsed     Int?
+  metadata       Json?   @db.JsonB
+
+  conversation AIConversation @relation(fields: [conversationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId, createdAt])
 }
 
 model Plan {

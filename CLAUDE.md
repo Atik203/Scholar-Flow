@@ -5,7 +5,7 @@
 - **Auth**: better-auth (replaced NextAuth.js v4)
 - **State**: Redux Toolkit Query (RTK Query)
 - **UI**: Tailwind CSS v4 + shadcn/ui
-- **Backend**: Express.js, Prisma 6.16.3, PostgreSQL + pgvector
+- **Backend**: Express.js, Prisma 7.8.0, PostgreSQL + pgvector
 - **Package Manager**: Yarn Berry v4.9.2
 - **Monorepo**: Turborepo v2.5.8
 
@@ -92,10 +92,12 @@ apps/backend/prisma/           → Schema + migrations
 ```
 
 ## Current Phase
-Phase 3: Dashboard Shell & Core Pages
+Phase 10 — FINAL PHASE (~98% Complete, Release 1.3.0-rc1)
 - Next.js 16 upgrade ✅
 - better-auth migration ✅
-- Current focus: Dashboard layout, sidebar, core pages
+- Prisma v7 migration ✅
+- Paper upload/import overhaul ✅
+- Current: Release 1.3.0-rc1 — deployment docs, version sync, production hardening
 
 ## Resources
 - GitHub: https://github.com/Atik203/Scholar-Flow

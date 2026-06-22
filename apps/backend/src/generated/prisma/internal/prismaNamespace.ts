@@ -393,6 +393,7 @@ export const ModelName = {
   Paper: 'Paper',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
+  PaperVersion: 'PaperVersion',
   Citation: 'Citation',
   Annotation: 'Annotation',
   AnnotationVersion: 'AnnotationVersion',
@@ -403,6 +404,8 @@ export const ModelName = {
   AISummary: 'AISummary',
   AIInsightThread: 'AIInsightThread',
   AIInsightMessage: 'AIInsightMessage',
+  AIConversation: 'AIConversation',
+  AIConversationMessage: 'AIConversationMessage',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -447,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1114,6 +1117,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PaperChunkCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PaperChunkCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperVersion: {
+      payload: Prisma.$PaperVersionPayload<ExtArgs>
+      fields: Prisma.PaperVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.PaperVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        findMany: {
+          args: Prisma.PaperVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        create: {
+          args: Prisma.PaperVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        createMany: {
+          args: Prisma.PaperVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.PaperVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        update: {
+          args: Prisma.PaperVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.PaperVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperVersion>
+        }
+        groupBy: {
+          args: Prisma.PaperVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperVersionCountAggregateOutputType> | number
         }
       }
     }
@@ -1854,6 +1931,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AIInsightMessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AIInsightMessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIConversation: {
+      payload: Prisma.$AIConversationPayload<ExtArgs>
+      fields: Prisma.AIConversationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIConversationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIConversationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        findFirst: {
+          args: Prisma.AIConversationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIConversationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        findMany: {
+          args: Prisma.AIConversationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>[]
+        }
+        create: {
+          args: Prisma.AIConversationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        createMany: {
+          args: Prisma.AIConversationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIConversationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>[]
+        }
+        delete: {
+          args: Prisma.AIConversationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        update: {
+          args: Prisma.AIConversationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AIConversationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIConversationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIConversationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AIConversationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationPayload>
+        }
+        aggregate: {
+          args: Prisma.AIConversationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIConversation>
+        }
+        groupBy: {
+          args: Prisma.AIConversationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIConversationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIConversationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIConversationCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIConversationMessage: {
+      payload: Prisma.$AIConversationMessagePayload<ExtArgs>
+      fields: Prisma.AIConversationMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIConversationMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIConversationMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.AIConversationMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIConversationMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        findMany: {
+          args: Prisma.AIConversationMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>[]
+        }
+        create: {
+          args: Prisma.AIConversationMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        createMany: {
+          args: Prisma.AIConversationMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIConversationMessageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>[]
+        }
+        delete: {
+          args: Prisma.AIConversationMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        update: {
+          args: Prisma.AIConversationMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.AIConversationMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIConversationMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIConversationMessageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>[]
+        }
+        upsert: {
+          args: Prisma.AIConversationMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIConversationMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.AIConversationMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIConversationMessage>
+        }
+        groupBy: {
+          args: Prisma.AIConversationMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIConversationMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIConversationMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIConversationMessageCountAggregateOutputType> | number
         }
       }
     }
@@ -4224,6 +4449,20 @@ export const PaperChunkScalarFieldEnum = {
 export type PaperChunkScalarFieldEnum = (typeof PaperChunkScalarFieldEnum)[keyof typeof PaperChunkScalarFieldEnum]
 
 
+export const PaperVersionScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  contentHtml: 'contentHtml',
+  title: 'title',
+  version: 'version',
+  savedAt: 'savedAt',
+  savedById: 'savedById',
+  sizeBytes: 'sizeBytes'
+} as const
+
+export type PaperVersionScalarFieldEnum = (typeof PaperVersionScalarFieldEnum)[keyof typeof PaperVersionScalarFieldEnum]
+
+
 export const CitationScalarFieldEnum = {
   id: 'id',
   sourcePaperId: 'sourcePaperId',
@@ -4379,6 +4618,35 @@ export const AIInsightMessageScalarFieldEnum = {
 } as const
 
 export type AIInsightMessageScalarFieldEnum = (typeof AIInsightMessageScalarFieldEnum)[keyof typeof AIInsightMessageScalarFieldEnum]
+
+
+export const AIConversationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  model: 'model',
+  workspaceId: 'workspaceId',
+  context: 'context',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationScalarFieldEnum = (typeof AIConversationScalarFieldEnum)[keyof typeof AIConversationScalarFieldEnum]
+
+
+export const AIConversationMessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  role: 'role',
+  content: 'content',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIConversationMessageScalarFieldEnum = (typeof AIConversationMessageScalarFieldEnum)[keyof typeof AIConversationMessageScalarFieldEnum]
 
 
 export const PlanScalarFieldEnum = {
@@ -5558,6 +5826,7 @@ export type GlobalOmitConfig = {
   paper?: Prisma.PaperOmit
   paperFile?: Prisma.PaperFileOmit
   paperChunk?: Prisma.PaperChunkOmit
+  paperVersion?: Prisma.PaperVersionOmit
   citation?: Prisma.CitationOmit
   annotation?: Prisma.AnnotationOmit
   annotationVersion?: Prisma.AnnotationVersionOmit
@@ -5568,6 +5837,8 @@ export type GlobalOmitConfig = {
   aISummary?: Prisma.AISummaryOmit
   aIInsightThread?: Prisma.AIInsightThreadOmit
   aIInsightMessage?: Prisma.AIInsightMessageOmit
+  aIConversation?: Prisma.AIConversationOmit
+  aIConversationMessage?: Prisma.AIConversationMessageOmit
   plan?: Prisma.PlanOmit
   subscription?: Prisma.SubscriptionOmit
   payment?: Prisma.PaymentOmit

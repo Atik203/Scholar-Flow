@@ -249,6 +249,14 @@ export class DocumentExtractionService {
       );
       await this.storeChunks(paperId, extractionResult.chunks!);
 
+      // Generate pgvector embeddings for semantic search (non-blocking)
+      this.generateEmbeddingsForPaper(paperId).catch((err) =>
+        console.error(
+          `[DocumentExtraction] Embedding generation failed for ${paperId}:`,
+          err.message
+        )
+      );
+
       // Update paper processing status and file info including preview data
       console.log(
         `[DocumentExtraction] Updating paper status to PROCESSED for paper: ${paperId}`
@@ -995,6 +1003,93 @@ export class DocumentExtractionService {
       console.error(`[DocumentExtraction] HTML sanitization failed:`, error);
       return ""; // Return empty string if sanitization fails
     }
+  }
+
+  /**
+   * Generate OpenAI embeddings for paper chunks (pgvector semantic search)
+   */
+  async generateEmbeddingsForPaper(paperId: string): Promise<void> {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey || process.env.USE_PGVECTOR !== "true") {
+      return;
+    }
+
+    const chunks = await prisma.paperChunk.findMany({
+      where: { paperId, isDeleted: false },
+      select: { id: true, content: true },
+      orderBy: { idx: "asc" },
+    });
+
+    if (chunks.length === 0) return;
+
+    console.log(
+      `[DocumentExtraction] Generating embeddings for ${chunks.length} chunks of paper ${paperId}`
+    );
+
+    const BATCH_SIZE = 20;
+    for (let i = 0; i < chunks.length; i += BATCH_SIZE) {
+      const batch = chunks.slice(i, i + BATCH_SIZE);
+
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        const response = await fetch(
+          "https://api.openai.com/v1/embeddings",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model: "text-embedding-3-small",
+              input: batch.map((c) => c.content.replace(/\s+/g, " ").trim().slice(0, 8000)),
+            }),
+            signal: controller.signal,
+          }
+        );
+
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+          const errText = await response.text().catch(() => "");
+          console.error(
+            `[DocumentExtraction] Embedding API error: ${response.status} ${errText}`
+          );
+          return;
+        }
+
+        const data = (await response.json()) as {
+          data: Array<{ embedding: number[] }>;
+        };
+
+        for (let j = 0; j < batch.length; j++) {
+          const embedding = data.data[j]?.embedding;
+          if (!embedding || embedding.length !== 1536) continue;
+
+          const vectorStr = `[${embedding.join(",")}]`;
+          await prisma.$executeRaw`
+            UPDATE "PaperChunk"
+            SET embedding = ${vectorStr}::vector
+            WHERE id = ${batch[j].id}
+          `;
+        }
+
+        console.log(
+          `[DocumentExtraction] Embedded batch ${i / BATCH_SIZE + 1}/${Math.ceil(chunks.length / BATCH_SIZE)}`
+        );
+      } catch (error) {
+        console.error(
+          `[DocumentExtraction] Embedding batch ${i / BATCH_SIZE + 1} failed:`,
+          error instanceof Error ? error.message : error
+        );
+      }
+    }
+
+    console.log(
+      `[DocumentExtraction] Embedding generation complete for paper ${paperId}`
+    );
   }
 }
 
