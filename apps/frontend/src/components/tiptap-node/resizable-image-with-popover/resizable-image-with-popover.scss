@@ -1,79 +1,233 @@
-/* Resizable Image with Popover Styles */
-.image-component {
+/* ================================================================
+   Scholar-Flow Image Component — Word/Docs-level image handling
+   ================================================================ */
+
+.scholar-image {
   position: relative;
-  display: inline-block;
-  margin: 0.5rem 0;
-  transition: transform 0.2s ease-in-out;
+  margin: 8px 0;
+  will-change: auto;
+  transform-origin: center center;
 
-  &.dragging {
-    cursor: grabbing !important;
-    user-select: none;
-    z-index: 1000;
-    transform-origin: center;
-  }
+  /* GPU layer promotion during drag */
+  &.is-dragging {
+    will-change: transform;
+    z-index: 1000 !important;
 
-  .drag-handle {
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    .image-body {
+      cursor: grabbing !important;
+      user-select: none;
+      -webkit-user-select: none;
+      filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.25));
+      transform: scale(1.02);
+      transition: transform 0.1s ease;
+    }
 
-    &:hover {
+    .image-drag-overlay {
       opacity: 1 !important;
     }
   }
 
-  &:hover .drag-handle {
+  /* Inline mode — flows with text */
+  &.wrap-inline {
+    .image-body {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+
+  /* Break mode — block-level, text wraps around */
+  &.wrap-break {
+    display: block;
+
+    .image-body {
+      display: block;
+    }
+  }
+
+  /* Image wrapper */
+  .image-body {
+    position: relative;
+    display: inline-block;
+    cursor: grab;
+    border-radius: 6px;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+
+    &:hover {
+      .image-drag-overlay {
+        opacity: 0.8;
+      }
+    }
+
+    &:focus-visible {
+      outline-color: #3b82f6;
+    }
+  }
+
+  /* Drag overlay — appears on hover */
+  .image-drag-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 10;
+    opacity: 0;
+    background: rgba(59, 130, 246, 0.85);
+    color: white;
+    border-radius: 4px;
+    padding: 3px 6px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    transition: opacity 0.15s ease;
+    backdrop-filter: blur(4px);
+    line-height: 1;
+  }
+
+  /* Caption display */
+  .image-caption-display {
+    display: block;
+    text-align: center;
+    font-size: 13px;
+    color: hsl(var(--muted-foreground));
+    margin-top: 6px;
+    font-style: italic;
+    padding: 0 4px;
+  }
+
+  /* Image element */
+  img {
+    border-radius: 4px;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    transition: box-shadow 0.2s ease;
+  }
+
+  &:hover img {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* ================================================================
+   Resizable image handles (from tiptap-extension-resizable-image)
+   ================================================================ */
+
+/* Corner resize handles */
+.resizable-image-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border: 2px solid #3b82f6;
+  border-radius: 4px;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.3);
+  }
+
+  &.resizable-image-handle-ne {
+    top: -6px;
+    right: -6px;
+    cursor: nesw-resize;
+  }
+
+  &.resizable-image-handle-se {
+    bottom: -6px;
+    right: -6px;
+    cursor: nwse-resize;
+  }
+
+  &.resizable-image-handle-sw {
+    bottom: -6px;
+    left: -6px;
+    cursor: nesw-resize;
+  }
+
+  &.resizable-image-handle-nw {
+    top: -6px;
+    left: -6px;
+    cursor: nwse-resize;
+  }
+}
+
+/* Edge resize handles */
+.resizable-image-handle-edge {
+  position: absolute;
+  background: transparent;
+  z-index: 19;
+  opacity: 0;
+
+  &.resizable-image-handle-n {
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: n-resize;
+  }
+
+  &.resizable-image-handle-s {
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: s-resize;
+  }
+
+  &.resizable-image-handle-e {
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: e-resize;
+  }
+
+  &.resizable-image-handle-w {
+    left: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: w-resize;
+  }
+}
+
+/* Show handles on hover/focus */
+.scholar-image:hover,
+.scholar-image:focus-within,
+.scholar-image.is-dragging {
+  .resizable-image-handle,
+  .resizable-image-handle-edge {
     opacity: 0.7;
   }
 }
 
-.image-component [data-radix-popper-content-wrapper] {
-  z-index: 50;
-}
-
-.image-component img {
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.image-component:hover img {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Ensure popover appears above other elements */
-.image-component .popover-content {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  padding: 8px;
-  z-index: 50;
-}
-
-/* Improve button styling in popover */
-.image-component .popover-content button {
-  transition: all 0.2s ease;
-}
-
-.image-component .popover-content button:hover {
-  background-color: #f1f5f9;
-}
-
-/* Selected node styling */
-.ProseMirror-selectednode .image-component img {
+/* ================================================================
+   ProseMirror selected node
+   ================================================================ */
+.ProseMirror-selectednode .scholar-image img {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .image-component .popover-content {
-    padding: 6px;
+/* ================================================================
+   Dark mode
+   ================================================================ */
+.dark {
+  .scholar-image img {
+    box-shadow: none;
   }
 
-  .image-component .popover-content button {
-    font-size: 0.75rem;
-    padding: 4px 8px;
+  .scholar-image:hover img {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);
+  }
+
+  .image-drag-overlay {
+    background: rgba(59, 130, 246, 0.9);
   }
 }
