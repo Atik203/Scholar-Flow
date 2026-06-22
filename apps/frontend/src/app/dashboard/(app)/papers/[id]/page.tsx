@@ -129,7 +129,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-lg">Preview</CardTitle></CardHeader>
           <CardContent>
-            <iframe src={previewUrlData.data.url} className="w-full h-[600px] border rounded-lg" title="PDF Preview" />
+            <iframe src={previewUrlData.data.url} className="w-full h-[600px] border rounded-lg" title="PDF Preview" loading="lazy" />
           </CardContent>
         </Card>
       )}

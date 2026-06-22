@@ -127,7 +127,7 @@ export default function TwoFactorSetupPage() {
                 <div className="space-y-5">
                   <div className="flex flex-col items-center">
                     <div className="border rounded-lg p-4 bg-white dark:bg-gray-100">
-                      <img src={qrValue} alt="2FA QR Code" className="h-48 w-48" />
+                      <img src={qrValue} alt="2FA QR Code" width={192} height={192} className="h-48 w-48" />
                     </div>
                     {secret && <p className="text-xs text-muted-foreground mt-3 font-mono bg-muted px-3 py-1.5 rounded select-all">{secret}</p>}
                   </div>
