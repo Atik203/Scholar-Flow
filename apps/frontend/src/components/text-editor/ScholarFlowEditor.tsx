@@ -6,9 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 import {
   AlertCircle,
+  Bookmark,
   Clock,
   Download,
   FileText,
+  Maximize,
+  Minimize,
+  Quote,
   Save,
   Send,
   Share2,
@@ -55,6 +59,9 @@ import { LatexBlock } from "@/components/tiptap-node/latex-block/latex-block-ext
 import { LatexInlineButton } from "@/components/tiptap-ui/latex-inline-button/latex-inline-button";
 import { LatexBlockButton } from "@/components/tiptap-ui/latex-block-button/latex-block-button";
 
+// Citation Extension
+import { CitationNode } from "@/components/tiptap-node/citation-node/citation-node";
+
 // Hooks
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -73,6 +80,9 @@ import {
 } from "@/redux/api/paperApi";
 
 import { VersionHistoryDialog } from "./VersionHistoryDialog";
+
+// Citation
+import { CitationSearchDialog } from "./CitationSearchDialog";
 
 // Components
 import { ShareModal } from "./ShareModal";
@@ -94,6 +104,8 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [title, setTitle] = useState("");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isCitationDialogOpen, setIsCitationDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
 
   // Redux hooks
@@ -164,6 +176,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       Subscript,
       LatexInline,
       LatexBlock,
+      CitationNode,
       CharacterCount,
       // Note: Removed ImageUploadNode since ResizableImage handles uploads
     ],
@@ -279,21 +292,22 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+      // Ctrl+S / Cmd+S → save
       if ((event.ctrlKey || event.metaKey) && event.key === "s") {
-        event.preventDefault(); // Prevent browser's default save behavior
+        event.preventDefault();
         handleSave();
+      }
+      // Esc → exit fullscreen
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
       }
     };
 
-    // Add the event listener to the document
     document.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSave]); // Re-bind when handleSave changes
+  }, [handleSave, isFullscreen]);
 
   // Publish draft
   const handlePublish = async () => {
@@ -474,11 +488,25 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
             <Share2 className="h-4 w-4 mr-2" />
             Share
           </Button>
+
+          <Button
+            onClick={() => setIsFullscreen((f) => !f)}
+            variant="ghost"
+            size="sm"
+            title={isFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Editor */}
-      <Card>
+      <div className={isFullscreen ? "fixed inset-0 z-50 bg-background overflow-auto p-4" : ""}>
+      <Card className={isFullscreen ? "max-w-5xl mx-auto" : ""}>
         <CardContent className="p-0">
           <EditorContext.Provider value={{ editor }}>
             {/* Toolbar */}
@@ -538,6 +566,20 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <ToolbarSeparator />
 
               <ToolbarGroup>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCitationDialogOpen(true)}
+                  title="Insert Citation"
+                >
+                  <Bookmark className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Cite</span>
+                </Button>
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
                 <ResizableImageUploadButton text="Image" />
               </ToolbarGroup>
 
@@ -578,6 +620,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           </EditorContext.Provider>
         </CardContent>
       </Card>
+      </div> {/* fullscreen wrapper */}
 
       {/* Version History Dialog */}
       {isVersionDialogOpen && (
@@ -587,6 +630,22 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           onClose={() => setIsVersionDialogOpen(false)}
         />
       )}
+
+      {/* Citation Search Dialog */}
+      <CitationSearchDialog
+        open={isCitationDialogOpen}
+        onOpenChange={setIsCitationDialogOpen}
+        editor={editor}
+        existingPaperIds={
+          editor
+            ? (editor.getJSON().content as any[])
+                ?.flatMap((n) =>
+                  n.type === "citation" ? [n.attrs?.paperId as string] : []
+                )
+                .filter(Boolean) ?? []
+            : []
+        }
+      />
 
       {/* Auto-save indicator */}
       {isSaving && (
