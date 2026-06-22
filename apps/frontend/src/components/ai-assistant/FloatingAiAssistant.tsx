@@ -176,21 +176,91 @@ export function FloatingAiAssistant() {
     setSending(true);
 
     try {
-      const result = await sendMessageMutation({ convId, content: trimmed }).unwrap();
+      // Try SSE streaming first
+      const token = (() => {
+        try {
+          const store = (window as any).__REDUX_STORE__;
+          return store?.getState()?.auth?.accessToken || null;
+        } catch { return null; }
+      })();
+      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+
+      const response = await fetch(`${apiBase}/ai-chat/${convId}/messages/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: trimmed }),
+      });
+
+      if (!response.ok) throw new Error("Stream not available");
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No reader");
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedContent = "";
+
+      // SSE stream has already created the message — mark response as started
+      const assistantMsgId = Date.now().toString() + "-stream";
       setLocalMessages((prev) => [
         ...prev,
         {
-          id: result.id,
-          role: "assistant",
-          content: result.content,
-          model: result.model,
+          id: assistantMsgId,
+          role: "assistant" as const,
+          content: "",
           createdAt: new Date().toISOString(),
         },
       ]);
-    } catch {} finally {
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.token) {
+                accumulatedContent += data.token;
+                // Update the assistant message content progressively
+                setLocalMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === assistantMsgId
+                      ? { ...m, content: accumulatedContent }
+                      : m
+                  )
+                );
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch {
+      // Fall back to RTK Query mutation
+      try {
+        const result = await sendMessageMutation({ convId, content: trimmed }).unwrap();
+        setLocalMessages((prev) => [
+          ...prev,
+          {
+            id: result.id,
+            role: "assistant",
+            content: result.content,
+            model: result.model,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      } catch {}
+    } finally {
       setSending(false);
     }
-  }, [input, sending, activeConvId, createConversation, selectedModel, sendMessageMutation]);
+  }, [input, sending, activeConvId, sendMessageMutation]);
 
   return (
     <>
