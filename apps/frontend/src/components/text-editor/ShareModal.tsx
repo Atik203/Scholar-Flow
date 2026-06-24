@@ -53,8 +53,7 @@ export function ShareModal({
 
   React.useEffect(() => {
     if (isOpen && isPublished) {
-      // Generate shareable link for published papers
-      const url = `${window.location.origin}/shared/paper/${paperId}`;
+      const url = `${window.location.origin}/public-view/${paperId}`;
       setShareUrl(url);
     } else if (!isOpen) {
       // Reset email form when modal closes
@@ -77,9 +76,7 @@ export function ShareModal({
   const generateShareLink = async () => {
     setIsGeneratingLink(true);
     try {
-      // TODO: Implement API call to generate temporary share link
-      // For now, use a simple URL
-      const url = `${window.location.origin}/shared/paper/${paperId}`;
+      const url = `${window.location.origin}/public-view/${paperId}`;
       setShareUrl(url);
       showSuccessToast("Share link generated!");
     } catch (error) {
