@@ -2,7 +2,6 @@
 
 import { PdfAnnotationViewerEnhanced } from "@/components/annotations/PdfAnnotationViewerEnhanced";
 import { CommentSection } from "@/components/comments/CommentSection";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { NotesPanel } from "@/components/notes/NotesPanel";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +106,6 @@ export default function ResearchAnnotationsPage() {
   };
 
   return (
-    <DashboardLayout>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
@@ -460,6 +458,5 @@ export default function ResearchAnnotationsPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
   );
 }

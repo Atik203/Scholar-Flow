@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,6 @@ export default function ResearcherPagesIndex() {
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -66,6 +64,5 @@ export default function ResearcherPagesIndex() {
           ))}
         </div>
       </div>
-    </DashboardLayout>
   );
 }
