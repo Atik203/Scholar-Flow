@@ -406,6 +406,7 @@ export const ModelName = {
   AIInsightMessage: 'AIInsightMessage',
   AIConversation: 'AIConversation',
   AIConversationMessage: 'AIConversationMessage',
+  AIProvider: 'AIProvider',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -450,7 +451,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2079,6 +2080,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AIConversationMessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AIConversationMessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIProvider: {
+      payload: Prisma.$AIProviderPayload<ExtArgs>
+      fields: Prisma.AIProviderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIProviderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIProviderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        findFirst: {
+          args: Prisma.AIProviderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIProviderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        findMany: {
+          args: Prisma.AIProviderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>[]
+        }
+        create: {
+          args: Prisma.AIProviderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        createMany: {
+          args: Prisma.AIProviderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIProviderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>[]
+        }
+        delete: {
+          args: Prisma.AIProviderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        update: {
+          args: Prisma.AIProviderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        deleteMany: {
+          args: Prisma.AIProviderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIProviderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIProviderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>[]
+        }
+        upsert: {
+          args: Prisma.AIProviderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIProviderPayload>
+        }
+        aggregate: {
+          args: Prisma.AIProviderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIProvider>
+        }
+        groupBy: {
+          args: Prisma.AIProviderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIProviderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIProviderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIProviderCountAggregateOutputType> | number
         }
       }
     }
@@ -4649,6 +4724,24 @@ export const AIConversationMessageScalarFieldEnum = {
 export type AIConversationMessageScalarFieldEnum = (typeof AIConversationMessageScalarFieldEnum)[keyof typeof AIConversationMessageScalarFieldEnum]
 
 
+export const AIProviderScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  model: 'model',
+  displayName: 'displayName',
+  enabled: 'enabled',
+  isDefault: 'isDefault',
+  description: 'description',
+  apiKeyEnvName: 'apiKeyEnvName',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIProviderScalarFieldEnum = (typeof AIProviderScalarFieldEnum)[keyof typeof AIProviderScalarFieldEnum]
+
+
 export const PlanScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -5839,6 +5932,7 @@ export type GlobalOmitConfig = {
   aIInsightMessage?: Prisma.AIInsightMessageOmit
   aIConversation?: Prisma.AIConversationOmit
   aIConversationMessage?: Prisma.AIConversationMessageOmit
+  aIProvider?: Prisma.AIProviderOmit
   plan?: Prisma.PlanOmit
   subscription?: Prisma.SubscriptionOmit
   payment?: Prisma.PaymentOmit
