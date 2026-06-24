@@ -290,6 +290,18 @@ const adminFeatures: SidebarItem[] = [
     minRole: USER_ROLES.ADMIN,
   },
   {
+    title: "AI Models",
+    path: "/dashboard/admin/ai",
+    icon: Brain,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "API Keys (AI)",
+    path: "/dashboard/admin/ai-keys",
+    icon: Key,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
     title: "Audit Log",
     path: "/dashboard/admin/audit",
     icon: History,
