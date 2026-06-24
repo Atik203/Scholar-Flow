@@ -54,6 +54,8 @@ export const aiProviderService = {
     enabled?: boolean;
     isDefault?: boolean;
     displayOrder?: number;
+    inputCostPer1k?: number | null;
+    outputCostPer1k?: number | null;
   }) {
     // If marking as default, clear any existing default first.
     if (input.isDefault) {
@@ -72,6 +74,8 @@ export const aiProviderService = {
         enabled: input.enabled ?? true,
         isDefault: input.isDefault ?? false,
         displayOrder: input.displayOrder ?? 0,
+        inputCostPer1k: input.inputCostPer1k ?? null,
+        outputCostPer1k: input.outputCostPer1k ?? null,
       },
     });
   },
@@ -84,6 +88,8 @@ export const aiProviderService = {
       apiKeyEnvName?: string | null;
       enabled?: boolean;
       displayOrder?: number;
+      inputCostPer1k?: number | null;
+      outputCostPer1k?: number | null;
     }
   ) {
     return prisma.aIProvider.update({
@@ -97,6 +103,12 @@ export const aiProviderService = {
         ...(input.enabled !== undefined && { enabled: input.enabled }),
         ...(input.displayOrder !== undefined && {
           displayOrder: input.displayOrder,
+        }),
+        ...(input.inputCostPer1k !== undefined && {
+          inputCostPer1k: input.inputCostPer1k,
+        }),
+        ...(input.outputCostPer1k !== undefined && {
+          outputCostPer1k: input.outputCostPer1k,
         }),
       },
     });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +13,18 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { useListPapersQuery } from "@/redux/api/paperApi";
-import { Bot, FileText, MessageCircle, Users } from "lucide-react";
+import { Bot, FileText, MessageCircle, Users, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useAIVisibility } from "@/lib/aiVisibilityContext";
 
 export default function AiInsightsPage() {
+  const { setShowFloatingButton } = useAIVisibility();
   const { isAuthenticated, isLoading: authLoading } = useProtectedRoute();
+
+  useEffect(() => {
+    setShowFloatingButton(false);
+    return () => setShowFloatingButton(true);
+  }, [setShowFloatingButton]);
   const {
     data: papersResponse,
     isLoading,
@@ -39,13 +47,27 @@ export default function AiInsightsPage() {
             <div className="p-3 bg-blue-500/10 dark:bg-blue-400/10 rounded-lg">
               <Bot className="h-8 w-8 text-blue-600 dark:text-white" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-2xl font-bold">AI Insights</h1>
               <p className="text-muted-foreground">
                 Chat with AI about your research papers to get insights and ask
                 questions
               </p>
             </div>
+            <Button
+              variant="outline"
+              className="gap-2 shrink-0"
+              onClick={() => {
+                const event = new KeyboardEvent("keydown", {
+                  metaKey: true,
+                  key: "j",
+                });
+                document.dispatchEvent(event);
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              Open AI Chat
+            </Button>
           </div>
         </div>
 

@@ -28,10 +28,12 @@ export type AggregateAIConversationMessage = {
 
 export type AIConversationMessageAvgAggregateOutputType = {
   tokensUsed: number | null
+  costCents: number | null
 }
 
 export type AIConversationMessageSumAggregateOutputType = {
   tokensUsed: number | null
+  costCents: number | null
 }
 
 export type AIConversationMessageMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type AIConversationMessageMinAggregateOutputType = {
   content: string | null
   model: string | null
   tokensUsed: number | null
+  costCents: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -52,6 +55,7 @@ export type AIConversationMessageMaxAggregateOutputType = {
   content: string | null
   model: string | null
   tokensUsed: number | null
+  costCents: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -63,6 +67,7 @@ export type AIConversationMessageCountAggregateOutputType = {
   content: number
   model: number
   tokensUsed: number
+  costCents: number
   metadata: number
   createdAt: number
   updatedAt: number
@@ -72,10 +77,12 @@ export type AIConversationMessageCountAggregateOutputType = {
 
 export type AIConversationMessageAvgAggregateInputType = {
   tokensUsed?: true
+  costCents?: true
 }
 
 export type AIConversationMessageSumAggregateInputType = {
   tokensUsed?: true
+  costCents?: true
 }
 
 export type AIConversationMessageMinAggregateInputType = {
@@ -85,6 +92,7 @@ export type AIConversationMessageMinAggregateInputType = {
   content?: true
   model?: true
   tokensUsed?: true
+  costCents?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -96,6 +104,7 @@ export type AIConversationMessageMaxAggregateInputType = {
   content?: true
   model?: true
   tokensUsed?: true
+  costCents?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -107,6 +116,7 @@ export type AIConversationMessageCountAggregateInputType = {
   content?: true
   model?: true
   tokensUsed?: true
+  costCents?: true
   metadata?: true
   createdAt?: true
   updatedAt?: true
@@ -206,6 +216,7 @@ export type AIConversationMessageGroupByOutputType = {
   content: string
   model: string | null
   tokensUsed: number | null
+  costCents: number | null
   metadata: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
@@ -241,6 +252,7 @@ export type AIConversationMessageWhereInput = {
   content?: Prisma.StringFilter<"AIConversationMessage"> | string
   model?: Prisma.StringNullableFilter<"AIConversationMessage"> | string | null
   tokensUsed?: Prisma.IntNullableFilter<"AIConversationMessage"> | number | null
+  costCents?: Prisma.FloatNullableFilter<"AIConversationMessage"> | number | null
   metadata?: Prisma.JsonNullableFilter<"AIConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
@@ -254,6 +266,7 @@ export type AIConversationMessageOrderByWithRelationInput = {
   content?: Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   tokensUsed?: Prisma.SortOrderInput | Prisma.SortOrder
+  costCents?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -270,6 +283,7 @@ export type AIConversationMessageWhereUniqueInput = Prisma.AtLeast<{
   content?: Prisma.StringFilter<"AIConversationMessage"> | string
   model?: Prisma.StringNullableFilter<"AIConversationMessage"> | string | null
   tokensUsed?: Prisma.IntNullableFilter<"AIConversationMessage"> | number | null
+  costCents?: Prisma.FloatNullableFilter<"AIConversationMessage"> | number | null
   metadata?: Prisma.JsonNullableFilter<"AIConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
@@ -283,6 +297,7 @@ export type AIConversationMessageOrderByWithAggregationInput = {
   content?: Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   tokensUsed?: Prisma.SortOrderInput | Prisma.SortOrder
+  costCents?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -303,6 +318,7 @@ export type AIConversationMessageScalarWhereWithAggregatesInput = {
   content?: Prisma.StringWithAggregatesFilter<"AIConversationMessage"> | string
   model?: Prisma.StringNullableWithAggregatesFilter<"AIConversationMessage"> | string | null
   tokensUsed?: Prisma.IntNullableWithAggregatesFilter<"AIConversationMessage"> | number | null
+  costCents?: Prisma.FloatNullableWithAggregatesFilter<"AIConversationMessage"> | number | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"AIConversationMessage">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AIConversationMessage"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AIConversationMessage"> | Date | string
@@ -314,6 +330,7 @@ export type AIConversationMessageCreateInput = {
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -327,6 +344,7 @@ export type AIConversationMessageUncheckedCreateInput = {
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -338,6 +356,7 @@ export type AIConversationMessageUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -351,6 +370,7 @@ export type AIConversationMessageUncheckedUpdateInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -363,6 +383,7 @@ export type AIConversationMessageCreateManyInput = {
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -374,6 +395,7 @@ export type AIConversationMessageUpdateManyMutationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -386,6 +408,7 @@ export type AIConversationMessageUncheckedUpdateManyInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -408,6 +431,7 @@ export type AIConversationMessageCountOrderByAggregateInput = {
   content?: Prisma.SortOrder
   model?: Prisma.SortOrder
   tokensUsed?: Prisma.SortOrder
+  costCents?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -415,6 +439,7 @@ export type AIConversationMessageCountOrderByAggregateInput = {
 
 export type AIConversationMessageAvgOrderByAggregateInput = {
   tokensUsed?: Prisma.SortOrder
+  costCents?: Prisma.SortOrder
 }
 
 export type AIConversationMessageMaxOrderByAggregateInput = {
@@ -424,6 +449,7 @@ export type AIConversationMessageMaxOrderByAggregateInput = {
   content?: Prisma.SortOrder
   model?: Prisma.SortOrder
   tokensUsed?: Prisma.SortOrder
+  costCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -435,12 +461,14 @@ export type AIConversationMessageMinOrderByAggregateInput = {
   content?: Prisma.SortOrder
   model?: Prisma.SortOrder
   tokensUsed?: Prisma.SortOrder
+  costCents?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type AIConversationMessageSumOrderByAggregateInput = {
   tokensUsed?: Prisma.SortOrder
+  costCents?: Prisma.SortOrder
 }
 
 export type AIConversationMessageCreateNestedManyWithoutConversationInput = {
@@ -485,12 +513,21 @@ export type AIConversationMessageUncheckedUpdateManyWithoutConversationNestedInp
   deleteMany?: Prisma.AIConversationMessageScalarWhereInput | Prisma.AIConversationMessageScalarWhereInput[]
 }
 
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type AIConversationMessageCreateWithoutConversationInput = {
   id?: string
   role: string
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -502,6 +539,7 @@ export type AIConversationMessageUncheckedCreateWithoutConversationInput = {
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -543,6 +581,7 @@ export type AIConversationMessageScalarWhereInput = {
   content?: Prisma.StringFilter<"AIConversationMessage"> | string
   model?: Prisma.StringNullableFilter<"AIConversationMessage"> | string | null
   tokensUsed?: Prisma.IntNullableFilter<"AIConversationMessage"> | number | null
+  costCents?: Prisma.FloatNullableFilter<"AIConversationMessage"> | number | null
   metadata?: Prisma.JsonNullableFilter<"AIConversationMessage">
   createdAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AIConversationMessage"> | Date | string
@@ -554,6 +593,7 @@ export type AIConversationMessageCreateManyConversationInput = {
   content: string
   model?: string | null
   tokensUsed?: number | null
+  costCents?: number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -565,6 +605,7 @@ export type AIConversationMessageUpdateWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -576,6 +617,7 @@ export type AIConversationMessageUncheckedUpdateWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -587,6 +629,7 @@ export type AIConversationMessageUncheckedUpdateManyWithoutConversationInput = {
   content?: Prisma.StringFieldUpdateOperationsInput | string
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokensUsed?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  costCents?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -601,6 +644,7 @@ export type AIConversationMessageSelect<ExtArgs extends runtime.Types.Extensions
   content?: boolean
   model?: boolean
   tokensUsed?: boolean
+  costCents?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -614,6 +658,7 @@ export type AIConversationMessageSelectCreateManyAndReturn<ExtArgs extends runti
   content?: boolean
   model?: boolean
   tokensUsed?: boolean
+  costCents?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -627,6 +672,7 @@ export type AIConversationMessageSelectUpdateManyAndReturn<ExtArgs extends runti
   content?: boolean
   model?: boolean
   tokensUsed?: boolean
+  costCents?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -640,12 +686,13 @@ export type AIConversationMessageSelectScalar = {
   content?: boolean
   model?: boolean
   tokensUsed?: boolean
+  costCents?: boolean
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AIConversationMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "role" | "content" | "model" | "tokensUsed" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["aIConversationMessage"]>
+export type AIConversationMessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "conversationId" | "role" | "content" | "model" | "tokensUsed" | "costCents" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["aIConversationMessage"]>
 export type AIConversationMessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   conversation?: boolean | Prisma.AIConversationDefaultArgs<ExtArgs>
 }
@@ -668,6 +715,7 @@ export type $AIConversationMessagePayload<ExtArgs extends runtime.Types.Extensio
     content: string
     model: string | null
     tokensUsed: number | null
+    costCents: number | null
     metadata: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -1101,6 +1149,7 @@ export interface AIConversationMessageFieldRefs {
   readonly content: Prisma.FieldRef<"AIConversationMessage", 'String'>
   readonly model: Prisma.FieldRef<"AIConversationMessage", 'String'>
   readonly tokensUsed: Prisma.FieldRef<"AIConversationMessage", 'Int'>
+  readonly costCents: Prisma.FieldRef<"AIConversationMessage", 'Float'>
   readonly metadata: Prisma.FieldRef<"AIConversationMessage", 'Json'>
   readonly createdAt: Prisma.FieldRef<"AIConversationMessage", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AIConversationMessage", 'DateTime'>
