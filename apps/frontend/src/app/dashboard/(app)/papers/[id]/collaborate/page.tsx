@@ -40,7 +40,7 @@ interface Props {
 
 export default function CollaborativeEditorPage({ params }: Props) {
   const { id: paperId } = use(params);
-  const { data: paperData } = useGetEditorPaperQuery(paperId);
+  const { data: paperData, isLoading: paperLoading, isError } = useGetEditorPaperQuery(paperId);
   const paper = paperData?.data;
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
@@ -101,10 +101,24 @@ export default function CollaborativeEditorPage({ params }: Props) {
     [ydoc, awareness]
   );
 
-  if (!paper) {
+  if (paperLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (isError || !paper) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <p className="text-destructive text-lg">Collaborative editing unavailable</p>
+        <p className="text-muted-foreground text-sm">This paper was not created with the editor. Only editor-created papers support real-time collaboration.</p>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/dashboard/papers/${paperId}`}>
+            <ArrowLeft className="h-4 w-4 mr-1" /> Back to Paper
+          </Link>
+        </Button>
       </div>
     );
   }
