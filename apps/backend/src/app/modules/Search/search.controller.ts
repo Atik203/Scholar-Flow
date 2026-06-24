@@ -4,7 +4,13 @@ import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
 import { SearchService } from "./search.service";
-import { globalSearchQuerySchema, searchHistoryQuerySchema, saveSearchHistorySchema } from "./search.validation";
+import {
+  aiSearchBodySchema,
+  globalSearchQuerySchema,
+  saveSearchHistorySchema,
+  searchHistoryQuerySchema,
+  sourcesQuerySchema,
+} from "./search.validation";
 
 export const SearchController = {
   globalSearch: catchAsync(async (req: Request, res: Response) => {
@@ -113,6 +119,39 @@ export const SearchController = {
     );
 
     sendSuccessResponse(res, result, "Semantic search completed");
+  }),
+
+  // Phase D.2 — AI search (Perplexity-style summary).
+  // POST /api/search/ai-search  body: { q, mode?, workspaceId?, model? }
+  aiSearch: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const body = aiSearchBodySchema.parse(req.body);
+    const result = await SearchService.aiSummarize(
+      authReq.user.id,
+      body.q,
+      body.workspaceId,
+      body.model
+    );
+    sendSuccessResponse(res, result, "AI summary generated");
+  }),
+
+  // Phase D.2 — Top sources citation list for a query.
+  // GET /api/search/sources?q=...&limit=5
+  getSources: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const q = sourcesQuerySchema.parse(req.query);
+    const limit = Math.min(10, parseInt(q.limit || "5", 10));
+    const sources = await SearchService.getTopSources(
+      authReq.user.id,
+      q.q,
+      limit,
+      q.workspaceId
+    );
+    sendSuccessResponse(res, { sources }, "Sources retrieved");
   }),
 };
 
