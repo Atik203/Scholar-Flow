@@ -157,6 +157,27 @@ export const analyticsApi = apiSlice
         providesTags: ["Analytics"],
       }),
 
+      getAiUsage: builder.query<
+        {
+          success: boolean;
+          message: string;
+          data: {
+            totalTokens: number;
+            totalCostCents: number;
+            totalMessages: number;
+            byModel: Array<{ model: string; tokens: number; costCents: number; messages: number }>;
+            dailyUsage: Array<{ date: string; tokens: number; costCents: number; messages: number }>;
+            timeRange: string;
+          };
+        },
+        { timeRange?: AnalyticsTimeRange }
+      >({
+        query: ({ timeRange = "month" } = {}) => ({
+          url: `/analytics/ai-usage?timeRange=${timeRange}`,
+        }),
+        providesTags: ["Analytics"],
+      }),
+
       exportUsageAnalytics: builder.query<
         { content: string; filename: string; format: string },
         { format?: "csv" | "json" }
@@ -175,5 +196,6 @@ export const {
   useStopReadingSessionMutation,
   useGetWorkspaceAnalyticsQuery,
   useGetUsageReportQuery,
+  useGetAiUsageQuery,
   useLazyExportUsageAnalyticsQuery,
 } = analyticsApi;

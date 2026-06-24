@@ -19,6 +19,8 @@ export const createAIProviderSchema = z.object({
   enabled: z.boolean().optional().default(true),
   isDefault: z.boolean().optional().default(false),
   displayOrder: z.number().int().optional().default(0),
+  inputCostPer1k: z.number().nonnegative().optional().nullable(),
+  outputCostPer1k: z.number().nonnegative().optional().nullable(),
 });
 
 function optionalApiKeyEnvName() {
@@ -34,6 +36,8 @@ export const updateAIProviderSchema = z.object({
   apiKeyEnvName: optionalApiKeyEnvName(),
   enabled: z.boolean().optional(),
   displayOrder: z.number().int().optional(),
+  inputCostPer1k: z.number().nonnegative().optional().nullable(),
+  outputCostPer1k: z.number().nonnegative().optional().nullable(),
 });
 
 export const reorderAIProvidersSchema = z.object({
