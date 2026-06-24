@@ -355,18 +355,87 @@ const ALL_PROVIDERS: ProviderName[] = [
 ];
 
 export const aiService = {
-  getProviderStatuses(): ProviderStatus[] {
-    return ALL_PROVIDERS.map((provider) => {
-      const instance = providers[provider];
-      const configured = Boolean(instance?.isEnabled());
-      return {
-        provider,
-        configured,
-        models: configured
-          ? PROVIDER_MODEL_MAP[provider] ?? EMPTY_MODELS
-          : EMPTY_MODELS,
-      };
+  /**
+   * Get the list of providers + their configured models.
+   *
+   * Reads from the AIProvider admin catalog (Phase C.1) when rows exist.
+   * Falls back to the static PROVIDER_MODEL_MAP if the table is empty
+   * (e.g., on a fresh deployment before the admin seeds the catalog).
+   * A model's `configured` flag is true when both:
+   *   1. The provider instance has its env-var API key set, AND
+   *   2. The row in AIProvider is enabled.
+   */
+  async getProviderStatuses(): Promise<ProviderStatus[]> {
+    const dbRows = await prisma.aIProvider.findMany({
+      where: { isDeleted: false },
+      orderBy: [{ provider: "asc" }, { displayOrder: "asc" }],
     });
+
+    // If admin hasn't seeded the catalog, return the static fallback
+    // (and skip key-status check since the static map doesn't carry
+    // an apiKeyEnvName per row).
+    if (dbRows.length === 0) {
+      return ALL_PROVIDERS.map((provider) => {
+        const instance = providers[provider];
+        const configured = Boolean(instance?.isEnabled());
+        return {
+          provider,
+          configured,
+          models: configured
+            ? PROVIDER_MODEL_MAP[provider] ?? EMPTY_MODELS
+            : EMPTY_MODELS,
+        };
+      });
+    }
+
+    // Group rows by provider key. The provider instance is "configured"
+    // when its API key env is set; individual rows are configured only
+    // when both the row is enabled AND the underlying provider is wired.
+    const byProvider = new Map<string, typeof dbRows>();
+    for (const row of dbRows) {
+      const arr = byProvider.get(row.provider) ?? [];
+      arr.push(row);
+      byProvider.set(row.provider, arr);
+    }
+
+    const statuses: ProviderStatus[] = [];
+    for (const [providerKey, rows] of byProvider.entries()) {
+      // The static map only knows openai/gemini/claude/deepseek; for
+      // custom keys (e.g., "anthropic", "minimax") we treat the provider
+      // as configured if any env-named key is set.
+      const knownInstance = (providers as Record<string, BaseAiProvider | null>)[providerKey];
+      const providerConfigured = knownInstance
+        ? Boolean(knownInstance.isEnabled())
+        : rows.some((r) => r.apiKeyEnvName && Boolean(process.env[r.apiKeyEnvName]));
+
+      const models: ProviderModel[] = rows.map((row) => ({
+        value: row.model,
+        label: row.displayName,
+        description: row.description ?? "",
+        provider: row.provider,
+      }));
+
+      statuses.push({
+        provider: providerKey as ProviderName,
+        configured: providerConfigured,
+        models: providerConfigured
+          ? models
+          : [],
+      });
+    }
+
+    // Preserve the original static provider order so the UI's fallback
+    // ordering matches what users saw before the catalog existed.
+    statuses.sort((a, b) => {
+      const ai = ALL_PROVIDERS.indexOf(a.provider as ProviderName);
+      const bi = ALL_PROVIDERS.indexOf(b.provider as ProviderName);
+      if (ai === -1 && bi === -1) return 0;
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+
+    return statuses;
   },
 
   async extractMetadata(
