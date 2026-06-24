@@ -38,7 +38,8 @@ router.get(
   "/:id",
   authMiddleware as any,
   catchAsync(async (req, res) => {
-    const conv = await aiConversationService.getConversation(req.params.id);
+    const authReq = req as AuthenticatedRequest;
+    const conv = await aiConversationService.getConversation(req.params.id, authReq.user!.id);
     sendSuccessResponse(res, conv, "Conversation retrieved");
   })
 );
@@ -74,7 +75,6 @@ router.post(
       return;
     }
 
-    // SSE headers
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
@@ -116,7 +116,8 @@ router.delete(
   "/:id",
   authMiddleware as any,
   catchAsync(async (req, res) => {
-    await aiConversationService.deleteConversation(req.params.id);
+    const authReq = req as AuthenticatedRequest;
+    await aiConversationService.deleteConversation(req.params.id, authReq.user!.id);
     sendSuccessResponse(res, null, "Conversation deleted");
   })
 );
