@@ -1,5 +1,5 @@
 import express from "express";
-import { authMiddleware } from "../../middleware/auth";
+import { authMiddleware, sseAuthMiddleware } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
 import { NotificationController } from "./notification.controller";
 import { notificationSettingsController } from "./notificationSettings.controller";
@@ -7,12 +7,14 @@ import { notificationSseController } from "./sse.controller";
 
 const router: import("express").Router = express.Router();
 
-// SSE stream for real-time notifications (must come before the catch-all "/" route)
+// SSE stream for real-time notifications (must come before the catch-all "/" route).
+// Uses sseAuthMiddleware because EventSource cannot set the Authorization header —
+// the client passes the JWT via `?token=...` instead.
 router.get(
   "/stream",
-  authMiddleware as any,
+  sseAuthMiddleware as any,
   rateLimiter as any,
-  notificationSseController.stream
+  notificationSseController.stream as any
 );
 
 // Notification settings (channels, categories, quiet hours)
