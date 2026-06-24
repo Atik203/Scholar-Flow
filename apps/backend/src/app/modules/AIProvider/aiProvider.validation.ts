@@ -15,26 +15,23 @@ export const createAIProviderSchema = z.object({
   model: z.string().min(1).max(128),
   displayName: z.string().min(1).max(200),
   description: z.string().max(1000).optional().nullable(),
-  apiKeyEnvName: z
-    .string()
-    .max(128)
-    .regex(/^[A-Z0-9_]+$/, "apiKeyEnvName must be UPPER_SNAKE_CASE")
-    .optional()
-    .nullable(),
+  apiKeyEnvName: optionalApiKeyEnvName(),
   enabled: z.boolean().optional().default(true),
   isDefault: z.boolean().optional().default(false),
   displayOrder: z.number().int().optional().default(0),
 });
 
+function optionalApiKeyEnvName() {
+  return z.preprocess(
+    (val) => (val === "" || val === null ? undefined : val),
+    z.string().max(128).regex(/^[A-Z0-9_]+$/, "apiKeyEnvName must be UPPER_SNAKE_CASE").optional()
+  );
+}
+
 export const updateAIProviderSchema = z.object({
   displayName: z.string().min(1).max(200).optional(),
   description: z.string().max(1000).optional().nullable(),
-  apiKeyEnvName: z
-    .string()
-    .max(128)
-    .regex(/^[A-Z0-9_]+$/, "apiKeyEnvName must be UPPER_SNAKE_CASE")
-    .optional()
-    .nullable(),
+  apiKeyEnvName: optionalApiKeyEnvName(),
   enabled: z.boolean().optional(),
   displayOrder: z.number().int().optional(),
 });
