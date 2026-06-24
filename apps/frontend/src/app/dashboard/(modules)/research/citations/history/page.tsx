@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
   showErrorToast,
   showSuccessToast,
@@ -120,7 +119,6 @@ export default function CitationHistoryPage() {
   ];
 
   return (
-    <DashboardLayout>
       <div className="space-y-8">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
@@ -347,6 +345,5 @@ export default function CitationHistoryPage() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
   );
 }
