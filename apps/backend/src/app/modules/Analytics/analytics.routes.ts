@@ -3,6 +3,7 @@ import {
   authMiddleware,
   requireProResearcher,
   requireTeamLead,
+  requireAdmin,
 } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
 import { analyticsController } from "./analytics.controller";
@@ -47,6 +48,23 @@ router.get(
   requireProResearcher,
   rateLimiter,
   analyticsController.exportUsage
+);
+
+// AI Usage: Any authenticated user can see their own AI usage
+router.get(
+  "/ai-usage",
+  authMiddleware,
+  rateLimiter,
+  analyticsController.aiUsage
+);
+
+// Admin AI Usage: Admin-only
+router.get(
+  "/admin/ai-usage",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  analyticsController.adminAiUsage
 );
 
 export const analyticsRoutes = router;

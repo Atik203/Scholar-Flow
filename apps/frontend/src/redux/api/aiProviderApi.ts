@@ -18,6 +18,8 @@ export interface AIProviderRow {
   enabled: boolean;
   isDefault: boolean;
   displayOrder: number;
+  inputCostPer1k: number | null;
+  outputCostPer1k: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,6 +43,8 @@ export interface CreateAIProviderRequest {
   enabled?: boolean;
   isDefault?: boolean;
   displayOrder?: number;
+  inputCostPer1k?: number | null;
+  outputCostPer1k?: number | null;
 }
 
 export interface UpdateAIProviderRequest {
@@ -50,6 +54,8 @@ export interface UpdateAIProviderRequest {
   apiKeyEnvName?: string | null;
   enabled?: boolean;
   displayOrder?: number;
+  inputCostPer1k?: number | null;
+  outputCostPer1k?: number | null;
 }
 
 export interface ReorderAIProvidersRequest {
