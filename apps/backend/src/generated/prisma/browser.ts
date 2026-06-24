@@ -128,6 +128,11 @@ export type AIConversation = Prisma.AIConversationModel
  */
 export type AIConversationMessage = Prisma.AIConversationMessageModel
 /**
+ * Model AIProvider
+ * 
+ */
+export type AIProvider = Prisma.AIProviderModel
+/**
  * Model Plan
  * 
  */
