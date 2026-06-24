@@ -1,25 +1,14 @@
 "use client";
 
-/**
- * Discover > Trending Papers
- *
- * Phase E.2 — responsive grid, skeleton loading, IntersectionObserver
- * infinite scroll.
- *
- * The marketing PageContainer that previously wrapped the page was a
- * bug: it capped the page at max-w-4xl (single column on every
- * viewport) and broke the dashboard shell. Removed in this rewrite.
- * The (modules) route group already supplies DashboardLayout, so the
- * page just emits the cards.
- */
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetTrendingQuery } from "@/redux/api/searchApi";
+import { formatDistanceToNow } from "date-fns";
 import { BookOpen, FileText, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 import { useEffect, useRef } from "react";
 
 const PAGE_SIZE = 12;

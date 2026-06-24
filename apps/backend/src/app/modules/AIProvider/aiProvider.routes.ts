@@ -4,7 +4,7 @@
  * catalog mutation costs predictable.
  */
 import express from "express";
-import { requireAdmin } from "../../middleware/auth";
+import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { rateLimiter } from "../../middleware/rateLimiter";
 import {
   validateRequestBody,
@@ -19,6 +19,9 @@ import {
 } from "./aiProvider.validation";
 
 const router: express.Router = express.Router();
+
+// Apply auth to all routes — requireAdmin needs req.user set by authMiddleware
+router.use(authMiddleware as any);
 
 // List + key status (read)
 router.get(

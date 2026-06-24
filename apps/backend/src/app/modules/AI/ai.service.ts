@@ -366,10 +366,21 @@ export const aiService = {
    *   2. The row in AIProvider is enabled.
    */
   async getProviderStatuses(): Promise<ProviderStatus[]> {
-    const dbRows = await prisma.aIProvider.findMany({
-      where: { isDeleted: false },
-      orderBy: [{ provider: "asc" }, { displayOrder: "asc" }],
-    });
+    let dbRows: any[];
+    try {
+      dbRows = await prisma.aIProvider.findMany({
+        where: { isDeleted: false },
+        orderBy: [{ provider: "asc" }, { displayOrder: "asc" }],
+      });
+    } catch (err: any) {
+      // P2021 = table doesn't exist (migration not yet applied). Fall back
+      // to the static model map so the frontend always has provider data.
+      if (err?.code === "P2021") {
+        dbRows = [];
+      } else {
+        throw err;
+      }
+    }
 
     // If admin hasn't seeded the catalog, return the static fallback
     // (and skip key-status check since the static map doesn't carry
