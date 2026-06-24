@@ -1062,7 +1062,14 @@ export const paperController = {
   // Get available AI providers and their models for dynamic UI
   getAiProviders: catchAsync(async (_req: Request, res: Response) => {
     const statuses = await aiService.getProviderStatuses();
-    sendSuccessResponse(res, { providers: statuses }, "AI providers retrieved");
+    const defaultRow = await prisma.aIProvider.findFirst({
+      where: { isDefault: true, isDeleted: false, enabled: true },
+      select: { provider: true, model: true },
+    });
+    sendSuccessResponse(res, {
+      providers: statuses,
+      defaultModel: defaultRow?.model ?? null,
+    }, "AI providers retrieved");
   }),
 };
 
@@ -1114,6 +1121,19 @@ export const editorPaperController = {
     }
 
     return sendSuccessResponse(res, paper, "Editor paper retrieved");
+  }),
+
+  // Public: get a published editor paper (no auth required)
+  getPublicEditorPaper: catchAsync(async (req: Request, res: Response) => {
+    const parsed = getPaperParamsSchema.safeParse(req.params);
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid paper ID");
+    }
+    const paper = await editorPaperService.getPublicPaperContent(parsed.data.id);
+    if (!paper) {
+      throw new ApiError(404, "Paper not found or not published");
+    }
+    return sendSuccessResponse(res, paper, "Published paper retrieved");
   }),
 
   // Update editor paper content

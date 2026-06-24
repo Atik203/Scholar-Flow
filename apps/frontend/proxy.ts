@@ -46,6 +46,7 @@ const publicRoutes = [
   "/debug-auth",
   "/dev",
   "/invitation",
+  "/public-view",
 ];
 
 // Legacy role-segmented prefixes. Visiting any of these redirects to the
