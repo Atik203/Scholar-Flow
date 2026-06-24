@@ -2,20 +2,15 @@
 
 /**
  * Discover > For You — AI-recommended papers
- *
- * Phase E.3 — responsive grid + skeleton loading.
- * Previously used a single-column <PageContainer> which broke the
- * dashboard layout. The (modules) route group already supplies
- * DashboardLayout, so the page just emits the cards.
  */
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetRecommendationsQuery } from "@/redux/api/searchApi";
+import { formatDistanceToNow } from "date-fns";
 import { BookOpen, FileText, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
 
 export default function RecommendationsPage() {
   const { data, isLoading } = useGetRecommendationsQuery();

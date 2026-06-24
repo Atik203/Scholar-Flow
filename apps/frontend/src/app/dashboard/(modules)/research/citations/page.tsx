@@ -1,7 +1,6 @@
 "use client";
 
 import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +129,6 @@ export default function CitationsPage() {
   ];
 
   return (
-    <DashboardLayout>
       <div className="flex flex-col gap-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -408,6 +406,5 @@ export default function CitationsPage() {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
   );
 }
