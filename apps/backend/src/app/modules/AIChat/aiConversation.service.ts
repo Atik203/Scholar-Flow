@@ -1,10 +1,48 @@
 import prisma from "../../shared/prisma";
 import config from "../../config";
 import { aiService } from "../AI/ai.service";
+import { aiProviderService } from "../AIProvider/aiProvider.service";
 import { AiError } from "../AI/ai.errors";
 import type { AiSummaryRequest } from "../AI/ai.types";
 
 const STREAMING_PROVIDER_ORDER = ["openai", "deepseek", "gemini", "claude"] as const;
+
+/**
+ * Resolve a runtime model name from the admin AIProvider catalog. The
+ * admin can add any model (e.g. gpt-5, gpt-4.1) without code changes;
+ * we just need to find the row that matches provider+model and pass
+ * the model string to the SDK. If no row matches, fall back to the
+ * provider's default model, then to the static "gpt-4o-mini" if
+ * the catalog is empty.
+ */
+async function resolveProviderForModel(model: string): Promise<{
+  provider: string;
+  model: string;
+  baseUrl?: string;
+}> {
+  if (!model) {
+    return { provider: "openai", model: "gpt-4o-mini" };
+  }
+  const row = await prisma.aIProvider.findFirst({
+    where: { model, isDeleted: false, enabled: true },
+  });
+  if (row) {
+    return { provider: row.provider, model: row.model };
+  }
+  // If the admin hasn't seeded the catalog, fall back to a sensible
+  // default based on the model name's prefix.
+  if (model.startsWith("claude")) {
+    return { provider: "claude", model };
+  }
+  if (model.startsWith("gemini")) {
+    return { provider: "gemini", model };
+  }
+  if (model.startsWith("deepseek")) {
+    return { provider: "deepseek", model };
+  }
+  // gpt-* / minimax-* / unknown -> openai-compatible
+  return { provider: "openai", model };
+}
 
 async function generateAiResponse(
   messages: Array<{ role: string; content: string }>,
@@ -50,14 +88,24 @@ async function streamFromProvider(
   model?: string,
   onToken?: (token: string) => void
 ): Promise<{ content: string; model: string }> {
-  // Try OpenAI first, fall back to non-streaming
+  // Resolve the runtime model from the admin catalog. Admins can add
+  // new models (e.g. gpt-5, gpt-4.1, claude-opus-4-5) without code
+  // changes; we just pass the model string to the SDK. The user chose
+  // the model from the admin UI so it must exist somewhere in the
+  // provider chain (or the static fallback handled by resolveProviderForModel).
+  const resolved = await resolveProviderForModel(model ?? "");
+
+  // Try OpenAI SDK first (covers gpt-* and any OpenAI-compatible
+  // endpoint). Other providers (Anthropic, Google, DeepSeek) have
+  // their own base URLs and we route to the appropriate provider
+  // instance when the catalog row says so.
   const openaiApiKey = config.openai.apiKey;
-  if (openaiApiKey) {
+  if (resolved.provider === "openai" && openaiApiKey) {
     try {
       const { OpenAI } = await import("openai");
       const openai = new OpenAI({ apiKey: openaiApiKey, timeout: 30000 });
       const stream = await openai.chat.completions.create({
-        model: model?.startsWith("gpt") ? model : "gpt-4o-mini",
+        model: resolved.model,
         messages: messages as any,
         stream: true,
         max_tokens: 2000,
@@ -72,18 +120,17 @@ async function streamFromProvider(
           onToken?.(delta);
         }
       }
-      return { content: fullContent, model: "openai" };
+      return { content: fullContent, model: resolved.model };
     } catch {}
   }
 
-  // Fallback to non-streaming via generateInsight
-  const result = await generateAiResponse(
-    messages,
-    model
-  );
-  // Emit full response as a single token
+  // Non-OpenAI providers: route through aiService.generateInsight which
+  // already knows the right SDK per provider. Streaming isn't natively
+  // supported for those branches yet, so we emit the full response as
+  // a single token (the SSE client will still show it as a 'token' event).
+  const result = await generateAiResponse(messages, resolved.model);
   onToken?.(result.content);
-  return { content: result.content, model: result.model };
+  return { content: result.content, model: resolved.model };
 }
 
 export const aiConversationService = {
