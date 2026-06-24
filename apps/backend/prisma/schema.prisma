@@ -713,6 +713,7 @@ model AIConversationMessage {
   content        String
   model          String? // which model generated this response
   tokensUsed     Int?
+  costCents      Float?
   metadata       Json?   @db.JsonB
 
   conversation AIConversation @relation(fields: [conversationId], references: [id])
@@ -741,6 +742,9 @@ model AIProvider {
   // Env-var name to look up the API key (e.g. "OPENAI_API_KEY").
   // Optional so a provider can be configured without a key (e.g. for catalog-only display).
   apiKeyEnvName String?
+  // Cost per 1K tokens (in USD cents) for cost tracking in analytics.
+  inputCostPer1k  Float?
+  outputCostPer1k Float?
   // Lower values appear first in admin lists and user dropdowns.
   displayOrder  Int      @default(0)
 

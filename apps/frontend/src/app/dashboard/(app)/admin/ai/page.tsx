@@ -65,6 +65,8 @@ const emptyForm: CreateAIProviderRequest = {
   enabled: true,
   isDefault: false,
   displayOrder: 0,
+  inputCostPer1k: null,
+  outputCostPer1k: null,
 };
 
 export default function AdminAIPage() {
@@ -92,6 +94,8 @@ export default function AdminAIPage() {
       enabled: row.enabled,
       isDefault: row.isDefault,
       displayOrder: row.displayOrder,
+      inputCostPer1k: row.inputCostPer1k,
+      outputCostPer1k: row.outputCostPer1k,
     });
   };
 
@@ -115,6 +119,8 @@ export default function AdminAIPage() {
           apiKeyEnvName: form.apiKeyEnvName ?? null,
           enabled: form.enabled,
           displayOrder: form.displayOrder,
+          inputCostPer1k: form.inputCostPer1k ?? null,
+          outputCostPer1k: form.outputCostPer1k ?? null,
         }).unwrap();
         showSuccessToast("Model updated");
       } else {
@@ -288,6 +294,11 @@ export default function AdminAIPage() {
                         </span>
                       )}
                       <span className="ml-2">order: {row.displayOrder}</span>
+                      {row.inputCostPer1k != null && row.outputCostPer1k != null && (
+                        <span className="ml-2 text-green-600 dark:text-green-400">
+                          ¢{row.inputCostPer1k}i / ¢{row.outputCostPer1k}o per 1K
+                        </span>
+                      )}
                     </div>
                     {row.description && (
                       <p className="text-xs text-muted-foreground mt-1">
@@ -416,6 +427,34 @@ export default function AdminAIPage() {
                   onChange={(e) =>
                     setForm({ ...form, displayOrder: Number(e.target.value) })
                   }
+                />
+              </Field>
+              <Field label="Input cost (per 1K tokens, USD cents)">
+                <Input
+                  type="number"
+                  step="0.001"
+                  value={form.inputCostPer1k ?? ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      inputCostPer1k: e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="e.g. 0.15"
+                />
+              </Field>
+              <Field label="Output cost (per 1K tokens, USD cents)">
+                <Input
+                  type="number"
+                  step="0.001"
+                  value={form.outputCostPer1k ?? ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      outputCostPer1k: e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                  placeholder="e.g. 0.60"
                 />
               </Field>
               <label className="flex items-center gap-2 text-sm">
