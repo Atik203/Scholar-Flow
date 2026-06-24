@@ -303,6 +303,191 @@ export class SearchService {
       result: data,
     };
   }
+
+  /**
+   * Get top sources (papers + collections + workspaces) for a query.
+   * Used by the AI summary endpoint to attach citations.
+   */
+  static async getTopSources(
+    userId: string,
+    query: string,
+    limit: number,
+    workspaceId?: string
+  ): Promise<
+    Array<{
+      id: string;
+      type: "paper" | "collection" | "workspace";
+      title: string;
+      description?: string | null;
+      href: string;
+    }>
+  > {
+    // Re-use globalSearch for the three core categories.
+    const result = await SearchService.globalSearch(
+      userId,
+      query,
+      "all",
+      limit,
+      0,
+      workspaceId
+    );
+
+    const out: Array<{
+      id: string;
+      type: "paper" | "collection" | "workspace";
+      title: string;
+      description?: string | null;
+      href: string;
+    }> = [];
+
+    for (const p of result.results.papers?.items ?? []) {
+      out.push({
+        id: p.id,
+        type: "paper",
+        title: p.title ?? "Untitled paper",
+        description: p.abstract ?? null,
+        href: `/dashboard/papers/${p.id}`,
+      });
+    }
+    for (const c of result.results.collections?.items ?? []) {
+      out.push({
+        id: c.id,
+        type: "collection",
+        title: c.name ?? "Untitled collection",
+        description: c.description ?? null,
+        href: `/dashboard/collections/${c.id}`,
+      });
+    }
+    for (const w of result.results.workspaces?.items ?? []) {
+      out.push({
+        id: w.id,
+        type: "workspace",
+        title: w.name ?? "Untitled workspace",
+        description: w.description ?? null,
+        href: `/dashboard/workspaces/${w.id}`,
+      });
+    }
+
+    return out.slice(0, limit);
+  }
+
+  /**
+   * Summarize a query using OpenAI with the top internal sources
+   * attached as citations. Returns a short prose summary plus the
+   * source list. Used by the global search Perplexity-style AI panel.
+   *
+   * Implementation note: uses raw fetch against the OpenAI Chat
+   * Completions API (no streaming) so this code path has no SDK
+   * dependency. If OPENAI_API_KEY is missing, returns a
+   * deterministic stub summary that points at the sources so the
+   * UI still renders a useful response.
+   */
+  static async aiSummarize(
+    userId: string,
+    query: string,
+    workspaceId?: string,
+    model = "gpt-4o-mini"
+  ): Promise<{
+    summary: string;
+    sources: Array<{
+      id: string;
+      type: "paper" | "collection" | "workspace";
+      title: string;
+      href: string;
+    }>;
+    fallback: string | null;
+  }> {
+    const sources = await SearchService.getTopSources(userId, query, 5, workspaceId);
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return {
+        summary: `AI summary is unavailable because the backend has no OPENAI_API_KEY configured. Here are the top matching results instead.\n\nQuery: "${query}"`,
+        sources: sources.map((s) => ({
+          id: s.id,
+          type: s.type,
+          title: s.title,
+          href: s.href,
+        })),
+        fallback: "OPENAI_KEY_MISSING",
+      };
+    }
+
+    try {
+      const contextLines = sources
+        .map(
+          (s, i) =>
+            `[${i + 1}] (${s.type}) ${s.title}${
+              s.description ? ` — ${String(s.description).slice(0, 200)}` : ""
+            }`
+        )
+        .join("\n");
+
+      const prompt = `You are a research assistant. Summarize the following internal sources to answer the user's query in 2-4 sentences. Use the numbered citations inline (e.g., [1], [2]). Do not invent sources.\n\nSources:\n${contextLines}\n\nQuery: ${query}\n\nSummary:`;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: "You answer research questions using only the provided sources." },
+            { role: "user", content: prompt },
+          ],
+          max_tokens: 500,
+          temperature: 0.2,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        return {
+          summary: `AI summary failed (OpenAI returned ${response.status}). Showing top matching results instead.`,
+          sources: sources.map((s) => ({
+            id: s.id,
+            type: s.type,
+            title: s.title,
+            href: s.href,
+          })),
+          fallback: "OPENAI_REQUEST_FAILED",
+        };
+      }
+
+      const data = (await response.json()) as {
+        choices: Array<{ message: { content: string } }>;
+      };
+      const summary =
+        data.choices?.[0]?.message?.content?.trim() ??
+        "No summary could be generated.";
+      return {
+        summary,
+        sources: sources.map((s) => ({
+          id: s.id,
+          type: s.type,
+          title: s.title,
+          href: s.href,
+        })),
+        fallback: null,
+      };
+    } catch {
+      return {
+        summary: `AI summary failed (network error). Showing top matching results instead.`,
+        sources: sources.map((s) => ({
+          id: s.id,
+          type: s.type,
+          title: s.title,
+          href: s.href,
+        })),
+        fallback: "OPENAI_REQUEST_FAILED",
+      };
+    }
+  }
   
   /**
    * Get trending papers (placeholder for real trending algorithm)
