@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   FileText,
   GraduationCap,
+  LayoutDashboard,
   Microscope,
   Search,
   Sparkles,
@@ -18,6 +19,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/redux/auth/useAuth";
 
 // Floating particle component
 const FloatingParticle = ({
@@ -151,6 +153,22 @@ export const Hero: React.FC = () => {
     2500,
   );
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  // Authenticated but onboarding incomplete → nudge them to /onboarding
+  // (the onboarding guard already enforces this, but we mirror it here so the
+  // primary CTA lands somewhere useful from the marketing page).
+  const ctaHref = isAuthenticated
+    ? user?.onboardingCompleted
+      ? "/dashboard"
+      : "/onboarding"
+    : "/register";
+  const ctaLabel = isAuthenticated
+    ? user?.onboardingCompleted
+      ? "Go to Dashboard"
+      : "Finish Onboarding"
+    : "Start Free Trial";
+  const CtaIcon = isAuthenticated && user?.onboardingCompleted ? LayoutDashboard : Sparkles;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -321,14 +339,14 @@ export const Hero: React.FC = () => {
             className="mt-10 flex flex-wrap items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/register">
+              <Link href={ctaHref} aria-busy={authLoading}>
                 <Button
                   size="lg"
                   className="relative overflow-hidden bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 text-white shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 px-8 py-6 text-lg group"
                 >
                   <span className="relative z-10 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Start Free Trial
+                    <CtaIcon className="h-5 w-5" />
+                    {ctaLabel}
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <motion.div
