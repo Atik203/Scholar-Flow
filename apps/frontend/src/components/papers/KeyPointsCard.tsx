@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useExtractKeyPointsMutation } from "@/redux/api/paperApi";
+import { useGetAiProvidersQuery } from "@/redux/api/paperApi";
 import { Lightbulb, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -14,9 +15,11 @@ interface KeyPointsCardProps {
 export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
   const [keyPoints, setKeyPoints] = useState<string[] | null>(null);
   const [extract, { isLoading }] = useExtractKeyPointsMutation();
+  const { data: providersData } = useGetAiProvidersQuery();
+  const defaultModel = providersData?.defaultModel;
 
   const handleExtract = async () => {
-    const result = await extract({ paperId }).unwrap();
+    const result = await extract({ paperId, model: defaultModel }).unwrap();
     setKeyPoints(result.keyPoints);
   };
 

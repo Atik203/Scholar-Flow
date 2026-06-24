@@ -47,6 +47,7 @@ export const generateSummarySchema = z.object({
     .max(600, "Word limit must be at most 600 words")
     .optional(),
   refresh: z.boolean().optional(),
+  model: z.string().max(128).optional(),
 });
 
 export type GenerateSummaryInput = z.infer<typeof generateSummarySchema>;
