@@ -27,13 +27,16 @@ import {
   Copy,
   MessageCircle,
   Plus,
+  RefreshCw,
   Send,
   Sparkles,
+  Square,
   Trash2,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { streamingFetch } from "@/lib/api/streamingFetch";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
@@ -46,7 +49,11 @@ interface Message {
   createdAt: string;
 }
 
-const MODEL_LABELS: Record<string, string> = {
+// Fallback label dictionary for legacy / unknown model ids. The dropdown
+// itself is now populated from the live API response (Phase C.3), so this
+// only matters for messages already persisted in the database that
+// reference a model id not present in the current admin catalog.
+const LEGACY_MODEL_LABELS: Record<string, string> = {
   "gpt-4o": "GPT-4o",
   "gpt-4o-mini": "GPT-4o Mini",
   "gpt-3.5-turbo": "GPT-3.5",
@@ -62,9 +69,13 @@ const MODEL_LABELS: Record<string, string> = {
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard may be unavailable in some browsers; silently ignore.
+    }
   };
   return (
     <Button
@@ -86,14 +97,31 @@ export function FloatingAiAssistant() {
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [lastUserPrompt, setLastUserPrompt] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const { data: providersData } = useGetAiProvidersQuery();
   const availableModels =
     providersData?.providers?.flatMap((p) => p.models) ?? [];
-  const [selectedModel, setSelectedModel] = useState(
-    availableModels[0]?.value ?? "gemini-2.5-flash-lite"
+  // Build a label map from the live provider list so dropdown labels stay
+  // in sync with whatever the admin has configured (Phase C.3).
+  const modelLabelByValue: Record<string, string> = Object.fromEntries(
+    availableModels.map((m) => [m.value, m.label.split("(")[0].trim()])
   );
+  const resolveModelLabel = (model?: string) => {
+    if (!model) return "";
+    return modelLabelByValue[model] ?? LEGACY_MODEL_LABELS[model] ?? model;
+  };
+  const [selectedModel, setSelectedModel] = useState(
+    availableModels[0]?.value ?? "gpt-4o-mini"
+  );
+  // Keep the selected model in sync if the catalog loads after mount.
+  useEffect(() => {
+    if (availableModels.length > 0 && !availableModels.find((m) => m.value === selectedModel)) {
+      setSelectedModel(availableModels[0].value);
+    }
+  }, [availableModels, selectedModel]);
 
   const { data: conversations = [], isLoading: loadingConvs } = useListConversationsQuery(undefined, {
     skip: !open,
@@ -133,15 +161,26 @@ export function FloatingAiAssistant() {
     }
   }, [localMessages]);
 
-  const startNewChat = async () => {
+  // Abort any in-flight stream when the panel closes.
+  useEffect(() => {
+    if (!open && abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+  }, [open]);
+
+  const startNewChat = async (model = selectedModel) => {
     try {
       const conv = await createConversation({
         title: "New Research Chat",
-        model: selectedModel,
+        model,
       }).unwrap();
       setActiveConvId(conv.id);
       setLocalMessages([]);
-    } catch {}
+      return conv.id as string;
+    } catch {
+      return null;
+    }
   };
 
   const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
@@ -155,14 +194,23 @@ export function FloatingAiAssistant() {
     } catch {}
   };
 
+  const stopStream = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setSending(false);
+  };
+
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || sending) return;
 
-    const convId = activeConvId;
+    let convId = activeConvId;
     if (!convId) {
-      await startNewChat();
-      return;
+      const newId = await startNewChat();
+      if (!newId) return;
+      convId = newId;
     }
 
     const userMsg: Message = {
@@ -172,44 +220,39 @@ export function FloatingAiAssistant() {
       createdAt: new Date().toISOString(),
     };
     setLocalMessages((prev) => [...prev, userMsg]);
+    setLastUserPrompt(trimmed);
     setInput("");
     setSending(true);
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      // Try SSE streaming first
-      const token = (() => {
-        try {
-          const store = (window as any).__REDUX_STORE__;
-          return store?.getState()?.auth?.accessToken || null;
-        } catch { return null; }
-      })();
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+      // Use the auth-aware streaming helper. No window global, no
+      // missing token race — the helper reads from the Redux store.
+      const response = await streamingFetch(
+        `/ai-chat/${convId}/messages/stream`,
+        {
+          method: "POST",
+          body: { content: trimmed },
+          signal: controller.signal,
+        }
+      );
 
-      const response = await fetch(`${apiBase}/ai-chat/${convId}/messages/stream`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: trimmed }),
-      });
-
-      if (!response.ok) throw new Error("Stream not available");
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No reader");
-
+      if (!response.body) {
+        throw new Error("No response body for stream");
+      }
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulatedContent = "";
 
-      // SSE stream has already created the message — mark response as started
-      const assistantMsgId = Date.now().toString() + "-stream";
+      const assistantMsgId = `${Date.now()}-stream`;
       setLocalMessages((prev) => [
         ...prev,
         {
           id: assistantMsgId,
-          role: "assistant" as const,
+          role: "assistant",
           content: "",
           createdAt: new Date().toISOString(),
         },
@@ -224,12 +267,19 @@ export function FloatingAiAssistant() {
         buffer = lines.pop() || "";
 
         for (const line of lines) {
+          // Backend emits two shapes:
+          //   event: token\ndata: { token: "..." }
+          //   event: done\ndata: { content: "..." }
+          // We only care about token lines for streaming; the final
+          // done event closes the connection.
+          if (line.startsWith("event: done")) {
+            break;
+          }
           if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              if (data.token) {
+              if (typeof data?.token === "string") {
                 accumulatedContent += data.token;
-                // Update the assistant message content progressively
                 setLocalMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsgId
@@ -238,14 +288,17 @@ export function FloatingAiAssistant() {
                   )
                 );
               }
-            } catch {}
+            } catch {
+              // ignore malformed lines
+            }
           }
         }
       }
     } catch {
-      // Fall back to RTK Query mutation
+      // Stream unavailable (network, 4xx, abort). Fall back to the
+      // RTK Query mutation which returns the full response in one go.
       try {
-        const result = await sendMessageMutation({ convId, content: trimmed }).unwrap();
+        const result = await sendMessageMutation({ convId: convId!, content: trimmed }).unwrap();
         setLocalMessages((prev) => [
           ...prev,
           {
@@ -256,11 +309,78 @@ export function FloatingAiAssistant() {
             createdAt: new Date().toISOString(),
           },
         ]);
-      } catch {}
+      } catch {
+        // Final fallback failed too — surface nothing here; the user
+        // can retry. (The previous version of this code already had
+        // this behavior.)
+      }
     } finally {
+      abortRef.current = null;
       setSending(false);
     }
-  }, [input, sending, activeConvId, sendMessageMutation]);
+  }, [input, sending, activeConvId, sendMessageMutation, selectedModel]);
+
+  const regenerateLast = useCallback(async () => {
+    if (!lastUserPrompt || !activeConvId || sending) return;
+    setSending(true);
+    setLocalMessages((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-regen`,
+        role: "assistant",
+        content: "",
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const response = await streamingFetch(
+        `/ai-chat/${activeConvId}/messages/stream`,
+        {
+          method: "POST",
+          body: { content: lastUserPrompt },
+          signal: controller.signal,
+        }
+      );
+      if (!response.body) {
+        throw new Error("No response body for stream");
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulated = "";
+      const targetId = `${Date.now()}-regen`;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (line.startsWith("event: done")) break;
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (typeof data?.token === "string") {
+                accumulated += data.token;
+                setLocalMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === targetId ? { ...m, content: accumulated } : m
+                  )
+                );
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch {
+      // silent — the empty assistant message remains so the user can retry
+    } finally {
+      abortRef.current = null;
+      setSending(false);
+    }
+  }, [activeConvId, lastUserPrompt, sending]);
 
   return (
     <>
@@ -322,7 +442,7 @@ export function FloatingAiAssistant() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Button size="sm" className="w-full mt-1 h-7 text-xs" onClick={startNewChat}>
+                      <Button size="sm" className="w-full mt-1 h-7 text-xs" onClick={() => void startNewChat()}>
                         <Plus className="h-3 w-3 mr-1" /> New
                       </Button>
                     </div>
@@ -398,7 +518,7 @@ export function FloatingAiAssistant() {
                               )}
                               {msg.model && (
                                 <p className="text-[10px] opacity-40 mt-1">
-                                  {MODEL_LABELS[msg.model] || msg.model}
+                                  {resolveModelLabel(msg.model)}
                                 </p>
                               )}
                             </div>
@@ -417,16 +537,53 @@ export function FloatingAiAssistant() {
                     </ScrollArea>
 
                     <div className="p-3 border-t flex gap-2">
+                      {lastUserPrompt && !sending && activeConvId && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 px-2"
+                          onClick={regenerateLast}
+                          title="Regenerate last response"
+                          aria-label="Regenerate last response"
+                        >
+                          <RefreshCw className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Input
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
                         placeholder="Ask about your research..."
                         className="flex-1 text-sm h-8"
+                        disabled={sending}
                       />
-                      <Button size="sm" className="h-8" onClick={sendMessage} disabled={!input.trim() || sending}>
-                        <Send className="h-3.5 w-3.5" />
-                      </Button>
+                      {sending ? (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8"
+                          onClick={stopStream}
+                          title="Stop generating"
+                          aria-label="Stop generating"
+                        >
+                          <Square className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          className="h-8"
+                          onClick={sendMessage}
+                          disabled={!input.trim()}
+                          aria-label="Send message"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
