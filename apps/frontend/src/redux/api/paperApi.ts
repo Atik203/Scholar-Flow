@@ -528,7 +528,6 @@ export const paperApi = apiSlice.injectEndpoints({
         data: { url: string; fileName: string };
         message: string;
       }) => {
-        console.log("Upload image response received:", response);
         return response.data;
       },
     }),
