@@ -146,6 +146,7 @@ export default function CitationFormatsPage() {
   ];
 
   return (
+    <>
       <div className="space-y-8">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
@@ -338,5 +339,6 @@ export default function CitationFormatsPage() {
         selectedPaperIds={selectedPapers}
         preSelectedFormat={selectedFormat as any}
       />
+    </>
   );
 }
