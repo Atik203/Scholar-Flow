@@ -723,6 +723,36 @@ model AIConversationMessage {
   @@index([conversationId, createdAt])
 }
 
+// Phase 10 — Admin-managed AI provider catalog.
+// Lets admins enable / disable individual models, set the default for
+// the floating AI assistant, and reorder display via displayOrder.
+// Add-only migration; no destructive changes to existing tables.
+model AIProvider {
+  id            String   @id @default(uuid())
+  // Logical provider key: openai | anthropic | google | deepseek | minimax
+  provider      String
+  // Model identifier passed to the SDK (e.g. "gpt-4o-mini", "claude-3-5-sonnet-latest")
+  model         String
+  // Human-readable label shown in UI dropdowns (e.g. "GPT-4o Mini (OpenAI - Fast)")
+  displayName   String
+  enabled       Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  description   String?
+  // Env-var name to look up the API key (e.g. "OPENAI_API_KEY").
+  // Optional so a provider can be configured without a key (e.g. for catalog-only display).
+  apiKeyEnvName String?
+  // Lower values appear first in admin lists and user dropdowns.
+  displayOrder  Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+
+  @@unique([provider, model])
+  @@index([enabled, displayOrder])
+  @@index([isDefault])
+}
+
 model Plan {
   id            String  @id @default(uuid())
   code          String  @unique
