@@ -32,6 +32,7 @@ import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
 import { exportRoutes } from "../modules/Export/export.routes";
 import { invitationRoutes } from "./invitation.routes";
 import healthRoutes from "./health.routes";
+import { editorPaperController } from "../modules/papers/paper.controller";
 
 const router: import("express").Router = express.Router();
 
@@ -63,6 +64,9 @@ router.use("/notifications", notificationRoutes);
 
 // Phase 1.9 Public content
 router.use("/public", publicRoutes);
+
+// Public: published editor docs (no auth)
+router.get("/public/editor/:id", editorPaperController.getPublicEditorPaper as any);
 
 // Phase 4 features
 router.use("/search", searchRoutes);

@@ -492,11 +492,14 @@ export function FloatingAiAssistant() {
                     </div>
                   ) : (
                     filteredConversations.map((c) => (
-                      <button
+                      <div
                         key={c.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setActiveConvId(c.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveConvId(c.id); } }}
                         className={cn(
-                          "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between border-b border-border/40",
+                          "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between border-b border-border/40 cursor-pointer",
                           activeConvId === c.id && "bg-accent"
                         )}
                       >
@@ -507,12 +510,12 @@ export function FloatingAiAssistant() {
                           </span>
                         </div>
                         <button
-                          onClick={(e) => handleDeleteConversation(c.id, e)}
+                          onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id, e); }}
                           className="opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
-                      </button>
+                      </div>
                     ))
                   )}
                 </ScrollArea>
