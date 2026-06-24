@@ -121,7 +121,11 @@ async function streamFromProvider(
         }
       }
       return { content: fullContent, model: resolved.model };
-    } catch {}
+    } catch {
+      // Streaming OpenAI call failed (network, 4xx, etc). Fall through
+      // to the non-streaming path below. The caller will see the full
+      // response as a single SSE token event.
+    }
   }
 
   // Non-OpenAI providers: route through aiService.generateInsight which
