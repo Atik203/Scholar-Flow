@@ -23,11 +23,13 @@ import {
   useUpdateMemberRoleMutation,
   useUpdateWorkspaceMutation,
   useUpdateWorkspaceSettingsMutation,
+  useGetWorkspaceActivityQuery,
 } from "@/redux/api/workspaceApi";
 import { selectAccessToken } from "@/redux/auth/authSlice";
 import { useAppSelector } from "@/redux/hooks";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  Activity as ActivityIcon,
   ArrowLeft,
   BookOpen,
   Building2,
@@ -61,7 +63,13 @@ const formatDate = (dateString: string) => {
   });
 };
 
-type TabType = "overview" | "collections" | "papers" | "members" | "settings";
+type TabType =
+  | "overview"
+  | "collections"
+  | "papers"
+  | "members"
+  | "activity"
+  | "settings";
 
 export default function WorkspaceDetailsPage() {
   const params = useParams<{ id: string }>();
@@ -88,6 +96,11 @@ export default function WorkspaceDetailsPage() {
   const members = membersData?.data || [];
   const { data: collectionsData } = useGetWorkspaceCollectionsQuery({ id, limit: 20 });
   const { data: papersData } = useGetWorkspacePapersQuery({ id, limit: 20 });
+  const { data: activityData, isLoading: activityLoading } = useGetWorkspaceActivityQuery(
+    { id, limit: 30 },
+    { skip: !shouldFetch }
+  );
+  const activity = activityData?.result ?? [];
 
   const [updateWorkspace, { isLoading: updating }] = useUpdateWorkspaceMutation();
   const [deleteWorkspace, { isLoading: deleting }] = useDeleteWorkspaceMutation();
@@ -119,6 +132,7 @@ export default function WorkspaceDetailsPage() {
     { id: "collections", label: "Collections", icon: Folder },
     { id: "papers", label: "Papers", icon: FileText },
     { id: "members", label: "Members", icon: Users },
+    { id: "activity", label: "Activity", icon: ActivityIcon },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -370,6 +384,10 @@ export default function WorkspaceDetailsPage() {
             onRemove={handleRemoveMember}
             onUpdateRole={handleUpdateMemberRole}
           />
+        )}
+
+        {activeTab === "activity" && (
+          <ActivityTab entries={activity as ActivityEntry[]} loading={activityLoading} />
         )}
 
         {activeTab === "settings" && (
@@ -723,6 +741,81 @@ function MembersTab({
               </div>
             );
           })
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface ActivityEntry {
+  id: string;
+  action: string;
+  entity: string;
+  entityId?: string;
+  createdAt: string;
+  userId?: string;
+  details?: Record<string, unknown> | null;
+}
+
+interface ActivityTabProps {
+  entries: ActivityEntry[];
+  loading: boolean;
+}
+
+function ActivityTab({ entries, loading }: ActivityTabProps) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold">Activity</h2>
+          <p className="text-sm text-muted-foreground">
+            Recent actions taken by workspace members.
+          </p>
+        </div>
+      </div>
+
+      <div className="border rounded-lg bg-card">
+        {loading ? (
+          <div className="p-8 text-center text-muted-foreground">
+            <ActivityIcon className="h-6 w-6 mx-auto mb-2 opacity-50 animate-pulse" />
+            Loading activity…
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            <ActivityIcon className="h-6 w-6 mx-auto mb-2 opacity-30" />
+            <p>No activity yet. Actions taken in this workspace will appear here.</p>
+          </div>
+        ) : (
+          <ul className="divide-y">
+            {entries.map((entry) => (
+              <li
+                key={entry.id}
+                className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors"
+              >
+                <div className="mt-0.5 h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                  <ActivityIcon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm">
+                    <span className="font-medium">
+                      {entry.userId ? entry.userId.slice(0, 8) : "Someone"}
+                    </span>{" "}
+                    <span className="text-muted-foreground">{entry.action}</span>{" "}
+                    <span className="font-medium">{entry.entity}</span>
+                    {entry.entityId ? (
+                      <span className="text-muted-foreground">
+                        {" "}
+                        ({entry.entityId.slice(0, 8)}…)
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {new Date(entry.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
