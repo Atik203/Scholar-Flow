@@ -5,6 +5,7 @@ import {
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
 import { aiConversationRoutes } from "../modules/AIChat/aiConversation.routes";
+import { aiProviderRoutes } from "../modules/AIProvider/aiProvider.routes";
 import { aiToolsRoutes } from "../modules/AI/aiTools.routes";
 import { annotationRoutes } from "../modules/annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
@@ -85,6 +86,9 @@ router.use("/ai-chat", aiConversationRoutes);
 
 // Phase 10 — AI Tools (rewriter, comparator, translator)
 router.use("/ai", aiToolsRoutes);
+
+// Phase 10 — Admin AI provider catalog (CRUD + key status)
+router.use("/admin/ai-providers", aiProviderRoutes as any);
 
 // Phase 10 — Export (LaTeX compilation, DOCX/DOC/MD → PDF)
 router.use("/export", exportRoutes);
