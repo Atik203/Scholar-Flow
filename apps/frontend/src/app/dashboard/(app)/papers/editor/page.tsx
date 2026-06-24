@@ -32,7 +32,7 @@ export default function PaperEditorPage() {
     try {
       const result = await createEditorPaper({ workspaceId: selectedWorkspace, title: newTitle.trim() }).unwrap();
       showSuccessToast("Paper created");
-      router.push(`/dashboard/papers/${result.data.paper.id}`);
+      router.push(`/dashboard/papers/${result.data.paper.id}/collaborate`);
     } catch (e: any) { showErrorToast(e?.data?.message || "Failed to create"); }
     setIsCreating(false);
   };
@@ -78,7 +78,7 @@ export default function PaperEditorPage() {
                     <div className="flex items-center gap-3">
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <div>
-                        <Link href={`/dashboard/papers/${paper.id}`} className="font-medium text-sm hover:text-primary">{paper.title}</Link>
+                        <Link href={`/dashboard/papers/${paper.id}/collaborate`} className="font-medium text-sm hover:text-primary">{paper.title}</Link>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>{new Date(paper.createdAt).toLocaleDateString()}</span>
                           <span className="px-1.5 py-0.5 rounded bg-secondary text-xs">{paper.isDraft ? "Draft" : "Published"}</span>
@@ -86,7 +86,7 @@ export default function PaperEditorPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" asChild><Link href={`/dashboard/papers/${paper.id}`}><Edit className="mr-1 h-3 w-3" />Edit</Link></Button>
+                      <Button size="sm" variant="outline" asChild><Link href={`/dashboard/papers/${paper.id}/collaborate`}><Edit className="mr-1 h-3 w-3" />Edit</Link></Button>
                     </div>
                   </motion.div>
                 ))}
