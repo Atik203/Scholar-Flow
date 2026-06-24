@@ -19,6 +19,7 @@
  */
 
 import { clearAuthCookie } from "@/lib/auth/authCookies";
+import { closeNotificationStream } from "@/hooks/useNotificationStream";
 import { apiSlice } from "@/redux/api/apiSlice";
 import { clearCredentials } from "@/redux/auth/authSlice";
 import { getAppStore, getPersistor } from "@/redux/storeAccess";
@@ -113,6 +114,12 @@ export async function handleSignOut(redirectUrl: string = "/"): Promise<void> {
   if (store) {
     store.dispatch(apiSlice.util.resetApiState());
   }
+
+  // Close the active SSE notification stream before we wipe auth state.
+  // Without this, the previous EventSource stays alive on the old (now
+  // invalidated) JWT and races against the next sign-in's connection,
+  // eventually hitting the per-user connection cap (5).
+  closeNotificationStream();
 
   await purgePersistedState();
 

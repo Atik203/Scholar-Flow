@@ -59,10 +59,12 @@ class NotificationBroadcaster {
     const localListener = (event: SseEvent) => {
       this.writeEvent(res, event);
     };
-    this.emitter.on(CHANNEL, localListener);
+    // Match the per-user channel used by publish() so events reach subscribers.
+    const userChannel = `${CHANNEL}:${userId}`;
+    this.emitter.on(userChannel, localListener);
 
     return () => {
-      this.emitter.off(CHANNEL, localListener);
+      this.emitter.off(userChannel, localListener);
       const set = this.connectionsByUser.get(userId);
       if (set) {
         set.delete(res);

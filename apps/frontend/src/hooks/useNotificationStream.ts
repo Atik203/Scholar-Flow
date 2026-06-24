@@ -32,6 +32,31 @@ export interface UseNotificationStreamOptions {
   enabled?: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// Module-level handle so signout() can close the active SSE connection
+// before navigating away. Without this, a logout → login cycle left the
+// previous EventSource alive in the background and would race against the
+// new connection (the backend caps at 5 connections per user).
+// ---------------------------------------------------------------------------
+let _activeSource: EventSource | null = null;
+let _activeToken: string | null = null;
+
+/**
+ * Force-close the active notification SSE connection, if any.
+ * Safe to call from signout() — handles the no-stream case.
+ */
+export function closeNotificationStream(): void {
+  if (_activeSource) {
+    try {
+      _activeSource.close();
+    } catch {
+      // best-effort close
+    }
+    _activeSource = null;
+    _activeToken = null;
+  }
+}
+
 export function useNotificationStream(
   options: UseNotificationStreamOptions = {}
 ) {
@@ -70,6 +95,10 @@ export function useNotificationStream(
         return;
       }
 
+      // Expose for signout() to close
+      _activeSource = es;
+      _activeToken = accessToken;
+
       es.addEventListener("connected", () => {
         retryDelay = 1000;
       });
@@ -100,6 +129,10 @@ export function useNotificationStream(
       es.onerror = () => {
         if (es) {
           es.close();
+          if (_activeSource === es) {
+            _activeSource = null;
+            _activeToken = null;
+          }
           es = null;
         }
         scheduleReconnect();
@@ -122,6 +155,10 @@ export function useNotificationStream(
       if (timeoutId) clearTimeout(timeoutId);
       if (es) {
         es.close();
+        if (_activeSource === es) {
+          _activeSource = null;
+          _activeToken = null;
+        }
         es = null;
       }
     };
