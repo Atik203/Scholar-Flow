@@ -17,6 +17,18 @@ export function getRoleDashboardUrl(role?: string): string {
 }
 
 /**
+ * Get the canonical dashboard URL for landing pages (no role segment).
+ *
+ * Landing CTAs (homepage Hero/CTA, marketing pages) should link to this
+ * rather than the role-scoped URL. The shared `/dashboard` layout serves
+ * all roles; routing through `/dashboard/researcher` first causes a
+ * redirect bounce and a 404 flash for nested resources.
+ */
+export function getLandingDashboardUrl(): string {
+  return "/dashboard";
+}
+
+/**
  * Get the callback URL from query parameters or use a default
  * Note: defaultUrl will be overridden with role-specific path if user session is available
  */
@@ -125,20 +137,22 @@ export function buildRegisterUrl(callbackUrl?: string): string {
  * @param isSuccess - Whether authentication was successful
  * @param searchParams - URL search parameters that may contain callbackUrl
  * @param errorUrl - URL to redirect to on error
- * @param userRole - Optional user role to redirect to role-specific dashboard
+ * @param userRole - Optional user role (kept for API compatibility; landing
+ *                   destination is always the canonical /dashboard)
  */
 export function handleAuthRedirect(
   isSuccess: boolean,
   searchParams?: URLSearchParams,
   errorUrl: string = "/login",
-  userRole?: string
+  _userRole?: string
 ): string {
   if (isSuccess) {
     const callbackUrl = getCallbackUrl(searchParams);
 
-    // If callback is the generic /dashboard and we have a role, use role-specific dashboard
-    if (callbackUrl === "/dashboard" && userRole) {
-      return getRoleDashboardUrl(userRole);
+    // If callback is the generic /dashboard, use the canonical landing URL.
+    // Avoids the /dashboard/researcher → /dashboard redirect bounce.
+    if (callbackUrl === "/dashboard") {
+      return getLandingDashboardUrl();
     }
 
     return callbackUrl;
@@ -150,24 +164,19 @@ export function handleAuthRedirect(
  * Smart navigation based on authentication status
  * @param isAuthenticated - Whether the user is authenticated
  * @param currentPath - Current pathname
- * @param userRole - Optional user role for role-specific dashboard redirect
+ * @param userRole - Optional user role (kept for API compatibility)
  */
 export function getSmartRedirectUrl(
   isAuthenticated: boolean,
   currentPath: string,
-  userRole?: string
+  _userRole?: string
 ): string | null {
-  // If user is authenticated and on auth pages, redirect to dashboard
+  // If user is authenticated and on auth pages, redirect to canonical dashboard
   if (
     isAuthenticated &&
     ["/login", "/register", "/auth/signin"].includes(currentPath)
   ) {
-    // If we have a user role, redirect to role-specific dashboard
-    if (userRole) {
-      return getRoleDashboardUrl(userRole);
-    }
-    // Fallback to generic dashboard (proxy.ts will redirect to role-specific)
-    return "/dashboard";
+    return getLandingDashboardUrl();
   }
 
   // If user is not authenticated and on protected routes, redirect to login
@@ -196,20 +205,15 @@ export function getSmartRedirectUrl(
  * Enhanced "Get Started" navigation logic
  * @param isAuthenticated - Whether the user is authenticated
  * @param currentPath - Current pathname
- * @param userRole - Optional user role for role-specific dashboard redirect
+ * @param userRole - Optional user role (kept for API compatibility)
  */
 export function getGetStartedUrl(
   isAuthenticated: boolean,
   currentPath: string = "/",
-  userRole?: string
+  _userRole?: string
 ): string {
   if (isAuthenticated) {
-    // If we have a user role, redirect to role-specific dashboard
-    if (userRole) {
-      return getRoleDashboardUrl(userRole);
-    }
-    // Fallback to generic dashboard (proxy.ts will redirect to role-specific)
-    return "/dashboard";
+    return getLandingDashboardUrl();
   }
 
   // For unauthenticated users, go to login with callback if not on home page
