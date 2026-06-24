@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,7 +32,6 @@ export default function AiInsightsPage() {
   const papers = papersResponse?.items || [];
 
   return (
-    <DashboardLayout>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border dark:border-gray-700">
@@ -205,6 +203,5 @@ export default function AiInsightsPage() {
           )}
         </div>
       </div>
-    </DashboardLayout>
   );
 }

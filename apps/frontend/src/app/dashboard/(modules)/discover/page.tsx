@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Discover landing page
- *
- * Phase E.4 — drop the marketing <PageContainer> wrapper that was
- * limiting the page to max-w-5xl and breaking the dashboard shell.
- * The (modules) route group already supplies DashboardLayout, so
- * the page just emits the cards directly.
- */
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Compass, Sparkles, TrendingUp, Search } from "lucide-react";
+import { Compass, Search, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
 
 export default function DiscoverPage() {
