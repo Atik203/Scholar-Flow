@@ -32,6 +32,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const lastSyncedUserVersion = useRef<string | null>(null);
   const previousRoleRef = useRef<string | null>(null);
 
+  // Sync the proxy `sf_auth` cookie with persisted Redux state on the very
+  // first render. Doing this synchronously (before any useEffect runs)
+  // prevents the first child-rendered RTK Query request from firing with
+  // a stale `sf_auth` cookie / null accessToken, which previously caused
+  // a 401 cascade on hard reloads.
+  if (!hasInitialized.current) {
+    hasInitialized.current = true;
+    if (isAuthenticated && accessToken) {
+      setAuthCookie();
+    } else {
+      clearAuthCookie();
+    }
+    // `setLoading(false)` was previously dispatched inside a useEffect that
+    // ran after the first render commit. Some RTK Query subscriptions in
+    // child components could fire between the first render and that effect
+    // and observe `isLoading=true` with `accessToken=null`. Dispatching
+    // synchronously here ensures hydration is complete before the first
+    // child commit.
+    if (accessToken === null) {
+      dispatch(setLoading(false));
+    }
+  }
+
   const shouldFetchUser = Boolean(accessToken && accessToken.length > 0);
 
   const { data: currentUserResponse } = useGetCurrentUserQuery(undefined, {
@@ -57,24 +80,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (!accessToken) {
       lastSyncedUserVersion.current = null;
     }
-  }, [accessToken]);
-
-  // Initialize auth state once on mount
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      // Sync the proxy cookie with persisted Redux state on app startup.
-      // This handles the case where a user has an existing session (from localStorage)
-      // but the sf_auth cookie hasn't been set yet (e.g., after a browser restart).
-      if (isAuthenticated && accessToken) {
-        setAuthCookie();
-      } else {
-        clearAuthCookie();
-      }
+    // If a token appeared (e.g., from rehydration on the same render), the
+    // first-render branch above couldn't set isLoading=false. Mark loading
+    // complete now that the token is present and child queries can fire.
+    if (accessToken && hasInitialized.current) {
       dispatch(setLoading(false));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+  }, [accessToken, dispatch]);
 
   // Update user data when fetched
   useEffect(() => {
