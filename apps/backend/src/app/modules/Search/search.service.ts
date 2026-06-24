@@ -1,14 +1,31 @@
 import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 
+export type GlobalSearchType =
+  | "all"
+  | "papers"
+  | "collections"
+  | "workspaces"
+  | "notes"
+  | "people"
+  | "internet";
+
 export class SearchService {
   /**
    * Global multi-entity search
+   *
+   * Phase D.1 — extended the `type` union to include "notes",
+   * "people", and "internet" (stub). "internet" returns an empty
+   * result set with `fallback: "INTERNET_SEARCH_DISABLED"` so the
+   * frontend can render a "coming soon" message. Real web search
+   * requires a third-party API key (SerpAPI / Brave) which is out
+   * of scope per the AGENTS.md package-install policy and the
+   * user's earlier decision.
    */
   static async globalSearch(
     userId: string,
     query: string,
-    type: "all" | "papers" | "collections" | "workspaces" = "all",
+    type: GlobalSearchType = "all",
     limit: number,
     skip: number,
     workspaceId?: string
@@ -63,7 +80,6 @@ export class SearchService {
 
     // 2. Search Collections
     if (type === "all" || type === "collections") {
-      // Must be a collection they have access to
       const collAndConditions: Prisma.CollectionWhereInput[] = [
         { isDeleted: false },
         {
@@ -128,7 +144,7 @@ export class SearchService {
           }
         ]
       };
-      
+
       const [totalCount, items] = await Promise.all([
         prisma.workspace.count({ where: workspaceWhere }),
         prisma.workspace.findMany({
@@ -146,15 +162,95 @@ export class SearchService {
       results.workspaces = { total: totalCount, items };
     }
 
+    // 4. Search Notes (Phase 6 ResearchNote)
+    if (type === "all" || type === "notes") {
+      const noteWhere: Prisma.ResearchNoteWhereInput = {
+        isDeleted: false,
+        userId,
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { content: { contains: q, mode: "insensitive" } },
+        ],
+      };
+      const [totalCount, items] = await Promise.all([
+        prisma.researchNote.count({ where: noteWhere }),
+        prisma.researchNote.findMany({
+          where: noteWhere,
+          take: limit,
+          skip,
+          orderBy: { updatedAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            excerpt: true,
+            noteType: true,
+            visibility: true,
+            updatedAt: true,
+          },
+        }),
+      ]);
+      results.notes = { total: totalCount, items };
+    }
+
+    // 5. Search People (Users)
+    if (type === "all" || type === "people") {
+      // Exclude soft-deleted; never expose the password hash.
+      const peopleWhere: Prisma.UserWhereInput = {
+        isDeleted: false,
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { email: { contains: q, mode: "insensitive" } },
+          { firstName: { contains: q, mode: "insensitive" } },
+          { lastName: { contains: q, mode: "insensitive" } },
+        ],
+      };
+      const [totalCount, items] = await Promise.all([
+        prisma.user.count({ where: peopleWhere }),
+        prisma.user.findMany({
+          where: peopleWhere,
+          take: limit,
+          skip,
+          orderBy: { name: "asc" },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+            role: true,
+            institution: true,
+          },
+        }),
+      ]);
+      results.people = { total: totalCount, items };
+    }
+
+    // 6. Internet search — stub.
+    // Per the user's decision in clarifying questions, this returns
+    // an empty result with a `fallback` flag so the frontend can
+    // render "Internet search is coming soon". Wiring a real
+    // provider (SerpAPI / Brave / Google CSE) requires a new env
+    // var and possibly a new npm dep, which the user did not
+    // approve.
+    if (type === "internet") {
+      results.internet = {
+        total: 0,
+        items: [],
+        fallback: "INTERNET_SEARCH_DISABLED",
+      };
+    }
+
     // Determine the total results sum
     let aggregateTotal = 0;
     if (results.papers) aggregateTotal += results.papers.total;
     if (results.collections) aggregateTotal += results.collections.total;
     if (results.workspaces) aggregateTotal += results.workspaces.total;
+    if (results.notes) aggregateTotal += results.notes.total;
+    if (results.people) aggregateTotal += results.people.total;
+    if (results.internet) aggregateTotal += results.internet.total;
 
     return {
       results,
-      meta: { limit, skip, total: aggregateTotal }
+      meta: { limit, skip, total: aggregateTotal },
     };
   }
 
