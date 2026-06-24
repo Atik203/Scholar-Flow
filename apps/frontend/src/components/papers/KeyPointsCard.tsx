@@ -19,7 +19,7 @@ export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
   const defaultModel = providersData?.defaultModel;
 
   const handleExtract = async () => {
-    const result = await extract({ paperId, model: defaultModel }).unwrap();
+    const result = await extract({ paperId, model: defaultModel ?? undefined }).unwrap();
     setKeyPoints(result.keyPoints);
   };
 
