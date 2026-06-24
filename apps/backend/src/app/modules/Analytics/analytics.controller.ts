@@ -6,6 +6,7 @@ import { sendSuccessResponse } from "../../shared/sendResponse";
 import { personalAnalyticsService } from "./personal.service";
 import { usageReportsService } from "./usage.service";
 import { workspaceAnalyticsService } from "./workspace.service";
+import { aiUsageService } from "./aiUsage.service";
 
 export const analyticsController = {
   personal: catchAsync(async (req: Request, res: Response) => {
@@ -77,6 +78,33 @@ export const analyticsController = {
       timeRange
     );
     sendSuccessResponse(res, report, "Usage report retrieved");
+  }),
+
+  aiUsage: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const timeRange = (String(req.query.timeRange ?? "month") as
+      | "week"
+      | "month"
+      | "quarter"
+      | "year");
+    const report = await aiUsageService.getAiUsage(
+      authReq.user.id,
+      timeRange
+    );
+    sendSuccessResponse(res, report, "AI usage report retrieved");
+  }),
+
+  adminAiUsage: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const timeRange = (String(req.query.timeRange ?? "month") as
+      | "week"
+      | "month"
+      | "quarter"
+      | "year");
+    const report = await aiUsageService.getAdminAiUsage(timeRange);
+    sendSuccessResponse(res, report, "Admin AI usage report retrieved");
   }),
 
   exportUsage: catchAsync(async (req: Request, res: Response) => {

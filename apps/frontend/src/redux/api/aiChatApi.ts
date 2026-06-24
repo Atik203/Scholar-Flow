@@ -73,7 +73,10 @@ export const aiChatApi = apiSlice.injectEndpoints({
         url: `/ai-chat/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["AIChat"],
+      invalidatesTags: (_result, _err, id) => [
+        "AIChat",
+        { type: "AIChat", id },
+      ],
     }),
 
     sendMessage: builder.mutation<SendMessageResponse, SendMessageRequest>({

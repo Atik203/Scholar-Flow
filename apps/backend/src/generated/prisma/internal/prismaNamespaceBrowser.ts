@@ -491,6 +491,7 @@ export const AIConversationMessageScalarFieldEnum = {
   content: 'content',
   model: 'model',
   tokensUsed: 'tokensUsed',
+  costCents: 'costCents',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -508,6 +509,8 @@ export const AIProviderScalarFieldEnum = {
   isDefault: 'isDefault',
   description: 'description',
   apiKeyEnvName: 'apiKeyEnvName',
+  inputCostPer1k: 'inputCostPer1k',
+  outputCostPer1k: 'outputCostPer1k',
   displayOrder: 'displayOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
