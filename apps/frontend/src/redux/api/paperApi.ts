@@ -88,6 +88,7 @@ export interface PaperSummaryRequest {
   language?: string;
   wordLimit?: number;
   refresh?: boolean;
+  model?: string;
 }
 
 export interface PaperSummaryResponse {
@@ -163,6 +164,7 @@ export interface AiProviderStatus {
 
 export interface AiProvidersResponse {
   providers: AiProviderStatus[];
+  defaultModel?: string | null;
 }
 
 export interface PaperVersion {
