@@ -204,6 +204,73 @@ export const requireOnboarding = async (
 };
 
 /**
+ * Lightweight auth middleware for SSE endpoints.
+ *
+ * EventSource cannot set custom headers, so the client passes the JWT via
+ * `?token=...` query param. This middleware accepts either the standard
+ * `Authorization: Bearer <token>` header (used by RTK Query) OR the
+ * `?token=` query param. It verifies the JWT and attaches the decoded
+ * identity to `req.user` without performing a DB lookup (SSE only needs
+ * the user id for the broadcaster channel).
+ */
+export const sseAuthMiddleware = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const header = req.headers.authorization;
+    let token: string | null = null;
+
+    if (header && header.startsWith("Bearer ")) {
+      token = header.substring(7);
+    } else if (typeof req.query.token === "string" && req.query.token.length > 0) {
+      token = req.query.token;
+    }
+
+    if (!token) {
+      throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
+    const jwtSecret = process.env.NEXTAUTH_SECRET;
+    if (!jwtSecret) {
+      throw new ApiError(500, "JWT secret not configured");
+    }
+
+    const decoded = jwt.verify(token, jwtSecret) as {
+      sub?: string;
+      id?: string;
+      email?: string;
+      role?: string;
+    };
+
+    const userId = decoded.sub || decoded.id;
+    if (!userId) {
+      throw new ApiError(401, "Invalid token: missing user identifier");
+    }
+
+    req.user = {
+      userId,
+      id: userId,
+      email: decoded.email as string,
+      role: decoded.role as string,
+    };
+
+    next();
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      next(new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_TOKEN));
+    } else if (error instanceof jwt.TokenExpiredError) {
+      next(new ApiError(401, AUTH_ERROR_MESSAGES.TOKEN_EXPIRED));
+    } else if (error instanceof ApiError) {
+      next(error);
+    } else {
+      next(new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_TOKEN));
+    }
+  }
+};
+
+/**
  * Optional authentication middleware - doesn't throw error if no token
  */
 export const optionalAuth = async (
