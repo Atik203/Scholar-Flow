@@ -4716,6 +4716,7 @@ export const AIConversationMessageScalarFieldEnum = {
   content: 'content',
   model: 'model',
   tokensUsed: 'tokensUsed',
+  costCents: 'costCents',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -4733,6 +4734,8 @@ export const AIProviderScalarFieldEnum = {
   isDefault: 'isDefault',
   description: 'description',
   apiKeyEnvName: 'apiKeyEnvName',
+  inputCostPer1k: 'inputCostPer1k',
+  outputCostPer1k: 'outputCostPer1k',
   displayOrder: 'displayOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -5508,6 +5511,20 @@ export type ListEnumCollectionPermissionFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
  * Reference to a field of type 'SubscriptionStatus'
  */
 export type EnumSubscriptionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionStatus'>
@@ -5784,20 +5801,6 @@ export type EnumContentReportStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'ContentReportStatus[]'
  */
 export type ListEnumContentReportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContentReportStatus[]'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**

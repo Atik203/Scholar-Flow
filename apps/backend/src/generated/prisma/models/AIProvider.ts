@@ -27,10 +27,14 @@ export type AggregateAIProvider = {
 }
 
 export type AIProviderAvgAggregateOutputType = {
+  inputCostPer1k: number | null
+  outputCostPer1k: number | null
   displayOrder: number | null
 }
 
 export type AIProviderSumAggregateOutputType = {
+  inputCostPer1k: number | null
+  outputCostPer1k: number | null
   displayOrder: number | null
 }
 
@@ -43,6 +47,8 @@ export type AIProviderMinAggregateOutputType = {
   isDefault: boolean | null
   description: string | null
   apiKeyEnvName: string | null
+  inputCostPer1k: number | null
+  outputCostPer1k: number | null
   displayOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -58,6 +64,8 @@ export type AIProviderMaxAggregateOutputType = {
   isDefault: boolean | null
   description: string | null
   apiKeyEnvName: string | null
+  inputCostPer1k: number | null
+  outputCostPer1k: number | null
   displayOrder: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -73,6 +81,8 @@ export type AIProviderCountAggregateOutputType = {
   isDefault: number
   description: number
   apiKeyEnvName: number
+  inputCostPer1k: number
+  outputCostPer1k: number
   displayOrder: number
   createdAt: number
   updatedAt: number
@@ -82,10 +92,14 @@ export type AIProviderCountAggregateOutputType = {
 
 
 export type AIProviderAvgAggregateInputType = {
+  inputCostPer1k?: true
+  outputCostPer1k?: true
   displayOrder?: true
 }
 
 export type AIProviderSumAggregateInputType = {
+  inputCostPer1k?: true
+  outputCostPer1k?: true
   displayOrder?: true
 }
 
@@ -98,6 +112,8 @@ export type AIProviderMinAggregateInputType = {
   isDefault?: true
   description?: true
   apiKeyEnvName?: true
+  inputCostPer1k?: true
+  outputCostPer1k?: true
   displayOrder?: true
   createdAt?: true
   updatedAt?: true
@@ -113,6 +129,8 @@ export type AIProviderMaxAggregateInputType = {
   isDefault?: true
   description?: true
   apiKeyEnvName?: true
+  inputCostPer1k?: true
+  outputCostPer1k?: true
   displayOrder?: true
   createdAt?: true
   updatedAt?: true
@@ -128,6 +146,8 @@ export type AIProviderCountAggregateInputType = {
   isDefault?: true
   description?: true
   apiKeyEnvName?: true
+  inputCostPer1k?: true
+  outputCostPer1k?: true
   displayOrder?: true
   createdAt?: true
   updatedAt?: true
@@ -230,6 +250,8 @@ export type AIProviderGroupByOutputType = {
   isDefault: boolean
   description: string | null
   apiKeyEnvName: string | null
+  inputCostPer1k: number | null
+  outputCostPer1k: number | null
   displayOrder: number
   createdAt: Date
   updatedAt: Date
@@ -268,6 +290,8 @@ export type AIProviderWhereInput = {
   isDefault?: Prisma.BoolFilter<"AIProvider"> | boolean
   description?: Prisma.StringNullableFilter<"AIProvider"> | string | null
   apiKeyEnvName?: Prisma.StringNullableFilter<"AIProvider"> | string | null
+  inputCostPer1k?: Prisma.FloatNullableFilter<"AIProvider"> | number | null
+  outputCostPer1k?: Prisma.FloatNullableFilter<"AIProvider"> | number | null
   displayOrder?: Prisma.IntFilter<"AIProvider"> | number
   createdAt?: Prisma.DateTimeFilter<"AIProvider"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AIProvider"> | Date | string
@@ -283,6 +307,8 @@ export type AIProviderOrderByWithRelationInput = {
   isDefault?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   apiKeyEnvName?: Prisma.SortOrderInput | Prisma.SortOrder
+  inputCostPer1k?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrderInput | Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -302,6 +328,8 @@ export type AIProviderWhereUniqueInput = Prisma.AtLeast<{
   isDefault?: Prisma.BoolFilter<"AIProvider"> | boolean
   description?: Prisma.StringNullableFilter<"AIProvider"> | string | null
   apiKeyEnvName?: Prisma.StringNullableFilter<"AIProvider"> | string | null
+  inputCostPer1k?: Prisma.FloatNullableFilter<"AIProvider"> | number | null
+  outputCostPer1k?: Prisma.FloatNullableFilter<"AIProvider"> | number | null
   displayOrder?: Prisma.IntFilter<"AIProvider"> | number
   createdAt?: Prisma.DateTimeFilter<"AIProvider"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AIProvider"> | Date | string
@@ -317,6 +345,8 @@ export type AIProviderOrderByWithAggregationInput = {
   isDefault?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   apiKeyEnvName?: Prisma.SortOrderInput | Prisma.SortOrder
+  inputCostPer1k?: Prisma.SortOrderInput | Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrderInput | Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -340,6 +370,8 @@ export type AIProviderScalarWhereWithAggregatesInput = {
   isDefault?: Prisma.BoolWithAggregatesFilter<"AIProvider"> | boolean
   description?: Prisma.StringNullableWithAggregatesFilter<"AIProvider"> | string | null
   apiKeyEnvName?: Prisma.StringNullableWithAggregatesFilter<"AIProvider"> | string | null
+  inputCostPer1k?: Prisma.FloatNullableWithAggregatesFilter<"AIProvider"> | number | null
+  outputCostPer1k?: Prisma.FloatNullableWithAggregatesFilter<"AIProvider"> | number | null
   displayOrder?: Prisma.IntWithAggregatesFilter<"AIProvider"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AIProvider"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AIProvider"> | Date | string
@@ -355,6 +387,8 @@ export type AIProviderCreateInput = {
   isDefault?: boolean
   description?: string | null
   apiKeyEnvName?: string | null
+  inputCostPer1k?: number | null
+  outputCostPer1k?: number | null
   displayOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -370,6 +404,8 @@ export type AIProviderUncheckedCreateInput = {
   isDefault?: boolean
   description?: string | null
   apiKeyEnvName?: string | null
+  inputCostPer1k?: number | null
+  outputCostPer1k?: number | null
   displayOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -385,6 +421,8 @@ export type AIProviderUpdateInput = {
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   apiKeyEnvName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  outputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -400,6 +438,8 @@ export type AIProviderUncheckedUpdateInput = {
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   apiKeyEnvName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  outputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +455,8 @@ export type AIProviderCreateManyInput = {
   isDefault?: boolean
   description?: string | null
   apiKeyEnvName?: string | null
+  inputCostPer1k?: number | null
+  outputCostPer1k?: number | null
   displayOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -430,6 +472,8 @@ export type AIProviderUpdateManyMutationInput = {
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   apiKeyEnvName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  outputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -445,6 +489,8 @@ export type AIProviderUncheckedUpdateManyInput = {
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   apiKeyEnvName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  outputCostPer1k?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   displayOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -465,6 +511,8 @@ export type AIProviderCountOrderByAggregateInput = {
   isDefault?: Prisma.SortOrder
   description?: Prisma.SortOrder
   apiKeyEnvName?: Prisma.SortOrder
+  inputCostPer1k?: Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -472,6 +520,8 @@ export type AIProviderCountOrderByAggregateInput = {
 }
 
 export type AIProviderAvgOrderByAggregateInput = {
+  inputCostPer1k?: Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
 }
 
@@ -484,6 +534,8 @@ export type AIProviderMaxOrderByAggregateInput = {
   isDefault?: Prisma.SortOrder
   description?: Prisma.SortOrder
   apiKeyEnvName?: Prisma.SortOrder
+  inputCostPer1k?: Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -499,6 +551,8 @@ export type AIProviderMinOrderByAggregateInput = {
   isDefault?: Prisma.SortOrder
   description?: Prisma.SortOrder
   apiKeyEnvName?: Prisma.SortOrder
+  inputCostPer1k?: Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -506,6 +560,8 @@ export type AIProviderMinOrderByAggregateInput = {
 }
 
 export type AIProviderSumOrderByAggregateInput = {
+  inputCostPer1k?: Prisma.SortOrder
+  outputCostPer1k?: Prisma.SortOrder
   displayOrder?: Prisma.SortOrder
 }
 
@@ -520,6 +576,8 @@ export type AIProviderSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   isDefault?: boolean
   description?: boolean
   apiKeyEnvName?: boolean
+  inputCostPer1k?: boolean
+  outputCostPer1k?: boolean
   displayOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -535,6 +593,8 @@ export type AIProviderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   isDefault?: boolean
   description?: boolean
   apiKeyEnvName?: boolean
+  inputCostPer1k?: boolean
+  outputCostPer1k?: boolean
   displayOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -550,6 +610,8 @@ export type AIProviderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   isDefault?: boolean
   description?: boolean
   apiKeyEnvName?: boolean
+  inputCostPer1k?: boolean
+  outputCostPer1k?: boolean
   displayOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -565,13 +627,15 @@ export type AIProviderSelectScalar = {
   isDefault?: boolean
   description?: boolean
   apiKeyEnvName?: boolean
+  inputCostPer1k?: boolean
+  outputCostPer1k?: boolean
   displayOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type AIProviderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "provider" | "model" | "displayName" | "enabled" | "isDefault" | "description" | "apiKeyEnvName" | "displayOrder" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["aIProvider"]>
+export type AIProviderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "provider" | "model" | "displayName" | "enabled" | "isDefault" | "description" | "apiKeyEnvName" | "inputCostPer1k" | "outputCostPer1k" | "displayOrder" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["aIProvider"]>
 
 export type $AIProviderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AIProvider"
@@ -585,6 +649,8 @@ export type $AIProviderPayload<ExtArgs extends runtime.Types.Extensions.Internal
     isDefault: boolean
     description: string | null
     apiKeyEnvName: string | null
+    inputCostPer1k: number | null
+    outputCostPer1k: number | null
     displayOrder: number
     createdAt: Date
     updatedAt: Date
@@ -1020,6 +1086,8 @@ export interface AIProviderFieldRefs {
   readonly isDefault: Prisma.FieldRef<"AIProvider", 'Boolean'>
   readonly description: Prisma.FieldRef<"AIProvider", 'String'>
   readonly apiKeyEnvName: Prisma.FieldRef<"AIProvider", 'String'>
+  readonly inputCostPer1k: Prisma.FieldRef<"AIProvider", 'Float'>
+  readonly outputCostPer1k: Prisma.FieldRef<"AIProvider", 'Float'>
   readonly displayOrder: Prisma.FieldRef<"AIProvider", 'Int'>
   readonly createdAt: Prisma.FieldRef<"AIProvider", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AIProvider", 'DateTime'>
