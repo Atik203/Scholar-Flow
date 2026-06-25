@@ -2,11 +2,15 @@
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { NotificationStreamProvider } from "@/components/providers/NotificationStreamProvider";
+import { useSocketKeepAlive } from "@/hooks/useSocketKeepAlive";
 import { useOnboardingGuard } from "@/hooks/useAuthGuard";
 import { PropsWithChildren, Suspense } from "react";
 
 export default function AppDashboardLayout({ children }: PropsWithChildren) {
   const { isLoading } = useOnboardingGuard();
+
+  // Keep the socket server warm (Render free-tier cold start prevention)
+  useSocketKeepAlive();
 
   if (isLoading) {
     return (
