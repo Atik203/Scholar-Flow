@@ -5,7 +5,7 @@ import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
 
 const PORT = parseInt(process.env.PORT || "5001", 10);
-const JWT_SECRET = process.env.JWT_SECRET || "5a2857498511e2dbf364e26a03c0dddb";
+const JWT_SECRET = process.env.NEXTAUTH_SECRET || "e0ed4136d0f47d278c4068ceb51bf4a1df62d88e060dea5cad643e762b6c9da2";
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 interface AuthenticatedSocket extends Socket {
