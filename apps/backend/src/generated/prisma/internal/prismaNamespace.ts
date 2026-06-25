@@ -4561,6 +4561,9 @@ export const AnnotationScalarFieldEnum = {
   text: 'text',
   version: 'version',
   parentId: 'parentId',
+  color: 'color',
+  positionIndex: 'positionIndex',
+  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
