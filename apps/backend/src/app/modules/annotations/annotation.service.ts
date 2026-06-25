@@ -22,12 +22,15 @@ export class AnnotationService {
       await prisma.$executeRaw`
         INSERT INTO "Annotation" (
           id, "paperId", "userId", type, anchor, text, "parentId", version, 
+          color, "positionIndex", metadata,
           "createdAt", "updatedAt", "isDeleted"
         )
         VALUES (
           ${annotationId}, ${data.paperId}, ${userId}, ${data.type}::"AnnotationType",
           ${JSON.stringify(data.anchor)}::jsonb, ${data.text}, ${data.parentId || null},
-          1, ${now}, ${now}, false
+          1, ${data.color || "#FFEB3B"}, ${data.anchor.coordinates.y || 0},
+          ${data.metadata ? JSON.stringify(data.metadata) : null}::jsonb,
+          ${now}, ${now}, false
         )
       `;
 
@@ -35,6 +38,7 @@ export class AnnotationService {
       const annotations = await prisma.$queryRaw<any[]>`
         SELECT 
           a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
+          a.color, a."positionIndex", a.metadata,
           a."parentId", a."createdAt", a."updatedAt",
           json_build_object(
             'id', u.id,
@@ -132,6 +136,9 @@ export class AnnotationService {
             text: true,
             version: true,
             parentId: true,
+            color: true,
+            positionIndex: true,
+            metadata: true,
             createdAt: true,
             updatedAt: true,
             user: {
@@ -143,6 +150,7 @@ export class AnnotationService {
               select: {
                 id: true,
                 text: true,
+                color: true,
                 createdAt: true,
                 updatedAt: true,
                 user: {
@@ -241,11 +249,18 @@ export class AnnotationService {
         ? JSON.stringify(data.anchor)
         : JSON.stringify(currentAnnotation.anchor);
 
+      const newColor = data.color || currentAnnotation.color;
+      const newMetadata = data.metadata
+        ? JSON.stringify(data.metadata)
+        : JSON.stringify(currentAnnotation.metadata);
+
       await prisma.$executeRaw`
         UPDATE "Annotation"
         SET text = ${newText},
             version = ${newVersion},
             anchor = ${newAnchor}::jsonb,
+            color = ${newColor},
+            metadata = ${newMetadata}::jsonb,
             "updatedAt" = ${now}
         WHERE id = ${annotationId}
       `;
@@ -254,6 +269,7 @@ export class AnnotationService {
       const updatedAnnotations = await prisma.$queryRaw<any[]>`
         SELECT 
           a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
+          a.color, a."positionIndex", a.metadata,
           a."parentId", a."createdAt", a."updatedAt",
           json_build_object(
             'id', u.id,
@@ -369,12 +385,15 @@ export class AnnotationService {
       await prisma.$executeRaw`
         INSERT INTO "Annotation" (
           id, "paperId", "userId", type, anchor, text, "parentId", version,
+          color, "positionIndex", metadata,
           "createdAt", "updatedAt", "isDeleted"
         )
         VALUES (
           ${replyId}, ${parentAnnotation.paperId}, ${userId}, 
           'COMMENT'::"AnnotationType", ${JSON.stringify(parentAnnotation.anchor)}::jsonb,
-          ${data.text}, ${annotationId}, 1, ${now}, ${now}, false
+          ${data.text}, ${annotationId}, 1,
+          ${data.color || "#2196F3"}, 0, NULL::jsonb,
+          ${now}, ${now}, false
         )
       `;
 
@@ -382,6 +401,7 @@ export class AnnotationService {
       const replies = await prisma.$queryRaw<any[]>`
         SELECT 
           a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
+          a.color, a."positionIndex", a.metadata,
           a."parentId", a."createdAt", a."updatedAt",
           json_build_object(
             'id', u.id,
@@ -455,6 +475,7 @@ export class AnnotationService {
       const annotations = await prisma.$queryRaw<any[]>`
         SELECT 
           a.id, a."paperId", a."userId", a.type, a.anchor, a.text, a.version,
+          a.color, a."positionIndex", a.metadata,
           a."parentId", a."createdAt", a."updatedAt",
           json_build_object(
             'id', p.id,

@@ -43,6 +43,18 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const [editTags, setEditTags] = useState("");
   const [showAiSummary, setShowAiSummary] = useState(false);
 
+  useEffect(() => {
+    if (!showPreview) setPreviewLoading(true);
+  }, [showPreview]);
+
+  useEffect(() => {
+    if (paper?.processingStatus === "PROCESSING") {
+      setPollProcessing(true);
+    } else {
+      setPollProcessing(false);
+    }
+  }, [paper?.processingStatus]);
+
   if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   if (error || !paper) return <div className="text-center py-20"><p className="text-destructive mb-4">Paper not found</p><Button asChild variant="outline"><Link href="/dashboard/papers"><ArrowLeft className="mr-2 h-4 w-4" />Back to Papers</Link></Button></div>;
 
@@ -68,18 +80,6 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
       showSuccessToast("Processing started");
     } catch (e: unknown) { showApiErrorToast(e as any); }
   };
-
-  useEffect(() => {
-    if (!showPreview) setPreviewLoading(true);
-  }, [showPreview]);
-
-  useEffect(() => {
-    if (paper?.processingStatus === "PROCESSING") {
-      setPollProcessing(true);
-    } else {
-      setPollProcessing(false);
-    }
-  }, [paper?.processingStatus]);
 
   const startEdit = () => {
     setEditTitle(paper.title);

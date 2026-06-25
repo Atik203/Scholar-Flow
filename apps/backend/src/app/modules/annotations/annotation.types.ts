@@ -60,11 +60,15 @@ export const createAnnotationSchema = z.object({
   }),
   text: z.string().min(1).max(5000),
   parentId: z.string().uuid().optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  metadata: z.record(z.unknown()).optional(),
 });
 
 // Annotation update schema
 export const updateAnnotationSchema = z.object({
   text: z.string().min(1).max(5000).optional(),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  metadata: z.record(z.unknown()).optional(),
   anchor: z
     .object({
       page: z.number().min(1),
@@ -102,6 +106,7 @@ export const updateAnnotationSchema = z.object({
 // Annotation reply schema
 export const createAnnotationReplySchema = z.object({
   text: z.string().min(1).max(5000),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
 });
 
 // Query parameters for getting annotations
