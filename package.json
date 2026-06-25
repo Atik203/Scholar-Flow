@@ -44,7 +44,7 @@
   },
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=24.0.0",
     "yarn": ">=4.9.2"
   },
   "packageManager": "yarn@4.9.2",
