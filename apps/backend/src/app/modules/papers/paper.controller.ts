@@ -262,7 +262,7 @@ export const paperController = {
     }
 
     // Use shorter expiry for security; front-end can re-request as needed
-    const EXPIRES_SECONDS = 300; // 5 minutes for preview (longer than file download)
+    const EXPIRES_SECONDS = 900; // 15 minutes for preview
     const url = await storage.getSignedUrl(objectKey, EXPIRES_SECONDS);
 
     // Add Cache-Control header to prevent caching of signed URLs
@@ -509,7 +509,6 @@ export const paperController = {
     }
 
     try {
-      // Try to queue document processing first (supports PDF, DOCX, etc.)
       await queueDocumentExtraction(parsed.data.id);
 
       console.log(
@@ -522,56 +521,58 @@ export const paperController = {
       );
     } catch (queueError) {
       console.warn(
-        `[PaperController] Queue failed for paper ${parsed.data.id}, attempting direct processing:`,
+        `[PaperController] Queue failed for paper ${parsed.data.id}, starting direct processing (async):`,
         queueError
       );
 
-      // Fallback: Process directly if queue fails
-      try {
-        const { documentExtractionService } = await import(
-          "../../services/documentExtractionService"
-        );
-        console.log(
-          `[PaperController] Starting direct document processing for paper: ${parsed.data.id}`
-        );
+      // Update status to PROCESSING immediately
+      await paperService.updateProcessingStatus(
+        parsed.data.id,
+        "PROCESSING",
+        null
+      );
 
-        const result = await documentExtractionService.extractFromDocument(
-          parsed.data.id,
-          {
-            preserveFormatting: true,
-            includeHtml: true,
-          }
-        );
-
-        if (result.success) {
+      // Fire direct processing in background (non-blocking)
+      setImmediate(async () => {
+        try {
+          const { documentExtractionService } = await import(
+            "../../services/documentExtractionService"
+          );
           console.log(
-            `[PaperController] Direct document processing completed successfully for paper: ${parsed.data.id}`
+            `[PaperController] Starting direct document processing for paper: ${parsed.data.id}`
           );
-          sendSuccessResponse(
-            res,
-            { message: "Document processing completed directly" },
-            "Document processing completed"
+
+          const result = await documentExtractionService.extractFromDocument(
+            parsed.data.id,
+            {
+              preserveFormatting: true,
+              includeHtml: true,
+            }
           );
-        } else {
+
+          if (result.success) {
+            console.log(
+              `[PaperController] Direct document processing completed successfully for paper: ${parsed.data.id}`
+            );
+          } else {
+            console.error(
+              `[PaperController] Direct document processing failed for paper ${parsed.data.id}:`,
+              result.error
+            );
+          }
+        } catch (directError) {
           console.error(
-            `[PaperController] Direct document processing failed for paper ${parsed.data.id}:`,
-            result.error
-          );
-          throw new ApiError(
-            500,
-            `Document processing failed: ${result.error}`
+            `[PaperController] Async direct processing also failed for paper ${parsed.data.id}:`,
+            directError
           );
         }
-      } catch (directError) {
-        console.error(
-          `[PaperController] Direct processing also failed for paper ${parsed.data.id}:`,
-          directError
-        );
-        throw new ApiError(
-          500,
-          `Document processing failed: ${directError instanceof Error ? directError.message : String(directError)}`
-        );
-      }
+      });
+
+      sendSuccessResponse(
+        res,
+        { message: "Document processing started asynchronously" },
+        "Document processing started"
+      );
     }
   }),
 

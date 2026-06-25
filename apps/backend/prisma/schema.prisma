@@ -491,10 +491,13 @@ model Annotation {
   paperId  String
   userId   String
   type     AnnotationType @default(HIGHLIGHT)
-  anchor   Json           @db.JsonB // position anchors
+  anchor   Json           @db.JsonB
   text     String
   version  Int            @default(1)
   parentId String?
+  color    String         @default("#FFEB3B")
+  positionIndex Int      @default(0)
+  metadata Json?
 
   parent   Annotation?  @relation("AnnotationThread", fields: [parentId], references: [id])
   children Annotation[] @relation("AnnotationThread")
