@@ -233,6 +233,10 @@ model User {
   @@index([isDeleted, createdAt]) // For listing active users sorted by creation
   @@index([role, isDeleted, createdAt]) // For role-filtered queries
   @@index([email, isDeleted]) // For email lookups with deletion filter
+
+  // Login tracking
+  lastLoginProvider String? // "google" | "github" | "credentials" | "magic-link"
+  loginHistory      LoginHistory[]
 }
 
 model Workspace {
@@ -934,6 +938,21 @@ model Session {
   // Optimized index - composite is sufficient for session lookups
   @@index([userId, expires])
   @@index([expires, isDeleted]) // For cleanup queries
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String   // "google" | "github" | "credentials" | "magic-link"
+  ip        String?
+  userAgent String?
+  device    String?  // derived from user-agent (e.g. "Chrome on MacOS")
+  location  String?  // geocoded from IP (e.g. "New York, USA")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model VerificationToken {
