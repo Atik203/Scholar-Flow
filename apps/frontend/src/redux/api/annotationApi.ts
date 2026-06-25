@@ -40,6 +40,9 @@ export interface Annotation {
   text: string;
   version: number;
   parentId?: string;
+  color: string;
+  positionIndex: number;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
   user: {
@@ -77,10 +80,12 @@ export interface CreateAnnotationRequest {
   anchor: AnnotationAnchor;
   text: string;
   parentId?: string;
+  color?: string;
 }
 
 export interface UpdateAnnotationRequest {
   text?: string;
+  color?: string;
   anchor?: AnnotationAnchor;
 }
 
