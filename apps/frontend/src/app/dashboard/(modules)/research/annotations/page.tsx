@@ -29,7 +29,7 @@ export default function ResearchAnnotationsPage() {
   const isProtected = useProtectedRoute();
   const [activeTab, setActiveTab] = useState<
     "preview" | "annotations" | "comments" | "notes"
-  >("preview");
+  >("annotations");
   const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
 
   // Fetch user's papers from database
@@ -64,16 +64,6 @@ export default function ResearchAnnotationsPage() {
       }
     }
   }, [papers, selectedPaperId]);
-
-  // Debug logging
-  useEffect(() => {
-    if (selectedPaperId) {
-      console.log("Selected paper ID:", selectedPaperId);
-      console.log("File URL data:", fileUrlData);
-      console.log("File URL error:", fileUrlError);
-      console.log("Is fetching file URL:", isFetchingFileUrl);
-    }
-  }, [selectedPaperId, fileUrlData, fileUrlError, isFetchingFileUrl]);
 
   if (!isProtected) {
     return null; // Loading state handled by useProtectedRoute
@@ -402,11 +392,10 @@ export default function ResearchAnnotationsPage() {
                           </div>
                         </div>
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
-                        <div className="h-[600px] border rounded-lg overflow-hidden">
+                        <div className="min-h-[75vh] border rounded-lg overflow-hidden">
                           <PdfAnnotationViewerEnhanced
                             fileUrl={fileUrlData.data.url}
                             paperId={selectedPaperId}
-                            className="h-full"
                           />
                         </div>
                       ) : (
