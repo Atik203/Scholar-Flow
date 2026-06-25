@@ -1,251 +1,266 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { formatDistanceToNow } from "date-fns";
+import { Trash2, Reply, Send, Save } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Annotation, AnnotationAnchor } from "@/redux/api/annotationApi";
-import {
-  Highlighter,
-  MessageSquare,
-  Pen,
-  Save,
-  Square,
-  StickyNote,
-  Strikethrough,
-  Trash2,
-  Underline,
-  X,
-} from "lucide-react";
-import { useState } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Annotation } from "@/redux/api/annotationApi";
 
 interface AnnotationEditDialogProps {
-  annotation: Annotation;
-  onSave: (text: string, anchor?: AnnotationAnchor) => void;
-  onCancel: () => void;
-  onDelete: () => void;
+  annotation: Annotation | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (id: string, data: { text?: string; color?: string }) => void;
+  onDelete: (id: string) => void;
+  onReply: (parentId: string, data: { text: string; color?: string }) => void;
+}
+
+const COLORS = [
+  "#FFEB3B",
+  "#4CAF50",
+  "#2196F3",
+  "#E91E63",
+  "#FF9800",
+  "#9C27B0",
+];
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function AnnotationEditDialog({
   annotation,
+  open,
+  onOpenChange,
   onSave,
-  onCancel,
   onDelete,
+  onReply,
 }: AnnotationEditDialogProps) {
-  const [text, setText] = useState(annotation.text);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [text, setText] = useState(annotation?.text ?? "");
+  const [color, setColor] = useState(annotation?.color ?? COLORS[0]);
+  const [replyText, setReplyText] = useState("");
+  const [showReply, setShowReply] = useState(false);
 
-  const getAnnotationIcon = () => {
-    const iconClass = "h-5 w-5";
-    switch (annotation.type) {
-      case "HIGHLIGHT":
-        return <Highlighter className={iconClass} />;
-      case "UNDERLINE":
-        return <Underline className={iconClass} />;
-      case "STRIKETHROUGH":
-        return <Strikethrough className={iconClass} />;
-      case "AREA":
-        return <Square className={iconClass} />;
-      case "COMMENT":
-        return <MessageSquare className={iconClass} />;
-      case "NOTE":
-        return <StickyNote className={iconClass} />;
-      case "INK":
-        return <Pen className={iconClass} />;
-      default:
-        return <Square className={iconClass} />;
-    }
-  };
-
-  const getAnnotationColor = () => {
-    switch (annotation.type) {
-      case "HIGHLIGHT":
-        return "text-yellow-700 bg-yellow-100 border-yellow-300";
-      case "UNDERLINE":
-        return "text-blue-700 bg-blue-100 border-blue-300";
-      case "STRIKETHROUGH":
-        return "text-red-700 bg-red-100 border-red-300";
-      case "AREA":
-        return "text-purple-700 bg-purple-100 border-purple-300";
-      case "COMMENT":
-        return "text-blue-700 bg-blue-100 border-blue-300";
-      case "NOTE":
-        return "text-green-700 bg-green-100 border-green-300";
-      case "INK":
-        return "text-gray-700 bg-gray-100 border-gray-300";
-      default:
-        return "text-gray-700 bg-gray-100 border-gray-300";
-    }
-  };
+  if (!annotation) return null;
 
   const handleSave = () => {
-    if (text.trim()) {
-      onSave(text.trim());
-    }
+    onSave(annotation.id, { text: text.trim() || undefined, color });
+    onOpenChange(false);
   };
 
   const handleDelete = () => {
-    onDelete();
-    setIsDeleteDialogOpen(false);
+    onDelete(annotation.id);
+    onOpenChange(false);
   };
 
-  const colorClass = getAnnotationColor();
+  const handleReply = () => {
+    if (!replyText.trim()) return;
+    onReply(annotation.id, { text: replyText.trim() });
+    setReplyText("");
+    setShowReply(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    }
+  };
 
   return (
-    <Dialog open={true} onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto"
+        onKeyDown={handleKeyDown}
+      >
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg border ${colorClass}`}>
-              {getAnnotationIcon()}
-            </div>
-            <div className="flex-1">
-              <DialogTitle className="text-xl">
-                Edit{" "}
-                {annotation.type.charAt(0) +
-                  annotation.type.slice(1).toLowerCase()}{" "}
-                Annotation
-              </DialogTitle>
-              <DialogDescription>
-                Page {annotation.anchor.page} • Created by{" "}
+            <span
+              className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold"
+              style={{
+                backgroundColor: annotation.color + "20",
+                color: annotation.color,
+                border: `1px solid ${annotation.color}40`,
+              }}
+            >
+              {annotation.type}
+            </span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Avatar className="size-5">
+                <AvatarImage src={annotation.user.image} />
+                <AvatarFallback className="text-[10px]">
+                  {getInitials(annotation.user.name)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="font-medium text-foreground">
                 {annotation.user.name}
-              </DialogDescription>
+              </span>
+              <span>&middot;</span>
+              <span>
+                {formatDistanceToNow(new Date(annotation.createdAt), {
+                  addSuffix: true,
+                })}
+              </span>
             </div>
           </div>
+          <DialogTitle className="sr-only">Edit Annotation</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          {/* Selected text preview */}
+        <div className="space-y-4">
           {annotation.anchor.selectedText && (
-            <>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">
-                  Selected Text
-                </label>
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-sm text-gray-700 italic">
-                    "{annotation.anchor.selectedText}"
-                  </p>
-                </div>
-              </div>
-              <Separator />
-            </>
+            <div className="border-l-2 border-muted pl-4 py-2 text-sm text-muted-foreground italic">
+              &ldquo;{annotation.anchor.selectedText}&rdquo;
+            </div>
           )}
 
-          {/* Annotation text editor */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Annotation Text
-            </label>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">
+              Color
+            </span>
+            <div className="flex gap-1.5">
+              {COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className="size-6 rounded-full border-2 transition-all"
+                  style={{
+                    backgroundColor: c,
+                    borderColor: c === color ? c : "transparent",
+                    boxShadow:
+                      c === color
+                        ? `0 0 0 2px hsl(var(--background)), 0 0 0 4px ${c}`
+                        : "none",
+                  }}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Enter your annotation text..."
-              className="min-h-[120px] resize-none"
+              placeholder="Edit annotation text..."
+              className="min-h-[100px] resize-none"
               autoFocus
             />
-            <p className="text-xs text-gray-500 mt-1">
-              {text.length} / 5000 characters
+            <p className="text-xs text-muted-foreground text-right">
+              {text.length} characters
             </p>
           </div>
 
-          {/* Metadata */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="text-xs">
-              Version {annotation.version}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              Created {new Date(annotation.createdAt).toLocaleString()}
-            </Badge>
-            {annotation.updatedAt !== annotation.createdAt && (
-              <Badge variant="outline" className="text-xs">
-                Updated {new Date(annotation.updatedAt).toLocaleString()}
-              </Badge>
-            )}
-          </div>
-
-          {/* Replies count */}
           {annotation.children && annotation.children.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800 font-medium">
-                This annotation has {annotation.children.length}{" "}
-                {annotation.children.length === 1 ? "reply" : "replies"}
+            <div className="space-y-3 border-l-2 border-muted pl-4">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Replies ({annotation.children.length})
               </p>
+              {annotation.children.map((reply) => (
+                <div key={reply.id} className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Avatar className="size-4">
+                      <AvatarImage src={reply.user.image} />
+                      <AvatarFallback className="text-[8px]">
+                        {getInitials(reply.user.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-foreground">
+                      {reply.user.name}
+                    </span>
+                    <span>&middot;</span>
+                    <span>
+                      {formatDistanceToNow(new Date(reply.createdAt), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                    <span
+                      className="ml-auto size-2 rounded-full"
+                      style={{ backgroundColor: reply.color || COLORS[0] }}
+                    />
+                  </div>
+                  <p className="text-sm pl-6">{reply.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showReply && (
+            <div className="flex gap-2 pl-4">
+              <Textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="Write a reply..."
+                className="min-h-[60px] resize-none text-sm"
+                autoFocus
+              />
+              <Button
+                size="icon"
+                variant="secondary"
+                onClick={handleReply}
+                disabled={!replyText.trim()}
+                className="shrink-0 self-end"
+              >
+                <Send className="size-4" />
+              </Button>
             </div>
           )}
         </div>
 
-        <DialogFooter className="flex justify-between sm:justify-between">
-          {/* Delete button with confirmation */}
-          <AlertDialog
-            open={isDeleteDialogOpen}
-            onOpenChange={setIsDeleteDialogOpen}
+        <div className="flex items-center justify-between gap-2 pt-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleDelete}
+            className="gap-1.5"
           >
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm" className="gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Annotation?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  this annotation
-                  {annotation.children &&
-                    annotation.children.length > 0 &&
-                    ` and its ${annotation.children.length} ${annotation.children.length === 1 ? "reply" : "replies"}`}
-                  .
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            <Trash2 className="size-4" />
+            Delete
+          </Button>
 
-          {/* Save/Cancel buttons */}
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onCancel} className="gap-2">
-              <X className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            {!showReply && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReply(true)}
+                className="gap-1.5"
+              >
+                <Reply className="size-4" />
+                Reply
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button
+              size="sm"
               onClick={handleSave}
-              disabled={!text.trim() || text === annotation.text}
-              className="gap-2"
+              disabled={!text.trim() && !color}
+              className="gap-1.5"
             >
-              <Save className="h-4 w-4" />
-              Save Changes
+              <Save className="size-4" />
+              Save
             </Button>
           </div>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
