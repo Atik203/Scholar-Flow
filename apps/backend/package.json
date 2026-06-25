@@ -3,7 +3,6 @@
   "version": "1.3.0-rc1",
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
-
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
