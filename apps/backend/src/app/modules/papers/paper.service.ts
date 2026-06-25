@@ -343,18 +343,29 @@ export const paperService = {
 
       // Queue document extraction for background processing (non-blocking)
       const queueStart = Date.now();
-      // Fire and forget - don't wait for Redis queue operations
       queueDocumentExtraction(created.id)
         .then(() => {
           console.log(
             `[PaperUpload] Queued document extraction for paper: ${created.id} (async)`
           );
         })
-        .catch((error) => {
+        .catch(async (error) => {
           console.error(
-            `[PaperUpload] Failed to queue document extraction for paper: ${created.id}`,
+            `[PaperUpload] Failed to queue document extraction for paper: ${created.id}, falling back to synchronous processing`,
             error
           );
+          try {
+            const { documentExtractionService } = await import(
+              "../../services/documentExtractionService"
+            );
+            await documentExtractionService.extractFromDocument(created.id);
+            console.log(`[PaperUpload] Synchronous extraction completed for paper: ${created.id}`);
+          } catch (syncError) {
+            console.error(
+              `[PaperUpload] Synchronous extraction also failed for paper: ${created.id}`,
+              syncError
+            );
+          }
         });
       console.log(
         `[PaperService] PDF queue (non-blocking): ${Date.now() - queueStart}ms`
@@ -1211,7 +1222,33 @@ export const editorPaperService = {
 
   // Get editor paper content
   async getEditorPaperContent(paperId: string, userId: string) {
-    const result = await prisma.$queryRaw<
+    // First try: user is uploader (covers null workspaceId)
+    let result = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        contentHtml: string | null;
+        isDraft: boolean;
+        isPublished: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        uploaderId: string;
+      }>
+    >`
+      SELECT 
+        p.id, p.title, p."contentHtml", p."isDraft", p."isPublished",
+        p."createdAt", p."updatedAt", p."uploaderId"
+      FROM "Paper" p
+      WHERE p.id = ${paperId}
+        AND p."uploaderId" = ${userId}
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+      LIMIT 1
+    `;
+    if (result[0]) return result[0];
+
+    // Second try: user is workspace member
+    result = await prisma.$queryRaw<
       Array<{
         id: string;
         title: string;
@@ -1228,10 +1265,11 @@ export const editorPaperService = {
         p."createdAt", p."updatedAt", p."uploaderId"
       FROM "Paper" p
       INNER JOIN "WorkspaceMember" wm ON wm."workspaceId" = p."workspaceId"
-      WHERE p.id = ${paperId} 
+      WHERE p.id = ${paperId}
         AND wm."userId" = ${userId}
         AND p."isDeleted" = false
         AND p.source = 'editor'
+      LIMIT 1
     `;
 
     return result[0] || null;
@@ -1368,6 +1406,31 @@ export const editorPaperService = {
         AND "uploaderId" = ${userId}
         AND source = 'editor'
     `;
+  },
+
+  // Public: get published editor paper content (no auth required)
+  async getPublicPaperContent(paperId: string) {
+    const result = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        title: string;
+        contentHtml: string | null;
+        isPublished: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+      }>
+    >`
+      SELECT 
+        p.id, p.title, p."contentHtml", p."isPublished",
+        p."createdAt", p."updatedAt"
+      FROM "Paper" p
+      WHERE p.id = ${paperId}
+        AND p."isPublished" = true
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+      LIMIT 1
+    `;
+    return result[0] || null;
   },
 
   // Auto-save functionality (updates content without changing draft status)

@@ -1,6 +1,5 @@
 "use client";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DocumentPreview } from "@/components/papers/DocumentPreview";
 import { ExtractionViewer } from "@/components/papers/ExtractionViewer";
 import { PdfProcessingStatus } from "@/components/papers/PdfProcessingStatus";
@@ -141,19 +140,16 @@ export default function PdfExtractionPage() {
   // Show loading state while auth guard is resolving
   if (isLoading) {
     return (
-      <DashboardLayout>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
             <p className="text-muted-foreground">Loading...</p>
           </div>
         </div>
-      </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -860,6 +856,5 @@ export default function PdfExtractionPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
   );
 }

@@ -1,8 +1,15 @@
 import { apiSlice } from './apiSlice';
 
+export type SearchTabType =
+  | "all"
+  | "papers"
+  | "people"
+  | "workspaces"
+  | "internet";
+
 export interface GlobalSearchQuery {
   q: string;
-  type?: "all" | "papers" | "collections" | "workspaces";
+  type?: SearchTabType;
   page?: number;
   limit?: number;
   workspaceId?: string;
@@ -14,16 +21,28 @@ export interface SearchResultItem {
   name?: string;
   description?: string;
   abstract?: string;
+  excerpt?: string;
   metadata?: Record<string, unknown>;
   source?: string;
   createdAt?: string;
   isPublic?: boolean;
+  // Phase D.1: people + notes
+  email?: string;
+  image?: string | null;
+  role?: string;
+  institution?: string | null;
+  noteType?: string;
+  visibility?: string;
+  updatedAt?: string;
 }
 
 export interface SearchResults {
   papers?: { total: number; items: SearchResultItem[] };
   collections?: { total: number; items: SearchResultItem[] };
   workspaces?: { total: number; items: SearchResultItem[] };
+  notes?: { total: number; items: SearchResultItem[] };
+  people?: { total: number; items: SearchResultItem[] };
+  internet?: { total: number; items: SearchResultItem[]; fallback?: string };
 }
 
 export interface GlobalSearchResponse {
@@ -70,6 +89,27 @@ export interface DiscoveryResponse {
   data: SearchResultItem[];
 }
 
+// Phase D.2 — Perplexity-style AI summary + citations.
+export interface AISearchSource {
+  id: string;
+  type: "paper" | "collection" | "workspace";
+  title: string;
+  href: string;
+}
+
+export interface AISearchResponse {
+  summary: string;
+  sources: AISearchSource[];
+  fallback: string | null;
+}
+
+export interface AISearchRequest {
+  q: string;
+  mode?: "summarize";
+  workspaceId?: string;
+  model?: string;
+}
+
 export const searchApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     globalSearch: builder.query<GlobalSearchResponse, GlobalSearchQuery>({
@@ -80,13 +120,12 @@ export const searchApi = apiSlice.injectEndpoints({
         if (params.page) queryParams.append('page', params.page.toString());
         if (params.limit) queryParams.append('limit', params.limit.toString());
         if (params.workspaceId) queryParams.append('workspaceId', params.workspaceId);
-        
+
         return `/search?${queryParams.toString()}`;
       },
-      // Cache results based on query parameters, keep unused for a bit
       keepUnusedDataFor: 60,
     }),
-    
+
     getSearchHistory: builder.query<SearchHistoryResponse, { page?: number; limit?: number }>({
       query: (params) => {
         const queryParams = new URLSearchParams();
@@ -96,7 +135,7 @@ export const searchApi = apiSlice.injectEndpoints({
       },
       providesTags: ['SearchHistory']
     }),
-    
+
     saveSearchQuery: builder.mutation<
       SaveSearchQueryResponse,
       SaveSearchQueryRequest
@@ -108,12 +147,12 @@ export const searchApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['SearchHistory']
     }),
-    
+
     getTrending: builder.query<DiscoveryResponse, void>({
       query: () => '/search/trending',
       keepUnusedDataFor: 300,
     }),
-    
+
     getRecommendations: builder.query<DiscoveryResponse, void>({
       query: () => '/search/recommendations',
       keepUnusedDataFor: 300,
@@ -130,6 +169,29 @@ export const searchApi = apiSlice.injectEndpoints({
         return `/search/semantic?${queryParams.toString()}`;
       },
     }),
+
+    // Phase D.2 — Perplexity-style AI summary
+    aiSearch: builder.mutation<AISearchResponse, AISearchRequest>({
+      query: (body) => ({
+        url: '/search/ai-search',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: { data: AISearchResponse }) => response.data,
+    }),
+
+    // Phase D.2 — citation list for the AI summary
+    getSearchSources: builder.query<
+      { sources: AISearchSource[] },
+      { q: string; workspaceId?: string; limit?: number }
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams({ q: params.q });
+        if (params.workspaceId) queryParams.append('workspaceId', params.workspaceId);
+        if (params.limit) queryParams.append('limit', params.limit.toString());
+        return `/search/sources?${queryParams.toString()}`;
+      },
+    }),
   }),
 });
 
@@ -141,4 +203,6 @@ export const {
   useGetTrendingQuery,
   useGetRecommendationsQuery,
   useSemanticSearchQuery,
+  useAiSearchMutation,
+  useGetSearchSourcesQuery,
 } = searchApi;

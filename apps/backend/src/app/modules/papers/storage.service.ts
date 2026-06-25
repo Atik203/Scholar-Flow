@@ -40,6 +40,8 @@ export class StorageService {
       },
       maxAttempts: 3, // Allow more retries for reliability
       retryMode: "adaptive", // Use adaptive retry mode for better handling
+      followRegionRedirects: true,
+      systemClockOffset: 0, // Allow SDK to auto-correct clock skew
     });
     this.bucket = bucket;
 

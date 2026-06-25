@@ -1,7 +1,6 @@
 "use client";
 
 import { CitationExportDialog } from "@/components/citations/CitationExportDialog";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,7 +146,7 @@ export default function CitationFormatsPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="space-y-8">
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
@@ -340,6 +339,6 @@ export default function CitationFormatsPage() {
         selectedPaperIds={selectedPapers}
         preSelectedFormat={selectedFormat as any}
       />
-    </DashboardLayout>
+    </>
   );
 }

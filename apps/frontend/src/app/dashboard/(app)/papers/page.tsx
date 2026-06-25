@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useListPapersQuery, useLazyListPapersQuery } from "@/redux/api/paperApi";
+import { useListPapersQuery, useLazyListPapersQuery, useProcessPDFMutation } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 
 function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(" ");
@@ -97,6 +98,16 @@ export default function PapersPage() {
   const papers = allPapers;
 
   const selectedWs = workspaces.find((w: any) => w.id === selectedWorkspace);
+  const [processPaper] = useProcessPDFMutation();
+
+  const handleProcess = async (paperId: string) => {
+    try {
+      await processPaper(paperId).unwrap();
+      showSuccessToast("Paper processing started");
+    } catch {
+      showErrorToast("Failed to start processing");
+    }
+  };
 
   const totalPapers = papers.length;
   const processedPapers = papers.filter((p) => p.processingStatus === "PROCESSED").length;
@@ -276,7 +287,6 @@ export default function PapersPage() {
                   <tr className="border-b text-sm text-muted-foreground">
                     <th className="py-3 px-4 text-left font-medium">Title</th>
                     <th className="py-3 px-4 text-left font-medium">Status</th>
-                    <th className="py-3 px-4 text-left font-medium">File</th>
                     <th className="py-3 px-4 text-left font-medium">Date</th>
                     <th className="py-3 px-4 text-left font-medium">Tags</th>
                     <th className="py-3 px-4 text-right font-medium">Actions</th>
@@ -290,16 +300,12 @@ export default function PapersPage() {
                       <motion.tr key={paper.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="border-b hover:bg-muted/50 transition-colors">
                         <td className="py-4 px-4">
                           <div className="flex flex-col">
-                            <span className="font-medium">{paper.title}</span>
+                            <Link href={`/dashboard/papers/${paper.id}`} className="font-medium hover:text-primary transition-colors">{paper.title}</Link>
                             {authorNames && <span className="text-sm text-muted-foreground">{authorNames}</span>}
                             {paper.citationCount ? <span className="text-xs text-muted-foreground"><TrendingUp className="inline h-3 w-3 mr-1" />{paper.citationCount.toLocaleString()} citations</span> : null}
                           </div>
                         </td>
                         <td className="py-4 px-4"><span className={cn("px-2 py-1 rounded-full text-xs font-medium", status.color)}>{status.label}</span></td>
-                        <td className="py-4 px-4 text-sm">
-                          <div>{paper.file?.originalFilename || "—"}</div>
-                          <div className="text-muted-foreground">{formatFileSize(paper.file?.sizeBytes)}</div>
-                        </td>
                         <td className="py-4 px-4 text-sm">
                           <div className="flex items-center"><Calendar className="mr-1 h-3 w-3" />{formatDate(paper.createdAt)}</div>
                         </td>
@@ -310,7 +316,7 @@ export default function PapersPage() {
                           <div className="flex justify-end gap-2">
                             <Button size="icon" variant="ghost" asChild><Link href={`/dashboard/papers/${paper.id}`}><Eye className="h-4 w-4" /></Link></Button>
                             {paper.processingStatus === "UPLOADED" && (
-                              <Button size="icon" variant="ghost"><Play className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => handleProcess(paper.id)}><Play className="h-4 w-4" /></Button>
                             )}
                           </div>
                         </td>

@@ -1,15 +1,56 @@
 import prisma from "../../shared/prisma";
 import config from "../../config";
 import { aiService } from "../AI/ai.service";
+import { aiProviderService } from "../AIProvider/aiProvider.service";
 import { AiError } from "../AI/ai.errors";
 import type { AiSummaryRequest } from "../AI/ai.types";
 
 const STREAMING_PROVIDER_ORDER = ["openai", "deepseek", "gemini", "claude"] as const;
 
+interface ProviderRow {
+  provider: string;
+  model: string;
+  inputCostPer1k?: number | null;
+  outputCostPer1k?: number | null;
+}
+
+async function resolveProviderForModel(model: string): Promise<ProviderRow> {
+  if (!model) {
+    return { provider: "openai", model: "gpt-4o-mini", inputCostPer1k: 0.15, outputCostPer1k: 0.6 };
+  }
+  const row = await prisma.aIProvider.findFirst({
+    where: { model, isDeleted: false, enabled: true },
+    select: { provider: true, model: true, inputCostPer1k: true, outputCostPer1k: true },
+  });
+  if (row) {
+    return row;
+  }
+  if (model.startsWith("claude")) {
+    return { provider: "claude", model };
+  }
+  if (model.startsWith("gemini")) {
+    return { provider: "gemini", model };
+  }
+  if (model.startsWith("deepseek")) {
+    return { provider: "deepseek", model };
+  }
+  return { provider: "openai", model };
+}
+
+function estimateCost(
+  inputTokens: number,
+  outputTokens: number,
+  resolved: ProviderRow,
+): number {
+  const inputRate = resolved.inputCostPer1k ?? 0;
+  const outputRate = resolved.outputCostPer1k ?? 0;
+  return (inputTokens / 1000) * inputRate + (outputTokens / 1000) * outputRate;
+}
+
 async function generateAiResponse(
   messages: Array<{ role: string; content: string }>,
   model?: string
-): Promise<{ content: string; model: string; tokensUsed?: number }> {
+): Promise<{ content: string; model: string; tokensUsed?: number; costCents?: number }> {
   const userMessages = messages
     .filter((m) => m.role === "user" || m.role === "assistant")
     .slice(-10);
@@ -49,41 +90,53 @@ async function streamFromProvider(
   messages: Array<{ role: "user" | "assistant" | "system"; content: string }>,
   model?: string,
   onToken?: (token: string) => void
-): Promise<{ content: string; model: string }> {
-  // Try OpenAI first, fall back to non-streaming
-  const openaiApiKey = config.openai.apiKey;
-  if (openaiApiKey) {
-    try {
-      const { OpenAI } = await import("openai");
-      const openai = new OpenAI({ apiKey: openaiApiKey, timeout: 30000 });
-      const stream = await openai.chat.completions.create({
-        model: model?.startsWith("gpt") ? model : "gpt-4o-mini",
-        messages: messages as any,
-        stream: true,
-        max_tokens: 2000,
-        temperature: 0.7,
-      });
+): Promise<{ content: string; model: string; inputTokens: number; outputTokens: number }> {
+  const resolved = await resolveProviderForModel(model ?? "");
+  let inputTokens = 0;
+  let outputTokens = 0;
 
-      let fullContent = "";
-      for await (const chunk of stream) {
-        const delta = chunk.choices?.[0]?.delta?.content;
-        if (delta) {
-          fullContent += delta;
-          onToken?.(delta);
+  if (resolved.provider === "openai") {
+    const openaiApiKey = config.openai.apiKey;
+    if (openaiApiKey) {
+      try {
+        const { OpenAI } = await import("openai");
+        const openai = new OpenAI({ apiKey: openaiApiKey, timeout: 30000 });
+        const stream = await openai.chat.completions.create({
+          model: resolved.model,
+          messages: messages as any,
+          stream: true,
+          max_tokens: 2000,
+          temperature: 0.7,
+        });
+
+        let fullContent = "";
+        for await (const chunk of stream) {
+          const delta = chunk.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullContent += delta;
+            onToken?.(delta);
+          }
+          if (chunk.usage) {
+            inputTokens = chunk.usage.prompt_tokens;
+            outputTokens = chunk.usage.completion_tokens;
+          }
         }
+        if (!inputTokens && !outputTokens) {
+          inputTokens = Math.ceil(messages.reduce((s, m) => s + m.content.length / 4, 0));
+          outputTokens = Math.ceil(fullContent.length / 4);
+        }
+        return { content: fullContent, model: resolved.model, inputTokens, outputTokens };
+      } catch {
+        // fall through
       }
-      return { content: fullContent, model: "openai" };
-    } catch {}
+    }
   }
 
-  // Fallback to non-streaming via generateInsight
-  const result = await generateAiResponse(
-    messages,
-    model
-  );
-  // Emit full response as a single token
+  const result = await generateAiResponse(messages, resolved.model);
+  inputTokens = Math.ceil(messages.reduce((s, m) => s + m.content.length / 4, 0));
+  outputTokens = Math.ceil((result.content?.length ?? 0) / 4);
   onToken?.(result.content);
-  return { content: result.content, model: result.model };
+  return { content: result.content, model: result.model, inputTokens, outputTokens };
 }
 
 export const aiConversationService = {
@@ -103,8 +156,8 @@ export const aiConversationService = {
     });
   },
 
-  async getConversation(conversationId: string) {
-    return prisma.aIConversation.findUnique({
+  async getConversation(conversationId: string, userId: string) {
+    const conv = await prisma.aIConversation.findUnique({
       where: { id: conversationId },
       include: {
         messages: {
@@ -120,6 +173,9 @@ export const aiConversationService = {
         },
       },
     });
+    if (!conv) throw new AiError(404, "Conversation not found");
+    if (conv.userId !== userId) throw new AiError(403, "Forbidden");
+    return conv;
   },
 
   async createConversation(userId: string, title?: string, model?: string) {
@@ -129,13 +185,18 @@ export const aiConversationService = {
   },
 
   async sendMessage(conversationId: string, userId: string, content: string) {
-    // Save user message
+    const conv = await prisma.aIConversation.findUnique({
+      where: { id: conversationId },
+      select: { userId: true },
+    });
+    if (!conv) throw new AiError(404, "Conversation not found");
+    if (conv.userId !== userId) throw new AiError(403, "Forbidden");
+
     await prisma.aIConversationMessage.create({
       data: { conversationId, role: "user", content },
     });
 
-    // Get conversation context
-    const conv = await prisma.aIConversation.findUnique({
+    const updatedConv = await prisma.aIConversation.findUnique({
       where: { id: conversationId },
       include: {
         messages: {
@@ -145,16 +206,18 @@ export const aiConversationService = {
         },
       },
     });
+    if (!updatedConv) throw new Error("Conversation not found");
 
-    if (!conv) throw new Error("Conversation not found");
-
-    // Generate AI response
     const aiResp = await generateAiResponse(
-      [...(conv.messages || []).map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })), { role: "user", content }],
-      conv.model ?? undefined
+      [...(updatedConv.messages || []).map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })), { role: "user", content }],
+      updatedConv.model ?? undefined
     );
 
-    // Save AI response
+    const resolved = await resolveProviderForModel(updatedConv.model ?? "");
+    const inputTokens = Math.ceil(content.length / 4);
+    const outputTokens = Math.ceil((aiResp.content?.length ?? 0) / 4);
+    const costCents = estimateCost(inputTokens, outputTokens, resolved);
+
     const aiMessage = await prisma.aIConversationMessage.create({
       data: {
         conversationId,
@@ -162,12 +225,12 @@ export const aiConversationService = {
         content: aiResp.content,
         model: aiResp.model,
         tokensUsed: aiResp.tokensUsed,
+        costCents,
       },
     });
 
-    // Update conversation title from first message if untitled
-    if (!conv.title || conv.title === "New Chat") {
-      const firstMsg = conv.messages?.[0];
+    if (!updatedConv.title || updatedConv.title === "New Chat") {
+      const firstMsg = updatedConv.messages?.[0];
       if (firstMsg) {
         await prisma.aIConversation.update({
           where: { id: conversationId },
@@ -185,13 +248,18 @@ export const aiConversationService = {
     content: string,
     onEvent: (token: string, done: boolean) => void
   ) {
-    // Save user message
+    const conv = await prisma.aIConversation.findUnique({
+      where: { id: conversationId },
+      select: { userId: true, model: true },
+    });
+    if (!conv) throw new AiError(404, "Conversation not found");
+    if (conv.userId !== userId) throw new AiError(403, "Forbidden");
+
     await prisma.aIConversationMessage.create({
       data: { conversationId, role: "user", content },
     });
 
-    // Get conversation context
-    const conv = await prisma.aIConversation.findUnique({
+    const updatedConv = await prisma.aIConversation.findUnique({
       where: { id: conversationId },
       include: {
         messages: {
@@ -201,21 +269,18 @@ export const aiConversationService = {
         },
       },
     });
+    if (!updatedConv) throw new Error("Conversation not found");
 
-    if (!conv) throw new Error("Conversation not found");
-
-    // Build message history for the provider
-    const msgs = (conv.messages || []).map((m: { role: string; content: string }) => ({
+    const msgs = (updatedConv.messages || []).map((m: { role: string; content: string }) => ({
       role: m.role as "user" | "assistant" | "system",
       content: m.content,
     }));
     msgs.push({ role: "user", content });
 
-    // Stream from provider with token callback
     const tokens: string[] = [];
     const result = await streamFromProvider(
       msgs,
-      conv.model ?? undefined,
+      updatedConv.model ?? undefined,
       (token: string) => {
         tokens.push(token);
         onEvent(token, false);
@@ -223,20 +288,22 @@ export const aiConversationService = {
     );
 
     const fullContent = tokens.join("");
+    const resolved = await resolveProviderForModel(updatedConv.model ?? "");
+    const costCents = estimateCost(result.inputTokens, result.outputTokens, resolved);
 
-    // Save AI response
     await prisma.aIConversationMessage.create({
       data: {
         conversationId,
         role: "assistant",
         content: fullContent,
         model: result.model,
+        tokensUsed: result.outputTokens,
+        costCents,
       },
     });
 
-    // Update conversation title from first message if untitled
-    if (!conv.title || conv.title === "New Chat") {
-      const firstMsg = conv.messages?.[0];
+    if (!updatedConv.title || updatedConv.title === "New Chat") {
+      const firstMsg = updatedConv.messages?.[0];
       if (firstMsg) {
         await prisma.aIConversation.update({
           where: { id: conversationId },
@@ -245,11 +312,16 @@ export const aiConversationService = {
       }
     }
 
-    // Signal completion with full content
     onEvent(fullContent, true);
   },
 
-  async deleteConversation(conversationId: string) {
+  async deleteConversation(conversationId: string, userId: string) {
+    const conv = await prisma.aIConversation.findUnique({
+      where: { id: conversationId },
+      select: { userId: true },
+    });
+    if (!conv) throw new AiError(404, "Conversation not found");
+    if (conv.userId !== userId) throw new AiError(403, "Forbidden");
     await prisma.aIConversationMessage.deleteMany({ where: { conversationId } });
     await prisma.aIConversation.delete({ where: { id: conversationId } });
   },

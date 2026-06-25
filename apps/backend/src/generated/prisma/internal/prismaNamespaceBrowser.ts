@@ -73,6 +73,7 @@ export const ModelName = {
   AIInsightMessage: 'AIInsightMessage',
   AIConversation: 'AIConversation',
   AIConversationMessage: 'AIConversationMessage',
+  AIProvider: 'AIProvider',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -335,6 +336,9 @@ export const AnnotationScalarFieldEnum = {
   text: 'text',
   version: 'version',
   parentId: 'parentId',
+  color: 'color',
+  positionIndex: 'positionIndex',
+  metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -490,12 +494,33 @@ export const AIConversationMessageScalarFieldEnum = {
   content: 'content',
   model: 'model',
   tokensUsed: 'tokensUsed',
+  costCents: 'costCents',
   metadata: 'metadata',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AIConversationMessageScalarFieldEnum = (typeof AIConversationMessageScalarFieldEnum)[keyof typeof AIConversationMessageScalarFieldEnum]
+
+
+export const AIProviderScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  model: 'model',
+  displayName: 'displayName',
+  enabled: 'enabled',
+  isDefault: 'isDefault',
+  description: 'description',
+  apiKeyEnvName: 'apiKeyEnvName',
+  inputCostPer1k: 'inputCostPer1k',
+  outputCostPer1k: 'outputCostPer1k',
+  displayOrder: 'displayOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIProviderScalarFieldEnum = (typeof AIProviderScalarFieldEnum)[keyof typeof AIProviderScalarFieldEnum]
 
 
 export const PlanScalarFieldEnum = {

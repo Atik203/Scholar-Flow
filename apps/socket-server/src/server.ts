@@ -1,11 +1,11 @@
-import http from "http";
-import express from "express";
 import cors from "cors";
-import { Server, Socket } from "socket.io";
+import express from "express";
+import http from "http";
 import jwt from "jsonwebtoken";
+import { Server, Socket } from "socket.io";
 
 const PORT = parseInt(process.env.PORT || "5001", 10);
-const JWT_SECRET = process.env.JWT_SECRET || "5a2857498511e2dbf364e26a03c0dddb";
+const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 interface AuthenticatedSocket extends Socket {

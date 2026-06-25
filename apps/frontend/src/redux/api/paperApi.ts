@@ -88,6 +88,7 @@ export interface PaperSummaryRequest {
   language?: string;
   wordLimit?: number;
   refresh?: boolean;
+  model?: string;
 }
 
 export interface PaperSummaryResponse {
@@ -163,6 +164,7 @@ export interface AiProviderStatus {
 
 export interface AiProvidersResponse {
   providers: AiProviderStatus[];
+  defaultModel?: string | null;
 }
 
 export interface PaperVersion {
@@ -368,6 +370,7 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, paperId) => [
+        "Paper",
         { type: "Paper", id: paperId },
         { type: "ProcessingStatus", id: paperId },
       ],
@@ -526,7 +529,6 @@ export const paperApi = apiSlice.injectEndpoints({
         data: { url: string; fileName: string };
         message: string;
       }) => {
-        console.log("Upload image response received:", response);
         return response.data;
       },
     }),

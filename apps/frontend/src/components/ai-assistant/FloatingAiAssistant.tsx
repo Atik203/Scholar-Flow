@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,18 +24,26 @@ import {
   Bot,
   Check,
   Copy,
+  Expand,
   MessageCircle,
+  Minimize2,
   Plus,
+  RefreshCw,
+  Search,
   Send,
   Sparkles,
+  Square,
   Trash2,
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { streamingFetch } from "@/lib/api/streamingFetch";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
+import { useAIVisibility } from "@/lib/aiVisibilityContext";
+import { showErrorToast } from "@/components/providers/ToastProvider";
 
 interface Message {
   id: string;
@@ -46,7 +53,7 @@ interface Message {
   createdAt: string;
 }
 
-const MODEL_LABELS: Record<string, string> = {
+const LEGACY_MODEL_LABELS: Record<string, string> = {
   "gpt-4o": "GPT-4o",
   "gpt-4o-mini": "GPT-4o Mini",
   "gpt-3.5-turbo": "GPT-3.5",
@@ -62,38 +69,59 @@ const MODEL_LABELS: Record<string, string> = {
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // silent
+    }
   };
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="h-6 w-6 p-0 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+    <button
       onClick={handleCopy}
+      className="absolute top-1 right-1 p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-muted-foreground/20 transition-opacity"
       title="Copy message"
     >
-      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-    </Button>
+      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
+    </button>
   );
 }
 
 export function FloatingAiAssistant() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [lastUserPrompt, setLastUserPrompt] = useState<string | null>(null);
+  const [convSearch, setConvSearch] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const sendingRef = useRef(false);
+
+  const { showFloatingButton } = useAIVisibility();
 
   const { data: providersData } = useGetAiProvidersQuery();
   const availableModels =
     providersData?.providers?.flatMap((p) => p.models) ?? [];
-  const [selectedModel, setSelectedModel] = useState(
-    availableModels[0]?.value ?? "gemini-2.5-flash-lite"
+  const modelLabelByValue: Record<string, string> = Object.fromEntries(
+    availableModels.map((m) => [m.value, m.label.split("(")[0].trim()])
   );
+  const resolveModelLabel = (model?: string) => {
+    if (!model) return "";
+    return modelLabelByValue[model] ?? LEGACY_MODEL_LABELS[model] ?? model;
+  };
+  const [selectedModel, setSelectedModel] = useState(
+    availableModels[0]?.value ?? "gpt-4o-mini"
+  );
+  useEffect(() => {
+    if (availableModels.length > 0 && !availableModels.find((m) => m.value === selectedModel)) {
+      setSelectedModel(availableModels[0].value);
+    }
+  }, [availableModels, selectedModel]);
 
   const { data: conversations = [], isLoading: loadingConvs } = useListConversationsQuery(undefined, {
     skip: !open,
@@ -119,7 +147,9 @@ export function FloatingAiAssistant() {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
+  // Sync from server ONLY when NOT actively streaming
   useEffect(() => {
+    if (sendingRef.current) return;
     if (activeConversation) {
       setLocalMessages(activeConversation.messages ?? []);
     } else if (!activeConvId) {
@@ -127,21 +157,36 @@ export function FloatingAiAssistant() {
     }
   }, [activeConversation, activeConvId]);
 
+  // Keep sendingRef in sync
+  useEffect(() => {
+    sendingRef.current = sending;
+  }, [sending]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [localMessages]);
 
-  const startNewChat = async () => {
+  useEffect(() => {
+    if (!open && abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+  }, [open]);
+
+  const startNewChat = async (model = selectedModel) => {
     try {
       const conv = await createConversation({
         title: "New Research Chat",
-        model: selectedModel,
+        model,
       }).unwrap();
       setActiveConvId(conv.id);
       setLocalMessages([]);
-    } catch {}
+      return conv.id as string;
+    } catch {
+      return null;
+    }
   };
 
   const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
@@ -152,17 +197,28 @@ export function FloatingAiAssistant() {
         setActiveConvId(null);
         setLocalMessages([]);
       }
-    } catch {}
+    } catch {
+      showErrorToast("Failed to delete conversation");
+    }
+  };
+
+  const stopStream = () => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    setSending(false);
   };
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || sending) return;
 
-    const convId = activeConvId;
+    let convId = activeConvId;
     if (!convId) {
-      await startNewChat();
-      return;
+      const newId = await startNewChat();
+      if (!newId) return;
+      convId = newId;
     }
 
     const userMsg: Message = {
@@ -172,44 +228,37 @@ export function FloatingAiAssistant() {
       createdAt: new Date().toISOString(),
     };
     setLocalMessages((prev) => [...prev, userMsg]);
+    setLastUserPrompt(trimmed);
     setInput("");
     setSending(true);
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
-      // Try SSE streaming first
-      const token = (() => {
-        try {
-          const store = (window as any).__REDUX_STORE__;
-          return store?.getState()?.auth?.accessToken || null;
-        } catch { return null; }
-      })();
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+      const response = await streamingFetch(
+        `/ai-chat/${convId}/messages/stream`,
+        {
+          method: "POST",
+          body: { content: trimmed },
+          signal: controller.signal,
+        }
+      );
 
-      const response = await fetch(`${apiBase}/ai-chat/${convId}/messages/stream`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: trimmed }),
-      });
-
-      if (!response.ok) throw new Error("Stream not available");
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No reader");
-
+      if (!response.body) {
+        throw new Error("No response body for stream");
+      }
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulatedContent = "";
 
-      // SSE stream has already created the message — mark response as started
-      const assistantMsgId = Date.now().toString() + "-stream";
+      const assistantMsgId = `${Date.now()}-stream`;
       setLocalMessages((prev) => [
         ...prev,
         {
           id: assistantMsgId,
-          role: "assistant" as const,
+          role: "assistant",
           content: "",
           createdAt: new Date().toISOString(),
         },
@@ -227,9 +276,8 @@ export function FloatingAiAssistant() {
           if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              if (data.token) {
+              if (typeof data?.token === "string") {
                 accumulatedContent += data.token;
-                // Update the assistant message content progressively
                 setLocalMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsgId
@@ -238,14 +286,16 @@ export function FloatingAiAssistant() {
                   )
                 );
               }
-            } catch {}
+            } catch {
+              // ignore malformed lines
+            }
           }
         }
       }
     } catch {
-      // Fall back to RTK Query mutation
+      // Stream unavailable, fall back to mutation
       try {
-        const result = await sendMessageMutation({ convId, content: trimmed }).unwrap();
+        const result = await sendMessageMutation({ convId: convId!, content: trimmed }).unwrap();
         setLocalMessages((prev) => [
           ...prev,
           {
@@ -256,11 +306,86 @@ export function FloatingAiAssistant() {
             createdAt: new Date().toISOString(),
           },
         ]);
-      } catch {}
+      } catch {
+        showErrorToast("Failed to send message. Please try again.");
+      }
     } finally {
+      abortRef.current = null;
       setSending(false);
     }
   }, [input, sending, activeConvId, sendMessageMutation]);
+
+  const regenerateLast = useCallback(async () => {
+    if (!lastUserPrompt || !activeConvId || sending) return;
+    setSending(true);
+    setLocalMessages((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-regen`,
+        role: "assistant",
+        content: "",
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const response = await streamingFetch(
+        `/ai-chat/${activeConvId}/messages/stream`,
+        {
+          method: "POST",
+          body: { content: lastUserPrompt },
+          signal: controller.signal,
+        }
+      );
+      if (!response.body) {
+        throw new Error("No response body for stream");
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulated = "";
+      const targetId = `${Date.now()}-regen`;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (typeof data?.token === "string") {
+                accumulated += data.token;
+                setLocalMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === targetId ? { ...m, content: accumulated } : m
+                  )
+                );
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch {
+      showErrorToast("Regeneration failed. Please try again.");
+    } finally {
+      abortRef.current = null;
+      setSending(false);
+    }
+  }, [activeConvId, lastUserPrompt, sending]);
+
+  const filteredConversations = convSearch
+    ? conversations.filter((c) =>
+        (c.title || "").toLowerCase().includes(convSearch.toLowerCase())
+      )
+    : conversations;
+
+  if (!showFloatingButton && !open) return null;
+
+  const panelWidth = fullscreen ? "min(100vw, 100%)" : "min(480px, calc(100vw - 24px))";
+  const panelHeight = fullscreen ? "min(100vh, 100%)" : "min(600px, calc(100vh - 120px))";
 
   return (
     <>
@@ -282,106 +407,149 @@ export function FloatingAiAssistant() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[420px] max-w-[calc(100vw-24px)] shadow-2xl rounded-xl border bg-card"
+            className={cn(
+              "fixed bottom-6 right-6 z-50 shadow-2xl rounded-xl border bg-card flex flex-col overflow-hidden",
+              fullscreen ? "inset-4 !bottom-4 !right-4 !left-4 !top-4" : ""
+            )}
+            style={{
+              width: fullscreen ? undefined : panelWidth,
+              height: fullscreen ? undefined : panelHeight,
+              resize: fullscreen ? "none" : "both",
+              overflow: "auto",
+            }}
           >
-            <Card className="border-0 shadow-none">
-              <CardHeader className="flex flex-row items-center justify-between p-3 border-b space-y-0">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-primary" />
-                  AI Assistant
-                </CardTitle>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0"
-                    onClick={() => setMinimized(true)}
-                    title="Minimize"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setOpen(false)}>
-                    <X className="h-4 w-4" />
+            {/* Header */}
+            <div className="flex items-center justify-between p-3 border-b shrink-0 bg-card">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <span className="font-semibold text-sm">AI Assistant</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setFullscreen(!fullscreen)}
+                  title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
+                >
+                  {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setMinimized(true)}
+                  title="Minimize"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setOpen(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="flex flex-1 min-h-0">
+              {/* Sidebar */}
+              <div className="w-44 border-r bg-muted/20 flex flex-col shrink-0">
+                <div className="p-2 border-b space-y-1">
+                  <Select value={selectedModel} onValueChange={setSelectedModel}>
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((m) => (
+                        <SelectItem key={m.value} value={m.value} className="text-xs">
+                          {m.label.split("(")[0].trim()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button size="sm" className="w-full h-7 text-xs" onClick={() => void startNewChat()}>
+                    <Plus className="h-3 w-3 mr-1" /> New Chat
                   </Button>
                 </div>
-              </CardHeader>
-
-              <CardContent className="p-0">
-                <div className="flex h-[500px]">
-                  <div className="w-36 border-r bg-muted/20 flex flex-col">
-                    <div className="p-2 border-b">
-                      <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="h-7 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableModels.map((m) => (
-                            <SelectItem key={m.value} value={m.value} className="text-xs">
-                              {m.label.split("(")[0].trim()}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button size="sm" className="w-full mt-1 h-7 text-xs" onClick={startNewChat}>
-                        <Plus className="h-3 w-3 mr-1" /> New
-                      </Button>
-                    </div>
-                    <ScrollArea className="flex-1">
-                      {loadingConvs ? (
-                        Array.from({ length: 3 }).map((_, i) => (
-                          <div key={i} className="p-2"><Skeleton className="h-4 w-full" /></div>
-                        ))
-                      ) : (
-                        conversations.map((c) => (
-                          <button
-                            key={c.id}
-                            onClick={() => setActiveConvId(c.id)}
-                            className={cn(
-                              "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between",
-                              activeConvId === c.id && "bg-accent"
-                            )}
-                          >
-                            <span className="truncate flex-1">
-                              {c.title || "New Chat"}
-                            </span>
-                            <button
-                              onClick={(e) => handleDeleteConversation(c.id, e)}
-                              className="opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0 text-muted-foreground hover:text-destructive"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          </button>
-                        ))
-                      )}
-                    </ScrollArea>
+                <div className="p-2 border-b">
+                  <div className="relative">
+                    <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={convSearch}
+                      onChange={(e) => setConvSearch(e.target.value)}
+                      placeholder="Search chats..."
+                      className="h-7 text-xs pl-6"
+                    />
                   </div>
+                </div>
+                <ScrollArea className="flex-1">
+                  {loadingConvs ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="p-2"><Skeleton className="h-4 w-full" /></div>
+                    ))
+                  ) : filteredConversations.length === 0 ? (
+                    <div className="p-3 text-xs text-muted-foreground text-center">
+                      {convSearch ? "No matching chats" : "No conversations yet"}
+                    </div>
+                  ) : (
+                    filteredConversations.map((c) => (
+                      <div
+                        key={c.id}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => setActiveConvId(c.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveConvId(c.id); } }}
+                        className={cn(
+                          "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between border-b border-border/40 cursor-pointer",
+                          activeConvId === c.id && "bg-accent"
+                        )}
+                      >
+                        <div className="truncate flex-1 min-w-0">
+                          <span className="truncate block">{c.title || "New Chat"}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {c._count?.messages ?? 0} msgs
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id, e); }}
+                          className="opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </div>
 
-                  <div className="flex-1 flex flex-col">
-                    <ScrollArea className="flex-1 p-3" ref={scrollRef}>
-                      {loadingMsgs ? (
-                        <div className="space-y-3 p-2">
-                          <Skeleton className="h-12 w-3/4" />
-                          <Skeleton className="h-20 w-full" />
-                        </div>
-                      ) : localMessages.length === 0 ? (
-                        <div className="text-center text-muted-foreground py-12">
-                          <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                          <p className="text-sm font-medium">Ask me anything about your research</p>
-                          <p className="text-xs mt-1">I can help with summaries, analysis, and more</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {localMessages.map((msg) => (
-                            <div
-                              key={msg.id}
-                              className={cn(
-                                "text-sm p-2.5 rounded-lg max-w-[95%] group relative",
-                                msg.role === "user"
-                                  ? "bg-primary text-primary-foreground ml-auto"
-                                  : "bg-muted pr-7"
-                              )}
-                            >
-                              {msg.role === "assistant" ? (
+              {/* Main chat area */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <ScrollArea className="flex-1 p-3" ref={scrollRef}>
+                  {loadingMsgs ? (
+                    <div className="space-y-3 p-2">
+                      <Skeleton className="h-12 w-3/4" />
+                      <Skeleton className="h-20 w-full" />
+                    </div>
+                  ) : localMessages.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-12">
+                      <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm font-medium">Ask me anything about your research</p>
+                      <p className="text-xs mt-1">I can help with summaries, analysis, and more</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {localMessages.map((msg, idx) => (
+                        <div
+                          key={msg.id}
+                          className={cn(
+                            "text-sm rounded-lg group relative",
+                            msg.role === "user"
+                              ? "bg-primary text-primary-foreground ml-auto max-w-[85%] px-3 py-2"
+                              : "max-w-full"
+                          )}
+                        >
+                          {msg.role === "assistant" ? (
+                            <div className="bg-muted rounded-lg px-3 py-2 pr-8">
+                              {msg.content ? (
                                 <div className="ai-message prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted-foreground/10 prose-pre:border prose-pre:rounded-lg">
                                   <ReactMarkdown
                                     remarkPlugins={[remarkGfm]}
@@ -391,47 +559,79 @@ export function FloatingAiAssistant() {
                                   </ReactMarkdown>
                                 </div>
                               ) : (
-                                <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                                <div className="flex gap-1 py-1">
+                                  <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                                  <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                                  <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                                </div>
                               )}
-                              {msg.role === "assistant" && (
-                                <CopyButton content={msg.content} />
-                              )}
+                              <CopyButton content={msg.content} />
                               {msg.model && (
                                 <p className="text-[10px] opacity-40 mt-1">
-                                  {MODEL_LABELS[msg.model] || msg.model}
+                                  {resolveModelLabel(msg.model)}
                                 </p>
                               )}
                             </div>
-                          ))}
-                          {sending && (
-                            <div className="text-sm p-2.5 rounded-lg bg-muted max-w-[90%]">
-                              <div className="flex gap-1">
-                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-                                <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
-                              </div>
-                            </div>
+                          ) : (
+                            <div className="whitespace-pre-wrap break-words">{msg.content}</div>
                           )}
                         </div>
-                      )}
-                    </ScrollArea>
-
-                    <div className="p-3 border-t flex gap-2">
-                      <Input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                        placeholder="Ask about your research..."
-                        className="flex-1 text-sm h-8"
-                      />
-                      <Button size="sm" className="h-8" onClick={sendMessage} disabled={!input.trim() || sending}>
-                        <Send className="h-3.5 w-3.5" />
-                      </Button>
+                      ))}
                     </div>
+                  )}
+                </ScrollArea>
+
+                {/* Input bar */}
+                <div className="p-3 border-t flex gap-2 shrink-0 bg-card">
+                  {lastUserPrompt && !sending && activeConvId && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-2 shrink-0"
+                      onClick={regenerateLast}
+                      title="Regenerate last response"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <div className="flex-1 relative">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Ask about your research..."
+                      className="text-sm h-8 pr-8"
+                      disabled={sending}
+                    />
                   </div>
+                  {sending ? (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-8 shrink-0"
+                      onClick={stopStream}
+                      title="Stop generating"
+                    >
+                      <Square className="h-3.5 w-3.5" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="h-8 shrink-0"
+                      onClick={sendMessage}
+                      disabled={!input.trim()}
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -5,6 +5,7 @@ import {
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
 import { aiConversationRoutes } from "../modules/AIChat/aiConversation.routes";
+import { aiProviderRoutes } from "../modules/AIProvider/aiProvider.routes";
 import { aiToolsRoutes } from "../modules/AI/aiTools.routes";
 import { annotationRoutes } from "../modules/annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
@@ -31,6 +32,7 @@ import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
 import { exportRoutes } from "../modules/Export/export.routes";
 import { invitationRoutes } from "./invitation.routes";
 import healthRoutes from "./health.routes";
+import { editorPaperController } from "../modules/papers/paper.controller";
 
 const router: import("express").Router = express.Router();
 
@@ -63,6 +65,9 @@ router.use("/notifications", notificationRoutes);
 // Phase 1.9 Public content
 router.use("/public", publicRoutes);
 
+// Public: published editor docs (no auth)
+router.get("/public/editor/:id", editorPaperController.getPublicEditorPaper as any);
+
 // Phase 4 features
 router.use("/search", searchRoutes);
 router.use("/recommendations", recommendationRoutes);
@@ -85,6 +90,9 @@ router.use("/ai-chat", aiConversationRoutes);
 
 // Phase 10 — AI Tools (rewriter, comparator, translator)
 router.use("/ai", aiToolsRoutes);
+
+// Phase 10 — Admin AI provider catalog (CRUD + key status)
+router.use("/admin/ai-providers", aiProviderRoutes as any);
 
 // Phase 10 — Export (LaTeX compilation, DOCX/DOC/MD → PDF)
 router.use("/export", exportRoutes);

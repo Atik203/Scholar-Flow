@@ -6,32 +6,54 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useUpdatePaperMetadataMutation } from "@/redux/api/paperApi";
+import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation } from "@/redux/api/paperApi";
 import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, Bot, Calendar, Edit, Eye, FileText, Highlighter, Loader2, MessageSquare, Save, Sparkles, StickyNote, Trash2, Users, X,
+  ArrowLeft, Bot, Calendar, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Trash2, Users, X,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
+import { showApiErrorToast } from "@/lib/errorHandling";
+import { showSuccessToast } from "@/components/providers/ToastProvider";
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   if (!resolvedParams?.id) notFound();
 
   const router = useRouter();
-  const { data: paper, isLoading, error } = useGetPaperQuery(resolvedParams.id);
+  const [pollProcessing, setPollProcessing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const { data: paper, isLoading, error } = useGetPaperQuery(resolvedParams.id, {
+    pollingInterval: pollProcessing ? 3000 : 0,
+  });
   const [updateMetadata] = useUpdatePaperMetadataMutation();
   const [deletePaper] = useDeletePaperMutation();
-  const { data: previewUrlData } = useGetPaperPreviewUrlQuery(resolvedParams.id);
+  const [processPaper, { isLoading: isProcessing }] = useProcessPDFMutation();
+  const { data: previewUrlData } = useGetPaperPreviewUrlQuery(resolvedParams.id, {
+    skip: !showPreview,
+  });
+  const [previewLoading, setPreviewLoading] = useState(true);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editAbstract, setEditAbstract] = useState("");
   const [editTags, setEditTags] = useState("");
-  const [showPreview, setShowPreview] = useState(false);
+  const [showAiSummary, setShowAiSummary] = useState(false);
+
+  useEffect(() => {
+    if (!showPreview) setPreviewLoading(true);
+  }, [showPreview]);
+
+  useEffect(() => {
+    if (paper?.processingStatus === "PROCESSING") {
+      setPollProcessing(true);
+    } else {
+      setPollProcessing(false);
+    }
+  }, [paper?.processingStatus]);
 
   if (isLoading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   if (error || !paper) return <div className="text-center py-20"><p className="text-destructive mb-4">Paper not found</p><Button asChild variant="outline"><Link href="/dashboard/papers"><ArrowLeft className="mr-2 h-4 w-4" />Back to Papers</Link></Button></div>;
@@ -45,11 +67,18 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
     try {
       await updateMetadata({ id: paper.id, title: editTitle || paper.title, abstract: editAbstract || paper.abstract || "", tags: editTags ? editTags.split(",").map((t) => t.trim()).filter(Boolean) : paper.tags }).unwrap();
       setIsEditing(false);
-    } catch {}
+    } catch (e: unknown) { showApiErrorToast(e as any); }
   };
 
   const handleDelete = async () => {
-    try { await deletePaper(paper.id).unwrap(); router.push("/dashboard/papers"); } catch {}
+    try { await deletePaper(paper.id).unwrap(); router.push("/dashboard/papers"); } catch (e: unknown) { showApiErrorToast(e as any); }
+  };
+
+  const handleProcess = async () => {
+    try {
+      await processPaper(paper.id).unwrap();
+      showSuccessToast("Processing started");
+    } catch (e: unknown) { showApiErrorToast(e as any); }
   };
 
   const startEdit = () => {
@@ -112,9 +141,24 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="flex gap-2 mt-4 pt-4 border-t">
           {paper.file && <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}><Eye className="mr-2 h-4 w-4" />{showPreview ? "Hide Preview" : "Preview PDF"}</Button>}
-          <Button variant="outline" size="sm" asChild><Link href={`/dashboard/papers/${paper.id}/annotations`}><Highlighter className="mr-2 h-4 w-4" />Annotate</Link></Button>
-          <Button variant="outline" size="sm"><Bot className="mr-2 h-4 w-4" />AI Insight</Button>
-          <Button variant="outline" size="sm"><FileText className="mr-2 h-4 w-4" />Export</Button>
+          {paper.processingStatus === "UPLOADED" && (
+            <Button variant="outline" size="sm" onClick={handleProcess} disabled={isProcessing}>
+              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
+              {isProcessing ? "Starting..." : "Process"}
+            </Button>
+          )}
+          {paper.processingStatus === "PROCESSING" && (
+            <Button variant="outline" size="sm" disabled>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+            </Button>
+          )}
+          {paper.processingStatus === "FAILED" && (
+            <Button variant="outline" size="sm" onClick={handleProcess} disabled={isProcessing}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Retry
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => setShowAiSummary(!showAiSummary)}><Bot className="mr-2 h-4 w-4" />{showAiSummary ? "Hide AI Summary" : "AI Summary"}</Button>
+          <Button variant="outline" size="sm" asChild><Link href={`/dashboard/papers/${paper.id}/relations`}><FileText className="mr-2 h-4 w-4" />Relations</Link></Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/papers/${paper.id}/collaborate`}><Users className="mr-2 h-4 w-4" />Collaborate</Link>
           </Button>
@@ -122,14 +166,22 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
       </motion.div>
 
       {/* AI Key Points */}
-      <KeyPointsCard paperId={paper.id} />
+      {showAiSummary && <KeyPointsCard paperId={paper.id} />}
 
       {/* PDF Preview */}
       {showPreview && previewUrlData?.data?.url && (
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-lg">Preview</CardTitle></CardHeader>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Preview</CardTitle>
+            {previewLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+          </CardHeader>
           <CardContent>
-            <iframe src={previewUrlData.data.url} className="w-full h-[600px] border rounded-lg" title="PDF Preview" loading="lazy" />
+            <iframe
+              src={previewUrlData.data.url}
+              className="w-full h-[85vh] border rounded-lg"
+              title="PDF Preview"
+              onLoad={() => setPreviewLoading(false)}
+            />
           </CardContent>
         </Card>
       )}

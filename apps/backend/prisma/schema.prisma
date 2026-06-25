@@ -233,6 +233,10 @@ model User {
   @@index([isDeleted, createdAt]) // For listing active users sorted by creation
   @@index([role, isDeleted, createdAt]) // For role-filtered queries
   @@index([email, isDeleted]) // For email lookups with deletion filter
+
+  // Login tracking
+  lastLoginProvider String? // "google" | "github" | "credentials" | "magic-link"
+  loginHistory      LoginHistory[]
 }
 
 model Workspace {
@@ -491,10 +495,13 @@ model Annotation {
   paperId  String
   userId   String
   type     AnnotationType @default(HIGHLIGHT)
-  anchor   Json           @db.JsonB // position anchors
+  anchor   Json           @db.JsonB
   text     String
   version  Int            @default(1)
   parentId String?
+  color    String         @default("#FFEB3B")
+  positionIndex Int      @default(0)
+  metadata Json?
 
   parent   Annotation?  @relation("AnnotationThread", fields: [parentId], references: [id])
   children Annotation[] @relation("AnnotationThread")
@@ -713,6 +720,7 @@ model AIConversationMessage {
   content        String
   model          String? // which model generated this response
   tokensUsed     Int?
+  costCents      Float?
   metadata       Json?   @db.JsonB
 
   conversation AIConversation @relation(fields: [conversationId], references: [id])
@@ -721,6 +729,39 @@ model AIConversationMessage {
   updatedAt DateTime @updatedAt
 
   @@index([conversationId, createdAt])
+}
+
+// Phase 10 — Admin-managed AI provider catalog.
+// Lets admins enable / disable individual models, set the default for
+// the floating AI assistant, and reorder display via displayOrder.
+// Add-only migration; no destructive changes to existing tables.
+model AIProvider {
+  id            String   @id @default(uuid())
+  // Logical provider key: openai | anthropic | google | deepseek | minimax
+  provider      String
+  // Model identifier passed to the SDK (e.g. "gpt-4o-mini", "claude-3-5-sonnet-latest")
+  model         String
+  // Human-readable label shown in UI dropdowns (e.g. "GPT-4o Mini (OpenAI - Fast)")
+  displayName   String
+  enabled       Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  description   String?
+  // Env-var name to look up the API key (e.g. "OPENAI_API_KEY").
+  // Optional so a provider can be configured without a key (e.g. for catalog-only display).
+  apiKeyEnvName String?
+  // Cost per 1K tokens (in USD cents) for cost tracking in analytics.
+  inputCostPer1k  Float?
+  outputCostPer1k Float?
+  // Lower values appear first in admin lists and user dropdowns.
+  displayOrder  Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+
+  @@unique([provider, model])
+  @@index([enabled, displayOrder])
+  @@index([isDefault])
 }
 
 model Plan {
@@ -897,6 +938,21 @@ model Session {
   // Optimized index - composite is sufficient for session lookups
   @@index([userId, expires])
   @@index([expires, isDeleted]) // For cleanup queries
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String   // "google" | "github" | "credentials" | "magic-link"
+  ip        String?
+  userAgent String?
+  device    String?  // derived from user-agent (e.g. "Chrome on MacOS")
+  location  String?  // geocoded from IP (e.g. "New York, USA")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model VerificationToken {

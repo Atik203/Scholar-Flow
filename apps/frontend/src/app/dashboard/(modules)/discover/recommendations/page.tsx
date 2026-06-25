@@ -1,69 +1,92 @@
 "use client";
 
-import { PageContainer } from "@/components/layout/PageContainer";
+/**
+ * Discover > For You — AI-recommended papers
+ */
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetRecommendationsQuery } from "@/redux/api/searchApi";
-import { FileText, Sparkles, Loader2, BookOpen } from "lucide-react";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { BookOpen, FileText, Sparkles } from "lucide-react";
+import Link from "next/link";
 
 export default function RecommendationsPage() {
   const { data, isLoading } = useGetRecommendationsQuery();
 
-  const recommendPapers = data?.data || [];
+  const recommendations = data?.data ?? [];
 
   return (
-    <PageContainer>
-      <div className="mb-6 space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">For You</h1>
-        <p className="text-muted-foreground">Personalized AI recommendations based on your activity and shared workspaces.</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+          <Sparkles className="h-8 w-8 text-purple-500" />
+          For You
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Personalized recommendations based on your shared workspaces and
+          reading history.
+        </p>
       </div>
+
       {isLoading ? (
-        <div className="flex items-center justify-center p-20">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <RecommendationCardSkeleton key={i} />
+          ))}
         </div>
-      ) : recommendPapers.length === 0 ? (
-        <div className="text-center py-20 bg-muted/20 border border-dashed rounded-lg">
-          <Sparkles className="w-10 h-10 text-muted-foreground mx-auto mb-4 opacity-20" />
-          <p className="text-muted-foreground">Not enough data to generate recommendations. Start uploading papers or joining workspaces to train your feed.</p>
+      ) : recommendations.length === 0 ? (
+        <div className="rounded-lg border border-dashed py-20 text-center">
+          <Sparkles className="h-10 w-10 mx-auto mb-4 text-muted-foreground opacity-30" />
+          <p className="text-muted-foreground">
+            Join or create a workspace to get personalized recommendations.
+          </p>
+          <Button asChild className="mt-4">
+            <Link href="/dashboard/workspaces">Browse workspaces</Link>
+          </Button>
         </div>
       ) : (
-        <div className="grid gap-4 max-w-4xl pt-4">
-          {recommendPapers.map((paper) => (
-            <Card key={paper.id} className="group hover:-translate-y-1 transition-all border-purple-500/10 hover:border-purple-500/40 relative overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start gap-6">
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-lg line-clamp-2">
-                       <Link href={`/dashboard/papers/${paper.id}`} className="hover:underline hover:text-purple-600 dark:hover:text-purple-500">
-                          {paper.title || "Untitled Paper"}
-                       </Link>
-                    </h3>
-                    
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {paper.abstract || "No abstract available for this recommended paper."}
-                    </p>
-                    
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4">
-                      {paper.createdAt && (
-                         <div className="flex items-center gap-1">
-                           <BookOpen className="w-3.5 h-3.5" />
-                           Added {formatDistanceToNow(new Date(paper.createdAt), { addSuffix: true })}
-                         </div>
-                      )}
-                      
-                      {paper.source && (
-                        <div className="flex items-center gap-1 capitalize">
-                          <FileText className="w-3.5 h-3.5" />
-                          Source: {paper.source}
-                        </div>
-                      )}
-                    </div>
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {recommendations.map((paper) => (
+            <Card
+              key={paper.id}
+              className="group hover:-translate-y-1 hover:shadow-lg transition-all border-purple-500/10 hover:border-purple-500/40"
+            >
+              <CardContent className="p-5">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-base line-clamp-2">
+                    <Link
+                      href={`/dashboard/papers/${paper.id}`}
+                      className="hover:underline hover:text-purple-600 dark:hover:text-purple-400"
+                    >
+                      {paper.title || "Untitled Paper"}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {paper.abstract || "No abstract available."}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    {paper.createdAt && (
+                      <div className="flex items-center gap-1">
+                        <BookOpen className="w-3.5 h-3.5" />
+                        Added {formatDistanceToNow(new Date(paper.createdAt), { addSuffix: true })}
+                      </div>
+                    )}
+                    {paper.source && (
+                      <div className="flex items-center gap-1 capitalize">
+                        <FileText className="w-3.5 h-3.5" />
+                        {paper.source}
+                      </div>
+                    )}
                   </div>
-                  
-                  <Button variant="outline" className="shrink-0 group-hover:bg-purple-50 dark:group-hover:bg-purple-950/20 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:border-purple-200 dark:group-hover:border-purple-800" asChild>
-                    <Link href={`/dashboard/papers/${paper.id}`}>Read Full</Link>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full group-hover:bg-purple-50 dark:group-hover:bg-purple-950/20 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:border-purple-200 dark:group-hover:border-purple-800"
+                  >
+                    <Link href={`/dashboard/papers/${paper.id}`}>Open</Link>
                   </Button>
                 </div>
               </CardContent>
@@ -71,6 +94,23 @@ export default function RecommendationsPage() {
           ))}
         </div>
       )}
-    </PageContainer>
+    </div>
+  );
+}
+
+function RecommendationCardSkeleton() {
+  return (
+    <Card className="border-purple-500/10">
+      <CardContent className="p-5 space-y-3">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <Skeleton className="h-9 w-full" />
+      </CardContent>
+    </Card>
   );
 }

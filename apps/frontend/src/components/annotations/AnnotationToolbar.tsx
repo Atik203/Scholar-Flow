@@ -1,240 +1,198 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import type { AnnotationType } from "@/redux/api/annotationApi";
 import {
-  Eye,
-  EyeOff,
+  ChevronLeft,
+  ChevronRight,
+  Eraser,
   Highlighter,
-  MessageSquare,
-  Pen,
-  Settings,
+  MessageSquareText,
+  Minus,
+  Pencil,
+  Plus,
+  RotateCcw,
   Square,
-  StickyNote,
   Strikethrough,
   Underline,
 } from "lucide-react";
 
+export const HIGHLIGHT_COLORS = [
+  { hex: "#FFEB3B", name: "Yellow" },
+  { hex: "#4CAF50", name: "Green" },
+  { hex: "#2196F3", name: "Blue" },
+  { hex: "#E91E63", name: "Pink" },
+  { hex: "#FF9800", name: "Orange" },
+  { hex: "#9C27B0", name: "Purple" },
+];
+
 interface AnnotationToolbarProps {
-  onAnnotationTypeChange: (type: AnnotationType) => void;
-  selectedType: AnnotationType;
-  onToggleAnnotations: () => void;
+  activeTool: AnnotationType | null;
+  onToolChange: (tool: AnnotationType | null) => void;
+  selectedColor: string;
+  onColorChange: (color: string) => void;
+  scale: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onZoomReset: () => void;
+  currentPage: number;
+  numPages: number;
+  onPrevPage: () => void;
+  onNextPage: () => void;
+  onPageJump: (page: number) => void;
+  rotation: number;
+  onRotate: () => void;
   showAnnotations: boolean;
-  className?: string;
+  onToggleAnnotations: () => void;
+  showSidebar: boolean;
+  onToggleSidebar: () => void;
 }
 
+const TOOLS: Array<{ type: AnnotationType; icon: typeof Highlighter; label: string }> = [
+  { type: "HIGHLIGHT", icon: Highlighter, label: "Highlight" },
+  { type: "UNDERLINE", icon: Underline, label: "Underline" },
+  { type: "STRIKETHROUGH", icon: Strikethrough, label: "Strikethrough" },
+  { type: "COMMENT", icon: MessageSquareText, label: "Comment" },
+  { type: "AREA", icon: Square, label: "Area" },
+  { type: "INK", icon: Pencil, label: "Draw" },
+];
+
 export function AnnotationToolbar({
-  onAnnotationTypeChange,
-  selectedType,
-  onToggleAnnotations,
+  activeTool,
+  onToolChange,
+  selectedColor,
+  onColorChange,
+  scale,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
+  currentPage,
+  numPages,
+  onPrevPage,
+  onNextPage,
+  onPageJump,
+  rotation,
+  onRotate,
   showAnnotations,
-  className = "",
+  onToggleAnnotations,
+  showSidebar,
+  onToggleSidebar,
 }: AnnotationToolbarProps) {
-  const annotationTypes: Array<{
-    type: AnnotationType;
-    label: string;
-    icon: React.ElementType;
-    description: string;
-    color: string;
-    shortcut?: string;
-  }> = [
-    {
-      type: "HIGHLIGHT",
-      label: "Highlight",
-      icon: Highlighter,
-      description: "Highlight text for reference",
-      color: "bg-yellow-200",
-      shortcut: "⌘H",
-    },
-    {
-      type: "UNDERLINE",
-      label: "Underline",
-      icon: Underline,
-      description: "Underline text",
-      color: "bg-blue-200",
-      shortcut: "⌘U",
-    },
-    {
-      type: "STRIKETHROUGH",
-      label: "Strikethrough",
-      icon: Strikethrough,
-      description: "Strike through text",
-      color: "bg-red-200",
-    },
-    {
-      type: "AREA",
-      label: "Area Selection",
-      icon: Square,
-      description: "Select an area or region",
-      color: "bg-purple-200",
-    },
-    {
-      type: "COMMENT",
-      label: "Comment",
-      icon: MessageSquare,
-      description: "Add a comment or question",
-      color: "bg-blue-300",
-      shortcut: "⌘M",
-    },
-    {
-      type: "NOTE",
-      label: "Note",
-      icon: StickyNote,
-      description: "Add a personal note",
-      color: "bg-green-200",
-      shortcut: "⌘N",
-    },
-    {
-      type: "INK",
-      label: "Ink/Drawing",
-      icon: Pen,
-      description: "Freehand drawing or sketch",
-      color: "bg-gray-200",
-    },
-  ];
-
-  const selectedAnnotation = annotationTypes.find(
-    (t) => t.type === selectedType
-  );
-
   return (
-    <div
-      className={`flex items-center justify-between p-3 border-t bg-white shadow-sm ${className}`}
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold text-gray-700">
-          Annotation Tools:
-        </span>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 min-w-[160px] justify-start"
-            >
-              {selectedAnnotation?.icon &&
-                (() => {
-                  const Icon = selectedAnnotation.icon;
-                  return <Icon className="h-4 w-4" />;
-                })()}
-              <span className="flex-1 text-left">
-                {selectedAnnotation?.label}
-              </span>
-              {selectedAnnotation?.shortcut && (
-                <kbd className="text-xs text-muted-foreground">
-                  {selectedAnnotation.shortcut}
-                </kbd>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-72">
-            <div className="px-2 py-1.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Text Annotations
-              </p>
-            </div>
-            {annotationTypes
-              .slice(0, 3)
-              .map(({ type, label, icon: Icon, description, shortcut }) => (
-                <DropdownMenuItem
-                  key={type}
-                  onClick={() => onAnnotationTypeChange(type)}
-                  className="gap-3 py-2.5"
-                >
-                  <Icon className="h-4 w-4 text-gray-600" />
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {description}
-                    </div>
-                  </div>
-                  {shortcut && (
-                    <kbd className="text-xs bg-gray-100 px-1.5 py-0.5 rounded border">
-                      {shortcut}
-                    </kbd>
-                  )}
-                </DropdownMenuItem>
-              ))}
-            <DropdownMenuSeparator />
-            <div className="px-2 py-1.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase">
-                Area & Comments
-              </p>
-            </div>
-            {annotationTypes
-              .slice(3)
-              .map(({ type, label, icon: Icon, description, shortcut }) => (
-                <DropdownMenuItem
-                  key={type}
-                  onClick={() => onAnnotationTypeChange(type)}
-                  className="gap-3 py-2.5"
-                >
-                  <Icon className="h-4 w-4 text-gray-600" />
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {description}
-                    </div>
-                  </div>
-                  {shortcut && (
-                    <kbd className="text-xs bg-gray-100 px-1.5 py-0.5 rounded border">
-                      {shortcut}
-                    </kbd>
-                  )}
-                </DropdownMenuItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Separator orientation="vertical" className="h-6" />
-
-        <div className="flex items-center gap-1.5">
-          {annotationTypes.slice(0, 6).map(({ type, color }) => (
+    <div className="sticky top-0 z-20 flex flex-wrap items-center gap-1.5 rounded-t-lg border bg-background/95 px-3 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Annotation tools */}
+      <div className="flex items-center gap-0.5 rounded-md bg-muted p-0.5">
+        {TOOLS.map((tool) => {
+          const Icon = tool.icon;
+          const isActive = activeTool === tool.type;
+          return (
             <button
-              key={type}
-              onClick={() => onAnnotationTypeChange(type)}
-              className={`w-6 h-6 rounded-md ${color} transition-all ${
-                selectedType === type
-                  ? "ring-2 ring-primary ring-offset-1 scale-110"
-                  : "hover:scale-105"
+              key={tool.type}
+              onClick={() => onToolChange(isActive ? null : tool.type)}
+              className={`flex h-7 items-center gap-1 rounded px-2 text-xs transition-colors ${
+                isActive
+                  ? "bg-primary text-primary-foreground shadow"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
-              title={annotationTypes.find((t) => t.type === type)?.label}
-            />
-          ))}
-        </div>
+              title={tool.label}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{tool.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button
-          variant={showAnnotations ? "default" : "outline"}
-          size="sm"
-          onClick={onToggleAnnotations}
-          className="gap-2"
-        >
-          {showAnnotations ? (
-            <>
-              <Eye className="h-4 w-4" />
-              Annotations On
-            </>
-          ) : (
-            <>
-              <EyeOff className="h-4 w-4" />
-              Annotations Off
-            </>
-          )}
-        </Button>
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
-        <Button variant="outline" size="sm" className="gap-2">
-          <Settings className="h-4 w-4" />
+      {/* Color picker */}
+      <div className="flex items-center gap-0.5">
+        {HIGHLIGHT_COLORS.map((c) => (
+          <button
+            key={c.hex}
+            onClick={() => onColorChange(c.hex)}
+            className={`h-5 w-5 rounded-full border-2 transition-all ${
+              selectedColor === c.hex
+                ? "border-foreground scale-110"
+                : "border-transparent hover:scale-110"
+            }`}
+            style={{ backgroundColor: c.hex }}
+            title={c.name}
+          />
+        ))}
+      </div>
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      {/* Zoom controls */}
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onZoomOut} title="Zoom out">
+          <Minus className="h-3.5 w-3.5" />
+        </Button>
+        <button
+          onClick={onZoomReset}
+          className="min-w-[4rem] text-center text-xs tabular-nums hover:underline"
+          title="Reset zoom"
+        >
+          {Math.round(scale * 100)}%
+        </button>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onZoomIn} title="Zoom in">
+          <Plus className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      {/* Page navigation */}
+      <div className="flex items-center gap-1">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onPrevPage} disabled={currentPage <= 1} title="Previous page">
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </Button>
+        <span className="flex items-center gap-0.5 text-xs tabular-nums">
+          <input
+            type="number"
+            min={1}
+            max={numPages}
+            value={currentPage}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (v >= 1 && v <= numPages) onPageJump(v);
+            }}
+            className="w-7 rounded border bg-transparent p-0 text-center text-xs [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          />
+          <span className="text-muted-foreground">/ {numPages}</span>
+        </span>
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onNextPage} disabled={currentPage >= numPages} title="Next page">
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      {/* Rotate */}
+      <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs" onClick={onRotate} title="Rotate">
+        <RotateCcw className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">{rotation}°</span>
+      </Button>
+
+      <div className="ml-auto flex items-center gap-1">
+        <Button
+          variant={showAnnotations ? "default" : "ghost"}
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={onToggleAnnotations}
+        >
+          <Eraser className="mr-1 h-3.5 w-3.5" />
+          Annotations
+        </Button>
+        <Button
+          variant={showSidebar ? "default" : "ghost"}
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={onToggleSidebar}
+        >
+          List
         </Button>
       </div>
     </div>

@@ -45,6 +45,19 @@ const publicRoutes = [
   "/test-session",
   "/debug-auth",
   "/dev",
+  "/invitation",
+  "/public-view",
+];
+
+// Legacy role-segmented prefixes. Visiting any of these redirects to the
+// canonical (un-prefixed) path. Examples:
+//   /dashboard/researcher            -> /dashboard
+//   /dashboard/team-lead/workspaces/abc -> /dashboard/workspaces/abc
+const LEGACY_ROLE_SEGMENTS = [
+  "/dashboard/researcher",
+  "/dashboard/pro-researcher",
+  "/dashboard/team-lead",
+  "/dashboard/admin",
 ];
 
 // Helper function to check if route matches pattern
@@ -82,18 +95,53 @@ export function proxy(request: Request) {
     return NextResponse.next();
   }
 
-  // Backward-compat: redirect legacy role-segmented URLs to shared dashboard
-  if (pathname === "/dashboard/researcher" || pathname.startsWith("/dashboard/researcher/")) {
-    const tail = pathname.slice("/dashboard/researcher".length);
-    return createRedirect(`/dashboard${tail}${url.search}`);
-  }
-  if (pathname === "/dashboard/pro-researcher" || pathname.startsWith("/dashboard/pro-researcher/")) {
-    const tail = pathname.slice("/dashboard/pro-researcher".length);
-    return createRedirect(`/dashboard${tail}${url.search}`);
-  }
-  if (pathname === "/dashboard/team-lead" || pathname.startsWith("/dashboard/team-lead/")) {
-    const tail = pathname.slice("/dashboard/team-lead".length);
-    return createRedirect(`/dashboard${tail}${url.search}`);
+  // Backward-compat: redirect legacy role-segmented URLs to the shared
+  // dashboard. Matches exact root + nested subpaths. Preserves the tail
+  // (including any nested resource like /workspaces/:id) so deep links
+  // resolve correctly without a 404 flash.
+  for (const segment of LEGACY_ROLE_SEGMENTS) {
+    if (pathname === segment || pathname.startsWith(segment + "/")) {
+      const tail = pathname.slice(segment.length);
+      // For the admin segment, keep the per-resource pages alive (the
+      // (app)/admin/* tree still exists), but drop the role prefix from
+      // any nested subpath. /dashboard/admin -> /dashboard (since
+      // /dashboard/admin/* is what the (app) tree currently uses).
+      // Specifically: if admin has a known top-level resource we route to
+      // its canonical /dashboard/* home; otherwise fall back to /dashboard.
+      let target: string;
+      if (segment === "/dashboard/admin") {
+        // Admin subtree lives at /dashboard/admin/* under (app). We only
+        // want to strip the role prefix when the request is *not* hitting
+        // an admin resource. We detect that by checking whether the next
+        // path segment matches an admin-only resource.
+        const rest = tail.startsWith("/") ? tail.slice(1) : tail;
+        const firstSegment = rest.split("/")[0];
+        const adminResources = new Set([
+          "users",
+          "subscriptions",
+          "plans",
+          "payments",
+          "reports",
+          "audit",
+          "webhooks",
+          "api-keys",
+          "moderation",
+          "alerts",
+          "system",
+          "settings",
+          "analytics",
+        ]);
+        if (!firstSegment || !adminResources.has(firstSegment)) {
+          target = `/dashboard${tail || ""}`;
+        } else {
+          // Keep the admin path intact.
+          return NextResponse.next();
+        }
+      } else {
+        target = `/dashboard${tail}`;
+      }
+      return createRedirect(`${target}${url.search}`);
+    }
   }
 
   const callbackUrl = url.searchParams.get("callbackUrl");

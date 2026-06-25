@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: scholar-flow-api
+    env: node
+    buildCommand: ./render-build.sh
+    startCommand: yarn workspace @scholar-flow/backend start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -411,7 +411,7 @@ export function DashboardLayout({ children, variant = "app" }: DashboardLayoutPr
             </div>
           </header>
           <main className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950 flex justify-center">
-            <div className="flex flex-col gap-6 p-6 w-full max-w-7xl">
+            <div className="flex flex-col gap-6 p-6 w-full max-w-[1440px]">
               {children}
             </div>
           </main>
