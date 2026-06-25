@@ -370,6 +370,7 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, paperId) => [
+        "Paper",
         { type: "Paper", id: paperId },
         { type: "ProcessingStatus", id: paperId },
       ],
