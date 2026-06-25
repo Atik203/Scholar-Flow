@@ -4,7 +4,6 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type {
   Annotation,
@@ -17,14 +16,6 @@ import {
   useGetPaperAnnotationsQuery,
   useUpdateAnnotationMutation,
 } from "@/redux/api/annotationApi";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut,
-} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -35,7 +26,6 @@ import { AnnotationList } from "./AnnotationList";
 import { AnnotationPopup } from "./AnnotationPopup";
 import { AnnotationToolbar } from "./AnnotationToolbar";
 
-// Configure PDF.js worker - use jsdelivr CDN which is more reliable
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PdfAnnotationViewerEnhancedProps {
@@ -49,18 +39,17 @@ export function PdfAnnotationViewerEnhanced({
   paperId,
   className = "",
 }: PdfAnnotationViewerEnhancedProps) {
-  // PDF State
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.2);
   const [rotation, setRotation] = useState<number>(0);
 
-  // Annotation State
   const [selectedText, setSelectedText] = useState<string>("");
   const [selection, setSelection] = useState<AnnotationAnchor | null>(null);
   const [isAnnotationPopupOpen, setIsAnnotationPopupOpen] = useState(false);
   const [annotationType, setAnnotationType] =
     useState<AnnotationType>("HIGHLIGHT");
+  const [annotationColor, setAnnotationColor] = useState<string>("#FFEB3B");
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [showAnnotationList, setShowAnnotationList] = useState(true);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -70,26 +59,23 @@ export function PdfAnnotationViewerEnhanced({
   const [editingAnnotation, setEditingAnnotation] = useState<Annotation | null>(
     null
   );
+  const [pageWidth, setPageWidth] = useState(0);
+  const [pageHeight, setPageHeight] = useState(0);
 
   const pageRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Fetch annotations for this paper
   const { data: annotationsData, isLoading: annotationsLoading } =
     useGetPaperAnnotationsQuery({
       paperId,
       includeReplies: true,
     });
 
-  // Mutations
-  const [createAnnotation, { isLoading: isCreatingAnnotation }] =
-    useCreateAnnotationMutation();
+  const [createAnnotation] = useCreateAnnotationMutation();
   const [updateAnnotation] = useUpdateAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
 
   const annotations = annotationsData?.data || [];
 
-  // Filter annotations for current page
   const currentPageAnnotations = annotations.filter(
     (annotation) => annotation.anchor.page === currentPage
   );
@@ -101,61 +87,19 @@ export function PdfAnnotationViewerEnhanced({
     []
   );
 
-  /**
-   * Convert page coordinates to viewport coordinates
-   * This accounts for scale and rotation transformations
-   */
-  const pageToViewport = useCallback(
-    (x: number, y: number, pageWidth: number, pageHeight: number) => {
-      const currentScale = scale;
-      const currentRotation = rotation;
-
-      let viewportX = x;
-      let viewportY = y;
-
-      // Apply rotation transformation
-      if (currentRotation === 90) {
-        viewportX = y;
-        viewportY = pageHeight - x;
-      } else if (currentRotation === 180) {
-        viewportX = pageWidth - x;
-        viewportY = pageHeight - y;
-      } else if (currentRotation === 270) {
-        viewportX = pageWidth - y;
-        viewportY = x;
-      }
-
-      // Apply scale
-      return {
-        x: viewportX * currentScale,
-        y: viewportY * currentScale,
-      };
-    },
-    [scale, rotation]
-  );
-
-  /**
-   * Convert viewport coordinates to page coordinates
-   * This reverses the page-to-viewport transformation
-   */
   const viewportToPage = useCallback(
     (x: number, y: number, pageWidth: number, pageHeight: number) => {
-      const currentScale = scale;
-      const currentRotation = rotation;
+      let pageX = x / scale;
+      let pageY = y / scale;
 
-      // Remove scale first
-      let pageX = x / currentScale;
-      let pageY = y / currentScale;
-
-      // Reverse rotation transformation
-      if (currentRotation === 90) {
+      if (rotation === 90) {
         const temp = pageX;
         pageX = pageHeight - pageY;
         pageY = temp;
-      } else if (currentRotation === 180) {
+      } else if (rotation === 180) {
         pageX = pageWidth - pageX;
         pageY = pageHeight - pageY;
-      } else if (currentRotation === 270) {
+      } else if (rotation === 270) {
         const temp = pageX;
         pageX = pageY;
         pageY = pageWidth - temp;
@@ -166,38 +110,28 @@ export function PdfAnnotationViewerEnhanced({
     [scale, rotation]
   );
 
-  /**
-   * Handle text selection in PDF
-   * Uses proper coordinate transformation
-   */
   const handleTextSelection = useCallback(() => {
     const windowSelection = window.getSelection();
     if (!windowSelection || !windowSelection.toString().trim()) return;
 
-    const selectedText = windowSelection.toString().trim();
+    const text = windowSelection.toString().trim();
     const range = windowSelection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     const pageRect = pageRef.current?.getBoundingClientRect();
 
     if (!pageRect) return;
 
-    // Calculate relative coordinates
     const relativeX = rect.left - pageRect.left;
     const relativeY = rect.top - pageRect.top;
-    const relativeWidth = rect.width;
-    const relativeHeight = rect.height;
+    const pw = pageRect.width / scale;
+    const ph = pageRect.height / scale;
 
-    // Get page dimensions (assuming standard PDF page)
-    const pageWidth = pageRect.width / scale;
-    const pageHeight = pageRect.height / scale;
-
-    // Convert to page coordinates
-    const topLeft = viewportToPage(relativeX, relativeY, pageWidth, pageHeight);
+    const topLeft = viewportToPage(relativeX, relativeY, pw, ph);
     const bottomRight = viewportToPage(
-      relativeX + relativeWidth,
-      relativeY + relativeHeight,
-      pageWidth,
-      pageHeight
+      relativeX + rect.width,
+      relativeY + rect.height,
+      pw,
+      ph
     );
 
     const anchor: AnnotationAnchor = {
@@ -208,82 +142,31 @@ export function PdfAnnotationViewerEnhanced({
         width: bottomRight.x - topLeft.x,
         height: bottomRight.y - topLeft.y,
       },
-      selectedText,
-      viewport: {
-        scale,
-        rotation,
-      },
+      selectedText: text,
+      viewport: { scale, rotation },
     };
 
-    setSelectedText(selectedText);
+    setSelectedText(text);
     setSelection(anchor);
     setIsAnnotationPopupOpen(true);
 
-    // Clear selection
     windowSelection.removeAllRanges();
   }, [currentPage, scale, rotation, viewportToPage]);
 
-  /**
-   * Handle area selection for AREA annotation type
-   */
-  const handleAreaSelection = useCallback(
-    (startX: number, startY: number, endX: number, endY: number) => {
-      const pageRect = pageRef.current?.getBoundingClientRect();
-      if (!pageRect) return;
-
-      const pageWidth = pageRect.width / scale;
-      const pageHeight = pageRect.height / scale;
-
-      const topLeft = viewportToPage(
-        Math.min(startX, endX),
-        Math.min(startY, endY),
-        pageWidth,
-        pageHeight
-      );
-      const bottomRight = viewportToPage(
-        Math.max(startX, endX),
-        Math.max(startY, endY),
-        pageWidth,
-        pageHeight
-      );
-
-      const anchor: AnnotationAnchor = {
-        page: currentPage,
-        coordinates: {
-          x: topLeft.x,
-          y: topLeft.y,
-          width: bottomRight.x - topLeft.x,
-          height: bottomRight.y - topLeft.y,
-        },
-        selectedText: "Area Selection",
-        viewport: {
-          scale,
-          rotation,
-        },
-      };
-
-      setSelection(anchor);
-      setIsAnnotationPopupOpen(true);
-    },
-    [currentPage, scale, rotation, viewportToPage]
-  );
-
-  /**
-   * Handle annotation creation
-   */
   const handleAnnotationCreate = useCallback(
-    async (text: string) => {
+    async ({ text, color, type }: { text: string; color: string; type: AnnotationType }) => {
       if (!selection) return;
 
       try {
         await createAnnotation({
           paperId,
-          type: annotationType,
+          type,
           anchor: selection,
           text: text.trim(),
+          color: type === "HIGHLIGHT" || type === "UNDERLINE" || type === "COMMENT" ? color : undefined,
         }).unwrap();
 
-        showSuccessToast(`${annotationType} annotation created successfully`);
+        showSuccessToast("Annotation created");
         setIsAnnotationPopupOpen(false);
         setSelection(null);
         setSelectedText("");
@@ -292,21 +175,14 @@ export function PdfAnnotationViewerEnhanced({
         showErrorToast(error.data?.message || "Failed to create annotation");
       }
     },
-    [selection, annotationType, paperId, createAnnotation]
+    [selection, paperId, createAnnotation]
   );
 
-  /**
-   * Handle annotation update
-   */
-  const handleAnnotationUpdate = useCallback(
-    async (annotationId: string, text: string, anchor?: AnnotationAnchor) => {
+  const handleAnnotationSave = useCallback(
+    async (id: string, data: { text?: string; color?: string }) => {
       try {
-        await updateAnnotation({
-          id: annotationId,
-          data: { text, anchor },
-        }).unwrap();
-
-        showSuccessToast("Annotation updated successfully");
+        await updateAnnotation({ id, data }).unwrap();
+        showSuccessToast("Annotation updated");
         setEditingAnnotation(null);
       } catch (error: any) {
         showErrorToast(error.data?.message || "Failed to update annotation");
@@ -315,19 +191,35 @@ export function PdfAnnotationViewerEnhanced({
     [updateAnnotation]
   );
 
-  /**
-   * Handle annotation deletion
-   */
   const handleAnnotationDelete = useCallback(
-    async (annotationId: string) => {
+    async (id: string) => {
       try {
-        await deleteAnnotation(annotationId).unwrap();
-        showSuccessToast("Annotation deleted successfully");
+        await deleteAnnotation(id).unwrap();
+        showSuccessToast("Annotation deleted");
       } catch (error: any) {
         showErrorToast(error.data?.message || "Failed to delete annotation");
       }
     },
     [deleteAnnotation]
+  );
+
+  const handleAnnotationReply = useCallback(
+    async (parentId: string, data: { text: string; color?: string }) => {
+      try {
+        await createAnnotation({
+          paperId,
+          type: "COMMENT",
+          anchor: { page: currentPage, coordinates: { x: 0, y: 0, width: 0, height: 0 } },
+          text: data.text.trim(),
+          parentId,
+          color: data.color || "#2196F3",
+        }).unwrap();
+        showSuccessToast("Reply added");
+      } catch (error: any) {
+        showErrorToast(error.data?.message || "Failed to add reply");
+      }
+    },
+    [paperId, currentPage, createAnnotation]
   );
 
   const handleAnnotationCancel = useCallback(() => {
@@ -337,7 +229,6 @@ export function PdfAnnotationViewerEnhanced({
     setDrawingPoints([]);
   }, []);
 
-  // Navigation
   const goToPreviousPage = useCallback(() => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
   }, []);
@@ -346,7 +237,6 @@ export function PdfAnnotationViewerEnhanced({
     setCurrentPage((prev) => Math.min(numPages, prev + 1));
   }, [numPages]);
 
-  // Zoom controls
   const zoomIn = useCallback(() => {
     setScale((prev) => Math.min(3.0, prev + 0.2));
   }, []);
@@ -363,130 +253,88 @@ export function PdfAnnotationViewerEnhanced({
     setRotation((prev) => (prev + 90) % 360);
   }, []);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + H for Highlight
-      if ((e.metaKey || e.ctrlKey) && e.key === "h") {
-        e.preventDefault();
-        setAnnotationType("HIGHLIGHT");
-      }
-      // Cmd/Ctrl + U for Underline
-      if ((e.metaKey || e.ctrlKey) && e.key === "u") {
-        e.preventDefault();
-        setAnnotationType("UNDERLINE");
-      }
-      // Cmd/Ctrl + M for Comment
-      if ((e.metaKey || e.ctrlKey) && e.key === "m") {
-        e.preventDefault();
-        setAnnotationType("COMMENT");
-      }
-      // Cmd/Ctrl + N for Note
-      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
-        e.preventDefault();
-        setAnnotationType("NOTE");
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
+  const pageJump = useCallback((page: number) => {
+    setCurrentPage(Math.max(1, page));
   }, []);
 
+  const handleToolChange = useCallback(
+    (tool: AnnotationType | null) => {
+      if (tool === "INK") {
+        setIsDrawingMode(true);
+      } else {
+        setIsDrawingMode(false);
+      }
+      if (tool) {
+        setAnnotationType(tool);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    const el = pageRef.current;
+    if (!el) return;
+    const update = () => {
+      setPageWidth(el.offsetWidth);
+      setPageHeight(el.offsetHeight);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [scale, rotation]);
+
+  const popupPosition = selection?.coordinates
+    ? {
+        x: selection.coordinates.x * scale + (pageRef.current?.getBoundingClientRect().left ?? 0),
+        y: selection.coordinates.y * scale + (pageRef.current?.getBoundingClientRect().top ?? 0),
+      }
+    : null;
+
   return (
-    <div className={`flex h-full bg-gray-50 ${className}`}>
-      {/* Main PDF Viewer */}
-      <div className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <div className="flex items-center justify-between p-3 border-b bg-white shadow-sm">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToPreviousPage}
-              disabled={currentPage <= 1}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium min-w-[80px] text-center">
-              Page {currentPage} / {numPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToNextPage}
-              disabled={currentPage >= numPages}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className={`flex h-full ${className}`}>
+      <div className="flex flex-1 flex-col">
+        <AnnotationToolbar
+          activeTool={annotationType}
+          onToolChange={handleToolChange}
+          selectedColor={annotationColor}
+          onColorChange={setAnnotationColor}
+          scale={scale}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onZoomReset={resetZoom}
+          currentPage={currentPage}
+          numPages={numPages}
+          onPrevPage={goToPreviousPage}
+          onNextPage={goToNextPage}
+          onPageJump={pageJump}
+          rotation={rotation}
+          onRotate={rotate}
+          showAnnotations={showAnnotations}
+          onToggleAnnotations={() => setShowAnnotations((v) => !v)}
+          showSidebar={showAnnotationList}
+          onToggleSidebar={() => setShowAnnotationList((v) => !v)}
+        />
 
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={zoomOut}>
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <span className="text-sm font-medium min-w-[60px] text-center">
-              {Math.round(scale * 100)}%
-            </span>
-            <Button variant="outline" size="sm" onClick={zoomIn}>
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetZoom}
-              title="Reset Zoom"
-            >
-              <Maximize2 className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={rotate} title="Rotate">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {currentPageAnnotations.length} annotations
-            </Badge>
-            <Button
-              variant={showAnnotationList ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowAnnotationList(!showAnnotationList)}
-            >
-              {showAnnotationList ? "Hide" : "Show"} List
-            </Button>
-          </div>
-        </div>
-
-        {/* PDF Document */}
         <div className="flex-1 overflow-auto bg-muted/30 p-6">
           <div className="flex justify-center">
-            <div
-              ref={pageRef}
-              className="relative bg-background shadow-2xl"
-              onMouseUp={handleTextSelection}
-            >
+            <div ref={pageRef} className="relative bg-background shadow-2xl">
               <Document
                 file={fileUrl}
                 onLoadSuccess={onDocumentLoadSuccess}
                 loading={
-                  <div className="flex items-center justify-center h-96">
+                  <div className="flex h-96 items-center justify-center">
                     <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                      <p className="text-sm text-muted-foreground">
-                        Loading PDF...
-                      </p>
+                      <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+                      <p className="text-sm text-muted-foreground">Loading PDF...</p>
                     </div>
                   </div>
                 }
                 error={
-                  <div className="flex items-center justify-center h-96">
+                  <div className="flex h-96 items-center justify-center">
                     <div className="text-center">
-                      <p className="text-sm text-destructive font-medium">
-                        Failed to load PDF
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Please try refreshing the page
-                      </p>
+                      <p className="text-sm font-medium text-destructive">Failed to load PDF</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Please try refreshing the page</p>
                     </div>
                   </div>
                 }
@@ -501,78 +349,84 @@ export function PdfAnnotationViewerEnhanced({
                 />
               </Document>
 
-              {/* Annotation Overlay */}
-              {showAnnotations && (
-                <AnnotationLayerEnhanced
-                  annotations={currentPageAnnotations}
-                  scale={scale}
-                  rotation={rotation}
-                  pageToViewport={pageToViewport}
-                  onAnnotationClick={(annotation: Annotation) => {
-                    setEditingAnnotation(annotation);
-                  }}
-                  onAnnotationEdit={(annotation: Annotation) => {
-                    setEditingAnnotation(annotation);
-                  }}
-                  onAnnotationDelete={handleAnnotationDelete}
-                />
-              )}
+              <AnnotationLayerEnhanced
+                pageIndex={currentPage - 1}
+                annotations={currentPageAnnotations}
+                scale={scale}
+                rotation={rotation}
+                pageWidth={pageWidth}
+                pageHeight={pageHeight}
+                activeTool={isDrawingMode ? "INK" : annotationType}
+                selectedColor={annotationColor}
+                showAnnotations={showAnnotations}
+                onAnnotationClick={(annotation) => {
+                  setEditingAnnotation(annotation);
+                }}
+                onCreateAnnotation={(anchor) => {
+                  setSelection(anchor);
+                  setSelectedText(anchor.selectedText || "");
+                  setIsAnnotationPopupOpen(true);
+                }}
+                isDrawingMode={isDrawingMode}
+                drawingPoints={drawingPoints}
+                onDrawingPointsChange={setDrawingPoints}
+                onDrawingComplete={(points) => {
+                  const normalized = points.map((p) => ({
+                    x: p.x / pageWidth,
+                    y: p.y / pageHeight,
+                  }));
+                  const anchor: AnnotationAnchor = {
+                    page: currentPage,
+                    coordinates: { x: 0, y: 0, width: 0, height: 0 },
+                    points: normalized,
+                    viewport: { scale, rotation },
+                  };
+                  setSelection(anchor);
+                  setAnnotationType("INK");
+                  setIsAnnotationPopupOpen(true);
+                }}
+              />
             </div>
           </div>
         </div>
-
-        {/* Annotation Toolbar */}
-        <AnnotationToolbar
-          onAnnotationTypeChange={setAnnotationType}
-          selectedType={annotationType}
-          onToggleAnnotations={() => setShowAnnotations(!showAnnotations)}
-          showAnnotations={showAnnotations}
-        />
       </div>
 
-      {/* Annotation List Sidebar */}
       {showAnnotationList && (
-        <div className="w-80 border-l bg-card shadow-lg">
+        <div className="w-80 flex-shrink-0 border-l bg-card shadow-lg">
           <AnnotationList
             annotations={annotations}
-            currentPage={currentPage}
-            onAnnotationClick={(annotation: Annotation) => {
+            totalPages={numPages}
+            onAnnotationClick={(annotation) => {
               setCurrentPage(annotation.anchor.page);
-            }}
-            onAnnotationEdit={(annotation: Annotation) => {
               setEditingAnnotation(annotation);
             }}
-            onAnnotationDelete={(annotation: Annotation) =>
-              handleAnnotationDelete(annotation.id)
-            }
+            onDelete={handleAnnotationDelete}
+            onPageJump={(page) => setCurrentPage(page)}
+            isLoading={annotationsLoading}
           />
         </div>
       )}
 
-      {/* Annotation Creation Popup */}
-      {isAnnotationPopupOpen && selection && (
-        <AnnotationPopup
-          selectedText={selectedText}
-          annotationType={annotationType}
-          onSave={handleAnnotationCreate}
-          onCancel={handleAnnotationCancel}
-        />
-      )}
+      <AnnotationPopup
+        isOpen={isAnnotationPopupOpen}
+        onClose={handleAnnotationCancel}
+        onSubmit={handleAnnotationCreate}
+        position={popupPosition}
+        selectedText={selectedText}
+        defaultColor={annotationColor}
+        defaultType={annotationType}
+      />
 
-      {/* Annotation Edit Dialog */}
-      {editingAnnotation && (
-        <AnnotationEditDialog
-          annotation={editingAnnotation}
-          onSave={(text: string, anchor?: AnnotationAnchor) =>
-            handleAnnotationUpdate(editingAnnotation.id, text, anchor)
-          }
-          onCancel={() => setEditingAnnotation(null)}
-          onDelete={() => {
-            handleAnnotationDelete(editingAnnotation.id);
-            setEditingAnnotation(null);
-          }}
-        />
-      )}
+      <AnnotationEditDialog
+        annotation={editingAnnotation}
+        open={!!editingAnnotation}
+        onOpenChange={(open) => {
+          if (!open) setEditingAnnotation(null);
+        }}
+        onSave={handleAnnotationSave}
+        onDelete={handleAnnotationDelete}
+        onReply={handleAnnotationReply}
+      />
     </div>
   );
 }

@@ -28,10 +28,12 @@ export type AggregateAnnotation = {
 
 export type AnnotationAvgAggregateOutputType = {
   version: number | null
+  positionIndex: number | null
 }
 
 export type AnnotationSumAggregateOutputType = {
   version: number | null
+  positionIndex: number | null
 }
 
 export type AnnotationMinAggregateOutputType = {
@@ -42,6 +44,8 @@ export type AnnotationMinAggregateOutputType = {
   text: string | null
   version: number | null
   parentId: string | null
+  color: string | null
+  positionIndex: number | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -55,6 +59,8 @@ export type AnnotationMaxAggregateOutputType = {
   text: string | null
   version: number | null
   parentId: string | null
+  color: string | null
+  positionIndex: number | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -69,6 +75,9 @@ export type AnnotationCountAggregateOutputType = {
   text: number
   version: number
   parentId: number
+  color: number
+  positionIndex: number
+  metadata: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -78,10 +87,12 @@ export type AnnotationCountAggregateOutputType = {
 
 export type AnnotationAvgAggregateInputType = {
   version?: true
+  positionIndex?: true
 }
 
 export type AnnotationSumAggregateInputType = {
   version?: true
+  positionIndex?: true
 }
 
 export type AnnotationMinAggregateInputType = {
@@ -92,6 +103,8 @@ export type AnnotationMinAggregateInputType = {
   text?: true
   version?: true
   parentId?: true
+  color?: true
+  positionIndex?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -105,6 +118,8 @@ export type AnnotationMaxAggregateInputType = {
   text?: true
   version?: true
   parentId?: true
+  color?: true
+  positionIndex?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -119,6 +134,9 @@ export type AnnotationCountAggregateInputType = {
   text?: true
   version?: true
   parentId?: true
+  color?: true
+  positionIndex?: true
+  metadata?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -220,6 +238,9 @@ export type AnnotationGroupByOutputType = {
   text: string
   version: number
   parentId: string | null
+  color: string
+  positionIndex: number
+  metadata: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -257,6 +278,9 @@ export type AnnotationWhereInput = {
   text?: Prisma.StringFilter<"Annotation"> | string
   version?: Prisma.IntFilter<"Annotation"> | number
   parentId?: Prisma.StringNullableFilter<"Annotation"> | string | null
+  color?: Prisma.StringFilter<"Annotation"> | string
+  positionIndex?: Prisma.IntFilter<"Annotation"> | number
+  metadata?: Prisma.JsonNullableFilter<"Annotation">
   createdAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Annotation"> | boolean
@@ -276,6 +300,9 @@ export type AnnotationOrderByWithRelationInput = {
   text?: Prisma.SortOrder
   version?: Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  color?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -298,6 +325,9 @@ export type AnnotationWhereUniqueInput = Prisma.AtLeast<{
   text?: Prisma.StringFilter<"Annotation"> | string
   version?: Prisma.IntFilter<"Annotation"> | number
   parentId?: Prisma.StringNullableFilter<"Annotation"> | string | null
+  color?: Prisma.StringFilter<"Annotation"> | string
+  positionIndex?: Prisma.IntFilter<"Annotation"> | number
+  metadata?: Prisma.JsonNullableFilter<"Annotation">
   createdAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Annotation"> | boolean
@@ -317,6 +347,9 @@ export type AnnotationOrderByWithAggregationInput = {
   text?: Prisma.SortOrder
   version?: Prisma.SortOrder
   parentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  color?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -339,6 +372,9 @@ export type AnnotationScalarWhereWithAggregatesInput = {
   text?: Prisma.StringWithAggregatesFilter<"Annotation"> | string
   version?: Prisma.IntWithAggregatesFilter<"Annotation"> | number
   parentId?: Prisma.StringNullableWithAggregatesFilter<"Annotation"> | string | null
+  color?: Prisma.StringWithAggregatesFilter<"Annotation"> | string
+  positionIndex?: Prisma.IntWithAggregatesFilter<"Annotation"> | number
+  metadata?: Prisma.JsonNullableWithAggregatesFilter<"Annotation">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Annotation"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Annotation"> | boolean
@@ -350,6 +386,9 @@ export type AnnotationCreateInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -369,6 +408,9 @@ export type AnnotationUncheckedCreateInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -382,6 +424,9 @@ export type AnnotationUpdateInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -401,6 +446,9 @@ export type AnnotationUncheckedUpdateInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -417,6 +465,9 @@ export type AnnotationCreateManyInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -428,6 +479,9 @@ export type AnnotationUpdateManyMutationInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -442,6 +496,9 @@ export type AnnotationUncheckedUpdateManyInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -471,6 +528,9 @@ export type AnnotationCountOrderByAggregateInput = {
   text?: Prisma.SortOrder
   version?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
+  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -478,6 +538,7 @@ export type AnnotationCountOrderByAggregateInput = {
 
 export type AnnotationAvgOrderByAggregateInput = {
   version?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
 }
 
 export type AnnotationMaxOrderByAggregateInput = {
@@ -488,6 +549,8 @@ export type AnnotationMaxOrderByAggregateInput = {
   text?: Prisma.SortOrder
   version?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -501,6 +564,8 @@ export type AnnotationMinOrderByAggregateInput = {
   text?: Prisma.SortOrder
   version?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  color?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -508,6 +573,7 @@ export type AnnotationMinOrderByAggregateInput = {
 
 export type AnnotationSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
+  positionIndex?: Prisma.SortOrder
 }
 
 export type AnnotationScalarRelationFilter = {
@@ -681,6 +747,9 @@ export type AnnotationCreateWithoutUserInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -698,6 +767,9 @@ export type AnnotationUncheckedCreateWithoutUserInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -743,6 +815,9 @@ export type AnnotationScalarWhereInput = {
   text?: Prisma.StringFilter<"Annotation"> | string
   version?: Prisma.IntFilter<"Annotation"> | number
   parentId?: Prisma.StringNullableFilter<"Annotation"> | string | null
+  color?: Prisma.StringFilter<"Annotation"> | string
+  positionIndex?: Prisma.IntFilter<"Annotation"> | number
+  metadata?: Prisma.JsonNullableFilter<"Annotation">
   createdAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"Annotation"> | boolean
@@ -754,6 +829,9 @@ export type AnnotationCreateWithoutPaperInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -771,6 +849,9 @@ export type AnnotationUncheckedCreateWithoutPaperInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -810,6 +891,9 @@ export type AnnotationCreateWithoutChildrenInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -828,6 +912,9 @@ export type AnnotationUncheckedCreateWithoutChildrenInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -845,6 +932,9 @@ export type AnnotationCreateWithoutParentInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -862,6 +952,9 @@ export type AnnotationUncheckedCreateWithoutParentInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -896,6 +989,9 @@ export type AnnotationUpdateWithoutChildrenInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -914,6 +1010,9 @@ export type AnnotationUncheckedUpdateWithoutChildrenInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -942,6 +1041,9 @@ export type AnnotationCreateWithoutVersionsInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -960,6 +1062,9 @@ export type AnnotationUncheckedCreateWithoutVersionsInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -988,6 +1093,9 @@ export type AnnotationUpdateWithoutVersionsInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1006,6 +1114,9 @@ export type AnnotationUncheckedUpdateWithoutVersionsInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1020,6 +1131,9 @@ export type AnnotationCreateManyUserInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1031,6 +1145,9 @@ export type AnnotationUpdateWithoutUserInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1048,6 +1165,9 @@ export type AnnotationUncheckedUpdateWithoutUserInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1063,6 +1183,9 @@ export type AnnotationUncheckedUpdateManyWithoutUserInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1076,6 +1199,9 @@ export type AnnotationCreateManyPaperInput = {
   text: string
   version?: number
   parentId?: string | null
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1087,6 +1213,9 @@ export type AnnotationUpdateWithoutPaperInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1104,6 +1233,9 @@ export type AnnotationUncheckedUpdateWithoutPaperInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1119,6 +1251,9 @@ export type AnnotationUncheckedUpdateManyWithoutPaperInput = {
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
   parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1132,6 +1267,9 @@ export type AnnotationCreateManyParentInput = {
   anchor: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text: string
   version?: number
+  color?: string
+  positionIndex?: number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -1143,6 +1281,9 @@ export type AnnotationUpdateWithoutParentInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1160,6 +1301,9 @@ export type AnnotationUncheckedUpdateWithoutParentInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1175,6 +1319,9 @@ export type AnnotationUncheckedUpdateManyWithoutParentInput = {
   anchor?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   text?: Prisma.StringFieldUpdateOperationsInput | string
   version?: Prisma.IntFieldUpdateOperationsInput | number
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  positionIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1229,6 +1376,9 @@ export type AnnotationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   text?: boolean
   version?: boolean
   parentId?: boolean
+  color?: boolean
+  positionIndex?: boolean
+  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1249,6 +1399,9 @@ export type AnnotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   text?: boolean
   version?: boolean
   parentId?: boolean
+  color?: boolean
+  positionIndex?: boolean
+  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1266,6 +1419,9 @@ export type AnnotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   text?: boolean
   version?: boolean
   parentId?: boolean
+  color?: boolean
+  positionIndex?: boolean
+  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1283,12 +1439,15 @@ export type AnnotationSelectScalar = {
   text?: boolean
   version?: boolean
   parentId?: boolean
+  color?: boolean
+  positionIndex?: boolean
+  metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type AnnotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paperId" | "userId" | "type" | "anchor" | "text" | "version" | "parentId" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["annotation"]>
+export type AnnotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "paperId" | "userId" | "type" | "anchor" | "text" | "version" | "parentId" | "color" | "positionIndex" | "metadata" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["annotation"]>
 export type AnnotationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.Annotation$parentArgs<ExtArgs>
   children?: boolean | Prisma.Annotation$childrenArgs<ExtArgs>
@@ -1326,6 +1485,9 @@ export type $AnnotationPayload<ExtArgs extends runtime.Types.Extensions.Internal
     text: string
     version: number
     parentId: string | null
+    color: string
+    positionIndex: number
+    metadata: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1765,6 +1927,9 @@ export interface AnnotationFieldRefs {
   readonly text: Prisma.FieldRef<"Annotation", 'String'>
   readonly version: Prisma.FieldRef<"Annotation", 'Int'>
   readonly parentId: Prisma.FieldRef<"Annotation", 'String'>
+  readonly color: Prisma.FieldRef<"Annotation", 'String'>
+  readonly positionIndex: Prisma.FieldRef<"Annotation", 'Int'>
+  readonly metadata: Prisma.FieldRef<"Annotation", 'Json'>
   readonly createdAt: Prisma.FieldRef<"Annotation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Annotation", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"Annotation", 'Boolean'>

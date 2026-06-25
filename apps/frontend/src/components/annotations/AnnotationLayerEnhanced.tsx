@@ -1,267 +1,341 @@
 "use client";
 
-import { Annotation, AnnotationType } from "@/redux/api/annotationApi";
-import {
-  Highlighter,
-  MessageSquare,
-  Pen,
-  Square,
-  StickyNote,
-  Strikethrough,
-  Underline,
-} from "lucide-react";
+import { useRef, useCallback, useEffect } from "react";
+import type { Annotation, AnnotationType, AnnotationAnchor } from "@/redux/api/annotationApi";
 
 interface AnnotationLayerEnhancedProps {
+  pageIndex: number;
   annotations: Annotation[];
   scale: number;
   rotation: number;
-  pageToViewport: (
-    x: number,
-    y: number,
-    pageWidth: number,
-    pageHeight: number
-  ) => { x: number; y: number };
+  pageWidth: number;
+  pageHeight: number;
+  activeTool: AnnotationType | null;
+  selectedColor: string;
+  showAnnotations: boolean;
   onAnnotationClick: (annotation: Annotation) => void;
-  onAnnotationEdit: (annotation: Annotation) => void;
-  onAnnotationDelete: (annotationId: string) => void;
-  className?: string;
+  onCreateAnnotation: (anchor: AnnotationAnchor) => void;
+  isDrawingMode: boolean;
+  drawingPoints: Array<{ x: number; y: number }>;
+  onDrawingPointsChange: (points: Array<{ x: number; y: number }>) => void;
+  onDrawingComplete: (points: Array<{ x: number; y: number }>) => void;
+}
+
+function hexToRgba(hex: string, alpha: number): string {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${isNaN(r) ? 0 : r}, ${isNaN(g) ? 0 : g}, ${isNaN(b) ? 0 : b}, ${alpha})`;
+}
+
+function HoverCard({ annotation }: { annotation: Annotation }) {
+  return (
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 min-w-[160px] max-w-[240px] bg-popover border rounded-lg shadow-xl p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+      <div className="flex items-center gap-2 mb-1">
+        <span
+          className="h-2.5 w-2.5 rounded-full shrink-0"
+          style={{ backgroundColor: annotation.color }}
+        />
+        <span className="text-xs font-semibold truncate">{annotation.user.name}</span>
+      </div>
+      {annotation.text && (
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{annotation.text}</p>
+      )}
+    </div>
+  );
+}
+
+function renderAnnotation(
+  annotation: Annotation,
+  pageWidth: number,
+  pageHeight: number,
+  onAnnotationClick: (a: Annotation) => void,
+): React.ReactNode {
+  const x = annotation.anchor.coordinates.x * pageWidth;
+  const y = annotation.anchor.coordinates.y * pageHeight;
+  const w = annotation.anchor.coordinates.width * pageWidth;
+  const h = annotation.anchor.coordinates.height * pageHeight;
+
+  const clickHandler = () => onAnnotationClick(annotation);
+
+  switch (annotation.type) {
+    case "HIGHLIGHT":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto"
+          style={{ left: x, top: y, width: w, height: h, backgroundColor: hexToRgba(annotation.color, 0.3) }}
+          onClick={clickHandler}
+        >
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "UNDERLINE":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto"
+          style={{ left: x, top: y, width: w, height: h }}
+          onClick={clickHandler}
+        >
+          <div className="absolute bottom-0 left-0 right-0" style={{ height: 3, backgroundColor: annotation.color }} />
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "STRIKETHROUGH":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto"
+          style={{ left: x, top: y, width: w, height: h }}
+          onClick={clickHandler}
+        >
+          <div
+            className="absolute left-0 right-0"
+            style={{ top: "50%", height: 2, backgroundColor: annotation.color, transform: "translateY(-50%)" }}
+          />
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "AREA":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto rounded"
+          style={{
+            left: x,
+            top: y,
+            width: w,
+            height: h,
+            border: `2px dashed ${annotation.color}`,
+            backgroundColor: hexToRgba(annotation.color, 0.1),
+          }}
+          onClick={clickHandler}
+        >
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "COMMENT":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto"
+          style={{ left: x, top: y, width: 28, height: 28 }}
+          onClick={clickHandler}
+        >
+          <span className="text-lg select-none leading-none">&#x1F4AC;</span>
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "NOTE":
+      return (
+        <div
+          key={annotation.id}
+          className="absolute group cursor-pointer pointer-events-auto"
+          style={{ left: x, top: y, width: 28, height: 28 }}
+          onClick={clickHandler}
+        >
+          <span className="text-lg select-none leading-none">&#x1F4CC;</span>
+          <HoverCard annotation={annotation} />
+        </div>
+      );
+
+    case "INK":
+      return null;
+
+    default:
+      return null;
+  }
 }
 
 export function AnnotationLayerEnhanced({
+  pageIndex,
   annotations,
   scale,
   rotation,
-  pageToViewport,
+  pageWidth,
+  pageHeight,
+  activeTool,
+  selectedColor,
+  showAnnotations,
   onAnnotationClick,
-  onAnnotationEdit,
-  onAnnotationDelete,
-  className = "",
+  onCreateAnnotation,
+  isDrawingMode,
+  drawingPoints,
+  onDrawingPointsChange,
+  onDrawingComplete,
 }: AnnotationLayerEnhancedProps) {
-  const getAnnotationStyle = (annotation: Annotation) => {
-    const { coordinates } = annotation.anchor;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawing = useRef(false);
+  const drawingPointsRef = useRef(drawingPoints);
+  drawingPointsRef.current = drawingPoints;
 
-    // Use stored viewport or current viewport
-    const annotationScale = annotation.anchor.viewport?.scale || 1;
-    const annotationRotation = annotation.anchor.viewport?.rotation || 0;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Calculate position with current scale
-    const scaleRatio = scale / annotationScale;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const left = coordinates.x * scale;
-    const top = coordinates.y * scale;
-    const width = coordinates.width * scale;
-    const height = coordinates.height * scale;
+    for (const ann of annotations) {
+      if (ann.type !== "INK" || !ann.anchor.points || ann.anchor.points.length < 2) continue;
+      const pts = ann.anchor.points;
+      ctx.beginPath();
+      ctx.strokeStyle = ann.color;
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.moveTo(pts[0].x * pageWidth, pts[0].y * pageHeight);
+      for (let i = 1; i < pts.length - 1; i++) {
+        ctx.quadraticCurveTo(
+          pts[i].x * pageWidth,
+          pts[i].y * pageHeight,
+          ((pts[i].x + pts[i + 1].x) / 2) * pageWidth,
+          ((pts[i].y + pts[i + 1].y) / 2) * pageHeight,
+        );
+      }
+      ctx.lineTo(pts[pts.length - 1].x * pageWidth, pts[pts.length - 1].y * pageHeight);
+      ctx.stroke();
+    }
 
-    const baseStyle: React.CSSProperties = {
-      position: "absolute",
-      left: `${left}px`,
-      top: `${top}px`,
-      width: `${width}px`,
-      height: `${height}px`,
-      pointerEvents: "auto",
-      cursor: "pointer",
-      transition: "opacity 0.2s",
-      zIndex: 10,
+    if (isDrawingMode && activeTool === "INK" && drawingPoints.length > 1) {
+      const pts = drawingPoints;
+      ctx.beginPath();
+      ctx.strokeStyle = selectedColor;
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length - 1; i++) {
+        ctx.quadraticCurveTo(
+          pts[i].x,
+          pts[i].y,
+          (pts[i].x + pts[i + 1].x) / 2,
+          (pts[i].y + pts[i + 1].y) / 2,
+        );
+      }
+      ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+      ctx.stroke();
+    }
+  }, [annotations, drawingPoints, isDrawingMode, activeTool, selectedColor, pageWidth, pageHeight]);
+
+  const getCanvasPoint = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement> | PointerEvent) => {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return { x: 0, y: 0 };
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    },
+    [],
+  );
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!isDrawingMode || activeTool !== "INK") return;
+      isDrawing.current = true;
+      onDrawingPointsChange([getCanvasPoint(e)]);
+    },
+    [isDrawingMode, activeTool, getCanvasPoint, onDrawingPointsChange],
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!isDrawing.current) return;
+      onDrawingPointsChange([...drawingPointsRef.current, getCanvasPoint(e)]);
+    },
+    [getCanvasPoint, onDrawingPointsChange],
+  );
+
+  const handlePointerUp = useCallback(() => {
+    if (!isDrawing.current) return;
+    isDrawing.current = false;
+    const pts = drawingPointsRef.current;
+    onDrawingPointsChange([]);
+    if (pts.length >= 2) {
+      onDrawingComplete(pts);
+    }
+  }, [onDrawingPointsChange, onDrawingComplete]);
+
+  useEffect(() => {
+    if (!activeTool || !["HIGHLIGHT", "UNDERLINE", "COMMENT"].includes(activeTool)) return;
+
+    const handleSelection = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
+
+      const range = sel.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      if (
+        rect.left < containerRect.left ||
+        rect.top < containerRect.top ||
+        rect.right > containerRect.right ||
+        rect.bottom > containerRect.bottom
+      ) return;
+
+      const anchor: AnnotationAnchor = {
+        page: pageIndex,
+        coordinates: {
+          x: (rect.left - containerRect.left) / pageWidth,
+          y: (rect.top - containerRect.top) / pageHeight,
+          width: rect.width / pageWidth,
+          height: rect.height / pageHeight,
+        },
+        selectedText: sel.toString().trim(),
+        viewport: { scale, rotation },
+      };
+
+      onCreateAnnotation(anchor);
+      sel.removeAllRanges();
     };
 
-    switch (annotation.type) {
-      case "HIGHLIGHT":
-        return {
-          ...baseStyle,
-          backgroundColor: "rgba(255, 255, 0, 0.35)",
-          border: "1px solid rgba(255, 193, 7, 0.6)",
-          mixBlendMode: "multiply" as const,
-        };
-      case "UNDERLINE":
-        return {
-          ...baseStyle,
-          height: "3px",
-          top: `${top + height - 3}px`,
-          backgroundColor: "rgba(33, 150, 243, 0.8)",
-          borderRadius: "1px",
-        };
-      case "STRIKETHROUGH":
-        return {
-          ...baseStyle,
-          height: "2px",
-          top: `${top + height / 2}px`,
-          backgroundColor: "rgba(244, 67, 54, 0.8)",
-          borderRadius: "1px",
-        };
-      case "AREA":
-        return {
-          ...baseStyle,
-          backgroundColor: "rgba(156, 39, 176, 0.15)",
-          border: "2px dashed rgba(156, 39, 176, 0.6)",
-          borderRadius: "4px",
-        };
-      case "COMMENT":
-        return {
-          ...baseStyle,
-          backgroundColor: "rgba(33, 150, 243, 0.2)",
-          border: "2px solid rgba(33, 150, 243, 0.5)",
-          borderRadius: "4px",
-        };
-      case "NOTE":
-        return {
-          ...baseStyle,
-          backgroundColor: "rgba(76, 175, 80, 0.2)",
-          border: "2px solid rgba(76, 175, 80, 0.5)",
-          borderRadius: "4px",
-        };
-      case "INK":
-        return {
-          ...baseStyle,
-          backgroundColor: "transparent",
-          border: "none",
-        };
-      default:
-        return {
-          ...baseStyle,
-          backgroundColor: "rgba(158, 158, 158, 0.2)",
-          border: "1px solid rgba(158, 158, 158, 0.5)",
-        };
-    }
-  };
+    const opts = { passive: true };
+    document.addEventListener("mouseup", handleSelection, opts);
+    document.addEventListener("touchend", handleSelection, opts);
 
-  const getAnnotationIcon = (type: AnnotationType) => {
-    const iconClass = "h-4 w-4";
-    switch (type) {
-      case "HIGHLIGHT":
-        return <Highlighter className={iconClass} />;
-      case "UNDERLINE":
-        return <Underline className={iconClass} />;
-      case "STRIKETHROUGH":
-        return <Strikethrough className={iconClass} />;
-      case "AREA":
-        return <Square className={iconClass} />;
-      case "COMMENT":
-        return <MessageSquare className={iconClass} />;
-      case "NOTE":
-        return <StickyNote className={iconClass} />;
-      case "INK":
-        return <Pen className={iconClass} />;
-      default:
-        return <Square className={iconClass} />;
-    }
-  };
+    return () => {
+      document.removeEventListener("mouseup", handleSelection);
+      document.removeEventListener("touchend", handleSelection);
+    };
+  }, [activeTool, pageIndex, pageWidth, pageHeight, scale, rotation, onCreateAnnotation]);
 
-  const getAnnotationColor = (type: AnnotationType) => {
-    switch (type) {
-      case "HIGHLIGHT":
-        return "text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-700";
-      case "UNDERLINE":
-        return "text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700";
-      case "STRIKETHROUGH":
-        return "text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-700";
-      case "AREA":
-        return "text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border-purple-300 dark:border-purple-700";
-      case "COMMENT":
-        return "text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700";
-      case "NOTE":
-        return "text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 border-green-300 dark:border-green-700";
-      case "INK":
-        return "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 border-gray-300 dark:border-gray-700";
-      default:
-        return "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 border-gray-300 dark:border-gray-700";
-    }
-  };
-
-  // Render INK annotation (freehand drawing)
-  const renderInkAnnotation = (annotation: Annotation) => {
-    if (!annotation.anchor.points || annotation.anchor.points.length === 0) {
-      return null;
-    }
-
-    const points = annotation.anchor.points
-      .map((p) => `${p.x * scale},${p.y * scale}`)
-      .join(" ");
-
-    return (
-      <svg
-        key={annotation.id}
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "none",
-          zIndex: 10,
-        }}
-      >
-        <polyline
-          points={points}
-          fill="none"
-          stroke="rgba(33, 150, 243, 0.8)"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  };
+  if (!showAnnotations && !isDrawingMode) return null;
 
   return (
-    <div className={`absolute inset-0 pointer-events-none ${className}`}>
-      {annotations.map((annotation) => {
-        if (annotation.type === "INK") {
-          return renderInkAnnotation(annotation);
-        }
+    <div
+      ref={containerRef}
+      className="absolute inset-0 pointer-events-none overflow-hidden"
+      style={{ width: pageWidth, height: pageHeight }}
+    >
+      {showAnnotations && annotations.map((ann) => renderAnnotation(ann, pageWidth, pageHeight, onAnnotationClick))}
 
-        const colorClass = getAnnotationColor(annotation.type);
-
-        return (
-          <div
-            key={annotation.id}
-            style={getAnnotationStyle(annotation)}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAnnotationClick(annotation);
-            }}
-            className="group hover:opacity-80 transition-opacity"
-            title={`${annotation.type}: ${annotation.text}`}
-          >
-            {/* Annotation icon badge */}
-            <div
-              className={`absolute -top-3 -right-3 rounded-full p-1.5 shadow-md border ${colorClass} opacity-0 group-hover:opacity-100 transition-opacity z-20`}
-            >
-              {getAnnotationIcon(annotation.type)}
-            </div>
-
-            {/* Annotation hover card */}
-            <div className="absolute top-full left-0 mt-2 bg-card dark:bg-card border rounded-lg shadow-xl p-3 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity z-30 pointer-events-none">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`p-1 rounded ${colorClass}`}>
-                  {getAnnotationIcon(annotation.type)}
-                </div>
-                <div>
-                  <div className="text-xs font-semibold">
-                    {annotation.user.name}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(annotation.createdAt).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-              {annotation.anchor.selectedText && (
-                <div className="text-xs italic mb-2 p-2 bg-muted/50 rounded border-l-2 border-muted-foreground/30">
-                  "{annotation.anchor.selectedText}"
-                </div>
-              )}
-              <div className="text-xs line-clamp-3">
-                {annotation.text}
-              </div>
-              {annotation.children && annotation.children.length > 0 && (
-                <div className="text-xs text-primary mt-2 font-medium">
-                  {annotation.children.length}{" "}
-                  {annotation.children.length === 1 ? "reply" : "replies"}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+      <canvas
+        ref={canvasRef}
+        width={pageWidth}
+        height={pageHeight}
+        className="absolute inset-0"
+        style={{
+          pointerEvents: isDrawingMode && activeTool === "INK" ? "auto" : "none",
+          cursor: isDrawingMode && activeTool === "INK" ? "crosshair" : "default",
+          touchAction: isDrawingMode && activeTool === "INK" ? "none" : "auto",
+        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+      />
     </div>
   );
 }
