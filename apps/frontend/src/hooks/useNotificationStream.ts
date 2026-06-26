@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import { getApiBaseUrl } from "@/lib/apiUrl";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import type { RootState } from "@/redux/store";
@@ -80,7 +81,7 @@ export function useNotificationStream(
     const connect = () => {
       if (closed) return;
       const base =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+        getApiBaseUrl();
       const url = `${base}/notifications/stream?token=${encodeURIComponent(
         accessToken
       )}`;

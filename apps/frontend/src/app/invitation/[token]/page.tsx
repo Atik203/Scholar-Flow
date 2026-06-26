@@ -11,8 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 interface InvitationData {
   id: string;
