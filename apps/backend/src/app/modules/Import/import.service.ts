@@ -1,9 +1,7 @@
 import axios from "axios";
 import prisma from "../../shared/prisma";
-import { StorageService } from "../papers/storage.service";
+import { StorageService as storage } from "../papers/storage.service";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
-
-const storage = new StorageService();
 
 export interface ImportedPaper {
   title: string;

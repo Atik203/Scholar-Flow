@@ -218,11 +218,17 @@ if (pdfProcessingQueue) {
 export async function queueDocumentExtraction(paperId: string): Promise<void> {
   // Check if queue is ready before attempting to queue
   if (!queueReady || !pdfProcessingQueue) {
-    console.warn(
-      `[DocumentQueue] Redis not available${
-        queueDisabledReason ? ` (${queueDisabledReason})` : ""
-      }, falling back to synchronous processing for paper: ${paperId}`
-    );
+    if (process.env.NODE_ENV !== "production") {
+      console.log(
+        `[DocumentQueue] Redis not available (expected in dev) — will use synchronous processing for paper: ${paperId}`
+      );
+    } else {
+      console.warn(
+        `[DocumentQueue] Redis not available${
+          queueDisabledReason ? ` (${queueDisabledReason})` : ""
+        }, falling back to synchronous processing for paper: ${paperId}`
+      );
+    }
     throw new Error("QUEUE_NOT_AVAILABLE");
   }
 
