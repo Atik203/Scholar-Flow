@@ -152,6 +152,10 @@ export const paperService = {
         source: input.source || "upload",
       };
 
+      const originalFormat = file.mimetype?.includes("wordprocessingml") || file.originalname?.toLowerCase().endsWith(".docx") ? "docx"
+        : file.mimetype?.includes("msword") || file.originalname?.toLowerCase().endsWith(".doc") ? "doc"
+        : "pdf";
+
       const createdRows = await prisma.$queryRaw<
         Array<{
           id: string;
@@ -171,6 +175,9 @@ export const paperService = {
           previewFileKey: string | null;
           previewMimeType: string | null;
           originalMimeType: string | null;
+          originalFormat: string | null;
+          processingStage: string | null;
+          processingStartedAt: Date | null;
           file_id: string | null;
           storageProvider: string | null;
           objectKey: string | null;
@@ -184,6 +191,7 @@ export const paperService = {
         INSERT INTO "Paper" (
           id, "workspaceId", "uploaderId", title, metadata, source,
           "processingStatus", tags, language, "citationCount",
+          "originalMimeType", "originalFormat",
           "createdAt", "updatedAt", "isDeleted"
         ) VALUES (
           gen_random_uuid(),
@@ -196,6 +204,8 @@ export const paperService = {
           ${(input as any).tags ?? []}::text[],
           ${(input as any).language ?? null},
           ${(input as any).citationCount ?? 0},
+          ${file.mimetype},
+          ${originalFormat},
           NOW(),
           NOW(),
           false
@@ -217,7 +227,10 @@ export const paperService = {
           "updatedAt",
           "previewFileKey",
           "previewMimeType",
-          "originalMimeType"
+          "originalMimeType",
+          "originalFormat",
+          "processingStage",
+          "processingStartedAt"
       ),
       inserted_file AS (
         INSERT INTO "PaperFile" (
@@ -272,6 +285,9 @@ export const paperService = {
         p."previewFileKey",
         p."previewMimeType",
         p."originalMimeType",
+        p."originalFormat",
+        p."processingStage",
+        p."processingStartedAt",
         f.id AS file_id,
         f."storageProvider",
         f."objectKey",
@@ -306,6 +322,9 @@ export const paperService = {
         previewFileKey: createdRow.previewFileKey,
         previewMimeType: createdRow.previewMimeType,
         originalMimeType: createdRow.originalMimeType,
+        originalFormat: createdRow.originalFormat,
+        processingStage: createdRow.processingStage,
+        processingStartedAt: createdRow.processingStartedAt,
         file: createdRow.file_id
           ? {
               id: createdRow.file_id,
@@ -519,6 +538,7 @@ export const paperService = {
              p.source, p.doi, p."processingStatus", p.tags, p.language, p."citationCount",
              p."createdAt", p."updatedAt",
              p."previewFileKey", p."previewMimeType", p."originalMimeType",
+             p."originalFormat", p."processingStage", p."processingStartedAt",
              pf.id as "file_id", pf."storageProvider", pf."objectKey", pf."contentType", 
              pf."sizeBytes", pf."originalFilename", pf."extractedAt"
       FROM "Paper" p
@@ -548,6 +568,9 @@ export const paperService = {
       previewFileKey: item.previewFileKey,
       previewMimeType: item.previewMimeType,
       originalMimeType: item.originalMimeType,
+      originalFormat: item.originalFormat,
+      processingStage: item.processingStage,
+      processingStartedAt: item.processingStartedAt,
       file: item.file_id
         ? {
             id: item.file_id,
