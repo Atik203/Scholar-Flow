@@ -5,6 +5,7 @@ import { aiService } from "../modules/AI/ai.service";
 import { StorageService } from "../modules/papers/storage.service";
 import prisma from "../shared/prisma";
 import { docxToPdfService } from "./docxToPdfService";
+import { extractPdfText } from "./pdfExtractionStrategies";
 
 export interface DocumentExtractionResult {
   success: boolean;
@@ -165,7 +166,10 @@ export class DocumentExtractionService {
       // Update processing status
       await prisma.$executeRaw`
         UPDATE "Paper"
-        SET "processingStatus" = 'PROCESSING', "updatedAt" = NOW()
+        SET "processingStatus" = 'PROCESSING',
+            "processingStage" = 'extracting',
+            "processingStartedAt" = NOW(),
+            "updatedAt" = NOW()
         WHERE id = ${paperId}
       `;
 
@@ -384,41 +388,41 @@ export class DocumentExtractionService {
   }
 
   /**
-   * Extract text from PDF with enhanced format preservation
+   * Extract text from PDF with tiered extraction:
+   *   poppler (native C) → OCR (tesseract) → unpdf (JS) → pdf-parse (legacy)
    */
   private async extractFromPDF(
     buffer: Buffer,
     options: DocumentProcessingOptions
   ): Promise<DocumentExtractionResult> {
     try {
-      console.log(
-        `[DocumentExtraction] Starting PDF extraction with pdf-parse`
-      );
+      console.log(`[DocumentExtraction] Starting tiered PDF extraction`);
 
-      // Extract text using pdf-parse with enhanced options
-      const pdfData = await pdf(buffer, {
-        max: 0, // Parse all pages
-        version: "v1.10.100",
-      });
+      const result = await extractPdfText(buffer);
 
-      const extractedText = pdfData.text;
-      const pageCount = pdfData.numpages;
-
-      console.log(
-        `[DocumentExtraction] PDF extraction completed. Text length: ${extractedText.length}, pages: ${pageCount}`
-      );
-
-      if (!extractedText || extractedText.trim().length === 0) {
+      if (!result.success || !result.text || result.text.trim().length === 0) {
         return {
           success: false,
-          error: "No text content found in PDF",
+          error: result.error || "No text content found in PDF",
         };
       }
 
-      // Sanitize and process the text
-      const sanitizedText = this.sanitizeText(extractedText);
+      console.log(
+        `[DocumentExtraction] PDF extraction via ${result.method}. Text length: ${result.text.length}`
+      );
 
-      // Enhanced chunking that tries to preserve structure
+      let pageCount = result.pageCount;
+      if (!pageCount) {
+        try {
+          const pdfData = await pdf(buffer, { max: 0, version: "v1.10.100" });
+          pageCount = pdfData.numpages;
+        } catch {
+          pageCount = 1;
+        }
+      }
+
+      const sanitizedText = this.sanitizeText(result.text);
+
       const chunks = this.createStructuredChunks(
         sanitizedText,
         pageCount,
@@ -435,7 +439,8 @@ export class DocumentExtractionService {
       console.error(`[DocumentExtraction] PDF extraction failed:`, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "PDF extraction failed",
+        error:
+          error instanceof Error ? error.message : "PDF extraction failed",
       };
     }
   }
