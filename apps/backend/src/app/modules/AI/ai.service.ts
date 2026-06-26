@@ -744,7 +744,7 @@ export const aiService = {
     const sanitizedHistory = sanitizeInsightHistory(request.history);
     const normalizedRequest: AiInsightRequest = {
       ...request,
-      prompt: `Extract 5-10 key claims, findings, or contributions from this paper. Return ONLY a JSON array of strings, each being a concise key point, without numbering or bullet points. Example: ["First key finding", "Second key finding"]`,
+      prompt: `Identify 5-10 key claims, findings, or contributions from this paper. Return a JSON array of strings where each string is a self-contained, well-punctuated sentence describing one key point. Format: ["Point one.", "Point two.", "Point three."]. Do NOT wrap in an object, do NOT use keys like "keyClaims" or "findings" — return ONLY the array.`,
       context: request.context || "",
       history: sanitizedHistory,
     };
@@ -771,18 +771,10 @@ export const aiService = {
 
       try {
         const result = await provider.generateInsights(normalizedRequest);
-        if (result) {
-          const content = result.message?.content || "";
-          try {
-            const parsed = JSON.parse(content);
-            if (Array.isArray(parsed)) return parsed.slice(0, 10).map(String);
-          } catch {
-            return content
-              .split(/\n|•|-|\d+\./)
-              .map((s) => s.replace(/^[\s"[\]]+|[\s"\]]+$/g, "").trim())
-              .filter((s) => s.length > 10)
-              .slice(0, 10);
-          }
+        if (result?.message?.content) {
+          const content = String(result.message.content);
+          const points = extractKeyPointsFromContent(content);
+          if (points.length > 0) return points;
         }
       } catch (error) {
         const errorMsg =
@@ -791,7 +783,10 @@ export const aiService = {
       }
     }
 
-    return [`AI key points extraction failed: ${errors.join("; ") || "No AI provider available"}`];
+    if (errors.length > 0) {
+      console.error("[AI] Key points extraction errors:", errors.join("; "));
+    }
+    return ["Could not extract key points. Try again or ensure AI features are configured."];
   },
 };
 
@@ -804,3 +799,58 @@ const shouldReplaceValue = (currentValue?: string | null) => {
   const normalized = currentValue.trim().toLowerCase();
   return ["untitled", "unknown", ""].includes(normalized);
 };
+
+/**
+ * Parse AI response content into an array of key point strings.
+ * Handles multiple response formats:
+ * - Bare JSON array: ["point1", "point2"]
+ * - Object with array values: {"keyClaims": [...], "findings": [...]}
+ * - Object wrapped as string: '{"keyClaims": [...]}'
+ * - Plain text with newlines/bullets
+ */
+function extractKeyPointsFromContent(content: string): string[] {
+  // Try JSON parse of the raw content
+  try {
+    const parsed = JSON.parse(content);
+    if (Array.isArray(parsed)) {
+      return parsed.slice(0, 10).map((item) =>
+        typeof item === "string" ? item : JSON.stringify(item)
+      );
+    }
+    if (parsed && typeof parsed === "object") {
+      // Look for the first array value in common key names
+      const arrayKeys = [
+        "keyClaims", "claims", "findings", "points",
+        "keyPoints", "key_points", "keyFindings", "key_findings",
+        "results", "contributions", "answer",
+      ];
+      for (const key of arrayKeys) {
+        if (Array.isArray(parsed[key])) {
+          return parsed[key].slice(0, 10).map((item: unknown) =>
+            typeof item === "string" ? item : JSON.stringify(item)
+          );
+        }
+      }
+      // Try any array value in the object
+      for (const value of Object.values(parsed)) {
+        if (Array.isArray(value)) {
+          return value.slice(0, 10).map((item: unknown) =>
+            typeof item === "string" ? item : JSON.stringify(item)
+          );
+        }
+      }
+    }
+  } catch {
+    // Not valid JSON — fall through to text parsing
+  }
+
+  // Fallback: split by newlines, bullets, or numbered markers
+  const lines = content
+    .replace(/^[\[\]{}"'\s]+|[\[\]{}"'\s]+$/g, "")
+    .split(/\n|•|-|\d+\.\s*|\d+\)\s*/)
+    .map((s) => s.replace(/^[\s"'[\],]+|[\s"'[\],]+$/g, "").trim())
+    .filter((s) => s.length > 15)
+    .slice(0, 10);
+
+  return lines;
+}
