@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Render build script — uses Corepack's built-in proxy to run Yarn 4.9.2
-# instead of the global Yarn 1.x. Avoids `corepack enable` which needs
-# write access to /usr/bin (read-only on Render).
+# Render build script — uses corepack yarn directly instead of `corepack enable`.
+# `corepack enable` fails on Render because /usr/bin is read-only (EROFS).
 set -euo pipefail
 
 corepack yarn install --immutable
