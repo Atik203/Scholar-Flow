@@ -18,6 +18,24 @@ import {
 } from "./auth.interface";
 import { authService } from "./auth.service";
 
+function detectDevice(ua: string): string {
+  if (!ua) return "Unknown";
+  if (/mobile|android|iphone|ipad|ipod/i.test(ua)) return "Mobile";
+  if (/tablet|ipad/i.test(ua)) return "Tablet";
+  return "Desktop";
+}
+
+function extractClientInfo(req: Request) {
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    "";
+  const userAgent = (req.headers["user-agent"] as string) || "";
+  const device = detectDevice(userAgent);
+  return { ip, userAgent, device };
+}
+
 class AuthController {
   /**
    * Handle email/password sign-in
@@ -46,6 +64,13 @@ class AuthController {
         jwtSecret,
         { expiresIn: "7d" }
       );
+
+      // Track login
+      const clientInfo = extractClientInfo(req);
+      authService.createLoginHistory(user.id, {
+        provider: "credentials",
+        ...clientInfo,
+      }).catch(() => {});
 
       sendResponse(res, {
         statusCode: 200,
@@ -110,6 +135,13 @@ class AuthController {
         jwtSecret,
         { expiresIn: "7d" }
       );
+
+      // Track login
+      const clientInfo = extractClientInfo(req);
+      authService.createLoginHistory(user.id, {
+        provider: "credentials",
+        ...clientInfo,
+      }).catch(() => {});
 
       sendResponse(res, {
         statusCode: 201,
@@ -530,6 +562,34 @@ class AuthController {
         statusCode: 200,
         success: true,
         message: result.message,
+      });
+    }
+  );
+
+  /**
+   * Get login history for the current user
+   * GET /api/auth/login-history?limit=20&cursor=xxx
+   */
+  getLoginHistory: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      if (!req.user?.id) {
+        throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      }
+
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+      const cursor = req.query.cursor as string | undefined;
+
+      const result = await authService.getLoginHistory(
+        req.user.id,
+        limit,
+        cursor
+      );
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Login history retrieved successfully",
+        data: result,
       });
     }
   );
