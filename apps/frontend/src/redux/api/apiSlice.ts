@@ -4,6 +4,7 @@ import {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "../store";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 // Enhanced error response interface
 export interface ApiErrorResponse {
@@ -54,7 +55,7 @@ const transformErrorResponse = (
 };
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
+  baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState, endpoint }) => {
     // Get token from Redux auth state
     const token = (getState() as RootState).auth.accessToken;
