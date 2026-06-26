@@ -51,9 +51,12 @@ io.use((socket: Socket, next) => {
   if (!token) {
     return next(new Error("Authentication required"));
   }
+  if (!JWT_SECRET) {
+    return next(new Error("JWT secret not configured"));
+  }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string; name?: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as unknown as { id: string; name?: string };
     (socket as AuthenticatedSocket).userId = decoded.id;
     (socket as AuthenticatedSocket).userName = decoded.name || "Unknown";
     next();
