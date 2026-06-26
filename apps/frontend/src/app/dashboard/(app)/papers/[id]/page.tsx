@@ -11,7 +11,7 @@ import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, Bot, Calendar, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Trash2, Users, X,
+  ArrowLeft, Bot, Calendar, Download, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Trash2, Users, X,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -42,6 +42,17 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const [editAbstract, setEditAbstract] = useState("");
   const [editTags, setEditTags] = useState("");
   const [showAiSummary, setShowAiSummary] = useState(false);
+  const [fetchFileUrl, setFetchFileUrl] = useState(false);
+  const { data: fileUrlData } = useGetPaperFileUrlQuery(resolvedParams.id, {
+    skip: !fetchFileUrl,
+  });
+
+  useEffect(() => {
+    if (fileUrlData?.data?.url && fetchFileUrl) {
+      window.open(fileUrlData.data.url, "_blank");
+      setFetchFileUrl(false);
+    }
+  }, [fileUrlData, fetchFileUrl]);
 
   useEffect(() => {
     if (!showPreview) setPreviewLoading(true);
@@ -62,6 +73,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
     UPLOADED: "bg-gray-100 text-gray-700", PROCESSING: "bg-blue-100 text-blue-700",
     PROCESSED: "bg-green-100 text-green-700", FAILED: "bg-red-100 text-red-700",
   };
+
+  const isDocx = paper.originalMimeType?.includes("wordprocessingml") || paper.originalMimeType?.includes("msword");
+  const formatBadge = isDocx ? "DOCX" : paper.originalMimeType?.includes("msword") ? "DOC" : null;
 
   const handleSaveMetadata = async () => {
     try {
@@ -114,6 +128,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-3">
                   <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(paper.createdAt).toLocaleDateString()}</span>
                   <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", statusColors[paper.processingStatus] || "")}>{paper.processingStatus}</span>
+                  {formatBadge && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{formatBadge}</span>
+                  )}
                   {paper.citationCount ? <span>{paper.citationCount.toLocaleString()} citations</span> : null}
                 </div>
                 {(paper.metadata?.authors || []).length > 0 && (
@@ -141,6 +158,12 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="flex gap-2 mt-4 pt-4 border-t">
           {paper.file && <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}><Eye className="mr-2 h-4 w-4" />{showPreview ? "Hide Preview" : "Preview PDF"}</Button>}
+          {paper.file && isDocx && (
+            <Button variant="outline" size="sm" onClick={() => setFetchFileUrl(true)}>
+              <Download className="mr-2 h-4 w-4" />
+              Download original
+            </Button>
+          )}
           {paper.processingStatus === "UPLOADED" && (
             <Button variant="outline" size="sm" onClick={handleProcess} disabled={isProcessing}>
               {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Play className="mr-2 h-4 w-4" />}
