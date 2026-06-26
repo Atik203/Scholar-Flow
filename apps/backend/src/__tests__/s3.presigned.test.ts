@@ -15,10 +15,10 @@ jest.mock("@aws-sdk/s3-request-presigner", () => ({
   getSignedUrl: mockGetSignedUrl,
 }));
 
-import { StorageService } from "../app/modules/papers/storage.service";
+import { StorageServiceClass } from "../app/modules/papers/storage.service";
 
 describe("StorageService", () => {
-  let storage: StorageService;
+  let storage: StorageServiceClass;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,7 +27,7 @@ describe("StorageService", () => {
     process.env.AWS_ACCESS_KEY_ID = "test-key";
     process.env.AWS_SECRET_ACCESS_KEY = "test-secret";
     mockS3Send.mockRejectedValue(new Error("connection test skip"));
-    storage = new StorageService();
+    storage = new StorageServiceClass();
   });
 
   describe("putObject", () => {
