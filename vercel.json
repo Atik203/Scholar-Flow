@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "corepack yarn turbo run build",
-  "installCommand": "corepack enable && corepack yarn install --immutable"
+  "buildCommand": "corepack yarn turbo run build --filter=@scholar-flow/frontend",
+  "installCommand": "corepack yarn install --immutable"
 }
