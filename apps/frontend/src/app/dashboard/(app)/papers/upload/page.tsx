@@ -18,7 +18,32 @@ function cn(...classes: (string | undefined | null | false)[]): string { return 
 type UploadMethod = "file" | "doi" | "arxiv" | "url" | "smart-url";
 type ProcessingStage = "idle" | "uploading" | "extracting" | "analyzing" | "complete" | "error";
 
-interface FileUpload { id: string; file: File; progress: number; stage: ProcessingStage; paperId?: string; error?: string; }
+interface FileUpload { id: string; file: File; progress: number; stage: ProcessingStage; paperId?: string; error?: string; format: "pdf" | "docx" | "doc"; }
+
+const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const DOC_MIME = "application/msword";
+
+function detectFormat(file: File): "pdf" | "docx" | "doc" {
+  if (file.type === "application/pdf" || file.name.endsWith(".pdf")) return "pdf";
+  if (file.type === DOCX_MIME || file.name.endsWith(".docx")) return "docx";
+  if (file.type === DOC_MIME || file.name.endsWith(".doc")) return "doc";
+  return "pdf";
+}
+
+function formatLabel(format: string): string {
+  if (format === "docx") return "DOCX";
+  if (format === "doc") return "DOC";
+  return "PDF";
+}
+
+function StageLabel({ upload }: { upload: FileUpload }) {
+  if (upload.stage === "error") return <span className="text-xs text-destructive">{upload.error}</span>;
+  if (upload.stage === "complete") return <span className="text-xs text-green-600">Processed</span>;
+  if (upload.stage === "extracting") return <span className="text-xs text-muted-foreground">
+    {upload.format === "docx" ? "Converting & extracting..." : "Extracting text..."}
+  </span>;
+  return <span className="text-xs text-muted-foreground">{upload.stage}</span>;
+}
 
 const stages = [
   { key: "uploading", label: "Uploading", icon: Upload },
@@ -56,7 +81,9 @@ export default function UploadPaperPage() {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault(); e.stopPropagation(); setDragActive(false);
-    const files = Array.from(e.dataTransfer.files).filter((f) => f.type === "application/pdf" || f.name.endsWith(".pdf"));
+    const files = Array.from(e.dataTransfer.files).filter(
+      (f) => f.type === "application/pdf" || f.type === DOCX_MIME || f.type === DOC_MIME || f.name.endsWith(".pdf") || f.name.endsWith(".docx") || f.name.endsWith(".doc")
+    );
     if (files.length) handleFiles(files);
   };
 
@@ -66,7 +93,7 @@ export default function UploadPaperPage() {
 
   const handleFiles = async (files: File[]) => {
     if (!selectedWorkspace) { showErrorToast("Please select a workspace first"); return; }
-    const newUploads: FileUpload[] = files.map((file) => ({ id: Math.random().toString(36).slice(2), file, progress: 0, stage: "uploading" }));
+    const newUploads: FileUpload[] = files.map((file) => ({ id: Math.random().toString(36).slice(2), file, progress: 0, stage: "uploading", format: detectFormat(file) }));
     setUploads((prev) => [...prev, ...newUploads]);
 
     for (const upload of newUploads) {
@@ -235,10 +262,10 @@ export default function UploadPaperPage() {
             dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50")}
           onClick={() => fileInputRef.current?.click()}
         >
-          <input ref={fileInputRef} type="file" multiple accept=".pdf" className="hidden" onChange={handleFileSelect} />
+          <input ref={fileInputRef} type="file" multiple accept=".pdf,.docx,.doc" className="hidden" onChange={handleFileSelect} />
           <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">Drag & drop PDF files here</h3>
-          <p className="text-sm text-muted-foreground mb-4">or click to browse. Supports PDF files up to 50MB.</p>
+          <h3 className="text-lg font-medium mb-2">Drag & drop PDF or DOCX files here</h3>
+          <p className="text-sm text-muted-foreground mb-4">or click to browse. Supports PDF, DOCX, DOC files up to 50MB.</p>
           <Button variant="outline"><FileText className="mr-2 h-4 w-4" />Select Files</Button>
         </motion.div>
       )}
@@ -297,7 +324,18 @@ export default function UploadPaperPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-muted-foreground" />
-                      <div><p className="font-medium text-sm">{upload.file.name}</p><p className="text-xs text-muted-foreground">{upload.stage === "error" ? upload.error : upload.stage}</p></div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{upload.file.name}</p>
+                          <span className={cn(
+                            "text-[10px] font-medium px-1.5 py-0.5 rounded",
+                            upload.format === "pdf" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300" :
+                            upload.format === "docx" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300" :
+                            "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                          )}>{formatLabel(upload.format)}</span>
+                        </div>
+                        <StageLabel upload={upload} />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {upload.stage === "complete" && <Check className="h-5 w-5 text-green-500" />}
