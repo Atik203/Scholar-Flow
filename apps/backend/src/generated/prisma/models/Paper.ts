@@ -52,6 +52,9 @@ export type PaperMinAggregateOutputType = {
   previewFileKey: string | null
   previewMimeType: string | null
   originalMimeType: string | null
+  originalFormat: string | null
+  processingStage: string | null
+  processingStartedAt: Date | null
   contentHtml: string | null
   extractionVersion: number | null
   language: string | null
@@ -77,6 +80,9 @@ export type PaperMaxAggregateOutputType = {
   previewFileKey: string | null
   previewMimeType: string | null
   originalMimeType: string | null
+  originalFormat: string | null
+  processingStage: string | null
+  processingStartedAt: Date | null
   contentHtml: string | null
   extractionVersion: number | null
   language: string | null
@@ -103,6 +109,9 @@ export type PaperCountAggregateOutputType = {
   previewFileKey: number
   previewMimeType: number
   originalMimeType: number
+  originalFormat: number
+  processingStage: number
+  processingStartedAt: number
   contentHtml: number
   extractionVersion: number
   tags: number
@@ -141,6 +150,9 @@ export type PaperMinAggregateInputType = {
   previewFileKey?: true
   previewMimeType?: true
   originalMimeType?: true
+  originalFormat?: true
+  processingStage?: true
+  processingStartedAt?: true
   contentHtml?: true
   extractionVersion?: true
   language?: true
@@ -166,6 +178,9 @@ export type PaperMaxAggregateInputType = {
   previewFileKey?: true
   previewMimeType?: true
   originalMimeType?: true
+  originalFormat?: true
+  processingStage?: true
+  processingStartedAt?: true
   contentHtml?: true
   extractionVersion?: true
   language?: true
@@ -192,6 +207,9 @@ export type PaperCountAggregateInputType = {
   previewFileKey?: true
   previewMimeType?: true
   originalMimeType?: true
+  originalFormat?: true
+  processingStage?: true
+  processingStartedAt?: true
   contentHtml?: true
   extractionVersion?: true
   tags?: true
@@ -306,6 +324,9 @@ export type PaperGroupByOutputType = {
   previewFileKey: string | null
   previewMimeType: string | null
   originalMimeType: string | null
+  originalFormat: string | null
+  processingStage: string | null
+  processingStartedAt: Date | null
   contentHtml: string | null
   extractionVersion: number
   tags: string[]
@@ -356,6 +377,9 @@ export type PaperWhereInput = {
   previewFileKey?: Prisma.StringNullableFilter<"Paper"> | string | null
   previewMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
+  originalFormat?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStage?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStartedAt?: Prisma.DateTimeNullableFilter<"Paper"> | Date | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
   tags?: Prisma.StringNullableListFilter<"Paper">
@@ -399,6 +423,9 @@ export type PaperOrderByWithRelationInput = {
   previewFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
   previewMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   originalMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalFormat?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingStage?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
   tags?: Prisma.SortOrder
@@ -445,6 +472,9 @@ export type PaperWhereUniqueInput = Prisma.AtLeast<{
   previewFileKey?: Prisma.StringNullableFilter<"Paper"> | string | null
   previewMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
+  originalFormat?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStage?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStartedAt?: Prisma.DateTimeNullableFilter<"Paper"> | Date | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
   tags?: Prisma.StringNullableListFilter<"Paper">
@@ -488,6 +518,9 @@ export type PaperOrderByWithAggregationInput = {
   previewFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
   previewMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
   originalMimeType?: Prisma.SortOrderInput | Prisma.SortOrder
+  originalFormat?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingStage?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingStartedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
   tags?: Prisma.SortOrder
@@ -523,6 +556,9 @@ export type PaperScalarWhereWithAggregatesInput = {
   previewFileKey?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
   previewMimeType?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
   originalMimeType?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
+  originalFormat?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
+  processingStage?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
+  processingStartedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Paper"> | Date | string | null
   contentHtml?: Prisma.StringNullableWithAggregatesFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntWithAggregatesFilter<"Paper"> | number
   tags?: Prisma.StringNullableListFilter<"Paper">
@@ -548,6 +584,9 @@ export type PaperCreateInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -591,6 +630,9 @@ export type PaperUncheckedCreateInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -630,6 +672,9 @@ export type PaperUpdateInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -673,6 +718,9 @@ export type PaperUncheckedUpdateInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -714,6 +762,9 @@ export type PaperCreateManyInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -739,6 +790,9 @@ export type PaperUpdateManyMutationInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -766,6 +820,9 @@ export type PaperUncheckedUpdateManyInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -803,6 +860,9 @@ export type PaperCountOrderByAggregateInput = {
   previewFileKey?: Prisma.SortOrder
   previewMimeType?: Prisma.SortOrder
   originalMimeType?: Prisma.SortOrder
+  originalFormat?: Prisma.SortOrder
+  processingStage?: Prisma.SortOrder
+  processingStartedAt?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
   tags?: Prisma.SortOrder
@@ -834,6 +894,9 @@ export type PaperMaxOrderByAggregateInput = {
   previewFileKey?: Prisma.SortOrder
   previewMimeType?: Prisma.SortOrder
   originalMimeType?: Prisma.SortOrder
+  originalFormat?: Prisma.SortOrder
+  processingStage?: Prisma.SortOrder
+  processingStartedAt?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
   language?: Prisma.SortOrder
@@ -859,6 +922,9 @@ export type PaperMinOrderByAggregateInput = {
   previewFileKey?: Prisma.SortOrder
   previewMimeType?: Prisma.SortOrder
   originalMimeType?: Prisma.SortOrder
+  originalFormat?: Prisma.SortOrder
+  processingStage?: Prisma.SortOrder
+  processingStartedAt?: Prisma.SortOrder
   contentHtml?: Prisma.SortOrder
   extractionVersion?: Prisma.SortOrder
   language?: Prisma.SortOrder
@@ -1201,6 +1267,9 @@ export type PaperCreateWithoutUploaderInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1242,6 +1311,9 @@ export type PaperUncheckedCreateWithoutUploaderInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1312,6 +1384,9 @@ export type PaperScalarWhereInput = {
   previewFileKey?: Prisma.StringNullableFilter<"Paper"> | string | null
   previewMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
   originalMimeType?: Prisma.StringNullableFilter<"Paper"> | string | null
+  originalFormat?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStage?: Prisma.StringNullableFilter<"Paper"> | string | null
+  processingStartedAt?: Prisma.DateTimeNullableFilter<"Paper"> | Date | string | null
   contentHtml?: Prisma.StringNullableFilter<"Paper"> | string | null
   extractionVersion?: Prisma.IntFilter<"Paper"> | number
   tags?: Prisma.StringNullableListFilter<"Paper">
@@ -1337,6 +1412,9 @@ export type PaperCreateWithoutWorkspaceInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1378,6 +1456,9 @@ export type PaperUncheckedCreateWithoutWorkspaceInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1443,6 +1524,9 @@ export type PaperCreateWithoutFileInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1485,6 +1569,9 @@ export type PaperUncheckedCreateWithoutFileInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1539,6 +1626,9 @@ export type PaperUpdateWithoutFileInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1581,6 +1671,9 @@ export type PaperUncheckedUpdateWithoutFileInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1619,6 +1712,9 @@ export type PaperCreateWithoutChunksInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1661,6 +1757,9 @@ export type PaperUncheckedCreateWithoutChunksInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1715,6 +1814,9 @@ export type PaperUpdateWithoutChunksInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1757,6 +1859,9 @@ export type PaperUncheckedUpdateWithoutChunksInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1795,6 +1900,9 @@ export type PaperCreateWithoutPaperVersionInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1837,6 +1945,9 @@ export type PaperUncheckedCreateWithoutPaperVersionInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -1891,6 +2002,9 @@ export type PaperUpdateWithoutPaperVersionInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1933,6 +2047,9 @@ export type PaperUncheckedUpdateWithoutPaperVersionInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -1971,6 +2088,9 @@ export type PaperCreateWithoutCitationsFromInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2013,6 +2133,9 @@ export type PaperUncheckedCreateWithoutCitationsFromInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2056,6 +2179,9 @@ export type PaperCreateWithoutCitationsToInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2098,6 +2224,9 @@ export type PaperUncheckedCreateWithoutCitationsToInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2152,6 +2281,9 @@ export type PaperUpdateWithoutCitationsFromInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2194,6 +2326,9 @@ export type PaperUncheckedUpdateWithoutCitationsFromInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2243,6 +2378,9 @@ export type PaperUpdateWithoutCitationsToInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2285,6 +2423,9 @@ export type PaperUncheckedUpdateWithoutCitationsToInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2323,6 +2464,9 @@ export type PaperCreateWithoutAnnotationsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2365,6 +2509,9 @@ export type PaperUncheckedCreateWithoutAnnotationsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2419,6 +2566,9 @@ export type PaperUpdateWithoutAnnotationsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2461,6 +2611,9 @@ export type PaperUncheckedUpdateWithoutAnnotationsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2499,6 +2652,9 @@ export type PaperCreateWithoutCollectionJoinsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2541,6 +2697,9 @@ export type PaperUncheckedCreateWithoutCollectionJoinsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2595,6 +2754,9 @@ export type PaperUpdateWithoutCollectionJoinsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2637,6 +2799,9 @@ export type PaperUncheckedUpdateWithoutCollectionJoinsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2675,6 +2840,9 @@ export type PaperCreateWithoutAiSummariesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2717,6 +2885,9 @@ export type PaperUncheckedCreateWithoutAiSummariesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2771,6 +2942,9 @@ export type PaperUpdateWithoutAiSummariesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2813,6 +2987,9 @@ export type PaperUncheckedUpdateWithoutAiSummariesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2851,6 +3028,9 @@ export type PaperCreateWithoutAiInsightThreadsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2893,6 +3073,9 @@ export type PaperUncheckedCreateWithoutAiInsightThreadsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -2947,6 +3130,9 @@ export type PaperUpdateWithoutAiInsightThreadsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -2989,6 +3175,9 @@ export type PaperUncheckedUpdateWithoutAiInsightThreadsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3027,6 +3216,9 @@ export type PaperCreateWithoutAiInsightMessagesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3069,6 +3261,9 @@ export type PaperUncheckedCreateWithoutAiInsightMessagesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3123,6 +3318,9 @@ export type PaperUpdateWithoutAiInsightMessagesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3165,6 +3363,9 @@ export type PaperUncheckedUpdateWithoutAiInsightMessagesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3203,6 +3404,9 @@ export type PaperCreateWithoutUsageEventInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3245,6 +3449,9 @@ export type PaperUncheckedCreateWithoutUsageEventInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3299,6 +3506,9 @@ export type PaperUpdateWithoutUsageEventInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3341,6 +3551,9 @@ export type PaperUncheckedUpdateWithoutUsageEventInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3379,6 +3592,9 @@ export type PaperCreateWithoutResearchNotesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3421,6 +3637,9 @@ export type PaperUncheckedCreateWithoutResearchNotesInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3475,6 +3694,9 @@ export type PaperUpdateWithoutResearchNotesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3517,6 +3739,9 @@ export type PaperUncheckedUpdateWithoutResearchNotesInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3555,6 +3780,9 @@ export type PaperCreateWithoutCitationExportsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3597,6 +3825,9 @@ export type PaperUncheckedCreateWithoutCitationExportsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3651,6 +3882,9 @@ export type PaperUpdateWithoutCitationExportsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3693,6 +3927,9 @@ export type PaperUncheckedUpdateWithoutCitationExportsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3731,6 +3968,9 @@ export type PaperCreateWithoutDiscussionThreadsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3773,6 +4013,9 @@ export type PaperUncheckedCreateWithoutDiscussionThreadsInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3827,6 +4070,9 @@ export type PaperUpdateWithoutDiscussionThreadsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3869,6 +4115,9 @@ export type PaperUncheckedUpdateWithoutDiscussionThreadsInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3908,6 +4157,9 @@ export type PaperCreateManyUploaderInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -3933,6 +4185,9 @@ export type PaperUpdateWithoutUploaderInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -3974,6 +4229,9 @@ export type PaperUncheckedUpdateWithoutUploaderInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -4014,6 +4272,9 @@ export type PaperUncheckedUpdateManyWithoutUploaderInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -4040,6 +4301,9 @@ export type PaperCreateManyWorkspaceInput = {
   previewFileKey?: string | null
   previewMimeType?: string | null
   originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
   contentHtml?: string | null
   extractionVersion?: number
   tags?: Prisma.PaperCreatetagsInput | string[]
@@ -4065,6 +4329,9 @@ export type PaperUpdateWithoutWorkspaceInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -4106,6 +4373,9 @@ export type PaperUncheckedUpdateWithoutWorkspaceInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -4146,6 +4416,9 @@ export type PaperUncheckedUpdateManyWithoutWorkspaceInput = {
   previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
   tags?: Prisma.PaperUpdatetagsInput | string[]
@@ -4312,6 +4585,9 @@ export type PaperSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   previewFileKey?: boolean
   previewMimeType?: boolean
   originalMimeType?: boolean
+  originalFormat?: boolean
+  processingStage?: boolean
+  processingStartedAt?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
   tags?: boolean
@@ -4356,6 +4632,9 @@ export type PaperSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   previewFileKey?: boolean
   previewMimeType?: boolean
   originalMimeType?: boolean
+  originalFormat?: boolean
+  processingStage?: boolean
+  processingStartedAt?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
   tags?: boolean
@@ -4385,6 +4664,9 @@ export type PaperSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   previewFileKey?: boolean
   previewMimeType?: boolean
   originalMimeType?: boolean
+  originalFormat?: boolean
+  processingStage?: boolean
+  processingStartedAt?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
   tags?: boolean
@@ -4414,6 +4696,9 @@ export type PaperSelectScalar = {
   previewFileKey?: boolean
   previewMimeType?: boolean
   originalMimeType?: boolean
+  originalFormat?: boolean
+  processingStage?: boolean
+  processingStartedAt?: boolean
   contentHtml?: boolean
   extractionVersion?: boolean
   tags?: boolean
@@ -4424,7 +4709,7 @@ export type PaperSelectScalar = {
   isDeleted?: boolean
 }
 
-export type PaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "uploaderId" | "title" | "abstract" | "metadata" | "source" | "doi" | "isDraft" | "isPublished" | "processingStatus" | "processingError" | "processedAt" | "previewFileKey" | "previewMimeType" | "originalMimeType" | "contentHtml" | "extractionVersion" | "tags" | "language" | "citationCount" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["paper"]>
+export type PaperOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "uploaderId" | "title" | "abstract" | "metadata" | "source" | "doi" | "isDraft" | "isPublished" | "processingStatus" | "processingError" | "processedAt" | "previewFileKey" | "previewMimeType" | "originalMimeType" | "originalFormat" | "processingStage" | "processingStartedAt" | "contentHtml" | "extractionVersion" | "tags" | "language" | "citationCount" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["paper"]>
 export type PaperInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   uploader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
@@ -4490,6 +4775,9 @@ export type $PaperPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     previewFileKey: string | null
     previewMimeType: string | null
     originalMimeType: string | null
+    originalFormat: string | null
+    processingStage: string | null
+    processingStartedAt: Date | null
     contentHtml: string | null
     extractionVersion: number
     tags: string[]
@@ -4953,6 +5241,9 @@ export interface PaperFieldRefs {
   readonly previewFileKey: Prisma.FieldRef<"Paper", 'String'>
   readonly previewMimeType: Prisma.FieldRef<"Paper", 'String'>
   readonly originalMimeType: Prisma.FieldRef<"Paper", 'String'>
+  readonly originalFormat: Prisma.FieldRef<"Paper", 'String'>
+  readonly processingStage: Prisma.FieldRef<"Paper", 'String'>
+  readonly processingStartedAt: Prisma.FieldRef<"Paper", 'DateTime'>
   readonly contentHtml: Prisma.FieldRef<"Paper", 'String'>
   readonly extractionVersion: Prisma.FieldRef<"Paper", 'Int'>
   readonly tags: Prisma.FieldRef<"Paper", 'String[]'>

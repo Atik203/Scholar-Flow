@@ -374,6 +374,9 @@ model Paper {
   previewFileKey    String? // S3 key for preview PDF (converted from DOCX)
   previewMimeType   String? // MIME type of preview file (usually application/pdf)
   originalMimeType  String? // Original uploaded MIME type (preserves DOCX, DOC, PDF)
+  originalFormat    String? // "pdf" | "docx" | "doc" — the format the user uploaded
+  processingStage   String? // Current stage: "extracting" | "ocr" | "converting" | "chunking" | "embedding"
+  processingStartedAt DateTime? // When processing began (for timeout detection)
   contentHtml       String? // Sanitized HTML content for rich text editor
   extractionVersion Int     @default(1) // Version for extraction algorithm
 
