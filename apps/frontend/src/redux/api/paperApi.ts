@@ -14,6 +14,10 @@ export interface Paper {
   source?: string;
   doi?: string;
   processingStatus: "UPLOADED" | "PROCESSING" | "PROCESSED" | "FAILED";
+  originalMimeType?: string;
+  previewFileKey?: string;
+  originalFormat?: string;
+  processingStage?: string;
   // Editor-specific fields
   isDraft?: boolean;
   isPublished?: boolean;
