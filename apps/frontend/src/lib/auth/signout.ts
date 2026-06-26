@@ -24,8 +24,7 @@ import { apiSlice } from "@/redux/api/apiSlice";
 import { clearCredentials } from "@/redux/auth/authSlice";
 import { getAppStore, getPersistor } from "@/redux/storeAccess";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 // better-auth cookies to clear. We only know the client-side names; the
 // server-side Set-Cookie response is what better-auth uses to clear them.

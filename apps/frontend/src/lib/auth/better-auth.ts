@@ -8,8 +8,7 @@ import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
 import { randomBytes } from "crypto";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 /**
  * Resolve the auth secret. In production, BETTER_AUTH_SECRET or NEXTAUTH_SECRET must be set.

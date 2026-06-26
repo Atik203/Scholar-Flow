@@ -1,4 +1,5 @@
 import { getAppStore } from "@/redux/storeAccess";
+import { getApiBaseUrl } from "@/lib/apiUrl";
 import type { Node as TiptapNode } from "@tiptap/pm/model";
 import { NodeSelection, Selection, TextSelection } from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
@@ -408,7 +409,7 @@ export const handleImageUpload = async (
 
       // Configure request
       const apiBaseUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+        getApiBaseUrl();
       xhr.open("POST", `${apiBaseUrl}/editor/upload-image`);
 
       // Add auth header
