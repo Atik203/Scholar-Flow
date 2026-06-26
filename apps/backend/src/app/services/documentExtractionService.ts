@@ -26,6 +26,8 @@ export interface DocumentProcessingOptions {
   preserveFormatting?: boolean;
   chunkSize?: number;
   includeHtml?: boolean;
+  /** Pre-loaded file buffer — when provided, skips S3 download */
+  fileBuffer?: Buffer;
 }
 
 type DocumentPaperRecord = {
@@ -59,11 +61,7 @@ type DocumentPaperRow = {
 };
 
 export class DocumentExtractionService {
-  private storage: StorageService;
-
-  constructor() {
-    this.storage = new StorageService();
-  }
+  private storage = StorageService;
 
   private mapPaperRow(row: DocumentPaperRow): DocumentPaperRecord {
     return {
@@ -173,13 +171,18 @@ export class DocumentExtractionService {
         WHERE id = ${paperId}
       `;
 
-      // Download file from S3
+      // Use provided fileBuffer if available, otherwise download from S3
+      const fileBuffer = options.fileBuffer
+        ? options.fileBuffer
+        : await this.storage.getObject(paper.file.objectKey);
+
+      if (!options.fileBuffer) {
+        console.log(
+          `[DocumentExtraction] Downloading file from S3: ${paper.file.objectKey}`
+        );
+      }
       console.log(
-        `[DocumentExtraction] Downloading file from S3: ${paper.file.objectKey}`
-      );
-      const fileBuffer = await this.storage.getObject(paper.file.objectKey);
-      console.log(
-        `[DocumentExtraction] Downloaded file buffer size: ${fileBuffer.length} bytes`
+        `[DocumentExtraction] File buffer size: ${fileBuffer.length} bytes`
       );
 
       // Determine file type and extract accordingly
