@@ -70,6 +70,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^5.0.4",
+    "unpdf": "^1.6.2",
     "winston": "^3.11.0",
     "yjs": "^13.6.31",
     "zod": "^3.22.4"

@@ -593,6 +593,27 @@ class AuthController {
       });
     }
   );
+
+  /**
+   * Get login summary for the current user
+   * GET /api/auth/login-summary
+   */
+  getLoginSummary: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      if (!req.user?.id) {
+        throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      }
+
+      const result = await authService.getLoginSummary(req.user.id);
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Login summary retrieved successfully",
+        data: result,
+      });
+    }
+  );
 }
 
 export const authController = new AuthController();

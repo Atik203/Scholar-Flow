@@ -916,6 +916,28 @@ class AuthService {
       cursor: hasMore && items.length > 0 ? items[items.length - 1].id : null,
     };
   }
+
+  /**
+   * Get login summary — last login + recent 5 + total count
+   */
+  async getLoginSummary(userId: string) {
+    const [lastLogin, recentLogins, totalLogins] = await Promise.all([
+      prisma.loginHistory.findFirst({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, provider: true, device: true, ip: true, createdAt: true },
+      }),
+      prisma.loginHistory.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, provider: true, device: true, ip: true, createdAt: true },
+      }),
+      prisma.loginHistory.count({ where: { userId } }),
+    ]);
+
+    return { lastLogin, recentLogins, totalLogins };
+  }
 }
 
 export const authService = new AuthService();

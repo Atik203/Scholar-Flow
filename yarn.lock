@@ -6148,6 +6148,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     ts-node-dev: "npm:^2.0.0"
     typescript: "npm:^5.3.3"
+    unpdf: "npm:^1.6.2"
     winston: "npm:^3.11.0"
     yjs: "npm:^13.6.31"
     zod: "npm:^3.22.4"
@@ -24110,6 +24111,18 @@ __metadata:
   version: 2.0.1
   resolution: "universalify@npm:2.0.1"
   checksum: 10c0/73e8ee3809041ca8b818efb141801a1004e3fc0002727f1531f4de613ea281b494a40909596dae4a042a4fb6cd385af5d4db2e137b1362e0e91384b828effd3a
+  languageName: node
+  linkType: hard
+
+"unpdf@npm:^1.6.2":
+  version: 1.6.2
+  resolution: "unpdf@npm:1.6.2"
+  peerDependencies:
+    "@napi-rs/canvas": ^0.1.69
+  peerDependenciesMeta:
+    "@napi-rs/canvas":
+      optional: true
+  checksum: 10c0/e70bda1a96bdac087433d3fadb25d16d7ebc9fa9b35ebecccedd2aa1f1a2b15b250f5c52bb87c8701dc6d00b3dfa9528af9ef685236fea71dc66f9901e2d7b1a
   languageName: node
   linkType: hard
 
