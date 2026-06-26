@@ -10,6 +10,7 @@ import { useAuth } from "@/redux/auth/useAuth";
 import { useAppDispatch } from "@/redux/hooks";
 import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import { useState } from "react";
+import { getApiBaseUrl, API_BASE_URL } from "@/lib/apiUrl";
 
 export default function AuthDebugPage() {
   const { session, status } = useAuth();
@@ -43,8 +44,7 @@ export default function AuthDebugPage() {
 
   const testBackendConnection = async () => {
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+      const apiUrl = getApiBaseUrl();
       const response = await fetch(`${apiUrl.replace("/api", "")}/health`);
       const data = await response.json();
       alert(
@@ -57,8 +57,7 @@ export default function AuthDebugPage() {
 
   const testBackendAuth = async () => {
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+      const apiUrl = getApiBaseUrl();
       const response = await fetch(`${apiUrl}/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -231,8 +230,7 @@ export default function AuthDebugPage() {
             <p>
               <strong>API Base URL:</strong>{" "}
               <code className="bg-muted px-2 py-1 rounded">
-                {process.env.NEXT_PUBLIC_API_BASE_URL ||
-                  "http://localhost:5000/api"}
+                {API_BASE_URL}
               </code>
             </p>
           </div>

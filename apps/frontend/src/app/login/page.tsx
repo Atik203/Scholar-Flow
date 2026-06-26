@@ -35,8 +35,7 @@ import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

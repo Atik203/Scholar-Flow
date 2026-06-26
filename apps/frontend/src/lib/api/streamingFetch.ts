@@ -8,8 +8,7 @@
  */
 import { getAppStore } from "@/redux/storeAccess";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
+import { API_BASE_URL } from "@/lib/apiUrl";
 
 export interface AuthedFetchOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
