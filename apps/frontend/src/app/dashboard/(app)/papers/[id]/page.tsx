@@ -18,6 +18,7 @@ import { notFound, useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
+import { cn } from "@/lib/utils";
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -40,6 +41,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editAbstract, setEditAbstract] = useState("");
+  const [editAuthors, setEditAuthors] = useState("");
   const [editTags, setEditTags] = useState("");
   const [showAiSummary, setShowAiSummary] = useState(false);
   const [fetchFileUrl, setFetchFileUrl] = useState(false);
@@ -79,7 +81,14 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
 
   const handleSaveMetadata = async () => {
     try {
-      await updateMetadata({ id: paper.id, title: editTitle || paper.title, abstract: editAbstract || paper.abstract || "", tags: editTags ? editTags.split(",").map((t) => t.trim()).filter(Boolean) : paper.tags }).unwrap();
+      await updateMetadata({
+        id: paper.id,
+        title: editTitle || paper.title,
+        abstract: editAbstract || paper.abstract || "",
+        authors: editAuthors ? editAuthors.split(",").map((t) => t.trim()).filter(Boolean) : (paper.metadata?.authors as string[]) || [],
+        tags: editTags ? editTags.split(",").map((t) => t.trim()).filter(Boolean) : paper.tags,
+      }).unwrap();
+      showSuccessToast("Paper metadata updated");
       setIsEditing(false);
     } catch (e: unknown) { showApiErrorToast(e as any); }
   };
@@ -98,6 +107,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const startEdit = () => {
     setEditTitle(paper.title);
     setEditAbstract(paper.abstract || "");
+    setEditAuthors(((paper.metadata?.authors || []) as string[]).join(", "));
     setEditTags((paper.tags || []).join(", "));
     setIsEditing(true);
   };
@@ -114,8 +124,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           <div className="flex-1">
             {isEditing ? (
               <div className="space-y-4">
-                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="text-2xl font-bold" />
-                <Textarea value={editAbstract} onChange={(e) => setEditAbstract(e.target.value)} rows={4} />
+                <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="text-2xl font-bold" placeholder="Title" />
+                <Input value={editAuthors} onChange={(e) => setEditAuthors(e.target.value)} placeholder="Authors (comma separated)" />
+                <Textarea value={editAbstract} onChange={(e) => setEditAbstract(e.target.value)} rows={4} placeholder="Abstract" />
                 <Input value={editTags} onChange={(e) => setEditTags(e.target.value)} placeholder="Tags (comma separated)" />
                 <div className="flex gap-2">
                   <Button onClick={handleSaveMetadata}><Save className="mr-2 h-4 w-4" />Save</Button>
@@ -224,5 +235,3 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
     </div>
   );
 }
-
-function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
