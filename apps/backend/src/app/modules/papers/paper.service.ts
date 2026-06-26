@@ -361,6 +361,7 @@ export const paperService = {
       );
 
       // Queue document extraction for background processing (non-blocking)
+      const fileBuffer = file.buffer;
       const queueStart = Date.now();
       queueDocumentExtraction(created.id)
         .then(() => {
@@ -369,15 +370,23 @@ export const paperService = {
           );
         })
         .catch(async (error) => {
-          console.error(
-            `[PaperUpload] Failed to queue document extraction for paper: ${created.id}, falling back to synchronous processing`,
-            error
-          );
+          if (process.env.NODE_ENV !== "production") {
+            console.log(
+              `[PaperUpload] Redis queue unavailable (expected in dev) — processing synchronously for paper: ${created.id}`
+            );
+          } else {
+            console.error(
+              `[PaperUpload] Queue failed for paper: ${created.id}, falling back to synchronous processing`,
+              error instanceof Error ? error.message : error
+            );
+          }
           try {
             const { documentExtractionService } = await import(
               "../../services/documentExtractionService"
             );
-            await documentExtractionService.extractFromDocument(created.id);
+            await documentExtractionService.extractFromDocument(created.id, {
+              fileBuffer,
+            });
             console.log(`[PaperUpload] Synchronous extraction completed for paper: ${created.id}`);
           } catch (syncError) {
             console.error(

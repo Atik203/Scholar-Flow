@@ -16,11 +16,7 @@ export interface PDFExtractionResult {
 }
 
 export class PDFExtractionService {
-  private storage: StorageService;
-
-  constructor() {
-    this.storage = new StorageService();
-  }
+  private storage = StorageService;
 
   /**
    * Extract text from PDF and chunk it for processing
