@@ -744,7 +744,7 @@ export const aiService = {
     const sanitizedHistory = sanitizeInsightHistory(request.history);
     const normalizedRequest: AiInsightRequest = {
       ...request,
-      prompt: `Extract 5-10 key claims, findings, or contributions from this paper. Return ONLY a JSON array of strings, each being a concise key point, without numbering or bullet points. Example: ["First key finding", "Second key finding"]`,
+      prompt: `Identify 5-10 key claims, findings, or contributions from this paper. Present them as a JSON string array. Example: ["First key finding", "Second key finding"]`,
       context: request.context || "",
       history: sanitizedHistory,
     };
@@ -771,18 +771,24 @@ export const aiService = {
 
       try {
         const result = await provider.generateInsights(normalizedRequest);
-        if (result) {
-          const content = result.message?.content || "";
+        if (result?.message?.content) {
+          const content = String(result.message.content);
           try {
             const parsed = JSON.parse(content);
             if (Array.isArray(parsed)) return parsed.slice(0, 10).map(String);
+            // If parsed is an object with answer field, extract it
+            if (parsed && typeof parsed === "object" && Array.isArray(parsed.answer)) {
+              return parsed.answer.slice(0, 10).map(String);
+            }
           } catch {
-            return content
-              .split(/\n|•|-|\d+\./)
-              .map((s) => s.replace(/^[\s"[\]]+|[\s"\]]+$/g, "").trim())
-              .filter((s) => s.length > 10)
-              .slice(0, 10);
+            // JSON parse failed — treat as plain text and split by lines/bullets
           }
+          const lines = content
+            .split(/\n|•|-|\d+\./)
+            .map((s: string) => s.replace(/^[\s"[\]]+|[\s"\]]+$/g, "").trim())
+            .filter((s: string) => s.length > 10)
+            .slice(0, 10);
+          if (lines.length > 0) return lines;
         }
       } catch (error) {
         const errorMsg =
@@ -791,7 +797,10 @@ export const aiService = {
       }
     }
 
-    return [`AI key points extraction failed: ${errors.join("; ") || "No AI provider available"}`];
+    if (errors.length > 0) {
+      console.error("[AI] Key points extraction errors:", errors.join("; "));
+    }
+    return ["Could not extract key points. Try again or ensure AI features are configured."];
   },
 };
 
