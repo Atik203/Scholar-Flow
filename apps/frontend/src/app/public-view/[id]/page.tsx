@@ -1,12 +1,12 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { API_BASE_URL as apiUrl } from "@/lib/apiUrl";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 async function getPublishedPaper(id: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api";
   try {
     const res = await fetch(`${apiUrl}/public/editor/${id}`, {
       next: { revalidate: 60 },
