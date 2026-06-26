@@ -56,6 +56,7 @@ export type UserMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
+  lastLoginProvider: string | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -80,6 +81,7 @@ export type UserMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
+  lastLoginProvider: string | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -104,6 +106,7 @@ export type UserCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   isDeleted: number
+  lastLoginProvider: number
   _all: number
 }
 
@@ -138,6 +141,7 @@ export type UserMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
+  lastLoginProvider?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -162,6 +166,7 @@ export type UserMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
+  lastLoginProvider?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -186,6 +191,7 @@ export type UserCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
+  lastLoginProvider?: true
   _all?: true
 }
 
@@ -297,6 +303,7 @@ export type UserGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
+  lastLoginProvider: string | null
   _count: UserCountAggregateOutputType | null
   _avg: UserAvgAggregateOutputType | null
   _sum: UserSumAggregateOutputType | null
@@ -344,6 +351,7 @@ export type UserWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   isDeleted?: Prisma.BoolFilter<"User"> | boolean
+  lastLoginProvider?: Prisma.StringNullableFilter<"User"> | string | null
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   memberships?: Prisma.WorkspaceMemberListRelationFilter
@@ -383,6 +391,7 @@ export type UserWhereInput = {
   contentReportsFiled?: Prisma.ContentReportListRelationFilter
   contentReportsAssigned?: Prisma.ContentReportListRelationFilter
   contentReportsResolved?: Prisma.ContentReportListRelationFilter
+  loginHistory?: Prisma.LoginHistoryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -407,6 +416,7 @@ export type UserOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  lastLoginProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   memberships?: Prisma.WorkspaceMemberOrderByRelationAggregateInput
@@ -446,6 +456,7 @@ export type UserOrderByWithRelationInput = {
   contentReportsFiled?: Prisma.ContentReportOrderByRelationAggregateInput
   contentReportsAssigned?: Prisma.ContentReportOrderByRelationAggregateInput
   contentReportsResolved?: Prisma.ContentReportOrderByRelationAggregateInput
+  loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -473,6 +484,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   isDeleted?: Prisma.BoolFilter<"User"> | boolean
+  lastLoginProvider?: Prisma.StringNullableFilter<"User"> | string | null
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
   memberships?: Prisma.WorkspaceMemberListRelationFilter
@@ -512,6 +524,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   contentReportsFiled?: Prisma.ContentReportListRelationFilter
   contentReportsAssigned?: Prisma.ContentReportListRelationFilter
   contentReportsResolved?: Prisma.ContentReportListRelationFilter
+  loginHistory?: Prisma.LoginHistoryListRelationFilter
 }, "id" | "email" | "stripeCustomerId" | "stripeSubscriptionId">
 
 export type UserOrderByWithAggregationInput = {
@@ -536,6 +549,7 @@ export type UserOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  lastLoginProvider?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -568,6 +582,7 @@ export type UserScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
+  lastLoginProvider?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
 export type UserCreateInput = {
@@ -592,6 +607,7 @@ export type UserCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -631,6 +647,7 @@ export type UserCreateInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -655,6 +672,7 @@ export type UserUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -694,6 +712,7 @@ export type UserUncheckedCreateInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -718,6 +737,7 @@ export type UserUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -757,6 +777,7 @@ export type UserUpdateInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -781,6 +802,7 @@ export type UserUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -820,6 +842,7 @@ export type UserUncheckedUpdateInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -844,6 +867,7 @@ export type UserCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -868,6 +892,7 @@ export type UserUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -892,6 +917,7 @@ export type UserUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type UserScalarRelationFilter = {
@@ -926,6 +952,7 @@ export type UserCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  lastLoginProvider?: Prisma.SortOrder
 }
 
 export type UserAvgOrderByAggregateInput = {
@@ -954,6 +981,7 @@ export type UserMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  lastLoginProvider?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -978,6 +1006,7 @@ export type UserMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  lastLoginProvider?: Prisma.SortOrder
 }
 
 export type UserSumOrderByAggregateInput = {
@@ -1348,6 +1377,20 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
+export type UserCreateNestedOneWithoutLoginHistoryInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginHistoryInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLoginHistoryNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLoginHistoryInput
+  upsert?: Prisma.UserUpsertWithoutLoginHistoryInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLoginHistoryInput, Prisma.UserUpdateWithoutLoginHistoryInput>, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
+}
+
 export type UserCreateNestedOneWithoutTokensInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutTokensInput, Prisma.UserUncheckedCreateWithoutTokensInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutTokensInput
@@ -1588,6 +1631,7 @@ export type UserCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -1626,6 +1670,7 @@ export type UserCreateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1650,6 +1695,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1688,6 +1734,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1717,6 +1764,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -1755,6 +1803,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
@@ -1779,6 +1828,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1817,6 +1867,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTriggeredNotificationsInput = {
@@ -1857,6 +1908,7 @@ export type UserUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -1895,6 +1947,7 @@ export type UserUpdateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1919,6 +1972,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1957,6 +2011,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutTriggeredNotificationsInput = {
@@ -1992,6 +2047,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -2030,6 +2086,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
@@ -2054,6 +2111,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -2092,6 +2150,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspacesOwnedInput = {
@@ -2116,6 +2175,7 @@ export type UserCreateWithoutWorkspacesOwnedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -2154,6 +2214,7 @@ export type UserCreateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
@@ -2178,6 +2239,7 @@ export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -2216,6 +2278,7 @@ export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspacesOwnedInput = {
@@ -2256,6 +2319,7 @@ export type UserUpdateWithoutWorkspacesOwnedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -2294,6 +2358,7 @@ export type UserUpdateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
@@ -2318,6 +2383,7 @@ export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -2356,6 +2422,7 @@ export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -2380,6 +2447,7 @@ export type UserCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
@@ -2418,6 +2486,7 @@ export type UserCreateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -2442,6 +2511,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
@@ -2480,6 +2550,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -2520,6 +2591,7 @@ export type UserUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
@@ -2558,6 +2630,7 @@ export type UserUpdateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -2582,6 +2655,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -2620,6 +2694,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
@@ -2644,6 +2719,7 @@ export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -2682,6 +2758,7 @@ export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
@@ -2706,6 +2783,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -2744,6 +2822,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspaceInvitesReceivedInput = {
@@ -2773,6 +2852,7 @@ export type UserCreateWithoutWorkspaceInvitesSentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -2811,6 +2891,7 @@ export type UserCreateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
@@ -2835,6 +2916,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -2873,6 +2955,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWorkspaceInvitesSentInput = {
@@ -2913,6 +2996,7 @@ export type UserUpdateWithoutWorkspaceInvitesReceivedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -2951,6 +3035,7 @@ export type UserUpdateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
@@ -2975,6 +3060,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -3013,6 +3099,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutWorkspaceInvitesSentInput = {
@@ -3048,6 +3135,7 @@ export type UserUpdateWithoutWorkspaceInvitesSentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -3086,6 +3174,7 @@ export type UserUpdateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
@@ -3110,6 +3199,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -3148,6 +3238,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUploadedPapersInput = {
@@ -3172,6 +3263,7 @@ export type UserCreateWithoutUploadedPapersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -3210,6 +3302,7 @@ export type UserCreateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUploadedPapersInput = {
@@ -3234,6 +3327,7 @@ export type UserUncheckedCreateWithoutUploadedPapersInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -3272,6 +3366,7 @@ export type UserUncheckedCreateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUploadedPapersInput = {
@@ -3312,6 +3407,7 @@ export type UserUpdateWithoutUploadedPapersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -3350,6 +3446,7 @@ export type UserUpdateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedPapersInput = {
@@ -3374,6 +3471,7 @@ export type UserUncheckedUpdateWithoutUploadedPapersInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -3412,6 +3510,7 @@ export type UserUncheckedUpdateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaperVersionsInput = {
@@ -3436,6 +3535,7 @@ export type UserCreateWithoutPaperVersionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -3474,6 +3574,7 @@ export type UserCreateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaperVersionsInput = {
@@ -3498,6 +3599,7 @@ export type UserUncheckedCreateWithoutPaperVersionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -3536,6 +3638,7 @@ export type UserUncheckedCreateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaperVersionsInput = {
@@ -3576,6 +3679,7 @@ export type UserUpdateWithoutPaperVersionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -3614,6 +3718,7 @@ export type UserUpdateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaperVersionsInput = {
@@ -3638,6 +3743,7 @@ export type UserUncheckedUpdateWithoutPaperVersionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -3676,6 +3782,7 @@ export type UserUncheckedUpdateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAnnotationsInput = {
@@ -3700,6 +3807,7 @@ export type UserCreateWithoutAnnotationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -3738,6 +3846,7 @@ export type UserCreateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsInput = {
@@ -3762,6 +3871,7 @@ export type UserUncheckedCreateWithoutAnnotationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -3800,6 +3910,7 @@ export type UserUncheckedCreateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsInput = {
@@ -3840,6 +3951,7 @@ export type UserUpdateWithoutAnnotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -3878,6 +3990,7 @@ export type UserUpdateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsInput = {
@@ -3902,6 +4015,7 @@ export type UserUncheckedUpdateWithoutAnnotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -3940,6 +4054,7 @@ export type UserUncheckedUpdateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAnnotationVersionInput = {
@@ -3964,6 +4079,7 @@ export type UserCreateWithoutAnnotationVersionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -4002,6 +4118,7 @@ export type UserCreateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationVersionInput = {
@@ -4026,6 +4143,7 @@ export type UserUncheckedCreateWithoutAnnotationVersionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -4064,6 +4182,7 @@ export type UserUncheckedCreateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationVersionInput = {
@@ -4104,6 +4223,7 @@ export type UserUpdateWithoutAnnotationVersionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -4142,6 +4262,7 @@ export type UserUpdateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
@@ -4166,6 +4287,7 @@ export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -4204,6 +4326,7 @@ export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCollectionsInput = {
@@ -4228,6 +4351,7 @@ export type UserCreateWithoutCollectionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -4266,6 +4390,7 @@ export type UserCreateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCollectionsInput = {
@@ -4290,6 +4415,7 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -4328,6 +4454,7 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCollectionsInput = {
@@ -4368,6 +4495,7 @@ export type UserUpdateWithoutCollectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -4406,6 +4534,7 @@ export type UserUpdateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollectionsInput = {
@@ -4430,6 +4559,7 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -4468,6 +4598,7 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCollectionPaperInput = {
@@ -4492,6 +4623,7 @@ export type UserCreateWithoutCollectionPaperInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -4530,6 +4662,7 @@ export type UserCreateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCollectionPaperInput = {
@@ -4554,6 +4687,7 @@ export type UserUncheckedCreateWithoutCollectionPaperInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -4592,6 +4726,7 @@ export type UserUncheckedCreateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCollectionPaperInput = {
@@ -4632,6 +4767,7 @@ export type UserUpdateWithoutCollectionPaperInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -4670,6 +4806,7 @@ export type UserUpdateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollectionPaperInput = {
@@ -4694,6 +4831,7 @@ export type UserUncheckedUpdateWithoutCollectionPaperInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -4732,6 +4870,7 @@ export type UserUncheckedUpdateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCollectionMemberInput = {
@@ -4756,6 +4895,7 @@ export type UserCreateWithoutCollectionMemberInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -4794,6 +4934,7 @@ export type UserCreateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCollectionMemberInput = {
@@ -4818,6 +4959,7 @@ export type UserUncheckedCreateWithoutCollectionMemberInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -4856,6 +4998,7 @@ export type UserUncheckedCreateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCollectionMemberInput = {
@@ -4885,6 +5028,7 @@ export type UserCreateWithoutCollectionInvitesSentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -4923,6 +5067,7 @@ export type UserCreateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
@@ -4947,6 +5092,7 @@ export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -4985,6 +5131,7 @@ export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCollectionInvitesSentInput = {
@@ -5025,6 +5172,7 @@ export type UserUpdateWithoutCollectionMemberInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -5063,6 +5211,7 @@ export type UserUpdateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollectionMemberInput = {
@@ -5087,6 +5236,7 @@ export type UserUncheckedUpdateWithoutCollectionMemberInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -5125,6 +5275,7 @@ export type UserUncheckedUpdateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutCollectionInvitesSentInput = {
@@ -5160,6 +5311,7 @@ export type UserUpdateWithoutCollectionInvitesSentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -5198,6 +5350,7 @@ export type UserUpdateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
@@ -5222,6 +5375,7 @@ export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -5260,6 +5414,7 @@ export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSearchHistoryInput = {
@@ -5284,6 +5439,7 @@ export type UserCreateWithoutSearchHistoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -5322,6 +5478,7 @@ export type UserCreateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSearchHistoryInput = {
@@ -5346,6 +5503,7 @@ export type UserUncheckedCreateWithoutSearchHistoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -5384,6 +5542,7 @@ export type UserUncheckedCreateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSearchHistoryInput = {
@@ -5424,6 +5583,7 @@ export type UserUpdateWithoutSearchHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -5462,6 +5622,7 @@ export type UserUpdateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSearchHistoryInput = {
@@ -5486,6 +5647,7 @@ export type UserUncheckedUpdateWithoutSearchHistoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -5524,6 +5686,7 @@ export type UserUncheckedUpdateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiInsightThreadsInput = {
@@ -5548,6 +5711,7 @@ export type UserCreateWithoutAiInsightThreadsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -5586,6 +5750,7 @@ export type UserCreateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
@@ -5610,6 +5775,7 @@ export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -5648,6 +5814,7 @@ export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiInsightThreadsInput = {
@@ -5688,6 +5855,7 @@ export type UserUpdateWithoutAiInsightThreadsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -5726,6 +5894,7 @@ export type UserUpdateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
@@ -5750,6 +5919,7 @@ export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -5788,6 +5958,7 @@ export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
@@ -5812,6 +5983,7 @@ export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -5850,6 +6022,7 @@ export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
@@ -5874,6 +6047,7 @@ export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -5912,6 +6086,7 @@ export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiInsightMessagesAuthoredInput = {
@@ -5952,6 +6127,7 @@ export type UserUpdateWithoutAiInsightMessagesAuthoredInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -5990,6 +6166,7 @@ export type UserUpdateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
@@ -6014,6 +6191,7 @@ export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -6052,6 +6230,7 @@ export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiConversationsInput = {
@@ -6076,6 +6255,7 @@ export type UserCreateWithoutAiConversationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -6114,6 +6294,7 @@ export type UserCreateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiConversationsInput = {
@@ -6138,6 +6319,7 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -6176,6 +6358,7 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiConversationsInput = {
@@ -6216,6 +6399,7 @@ export type UserUpdateWithoutAiConversationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -6254,6 +6438,7 @@ export type UserUpdateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiConversationsInput = {
@@ -6278,6 +6463,7 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -6316,6 +6502,7 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSubscriptionsInput = {
@@ -6340,6 +6527,7 @@ export type UserCreateWithoutSubscriptionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -6378,6 +6566,7 @@ export type UserCreateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubscriptionsInput = {
@@ -6402,6 +6591,7 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -6440,6 +6630,7 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubscriptionsInput = {
@@ -6480,6 +6671,7 @@ export type UserUpdateWithoutSubscriptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -6518,6 +6710,7 @@ export type UserUpdateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubscriptionsInput = {
@@ -6542,6 +6735,7 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -6580,6 +6774,7 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPaymentsInput = {
@@ -6604,6 +6799,7 @@ export type UserCreateWithoutPaymentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -6642,6 +6838,7 @@ export type UserCreateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -6666,6 +6863,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -6704,6 +6902,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -6744,6 +6943,7 @@ export type UserUpdateWithoutPaymentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -6782,6 +6982,7 @@ export type UserUpdateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -6806,6 +7007,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -6844,6 +7046,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutUsageEventsInput = {
@@ -6868,6 +7071,7 @@ export type UserCreateWithoutUsageEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -6906,6 +7110,7 @@ export type UserCreateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutUsageEventsInput = {
@@ -6930,6 +7135,7 @@ export type UserUncheckedCreateWithoutUsageEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -6968,6 +7174,7 @@ export type UserUncheckedCreateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutUsageEventsInput = {
@@ -7008,6 +7215,7 @@ export type UserUpdateWithoutUsageEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -7046,6 +7254,7 @@ export type UserUpdateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUsageEventsInput = {
@@ -7070,6 +7279,7 @@ export type UserUncheckedUpdateWithoutUsageEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -7108,6 +7318,7 @@ export type UserUncheckedUpdateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivitiesInput = {
@@ -7132,6 +7343,7 @@ export type UserCreateWithoutActivitiesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -7170,6 +7382,7 @@ export type UserCreateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutActivitiesInput = {
@@ -7194,6 +7407,7 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -7232,6 +7446,7 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutActivitiesInput = {
@@ -7272,6 +7487,7 @@ export type UserUpdateWithoutActivitiesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -7310,6 +7526,7 @@ export type UserUpdateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivitiesInput = {
@@ -7334,6 +7551,7 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -7372,6 +7590,7 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -7396,6 +7615,7 @@ export type UserCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
@@ -7434,6 +7654,7 @@ export type UserCreateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -7458,6 +7679,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
@@ -7496,6 +7718,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -7536,6 +7759,7 @@ export type UserUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
@@ -7574,6 +7798,7 @@ export type UserUpdateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -7598,6 +7823,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
@@ -7636,6 +7862,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -7660,6 +7887,7 @@ export type UserCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
@@ -7698,6 +7926,7 @@ export type UserCreateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -7722,6 +7951,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
   workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
@@ -7760,6 +7990,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -7800,7 +8031,281 @@ export type UserUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
+  paperVersions?: Prisma.PaperVersionUpdateManyWithoutSavedByNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUpdateManyWithoutUserNestedInput
+  adminReportsCreated?: Prisma.AdminReportUpdateManyWithoutCreatedByNestedInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUpdateManyWithoutResolvedByNestedInput
+  apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
+  contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
+  contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
+  contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUncheckedUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUncheckedUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
+  paperVersions?: Prisma.PaperVersionUncheckedUpdateManyWithoutSavedByNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
+  preference?: Prisma.UserPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedUpdateManyWithoutUserNestedInput
+  adminReportsCreated?: Prisma.AdminReportUncheckedUpdateManyWithoutCreatedByNestedInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUncheckedUpdateManyWithoutResolvedByNestedInput
+  apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
+  contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
+  contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
+  contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLoginHistoryInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  lastLoginProvider?: string | null
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
+  paperVersions?: Prisma.PaperVersionCreateNestedManyWithoutSavedByInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberCreateNestedManyWithoutUserInput
+  adminReportsCreated?: Prisma.AdminReportCreateNestedManyWithoutCreatedByInput
+  resolvedSystemAlerts?: Prisma.SystemAlertCreateNestedManyWithoutResolvedByInput
+  apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
+  contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
+  contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
+  contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+}
+
+export type UserUncheckedCreateWithoutLoginHistoryInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  lastLoginProvider?: string | null
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperUncheckedCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventUncheckedCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
+  paperVersions?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutSavedByInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutUserInput
+  preference?: Prisma.UserPreferenceUncheckedCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutUserInput
+  adminReportsCreated?: Prisma.AdminReportUncheckedCreateNestedManyWithoutCreatedByInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUncheckedCreateNestedManyWithoutResolvedByInput
+  apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
+  contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
+  contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
+  contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+}
+
+export type UserCreateOrConnectWithoutLoginHistoryInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+}
+
+export type UserUpsertWithoutLoginHistoryInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLoginHistoryInput, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLoginHistoryInput, Prisma.UserUncheckedCreateWithoutLoginHistoryInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLoginHistoryInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLoginHistoryInput, Prisma.UserUncheckedUpdateWithoutLoginHistoryInput>
+}
+
+export type UserUpdateWithoutLoginHistoryInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
   uploadedPapers?: Prisma.PaperUpdateManyWithoutUploaderNestedInput
@@ -7840,7 +8345,7 @@ export type UserUpdateWithoutSessionsInput = {
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
 }
 
-export type UserUncheckedUpdateWithoutSessionsInput = {
+export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7862,7 +8367,9 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
   workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
   uploadedPapers?: Prisma.PaperUncheckedUpdateManyWithoutUploaderNestedInput
@@ -7924,6 +8431,7 @@ export type UserCreateWithoutTokensInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -7962,6 +8470,7 @@ export type UserCreateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTokensInput = {
@@ -7986,6 +8495,7 @@ export type UserUncheckedCreateWithoutTokensInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8024,6 +8534,7 @@ export type UserUncheckedCreateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTokensInput = {
@@ -8064,6 +8575,7 @@ export type UserUpdateWithoutTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -8102,6 +8614,7 @@ export type UserUpdateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTokensInput = {
@@ -8126,6 +8639,7 @@ export type UserUncheckedUpdateWithoutTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8164,6 +8678,7 @@ export type UserUncheckedUpdateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutResearchNotesInput = {
@@ -8188,6 +8703,7 @@ export type UserCreateWithoutResearchNotesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -8226,6 +8742,7 @@ export type UserCreateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutResearchNotesInput = {
@@ -8250,6 +8767,7 @@ export type UserUncheckedCreateWithoutResearchNotesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8288,6 +8806,7 @@ export type UserUncheckedCreateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutResearchNotesInput = {
@@ -8328,6 +8847,7 @@ export type UserUpdateWithoutResearchNotesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -8366,6 +8886,7 @@ export type UserUpdateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResearchNotesInput = {
@@ -8390,6 +8911,7 @@ export type UserUncheckedUpdateWithoutResearchNotesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8428,6 +8950,7 @@ export type UserUncheckedUpdateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotebooksInput = {
@@ -8452,6 +8975,7 @@ export type UserCreateWithoutNotebooksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -8490,6 +9014,7 @@ export type UserCreateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotebooksInput = {
@@ -8514,6 +9039,7 @@ export type UserUncheckedCreateWithoutNotebooksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8552,6 +9078,7 @@ export type UserUncheckedCreateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotebooksInput = {
@@ -8592,6 +9119,7 @@ export type UserUpdateWithoutNotebooksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -8630,6 +9158,7 @@ export type UserUpdateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotebooksInput = {
@@ -8654,6 +9183,7 @@ export type UserUncheckedUpdateWithoutNotebooksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8692,6 +9222,7 @@ export type UserUncheckedUpdateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotebookSectionsInput = {
@@ -8716,6 +9247,7 @@ export type UserCreateWithoutNotebookSectionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -8754,6 +9286,7 @@ export type UserCreateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotebookSectionsInput = {
@@ -8778,6 +9311,7 @@ export type UserUncheckedCreateWithoutNotebookSectionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -8816,6 +9350,7 @@ export type UserUncheckedCreateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotebookSectionsInput = {
@@ -8856,6 +9391,7 @@ export type UserUpdateWithoutNotebookSectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -8894,6 +9430,7 @@ export type UserUpdateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
@@ -8918,6 +9455,7 @@ export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -8956,6 +9494,7 @@ export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutCitationExportsInput = {
@@ -8980,6 +9519,7 @@ export type UserCreateWithoutCitationExportsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -9018,6 +9558,7 @@ export type UserCreateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCitationExportsInput = {
@@ -9042,6 +9583,7 @@ export type UserUncheckedCreateWithoutCitationExportsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -9080,6 +9622,7 @@ export type UserUncheckedCreateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCitationExportsInput = {
@@ -9120,6 +9663,7 @@ export type UserUpdateWithoutCitationExportsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -9158,6 +9702,7 @@ export type UserUpdateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCitationExportsInput = {
@@ -9182,6 +9727,7 @@ export type UserUncheckedUpdateWithoutCitationExportsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -9220,6 +9766,7 @@ export type UserUncheckedUpdateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDiscussionThreadsInput = {
@@ -9244,6 +9791,7 @@ export type UserCreateWithoutDiscussionThreadsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -9282,6 +9830,7 @@ export type UserCreateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
@@ -9306,6 +9855,7 @@ export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -9344,6 +9894,7 @@ export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDiscussionThreadsInput = {
@@ -9384,6 +9935,7 @@ export type UserUpdateWithoutDiscussionThreadsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -9422,6 +9974,7 @@ export type UserUpdateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
@@ -9446,6 +9999,7 @@ export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -9484,6 +10038,7 @@ export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutDiscussionMessagesInput = {
@@ -9508,6 +10063,7 @@ export type UserCreateWithoutDiscussionMessagesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -9546,6 +10102,7 @@ export type UserCreateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
@@ -9570,6 +10127,7 @@ export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -9608,6 +10166,7 @@ export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutDiscussionMessagesInput = {
@@ -9648,6 +10207,7 @@ export type UserUpdateWithoutDiscussionMessagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -9686,6 +10246,7 @@ export type UserUpdateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
@@ -9710,6 +10271,7 @@ export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -9748,6 +10310,7 @@ export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutActivityLogEntriesInput = {
@@ -9772,6 +10335,7 @@ export type UserCreateWithoutActivityLogEntriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -9810,6 +10374,7 @@ export type UserCreateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
@@ -9834,6 +10399,7 @@ export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -9872,6 +10438,7 @@ export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutActivityLogEntriesInput = {
@@ -9912,6 +10479,7 @@ export type UserUpdateWithoutActivityLogEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -9950,6 +10518,7 @@ export type UserUpdateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
@@ -9974,6 +10543,7 @@ export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -10012,6 +10582,7 @@ export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPreferenceInput = {
@@ -10036,6 +10607,7 @@ export type UserCreateWithoutPreferenceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -10074,6 +10646,7 @@ export type UserCreateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPreferenceInput = {
@@ -10098,6 +10671,7 @@ export type UserUncheckedCreateWithoutPreferenceInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -10136,6 +10710,7 @@ export type UserUncheckedCreateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPreferenceInput = {
@@ -10176,6 +10751,7 @@ export type UserUpdateWithoutPreferenceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -10214,6 +10790,7 @@ export type UserUpdateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPreferenceInput = {
@@ -10238,6 +10815,7 @@ export type UserUncheckedUpdateWithoutPreferenceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -10276,6 +10854,7 @@ export type UserUncheckedUpdateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAdminReportsCreatedInput = {
@@ -10300,6 +10879,7 @@ export type UserCreateWithoutAdminReportsCreatedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -10338,6 +10918,7 @@ export type UserCreateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAdminReportsCreatedInput = {
@@ -10362,6 +10943,7 @@ export type UserUncheckedCreateWithoutAdminReportsCreatedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -10400,6 +10982,7 @@ export type UserUncheckedCreateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAdminReportsCreatedInput = {
@@ -10440,6 +11023,7 @@ export type UserUpdateWithoutAdminReportsCreatedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -10478,6 +11062,7 @@ export type UserUpdateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAdminReportsCreatedInput = {
@@ -10502,6 +11087,7 @@ export type UserUncheckedUpdateWithoutAdminReportsCreatedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -10540,6 +11126,7 @@ export type UserUncheckedUpdateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutResolvedSystemAlertsInput = {
@@ -10564,6 +11151,7 @@ export type UserCreateWithoutResolvedSystemAlertsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -10602,6 +11190,7 @@ export type UserCreateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutResolvedSystemAlertsInput = {
@@ -10626,6 +11215,7 @@ export type UserUncheckedCreateWithoutResolvedSystemAlertsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -10664,6 +11254,7 @@ export type UserUncheckedCreateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutResolvedSystemAlertsInput = {
@@ -10704,6 +11295,7 @@ export type UserUpdateWithoutResolvedSystemAlertsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -10742,6 +11334,7 @@ export type UserUpdateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutResolvedSystemAlertsInput = {
@@ -10766,6 +11359,7 @@ export type UserUncheckedUpdateWithoutResolvedSystemAlertsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -10804,6 +11398,7 @@ export type UserUncheckedUpdateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutApiKeysCreatedInput = {
@@ -10828,6 +11423,7 @@ export type UserCreateWithoutApiKeysCreatedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -10866,6 +11462,7 @@ export type UserCreateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutApiKeysCreatedInput = {
@@ -10890,6 +11487,7 @@ export type UserUncheckedCreateWithoutApiKeysCreatedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -10928,6 +11526,7 @@ export type UserUncheckedCreateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutApiKeysCreatedInput = {
@@ -10968,6 +11567,7 @@ export type UserUpdateWithoutApiKeysCreatedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -11006,6 +11606,7 @@ export type UserUpdateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutApiKeysCreatedInput = {
@@ -11030,6 +11631,7 @@ export type UserUncheckedUpdateWithoutApiKeysCreatedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -11068,6 +11670,7 @@ export type UserUncheckedUpdateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutContentReportsFiledInput = {
@@ -11092,6 +11695,7 @@ export type UserCreateWithoutContentReportsFiledInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -11130,6 +11734,7 @@ export type UserCreateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutContentReportsFiledInput = {
@@ -11154,6 +11759,7 @@ export type UserUncheckedCreateWithoutContentReportsFiledInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -11192,6 +11798,7 @@ export type UserUncheckedCreateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutContentReportsFiledInput = {
@@ -11221,6 +11828,7 @@ export type UserCreateWithoutContentReportsAssignedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -11259,6 +11867,7 @@ export type UserCreateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutContentReportsAssignedInput = {
@@ -11283,6 +11892,7 @@ export type UserUncheckedCreateWithoutContentReportsAssignedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -11321,6 +11931,7 @@ export type UserUncheckedCreateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutContentReportsAssignedInput = {
@@ -11350,6 +11961,7 @@ export type UserCreateWithoutContentReportsResolvedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
@@ -11388,6 +12000,7 @@ export type UserCreateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutContentReportsResolvedInput = {
@@ -11412,6 +12025,7 @@ export type UserUncheckedCreateWithoutContentReportsResolvedInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
+  lastLoginProvider?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
@@ -11450,6 +12064,7 @@ export type UserUncheckedCreateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutContentReportsResolvedInput = {
@@ -11490,6 +12105,7 @@ export type UserUpdateWithoutContentReportsFiledInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -11528,6 +12144,7 @@ export type UserUpdateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContentReportsFiledInput = {
@@ -11552,6 +12169,7 @@ export type UserUncheckedUpdateWithoutContentReportsFiledInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -11590,6 +12208,7 @@ export type UserUncheckedUpdateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutContentReportsAssignedInput = {
@@ -11625,6 +12244,7 @@ export type UserUpdateWithoutContentReportsAssignedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -11663,6 +12283,7 @@ export type UserUpdateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContentReportsAssignedInput = {
@@ -11687,6 +12308,7 @@ export type UserUncheckedUpdateWithoutContentReportsAssignedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -11725,6 +12347,7 @@ export type UserUncheckedUpdateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutContentReportsResolvedInput = {
@@ -11760,6 +12383,7 @@ export type UserUpdateWithoutContentReportsResolvedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
@@ -11798,6 +12422,7 @@ export type UserUpdateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutContentReportsResolvedInput = {
@@ -11822,6 +12447,7 @@ export type UserUncheckedUpdateWithoutContentReportsResolvedInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -11860,6 +12486,7 @@ export type UserUncheckedUpdateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -11906,6 +12533,7 @@ export type UserCountOutputType = {
   contentReportsFiled: number
   contentReportsAssigned: number
   contentReportsResolved: number
+  loginHistory: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -11947,6 +12575,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   contentReportsFiled?: boolean | UserCountOutputTypeCountContentReportsFiledArgs
   contentReportsAssigned?: boolean | UserCountOutputTypeCountContentReportsAssignedArgs
   contentReportsResolved?: boolean | UserCountOutputTypeCountContentReportsResolvedArgs
+  loginHistory?: boolean | UserCountOutputTypeCountLoginHistoryArgs
 }
 
 /**
@@ -12225,6 +12854,13 @@ export type UserCountOutputTypeCountContentReportsResolvedArgs<ExtArgs extends r
   where?: Prisma.ContentReportWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLoginHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoginHistoryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -12248,6 +12884,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
+  lastLoginProvider?: boolean
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -12287,6 +12924,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   contentReportsFiled?: boolean | Prisma.User$contentReportsFiledArgs<ExtArgs>
   contentReportsAssigned?: boolean | Prisma.User$contentReportsAssignedArgs<ExtArgs>
   contentReportsResolved?: boolean | Prisma.User$contentReportsResolvedArgs<ExtArgs>
+  loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -12312,6 +12950,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
+  lastLoginProvider?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -12336,6 +12975,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
+  lastLoginProvider?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -12360,9 +13000,10 @@ export type UserSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
+  lastLoginProvider?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "firstName" | "lastName" | "institution" | "fieldOfStudy" | "image" | "password" | "role" | "emailVerified" | "emailVerificationToken" | "onboardingCompleted" | "onboardingStep" | "stripeCustomerId" | "stripeSubscriptionId" | "stripePriceId" | "stripeCurrentPeriodEnd" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "firstName" | "lastName" | "institution" | "fieldOfStudy" | "image" | "password" | "role" | "emailVerified" | "emailVerificationToken" | "onboardingCompleted" | "onboardingStep" | "stripeCustomerId" | "stripeSubscriptionId" | "stripePriceId" | "stripeCurrentPeriodEnd" | "createdAt" | "updatedAt" | "isDeleted" | "lastLoginProvider", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -12403,6 +13044,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   contentReportsFiled?: boolean | Prisma.User$contentReportsFiledArgs<ExtArgs>
   contentReportsAssigned?: boolean | Prisma.User$contentReportsAssignedArgs<ExtArgs>
   contentReportsResolved?: boolean | Prisma.User$contentReportsResolvedArgs<ExtArgs>
+  loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -12450,6 +13092,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     contentReportsFiled: Prisma.$ContentReportPayload<ExtArgs>[]
     contentReportsAssigned: Prisma.$ContentReportPayload<ExtArgs>[]
     contentReportsResolved: Prisma.$ContentReportPayload<ExtArgs>[]
+    loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -12473,6 +13116,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
+    lastLoginProvider: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -12906,6 +13550,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   contentReportsFiled<T extends Prisma.User$contentReportsFiledArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsFiledArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contentReportsAssigned<T extends Prisma.User$contentReportsAssignedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsAssignedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contentReportsResolved<T extends Prisma.User$contentReportsResolvedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsResolvedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loginHistory<T extends Prisma.User$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12956,6 +13601,7 @@ export interface UserFieldRefs {
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"User", 'Boolean'>
+  readonly lastLoginProvider: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -14277,6 +14923,30 @@ export type User$contentReportsResolvedArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.ContentReportScalarFieldEnum | Prisma.ContentReportScalarFieldEnum[]
+}
+
+/**
+ * User.loginHistory
+ */
+export type User$loginHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LoginHistory
+   */
+  select?: Prisma.LoginHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LoginHistory
+   */
+  omit?: Prisma.LoginHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoginHistoryInclude<ExtArgs> | null
+  where?: Prisma.LoginHistoryWhereInput
+  orderBy?: Prisma.LoginHistoryOrderByWithRelationInput | Prisma.LoginHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.LoginHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoginHistoryScalarFieldEnum | Prisma.LoginHistoryScalarFieldEnum[]
 }
 
 /**

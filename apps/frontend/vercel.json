@@ -3,6 +3,6 @@
   "version": 2,
   "framework": "nextjs",
   "buildCommand": "cd ../.. && corepack yarn workspace @scholar-flow/frontend build",
-  "installCommand": "cd ../.. && corepack enable && corepack yarn install --immutable",
+  "installCommand": "cd ../.. && corepack yarn install --immutable",
   "outputDirectory": ".next"
 }

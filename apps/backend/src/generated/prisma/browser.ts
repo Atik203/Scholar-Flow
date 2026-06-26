@@ -173,6 +173,11 @@ export type Account = Prisma.AccountModel
  */
 export type Session = Prisma.SessionModel
 /**
+ * Model LoginHistory
+ * 
+ */
+export type LoginHistory = Prisma.LoginHistoryModel
+/**
  * Model VerificationToken
  * 
  */
