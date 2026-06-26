@@ -873,6 +873,49 @@ class AuthService {
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
+  /**
+   * Create a login history entry
+   */
+  async createLoginHistory(
+    userId: string,
+    data: { provider: string; ip?: string; userAgent?: string; device?: string }
+  ) {
+    return prisma.loginHistory.create({
+      data: {
+        id: randomUUID(),
+        userId,
+        provider: data.provider,
+        ip: data.ip || null,
+        userAgent: data.userAgent || null,
+        device: data.device || null,
+        location: null,
+      },
+    });
+  }
+
+  /**
+   * Get login history for a user with cursor-based pagination
+   */
+  async getLoginHistory(
+    userId: string,
+    limit = 20,
+    cursor?: string
+  ) {
+    const items = await prisma.loginHistory.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = items.length > limit;
+    if (hasMore) items.pop();
+
+    return {
+      items,
+      cursor: hasMore && items.length > 0 ? items[items.length - 1].id : null,
+    };
+  }
 }
 
 export const authService = new AuthService();
