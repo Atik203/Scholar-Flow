@@ -3,7 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
-import { StorageService } from "../papers/storage.service";
+import { StorageService as storageService } from "../papers/storage.service";
 import {
   UpdateOnboardingInput,
   UpdatePreferencesInput,
@@ -297,9 +297,6 @@ const uploadProfilePicture = async (
     if (existingUsers.length === 0) {
       throw new ApiError(404, "User not found or account deleted");
     }
-
-    // Initialize storage service
-    const storageService = new StorageService();
 
     // Generate unique file key for profile picture
     const fileExtension = file.mimetype.split("/")[1];
