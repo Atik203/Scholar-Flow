@@ -6,6 +6,7 @@ import {
   showLoadingToast,
 } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { FloatingInput } from "@/components/customUI/form/FloatingInput";
 import { ToggleField } from "@/components/customUI/form/ToggleField";
 import { useAuthRoute } from "@/hooks/useAuthGuard";
@@ -17,14 +18,12 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
-  ChevronDown,
   Eye,
   EyeOff,
   Github,
   Globe,
   Loader2,
   Mail,
-  MapPin,
   Shield,
   Sparkles,
   Wand2,
@@ -32,7 +31,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 
@@ -56,29 +55,23 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
   delay: Math.random() * 5,
 }));
 
-const recentLoginLocations = [
-  {
-    city: "New York, USA",
-    device: "Chrome on MacOS",
-    time: "2 hours ago",
-    current: true,
-  },
-  { city: "Boston, USA", device: "Safari on iPhone", time: "Yesterday" },
-  { city: "London, UK", device: "Firefox on Windows", time: "3 days ago" },
-];
-
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState<"password" | "magic-link">("password");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
-  const [showRecentLogins, setShowRecentLogins] = useState(false);
+  const [lastProvider, setLastProvider] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
 
   const { isLoading: authLoading } = useAuthRoute();
+
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|;\s*)sf_last_auth=([^;]*)/);
+    setLastProvider(match ? match[1] : null);
+  }, []);
 
   const {
     register,
@@ -250,6 +243,11 @@ export default function LoginPage() {
                   }`}
                 >
                   Password
+                  {lastProvider === "credentials" && (
+                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-300 bg-green-50 ml-1 dark:bg-green-950 dark:text-green-400 dark:border-green-800">
+                      Last used
+                    </Badge>
+                  )}
                 </button>
                 <button
                   onClick={() => setLoginMethod("magic-link")}
@@ -282,7 +280,12 @@ export default function LoginPage() {
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                     </svg>
                   )}
-                  Continue with Google
+                  <span className="flex-1 text-left">Continue with Google</span>
+                  {lastProvider === "google" && (
+                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-300 bg-green-50 dark:bg-green-950 dark:text-green-400 dark:border-green-800 ml-auto">
+                      Last used
+                    </Badge>
+                  )}
                 </Button>
 
                 <Button
@@ -297,7 +300,12 @@ export default function LoginPage() {
                   ) : (
                     <Github className="h-5 w-5 mr-3" />
                   )}
-                  Continue with GitHub
+                  <span className="flex-1 text-left">Continue with GitHub</span>
+                  {lastProvider === "github" && (
+                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-300 bg-green-50 dark:bg-green-950 dark:text-green-400 dark:border-green-800 ml-auto">
+                      Last used
+                    </Badge>
+                  )}
                 </Button>
               </div>
 
@@ -469,62 +477,17 @@ export default function LoginPage() {
                 )}
               </AnimatePresence>
 
-              <div className="mt-6">
-                <button
-                  onClick={() => setShowRecentLogins(!showRecentLogins)}
-                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
-                >
+              {lastProvider && (
+                <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
                   <Globe className="h-4 w-4" />
-                  <span>Recent login activity</span>
-                  <ChevronDown
-                    className={`h-4 w-4 ml-auto transition-transform ${
-                      showRecentLogins ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {showRecentLogins && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-3 space-y-2 overflow-hidden"
-                    >
-                      {recentLoginLocations.map((login, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className={`flex items-center gap-3 p-3 rounded-lg border ${
-                            login.current
-                              ? "border-green-500/30 bg-green-500/5"
-                              : "border-border bg-muted/30"
-                          }`}
-                        >
-                          <MapPin
-                            className={`h-4 w-4 ${login.current ? "text-green-500" : "text-muted-foreground"}`}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">
-                              {login.city}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {login.device} &middot; {login.time}
-                            </p>
-                          </div>
-                          {login.current ? (
-                            <span className="text-xs text-green-500 font-medium">
-                              Current
-                            </span>
-                          ) : null}
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                  <span>
+                    Last signed in with{" "}
+                    <span className="font-medium text-foreground capitalize">
+                      {lastProvider === "credentials" ? "password" : lastProvider}
+                    </span>
+                  </span>
+                </div>
+              )}
 
               <div className="mt-8 text-center">
                 <p className="text-sm text-muted-foreground">
