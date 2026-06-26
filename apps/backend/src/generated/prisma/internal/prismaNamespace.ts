@@ -415,6 +415,7 @@ export const ModelName = {
   ActivityLog: 'ActivityLog',
   Account: 'Account',
   Session: 'Session',
+  LoginHistory: 'LoginHistory',
   VerificationToken: 'VerificationToken',
   UserToken: 'UserToken',
   ResearchNote: 'ResearchNote',
@@ -451,7 +452,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "loginHistory" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2749,6 +2750,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LoginHistory: {
+      payload: Prisma.$LoginHistoryPayload<ExtArgs>
+      fields: Prisma.LoginHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoginHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoginHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.LoginHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoginHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.LoginHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.LoginHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.LoginHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoginHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.LoginHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        update: {
+          args: Prisma.LoginHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoginHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoginHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoginHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoginHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoginHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.LoginHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoginHistory>
+        }
+        groupBy: {
+          args: Prisma.LoginHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoginHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoginHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
     VerificationToken: {
       payload: Prisma.$VerificationTokenPayload<ExtArgs>
       fields: Prisma.VerificationTokenFieldRefs
@@ -4384,7 +4459,8 @@ export const UserScalarFieldEnum = {
   stripeCurrentPeriodEnd: 'stripeCurrentPeriodEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  lastLoginProvider: 'lastLoginProvider'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -4892,6 +4968,20 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const LoginHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  device: 'device',
+  location: 'location',
+  createdAt: 'createdAt'
+} as const
+
+export type LoginHistoryScalarFieldEnum = (typeof LoginHistoryScalarFieldEnum)[keyof typeof LoginHistoryScalarFieldEnum]
 
 
 export const VerificationTokenScalarFieldEnum = {
@@ -5947,6 +6037,7 @@ export type GlobalOmitConfig = {
   activityLog?: Prisma.ActivityLogOmit
   account?: Prisma.AccountOmit
   session?: Prisma.SessionOmit
+  loginHistory?: Prisma.LoginHistoryOmit
   verificationToken?: Prisma.VerificationTokenOmit
   userToken?: Prisma.UserTokenOmit
   researchNote?: Prisma.ResearchNoteOmit
