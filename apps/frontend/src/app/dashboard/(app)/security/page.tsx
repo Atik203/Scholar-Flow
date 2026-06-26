@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/redux/auth/useAuth";
+import { useGetLoginSummaryQuery } from "@/redux/api/loginHistoryApi";
 import { Shield, ShieldCheck, ShieldAlert, Smartphone, Laptop, EyeOff, Clock, ArrowRight, Fingerprint, History } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -56,16 +57,30 @@ function NavLink({ title, desc, icon: Icon, href, color, badge }: {
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  credentials: "Password",
+  google: "Google",
+  github: "GitHub",
+};
+
 export default function SecurityDashboardPage() {
   const { user } = useAuth();
   const u = user as Record<string, unknown> | null;
   const twoFa = (u?.twoFactorEnabled as boolean) ?? false;
-  const sessions = (u?.activeSessions as number) ?? 1;
-  const lastLogin = u?.lastLogin
-    ? new Date(u.lastLogin as string).toLocaleDateString("en-US", {
+
+  const { data: summary, isLoading } = useGetLoginSummaryQuery();
+
+  const lastLogin = summary?.data?.lastLogin;
+  const totalLogins = summary?.data?.totalLogins ?? 0;
+  const lastLoginStr = lastLogin
+    ? new Date(lastLogin.createdAt).toLocaleDateString("en-US", {
         month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit",
       })
     : "N/A";
+
+  const lastLoginProvider = lastLogin
+    ? PROVIDER_LABELS[lastLogin.provider] || lastLogin.provider
+    : null;
 
   const [lastProvider, setLastProvider] = useState<string | null>(null);
   useEffect(() => {
@@ -101,19 +116,19 @@ export default function SecurityDashboardPage() {
         </motion.div>
         <motion.div variants={fadeIn}>
           <StatBox
-            label="Active Sessions"
-            value={String(sessions)}
-            desc={sessions > 1 ? "Multiple devices signed in" : "Only this device"}
-            icon={Laptop}
+            label="Login Activity"
+            value={isLoading ? "..." : String(totalLogins)}
+            desc={totalLogins > 0 ? "Total sign-ins recorded" : "No login data yet"}
+            icon={Clock}
             color="bg-blue-500"
           />
         </motion.div>
         <motion.div variants={fadeIn}>
           <StatBox
             label="Last Login"
-            value={lastLogin}
-            desc="Your most recent sign-in"
-            icon={Clock}
+            value={isLoading ? "..." : lastLoginStr}
+            desc={lastLoginProvider ? `via ${lastLoginProvider}` : "Your most recent sign-in"}
+            icon={History}
             color="bg-purple-500"
           />
         </motion.div>
@@ -142,7 +157,6 @@ export default function SecurityDashboardPage() {
             icon={Laptop}
             href="/dashboard/security/sessions"
             color="bg-blue-500"
-            badge={`${sessions} active`}
           />
         </motion.div>
         <motion.div variants={fadeIn}>
@@ -161,9 +175,46 @@ export default function SecurityDashboardPage() {
             icon={History}
             href="/dashboard/security/login-history"
             color="bg-orange-500"
+            badge={totalLogins > 0 ? `${totalLogins} events` : undefined}
           />
         </motion.div>
       </motion.div>
+
+      {lastLogin && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock className="h-4 w-4 text-purple-500" />
+              Latest Sign-In
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4 text-sm">
+              <Badge variant="secondary" className="text-[11px]">
+                {lastLoginProvider || lastLogin.provider}
+              </Badge>
+              <span className="text-muted-foreground">
+                {new Date(lastLogin.createdAt).toLocaleString("en-US", {
+                  weekday: "long", month: "long", day: "numeric",
+                  year: "numeric", hour: "2-digit", minute: "2-digit",
+                })}
+              </span>
+              {lastLogin.device && (
+                <>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground">{lastLogin.device}</span>
+                </>
+              )}
+              {lastLogin.ip && (
+                <>
+                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground text-xs font-mono">{lastLogin.ip}</span>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -198,7 +249,9 @@ export default function SecurityDashboardPage() {
           {lastProvider && (
             <div>
               <span className="text-muted-foreground">Last Login Method</span>
-              <p className="font-medium mt-0.5 capitalize">{lastProvider === "credentials" ? "Password" : lastProvider}</p>
+              <p className="font-medium mt-0.5 capitalize">
+                {PROVIDER_LABELS[lastProvider] || lastProvider}
+              </p>
             </div>
           )}
         </CardContent>
