@@ -82,6 +82,7 @@ export const ModelName = {
   ActivityLog: 'ActivityLog',
   Account: 'Account',
   Session: 'Session',
+  LoginHistory: 'LoginHistory',
   VerificationToken: 'VerificationToken',
   UserToken: 'UserToken',
   ResearchNote: 'ResearchNote',
@@ -159,7 +160,8 @@ export const UserScalarFieldEnum = {
   stripeCurrentPeriodEnd: 'stripeCurrentPeriodEnd',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  isDeleted: 'isDeleted'
+  isDeleted: 'isDeleted',
+  lastLoginProvider: 'lastLoginProvider'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -667,6 +669,20 @@ export const SessionScalarFieldEnum = {
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const LoginHistoryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  device: 'device',
+  location: 'location',
+  createdAt: 'createdAt'
+} as const
+
+export type LoginHistoryScalarFieldEnum = (typeof LoginHistoryScalarFieldEnum)[keyof typeof LoginHistoryScalarFieldEnum]
 
 
 export const VerificationTokenScalarFieldEnum = {
