@@ -59,6 +59,9 @@ export async function signInWithCredentials(
       })
     );
 
+    // Set last auth provider cookie
+    document.cookie = `sf_last_auth=credentials; path=/; max-age=604800; samesite=lax`;
+
     // Force the new auth state to localStorage so a subsequent hard navigation
     // rehydrates the correct user/token instead of the previous account's.
     await flushAuthState();
@@ -140,6 +143,9 @@ export async function completeOAuthSignIn(
         accessToken: data.data.accessToken,
       })
     );
+
+    // Set last auth provider cookie
+    document.cookie = `sf_last_auth=${provider}; path=/; max-age=604800; samesite=lax`;
 
     // Force the new auth state to localStorage so the upcoming hard navigation
     // rehydrates the correct user/token instead of the previous account's.
