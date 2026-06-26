@@ -116,7 +116,12 @@ const summarySchema = z.object({
 type RawSummary = z.infer<typeof summarySchema>;
 
 const insightSchema = z.object({
-  answer: z.string().min(20).max(5000),
+  answer: z
+    .union([z.string(), z.array(z.string())])
+    .transform((val) =>
+      Array.isArray(val) ? JSON.stringify(val) : val
+    )
+    .pipe(z.string().min(20).max(5000)),
   suggestions: z.union([z.array(z.string()), z.string()]).optional(),
   tokensUsed: z.union([z.number(), z.string()]).optional(),
 });
@@ -416,7 +421,18 @@ export class OpenAiProvider extends BaseAiProvider {
           maxTokens: 900,
           responseSchema: INSIGHT_RESPONSE_SCHEMA,
         },
-        insightSchema
+        insightSchema,
+        (parsed: unknown) => {
+          // Normalize bare arrays or objects missing the "answer" field
+          if (Array.isArray(parsed)) {
+            return { answer: JSON.stringify(parsed) };
+          }
+          if (parsed && typeof parsed === "object" && !("answer" in (parsed as Record<string, unknown>))) {
+            // AI returned an object without the answer key — use stringified object as answer
+            return { answer: JSON.stringify(parsed) };
+          }
+          return parsed;
+        }
       );
 
       const validated = payload as RawInsight;
@@ -487,7 +503,8 @@ export class OpenAiProvider extends BaseAiProvider {
         strict?: boolean;
       };
     },
-    validator: z.ZodType<T>
+    validator: z.ZodType<T>,
+    normalize?: (parsed: unknown) => unknown
   ): Promise<{ payload: T; raw: unknown; tokens?: number }> {
     if (!this.client) {
       throw new AiError(
@@ -534,7 +551,8 @@ export class OpenAiProvider extends BaseAiProvider {
 
       const text = this.extractResponseText(response);
       const parsed = this.safeParseJson(text);
-      const payload = validator.parse(parsed) as T;
+      const normalized = normalize ? normalize(parsed) : parsed;
+      const payload = validator.parse(normalized) as T;
       const tokens = this.extractTokenUsage((response as any).usage);
 
       return { payload, raw: response, tokens };
@@ -549,7 +567,8 @@ export class OpenAiProvider extends BaseAiProvider {
 
     const messageContent = completion.choices[0]?.message?.content ?? "";
     const parsed = this.safeParseJson(messageContent);
-    const payload = validator.parse(parsed) as T;
+    const normalized = normalize ? normalize(parsed) : parsed;
+    const payload = validator.parse(normalized) as T;
     const tokens = this.extractTokenUsage(completion.usage);
 
     return { payload, raw: completion, tokens };
