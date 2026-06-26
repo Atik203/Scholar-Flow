@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/redux/auth/useAuth";
-import { Shield, ShieldCheck, ShieldAlert, Smartphone, Laptop, EyeOff, Clock, ArrowRight, Fingerprint } from "lucide-react";
+import { Shield, ShieldCheck, ShieldAlert, Smartphone, Laptop, EyeOff, Clock, ArrowRight, Fingerprint, History } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
@@ -64,6 +66,12 @@ export default function SecurityDashboardPage() {
         month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit",
       })
     : "N/A";
+
+  const [lastProvider, setLastProvider] = useState<string | null>(null);
+  useEffect(() => {
+    const match = document.cookie.match(/(?:^|;\s*)sf_last_auth=([^;]*)/);
+    setLastProvider(match ? match[1] : null);
+  }, []);
 
   return (
     <div className="space-y-6 pb-12">
@@ -146,6 +154,15 @@ export default function SecurityDashboardPage() {
             color="bg-purple-500"
           />
         </motion.div>
+        <motion.div variants={fadeIn}>
+          <NavLink
+            title="Login Activity"
+            desc="Review your recent sign-in history"
+            icon={History}
+            href="/dashboard/security/login-history"
+            color="bg-orange-500"
+          />
+        </motion.div>
       </motion.div>
 
       <Card>
@@ -178,6 +195,12 @@ export default function SecurityDashboardPage() {
               )}
             </p>
           </div>
+          {lastProvider && (
+            <div>
+              <span className="text-muted-foreground">Last Login Method</span>
+              <p className="font-medium mt-0.5 capitalize">{lastProvider === "credentials" ? "Password" : lastProvider}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
