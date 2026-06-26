@@ -138,6 +138,12 @@ router.get(
   authController.getLoginHistory
 );
 
+router.get(
+  "/login-summary",
+  authMiddleware,
+  authController.getLoginSummary
+);
+
 /**
  * @swagger
  * components:
