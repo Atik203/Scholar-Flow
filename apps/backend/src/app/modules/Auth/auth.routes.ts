@@ -131,6 +131,13 @@ router.put(
 
 router.get("/profile", optionalAuth, authController.getCurrentUser);
 
+// Login history (authenticated)
+router.get(
+  "/login-history",
+  authMiddleware,
+  authController.getLoginHistory
+);
+
 /**
  * @swagger
  * components:

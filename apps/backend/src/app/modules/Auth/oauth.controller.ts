@@ -11,6 +11,24 @@ import sendResponse from "../../shared/sendResponse";
 import { AsyncRequestHandler } from "../../types/express";
 import { authService } from "./auth.service";
 
+function detectDevice(ua: string): string {
+  if (!ua) return "Unknown";
+  if (/mobile|android|iphone|ipad|ipod/i.test(ua)) return "Mobile";
+  if (/tablet|ipad/i.test(ua)) return "Tablet";
+  return "Desktop";
+}
+
+function extractClientInfo(req: Request) {
+  const ip =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.ip ||
+    req.socket?.remoteAddress ||
+    "";
+  const userAgent = (req.headers["user-agent"] as string) || "";
+  const device = detectDevice(userAgent);
+  return { ip, userAgent, device };
+}
+
 interface GoogleTokenResponse {
   access_token: string;
   refresh_token?: string;
@@ -242,6 +260,13 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
     // Generate JWT access token
     const accessToken = generateAccessToken(user);
 
+    // Track login
+    const clientInfo = extractClientInfo(req);
+    authService.createLoginHistory(user.id, {
+      provider: "google",
+      ...clientInfo,
+    }).catch(() => {});
+
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -382,6 +407,13 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
 
     // Generate JWT access token
     const accessToken = generateAccessToken(user);
+
+    // Track login
+    const clientInfo = extractClientInfo(req);
+    authService.createLoginHistory(user.id, {
+      provider: "github",
+      ...clientInfo,
+    }).catch(() => {});
 
     sendResponse(res, {
       statusCode: 200,
