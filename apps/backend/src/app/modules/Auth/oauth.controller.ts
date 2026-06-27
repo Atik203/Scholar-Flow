@@ -107,17 +107,26 @@ function generateAccessToken(user: UserData): string {
  */
 export const initiateGoogleOAuth: AsyncRequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    // callbackUrl is already URL-encoded from the frontend, don't encode again
     const callbackUrl = (req.query.callbackUrl as string) || "/dashboard";
-    const state = callbackUrl; // Use as-is, already encoded from frontend
+    const state = callbackUrl;
 
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
     const redirectUri = `${frontendUrl}/auth/callback/google`;
 
     if (!googleClientId) {
+      console.error("[OAuth] GOOGLE_CLIENT_ID not configured in environment");
       throw new ApiError(500, "Google OAuth not configured");
     }
+
+    console.log("[OAuth] Initiating Google OAuth", {
+      redirectUri,
+      frontendUrl,
+      hasCallbackUrl: !!callbackUrl,
+    });
 
     const googleAuthUrl = new URL(
       "https://accounts.google.com/o/oauth2/v2/auth"
@@ -141,15 +150,18 @@ export const initiateGoogleOAuth: AsyncRequestHandler = catchAsync(
  */
 export const initiateGitHubOAuth: AsyncRequestHandler = catchAsync(
   async (req: Request, res: Response) => {
-    // callbackUrl is already URL-encoded from the frontend, don't encode again
     const callbackUrl = (req.query.callbackUrl as string) || "/dashboard";
-    const state = callbackUrl; // Use as-is, already encoded from frontend
+    const state = callbackUrl;
 
     const githubClientId = process.env.GITHUB_CLIENT_ID;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
     const redirectUri = `${frontendUrl}/auth/callback/github`;
 
     if (!githubClientId) {
+      console.error("[OAuth] GITHUB_CLIENT_ID not configured in environment");
       throw new ApiError(500, "GitHub OAuth not configured");
     }
 
@@ -179,16 +191,19 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
 
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
     const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.VERCEL_URL ||
+      "http://localhost:3000";
     const redirectUri = `${frontendUrl}/auth/callback/google`;
 
     if (!googleClientId || !googleClientSecret) {
+      console.error("[OAuth] Google OAuth credentials not configured");
       throw new ApiError(500, "Google OAuth not configured");
     }
 
-    // Exchange code for tokens
-    console.log("🔄 Exchanging Google OAuth code...", {
-      codeLength: code.length,
+    console.log("[OAuth] Handling Google callback", {
+      hasCode: !!code,
       redirectUri,
       frontendUrl,
     });

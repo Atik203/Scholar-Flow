@@ -20,8 +20,12 @@ import {
   isStripeWebhookPath,
 } from "./app/utils/stripeWebhook";
 
-// Initialize queue processing
-import "./app/services/pdfProcessingQueue";
+// Initialize queue processing (lazy on Vercel to avoid cold start issues)
+if (process.env.VERCEL !== "1") {
+  require("./app/services/pdfProcessingQueue");
+} else {
+  console.log("[Boot] Vercel environment — deferring queue init");
+}
 
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
@@ -79,7 +83,14 @@ const allowedOrigins = [
   process.env.FRONTEND_URL || "http://localhost:3000",
   "https://scholar-flow-ai.vercel.app",
   process.env.WS_URL || "http://localhost:5001",
-];
+].filter(Boolean);
+
+// Add Vercel deployment URL if available
+if (process.env.VERCEL_URL) {
+  allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
+}
+
+console.log("[Boot] CORS allowed origins:", allowedOrigins);
 app.use(
   cors({
     origin: (origin, callback) => {
