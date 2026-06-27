@@ -923,7 +923,7 @@ export const paperController = {
     }
   }),
 
-  // Phase 10 — AI Key Points extraction
+  // Phase 10 — AI Key Points extraction (persisted)
   generateKeyPoints: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
 
@@ -935,6 +935,7 @@ export const paperController = {
     const { id: paperId } = params.data;
     const body = req.body || {};
     const model = body.model as string | undefined;
+    const refresh = body.refresh === true;
 
     const paperRecord = await paperService.getPaperForSummary(paperId);
     if (!paperRecord) {
@@ -947,6 +948,24 @@ export const paperController = {
     );
     if (!hasAccess) {
       throw createPaperError.insufficientPermissions();
+    }
+
+    // Return persisted key points if available and refresh not requested
+    if (!refresh) {
+      const existing = await prisma.aIKeyPoint.findMany({
+        where: { paperId, isDeleted: false },
+        orderBy: { order: "asc" },
+        select: { content: true, category: true, model: true, createdAt: true },
+      });
+
+      if (existing.length > 0) {
+        sendSuccessResponse(
+          res,
+          { keyPoints: existing.map((kp) => kp.content), persisted: true },
+          "Key points loaded from cache"
+        );
+        return;
+      }
     }
 
     const source = await paperService.getSummarySourceText(
@@ -962,10 +981,31 @@ export const paperController = {
         ...(model && { model }),
       });
 
+      const points = Array.isArray(keyPoints) ? keyPoints : (keyPoints as any)?.keyPoints || [];
+      const keyPointStrings = points.map((kp: any) =>
+        typeof kp === "string" ? kp : kp.content || kp.text || JSON.stringify(kp)
+      );
+
+      // Persist key points to DB
+      if (keyPointStrings.length > 0) {
+        await prisma.aIKeyPoint.deleteMany({
+          where: { paperId },
+        });
+
+        await prisma.aIKeyPoint.createMany({
+          data: keyPointStrings.map((content: string, idx: number) => ({
+            paperId,
+            content,
+            order: idx,
+            model: model || "default",
+          })),
+        });
+      }
+
       sendSuccessResponse(
         res,
-        { keyPoints },
-        "Key points extracted successfully"
+        { keyPoints: keyPointStrings, persisted: true },
+        "Key points extracted and saved"
       );
     } catch (error) {
       console.error("[PaperController] Key points extraction failed:", error);

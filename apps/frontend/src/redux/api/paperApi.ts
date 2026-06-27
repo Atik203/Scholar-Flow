@@ -621,15 +621,15 @@ export const paperApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    // Phase 10 — AI Key Points extraction
+    // Phase 10 — AI Key Points extraction (persisted)
     extractKeyPoints: builder.mutation<
-      { keyPoints: string[] },
-      { paperId: string; model?: string }
+      { keyPoints: string[]; persisted?: boolean },
+      { paperId: string; model?: string; refresh?: boolean }
     >({
-      query: ({ paperId, model }) => ({
+      query: ({ paperId, model, refresh }) => ({
         url: `/papers/${paperId}/key-points`,
         method: "POST",
-        body: model ? { model } : {},
+        body: { ...(model && { model }), ...(refresh !== undefined && { refresh }) },
       }),
       transformResponse: (response: {
         data: { keyPoints: string[] };
