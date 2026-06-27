@@ -222,6 +222,7 @@ export type WorkspaceWhereInput = {
   activities?: Prisma.ActivityLogListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   activityLogEntries?: Prisma.ActivityLogEntryListRelationFilter
+  aiContextCaches?: Prisma.AIContextCacheListRelationFilter
   settings?: Prisma.XOR<Prisma.WorkspaceSettingsNullableScalarRelationFilter, Prisma.WorkspaceSettingsWhereInput> | null
   Subscription?: Prisma.SubscriptionListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
@@ -245,6 +246,7 @@ export type WorkspaceOrderByWithRelationInput = {
   activities?: Prisma.ActivityLogOrderByRelationAggregateInput
   discussionThreads?: Prisma.DiscussionThreadOrderByRelationAggregateInput
   activityLogEntries?: Prisma.ActivityLogEntryOrderByRelationAggregateInput
+  aiContextCaches?: Prisma.AIContextCacheOrderByRelationAggregateInput
   settings?: Prisma.WorkspaceSettingsOrderByWithRelationInput
   Subscription?: Prisma.SubscriptionOrderByRelationAggregateInput
   UsageEvent?: Prisma.UsageEventOrderByRelationAggregateInput
@@ -271,6 +273,7 @@ export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
   activities?: Prisma.ActivityLogListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   activityLogEntries?: Prisma.ActivityLogEntryListRelationFilter
+  aiContextCaches?: Prisma.AIContextCacheListRelationFilter
   settings?: Prisma.XOR<Prisma.WorkspaceSettingsNullableScalarRelationFilter, Prisma.WorkspaceSettingsWhereInput> | null
   Subscription?: Prisma.SubscriptionListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
@@ -323,6 +326,7 @@ export type WorkspaceCreateInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -345,6 +349,7 @@ export type WorkspaceUncheckedCreateInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -367,6 +372,7 @@ export type WorkspaceUpdateInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -389,6 +395,7 @@ export type WorkspaceUncheckedUpdateInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -601,6 +608,22 @@ export type WorkspaceUpdateOneRequiredWithoutCollectionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutCollectionsInput, Prisma.WorkspaceUpdateWithoutCollectionsInput>, Prisma.WorkspaceUncheckedUpdateWithoutCollectionsInput>
 }
 
+export type WorkspaceCreateNestedOneWithoutAiContextCachesInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedCreateWithoutAiContextCachesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutAiContextCachesInput
+  connect?: Prisma.WorkspaceWhereUniqueInput
+}
+
+export type WorkspaceUpdateOneWithoutAiContextCachesNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedCreateWithoutAiContextCachesInput>
+  connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutAiContextCachesInput
+  upsert?: Prisma.WorkspaceUpsertWithoutAiContextCachesInput
+  disconnect?: Prisma.WorkspaceWhereInput | boolean
+  delete?: Prisma.WorkspaceWhereInput | boolean
+  connect?: Prisma.WorkspaceWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkspaceUpdateToOneWithWhereWithoutAiContextCachesInput, Prisma.WorkspaceUpdateWithoutAiContextCachesInput>, Prisma.WorkspaceUncheckedUpdateWithoutAiContextCachesInput>
+}
+
 export type WorkspaceCreateNestedOneWithoutSubscriptionInput = {
   create?: Prisma.XOR<Prisma.WorkspaceCreateWithoutSubscriptionInput, Prisma.WorkspaceUncheckedCreateWithoutSubscriptionInput>
   connectOrCreate?: Prisma.WorkspaceCreateOrConnectWithoutSubscriptionInput
@@ -697,6 +720,7 @@ export type WorkspaceCreateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -718,6 +742,7 @@ export type WorkspaceUncheckedCreateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -780,6 +805,7 @@ export type WorkspaceCreateWithoutMembersInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -801,6 +827,7 @@ export type WorkspaceUncheckedCreateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -838,6 +865,7 @@ export type WorkspaceUpdateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -859,6 +887,7 @@ export type WorkspaceUncheckedUpdateWithoutMembersInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -880,6 +909,7 @@ export type WorkspaceCreateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -901,6 +931,7 @@ export type WorkspaceUncheckedCreateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -938,6 +969,7 @@ export type WorkspaceUpdateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -959,6 +991,7 @@ export type WorkspaceUncheckedUpdateWithoutInvitationsInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -981,6 +1014,7 @@ export type WorkspaceCreateWithoutSettingsInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -1002,6 +1036,7 @@ export type WorkspaceUncheckedCreateWithoutSettingsInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1039,6 +1074,7 @@ export type WorkspaceUpdateWithoutSettingsInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1060,6 +1096,7 @@ export type WorkspaceUncheckedUpdateWithoutSettingsInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1080,6 +1117,7 @@ export type WorkspaceCreateWithoutPapersInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -1101,6 +1139,7 @@ export type WorkspaceUncheckedCreateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -1138,6 +1177,7 @@ export type WorkspaceUpdateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1159,6 +1199,7 @@ export type WorkspaceUncheckedUpdateWithoutPapersInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1180,6 +1221,7 @@ export type WorkspaceCreateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -1201,6 +1243,7 @@ export type WorkspaceUncheckedCreateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -1238,6 +1281,7 @@ export type WorkspaceUpdateWithoutCollectionsInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1255,6 +1299,111 @@ export type WorkspaceUncheckedUpdateWithoutCollectionsInput = {
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
   invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+  Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
+  UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceCreateWithoutAiContextCachesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  owner: Prisma.UserCreateNestedOneWithoutWorkspacesOwnedInput
+  members?: Prisma.WorkspaceMemberCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationCreateNestedManyWithoutWorkspaceInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutWorkspaceInput
+  papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+  Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
+  UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceUncheckedCreateWithoutAiContextCachesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  ownerId: string
+  color?: string
+  visibility?: $Enums.WorkspaceVisibility
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  members?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutWorkspaceInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutWorkspaceInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutWorkspaceInput
+  papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+  Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
+  UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
+}
+
+export type WorkspaceCreateOrConnectWithoutAiContextCachesInput = {
+  where: Prisma.WorkspaceWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedCreateWithoutAiContextCachesInput>
+}
+
+export type WorkspaceUpsertWithoutAiContextCachesInput = {
+  update: Prisma.XOR<Prisma.WorkspaceUpdateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedUpdateWithoutAiContextCachesInput>
+  create: Prisma.XOR<Prisma.WorkspaceCreateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedCreateWithoutAiContextCachesInput>
+  where?: Prisma.WorkspaceWhereInput
+}
+
+export type WorkspaceUpdateToOneWithWhereWithoutAiContextCachesInput = {
+  where?: Prisma.WorkspaceWhereInput
+  data: Prisma.XOR<Prisma.WorkspaceUpdateWithoutAiContextCachesInput, Prisma.WorkspaceUncheckedUpdateWithoutAiContextCachesInput>
+}
+
+export type WorkspaceUpdateWithoutAiContextCachesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  owner?: Prisma.UserUpdateOneRequiredWithoutWorkspacesOwnedNestedInput
+  members?: Prisma.WorkspaceMemberUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUpdateManyWithoutWorkspaceNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutWorkspaceNestedInput
+  papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+  Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
+  UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
+}
+
+export type WorkspaceUncheckedUpdateWithoutAiContextCachesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  visibility?: Prisma.EnumWorkspaceVisibilityFieldUpdateOperationsInput | $Enums.WorkspaceVisibility
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  members?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutWorkspaceNestedInput
+  invitations?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutWorkspaceNestedInput
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1281,6 +1430,7 @@ export type WorkspaceCreateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
 }
@@ -1302,6 +1452,7 @@ export type WorkspaceUncheckedCreateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1339,6 +1490,7 @@ export type WorkspaceUpdateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1360,6 +1512,7 @@ export type WorkspaceUncheckedUpdateWithoutSubscriptionInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1381,6 +1534,7 @@ export type WorkspaceCreateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
 }
@@ -1402,6 +1556,7 @@ export type WorkspaceUncheckedCreateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
 }
@@ -1439,6 +1594,7 @@ export type WorkspaceUpdateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1460,6 +1616,7 @@ export type WorkspaceUncheckedUpdateWithoutUsageEventInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
 }
@@ -1480,6 +1637,7 @@ export type WorkspaceCreateWithoutActivitiesInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -1501,6 +1659,7 @@ export type WorkspaceUncheckedCreateWithoutActivitiesInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -1538,6 +1697,7 @@ export type WorkspaceUpdateWithoutActivitiesInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1559,6 +1719,7 @@ export type WorkspaceUncheckedUpdateWithoutActivitiesInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1580,6 +1741,7 @@ export type WorkspaceCreateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -1601,6 +1763,7 @@ export type WorkspaceUncheckedCreateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -1638,6 +1801,7 @@ export type WorkspaceUpdateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1659,6 +1823,7 @@ export type WorkspaceUncheckedUpdateWithoutDiscussionThreadsInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1680,6 +1845,7 @@ export type WorkspaceCreateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutWorkspaceInput
@@ -1701,6 +1867,7 @@ export type WorkspaceUncheckedCreateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUncheckedCreateNestedManyWithoutWorkspaceInput
   activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutWorkspaceInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutWorkspaceInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutWorkspaceInput
   settings?: Prisma.WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
   Subscription?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutWorkspaceInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutWorkspaceInput
@@ -1738,6 +1905,7 @@ export type WorkspaceUpdateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1759,6 +1927,7 @@ export type WorkspaceUncheckedUpdateWithoutActivityLogEntriesInput = {
   papers?: Prisma.PaperUncheckedUpdateManyWithoutWorkspaceNestedInput
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1791,6 +1960,7 @@ export type WorkspaceUpdateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutWorkspaceNestedInput
@@ -1812,6 +1982,7 @@ export type WorkspaceUncheckedUpdateWithoutOwnerInput = {
   activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutWorkspaceNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutWorkspaceNestedInput
   activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutWorkspaceNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutWorkspaceNestedInput
   settings?: Prisma.WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
   Subscription?: Prisma.SubscriptionUncheckedUpdateManyWithoutWorkspaceNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutWorkspaceNestedInput
@@ -1841,6 +2012,7 @@ export type WorkspaceCountOutputType = {
   activities: number
   discussionThreads: number
   activityLogEntries: number
+  aiContextCaches: number
   Subscription: number
   UsageEvent: number
 }
@@ -1853,6 +2025,7 @@ export type WorkspaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   activities?: boolean | WorkspaceCountOutputTypeCountActivitiesArgs
   discussionThreads?: boolean | WorkspaceCountOutputTypeCountDiscussionThreadsArgs
   activityLogEntries?: boolean | WorkspaceCountOutputTypeCountActivityLogEntriesArgs
+  aiContextCaches?: boolean | WorkspaceCountOutputTypeCountAiContextCachesArgs
   Subscription?: boolean | WorkspaceCountOutputTypeCountSubscriptionArgs
   UsageEvent?: boolean | WorkspaceCountOutputTypeCountUsageEventArgs
 }
@@ -1919,6 +2092,13 @@ export type WorkspaceCountOutputTypeCountActivityLogEntriesArgs<ExtArgs extends 
 /**
  * WorkspaceCountOutputType without action
  */
+export type WorkspaceCountOutputTypeCountAiContextCachesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AIContextCacheWhereInput
+}
+
+/**
+ * WorkspaceCountOutputType without action
+ */
 export type WorkspaceCountOutputTypeCountSubscriptionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SubscriptionWhereInput
 }
@@ -1949,6 +2129,7 @@ export type WorkspaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   activities?: boolean | Prisma.Workspace$activitiesArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Workspace$discussionThreadsArgs<ExtArgs>
   activityLogEntries?: boolean | Prisma.Workspace$activityLogEntriesArgs<ExtArgs>
+  aiContextCaches?: boolean | Prisma.Workspace$aiContextCachesArgs<ExtArgs>
   settings?: boolean | Prisma.Workspace$settingsArgs<ExtArgs>
   Subscription?: boolean | Prisma.Workspace$SubscriptionArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Workspace$UsageEventArgs<ExtArgs>
@@ -2003,6 +2184,7 @@ export type WorkspaceInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   activities?: boolean | Prisma.Workspace$activitiesArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Workspace$discussionThreadsArgs<ExtArgs>
   activityLogEntries?: boolean | Prisma.Workspace$activityLogEntriesArgs<ExtArgs>
+  aiContextCaches?: boolean | Prisma.Workspace$aiContextCachesArgs<ExtArgs>
   settings?: boolean | Prisma.Workspace$settingsArgs<ExtArgs>
   Subscription?: boolean | Prisma.Workspace$SubscriptionArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Workspace$UsageEventArgs<ExtArgs>
@@ -2026,6 +2208,7 @@ export type $WorkspacePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     activities: Prisma.$ActivityLogPayload<ExtArgs>[]
     discussionThreads: Prisma.$DiscussionThreadPayload<ExtArgs>[]
     activityLogEntries: Prisma.$ActivityLogEntryPayload<ExtArgs>[]
+    aiContextCaches: Prisma.$AIContextCachePayload<ExtArgs>[]
     settings: Prisma.$WorkspaceSettingsPayload<ExtArgs> | null
     Subscription: Prisma.$SubscriptionPayload<ExtArgs>[]
     UsageEvent: Prisma.$UsageEventPayload<ExtArgs>[]
@@ -2442,6 +2625,7 @@ export interface Prisma__WorkspaceClient<T, Null = never, ExtArgs extends runtim
   activities<T extends Prisma.Workspace$activitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionThreads<T extends Prisma.Workspace$discussionThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$discussionThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activityLogEntries<T extends Prisma.Workspace$activityLogEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$activityLogEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ActivityLogEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiContextCaches<T extends Prisma.Workspace$aiContextCachesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$aiContextCachesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIContextCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   settings<T extends Prisma.Workspace$settingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$settingsArgs<ExtArgs>>): Prisma.Prisma__WorkspaceSettingsClient<runtime.Types.Result.GetResult<Prisma.$WorkspaceSettingsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   Subscription<T extends Prisma.Workspace$SubscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$SubscriptionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   UsageEvent<T extends Prisma.Workspace$UsageEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workspace$UsageEventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3049,6 +3233,30 @@ export type Workspace$activityLogEntriesArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.ActivityLogEntryScalarFieldEnum | Prisma.ActivityLogEntryScalarFieldEnum[]
+}
+
+/**
+ * Workspace.aiContextCaches
+ */
+export type Workspace$aiContextCachesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AIContextCache
+   */
+  select?: Prisma.AIContextCacheSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AIContextCache
+   */
+  omit?: Prisma.AIContextCacheOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AIContextCacheInclude<ExtArgs> | null
+  where?: Prisma.AIContextCacheWhereInput
+  orderBy?: Prisma.AIContextCacheOrderByWithRelationInput | Prisma.AIContextCacheOrderByWithRelationInput[]
+  cursor?: Prisma.AIContextCacheWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AIContextCacheScalarFieldEnum | Prisma.AIContextCacheScalarFieldEnum[]
 }
 
 /**
