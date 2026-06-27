@@ -254,6 +254,7 @@ model Workspace {
   // New Phase 2 features
   discussionThreads  DiscussionThread[]
   activityLogEntries ActivityLogEntry[]
+  aiContextCaches    AIContextCache[]
 
   // Phase 5 - denormalized color and visibility for fast list/sort without settings join
   color      String              @default("blue")
@@ -397,6 +398,9 @@ model Paper {
   aiInsightThreads  AIInsightThread[]
   aiInsightMessages AIInsightMessage[]
   researchNotes     ResearchNote[]
+  aiKeyPoints       AIKeyPoint[]
+  aiMetadata        AIMetadata?
+  aiContextCaches   AIContextCache[]
 
   // New Phase 2 features
   citationExports   CitationExport[]
@@ -765,6 +769,78 @@ model AIProvider {
   @@unique([provider, model])
   @@index([enabled, displayOrder])
   @@index([isDefault])
+}
+
+// Phase 10 — Persisted AI Key Points extracted from papers.
+// Caches key findings/claims so they're reused across page loads
+// instead of being regenerated on every click.
+model AIKeyPoint {
+  id        String   @id @default(uuid())
+  paperId   String
+  content   String
+  category  String?  // "claim" | "finding" | "methodology" | "limitation" | "contribution"
+  order     Int
+  model     String?
+  tokensUsed Int?
+  paper     Paper    @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@unique([paperId, order])
+  @@index([paperId, isDeleted])
+}
+
+// Phase 10 — AI-generated / improved paper metadata.
+// Separate from Paper.metadata JSONB for typed access, avoiding
+// the "WHERE metadata->>'aiTitle' IS NULL" anti-pattern.
+// User can accept, modify, or reject AI suggestions here.
+model AIMetadata {
+  id              String   @id @default(uuid())
+  paperId         String
+  title           String?  // AI-improved title
+  abstract        String?  // AI-generated abstract
+  keywords        String[]
+  tags            String[]
+  researchDomain  String?  // "computer-science" | "biology" etc.
+  publicationType String?  // "journal" | "conference" | "preprint" | "thesis"
+  readingLevel    String?  // "beginner" | "intermediate" | "advanced"
+  methodology     String?
+  researchQuestions String[]
+  contributions   String[] 
+  limitations     String[]
+  futureWork      String[]
+  model           String?
+  tokensUsed      Int?
+  paper           Paper    @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isDeleted       Boolean  @default(false)
+
+  @@unique([paperId])
+}
+
+// Phase 10 — Generic AI context cache.
+// Stores parsed text, structured document representations, and other
+// pre-processed content so downstream AI features don't re-read / re-chunk
+// the same paper text. Keeps token usage predictable.
+model AIContextCache {
+  id          String   @id @default(uuid())
+  paperId     String?
+  workspaceId String?
+  contentType String   // "parsed_text" | "structured_doc" | "chunks_index" | "summary_snapshot"
+  content     String
+  tokenCount  Int?
+  model       String?
+  expiresAt   DateTime?
+  paper       Paper?   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paperId, contentType])
+  @@index([workspaceId, contentType])
+  @@index([expiresAt])
 }
 
 model Plan {
