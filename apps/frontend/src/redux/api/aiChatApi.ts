@@ -30,6 +30,7 @@ interface ConversationResponse {
 interface CreateConversationRequest {
   title: string;
   model: string;
+  context?: { type: string; id?: string; title?: string };
 }
 
 interface SendMessageRequest {
