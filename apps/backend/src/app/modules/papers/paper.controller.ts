@@ -1016,6 +1016,101 @@ export const paperController = {
     }
   }),
 
+  // Phase 10 — AI Metadata Generation (title, authors, abstract, keywords, domain)
+  generateMetadata: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+
+    const params = getPaperParamsSchema.safeParse(req.params);
+    if (!params.success) {
+      throw createPaperError.validationFailed("Invalid paper ID");
+    }
+
+    const { id: paperId } = params.data;
+    const body = req.body || {};
+    const model = body.model as string | undefined;
+
+    const paperRecord = await paperService.getPaperForSummary(paperId);
+    if (!paperRecord) {
+      throw createPaperError.paperNotFound(paperId);
+    }
+
+    const hasAccess = await paperService.userHasSummaryAccess(
+      paperRecord,
+      authReq.user.id
+    );
+    if (!hasAccess) {
+      throw createPaperError.insufficientPermissions();
+    }
+
+    const source = await paperService.getSummarySourceText(
+      paperId,
+      paperRecord
+    );
+
+    if (!source.text || source.text.length < 50) {
+      throw new ApiError(400, "Paper has insufficient text content for metadata extraction");
+    }
+
+    try {
+      const metadata = await aiService.extractMetadata({
+        text: source.text,
+        originalTitle: (paperRecord as any).title,
+        existingMetadata: (paperRecord as any).metadata || {},
+        workspaceId: (paperRecord as any).workspaceId,
+        uploaderId: authReq.user.id,
+        timeoutMs: 15000,
+      });
+
+      if (!metadata || !metadata.metadata) {
+        throw new ApiError(500, "AI failed to generate metadata");
+      }
+
+      const md = metadata.metadata as Record<string, any>;
+
+      const aiMetadata = {
+        title: md.title || null,
+        abstract: md.abstract || null,
+        keywords: Array.isArray(md.keywords) ? md.keywords : [],
+        tags: Array.isArray(md.tags) ? md.tags : Array.isArray(md.keywords) ? md.keywords : [],
+        researchDomain: md.researchDomain || md.domain || null,
+        publicationType: md.publicationType || md.type || null,
+        readingLevel: md.readingLevel || md.level || null,
+        methodology: md.methodology || null,
+        researchQuestions: Array.isArray(md.researchQuestions) ? md.researchQuestions : [],
+        contributions: Array.isArray(md.contributions) ? md.contributions : [],
+        limitations: Array.isArray(md.limitations) ? md.limitations : [],
+        futureWork: Array.isArray(md.futureWork) ? md.futureWork : [],
+        model: model || metadata.provider || "default",
+      };
+
+      // Persist to AIMetadata table (upsert)
+      await prisma.aIMetadata.upsert({
+        where: { paperId },
+        create: { paperId, ...aiMetadata },
+        update: { ...aiMetadata },
+      });
+
+      // Also return authors for the edit form
+      const authors = Array.isArray(md.authors)
+        ? md.authors
+        : typeof md.authors === "string"
+          ? md.authors.split(/[,;]/).map((a: string) => a.trim()).filter(Boolean)
+          : [];
+
+      sendSuccessResponse(
+        res,
+        { ...aiMetadata, authors },
+        "Metadata generated successfully"
+      );
+    } catch (error) {
+      console.error("[PaperController] Metadata generation failed:", error);
+      if (error instanceof ApiError) throw error;
+      throw createPaperError.insightGenerationFailed(
+        error instanceof Error ? error.message : String(error)
+      );
+    }
+  }),
+
   // Get insight conversation history for a paper
   getInsightHistory: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
