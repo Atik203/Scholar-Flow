@@ -43,6 +43,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { useAIVisibility } from "@/lib/aiVisibilityContext";
+import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { showErrorToast } from "@/components/providers/ToastProvider";
 
 interface Message {
@@ -103,6 +104,7 @@ export function FloatingAiAssistant() {
   const sendingRef = useRef(false);
 
   const { showFloatingButton } = useAIVisibility();
+  const { currentContext } = useAiContext();
 
   const { data: providersData } = useGetAiProvidersQuery();
   const availableModels =
@@ -178,8 +180,11 @@ export function FloatingAiAssistant() {
   const startNewChat = async (model = selectedModel) => {
     try {
       const conv = await createConversation({
-        title: "New Research Chat",
+        title: currentContext?.title
+          ? `${currentContext.type === "paper" ? "Paper" : "Workspace"}: ${currentContext.title.slice(0, 40)}`
+          : "New Research Chat",
         model,
+        context: currentContext || undefined,
       }).unwrap();
       setActiveConvId(conv.id);
       setLocalMessages([]);

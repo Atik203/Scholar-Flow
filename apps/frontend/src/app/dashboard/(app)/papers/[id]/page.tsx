@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation, useGenerateMetadataMutation } from "@/redux/api/paperApi";
 import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
+import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
@@ -27,6 +28,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
   const [pollProcessing, setPollProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const { setContext } = useAiContext();
   const { data: paper, isLoading, error } = useGetPaperQuery(resolvedParams.id, {
     pollingInterval: pollProcessing ? 3000 : 0,
   });
@@ -60,6 +62,13 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     if (!showPreview) setPreviewLoading(true);
   }, [showPreview]);
+
+  useEffect(() => {
+    if (paper) {
+      setContext({ type: "paper", id: paper.id, title: paper.title });
+    }
+    return () => { setContext(null); };
+  }, [paper, setContext]);
 
   useEffect(() => {
     if (paper?.processingStatus === "PROCESSING") {

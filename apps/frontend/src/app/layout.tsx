@@ -3,6 +3,7 @@ import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { BrowserCleanup } from "@/components/providers/BrowserCleanup";
 import { FloatingAiAssistant } from "@/components/ai-assistant/FloatingAiAssistant";
+import { AiContextProvider } from "@/components/ai-assistant/AiContextProvider";
 import { AIVisibilityProvider } from "@/lib/aiVisibilityContext";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -158,11 +159,13 @@ export default function RootLayout({
         <ReduxProvider>
           <AuthProvider>
             <ThemeProvider>
-              <ConditionalLayout>{children}</ConditionalLayout>
-              <ToastProvider />
-              <AIVisibilityProvider>
-                <FloatingAiAssistant />
-              </AIVisibilityProvider>
+              <AiContextProvider>
+                <ConditionalLayout>{children}</ConditionalLayout>
+                <ToastProvider />
+                <AIVisibilityProvider>
+                  <FloatingAiAssistant />
+                </AIVisibilityProvider>
+              </AiContextProvider>
             </ThemeProvider>
           </AuthProvider>
         </ReduxProvider>
