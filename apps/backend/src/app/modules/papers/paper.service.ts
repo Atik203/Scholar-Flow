@@ -697,9 +697,22 @@ export const paperService = {
     record: PaperSummaryRecord
   ): Promise<{
     text: string;
-    source: "chunks" | "content" | "abstract" | "metadata" | "empty";
+    source: "chunks" | "content" | "abstract" | "metadata" | "empty" | "cache";
     chunkCount: number;
   }> {
+    // Check AIContextCache first (token optimization)
+    const cached = await prisma.aIContextCache.findFirst({
+      where: { paperId, contentType: "parsed_text" },
+      select: { content: true },
+    });
+    if (cached?.content) {
+      return {
+        text: truncateText(cached.content, MAX_SUMMARY_SOURCE_LENGTH),
+        source: "cache",
+        chunkCount: 0,
+      };
+    }
+
     const chunks = await prisma.$queryRaw<Array<{ content: string }>>`
       SELECT content
       FROM "PaperChunk"
@@ -714,6 +727,16 @@ export const paperService = {
       .join("\n\n");
 
     if (chunkText) {
+      // Cache the parsed text for future use
+      await prisma.aIContextCache.create({
+        data: {
+          paperId,
+          contentType: "parsed_text",
+          content: truncateText(chunkText, MAX_SUMMARY_SOURCE_LENGTH),
+          tokenCount: Math.ceil(chunkText.length / 4),
+        },
+      }).catch(() => {}); // Silently fail if cache write fails
+
       return {
         text: truncateText(chunkText, MAX_SUMMARY_SOURCE_LENGTH),
         source: "chunks",
