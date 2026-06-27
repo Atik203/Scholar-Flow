@@ -1,6 +1,7 @@
 import prisma from "../../shared/prisma";
 import config from "../../config";
 import { aiService } from "../AI/ai.service";
+import { aiContextService } from "../AIContext/aiContext.service";
 import { aiProviderService } from "../AIProvider/aiProvider.service";
 import { AiError } from "../AI/ai.errors";
 import type { AiSummaryRequest } from "../AI/ai.types";
@@ -45,6 +46,28 @@ function estimateCost(
   const inputRate = resolved.inputCostPer1k ?? 0;
   const outputRate = resolved.outputCostPer1k ?? 0;
   return (inputTokens / 1000) * inputRate + (outputTokens / 1000) * outputRate;
+}
+
+async function buildContextMessages(
+  context: { type?: string; id?: string } | null | undefined,
+  userId: string
+): Promise<Array<{ role: "system"; content: string }>> {
+  if (!context?.type || !context?.id) return [];
+
+  try {
+    const resolved = await aiContextService.resolve({
+      type: context.type as "paper" | "workspace" | "dashboard",
+      id: context.id,
+      userId,
+    });
+    const { systemPrompt } = aiContextService.injectContextIntoSystemPrompt(
+      resolved,
+      "You are a knowledgeable research assistant. Use the context below to answer naturally."
+    );
+    return [{ role: "system", content: systemPrompt }];
+  } catch {
+    return [];
+  }
 }
 
 async function generateAiResponse(
@@ -178,16 +201,26 @@ export const aiConversationService = {
     return conv;
   },
 
-  async createConversation(userId: string, title?: string, model?: string) {
+  async createConversation(
+    userId: string,
+    title?: string,
+    model?: string,
+    context?: Record<string, unknown>
+  ) {
     return prisma.aIConversation.create({
-      data: { userId, title: title || "New Chat", model },
+      data: {
+        userId,
+        title: title || "New Chat",
+        model,
+        context: context as any,
+      },
     });
   },
 
   async sendMessage(conversationId: string, userId: string, content: string) {
     const conv = await prisma.aIConversation.findUnique({
       where: { id: conversationId },
-      select: { userId: true },
+      select: { userId: true, model: true, context: true },
     });
     if (!conv) throw new AiError(404, "Conversation not found");
     if (conv.userId !== userId) throw new AiError(403, "Forbidden");
@@ -208,8 +241,16 @@ export const aiConversationService = {
     });
     if (!updatedConv) throw new Error("Conversation not found");
 
+    // Inject page context as system message if available
+    const contextMessages = await buildContextMessages(conv.context as any, userId);
+
+    const allMessages = [
+      ...contextMessages,
+      ...((updatedConv.messages || []).map((m) => ({ role: m.role, content: m.content }))),
+    ];
+
     const aiResp = await generateAiResponse(
-      [...(updatedConv.messages || []).map((m: { role: string; content: string }) => ({ role: m.role, content: m.content })), { role: "user", content }],
+      allMessages.map((m) => ({ role: m.role, content: m.content })),
       updatedConv.model ?? undefined
     );
 
@@ -250,7 +291,7 @@ export const aiConversationService = {
   ) {
     const conv = await prisma.aIConversation.findUnique({
       where: { id: conversationId },
-      select: { userId: true, model: true },
+      select: { userId: true, model: true, context: true },
     });
     if (!conv) throw new AiError(404, "Conversation not found");
     if (conv.userId !== userId) throw new AiError(403, "Forbidden");
@@ -271,11 +312,17 @@ export const aiConversationService = {
     });
     if (!updatedConv) throw new Error("Conversation not found");
 
-    const msgs = (updatedConv.messages || []).map((m: { role: string; content: string }) => ({
+    // Inject page context as system message if available
+    const contextMessages = await buildContextMessages(conv.context as any, userId);
+    const allMessages = [
+      ...contextMessages,
+      ...((updatedConv.messages || []).map((m) => ({ role: m.role, content: m.content }))),
+    ];
+
+    const msgs = allMessages.map((m: { role: string; content: string }) => ({
       role: m.role as "user" | "assistant" | "system",
       content: m.content,
     }));
-    msgs.push({ role: "user", content });
 
     const tokens: string[] = [];
     const result = await streamFromProvider(
