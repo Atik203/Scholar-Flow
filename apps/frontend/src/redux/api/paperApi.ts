@@ -636,6 +636,33 @@ export const paperApi = apiSlice.injectEndpoints({
       }) => response.data,
     }),
 
+    // AI Metadata Generation — extract title/authors/abstract/keywords/domain
+    generateMetadata: builder.mutation<
+      {
+        title?: string;
+        abstract?: string;
+        keywords: string[];
+        tags: string[];
+        authors: string[];
+        researchDomain?: string;
+        publicationType?: string;
+        readingLevel?: string;
+        methodology?: string;
+        researchQuestions: string[];
+        contributions: string[];
+        limitations: string[];
+        futureWork: string[];
+      },
+      { paperId: string; model?: string }
+    >({
+      query: ({ paperId, model }) => ({
+        url: `/papers/${paperId}/generate-metadata`,
+        method: "POST",
+        body: model ? { model } : {},
+      }),
+      transformResponse: (response: { data: any }) => response.data,
+    }),
+
     // AI provider status — returns available providers + models for dynamic UI
     getAiProviders: builder.query<AiProvidersResponse, void>({
       query: () => "/papers/ai/providers",
@@ -712,4 +739,5 @@ export const {
   useGetPaperVersionQuery,
   useRestorePaperVersionMutation,
   useExtractKeyPointsMutation,
+  useGenerateMetadataMutation,
 } = paperApi;
