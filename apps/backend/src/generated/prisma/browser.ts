@@ -133,6 +133,21 @@ export type AIConversationMessage = Prisma.AIConversationMessageModel
  */
 export type AIProvider = Prisma.AIProviderModel
 /**
+ * Model AIKeyPoint
+ * 
+ */
+export type AIKeyPoint = Prisma.AIKeyPointModel
+/**
+ * Model AIMetadata
+ * 
+ */
+export type AIMetadata = Prisma.AIMetadataModel
+/**
+ * Model AIContextCache
+ * 
+ */
+export type AIContextCache = Prisma.AIContextCacheModel
+/**
  * Model Plan
  * 
  */
