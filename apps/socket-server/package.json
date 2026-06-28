@@ -1,6 +1,6 @@
 {
   "name": "@scholar-flow/socket-server",
-  "version": "1.3.0-rc1",
+  "version": "1.3.1",
   "private": true,
   "description": "Lightweight Socket.io server for real-time features (Render Free deployment)",
   "main": "dist/server.js",
