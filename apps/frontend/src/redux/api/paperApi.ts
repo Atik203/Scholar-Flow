@@ -621,19 +621,46 @@ export const paperApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    // Phase 10 — AI Key Points extraction
+    // Phase 10 — AI Key Points extraction (persisted)
     extractKeyPoints: builder.mutation<
-      { keyPoints: string[] },
-      { paperId: string; model?: string }
+      { keyPoints: string[]; persisted?: boolean },
+      { paperId: string; model?: string; refresh?: boolean }
     >({
-      query: ({ paperId, model }) => ({
+      query: ({ paperId, model, refresh }) => ({
         url: `/papers/${paperId}/key-points`,
         method: "POST",
-        body: model ? { model } : {},
+        body: { ...(model && { model }), ...(refresh !== undefined && { refresh }) },
       }),
       transformResponse: (response: {
         data: { keyPoints: string[] };
       }) => response.data,
+    }),
+
+    // AI Metadata Generation — extract title/authors/abstract/keywords/domain
+    generateMetadata: builder.mutation<
+      {
+        title?: string;
+        abstract?: string;
+        keywords: string[];
+        tags: string[];
+        authors: string[];
+        researchDomain?: string;
+        publicationType?: string;
+        readingLevel?: string;
+        methodology?: string;
+        researchQuestions: string[];
+        contributions: string[];
+        limitations: string[];
+        futureWork: string[];
+      },
+      { paperId: string; model?: string }
+    >({
+      query: ({ paperId, model }) => ({
+        url: `/papers/${paperId}/generate-metadata`,
+        method: "POST",
+        body: model ? { model } : {},
+      }),
+      transformResponse: (response: { data: any }) => response.data,
     }),
 
     // AI provider status — returns available providers + models for dynamic UI
@@ -712,4 +739,5 @@ export const {
   useGetPaperVersionQuery,
   useRestorePaperVersionMutation,
   useExtractKeyPointsMutation,
+  useGenerateMetadataMutation,
 } = paperApi;
