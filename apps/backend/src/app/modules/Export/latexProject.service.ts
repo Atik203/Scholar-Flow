@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import prisma from "../../shared/prisma";
-import { v4 as uuidv4 } from "uuid";
 
 export interface LatexFileNode {
   id: string;
@@ -128,7 +128,7 @@ export const latexProjectService = {
 
     const project = getLatexProject(paper.metadata);
     const newFile: LatexFileNode = {
-      id: uuidv4(),
+      id: randomUUID(),
       name,
       content: content || `% ${name}\n`,
       parentId: parentId ?? null,
