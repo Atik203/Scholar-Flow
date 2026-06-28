@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.3.0--rc1-blue)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.1-blue)](./CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
@@ -12,6 +12,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 📦 Recent Releases
 
+- **1.3.1 (2026-06-28)** — AI architecture overhaul: context persistence, metadata generation, context-aware chat, inline paper Q&A, token optimization, Vercel crash fix (uuid ESM + outputDirectory). See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.0-rc1 (2026-10-01)** — Phase 10: AI assistant, WebSocket collab, editor templates, paper upload/import overhaul, smart URL import (IEEE/ResearchGate/Google Scholar/Semantic Scholar). See [CHANGELOG.md](./CHANGELOG.md).
 - **1.2.9** — Phase 9: WCAG 2.1 AA, code splitting, 8 final pages, invitation backend.
 - **1.2.8** — Phase 8: Architecture stabilization, 14 new pages, removed dead code.
