@@ -6,12 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation } from "@/redux/api/paperApi";
+import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation, useGenerateMetadataMutation } from "@/redux/api/paperApi";
 import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
+import { AiPaperChat } from "@/components/papers/AiPaperChat";
+import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, Bot, Calendar, Download, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Trash2, Users, X,
+  ArrowLeft, Bot, Calendar, Download, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Sparkles, Trash2, Users, X,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -27,12 +29,14 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
   const [pollProcessing, setPollProcessing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const { setContext } = useAiContext();
   const { data: paper, isLoading, error } = useGetPaperQuery(resolvedParams.id, {
     pollingInterval: pollProcessing ? 3000 : 0,
   });
   const [updateMetadata] = useUpdatePaperMetadataMutation();
   const [deletePaper] = useDeletePaperMutation();
   const [processPaper, { isLoading: isProcessing }] = useProcessPDFMutation();
+  const [generateMetadata, { isLoading: isGeneratingMetadata }] = useGenerateMetadataMutation();
   const { data: previewUrlData } = useGetPaperPreviewUrlQuery(resolvedParams.id, {
     skip: !showPreview,
   });
@@ -59,6 +63,13 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     if (!showPreview) setPreviewLoading(true);
   }, [showPreview]);
+
+  useEffect(() => {
+    if (paper) {
+      setContext({ type: "paper", id: paper.id, title: paper.title });
+    }
+    return () => { setContext(null); };
+  }, [paper, setContext]);
 
   useEffect(() => {
     if (paper?.processingStatus === "PROCESSING") {
@@ -90,6 +101,17 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
       }).unwrap();
       showSuccessToast("Paper metadata updated");
       setIsEditing(false);
+    } catch (e: unknown) { showApiErrorToast(e as any); }
+  };
+
+  const handleGenerateMetadata = async () => {
+    try {
+      const result = await generateMetadata({ paperId: paper.id }).unwrap();
+      if (result.title) setEditTitle(result.title);
+      if (result.authors?.length) setEditAuthors(result.authors.join(", "));
+      if (result.abstract) setEditAbstract(result.abstract);
+      if (result.tags?.length) setEditTags(result.tags.join(", "));
+      showSuccessToast("AI metadata generated — review and save");
     } catch (e: unknown) { showApiErrorToast(e as any); }
   };
 
@@ -131,6 +153,10 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
                 <div className="flex gap-2">
                   <Button onClick={handleSaveMetadata}><Save className="mr-2 h-4 w-4" />Save</Button>
                   <Button variant="outline" onClick={() => setIsEditing(false)}><X className="mr-2 h-4 w-4" />Cancel</Button>
+                  <Button variant="outline" onClick={handleGenerateMetadata} disabled={isGeneratingMetadata}>
+                    {isGeneratingMetadata ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                    {isGeneratingMetadata ? "Generating..." : "Generate with AI"}
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -201,6 +227,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* AI Key Points */}
       {showAiSummary && <KeyPointsCard paperId={paper.id} />}
+
+      {/* Inline Paper Q&A */}
+      {showAiSummary && <AiPaperChat paperId={paper.id} />}
 
       {/* PDF Preview */}
       {showPreview && previewUrlData?.data?.url && (

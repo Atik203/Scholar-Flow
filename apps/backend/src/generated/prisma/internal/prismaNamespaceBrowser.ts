@@ -74,6 +74,9 @@ export const ModelName = {
   AIConversation: 'AIConversation',
   AIConversationMessage: 'AIConversationMessage',
   AIProvider: 'AIProvider',
+  AIKeyPoint: 'AIKeyPoint',
+  AIMetadata: 'AIMetadata',
+  AIContextCache: 'AIContextCache',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -526,6 +529,63 @@ export const AIProviderScalarFieldEnum = {
 } as const
 
 export type AIProviderScalarFieldEnum = (typeof AIProviderScalarFieldEnum)[keyof typeof AIProviderScalarFieldEnum]
+
+
+export const AIKeyPointScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  content: 'content',
+  category: 'category',
+  order: 'order',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIKeyPointScalarFieldEnum = (typeof AIKeyPointScalarFieldEnum)[keyof typeof AIKeyPointScalarFieldEnum]
+
+
+export const AIMetadataScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  title: 'title',
+  abstract: 'abstract',
+  keywords: 'keywords',
+  tags: 'tags',
+  researchDomain: 'researchDomain',
+  publicationType: 'publicationType',
+  readingLevel: 'readingLevel',
+  methodology: 'methodology',
+  researchQuestions: 'researchQuestions',
+  contributions: 'contributions',
+  limitations: 'limitations',
+  futureWork: 'futureWork',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIMetadataScalarFieldEnum = (typeof AIMetadataScalarFieldEnum)[keyof typeof AIMetadataScalarFieldEnum]
+
+
+export const AIContextCacheScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  workspaceId: 'workspaceId',
+  contentType: 'contentType',
+  content: 'content',
+  tokenCount: 'tokenCount',
+  model: 'model',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIContextCacheScalarFieldEnum = (typeof AIContextCacheScalarFieldEnum)[keyof typeof AIContextCacheScalarFieldEnum]
 
 
 export const PlanScalarFieldEnum = {

@@ -24,11 +24,12 @@ router.post(
   rateLimiter as any,
   catchAsync(async (req, res) => {
     const authReq = req as AuthenticatedRequest;
-    const { title, model } = req.body || {};
+    const { title, model, context } = req.body || {};
     const conv = await aiConversationService.createConversation(
       authReq.user!.id,
       title,
-      model
+      model,
+      context
     );
     sendSuccessResponse(res, conv, "Conversation created");
   })

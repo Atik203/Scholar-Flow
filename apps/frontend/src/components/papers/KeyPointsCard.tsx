@@ -17,7 +17,7 @@ import {
   BookOpen,
   Brain,
 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 interface KeyPointsCardProps {
   paperId: string;
@@ -86,16 +86,39 @@ function CopyButton({ text }: { text: string }) {
 
 export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
   const [keyPoints, setKeyPoints] = useState<string[] | null>(null);
+  const [persisted, setPersisted] = useState(false);
   const [extract, { isLoading }] = useExtractKeyPointsMutation();
   const { data: providersData } = useGetAiProvidersQuery();
   const defaultModel = providersData?.defaultModel;
 
-  const handleExtract = async () => {
+  // Load persisted key points on mount
+  useEffect(() => {
+    const loadKeyPoints = async () => {
+      try {
+        const result = await extract({
+          paperId,
+          refresh: false,
+        }).unwrap();
+        if (result.keyPoints && result.keyPoints.length > 0) {
+          setKeyPoints(result.keyPoints);
+          setPersisted(result.persisted || false);
+        }
+      } catch {
+        // No key points yet — user can generate
+      }
+    };
+    loadKeyPoints();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paperId]);
+
+  const handleExtract = async (regenerate = false) => {
     const result = await extract({
       paperId,
       model: defaultModel ?? undefined,
+      refresh: regenerate || !persisted,
     }).unwrap();
     setKeyPoints(result.keyPoints);
+    setPersisted(true);
   };
 
   const hasError =
@@ -117,9 +140,9 @@ export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
           </span>
         </CardTitle>
         <Button
-          variant={keyPoints ? "outline" : "default"}
+          variant={keyPoints && keyPoints.length > 0 ? "outline" : "default"}
           size="sm"
-          onClick={handleExtract}
+          onClick={() => handleExtract(true)}
           disabled={isLoading}
           className="gap-1.5"
         >
@@ -130,8 +153,8 @@ export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
           )}
           {isLoading
             ? "Analyzing..."
-            : keyPoints
-              ? "Refresh"
+            : keyPoints && keyPoints.length > 0
+              ? "Regenerate"
               : "Extract Key Points"}
         </Button>
       </CardHeader>
@@ -205,7 +228,7 @@ export function KeyPointsCard({ paperId }: KeyPointsCardProps) {
               variant="outline"
               size="sm"
               className="mt-3"
-              onClick={handleExtract}
+              onClick={() => handleExtract(true)}
             >
               <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
               Try Again

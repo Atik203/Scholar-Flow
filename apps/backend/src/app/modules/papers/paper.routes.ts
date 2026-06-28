@@ -174,6 +174,14 @@ paperRoutes.post(
   paperController.generateKeyPoints as any
 );
 
+// Phase 10 — AI Metadata Generation
+paperRoutes.post(
+  "/:id/generate-metadata",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.generateMetadata as any
+);
+
 // Editor-specific routes
 export const editorPaperRoutes: express.Router = express.Router();
 

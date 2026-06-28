@@ -407,6 +407,9 @@ export const ModelName = {
   AIConversation: 'AIConversation',
   AIConversationMessage: 'AIConversationMessage',
   AIProvider: 'AIProvider',
+  AIKeyPoint: 'AIKeyPoint',
+  AIMetadata: 'AIMetadata',
+  AIContextCache: 'AIContextCache',
   Plan: 'Plan',
   Subscription: 'Subscription',
   Payment: 'Payment',
@@ -452,7 +455,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "loginHistory" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "aIKeyPoint" | "aIMetadata" | "aIContextCache" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "loginHistory" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2155,6 +2158,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AIProviderCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AIProviderCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIKeyPoint: {
+      payload: Prisma.$AIKeyPointPayload<ExtArgs>
+      fields: Prisma.AIKeyPointFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIKeyPointFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIKeyPointFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        findFirst: {
+          args: Prisma.AIKeyPointFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIKeyPointFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        findMany: {
+          args: Prisma.AIKeyPointFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>[]
+        }
+        create: {
+          args: Prisma.AIKeyPointCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        createMany: {
+          args: Prisma.AIKeyPointCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIKeyPointCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>[]
+        }
+        delete: {
+          args: Prisma.AIKeyPointDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        update: {
+          args: Prisma.AIKeyPointUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        deleteMany: {
+          args: Prisma.AIKeyPointDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIKeyPointUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIKeyPointUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>[]
+        }
+        upsert: {
+          args: Prisma.AIKeyPointUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIKeyPointPayload>
+        }
+        aggregate: {
+          args: Prisma.AIKeyPointAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIKeyPoint>
+        }
+        groupBy: {
+          args: Prisma.AIKeyPointGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIKeyPointGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIKeyPointCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIKeyPointCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIMetadata: {
+      payload: Prisma.$AIMetadataPayload<ExtArgs>
+      fields: Prisma.AIMetadataFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIMetadataFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIMetadataFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        findFirst: {
+          args: Prisma.AIMetadataFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIMetadataFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        findMany: {
+          args: Prisma.AIMetadataFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>[]
+        }
+        create: {
+          args: Prisma.AIMetadataCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        createMany: {
+          args: Prisma.AIMetadataCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIMetadataCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>[]
+        }
+        delete: {
+          args: Prisma.AIMetadataDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        update: {
+          args: Prisma.AIMetadataUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        deleteMany: {
+          args: Prisma.AIMetadataDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIMetadataUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIMetadataUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>[]
+        }
+        upsert: {
+          args: Prisma.AIMetadataUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIMetadataPayload>
+        }
+        aggregate: {
+          args: Prisma.AIMetadataAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIMetadata>
+        }
+        groupBy: {
+          args: Prisma.AIMetadataGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIMetadataGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIMetadataCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIMetadataCountAggregateOutputType> | number
+        }
+      }
+    }
+    AIContextCache: {
+      payload: Prisma.$AIContextCachePayload<ExtArgs>
+      fields: Prisma.AIContextCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AIContextCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AIContextCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        findFirst: {
+          args: Prisma.AIContextCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AIContextCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        findMany: {
+          args: Prisma.AIContextCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>[]
+        }
+        create: {
+          args: Prisma.AIContextCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        createMany: {
+          args: Prisma.AIContextCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AIContextCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>[]
+        }
+        delete: {
+          args: Prisma.AIContextCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        update: {
+          args: Prisma.AIContextCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.AIContextCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AIContextCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AIContextCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.AIContextCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AIContextCachePayload>
+        }
+        aggregate: {
+          args: Prisma.AIContextCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAIContextCache>
+        }
+        groupBy: {
+          args: Prisma.AIContextCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIContextCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AIContextCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AIContextCacheCountAggregateOutputType> | number
         }
       }
     }
@@ -4827,6 +5052,63 @@ export const AIProviderScalarFieldEnum = {
 export type AIProviderScalarFieldEnum = (typeof AIProviderScalarFieldEnum)[keyof typeof AIProviderScalarFieldEnum]
 
 
+export const AIKeyPointScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  content: 'content',
+  category: 'category',
+  order: 'order',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIKeyPointScalarFieldEnum = (typeof AIKeyPointScalarFieldEnum)[keyof typeof AIKeyPointScalarFieldEnum]
+
+
+export const AIMetadataScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  title: 'title',
+  abstract: 'abstract',
+  keywords: 'keywords',
+  tags: 'tags',
+  researchDomain: 'researchDomain',
+  publicationType: 'publicationType',
+  readingLevel: 'readingLevel',
+  methodology: 'methodology',
+  researchQuestions: 'researchQuestions',
+  contributions: 'contributions',
+  limitations: 'limitations',
+  futureWork: 'futureWork',
+  model: 'model',
+  tokensUsed: 'tokensUsed',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type AIMetadataScalarFieldEnum = (typeof AIMetadataScalarFieldEnum)[keyof typeof AIMetadataScalarFieldEnum]
+
+
+export const AIContextCacheScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  workspaceId: 'workspaceId',
+  contentType: 'contentType',
+  content: 'content',
+  tokenCount: 'tokenCount',
+  model: 'model',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AIContextCacheScalarFieldEnum = (typeof AIContextCacheScalarFieldEnum)[keyof typeof AIContextCacheScalarFieldEnum]
+
+
 export const PlanScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -6032,6 +6314,9 @@ export type GlobalOmitConfig = {
   aIConversation?: Prisma.AIConversationOmit
   aIConversationMessage?: Prisma.AIConversationMessageOmit
   aIProvider?: Prisma.AIProviderOmit
+  aIKeyPoint?: Prisma.AIKeyPointOmit
+  aIMetadata?: Prisma.AIMetadataOmit
+  aIContextCache?: Prisma.AIContextCacheOmit
   plan?: Prisma.PlanOmit
   subscription?: Prisma.SubscriptionOmit
   payment?: Prisma.PaymentOmit
