@@ -10,7 +10,6 @@
   },
   "installCommand": "cd ../.. && corepack enable && corepack yarn --version && corepack yarn install --immutable",
   "buildCommand": "cd ../.. && corepack enable && corepack yarn workspace @scholar-flow/backend db:generate && corepack yarn workspace @scholar-flow/backend build",
-  "outputDirectory": "dist",
   "functions": {
     "api/server.js": {
       "includeFiles": "dist/**"

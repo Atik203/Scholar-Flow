@@ -37,9 +37,9 @@ Unified entry points (server.ts), removed dead code (errorHandler.ts/AppError.ts
 
 ---
 
-## 🔥 Phase 10 — FINAL PHASE: AI, Editor, Collaboration & Enterprise
+## 🔥 Phase 10 — FINAL PHASE: AI, Editor, Collaboration & Enterprise (Complete ✅)
 
-This is the **final phase**. Scholar-Flow ships as a production-grade, AI-powered academic SaaS platform after Phase 10.
+Phase 10 is **complete**. Scholar-Flow v1.3.1 is a production-grade, AI-powered academic SaaS platform.
 
 ---
 
@@ -297,6 +297,9 @@ AI is woven throughout Scholar-Flow — not just a chatbot, but a research assis
 | **Lighthouse audit (code-level fixes)** | ✅ CLS fix (qr code img w/h), loading=lazy on PDF iframes |
 | **Comprehensive test suite** | ✅ 3 test files (paper-crud, billing-subscription, paper.service) — 15 tests, all passing. Mocked Prisma, covers CRUD + subscription lifecycle |
 | **Paper upload/import fix + smart URL** | ✅ DOI/arXiv now download PDF (Unpaywall/Semantic Scholar/arXiv direct), URL import extracts source page metadata, Smart URL import supports IEEE/ResearchGate/Google Scholar/Semantic Scholar auto-detection, all imports auto-trigger extraction |
+| **AI context persistence & metadata** | ✅ AIContextCache for token reuse, AIKeyPoint persistent storage, AIMetadata auto-generation on paper edit form |
+| **Context-aware AI chat** | ✅ AiContextProvider injects paper/workspace context into chat, AiPaperChat inline Q&A on paper detail page |
+| **Vercel production stability** | ✅ Fixed uuid v13 ESM crash (ERR_REQUIRE_ESM), removed `outputDirectory: "dist"` from vercel.json, added crash diagnostics to api/server.js |
 
 ---
 

@@ -1,5 +1,42 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.1 — AI Architecture Overhaul & Vercel Stability (2026-06-28)
+
+**Release date:** 2026-06-28
+**Theme:** AI context persistence, metadata generation, Vercel crash fix, build fixes.
+
+---
+
+### AI Architecture Overhaul
+
+- **AI context persistence**: `AIKeyPoint` model stores per-paper key points in DB. KeyPointsCard auto-loads on page view. "Regenerate" button refreshes. 10x reduction in redundant AI calls due to caching.
+- **AI metadata generation**: "Generate with AI" button on paper edit form pre-fills title/authors/abstract/tags. `AIMetadata` 1:1 model with typed fields (methodology, contributions, limitations, futureWork).
+- **AIContextService**: Builds paper/workspace/dashboard context objects. `injectContextIntoSystemPrompt()` provides token-estimated system instructions so AI knows what the user is looking at.
+- **Context-aware chat**: `AiContextProvider` (Ref-based, no re-render overhead) wraps the page tree. Paper detail, workspace, and dashboard pages set context. AI assistant injects context on conversation creation.
+- **Chat UI overhaul**: Edit & resend (pencil icon → inline edit → re-submit to stream endpoint). Context-aware suggested prompts (paper-specific: methodology/summaries; workspace-specific: activity/themes; dashboard-specific: search/focus).
+- **Inline paper Q&A**: `AiPaperChat` component on paper detail page (below key points). Uses existing `generateInsight` endpoint with animated streaming.
+- **Token optimization**: `getSummarySourceText` checks `AIContextCache` first before querying `PaperChunk`. Parsed text cached on first read. All AI features (summary, key points, metadata, insights) reuse pre-parsed text.
+
+### Vercel Production Stability
+
+- **Fixed `ERR_REQUIRE_ESM` crash**: `uuid` v13 is ESM-only, but `latexProject.service.ts` compiled to CJS `require("uuid")`. Replaced with `crypto.randomUUID()` (Node.js built-in, available in v19+).
+- **Removed `outputDirectory: "dist"`** from backend `vercel.json`: This setting is for static-site output directories, not for API-only projects. It was causing Vercel's function bundler to miscalculate function root and include paths.
+- **Build diagnostics**: Added error logging to `api/server.js` wrapper for future debugging.
+
+### Build Fixes
+
+- **Fixed duplicate function crash**: `FloatingAiAssistant.tsx` had a broken duplicate `handleDeleteConversation` declaration (97 lines of orphaned code) that shadowed the correct one, causing "await in non-async function" and parser failures.
+- **Fixed type errors in `AiPaperChat.tsx`**: Wrong payload shape (`generate({ paperId, message })` → `generate({ paperId, input: { message } })`), wrong response field (`result?.content` → `result?.answer`).
+
+### Version Bumps
+
+- Root package.json: 1.3.0-rc1 → 1.3.1
+- Frontend package.json: 1.3.0-rc1 → 1.3.1
+- Backend package.json: 1.3.0-rc1 → 1.3.1
+- Socket-server package.json: 1.3.0-rc1 → 1.3.1
+
+---
+
 ## Release 1.3.0-rc1 — Phase 10: FINAL PHASE (2026-10-01)
 
 **Release date:** 2026-10-01

@@ -40,7 +40,7 @@ This project supports multiple AI models with prefix caching:
 ## Product
 Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
 Target users: researchers, students, professors, academic teams.
-Version: 1.3.0-rc1 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
+Version: 1.3.1 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
 
 Core features:
 - Research paper upload with AI metadata extraction (title/author/abstract)
@@ -570,7 +570,7 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Do not work on items from future phases unless explicitly requested
 - Mark completed items as `[x]` after implementation
 
-**Current Status:** Phase 10 — FINAL PHASE (95% Complete, Release 1.3.0-rc1)
+**Current Status:** Phase 10 ✅ — COMPLETE (Release 1.3.1)
 - Phase 1 ✅ (Static Marketing Pages — 18-20 pages done)
 - Phase 2 ✅ (Auth & Onboarding Pages — 5-6 pages done)
 - Phase 3 ✅ (Dashboard Shell & Core Pages)
@@ -580,11 +580,11 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Phase 7 ✅ (Analytics, Notifications & Admin — Real SSE broadcaster, 8 new admin pages, 7 new user-facing pages, 8 new RTK slices, persisted notification settings, `useNotificationStream` hook + `NotificationBell` popover, 6 new Prisma models)
 - Phase 8 ✅ (Architecture stabilization — unified entry points, removed dead code, fixed `any` types, standardized exports, 14 new pages)
 - Phase 9 ✅ (Polish & Performance — 8 remaining pages, invitation backend, WCAG 2.1 AA, code splitting, Cache-Control headers)
-- Phase 10 🔄 (95% complete — AI features, editor templates, WebSocket collab, live chat, error boundaries, rate limiting)
+- Phase 10 ✅ (AI context persistence, chat overhaul, token optimization, Vercel production stability)
 - Next.js 16 migration ✅ (Async APIs, proxy.ts, React Compiler, Turbopack default)
 - better-auth migration ✅ (replaced NextAuth.js v4)
 - Prisma v7 migration ✅ (driver adapter required)
-- Current focus: Phase 10 final polish — deployment docs, version sync, production hardening
+- Current focus: Release 1.3.1 — AI architecture overhaul, Vercel crash fix, build fixes
 - Framework: Next.js 16, React 19.2, Turbopack default, Prisma 7.8.0
 - React Compiler: enabled (do not add manual memoization)
 
