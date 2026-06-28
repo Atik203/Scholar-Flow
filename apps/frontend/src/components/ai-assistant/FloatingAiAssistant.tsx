@@ -27,6 +27,7 @@ import {
   Expand,
   MessageCircle,
   Minimize2,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
@@ -43,6 +44,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import { useAIVisibility } from "@/lib/aiVisibilityContext";
+import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { showErrorToast } from "@/components/providers/ToastProvider";
 
 interface Message {
@@ -97,12 +99,15 @@ export function FloatingAiAssistant() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [lastUserPrompt, setLastUserPrompt] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
   const [convSearch, setConvSearch] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
 
   const { showFloatingButton } = useAIVisibility();
+  const { currentContext } = useAiContext();
 
   const { data: providersData } = useGetAiProvidersQuery();
   const availableModels =
@@ -178,14 +183,105 @@ export function FloatingAiAssistant() {
   const startNewChat = async (model = selectedModel) => {
     try {
       const conv = await createConversation({
-        title: "New Research Chat",
+        title: currentContext?.title
+          ? `${currentContext.type === "paper" ? "Paper" : "Workspace"}: ${currentContext.title.slice(0, 40)}`
+          : "New Research Chat",
         model,
+        context: currentContext || undefined,
       }).unwrap();
       setActiveConvId(conv.id);
       setLocalMessages([]);
       return conv.id as string;
     } catch {
       return null;
+    }
+  };
+
+  const handleEditAndResend = (msgId: string) => {
+    setEditingMessageId(msgId);
+    const msg = localMessages.find((m) => m.id === msgId);
+    if (msg) setEditContent(msg.content);
+  };
+
+  const submitEdit = async () => {
+    if (!editingMessageId || !editContent.trim()) return;
+    const trimmed = editContent.trim();
+    setEditingMessageId(null);
+    setEditContent("");
+    setLocalMessages((prev) => prev.filter((m) => m.id !== editingMessageId));
+    setLastUserPrompt(null);
+
+    try {
+      const convId = activeConvId;
+      if (!convId) return;
+
+      const userMsg: Message = {
+        id: Date.now().toString(),
+        role: "user",
+        content: trimmed,
+        createdAt: new Date().toISOString(),
+      };
+      setLocalMessages((prev) => [...prev, userMsg]);
+      setLastUserPrompt(trimmed);
+      setSending(true);
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      const response = await streamingFetch(
+        `/ai-chat/${convId}/messages/stream`,
+        {
+          method: "POST",
+          body: { content: trimmed },
+          signal: controller.signal,
+        }
+      );
+
+      if (!response.body) throw new Error("No response body");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulated = "";
+
+      const assistantMsgId = `${Date.now()}-stream`;
+      setLocalMessages((prev) => [
+        ...prev,
+        { id: assistantMsgId, role: "assistant", content: "", createdAt: new Date().toISOString() },
+      ]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (typeof data?.token === "string") {
+                accumulated += data.token;
+                setLocalMessages((prev) =>
+                  prev.map((m) => (m.id === assistantMsgId ? { ...m, content: accumulated } : m))
+                );
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch {
+      try {
+        const result = await sendMessageMutation({ convId: activeConvId!, content: trimmed }).unwrap();
+        setLocalMessages((prev) => [
+          ...prev,
+          { id: result.id, role: "assistant", content: result.content, model: result.model, createdAt: new Date().toISOString() },
+        ]);
+      } catch {
+        showErrorToast("Failed to send message");
+      }
+    } finally {
+      abortRef.current = null;
+      setSending(false);
     }
   };
 
@@ -382,6 +478,25 @@ export function FloatingAiAssistant() {
       )
     : conversations;
 
+  const suggestedPrompts = currentContext?.type === "paper"
+    ? [
+        "What methodology does this paper use?",
+        "Summarize the key contributions",
+        "What are the limitations of this study?",
+        "Explain the main findings in simple terms",
+      ]
+    : currentContext?.type === "workspace"
+      ? [
+          "Summarize recent activity in this workspace",
+          "What are the common themes across papers?",
+          "Suggest connections between papers",
+        ]
+      : [
+          "Help me find papers on deep learning",
+          "Summarize my recent research activity",
+          "What should I focus on next?",
+        ]; 
+
   if (!showFloatingButton && !open) return null;
 
   const panelWidth = fullscreen ? "min(100vw, 100%)" : "min(480px, calc(100vw - 24px))";
@@ -530,10 +645,26 @@ export function FloatingAiAssistant() {
                       <Skeleton className="h-20 w-full" />
                     </div>
                   ) : localMessages.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-12">
+                    <div className="text-center text-muted-foreground py-8">
                       <Sparkles className="h-10 w-10 mx-auto mb-3 opacity-30" />
                       <p className="text-sm font-medium">Ask me anything about your research</p>
                       <p className="text-xs mt-1">I can help with summaries, analysis, and more</p>
+                      {suggestedPrompts.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 justify-center mt-4">
+                          {suggestedPrompts.map((prompt, i) => (
+                            <button
+                              key={i}
+                              onClick={() => {
+                                setInput(prompt);
+                                setTimeout(() => sendMessage(), 100);
+                              }}
+                              className="text-xs px-2.5 py-1 rounded-full border border-border bg-muted/50 hover:bg-accent hover:border-primary/30 transition-colors text-left"
+                            >
+                              {prompt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -573,7 +704,16 @@ export function FloatingAiAssistant() {
                               )}
                             </div>
                           ) : (
-                            <div className="whitespace-pre-wrap break-words">{msg.content}</div>
+                            <div className="whitespace-pre-wrap break-words group">
+                              {msg.content}
+                              <button
+                                onClick={() => handleEditAndResend(msg.id)}
+                                className="ml-2 opacity-0 group-hover:opacity-100 inline-flex items-center text-muted-foreground hover:text-foreground align-middle"
+                                title="Edit and resend"
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </button>
+                            </div>
                           )}
                         </div>
                       ))}

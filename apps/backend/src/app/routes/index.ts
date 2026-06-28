@@ -5,6 +5,7 @@ import {
 } from "../controllers/status.controller";
 import { adminRoutes } from "../modules/Admin/admin.routes";
 import { aiConversationRoutes } from "../modules/AIChat/aiConversation.routes";
+import { aiContextRoutes } from "../modules/AIContext/aiContext.routes";
 import { aiProviderRoutes } from "../modules/AIProvider/aiProvider.routes";
 import { aiToolsRoutes } from "../modules/AI/aiTools.routes";
 import { annotationRoutes } from "../modules/annotations/annotation.routes";
@@ -87,6 +88,9 @@ router.use("/invitations", invitationRoutes);
 
 // Phase 10 — Global AI chat assistant
 router.use("/ai-chat", aiConversationRoutes);
+
+// Phase 10 — AI Context resolution (paper/workspace/dashboard)
+router.use("/ai-context", aiContextRoutes);
 
 // Phase 10 — AI Tools (rewriter, comparator, translator)
 router.use("/ai", aiToolsRoutes);
