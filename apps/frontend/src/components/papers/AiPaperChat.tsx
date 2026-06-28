@@ -30,10 +30,10 @@ export function AiPaperChat({ paperId }: AiPaperChatProps) {
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
 
     try {
-      const result = await generate({ paperId, message: trimmed }).unwrap();
+      const result = await generate({ paperId, input: { message: trimmed } }).unwrap();
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: result?.content || result?.message || "No response" },
+        { role: "assistant", content: result?.answer || "No response" },
       ]);
     } catch {
       setMessages((prev) => [
