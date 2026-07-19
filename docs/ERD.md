@@ -1,7 +1,20 @@
-# ScholarFlow ERD and Relational Schema Reference
+# Scholar-Flow ERD and Relational Schema Reference
 
-- For Better View: [ERD](https://lucid.app/lucidchart/76e3f9ec-0891-48af-aeed-1a6f9dbd641c/view)
-- For Better View: [Schema](https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b/view)
+## How to Read This Document
+
+This is a **simplified reference** showing the main database tables and their relationships. The **source of truth** is always `apps/backend/prisma/schema.prisma` — check there for the complete field list, indexes, and constraints.
+
+**Legend:**
+- PK = Primary Key
+- FK = Foreign Key
+- `vector` = pgvector column (embedding for semantic search)
+
+> The schema has evolved through 10 phases. This document covers the core tables from Phases 1-3. For newer tables (Phases 7-10 — Notifications, Analytics, Admin, AI, Collaboration), refer to the Prisma schema directly.
+
+## Visual Diagrams
+
+- [LucidChart ERD](https://lucid.app/lucidchart/76e3f9ec-0891-48af-aeed-1a6f9dbd641c/view) — Entity relationship diagram
+- [LucidChart Schema](https://lucid.app/lucidchart/8fa45201-ebc1-46e2-8204-93c162cbaf0b/view) — Full relational schema
 
 ## Phase 1 Tables (MVP - Core Features)
 
@@ -90,6 +103,7 @@
 - **paperId** (FK → Paper.id)
 - idx, page
 - content, tokenCount
+- **embedding** (`vector` — pgvector column for semantic search)
 - timestamps, isDeleted
 
 ### Collection Management Tables
@@ -320,6 +334,37 @@
 - Paper **1 : M** UsageEvent _(generates usage)_
 
 ---
+
+## Phase 7-10 Tables (Newer Models)
+
+The project has grown beyond Phase 3. Here are the newer model groups (check `schema.prisma` for full details):
+
+### Notifications & Analytics (Phase 7)
+- `Notification` — per-user notification messages
+- `NotificationSetting` — user notification preferences (per type)
+- `UsageEvent` — tracks feature usage for analytics
+- `ActivityLog` — audit trail of user actions
+
+### Admin & Monitoring (Phase 7)
+- `AdminReport` — generated admin reports (with filters + result JSON)
+- `SystemAlert` — system health alerts
+- `ApiKey` — programmatic API keys
+- `ContentReport` — user-reported content issues
+- `WebhookEndpoint` / `WebhookDelivery` — outbound webhooks
+
+### AI Features (Phase 10)
+- `AIConversation` — persisted AI chat conversations
+- `AIMetadata` — 1:1 with Paper, stores AI-generated metadata (methodology, contributions, etc.)
+- `AIKeyPoint` — per-paper AI key points
+
+### Editor & Collaboration (Phase 6, 10)
+- `PaperVersion` — version snapshots for the TipTap editor
+- `Discussion` / `DiscussionMessage` — threaded discussions
+- `Note` / `NoteSection` — notebook hierarchy
+
+---
+
+> **Prisma schema is the source of truth.** The ERD above is a simplified Phase 1-3 reference. For the complete model list with all fields and indexes, open `apps/backend/prisma/schema.prisma` or run `yarn db:studio`.
 
 ## ERD Drawing Guidelines
 
