@@ -127,9 +127,21 @@ git push origin feature/my-feature
 
 ### Hotfixes:
 
-- Create hotfix branch from `main`
-- After fix, merge hotfix to `atik` (not directly to main)
-- Follow normal flow: `atik` → `dev` → `main`
+- Create hotfix branch from `main`:
+  ```bash
+  git checkout main
+  git pull origin main
+  git checkout -b hotfix/critical-fix
+  ```
+- Apply the fix and commit
+- Merge hotfix branch to `atik` (not directly to main):
+  ```bash
+  git checkout atik
+  git merge hotfix/critical-fix
+  git push origin atik
+  ```
+- The normal automated flow (`atik` → `dev` → `main`) carries the fix forward
+- If the fix needs `main` immediately, merge to `atik` first; the auto-flow handles the rest
 
 ### Rollbacks:
 
@@ -181,6 +193,6 @@ git push origin feature/my-feature
 
 ---
 
-**Last Updated**: August 26, 2025
+**Last Updated**: July 2026
 **Maintained by**: Development Team
 **Questions?** Check GitHub Actions logs or create an issue

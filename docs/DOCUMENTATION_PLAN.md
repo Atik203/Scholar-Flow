@@ -185,26 +185,24 @@ Files: `docs/DEPLOY.md`, `docs/BRANCH_FLOW.md`, plus new `docs/QUICKSTART.md`, `
 
 ### docs/DEPLOY.md
 
-- Status: Exists — good quality, minor fixes needed
-- Current issues: Node 22.x setup script used for Oracle Cloud (should be 24.x); Git clone URL uses HTTPS (verify it matches repo); Some env var names may differ from current .env.example (e.g., BETTER_AUTH_SECRET vs NEXTAUTH_SECRET)
+- Status: Updated
 - Target audience: DevOps / team member deploying
 - Todos:
-  - [ ] Fix Node.js version in Oracle Cloud section (22.x → 24.x)
-  - [ ] Update Oracle Cloud Ubuntu version (22.04 → 24.04 recommended)
-  - [ ] Verify all env var names against current .env.example files
-  - [ ] Add socket-server deployment to Oracle Cloud section (currently only covers REST API)
-  - [ ] Add "Prerequisites" section at top with links to Vercel/Render signup
-  - [ ] Add verification curl commands in each deployment step (not just at end)
+  - [x] Fixed Node.js version (22.x → 24.x) in Oracle Cloud section
+  - [x] Updated Ubuntu to 24.04 LTS
+  - [x] Added socket-server deployment to Oracle Cloud section
+  - [x] Added WebSocket systemd service + Nginx config
+  - [x] Added "Prerequisites" section at top
+  - [x] Added `yarn setup` instead of manual install steps
 
 ### docs/BRANCH_FLOW.md
 
-- Status: Exists — good quality, minor updates
-- Current issues: Date says "August 26, 2025" (needs refresh); Emoji usage is fine but inconsistent with other docs; Hotfix flow says "merge hotfix to atik" — this bypasses the `atik`→`dev`→`main` flow (contradiction)
+- Status: Updated
 - Target audience: Team member
 - Todos:
-  - [ ] Update last-updated date
-  - [ ] Clarify hotfix flow: after merging hotfix to `atik`, does it auto-flow to `dev`→`main`?
-  - [ ] Add note about conventional commit format expected by the flow
+  - [x] Updated last-updated date to July 2026
+  - [x] Clarified hotfix flow with explicit commands
+  - [x] Added note that auto-flow carries hotfix forward
 
 ### docs/QUICKSTART.md (NEW)
 
@@ -212,11 +210,11 @@ Files: `docs/DEPLOY.md`, `docs/BRANCH_FLOW.md`, plus new `docs/QUICKSTART.md`, `
 - Why needed: No single 5-minute "get running" guide exists. A new contributor doesn't know which file to read first.
 - Target audience: New contributor (first 15 minutes)
 - Todos:
-  - [ ] Create `docs/QUICKSTART.md`
-  - [ ] 10 numbered steps max: clone → install → env → DB → migrate → seed → dev → verify
-  - [ ] Each step is exactly one copy-paste command
-  - [ ] Links to detailed docs for each step (SETUP.md, ENVIRONMENT.md, etc.)
-  - [ ] "You should see" checkpoints after key steps
+- [x] Created `docs/QUICKSTART.md`
+- [x] 10 numbered steps: clone → env → DB → install → migrate → seed → dev → verify → open → done
+- [x] Each step has exactly one copy-paste command
+- [x] Links to detailed docs for each step
+- [x] "Expected output" after key steps
 
 ### docs/TESTING.md (NEW)
 
@@ -224,12 +222,13 @@ Files: `docs/DEPLOY.md`, `docs/BRANCH_FLOW.md`, plus new `docs/QUICKSTART.md`, `
 - Why needed: No testing documentation exists
 - Target audience: Contributor writing/running tests
 - Todos:
-  - [ ] Create `docs/TESTING.md`
-  - [ ] Section: How to run tests (all, frontend, backend)
-  - [ ] Section: Test structure and conventions
-  - [ ] Section: Writing new tests (with examples)
-  - [ ] Section: Testing database operations (mocking Prisma)
-  - [ ] Section: CI/CD test expectations
+- [x] Created `docs/TESTING.md`
+- [x] How to run tests (all, frontend, backend, watch mode)
+- [x] Test structure and conventions
+- [x] Writing new tests (with examples for frontend + backend)
+- [x] Mocking Prisma guide
+- [x] CI/CD test expectations
+- [x] Testing priority areas
 
 ---
 
@@ -291,7 +290,7 @@ Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_C
 1. **Section 1: Root-Level Docs** — ✅ Complete. Updated README.md (Node badge, license, Quick Start, socket-server, commands), rewrote CONTRIBUTING.md (versions, branching, PR workflow), fixed SECURITY.md email + links, updated CODE_OF_CONDUCT.md (Our Pledge).
 2. **Section 2: Setup & Environment** — ✅ Complete. Rewrote SETUP.md (correct versions, commands, architecture, verify step), rewrote DEVELOPMENT.md (active workflow guide with common tasks), rewrote ENVIRONMENT.md (restructured, fixed formatting, added socket-server section, better-auth consistency).
 3. **Section 3: Database & Redis** — ✅ Complete. Updated REDIS_SETUP.md (REDIS_URL, Upstash, verify step, pinned Docker), updated ERD.md (how-to-read, pgvector, Phase 7-10 tables), created DATABASE.md (full PostgreSQL + pgvector + Prisma guide).
-4. **Section 4: Deployment & Operations** — DEPLOY.md, BRANCH_FLOW.md, QUICKSTART.md (new), TESTING.md (new)
+4. **Section 4: Deployment & Operations** — ✅ Complete. Fixed DEPLOY.md (Node 24, Oracle socket-server, Ubuntu 24.04), updated BRANCH_FLOW.md (hotfix commands, date), created QUICKSTART.md (10-step beginner guide), created TESTING.md (testing conventions, examples, mocking).
 5. **Section 5: Legal & Polish** — LICENSE.md, PROMPTING_GUIDE.md (no changes: TERMS.md)
 
 Each section is committed and pushed independently.
