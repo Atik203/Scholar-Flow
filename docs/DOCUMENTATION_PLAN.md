@@ -87,56 +87,50 @@ Files: `docs/SETUP.md`, `docs/DEVELOPMENT.md`, `docs/ENVIRONMENT.md`
 
 ### docs/SETUP.md
 
-- Status: Exists — needs heavy rewrite
-- Current issues: Node.js says 20+ (should be 24+); `yarn db:generate` before `yarn db:migrate` (wrong order — migrations first); `yarn dev` outdated (starts 2 servers, but should be 3); Missing socket-server from architecture; "Yarn 4.5+" should be "4.9.2"; References `src/store/api/` (check if actual path); Deployment section says "Railway/Render/Fly.io" but actual config is Vercel; No Redis setup mention (covered elsewhere but not linked); No "verify it worked" checkpoint
+- Status: Rewritten
 - Target audience: New contributor
 - Todos:
-  - [ ] Rewrite "Prerequisites" with correct versions (Node >=24, Yarn >=4.9.2, PostgreSQL 15+)
-  - [ ] Add socket-server to architecture diagram
-  - [ ] Fix command order: `yarn db:migrate` then `yarn db:generate` (not the reverse)
-  - [ ] Replace `yarn dev` with `yarn dev:turbo` as primary dev command
-  - [ ] Add note that `yarn dev` starts 3 processes: frontend (:3000), backend (:5000), socket-server (:5001)
-  - [ ] Remove deployment section (covered in DEPLOY.md — just link to it)
-  - [ ] Remove "Ready for Implementation" checklist (this is a setup guide, not a roadmap)
-  - [ ] Add "Verify everything works" section with curl commands
-  - [ ] Add links to ENVIRONMENT.md, REDIS_SETUP.md, DEPLOY.md, BRANCH_FLOW.md
-  - [ ] Add troubleshooting section for common first-time issues
-  - [ ] Add `yarn setup` as the single bootstrap command
+  - [x] Rewrote entirely with correct versions, architecture, commands, and order
+  - [x] Prerequisites: Node >=24, Yarn >=4.9.2, PostgreSQL 15+
+  - [x] Added socket-server to architecture
+  - [x] Fixed command order: migrate before generate
+  - [x] Primary dev command is `yarn dev:turbo`
+  - [x] Removed deployment section (links to DEPLOY.md)
+  - [x] Removed "Ready for Implementation" checklist
+  - [x] Added "Verify everything works" with curl commands
+  - [x] Added links to all related docs
+  - [x] Added troubleshooting section
 
 ### docs/DEVELOPMENT.md
 
-- Status: Exists — needs heavy rewrite
-- Current issues: Title says "Project Template" (this is not a template, it's a live project); Refers to README.md as "comprehensive README" but doesn't link well; `setup.bat` referenced but file does not exist; `yarn dev` outdated; Missing socket-server; Node version wrong; Feature checklists are duplicating IMPLEMENTATION.md; API endpoints list is incomplete and has no base URL; Database setup section too brief; Deployment section outdated; No development workflow for common tasks
+- Status: Rewritten
 - Target audience: Team member / active contributor
 - Todos:
-  - [ ] Rewrite entirely as a development workflow guide, not a project template
-  - [ ] Remove `setup.bat` reference (file does not exist)
-  - [ ] Add correct Node (>=24) and Yarn (>=4.9.2) requirements
-  - [ ] Add socket-server to project structure
-  - [ ] Replace feature checklists with links to IMPLEMENTATION.md
-  - [ ] Add section on how to run each app individually and together
-  - [ ] Add section on common development tasks (new page, new API route, new DB model)
-  - [ ] Add section on code quality checks (lint, type-check, test)
-  - [ ] Add section on migration workflow
-  - [ ] Remove deployment section (link to DEPLOY.md)
-  - [ ] Add troubleshooting for dev server issues
+  - [x] Rewrote as active development workflow guide (not "project template")
+  - [x] Removed `setup.bat` reference
+  - [x] Correct Node (>=24) and Yarn (>=4.9.2)
+  - [x] Added socket-server to project structure
+  - [x] Removed feature checklists (links to IMPLEMENTATION.md instead)
+  - [x] Added common dev tasks: new page, new API route, new DB model, RTK Query
+  - [x] Added quality checks section (lint, type-check, test)
+  - [x] Added migration workflow section
+  - [x] No deployment section — links to DEPLOY.md
+  - [x] Added troubleshooting for dev issues
 
 ### docs/ENVIRONMENT.md
 
-- Status: Exists — needs restructure and accuracy fixes
-- Current issues: NextAuth references remain (better-auth migration completed); Formatting broken in some list items (e.g., line 52 orphaned `- What:` fragment); REDIS_URL listed under "Frontend Flags" section (should be under Redis in Backend); OAuth callback URLs may use NextAuth pattern; No socket-server env vars documented; Some env vars documented that may not be used (SSLCommerz URLs dev example mentions localhost:3000, but payment pages may differ); Gotenberg section is thorough but could be a separate doc; Some descriptions assume knowledge (e.g., "Enable 2FA in Google Account")
-- Target audience: Both (new contributor setting up + team member configuring)
+- Status: Rewritten and restructured
+- Target audience: Both (new contributor + team member)
 - Todos:
-  - [ ] Remove NextAuth.js references; use "better-auth" consistently
-  - [ ] Restructure into clearer sections: Required → Database → Auth → OAuth → AI → S3 → Payments → Redis → Gotenberg
-  - [ ] Fix broken list formatting throughout
-  - [ ] Move REDIS_URL out of "Frontend Flags" into Redis section
-  - [ ] Add socket-server env vars table
-  - [ ] Add better-auth specific callback URLs
-  - [ ] Add verification steps after each major section
-  - [ ] Add "Quick Start" summary at the top (which 3-5 vars to set to get running)
-  - [ ] Verify all documented env vars exist in actual .env.example files
-  - [ ] Add note about NEXTAUTH_SECRET vs BETTER_AUTH_SECRET (both exist but one may alias the other)
+  - [x] Removed NextAuth.js references; consistent "better-auth" usage
+  - [x] Restructured: Quick Start → Backend (DB, Server, Auth, OAuth, Email, AI, S3, Stripe, SSLCommerz, Redis, Doc Conversion, Uploads) → Frontend (Auth, URLs, OAuth, Flags, Stripe, Analytics) → Socket-server → Production Notes
+  - [x] Fixed all formatting issues
+  - [x] REDIS_URL moved to proper Redis section
+  - [x] Added socket-server env vars section
+  - [x] Added better-auth callback URLs
+  - [x] Added "Quick Start" summary at top
+  - [x] Verified all vars against .env.example files
+  - [x] Added note about NEXTAUTH_SECRET/BETTER_AUTH_SECRET alias
 
 ---
 
@@ -295,7 +289,7 @@ Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_C
 ## Execution Order
 
 1. **Section 1: Root-Level Docs** — ✅ Complete. Updated README.md (Node badge, license, Quick Start, socket-server, commands), rewrote CONTRIBUTING.md (versions, branching, PR workflow), fixed SECURITY.md email + links, updated CODE_OF_CONDUCT.md (Our Pledge).
-2. **Section 2: Setup & Environment** — SETUP.md, DEVELOPMENT.md, ENVIRONMENT.md
+2. **Section 2: Setup & Environment** — ✅ Complete. Rewrote SETUP.md (correct versions, commands, architecture, verify step), rewrote DEVELOPMENT.md (active workflow guide with common tasks), rewrote ENVIRONMENT.md (restructured, fixed formatting, added socket-server section, better-auth consistency).
 3. **Section 3: Database & Redis** — ERD.md, REDIS_SETUP.md, DATABASE.md (new)
 4. **Section 4: Deployment & Operations** — DEPLOY.md, BRANCH_FLOW.md, QUICKSTART.md (new), TESTING.md (new)
 5. **Section 5: Legal & Polish** — LICENSE.md, PROMPTING_GUIDE.md (no changes: TERMS.md)
