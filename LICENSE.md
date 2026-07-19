@@ -1,22 +1,18 @@
-# Apache License 2.0
+# License
 
 Copyright 2025 Md. Atikur Rahaman
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+All rights reserved.
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+The project `package.json` declares this work as **UNLICENSED**. This means all rights are reserved. You may view and fork the code for personal, non-commercial use, but you do not have permission to redistribute, modify, or use this software for commercial purposes without explicit written permission from the copyright holder.
 
 ---
 
-## Apache License 2.0
+**Note on Apache 2.0 text below:** The following text is the standard Apache License 2.0 template that was included during the project's initial setup. It is **not** the active license for this project. The project is UNLICENSED as declared in `package.json`.
+
+---
+
+## Apache License 2.0 (Reference Only)
 
 ### Terms and Conditions for use, reproduction, and distribution
 
