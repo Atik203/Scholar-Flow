@@ -61,23 +61,23 @@ Files: `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`
 
 ### SECURITY.md
 
-- Status: Exists — update minor
-- Current issues: Email address has typo? `matikurrahaman0305@gmail.com` vs `atikurrahaman0305@gmail.com` in other docs
+- Status: Updated
+- Current issues: Fixed email typo, added links to docs, minor polish
 - Target audience: External contributors/security researchers
 - Todos:
-  - [ ] Verify email matches README.md (atikurrahaman0305@gmail.com)
-  - [ ] Add security-related `docs/` links (ENVIRONMENT.md for env var best practices)
-  - [ ] Minor polish for readability
+  - [x] Fixed email (was matikurrahaman0305@gmail.com → atikurrahaman0305@gmail.com)
+  - [x] Added links to docs/ENVIRONMENT.md and docs/DEPLOY.md
+  - [x] Added principle of least privilege note
 
 ### CODE_OF_CONDUCT.md
 
-- Status: Exists — minor update
-- Current issues: Very minimal template, mostly links to external source
+- Status: Updated
+- Current issues: Added our pledge section, clarified scope
 - Target audience: All contributors
 - Todos:
-  - [ ] Add project-specific contact section (email already listed, good)
-  - [ ] Clarify enforcement scope for this project
-  - [ ] Minor formatting improvements
+  - [x] Added "Our Pledge" section with specific commitments
+  - [x] Clarified enforcement scope
+  - [x] Minor formatting improvements
 
 ---
 
@@ -294,7 +294,7 @@ Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_C
 
 ## Execution Order
 
-1. **Section 1: Root-Level Docs** — README.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
+1. **Section 1: Root-Level Docs** — ✅ Complete. Updated README.md (Node badge, license, Quick Start, socket-server, commands), rewrote CONTRIBUTING.md (versions, branching, PR workflow), fixed SECURITY.md email + links, updated CODE_OF_CONDUCT.md (Our Pledge).
 2. **Section 2: Setup & Environment** — SETUP.md, DEVELOPMENT.md, ENVIRONMENT.md
 3. **Section 3: Database & Redis** — ERD.md, REDIS_SETUP.md, DATABASE.md (new)
 4. **Section 4: Deployment & Operations** — DEPLOY.md, BRANCH_FLOW.md, QUICKSTART.md (new), TESTING.md (new)
