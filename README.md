@@ -5,10 +5,11 @@
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
 [![Version](https://img.shields.io/badge/version-1.3.1-blue)](./CHANGELOG.md)
-[![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
+
+> **Note on licensing:** The project `package.json` declares `"license": "UNLICENSED"`. See [LICENSE.md](./LICENSE.md) for details.
 
 ## 📦 Recent Releases
 
@@ -116,10 +117,10 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ### DevOps & Tools
 
-- **Package Manager**: Yarn Berry (v4)
+- **Package Manager**: Yarn Berry (v4.9.2)
 - **Monorepo**: Turborepo for build optimization
 - **Database**: PostgreSQL with pgvector (AI-ready)
-- **Deployment**: Vercel (Frontend) + Railway/Render (Backend)
+- **Deployment**: Vercel (Frontend + REST API) + Render (WebSocket)
 - **Monitoring**: Health checks and performance tracking
 
 ## 📁 Project Structure
@@ -127,15 +128,16 @@ ScholarFlow is a modern research paper management and collaboration platform des
 ```text
 Scholar-Flow/
 ├── apps/
-│   ├── frontend/          # Next.js 16 application
+│   ├── frontend/          # Next.js 16 application (port 3000)
 │   │   ├── src/app/       # App Router pages
 │   │   ├── components/    # Reusable UI components
 │   │   ├── lib/          # Utilities and configurations
-│   │   └── redux/        # State management
-│   └── backend/          # Express.js API server
-│       ├── src/app/      # Application logic
-│       ├── prisma/       # Database schema and migrations
-│       └── scripts/      # Utility scripts
+│   │   └── redux/        # RTK Query state management
+│   ├── backend/          # Express.js REST API (port 5000)
+│   │   ├── src/app/      # Application logic
+│   │   ├── prisma/       # Database schema and migrations
+│   │   └── scripts/      # Utility scripts
+│   └── socket-server/    # Socket.io real-time server (port 5001)
 ├── docs/                 # Project documentation
 ├── .github/             # GitHub workflows and templates
 └── .cursor/             # Development rules and guidelines
@@ -145,10 +147,10 @@ Scholar-Flow/
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 24+ (check with `node --version`)
+- Yarn Berry v4.9.2+ (check with `yarn --version`)
 - PostgreSQL 15+ with pgvector extension
-- Yarn Berry (v4)
-- AWS S3 account (for file storage)
+- AWS S3 account (for file storage — optional for local dev without uploads)
 
 ### Installation
 
@@ -159,27 +161,30 @@ Scholar-Flow/
    cd Scholar-Flow
    ```
 
-2. **Install dependencies**
-
-   ```bash
-   yarn install
-   ```
-
-3. **Set up environment variables**
+2. **Set up environment variables**
 
    ```bash
    # Copy environment templates
    cp apps/frontend/.env.example apps/frontend/.env.local
    cp apps/backend/.env.example apps/backend/.env
+   cp apps/socket-server/.env.example apps/socket-server/.env
 
    # Edit the .env files with your configurations
    ```
+
+3. **Install dependencies, generate Prisma client, and build**
+
+   ```bash
+   yarn setup
+   ```
+
+   This runs `yarn install` followed by `prisma generate --sql` in one step.
 
 4. **Set up the database**
 
    ```bash
    yarn db:migrate
-   yarn db:generate
+   yarn db:seed
    ```
 
 5. **Start development servers**
@@ -191,6 +196,7 @@ Scholar-Flow/
    The application will be available at:
    - Frontend: [http://localhost:3000](http://localhost:3000)
    - Backend: [http://localhost:5000](http://localhost:5000)
+   - WebSocket: [http://localhost:5001](http://localhost:5001)
 
 ## 🔧 Development Commands
 
@@ -214,7 +220,7 @@ yarn build              # Production build
 
 # Utilities
 yarn clean              # Clean build artifacts
-yarn reset              # Reset node_modules and rebuild
+yarn setup:clean        # Full clean reinstall (clean → install → generate)
 ```
 
 ### Content Management & Editing
@@ -256,10 +262,16 @@ yarn reset              # Reset node_modules and rebuild
 
 - [**Changelog**](./CHANGELOG.md) - Version history and release notes
 - [**Roadmap**](./IMPLEMENTATION.md) - Phase-by-phase implementation plan and current status
-- [**Setup Guide**](./docs/SETUP.md) - Environment setup, architecture overview
-- [**Development Guide**](./docs/DEVELOPMENT.md) - Project template, contribution workflow
-- [**Branch Flow**](./docs/BRANCH_FLOW.md) - Git branching strategy
+- [**Quickstart**](./docs/QUICKSTART.md) - Get running in 5 minutes (start here if new)
+- [**Setup Guide**](./docs/SETUP.md) - Detailed environment setup and architecture
+- [**Environment Variables**](./docs/ENVIRONMENT.md) - All env vars explained
+- [**Development Guide**](./docs/DEVELOPMENT.md) - Day-to-day development workflow
+- [**Database Setup**](./docs/DATABASE.md) - PostgreSQL, pgvector, and Prisma guide
+- [**Redis Setup**](./docs/REDIS_SETUP.md) - Redis configuration for background jobs
+- [**Deployment Guide**](./docs/DEPLOY.md) - Deploy to Vercel + Render / Oracle Cloud
+- [**Branch Flow**](./docs/BRANCH_FLOW.md) - Git branching strategy (atik → dev → main)
 - [**Database Schema**](./docs/ERD.md) - ERD and relational schema reference
+- [**Testing Guide**](./docs/TESTING.md) - How to run and write tests
 - [**API Reference**](http://localhost:5000/api/docs) - Live Swagger UI when backend is running
 
 ## 🤝 Contributing
@@ -275,25 +287,22 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 ## 🧪 Testing
 
 ```bash
-# Run all tests
+# Run all tests (via Turborepo)
 yarn test
 
-# Run tests with coverage
-yarn test:coverage
+# Run frontend tests only
+yarn workspace @scholar-flow/frontend test
 
-# Run integration tests
-yarn test:integration
+# Run backend tests only
+yarn workspace @scholar-flow/backend test
 
-# Run frontend tests
-yarn test:frontend
-
-# Run backend tests
-yarn test:backend
+# Watch mode (frontend)
+yarn workspace @scholar-flow/frontend test:watch
 ```
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE.md](./LICENSE.md) file for details.
+This project is UNLICENSED — see the [LICENSE.md](./LICENSE.md) file for details. All rights reserved by the project maintainer unless otherwise stated.
 
 ## 🙏 Acknowledgments
 
