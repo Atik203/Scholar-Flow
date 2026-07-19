@@ -1,97 +1,158 @@
 # Contributing to Scholar-Flow
 
-Thanks for your interest in contributing! This guide will help you set up, develop, and submit changes.
+Thanks for your interest in contributing! This guide walks you through setting up the project, making changes, and submitting them.
 
-## Development Workflow
+## Prerequisites
 
-- Package manager: Yarn Berry (v4). Please use `yarn`, not `npm`.
-- Monorepo: apps/frontend (Next.js) and apps/backend (Express + Prisma)
+Make sure you have these installed before starting:
 
-### Prerequisites
+- **Node.js >= 24** (check with `node --version`)
+- **Yarn >= 4.9.2** (check with `yarn --version` — the project uses Yarn Berry, not npm)
+- **PostgreSQL 15+** with the **pgvector** extension enabled
+- **Git** (for cloning and creating pull requests)
 
-- Node.js >= 18
-- Yarn >= 4
-- PostgreSQL (local or Prisma Postgres)
+> If you're new to the project, start with the [Quickstart Guide](./docs/QUICKSTART.md) to get running in 5 minutes.
 
-### Setup
+## Project Overview
+
+This is a **Turborepo** monorepo with three workspaces:
+
+| Workspace | Directory | Port | Purpose |
+|-----------|-----------|------|---------|
+| `@scholar-flow/frontend` | `apps/frontend/` | 3000 | Next.js 16 web app |
+| `@scholar-flow/backend` | `apps/backend/` | 5000 | Express.js REST API |
+| `@scholar-flow/socket-server` | `apps/socket-server/` | 5001 | Socket.io real-time server |
+
+## Setup
 
 ```bash
-# Install deps
-yarn install
+# 1. Clone the repo
+git clone https://github.com/Atik203/Scholar-Flow.git
+cd Scholar-Flow
 
-# Generate Prisma client
-yarn db:generate
+# 2. Copy environment files
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env.local
+cp apps/socket-server/.env.example apps/socket-server/.env
 
-# Run database migrations
+# 3. Install dependencies, generate Prisma client
+yarn setup
+
+# 4. Run database migrations
 yarn db:migrate
 
-# Start dev (both apps via turbo)
-yarn dev
+# 5. (Optional) Seed sample data
+yarn db:seed
+
+# 6. Start all dev servers
+yarn dev:turbo
 ```
 
-### Useful scripts (from repo root)
+For detailed setup, see [docs/SETUP.md](./docs/SETUP.md) and [docs/ENVIRONMENT.md](./docs/ENVIRONMENT.md).
 
-- `yarn dev` – run all dev servers
-- `yarn build` – build all packages
-- `yarn lint` – run linters
-- `yarn type-check` – TS checks across packages
-- `yarn db:migrate` – run Prisma migrations
-- `yarn db:studio` – open Prisma Studio
-- `yarn db:reset` – reset DB (dev only)
+## Useful Scripts
+
+Run these from the repo root:
+
+| Command | What it does |
+|---------|-------------|
+| `yarn dev:turbo` | Start all three dev servers (frontend, backend, socket-server) |
+| `yarn dev:frontend` | Start frontend only |
+| `yarn dev:backend` | Start backend only |
+| `yarn build` | Build all packages for production |
+| `yarn lint` | Run ESLint across all packages |
+| `yarn type-check` | TypeScript type checking |
+| `yarn test` | Run all test suites |
+| `yarn db:migrate` | Apply database migrations |
+| `yarn db:generate` | Re-generate Prisma client (`--sql` flag always) |
+| `yarn db:studio` | Open Prisma Studio (GUI database browser) |
+| `yarn db:seed` | Seed database with sample data |
+| `yarn db:reset` | Reset database (dev only — drops all data) |
+| `yarn setup` | Install + Prisma generate |
+| `yarn format` | Format code with Prettier |
 
 ## Branching and Commits
 
-Main branches:
+### Branch Structure
 
-- `main` – production, protected
-- `dev` – active development, staging
+This project uses a **strict one-way branch flow**: changes always move forward.
 
-Personal/feature branches:
+```
+feature-branch → atik → dev → main
+```
 
-- Preferred naming: `username` or `feat/<topic>` / `fix/<topic>` / `chore/<topic>`
-- Example: `atik` (admin branch), `feat/auth-flow`, `fix/upload-limit`
+No reverse merges are allowed (dev→atik, main→dev, main→atik are all blocked by automation).
 
-Flow:
+### For Contributors (non-admin)
 
-- Developers branch off `dev`
-- Open PRs into `dev`
-- `dev` is regularly merged into `main` via automation after checks
+1. Branch off `dev`:
 
-Admin fast‑path (Atik):
+   ```bash
+   git checkout dev
+   git pull origin dev
+   git checkout -b feat/my-feature
+   ```
 
-- Push to `atik` branch
-- GitHub Actions auto‑merges `atik → dev` and then triggers `dev → main`
-- No manual review required for `atik`
+2. Make changes, commit using [Conventional Commits](https://www.conventionalcommits.org/):
 
-Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, etc.
-Keep PRs small and focused.
+   | Prefix | Example |
+   |--------|---------|
+   | `feat:` | `feat: add DOI import button` |
+   | `fix:` | `fix: handle empty paper title` |
+   | `docs:` | `docs: update setup guide` |
+   | `chore:` | `chore: bump dependencies` |
+   | `refactor:` | `refactor: extract upload service` |
+   | `test:` | `test: add billing webhook tests` |
 
-### Automation
+3. Push and create a PR into `dev`:
 
-When commits land on `dev`, an action creates a PR to `main` and auto‑merges it when mergeable (see `.github/workflows/auto-create-pr-dev-to-main.yml` and `auto-merge-pr.yml`).
+   ```bash
+   git push origin feat/my-feature
+   ```
 
-When commits land on `atik`, an action merges `atik → dev` (or opens a PR if conflicts) and pushes `dev`, which triggers the `dev → main` flow (see `.github/workflows/auto-merge-atik-to-dev.yml`).
+4. After review, squash-merge into `dev`. The `dev` → `main` merge happens automatically via GitHub Actions.
 
-- TypeScript strict, no implicit any.
-- Backend: use `catchAsync`, `ApiError`, `sendResponse`, and Zod validation.
-- Frontend: prefer Server Components, Tailwind + ShadCN; use RTK Query for data.
-- Add or update tests when changing behavior.
+### For Admins (Atik)
 
-## Environment
+Push directly to the `atik` branch. GitHub Actions auto-merges `atik → dev`, then triggers `dev → main`.
 
-- Backend env in `apps/backend/.env`; Frontend in `apps/frontend/.env.local`.
-- Respect `FRONTEND_URL` for CORS in backend config.
-- Never commit secrets.
+### Code Style
 
-## Pull Requests
+- **TypeScript strict** — no implicit `any`, no `@ts-ignore`
+- **Backend**: use `catchAsync`, `ApiError`, `sendResponse`, and Zod validation for all routes
+- **Frontend**: prefer Server Components; only add `"use client"` when you need interactivity; use RTK Query for API calls (never raw `fetch`)
+- **React Compiler** is enabled — do NOT add `useMemo`, `useCallback`, or `memo()` manually
+- Add or update tests when changing behavior
 
-- Link issues and describe changes clearly.
-- Include screenshots or logs for UI or error changes when useful.
-- Ensure CI passes: build, lint, type-check, tests.
+## Your First PR
+
+1. Find an open issue or feature you want to work on
+2. Comment on the issue to let others know you're working on it
+3. Follow the branching flow above
+4. Run `yarn type-check` and `yarn lint` before submitting
+5. Open a PR with a clear description of what you changed and why
+
+## Environment Variables
+
+- Backend env: `apps/backend/.env`
+- Frontend env: `apps/frontend/.env.local`
+- Socket-server env: `apps/socket-server/.env`
+
+Never commit `.env` files or real secrets. See [docs/ENVIRONMENT.md](./docs/ENVIRONMENT.md) for the full list.
+
+## Pull Request Checklist
+
+- [ ] Build passes (`yarn build`)
+- [ ] TypeScript checks pass (`yarn type-check`)
+- [ ] Lint passes (`yarn lint`)
+- [ ] Tests pass (`yarn test`)
+- [ ] No secrets committed
+- [ ] Description explains _what_ and _why_ (not just _how_)
+- [ ] Linked to relevant issue (if any)
 
 ## Conduct and Security
 
-- Follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
-- Report vulnerabilities via [SECURITY](./SECURITY.md).
+- Follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
+- Report vulnerabilities via [SECURITY.md](./SECURITY.md)
 
 Thank you for contributing!
