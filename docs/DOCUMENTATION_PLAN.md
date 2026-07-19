@@ -234,35 +234,34 @@ Files: `docs/DEPLOY.md`, `docs/BRANCH_FLOW.md`, plus new `docs/QUICKSTART.md`, `
 
 ## Section 5: Legal, Policy & AI Docs
 
-Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_CONDUCT.md`
+Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`
 
 ### LICENSE.md
 
-- Status: Exists — needs resolution with package.json
-- Current issues: Content says Apache 2.0, but root `package.json` has `"license": "UNLICENSED"`. This is a real conflict. README badge says Apache 2.0.
+- Status: Resolved conflict
+- Current issues: Rewrote to match package.json (UNLICENSED), kept Apache 2.0 text as reference with clear disclaimer
 - Target audience: Legal / all contributors
 - Todos:
-  - [ ] Flag the Apache 2.0 vs UNLICENSED conflict
-  - [ ] Align LICENSE.md with the actual license intent (if UNLICENSED is correct, update this doc; if Apache 2.0 is correct, update package.json — but updating package.json is outside docs/ scope)
-  - [ ] For docs/: update README.md badge and any license references to match LICENSE.md content
+  - [x] Resolved UNLICENSED vs Apache 2.0 conflict
+  - [x] Aligned with package.json — project is UNLICENSED, all rights reserved
+  - [x] Kept Apache 2.0 text as "Reference Only" with clear note that it is not the active license
+  - [x] README.md badge already updated in Section 1
 
 ### docs/PROMPTING_GUIDE.md
 
-- Status: Exists — good quality, no significant changes needed
-- Current issues: References Next.js 15 in some examples (actually 16); Some version references may be stale (v1.1.0 in examples); Very thorough and well-structured
+- Status: Updated
 - Target audience: AI agents / developers using AI tools
 - Todos:
-  - [ ] Update version references in examples (1.1.0 → 1.3.1)
-  - [ ] Update Next.js 15 references to 16
-  - [ ] Quick verification pass for stale content
+  - [x] Updated version references (1.1.0 → 1.3.1)
+  - [x] Updated Next.js 15 → 16 references
+  - [x] Quick verification pass — no other stale content found
 
 ### docs/TERMS.md
 
-- Status: Exists — legal document, leave as-is
-- Current issues: None — this is a legal EULA, not documentation
+- Status: No changes needed (legal EULA)
 - Target audience: Legal / users
 - Todos:
-  - [ ] No changes needed (legal document)
+  - [x] Confirmed — no changes needed for this legal document
 
 ---
 
@@ -291,6 +290,6 @@ Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_C
 2. **Section 2: Setup & Environment** — ✅ Complete. Rewrote SETUP.md (correct versions, commands, architecture, verify step), rewrote DEVELOPMENT.md (active workflow guide with common tasks), rewrote ENVIRONMENT.md (restructured, fixed formatting, added socket-server section, better-auth consistency).
 3. **Section 3: Database & Redis** — ✅ Complete. Updated REDIS_SETUP.md (REDIS_URL, Upstash, verify step, pinned Docker), updated ERD.md (how-to-read, pgvector, Phase 7-10 tables), created DATABASE.md (full PostgreSQL + pgvector + Prisma guide).
 4. **Section 4: Deployment & Operations** — ✅ Complete. Fixed DEPLOY.md (Node 24, Oracle socket-server, Ubuntu 24.04), updated BRANCH_FLOW.md (hotfix commands, date), created QUICKSTART.md (10-step beginner guide), created TESTING.md (testing conventions, examples, mocking).
-5. **Section 5: Legal & Polish** — LICENSE.md, PROMPTING_GUIDE.md (no changes: TERMS.md)
+5. **Section 5: Legal & Polish** — ✅ Complete. Resolved LICENSE.md UNLICENSED conflict (Apache 2.0 text kept as reference), updated PROMPTING_GUIDE.md versions (1.1.0→1.3.1, Next.js 15→16), confirmed TERMS.md needs no changes.
 
 Each section is committed and pushed independently.
