@@ -1,316 +1,223 @@
-# ScholarFlow Project - Setup Guide
+# Scholar-Flow Setup Guide
 
-## 🏗️ Architecture Overview
+This guide walks you through setting up Scholar-Flow for local development from scratch. By the end, you'll have the frontend, backend API, and WebSocket server running on your machine.
 
-### Monorepo Structure
+## Prerequisites
+
+Before starting, make sure you have these installed:
+
+- **Node.js >= 24.0.0** — check with `node --version`
+- **Yarn >= 4.9.2** (Berry) — check with `yarn --version`
+- **PostgreSQL 15+** — running locally or via Docker
+- **pgvector extension** — enabled in your PostgreSQL database
+- **Git** — for cloning the repo
+
+If you don't have PostgreSQL yet, see the [Database Setup Guide](./DATABASE.md) for installation instructions.
+
+## Architecture Overview
+
+This is a Turborepo monorepo with three apps:
 
 ```
-Project-Info/
+Scholar-Flow/
 ├── apps/
-│   ├── frontend/          # Next.js 16 + React 19.2 + TypeScript
-│   └── backend/           # Node.js + Express + Prisma 7.8 + PostgreSQL + WebSocket
-├── packages/
-│   └── shared/            # Shared utilities (ready for expansion)
-├── docs/                  # Documentation
-└── scripts/               # Setup and deployment scripts
+│   ├── frontend/          # Next.js 16 web app (port 3000)
+│   │   ├── src/app/       # App Router pages
+│   │   ├── components/    # UI components (shadcn/ui)
+│   │   └── redux/         # RTK Query state management
+│   ├── backend/           # Express.js REST API (port 5000)
+│   │   ├── src/app/       # Controllers, routes, middleware
+│   │   └── prisma/        # Schema + migrations
+│   └── socket-server/     # Socket.io real-time server (port 5001)
+├── docs/                  # All documentation
+└── .github/               # CI/CD workflows
 ```
 
-### Technology Stack
+Data flows: **Frontend** → HTTP/REST → **Backend** → Prisma → **PostgreSQL**.
+Real-time features: **Frontend** → WebSocket → **Socket-server** (no database access).
 
-**Frontend (Next.js App)**
+## Step-by-Step Setup
 
-- ⚡ Next.js 16 with App Router (Turbopack default)
-- 🎨 Tailwind CSS + ShadCN UI components
-- 🔐 better-auth for authentication (Google/GitHub/email)
-- 🏪 Redux Toolkit Query for state management
-- 🔗 socket.io-client for real-time collaboration
-- 📝 TipTap rich text editor with LaTeX, citations, version history
-- 📱 Fully responsive design
-- 🎯 TypeScript for type safety
-
-**Backend (Node.js API)**
-
-- 🚀 Express.js with TypeScript
-- 🗄️ Prisma ORM with PostgreSQL
-- 🔒 JWT authentication with role-based access
-- 📊 Complete data models for papers, annotations, collections
-- 🎛️ API routes for all core features
-- 🛡️ Security middleware (CORS, Helmet, Rate Limiting)
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 20+ (LTS recommended)
-- Yarn 4.5+ (Berry)
-- PostgreSQL 15+ with pgvector extension
-- Redis (optional, for background jobs)
-
-### 1. Install Dependencies
+### Step 1: Clone the repository
 
 ```bash
-yarn install
+git clone https://github.com/Atik203/Scholar-Flow.git
+cd Scholar-Flow
 ```
 
-### 2. Environment Setup
+### Step 2: Copy environment files
 
 ```bash
-# Backend configuration
 cp apps/backend/.env.example apps/backend/.env
-
-# Frontend configuration
 cp apps/frontend/.env.example apps/frontend/.env.local
+cp apps/socket-server/.env.example apps/socket-server/.env
 ```
 
-For a complete list of variables and how to obtain them (Google/GitHub OAuth, S3, Stripe, etc.), see: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md)
+Run this from: the repo root (`/path/to/Scholar-Flow`)
 
-### 3. Configure Environment Variables
+These are template files. You'll need to fill in your own values for secrets and API keys. For now, the defaults are enough to get the dev servers running.
 
-#### Backend (.env)
+### Step 3: Configure database connection
+
+Open `apps/backend/.env` and set your PostgreSQL connection string:
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/scholar_flow"
-NEXTAUTH_SECRET="your-secret-key-change-in-production"
-PORT=5000
-FRONTEND_URL="http://localhost:3000"
-NODE_ENV=development
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
+DIRECT_DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
 ```
 
-#### Frontend (.env.local)
-
-```env
-NEXTAUTH_SECRET="your-secret-key-change-in-production"
-NEXTAUTH_URL="http://localhost:3000"
-NEXT_PUBLIC_API_BASE_URL="http://localhost:5000/api"
-DATABASE_URL="postgresql://username:password@localhost:5432/scholar_flow"
-```
-
-### 4. Database Setup
+Replace `postgres:admin` with your actual PostgreSQL username and password. The database must already exist — create it with:
 
 ```bash
-# Generate Prisma client
-yarn db:generate
+createdb scholarflow_dev
+```
 
-# Run database migrations
+Or via psql:
+
+```bash
+sudo -u postgres psql -c "CREATE DATABASE scholarflow_dev;"
+```
+
+### Step 4: Install dependencies and generate Prisma client
+
+```bash
+yarn setup
+```
+
+Run this from: the repo root
+
+This command runs `yarn install` (installs all dependencies for all three apps) followed by `prisma generate --sql` (generates the Prisma client with typed SQL queries).
+
+**Expected output:** You should see `Done in Xs` from Yarn, followed by Prisma generation messages with no errors.
+
+### Step 5: Run database migrations
+
+```bash
 yarn db:migrate
+```
 
-# Seed sample data (optional)
+Run this from: the repo root
+
+This creates all the database tables defined in `apps/backend/prisma/schema.prisma`. The first time you run it, Prisma will prompt you for a migration name — enter something like `initial_setup`.
+
+**Expected output:** `Your database is now in sync with your schema.`
+
+### Step 6: (Optional) Seed sample data
+
+```bash
 yarn db:seed
 ```
 
-### 5. Start Development Servers
+Run this from: the repo root
 
-```bash
-yarn dev
-```
+This populates the database with demo users and sample data. Demo accounts created:
 
-This starts:
+| Email | Password | Role |
+|-------|----------|------|
+| admin@scholarflow.com | password123 | Admin |
+| researcher@scholarflow.com | password123 | Researcher |
+| pro.researcher@scholarflow.com | password123 | Pro Researcher |
+| teamlead@scholarflow.com | password123 | Team Lead |
 
-- **Frontend**: <http://localhost:3000> (per apps/frontend/package.json)
-- **Backend API**: <http://localhost:5000>
-
-Optional (Turborepo):
+### Step 7: Start development servers
 
 ```bash
 yarn dev:turbo
 ```
 
-Note: Ensure ports 3000 and 5000 are free before running the Turbo dev task.
+Run this from: the repo root
 
-## 📋 Available Scripts
+This starts all three apps simultaneously using Turborepo's parallel execution:
 
-```bash
-# Development
-yarn dev                 # Start both frontend and backend
-yarn build               # Build both applications
-yarn type-check          # TypeScript type checking
-yarn lint                # Lint both applications
+| Service | URL | Description |
+|---------|-----|-------------|
+| Frontend | http://localhost:3000 | Next.js web app |
+| Backend API | http://localhost:5000 | Express.js REST API |
+| WebSocket | http://localhost:5001 | Socket.io real-time server |
 
-# Database
-yarn db:migrate          # Run Prisma migrations
-yarn db:generate         # Generate Prisma client
-yarn db:studio           # Open Prisma Studio
-yarn db:seed             # Seed sample data
+**Expected output:** You'll see logs from all three services. Look for lines like `ready started server on http://localhost:3000` and `Server running on port 5000`.
 
-# Individual apps
-cd apps/frontend && yarn dev    # Frontend only
-cd apps/backend && yarn dev     # Backend only
-```
+## Running Individual Apps
 
-## 🎯 What's Included
-
-### ✅ Completed Features
-
-- **🏗️ Complete Project Structure**: Monorepo with frontend and backend
-- **🔐 Authentication System**: better-auth with JWT sessions + OAuth
-- **📊 Database Schema**: Complete Prisma schema with all models
-- **🎨 UI Components**: Basic UI components with Tailwind CSS
-- **📡 API Structure**: Express routes with proper middleware
-- **🛡️ Security**: CORS, Helmet, Rate limiting, JWT validation
-- **📱 Responsive Design**: Mobile-first responsive layout
-- **⚡ Build System**: Turbo for optimized builds
-- **📝 TypeScript**: Full TypeScript configuration
-
-### 🚧 Ready for Implementation
-
-- **📄 File Upload**: S3 pre-signed URLs structure ready
-- **🤖 AI Features**: OpenAI integration placeholder
-- **🔍 Vector Search**: pgvector schema ready for embeddings
-- **💳 Payments**: Stripe/SSLCommerz webhook structure
-- **👥 Collaboration**: Real-time annotations structure
-- **📊 Analytics**: Usage tracking models in place
-
-## 🔧 Development Workflow
-
-### 1. Frontend Development
+If you only need one service (e.g., working only on the backend):
 
 ```bash
-cd apps/frontend
-yarn dev
+yarn dev:backend     # Backend only on port 5000
+yarn dev:frontend    # Frontend only on port 3000
 ```
 
-- Modify pages in `src/app/`
-- Add components in `src/components/`
-- Update API calls in `src/store/api/`
+Run this from: the repo root
 
-### 2. Backend Development
+> Note: `yarn dev` also works — it starts all three apps using background processes. `yarn dev:turbo` is preferred because it gives cleaner parallel output.
+
+## Verify Everything Works
+
+Once the dev servers are running, run these checks:
 
 ```bash
-cd apps/backend
-yarn dev
+# Check the backend health endpoint
+curl http://localhost:5000/api/health
+
+# Expected: { "status": "ok", ... }
 ```
-
-- Add routes in `src/routes/`
-- Modify middleware in `src/middleware/`
-- Update database schema in `prisma/schema.prisma`
-
-### 3. Database Changes
 
 ```bash
-# After modifying schema.prisma
-yarn db:migrate
-yarn db:generate
+# Check the frontend loads
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+
+# Expected: 200
 ```
 
-## 🚀 Deployment
+Open http://localhost:3000 in your browser. You should see the Scholar-Flow login page.
 
-### Frontend and Backend (Vercel Monorepo)
+## Available Scripts
 
-We deploy both apps on Vercel using the Monorepo + Turborepo flow. See: <https://vercel.com/docs/monorepos/turborepo>
+| Command | What it does |
+|---------|-------------|
+| `yarn setup` | Install + Prisma generate (one-step bootstrap) |
+| `yarn dev:turbo` | Start all three dev servers |
+| `yarn dev:frontend` | Frontend only |
+| `yarn dev:backend` | Backend only |
+| `yarn build` | Build all apps for production |
+| `yarn lint` | ESLint across all apps |
+| `yarn type-check` | TypeScript type checking |
+| `yarn test` | Run all tests |
+| `yarn db:migrate` | Apply Prisma migrations |
+| `yarn db:generate` | Re-generate Prisma client |
+| `yarn db:studio` | Open Prisma Studio GUI |
+| `yarn db:seed` | Seed sample data |
+| `yarn db:reset` | Drop and recreate all tables (dev only) |
+| `yarn format` | Format with Prettier |
+| `yarn clean` | Remove build artifacts |
 
-Create two Vercel Projects pointing to different root directories in this repo:
+## Troubleshooting
 
-1. Frontend Project
+**Problem: `Error: Cannot find module '@prisma/client'`**
+Cause: Prisma client hasn't been generated.
+Fix: Run `yarn db:generate`.
 
-- Root Directory: `apps/frontend`
-- Framework Preset: Next.js
-- Install Command: `yarn install`
-- Build Command: `yarn build`
-- Output: auto (Next.js)
-- Env vars: copy from `apps/frontend/.env.example` to Vercel Project settings
+**Problem: `Error: getaddrinfo ENOTFOUND` at database connection**
+Cause: PostgreSQL isn't running or the connection URL is wrong.
+Fix: Start PostgreSQL (`sudo pg_ctlcluster 18 main start`) and verify `DATABASE_URL` in `apps/backend/.env`.
 
-1. Backend Project (Express/Node)
+**Problem: `Port 3000 already in use`**
+Cause: Another process is using the port.
+Fix: Kill the process or change the port in `apps/frontend/package.json` (`next dev -p 3001`).
 
-- Root Directory: `apps/backend`
-- Runtime: Node.js
-- Install Command: `yarn install`
-- Build Command: `yarn build` (runs `tsc` per package.json)
-- Start Command (Preview/Dev only): `node dist/server.js`
-- Env vars: copy from `apps/backend/.env.example` to Vercel Project settings
+**Problem: `ERR_DLOPEN_FAILED` or native module errors**
+Cause: Node.js version mismatch with compiled native addons.
+Fix: Run `yarn clean && yarn setup` to rebuild everything.
 
-Important notes for the backend on Vercel:
+**Problem: pgvector extension not found**
+Cause: PostgreSQL doesn't have the vector extension installed.
+Fix: See the [Database Setup Guide](./DATABASE.md) for pgvector installation.
 
-- Vercel is serverless-first. Long-running servers (`app.listen`) are not supported on the Edge or Serverless Functions.
-- For production on Vercel, expose your API via Serverless Functions. The common pattern is to export the Express `app` as the default handler from an `api/index.ts` and remove direct `app.listen` calls in that path.
-- Until refactoring is complete, you can use Preview deployments for quick checks or deploy the backend to another host. We’ll add a serverless entrypoint in a follow-up.
+## Related Docs
 
-Optional serverless entry (to be implemented later):
-
-```ts
-// apps/backend/api/index.ts
-import app from "../src/serverless-app"; // express app without app.listen
-export default app;
-```
-
-Then in `apps/backend/vercel.json` (optional):
-
-```json
-{
-  "functions": {
-    "api/**/*.ts": { "runtime": "nodejs22.x" }
-  },
-  "routes": [{ "src": "/(.*)", "dest": "/api/index.ts" }]
-}
-```
-
-## 🧪 Testing
-
-The project is ready for testing:
-
-- ✅ TypeScript compilation passes
-- ✅ Build process completes successfully
-- ✅ Development servers start correctly
-- ✅ All dependencies installed properly
-
-## 📚 Next Implementation Steps
-
-1. **Authentication Flow**
-   - Configure OAuth providers (Google, GitHub)
-   - Implement user registration/onboarding
-
-2. **File Upload System**
-   - Implement S3 pre-signed URL generation
-   - Add file processing pipeline
-
-3. **AI Integration**
-   - Connect OpenAI API
-   - Implement semantic search with pgvector
-
-4. **Payment System**
-   - Configure Stripe/SSLCommerz
-   - Implement subscription logic
-
-5. **Real-time Features**
-   - Add WebSocket for live collaboration (socket.io — Phase 10 ✅)
-
-### WebSocket / Real-Time Features (Phase 10)
-
-- **Server**: socket.io attached to the Express HTTP server
-- **Auth**: JWT token verification on WebSocket handshake
-- **Rooms**: `paper:{id}`, `discussion:{id}`, `workspace:{id}`
-- **Events**: presence tracking, typing indicators, live chat, Y.js document sync
-- **Run**: WebSocket auto-starts with `yarn dev:backend` — no separate process needed
-- **Production**: Ensure `FRONTEND_URL` points to your deployed frontend (CORS whitelist)
-   - Implement real-time annotations
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-### Dependency Conflicts
-
-```bash
-rm -rf node_modules .yarn/cache
-yarn install
-```
-
-### Database Connection
-
-- Ensure PostgreSQL is running
-- Check DATABASE_URL format
-- Install pgvector extension: `CREATE EXTENSION vector;`
-
-### Build Errors
-
-```bash
-yarn type-check  # Check for TypeScript errors
-yarn lint        # Check for linting issues
-```
-
-## 📞 Support
-
-- Review the [comprehensive specification](README.md) for detailed requirements
-- Check the [database schema](apps/backend/prisma/schema.prisma) for data models
-- Examine API routes in `apps/backend/src/routes/` for endpoint documentation
-
-The template is ready for development and includes all the foundational elements specified in the original requirements. You can now start implementing specific features based on your priorities.
+- [Quickstart Guide](./QUICKSTART.md) — get running in 5 minutes
+- [Environment Variables](./ENVIRONMENT.md) — full env var reference
+- [Database Setup](./DATABASE.md) — PostgreSQL + pgvector + Prisma
+- [Redis Setup](./REDIS_SETUP.md) — optional Redis for background jobs
+- [Development Guide](./DEVELOPMENT.md) — day-to-day dev workflow
+- [Deployment Guide](./DEPLOY.md) — deploy to production
+- [Branch Flow](./BRANCH_FLOW.md) — git strategy
