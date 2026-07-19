@@ -1,190 +1,189 @@
-# Scholar-Flow Project Template
+# Scholar-Flow Development Guide
 
-This project template provides a complete foundation for the Scholar-Flow AI-powered research paper collaboration platform as described in the [comprehensive README](README.md).
+This guide covers day-to-day development workflows: how to add features, fix bugs, run quality checks, and work with the monorepo.
 
-## Project Structure
+## Prerequisites
+
+You should have completed the [Setup Guide](./SETUP.md) first. By now you should have:
+
+- A running PostgreSQL database
+- Three dev servers running on ports 3000, 5000, and 5001
+- Access to http://localhost:3000 in your browser
+
+## Project Structure (Where Things Live)
 
 ```
-├── apps/
-│   ├── frontend/          # Next.js frontend application
-│   └── backend/           # Node.js/Express backend API
-├── docs/                  # Documentation
-└── scripts/               # Build and deployment scripts
+apps/
+├── frontend/src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # Reusable UI components
+│   │   ├── auth/         # Login, register, etc.
+│   │   ├── layout/       # Navigation, sidebar, header
+│   │   ├── ui/           # shadcn/ui primitives
+│   │   └── customUI/     # Project-specific components
+│   ├── lib/              # Utilities, auth config, API clients
+│   └── redux/            # RTK Query slices and store
+├── backend/src/
+│   └── app/
+│       ├── modules/      # Feature modules (Papers, Auth, Billing, etc.)
+│       │   └── [Module]/
+│       │       ├── [name].controller.ts
+│       │       ├── [name].service.ts
+│       │       ├── [name].routes.ts
+│       │       └── [name].validation.ts
+│       ├── middleware/    # Auth, rate limiting, error handling
+│       ├── routes/        # Route registration
+│       └── shared/        # Prisma singleton, email service, etc.
+├── socket-server/
+│   └── src/
+│       └── server.ts     # Socket.io server entry point
 ```
 
-## Quick Start
+## Common Development Tasks
 
-### Prerequisites
+### Adding a new page (frontend)
 
-- Node.js 22+
-- PostgreSQL 15+ with pgvector extension
-- Redis (for background jobs)
+```bash
+# Create the page file
+mkdir -p apps/frontend/src/app/papers/new
+touch apps/frontend/src/app/papers/new/page.tsx
+```
 
-### Development Setup
+Pages use the App Router. If the page needs interactive state, add `"use client"` at the top. Otherwise it's a Server Component by default (preferred).
 
-1. **Clone and install dependencies:**
+```typescript
+// apps/frontend/src/app/papers/new/page.tsx
+import { NewPaperForm } from "@/components/papers/NewPaperForm"
+
+export default function NewPaperPage() {
+  return <NewPaperForm />
+}
+```
+
+### Adding a new API endpoint (backend)
+
+Each feature has its own module directory under `apps/backend/src/app/modules/`:
+
+```bash
+# Create module files
+touch apps/backend/src/app/modules/Reports/reports.controller.ts
+touch apps/backend/src/app/modules/Reports/reports.service.ts
+touch apps/backend/src/app/modules/Reports/reports.routes.ts
+touch apps/backend/src/app/modules/Reports/reports.validation.ts
+```
+
+Then register the routes in `apps/backend/src/app/routes/index.ts`.
+
+**Structure rules:**
+- Controllers are thin — all business logic goes in services
+- All request/response validation uses Zod schemas
+- Use `catchAsync` for async error handling
+- Use `ApiError` for known error responses
+- Use `sendResponse` / `sendSuccessResponse` for consistent response format
+
+### Adding a new database model
+
+1. Edit `apps/backend/prisma/schema.prisma` to add your model
+2. Run migrations and regenerate the client:
 
    ```bash
-   # For Windows users, run the setup script
-      setup.bat
-
-      # Or manually:
-      yarn install
+   yarn db:migrate        # Creates the migration file and applies it
+   yarn db:generate       # Rebuilds the Prisma client with --sql flag
    ```
 
-2. **Set up environment variables:**
+3. Use the new model in your service:
 
-   ```bash
-   # Backend
-   cp apps/backend/.env.example apps/backend/.env
-   # Frontend
-   cp apps/frontend/.env.example apps/frontend/.env.local
+   ```typescript
+   import { prisma } from "../../shared/prisma"
+
+   const papers = await prisma.paper.findMany({ ... })
    ```
 
-3. **Configure database:**
+**Important:** Always use `yarn db:migrate` (not `prisma db push`) for schema changes. See [Database Guide](./DATABASE.md) for migration discipline.
 
-   ```bash
-   # Update DATABASE_URL in both .env files
-   # Run migrations
-   yarn db:migrate
-   ```
+### Working with RTK Query (frontend API calls)
 
-4. **Start development servers:**
-   ```bash
-   yarn dev
-   ```
+All API calls go through RTK Query slices in `apps/frontend/redux/`. Never make raw `fetch` calls inside components.
 
-This will start:
+```typescript
+// redux/api/papersApi.ts
+export const papersApi = createApi({
+  reducerPath: "papersApi",
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+  endpoints: (builder) => ({
+    getPapers: builder.query<Paper[], void>({
+      query: () => "/papers",
+    }),
+  }),
+})
 
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-
-## Features Implemented
-
-### ✅ Basic Structure
-
-- [x] Monorepo setup with Turbo
-- [x] Next.js frontend with TypeScript
-- [x] Express backend with TypeScript following Apollo Healthcare pattern
-- [x] Prisma schema with complete data model
-- [x] Backend modular architecture (modules/User, modules/Auth, etc.)
-- [x] Windows setup script (setup.bat)
-- [x] Environment configuration files
-- [x] GitHub Copilot instructions
-
-### ✅ Completed (Phases 1-9)
-
-- [x] Monorepo with Turborepo + Yarn Berry
-- [x] better-auth authentication + JWT backend
-- [x] Core UI components + design system
-- [x] Dashboard pages for all roles
-- [x] Paper upload/management with AI metadata extraction
-- [x] Collections CRUD + workspace/team features
-- [x] Discussions (threaded), Notes, Citations (9 formats)
-- [x] Analytics, Notifications (SSE), Admin dashboard
-- [x] Next.js 16 migration + React Compiler + Turbopack
-- [x] Prisma v7 + pgvector semantic search
-- [x] 98/102 figma-make pages (96.1%)
-
-### 🚧 Phase 10 — FINAL (95% complete)
-
-- [x] AI: Floating chat assistant (Cmd+J), rewriter, comparator, translator, literature review, key points
-- [x] Editor: LaTeX (KaTeX), version history, full-screen mode, citations, templates, Markdown/DOCX/PDF export
-- [x] Real-Time: WebSocket (socket.io), Y.js collaborative editing, live discussions
-- [x] Production: Error boundaries, rate limiting (15+ limiters), CORS/CSP headers
-- [ ] Lighthouse audit (target 90+)
-- [ ] Comprehensive test suite
-- [ ] AI streaming (SSE)
-
-### ⏳ Future (Post-Launch)
-
-- [ ] SSO/SAML integration (Okta, Azure AD)
-- [ ] Multi-file LaTeX projects + compilation
-- [ ] Bundle analysis + Core Web Vitals optimization
-- [ ] Enterprise licensing + audit exports
-
-## API Endpoints
-
-The backend provides the following API endpoints:
-
-- `GET /health` - Health check
-- `POST /api/auth/session/validate` - Validate JWT session
-- `GET /api/papers` - List papers
-- `GET /api/papers/:id` - Get paper details
-- Additional endpoints for annotations, collections, workspaces, etc.
-
-## Environment Variables
-
-### Backend (.env)
-
-```
-DATABASE_URL=postgresql://...
-NEXTAUTH_SECRET=your-secret-key
-PORT=5000
-FRONTEND_URL=http://localhost:3000
-# Additional keys for AWS, OpenAI, Stripe, etc.
+// In a component:
+const { data: papers, isLoading } = useGetPapersQuery()
 ```
 
-### Frontend (.env.local)
+### Adding environment variables
 
+1. Add the variable to the appropriate `.env.example` file (frontend or backend)
+2. Add it to both `.env` (local) and the Vercel dashboard (production)
+3. Document it in [docs/ENVIRONMENT.md](./ENVIRONMENT.md)
+
+## Quality Checks
+
+Run these before committing or opening a PR:
+
+```bash
+# TypeScript type checking
+yarn type-check
+
+# ESLint (catch bugs and style issues)
+yarn lint
+
+# Run tests
+yarn test
 ```
-NEXTAUTH_SECRET=your-secret-key
-NEXT_PUBLIC_API_BASE_URL=http://localhost:5000/api
-DATABASE_URL=postgresql://...
-# OAuth provider keys
+
+Run all three from the repo root. If any fail, fix the issues before pushing.
+
+## Database Workflow
+
+```bash
+# After editing schema.prisma:
+yarn db:migrate          # Create and apply migration
+yarn db:generate         # Rebuild client with typed SQL
+
+# View/edit data visually:
+yarn db:studio           # Opens Prisma Studio in browser
+
+# Reset dev database (drops all data):
+yarn db:reset
+
+# Re-seed after reset:
+yarn db:seed
 ```
 
-## Database Setup
+## Troubleshooting Dev Issues
 
-1. Install PostgreSQL with pgvector extension
-2. Create database: `scholar_flow`
-3. Run migrations: `yarn db:migrate`
-4. Generate Prisma client: `yarn db:generate`
+**Problem: Changes not showing in the browser**
+Cause: Next.js caches aggressively in dev.
+Fix: Clear the Next.js cache with `rm -rf apps/frontend/.next` and restart.
 
-## Deployment
+**Problem: TypeScript errors after pulling new code**
+Cause: New Prisma models or API endpoints added by someone else.
+Fix: Run `yarn db:generate` to rebuild the client, then `yarn type-check`.
 
-### Frontend (Vercel)
+**Problem: "Module not found" errors**
+Cause: A new dependency was added.
+Fix: Run `yarn install` (or `yarn setup` if the Prisma schema also changed).
 
-- Deploy to Vercel with environment variables
-- Set build command: `yarn build`
-- Set output directory: `apps/frontend/.next`
+**Problem: Port conflict (EADDRINUSE)**
+Cause: A previous dev server didn't shut down properly.
+Fix: `lsof -ti:3000 | xargs kill -9` (replace 3000 with the port number).
 
-### Backend (Railway/Render/Fly.io)
+## Related Docs
 
-- Deploy as Docker container or Node.js app
-- Set start command: `yarn start`
-- Configure environment variables
-
-## Next Steps
-
-1. **Complete Authentication Flow**
-   - Implement OAuth providers
-   - Add user registration/profile completion
-
-2. **File Upload System**
-   - S3 pre-signed URLs
-   - Background processing pipeline
-
-3. **Vector Search**
-   - Implement pgvector queries
-   - Add embedding generation
-
-4. **Payment Integration**
-   - Stripe checkout flow
-   - Webhook handling
-
-5. **AI Features**
-   - OpenAI integration for summaries
-   - Semantic search capabilities
-
-## Support
-
-For questions or issues:
-
-1. Check the [comprehensive README](README.md) for detailed specifications
-2. Review the Prisma schema for data model details
-3. Examine the API route implementations for endpoint behavior
-
-## License
-
-MIT License - See [LICENSE](LICENSE) for details.
+- [Setup Guide](./SETUP.md) — initial environment setup
+- [Quickstart Guide](./QUICKSTART.md) — get running in 5 minutes
+- [Branch Flow](./BRANCH_FLOW.md) — git branching strategy
+- [Contributing Guide](../CONTRIBUTING.md) — how to submit PRs
+- [Database Setup](./DATABASE.md) — PostgreSQL + pgvector + Prisma
+- [Environment Variables](./ENVIRONMENT.md) — full env var reference
