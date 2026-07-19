@@ -71,9 +71,10 @@ For when you need the backend always-on with zero cold starts.
 
 ### Prerequisites
 
-- GitHub account with Scholar-Flow repo
-- Vercel account (sign up at vercel.com with GitHub)
-- Render account (sign up at render.com with GitHub)
+- **GitHub account** with Scholar-Flow repo (you have push access)
+- **Vercel account** (sign up at [vercel.com](https://vercel.com) with GitHub)
+- **Render account** (sign up at [render.com](https://render.com) with GitHub)
+- **Node.js >= 24** installed locally (for generating secrets with `openssl`)
 
 ### 1. Deploy Frontend to Vercel
 
@@ -236,7 +237,7 @@ curl https://scholar-flow-socket.onrender.com/health
 # 2. Navigate to Compute → Instances → Create Instance
 # 3. Configure:
 #    Name: scholar-flow-backend
-#    Image: Ubuntu 22.04
+#    Image: Ubuntu 24.04 (LTS)
 #    Shape: VM.Standard.A1.Flex (4 OCPU, 24 GB RAM)
 #    Boot Volume: 100 GB
 #    Add SSH key
@@ -255,13 +256,21 @@ ssh ubuntu@<VM_PUBLIC_IP>
 # Update system
 sudo apt update && sudo apt upgrade -y
 
-# Install Node.js 22
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+# Install Node.js 24
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
+
+# Verify Node version
+node --version
+# Should show: v24.x.x
 
 # Enable Corepack for Yarn
 corepack enable
 corepack prepare yarn@4.9.2 --activate
+
+# Verify Yarn version
+yarn --version
+# Should show: 4.9.2
 
 # Install git
 sudo apt install -y git
@@ -270,14 +279,11 @@ sudo apt install -y git
 git clone https://github.com/Atik203/Scholar-Flow.git
 cd Scholar-Flow
 
-# Install dependencies (backend only)
+# Install dependencies and generate Prisma client
+yarn setup
+
+# Build backend
 cd apps/backend
-yarn install
-
-# Generate Prisma client
-yarn db:generate
-
-# Build
 yarn build
 
 # Create .env.production
@@ -348,7 +354,29 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 ```
 
-### 4. Run as Systemd Service
+### 3.5 Deploy WebSocket Server (Socket.io)
+
+The socket-server can run on the same VM on port 5001:
+
+```bash
+# Build socket-server
+cd /home/ubuntu/Scholar-Flow/apps/socket-server
+yarn install
+yarn build
+
+# Create .env
+cp .env.example .env
+# Edit with:
+#   PORT=5001
+#   NEXTAUTH_SECRET=<same JWT_SECRET as backend>
+#   FRONTEND_URL=https://scholar-flow-ai.vercel.app
+```
+
+Then add a second systemd service for the socket-server (see next step).
+
+### 4. Run as Systemd Services
+
+#### REST API Service
 
 ```bash
 # Create service file
@@ -379,6 +407,58 @@ sudo systemctl status scholar-flow
 
 # View logs
 sudo journalctl -u scholar-flow -f
+```
+
+#### WebSocket Service
+
+```bash
+# Create service file
+sudo nano /etc/systemd/system/scholar-flow-socket.service
+
+# Paste:
+[Unit]
+Description=Scholar-Flow WebSocket Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Scholar-Flow/apps/socket-server
+ExecStart=/usr/bin/node dist/server.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ubuntu/Scholar-Flow/apps/socket-server/.env
+
+[Install]
+WantedBy=multi-user.target
+
+# Enable and start
+sudo systemctl enable scholar-flow-socket
+sudo systemctl start scholar-flow-socket
+sudo systemctl status scholar-flow-socket
+
+# View logs
+sudo journalctl -u scholar-flow-socket -f
+```
+
+Also add the socket-server location to the Nginx config:
+
+```nginx
+# Add inside the server block from step 3:
+location /socket.io/ {
+    proxy_pass http://localhost:5001;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
+
+Don't forget to reload Nginx:
+```bash
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ### 5. Update Frontend Env Vars
