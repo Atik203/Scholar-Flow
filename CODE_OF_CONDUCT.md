@@ -1,8 +1,10 @@
 # Code of Conduct
 
-We are committed to fostering a welcoming, harassment‑free, and inclusive community for everyone.
+## Our Pledge
 
-This project follows the Contributor Covenant Code of Conduct, Version 2.1.
+We are committed to fostering a welcoming, harassment‑free, and inclusive community for everyone — regardless of age, body size, disability, ethnicity, gender identity, experience level, nationality, personal appearance, race, religion, or sexual identity and orientation.
+
+This project follows the **Contributor Covenant Code of Conduct, Version 2.1**.
 
 - Home: <https://www.contributor-covenant.org>
 - Full text: <https://www.contributor-covenant.org/version/2/1/code_of_conduct/>
