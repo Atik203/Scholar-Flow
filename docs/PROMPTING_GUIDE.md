@@ -184,8 +184,8 @@ Do not summarize or truncate.
 
 **Example:**
 ```
-# Project: Scholar-Flow (1.1.0)
-# Architecture: Turborepo + Next.js 15 + Express + Prisma + PostgreSQL
+# Project: Scholar-Flow (1.3.1)
+# Architecture: Turborepo + Next.js 16 + Express + Prisma + PostgreSQL
 # Current Phase: Phase 2 - Auth & Onboarding
 # Status: 5 of 6 auth pages pending
 
@@ -536,8 +536,8 @@ Models like DeepSeek, Kimi, GLM, and MiMo cache the "prefix" (system prompt + pr
 
 **Stable (good for caching):**
 ```
-# Project: Scholar-Flow v1.1.0
-# Stack: Next.js 15 + Express + Prisma + PostgreSQL
+# Project: Scholar-Flow v1.3.1
+# Stack: Next.js 16 + Express + Prisma + PostgreSQL
 # Rules: [unchanged rules]
 
 ---
