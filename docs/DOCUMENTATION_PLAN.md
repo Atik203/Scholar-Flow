@@ -140,27 +140,25 @@ Files: `docs/ERD.md`, `docs/REDIS_SETUP.md`, plus new `docs/DATABASE.md`
 
 ### docs/ERD.md
 
-- Status: Exists — minor updates
-- Current issues: References NextAuth.js table names (Account, Session) — may differ from better-auth schema; No mention of newer models from Phases 7-10 (Analytics, Notifications, Admin models like AdminReport, SystemAlert, WebhookEndpoint, etc.; plus AIConversation, AIMetadata, AIKeyPoint from Phase 10); Good reference for existing devs but no "how to use this" guidance
+- Status: Updated
 - Target audience: Team member / database contributor
 - Todos:
-  - [ ] Add Phase 7-10 tables (Notification, NotificationSetting, AdminReport, SystemAlert, WebhookEndpoint, WebhookDelivery, ApiKey, ContentReport, AIConversation, AIMetadata, AIKeyPoint, PaperVersion, etc.)
-  - [ ] Note that this is a simplified reference — Prisma schema is the source of truth
-  - [ ] Add note about better-auth tables vs NextAuth tables if different
-  - [ ] Add a "How to read this document" section at the top
-  - [ ] Add links to Prisma schema file and ERD.md external LucidChart views
-  - [ ] Add pgvector column note (PaperChunk.embedding as Unsupported("vector"))
+  - [x] Added "How to Read This Document" section at top
+  - [x] Added note: Prisma schema is the source of truth
+  - [x] Added Phase 7-10 tables section (Notifications, Admin, AI, Collaboration)
+  - [x] Added pgvector column note on PaperChunk
+  - [x] Added links to LucidChart diagrams
 
 ### docs/REDIS_SETUP.md
 
-- Status: Exists — good quality, minor alignment needed
-- Current issues: REDIS_HOST/REDIS_PORT/REDIS_PASSWORD env var names differ from .env.example which prefers REDIS_URL; Docker command uses `redis:alpine` tag (latest vs pinned); No mention of Upstash as alternative in the setup options (mentioned in production section but not in options)
+- Status: Updated and restructured
 - Target audience: New contributor
 - Todos:
-  - [ ] Add note that .env.example uses `REDIS_URL` as the primary connection string
-  - [ ] Add Upstash as Option 4 (serverless Redis, good for Vercel)
-  - [ ] Add "Verify it worked" curl/redis-cli check after setup
-  - [ ] Pin Docker image tag to `redis:7-alpine` for reproducibility
+  - [x] Added REDIS_URL as primary connection string option
+  - [x] Added Upstash as Option 4 (serverless Redis)
+  - [x] Added manual verification step with redis-cli ping
+  - [x] Pinned Docker tag to `redis:7-alpine`
+  - [x] Rewrote with clearer section headers and options
 
 ### docs/DATABASE.md (NEW)
 
@@ -168,14 +166,16 @@ Files: `docs/ERD.md`, `docs/REDIS_SETUP.md`, plus new `docs/DATABASE.md`
 - Why needed: DB setup knowledge is scattered across SETUP.md, ENVIRONMENT.md, REDIS_SETUP.md, and AGENTS.md. A single focused guide is needed.
 - Target audience: New contributor
 - Todos:
-  - [ ] Create new file `docs/DATABASE.md`
-  - [ ] Section: PostgreSQL installation (local, WSL, Docker)
-  - [ ] Section: pgvector extension setup
-  - [ ] Section: Create database and user
-  - [ ] Section: Prisma migration workflow (migrate → generate → seed)
-  - [ ] Section: Prisma Studio usage
-  - [ ] Section: Common DB troubleshooting
-  - [ ] Section: Migration discipline checklist
+- [x] Created `docs/DATABASE.md`
+- [x] PostgreSQL installation (local, WSL, Docker)
+- [x] pgvector extension setup
+- [x] Create database and user
+- [x] Prisma migration workflow (migrate → generate → seed)
+- [x] Prisma Studio usage
+- [x] Common DB troubleshooting
+- [x] Migration discipline checklist
+- [x] Prisma client usage tips (typed queries vs raw SQL)
+- [x] Drift detection and reconciliation
 
 ---
 
@@ -290,7 +290,7 @@ Files: `LICENSE.md`, `docs/PROMPTING_GUIDE.md`, `docs/TERMS.md`, `docs/CODE_OF_C
 
 1. **Section 1: Root-Level Docs** — ✅ Complete. Updated README.md (Node badge, license, Quick Start, socket-server, commands), rewrote CONTRIBUTING.md (versions, branching, PR workflow), fixed SECURITY.md email + links, updated CODE_OF_CONDUCT.md (Our Pledge).
 2. **Section 2: Setup & Environment** — ✅ Complete. Rewrote SETUP.md (correct versions, commands, architecture, verify step), rewrote DEVELOPMENT.md (active workflow guide with common tasks), rewrote ENVIRONMENT.md (restructured, fixed formatting, added socket-server section, better-auth consistency).
-3. **Section 3: Database & Redis** — ERD.md, REDIS_SETUP.md, DATABASE.md (new)
+3. **Section 3: Database & Redis** — ✅ Complete. Updated REDIS_SETUP.md (REDIS_URL, Upstash, verify step, pinned Docker), updated ERD.md (how-to-read, pgvector, Phase 7-10 tables), created DATABASE.md (full PostgreSQL + pgvector + Prisma guide).
 4. **Section 4: Deployment & Operations** — DEPLOY.md, BRANCH_FLOW.md, QUICKSTART.md (new), TESTING.md (new)
 5. **Section 5: Legal & Polish** — LICENSE.md, PROMPTING_GUIDE.md (no changes: TERMS.md)
 
