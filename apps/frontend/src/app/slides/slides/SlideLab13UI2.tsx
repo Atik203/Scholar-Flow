@@ -1,28 +1,28 @@
-import { Monitor } from "lucide-react";
+import { Layout } from "lucide-react";
 import Image from "next/image";
 
 const screenshots = [
   {
-    src: "/slides/dashboard_overview.png",
-    title: "Dashboard Overview",
-    description: "Clean, intuitive interface for managing all your research papers in one place. View recent uploads, track reading progress, and access collections with a single click. Features a smart search bar and quick-action buttons for common tasks like upload, share, and export.",
+    src: "/slides/annotations.png",
+    title: "PDF Annotations",
+    description: "Highlight important text passages, add sticky notes, and bookmark key sections directly on PDF documents. Annotations are saved per-user and persist across sessions. Share annotated papers with team members for collaborative review and feedback.",
   },
   {
-    src: "/slides/text_editor.png",
-    title: "Rich Text Editor (TipTap)",
-    description: "Full-featured collaborative editor with real-time sync, auto-save functionality, and PDF/DOCX export. Supports headings, tables, images, citations, and LaTeX math. Multiple users can edit the same document simultaneously with live cursor presence indicators.",
+    src: "/slides/ai_chat.png",
+    title: "AI Chat & Paper Insights",
+    description: "Ask questions about your papers and get instant, context-aware answers powered by Gemini and OpenAI. The AI understands the full document content and can summarize sections, explain complex concepts, and generate literature comparisons across multiple papers.",
   },
 ];
 
-export default function SlideLab12UI() {
+export default function SlideLab13UI2() {
   return (
     <div className="w-full h-full bg-white p-8 flex flex-col">
       <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-          <Monitor className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
+          <Layout className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-black">UI/UX Preview</h1>
-        <span className="text-lg font-bold text-black">(1/2)</span>
+        <span className="text-lg font-bold text-black">(2/2)</span>
       </div>
 
       <div className="flex-1 grid grid-cols-2 gap-4">
