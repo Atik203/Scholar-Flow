@@ -11,15 +11,14 @@ const products = [
   { name: "ScholarFlow", color: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white" },
   { name: "Mendeley", color: "bg-orange-100 text-orange-900" },
   { name: "Zotero", color: "bg-red-100 text-red-900" },
-  { name: "ResearchGate", color: "bg-teal-100 text-teal-900" },
   { name: "Paperpile", color: "bg-indigo-100 text-indigo-900" },
   { name: "EndNote", color: "bg-blue-100 text-blue-900" },
 ];
 
 const support: number[][] = [
-  [2, 2, 2, 1, 2, 2], [2, 0, 0, 0, 0, 0], [2, 0, 0, 0, 0, 0], [2, 1, 0, 0, 0, 0],
-  [2, 1, 0, 0, 1, 2], [2, 2, 2, 1, 2, 2], [2, 2, 2, 1, 2, 2], [2, 2, 2, 0, 2, 1],
-  [2, 1, 0, 0, 1, 1], [2, 1, 1, 1, 1, 1], [2, 2, 0, 0, 2, 2], [2, 2, 2, 1, 2, 2],
+  [2, 2, 2, 2, 2], [2, 0, 0, 0, 0], [2, 0, 0, 0, 0], [2, 1, 0, 0, 0],
+  [2, 1, 0, 1, 2], [2, 2, 2, 2, 2], [2, 2, 2, 2, 2], [2, 2, 2, 2, 1],
+  [2, 1, 0, 1, 1], [2, 1, 1, 1, 1], [2, 2, 0, 2, 2], [2, 2, 2, 2, 2],
 ];
 
 function SupportIcon({ level }: { level: number }) {
@@ -30,27 +29,24 @@ function SupportIcon({ level }: { level: number }) {
 
 export default function SlideLab09Comparison() {
   return (
-    <div className="w-full h-full bg-white p-8 flex flex-col">
+    <div className="w-full h-full bg-white p-6 flex flex-col">
       <div className="flex items-center justify-center gap-3 mb-3">
-        <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-          <Table className="w-6 h-6 text-white" />
+        <div className="w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
+          <Table className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-black">Feature Comparison Matrix</h1>
       </div>
 
-      <div className="flex justify-center gap-6 mb-3">
-        <div className="flex items-center gap-2">
-          <Check className="w-5 h-5 text-emerald-600" strokeWidth={3} />
-          <span className="text-xl font-bold text-black">Full Support</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Minus className="w-5 h-5 text-amber-600" strokeWidth={3} />
-          <span className="text-xl font-bold text-black">Partial</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <X className="w-5 h-5 text-red-600" strokeWidth={3} />
-          <span className="text-xl font-bold text-black">Not Available</span>
-        </div>
+      <div className="flex justify-center gap-4 mb-3">
+        {[{ icon: Check, label: "Full Support", color: "text-emerald-600" },
+          { icon: Minus, label: "Partial", color: "text-amber-600" },
+          { icon: X, label: "Not Available", color: "text-red-600" },
+        ].map((item, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <item.icon className={`w-5 h-5 ${item.color}`} strokeWidth={3} />
+            <span className="text-xl font-bold text-black">{item.label}</span>
+          </div>
+        ))}
       </div>
 
       <div className="flex-1 overflow-hidden">
