@@ -9,16 +9,25 @@ const features = [
 
 const products = [
   { name: "ScholarFlow", sub: "Our Platform" },
+  { name: "Paperpal", sub: "Cactus AI" },
+  { name: "EndNote 21", sub: "Clarivate" },
   { name: "Mendeley", sub: "Elsevier" },
   { name: "Zotero", sub: "Open Source" },
-  { name: "Paperpile", sub: "Paperpile LLC" },
-  { name: "EndNote", sub: "Clarivate" },
 ];
 
 const support: number[][] = [
-  [2, 2, 2, 2, 2], [2, 0, 0, 0, 0], [2, 0, 0, 0, 0], [2, 1, 0, 0, 0],
-  [2, 1, 0, 1, 2], [2, 2, 2, 2, 2], [2, 2, 2, 2, 2], [2, 2, 2, 2, 1],
-  [2, 1, 0, 1, 1], [2, 1, 1, 1, 1], [2, 2, 0, 2, 2], [2, 2, 2, 2, 2],
+  [2, 1, 2, 2, 2], // Smart Paper Upload
+  [2, 2, 0, 0, 0], // AI Summarization
+  [2, 2, 0, 0, 0], // AI Chat Q&A
+  [2, 2, 0, 0, 0], // Rich Text Editor
+  [2, 0, 1, 1, 1], // Team Workspaces
+  [2, 0, 2, 2, 2], // Collections & Tagging
+  [2, 1, 2, 2, 2], // Citation Generator
+  [2, 0, 2, 2, 2], // PDF Annotations
+  [2, 0, 0, 0, 0], // Real-time Collaboration
+  [2, 1, 1, 1, 0], // Analytics Dashboard
+  [2, 2, 0, 0, 0], // Subscription Billing
+  [2, 1, 2, 2, 2], // Enterprise Security
 ];
 
 function SupportIcon({ level }: { level: number }) {
@@ -103,7 +112,7 @@ export default function SlideLab09Comparison() {
       {/* ── Footer ── */}
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 rounded-xl px-6 py-3 shadow-lg border border-indigo-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white tracking-wide">
-          🏆 ScholarFlow scores <span className="text-amber-300">12/12</span> — the only platform with full AI + collaboration + affordable pricing
+          🏆 ScholarFlow scores <span className="text-amber-300">12/12</span> — the only platform combining full reference management, AI insights, and real-time collaboration
         </p>
       </div>
     </div>
