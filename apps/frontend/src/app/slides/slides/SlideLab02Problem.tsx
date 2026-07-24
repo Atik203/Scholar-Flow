@@ -110,27 +110,29 @@ export default function SlideLab02Problem() {
                 <Monitor className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="text-xs uppercase tracking-wider font-extrabold text-blue-200 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">
+                <span className="text-xs uppercase tracking-wider font-extrabold text-blue-100 bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
                   The Solution
                 </span>
                 <h2 className="text-2xl font-extrabold text-white">What is ScholarFlow?</h2>
               </div>
             </div>
 
-            <p className="text-xl font-normal text-blue-50 leading-snug text-justify mb-4">
+            <p className="text-xl font-medium text-white leading-snug text-justify mb-3">
               An AI-powered collaborative research management platform that unifies paper upload, intelligent analysis, team workspaces, and citation management into a single affordable solution.
             </p>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {[
-                { icon: "🤖", text: "AI-powered summarization, chat Q&A, and literature review" },
+                { icon: "🤖", text: "AI-powered paper summarization, chat Q&A, and literature review" },
                 { icon: "👥", text: "Role-based team workspaces with real-time collaboration" },
+                { icon: "🔍", text: "pgvector semantic search for instant literature discovery" },
+                { icon: "📝", text: "TipTap rich text editor with auto-save & PDF/DOCX export" },
                 { icon: "☁️", text: "Scalable cloud storage with AWS S3 presigned URLs" },
                 { icon: "💰", text: "Affordable pricing with generous free tier for students" },
               ].map((item, i) => (
-                <div key={i} className="bg-white/10 backdrop-blur-md rounded-xl px-3.5 py-2.5 border border-white/15 flex items-center gap-3">
-                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
-                  <span className="text-xl font-semibold text-white leading-tight">{item.text}</span>
+                <div key={i} className="bg-white/12 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 flex items-center gap-2.5">
+                  <span className="text-xl flex-shrink-0">{item.icon}</span>
+                  <span className="text-xl font-bold text-white leading-tight">{item.text}</span>
                 </div>
               ))}
             </div>
