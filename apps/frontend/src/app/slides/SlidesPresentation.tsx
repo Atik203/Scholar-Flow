@@ -24,9 +24,10 @@ import SlideLab09Comparison from "./slides/SlideLab09Comparison";
 import SlideLab10TechStack from "./slides/SlideLab10TechStack";
 import SlideLab11Architecture from "./slides/SlideLab11Architecture";
 import SlideLab12UI from "./slides/SlideLab12UI";
-import SlideLab13Timeline from "./slides/SlideLab13Timeline";
-import SlideLab14Conclusion from "./slides/SlideLab14Conclusion";
-import SlideLab15ThankYou from "./slides/SlideLab15ThankYou";
+import SlideLab13UI2 from "./slides/SlideLab13UI2";
+import SlideLab14Timeline from "./slides/SlideLab14Timeline";
+import SlideLab15Conclusion from "./slides/SlideLab15Conclusion";
+import SlideLab16ThankYou from "./slides/SlideLab16ThankYou";
 
 const slides = [
   { id: 1, title: "Title", component: SlideLab01Title },
@@ -40,10 +41,11 @@ const slides = [
   { id: 9, title: "Feature Comparison Matrix", component: SlideLab09Comparison },
   { id: 10, title: "Technology Stack & Justification", component: SlideLab10TechStack },
   { id: 11, title: "System Architecture", component: SlideLab11Architecture },
-  { id: 12, title: "UI Preview", component: SlideLab12UI },
-  { id: 13, title: "Implementation Timeline", component: SlideLab13Timeline },
-  { id: 14, title: "Conclusion", component: SlideLab14Conclusion },
-  { id: 15, title: "Thank You & Q&A", component: SlideLab15ThankYou },
+  { id: 12, title: "UI Preview (1/2)", component: SlideLab12UI },
+  { id: 13, title: "UI Preview (2/2)", component: SlideLab13UI2 },
+  { id: 14, title: "Implementation Timeline", component: SlideLab14Timeline },
+  { id: 15, title: "Conclusion", component: SlideLab15Conclusion },
+  { id: 16, title: "Thank You & Q&A", component: SlideLab16ThankYou },
 ];
 
 export default function SlidesPresentation() {
@@ -94,7 +96,6 @@ export default function SlidesPresentation() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col">
-      {/* Control Bar */}
       <div className="bg-white border-b border-slate-200 px-4 py-2 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <Link
@@ -128,7 +129,6 @@ export default function SlidesPresentation() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4 md:p-8">
         <div
           ref={slideContainerRef}
@@ -156,7 +156,6 @@ export default function SlidesPresentation() {
         </div>
       </div>
 
-      {/* Navigation */}
       <div className="bg-white border-t border-slate-200 px-4 py-3">
         <div className="max-w-[1200px] mx-auto flex items-center justify-between">
           <button
