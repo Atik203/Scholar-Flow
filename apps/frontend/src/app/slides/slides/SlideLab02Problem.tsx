@@ -1,100 +1,113 @@
-import { AlertTriangle, Bot, Clock, DollarSign, FolderX, Monitor, Sparkles, Users } from "lucide-react";
+import { AlertTriangle, Bot, Clock, FolderX, Lightbulb, Monitor, Users, Zap } from "lucide-react";
 
 const problems = [
   {
     icon: FolderX,
     title: "Fragmented Tools",
-    description: "Researchers juggle 4+ disconnected apps — Mendeley, Dropbox, Slack — with no unified workflow or central repository for their papers.",
+    description: "Researchers switch between 4+ disconnected apps with no unified place to store, search, or manage research papers.",
     stat: "65%",
-    statText: "use 4+ different tools",
+    statText: "use 4+ separate tools",
     color: "from-rose-500 to-red-600",
-    bgColor: "bg-rose-50 border-rose-100",
+    bgColor: "bg-rose-50 border-rose-200",
+    statColor: "text-rose-700",
   },
   {
     icon: Bot,
-    title: "No AI Integration",
-    description: "No intelligent assistance for paper summarization, literature review, or research analysis. Everything is done manually.",
+    title: "Zero AI Assistance",
+    description: "Paper reading, summarization, and literature reviews are done manually — wasting hours that could go into actual research.",
     stat: "91%",
-    statText: "lack AI assistance",
+    statText: "get no AI help",
     color: "from-amber-500 to-orange-600",
-    bgColor: "bg-amber-50 border-amber-100",
+    bgColor: "bg-amber-50 border-amber-200",
+    statColor: "text-amber-700",
   },
   {
     icon: Users,
-    title: "Poor Collaboration",
-    description: "Existing tools lack real-time collaboration features and role-based team access control for research groups.",
+    title: "Weak Collaboration",
+    description: "No shared workspaces, role controls, or co-annotation tools — research teams work in silos and lose context.",
     stat: "78%",
-    statText: "struggle with team work",
+    statText: "struggle to collaborate",
     color: "from-purple-500 to-indigo-600",
-    bgColor: "bg-purple-50 border-purple-100",
+    bgColor: "bg-purple-50 border-purple-200",
+    statColor: "text-purple-700",
   },
   {
     icon: Clock,
-    title: "Manual Processes",
-    description: "Time-consuming metadata entry, citation management, and paper organization are still done entirely by hand.",
+    title: "Wasted Time",
+    description: "Metadata entry, citation formatting, and paper organization are tedious manual tasks that slow every researcher down.",
     stat: "82%",
-    statText: "manually extract metadata",
+    statText: "still work manually",
     color: "from-blue-500 to-cyan-600",
-    bgColor: "bg-blue-50 border-blue-100",
+    bgColor: "bg-blue-50 border-blue-200",
+    statColor: "text-blue-700",
   },
+];
+
+const solutions = [
+  { icon: "📄", title: "Smart Paper Upload", desc: "Auto-extracts title, authors & abstract on upload" },
+  { icon: "🔍", title: "AI Semantic Search", desc: "Find relevant passages across all your papers instantly" },
+  { icon: "🧠", title: "AI Summaries", desc: "Condense any paper into crisp, readable insights" },
+  { icon: "📂", title: "Team Collections", desc: "Group, share and explore papers together" },
+  { icon: "✏️", title: "Inline Annotations", desc: "Highlight, comment and discuss within the paper" },
+  { icon: "🔒", title: "Role-Based Access", desc: "Viewer, editor and admin controls per workspace" },
 ];
 
 export default function SlideLab02Problem() {
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 p-12 flex flex-col justify-between relative overflow-hidden select-none">
-      {/* Background Decorative Blur Blobs */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Background Blur Blobs */}
+      <div className="absolute -top-32 -right-32 w-[28rem] h-[28rem] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-[28rem] h-[28rem] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header Section */}
-      <div className="flex items-center justify-between mb-4 relative z-10">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/20">
+          <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-500/25">
             <AlertTriangle className="w-7 h-7 text-white" />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="text-xs uppercase tracking-wider font-extrabold text-rose-600 bg-rose-100/80 px-2.5 py-0.5 rounded-full border border-rose-200">
-                Key Challenges
-              </span>
-            </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Problem Statement</h1>
+            <p className="text-base font-bold uppercase tracking-widest text-rose-600 mb-0.5">Slide 02 · Problem Statement</p>
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Why ScholarFlow?</h1>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl border border-slate-200/90 shadow-sm">
-          <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
-          <span className="text-lg font-bold text-slate-800">The Research Management Crisis</span>
+        <div className="flex items-center gap-2 bg-white/95 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-slate-200 shadow-md">
+          <Zap className="w-5 h-5 text-amber-500" />
+          <span className="text-xl font-bold text-slate-900">The Research Management Crisis</span>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-5 gap-4 relative z-10 min-h-0">
-        {/* Left Side: 4 Problems Grid (3 columns) */}
+      {/* ── Main Grid ── */}
+      <div className="flex-1 grid grid-cols-5 gap-5 relative z-10 my-4 min-h-0">
+
+        {/* Left — 4 Problem Cards */}
         <div className="col-span-3 grid grid-cols-2 gap-4">
           {problems.map((problem, index) => (
             <div
               key={index}
-              className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/90 shadow-md shadow-slate-100 flex flex-col justify-between hover:border-blue-300 transition-all duration-200"
+              className="bg-white rounded-2xl p-4 border border-slate-200 shadow-md flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-center gap-3 mb-2.5">
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${problem.color} flex items-center justify-center flex-shrink-0 shadow-md shadow-slate-200`}>
+                {/* Title Row */}
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${problem.color} flex items-center justify-center flex-shrink-0 shadow-sm`}>
                     <problem.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{problem.title}</h3>
+                  <h3 className="text-2xl font-extrabold text-slate-900 leading-tight">{problem.title}</h3>
                 </div>
 
-                <p className="text-xl font-medium text-slate-700 leading-snug text-justify mb-3">
+                {/* Description */}
+                <p className="text-xl font-semibold text-slate-800 leading-snug text-justify">
                   {problem.description}
                 </p>
               </div>
 
-              <div className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border ${problem.bgColor}`}>
+              {/* Stat Badge */}
+              <div className={`mt-3 flex items-center gap-2.5 px-3 py-2 rounded-xl border ${problem.bgColor}`}>
                 <span className={`text-3xl font-black bg-gradient-to-r ${problem.color} bg-clip-text text-transparent`}>
                   {problem.stat}
                 </span>
-                <span className="text-lg font-bold text-slate-800 leading-tight">
+                <span className={`text-xl font-bold ${problem.statColor} leading-tight`}>
                   {problem.statText}
                 </span>
               </div>
@@ -102,54 +115,47 @@ export default function SlideLab02Problem() {
           ))}
         </div>
 
-        {/* Right Side: What is ScholarFlow Solution (2 columns) */}
-        <div className="col-span-2 bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-700 text-white rounded-2xl p-5 shadow-xl shadow-indigo-500/20 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-white/15 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20">
-                <Monitor className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="text-xs uppercase tracking-wider font-extrabold text-blue-100 bg-white/15 px-2.5 py-0.5 rounded-full border border-white/20">
-                  The Solution
-                </span>
-                <h2 className="text-2xl font-extrabold text-white">What is ScholarFlow?</h2>
-              </div>
+        {/* Right — Solution Card */}
+        <div className="col-span-2 bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 rounded-2xl p-5 shadow-xl shadow-indigo-500/25 flex flex-col">
+          {/* Card Header */}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center border border-white/30 flex-shrink-0">
+              <Monitor className="w-6 h-6 text-white" />
             </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Lightbulb className="w-4 h-4 text-amber-300" />
+                <span className="text-base font-extrabold uppercase tracking-widest text-blue-100">Our Solution</span>
+              </div>
+              <h2 className="text-2xl font-extrabold text-white leading-tight">What is ScholarFlow?</h2>
+            </div>
+          </div>
 
-            <p className="text-xl font-medium text-white leading-snug text-justify mb-3">
-              An AI-powered collaborative research management platform that unifies paper upload, intelligent analysis, team workspaces, and citation management into a single affordable solution.
-            </p>
+          {/* Elevator Pitch */}
+          <p className="text-xl font-bold text-white leading-snug mb-4 border-l-4 border-amber-400 pl-3">
+            One platform to upload, search, summarize, annotate and collaborate on research papers — powered by AI.
+          </p>
 
-            <div className="space-y-2">
-              {[
-                { icon: "🤖", text: "AI-powered paper summarization, chat Q&A, and literature review" },
-                { icon: "👥", text: "Role-based team workspaces with real-time collaboration" },
-                { icon: "🔍", text: "pgvector semantic search for instant literature discovery" },
-                { icon: "📝", text: "TipTap rich text editor with auto-save & PDF/DOCX export" },
-                { icon: "☁️", text: "Scalable cloud storage with AWS S3 presigned URLs" },
-                { icon: "💰", text: "Affordable pricing with generous free tier for students" },
-              ].map((item, i) => (
-                <div key={i} className="bg-white/12 backdrop-blur-md rounded-xl px-3 py-2 border border-white/20 flex items-center gap-2.5">
-                  <span className="text-xl flex-shrink-0">{item.icon}</span>
-                  <span className="text-xl font-bold text-white leading-tight">{item.text}</span>
+          {/* Feature List */}
+          <div className="flex flex-col gap-2 flex-1">
+            {solutions.map((item, i) => (
+              <div key={i} className="bg-white/20 rounded-xl px-3 py-2.5 border border-white/25 flex items-center gap-3">
+                <span className="text-2xl flex-shrink-0 leading-none">{item.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-xl font-extrabold text-white leading-none">{item.title}</p>
+                  <p className="text-base font-semibold text-blue-100 leading-tight truncate">{item.desc}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Footer Commercial Cost Banner */}
-      <div className="mt-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-xl p-3 text-center shadow-lg shadow-blue-500/20 border border-blue-400/30 relative z-10">
-        <div className="flex items-center justify-center gap-2.5 text-white">
-          <div className="w-7 h-7 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-amber-300">
-            <DollarSign className="w-4 h-4" />
-          </div>
-          <span className="text-xl font-bold tracking-wide">
-            Commercial tools cost <span className="text-amber-300 font-extrabold">$50–$250/month</span> — Students & Researchers need an accessible, unified solution.
-          </span>
-        </div>
+      {/* ── Footer Banner ── */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-xl px-6 py-3 shadow-lg shadow-blue-500/20 border border-blue-400/30 relative z-10">
+        <p className="text-center text-xl font-bold text-white tracking-wide">
+          💸 Existing tools cost <span className="text-amber-300 font-extrabold">$50–$250/month</span> — ScholarFlow brings it all together, affordably, for students & researchers.
+        </p>
       </div>
     </div>
   );
