@@ -1,120 +1,147 @@
-import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { BarChart3, CheckCircle2, TrendingUp, XCircle } from "lucide-react";
 
 const competitors = [
   {
-    name: "Mendeley", company: "Elsevier", color: "from-orange-500 to-orange-600",
-    type: "Reference Manager", users: "15M+", pricing: "Freemium",
-    features: [
-      { name: "PDF Annotation", ok: true },
-      { name: "AI Summarization", ok: false },
-      { name: "AI Chat with Papers", ok: false },
-      { name: "Real-time Collaboration", ok: false },
-    ],
-    limitation: "Limited AI, vendor lock-in with Elsevier",
+    name: "Mendeley",
+    company: "Elsevier",
+    color: "from-orange-500 to-orange-600",
+    pricing: "Freemium",
+    features: [true, false, false, false],
+    limitation: "Vendor lock-in, no AI",
   },
   {
-    name: "Zotero", company: "Open Source", color: "from-red-500 to-red-600",
-    type: "Reference Manager", users: "8M+", pricing: "Free (300MB)",
-    features: [
-      { name: "PDF Annotation", ok: true },
-      { name: "AI Summarization", ok: false },
-      { name: "AI Chat with Papers", ok: false },
-      { name: "Real-time Collaboration", ok: false },
-    ],
-    limitation: "No native AI, basic collab, 300MB limit",
+    name: "Zotero",
+    company: "Open Source",
+    color: "from-red-500 to-rose-600",
+    pricing: "Free (300 MB)",
+    features: [true, false, false, false],
+    limitation: "No AI, 300 MB cap",
   },
   {
-    name: "Paperpile", company: "Paperpile LLC", color: "from-indigo-500 to-indigo-600",
-    type: "Reference Manager", users: "1M+", pricing: "$2.99/mo",
-    features: [
-      { name: "PDF Annotation", ok: true },
-      { name: "AI Summarization", ok: false },
-      { name: "AI Chat with Papers", ok: false },
-      { name: "Real-time Collaboration", ok: false },
-    ],
-    limitation: "Limited free tier, no AI, Google Docs only",
+    name: "Paperpile",
+    company: "Paperpile LLC",
+    color: "from-indigo-500 to-indigo-600",
+    pricing: "$2.99 / mo",
+    features: [true, false, false, false],
+    limitation: "No AI, Google Docs only",
   },
   {
-    name: "EndNote", company: "Clarivate Analytics", color: "from-blue-700 to-blue-800",
-    type: "Enterprise Reference", users: "3M+", pricing: "$250/yr",
-    features: [
-      { name: "PDF Annotation", ok: true },
-      { name: "AI Summarization", ok: false },
-      { name: "AI Chat with Papers", ok: false },
-      { name: "Real-time Collaboration", ok: false },
-    ],
-    limitation: "Very expensive, dated UI, no AI at all",
+    name: "EndNote",
+    company: "Clarivate",
+    color: "from-blue-700 to-blue-800",
+    pricing: "$250 / yr",
+    features: [true, false, false, false],
+    limitation: "Expensive, dated UI",
   },
 ];
 
-const scholarFlowFeatures = [
-  { name: "PDF Annotation", ok: true },
-  { name: "AI Summarization", ok: true },
-  { name: "AI Chat with Papers", ok: true },
-  { name: "Real-time Collaboration", ok: true },
+const featureLabels = [
+  "PDF Annotation",
+  "AI Summarization",
+  "AI Chat Q&A",
+  "Team Collaboration",
 ];
+
+const scholarFlowFeatures = [true, true, true, true];
 
 export default function SlideLab08Benchmark() {
   return (
-    <div className="w-full h-full bg-white p-6 flex flex-col">
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-14 h-14 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center">
-          <AlertCircle className="w-7 h-7 text-white" />
+    <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 p-10 flex flex-col justify-between relative overflow-hidden select-none">
+      {/* Background Blur Blobs */}
+      <div className="absolute -top-32 -right-32 w-[28rem] h-[28rem] bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-[28rem] h-[28rem] bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* ── Header ── */}
+      <div className="relative z-10">
+        <div className="absolute -top-10 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full opacity-60" />
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <BarChart3 className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Slide 08 · Benchmark Analysis</p>
+              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">ScholarFlow vs. Competitors</h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-md">
+            <TrendingUp className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+            <span className="text-xl font-bold text-slate-900">Market Gap Analysis</span>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-black">Benchmark Analysis</h1>
       </div>
 
-      <div className="flex-1 grid grid-cols-4 gap-3">
-        {/* ScholarFlow column highlighted */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-4 text-white flex flex-col">
-          <div className="text-center mb-3">
-            <h3 className="text-2xl font-bold">ScholarFlow</h3>
-            <p className="text-sm text-blue-100 font-semibold">AI-Powered Platform</p>
-            <p className="text-sm text-blue-100">Freemium · 2025</p>
+      {/* ── Comparison Table ── */}
+      <div className="flex-1 grid grid-cols-5 gap-3 relative z-10 my-3 min-h-0">
+
+        {/* ── ScholarFlow Column (highlighted) ── */}
+        <div className="bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 rounded-2xl p-4 flex flex-col shadow-2xl shadow-indigo-500/30 border border-white/10">
+          {/* Header */}
+          <div className="text-center mb-3 pb-3 border-b border-white/20">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-2 border border-white/30">
+              <span className="text-xl">⭐</span>
+            </div>
+            <h3 className="text-2xl font-extrabold text-white leading-tight">ScholarFlow</h3>
+            <p className="text-lg font-bold text-blue-200">AI-Powered Platform</p>
+            <div className="mt-1.5 bg-emerald-500 text-white text-base font-extrabold px-3 py-0.5 rounded-full inline-block">Free Tier Available</div>
           </div>
-          <div className="border-t border-white/20 pt-3 space-y-2 flex-1">
-            {scholarFlowFeatures.map((f, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-300 flex-shrink-0" />
-                <span className="text-lg font-semibold">{f.name}</span>
+
+          {/* Feature checks */}
+          <div className="flex flex-col gap-2.5 flex-1">
+            {featureLabels.map((label, i) => (
+              <div key={i} className="bg-white/20 rounded-xl px-3 py-2 border border-white/25 flex items-center gap-2.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-300 flex-shrink-0" />
+                <span className="text-xl font-bold text-white leading-tight">{label}</span>
               </div>
             ))}
           </div>
-          <div className="mt-2 pt-2 border-t border-white/20 text-center">
-            <span className="text-lg font-bold text-green-300">✓ All features supported</span>
+
+          <div className="mt-3 pt-3 border-t border-white/20 text-center">
+            <span className="text-xl font-extrabold text-emerald-300">✅ All 4 supported</span>
           </div>
         </div>
 
+        {/* ── Competitor Columns ── */}
         {competitors.map((comp, i) => (
-          <div key={i} className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col">
-            <div className={`bg-gradient-to-br ${comp.color} rounded-lg px-3 py-2 text-white text-center mb-3`}>
-              <h3 className="text-2xl font-bold">{comp.name}</h3>
-              <p className="text-xs font-semibold">{comp.type}</p>
-              <p className="text-xs">{comp.users} · {comp.pricing}</p>
+          <div key={i} className="bg-white rounded-2xl border-2 border-slate-200 shadow-md flex flex-col overflow-hidden">
+            {/* Coloured header strip */}
+            <div className={`bg-gradient-to-r ${comp.color} px-4 py-3 text-white text-center`}>
+              <h3 className="text-2xl font-extrabold leading-tight">{comp.name}</h3>
+              <p className="text-lg font-bold text-white/90">{comp.company}</p>
+              <div className="mt-1 bg-white/20 text-white text-base font-bold px-3 py-0.5 rounded-full inline-block">{comp.pricing}</div>
             </div>
-            <div className="space-y-2 flex-1">
-              {comp.features.map((f, j) => (
-                <div key={j} className="flex items-center gap-2">
-                  {f.ok ? (
+
+            {/* Feature rows */}
+            <div className="flex flex-col gap-2 p-3 flex-1">
+              {featureLabels.map((label, j) => (
+                <div key={j} className={`rounded-xl px-3 py-2 border flex items-center gap-2 ${comp.features[j] ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}>
+                  {comp.features[j] ? (
                     <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                   ) : (
                     <XCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
                   )}
-                  <span className="text-2xl font-normal text-black">{f.name}</span>
+                  <span className={`text-xl font-bold leading-tight ${comp.features[j] ? "text-emerald-800" : "text-red-700"}`}>{label}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-2 pt-2 border-t border-slate-200">
-              <p className="text-sm text-black font-semibold">✗ {comp.limitation}</p>
+
+            {/* Limitation footer */}
+            <div className="px-3 pb-3">
+              <div className="bg-slate-100 rounded-xl px-3 py-2 border border-slate-200">
+                <p className="text-xl font-bold text-slate-700 leading-tight text-center">⚠️ {comp.limitation}</p>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200 text-center">
-        <span className="text-2xl font-bold text-black">
-          <span className="text-blue-700">Market Gap:</span> No existing solution combines AI-first design, modern tech stack, and affordable team collaboration in one platform.
-        </span>
+      {/* ── Footer Banner ── */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl px-6 py-3 shadow-lg shadow-blue-500/20 border border-blue-400/30 relative z-10">
+        <p className="text-center text-xl font-extrabold text-white tracking-wide">
+          🏆 <span className="text-amber-300">Market Gap:</span> No existing tool combines AI-first design, real-time collaboration, and affordable pricing — ScholarFlow does.
+        </p>
       </div>
     </div>
   );
