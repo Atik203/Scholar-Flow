@@ -25,19 +25,17 @@ export default function SlideLab01Title() {
 
         <div className="bg-slate-50 border border-slate-200 rounded-2xl px-10 py-5 shadow-xl max-w-3xl w-full">
           <h2 className="text-2xl font-bold text-blue-600 text-center mb-3">
-            Software Engineering Lab Project Proposal
+            Project Proposal
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl p-3 border border-slate-200 text-center">
-              <p className="text-lg font-bold text-black">Course</p>
-              <p className="text-xl font-bold text-black">Software Engineering Laboratory</p>
-            </div>
-            <div className="bg-white rounded-xl p-3 border border-slate-200 text-center">
-              <p className="text-lg font-bold text-black">Team</p>
-              <p className="text-xl font-bold text-black">Phantom Devs</p>
-            </div>
+          <div className="bg-white rounded-xl p-3 border border-slate-200 text-center">
+            <p className="text-lg font-bold text-black">Course: Software Engineering Laboratory</p>
+
           </div>
+          <div className="bg-white rounded-xl p-3 border border-slate-200 text-center">
+            <p className="text-lg font-bold text-black">Team: Phantom Devs</p>
+            </div>
+      
 
           <div className="mt-3 pt-3 border-t border-slate-200 text-center">
             <a href="https://scholar-flow-ai.vercel.app" className="text-blue-600 hover:text-blue-700 font-bold text-lg">
