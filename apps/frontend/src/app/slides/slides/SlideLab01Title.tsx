@@ -1,4 +1,4 @@
-import { BookOpen, ExternalLink, Github, Globe, GraduationCap, Sparkles, User, Users } from "lucide-react";
+import { BookOpen, GraduationCap, Sparkles, User, Users } from "lucide-react";
 import Image from "next/image";
 import { SiGithub } from "react-icons/si";
 
@@ -11,7 +11,7 @@ const teamMembers = [
 
 export default function SlideLab01Title() {
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/60 p-6 flex flex-col relative overflow-hidden select-none">
+    <div className="w-full h-full bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/60 p-10 flex flex-col relative overflow-hidden select-none">
       {/* Background Decorative Blur Blobs */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -25,8 +25,8 @@ export default function SlideLab01Title() {
 
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 max-w-5xl mx-auto w-full">
         {/* Header Section */}
-        <div className="flex flex-col items-center mb-4 text-center">
-          <div className="w-28 h-28 relative drop-shadow-xl mb-2">
+        <div className="flex flex-col items-center mb-5 text-center">
+          <div className="w-28 h-28 relative drop-shadow-xl mb-3">
             <Image src="/logo.png" alt="ScholarFlow Logo" fill className="object-contain" priority />
           </div>
 
@@ -39,57 +39,60 @@ export default function SlideLab01Title() {
             <span className="text-2xl font-bold tracking-wide">AI-Powered Research Collaboration Platform</span>
           </div>
 
-          <div className="inline-flex items-center gap-2.5 px-5 py-1.5 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 font-bold text-lg">
+          {/* Presentation badge — bumped to text-xl */}
+          <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-blue-100/90 border border-blue-200 text-blue-800 font-bold text-xl">
             <GraduationCap className="w-5 h-5 text-blue-600" />
             <span>Project Proposal Presentation</span>
           </div>
         </div>
 
-        {/* Project Proposal Card Container */}
+        {/* Card Container */}
         <div className="bg-white/90 backdrop-blur-md border border-slate-200/90 rounded-2xl p-6 shadow-xl shadow-slate-200/60 w-full">
-          {/* Metadata Row: Course & Team */}
+
+          {/* Course & Team Row */}
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 flex items-center gap-3.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center flex-shrink-0">
                 <BookOpen className="w-6 h-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs uppercase tracking-wider font-bold text-slate-500">Course</p>
+                {/* Label bumped from text-xs to text-base */}
+                <p className="text-base font-extrabold uppercase tracking-widest text-slate-500 mb-0.5">Course</p>
                 <p className="text-xl font-bold text-slate-900 truncate">Software Engineering Laboratory</p>
               </div>
             </div>
 
-            <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 flex items-center gap-3.5">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center flex-shrink-0">
                 <Users className="w-6 h-6" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs uppercase tracking-wider font-bold text-slate-500">Team</p>
+                <p className="text-base font-extrabold uppercase tracking-widest text-slate-500 mb-0.5">Team</p>
                 <p className="text-xl font-bold text-slate-900 truncate">Phantom Devs</p>
               </div>
             </div>
           </div>
 
           {/* Team Members Section */}
-          <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-4 mb-4">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/60">
-              <span className="text-sm uppercase tracking-wider font-bold text-slate-700 flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-600" />
-                Team Members
-              </span>
-            
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4">
+            {/* Section header label bumped from text-sm to text-base */}
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200">
+              <User className="w-5 h-5 text-blue-600 flex-shrink-0" />
+              <span className="text-base font-extrabold uppercase tracking-widest text-slate-700">Team Members</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               {teamMembers.map((member) => (
-                <div key={member.id} className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between shadow-sm hover:border-blue-300 transition-colors">
+                <div key={member.id} className="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-sm">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 font-bold text-base flex items-center justify-center flex-shrink-0 border border-blue-100">
+                    {/* Avatar bumped from w-9 h-9 text-base to w-11 h-11 text-lg */}
+                    <div className="w-11 h-11 rounded-full bg-blue-600 text-white font-extrabold text-lg flex items-center justify-center flex-shrink-0 shadow-sm">
                       {member.initial}
                     </div>
                     <span className="text-xl font-bold text-slate-900 truncate">{member.name}</span>
                   </div>
-                  <span className="text-lg font-mono font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex-shrink-0 ml-2">
+                  {/* Student ID bumped from text-lg to text-xl */}
+                  <span className="text-xl font-mono font-extrabold text-blue-700 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200 flex-shrink-0 ml-2">
                     {member.id}
                   </span>
                 </div>
@@ -97,16 +100,16 @@ export default function SlideLab01Title() {
             </div>
           </div>
 
-          {/* Live Link Footer */}
-          <div className="flex items-center justify-center text-base">
+          {/* GitHub Link — bumped from text-base to text-xl */}
+          <div className="flex items-center justify-center">
             <a
-              href="https://scholar-flow-ai.vercel.app"
+              href="https://github.com/Atik203/Scholar-Flow"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 text-blue-600 hover:text-blue-700 font-bold bg-blue-50 hover:bg-blue-100/80 px-5 py-2.5 rounded-xl transition-all duration-200 border border-blue-200 shadow-sm"
+              className="inline-flex items-center gap-3 text-blue-700 font-bold bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-xl transition-all duration-200 border border-blue-200 shadow-sm"
             >
-              <SiGithub className="w-5 h-5 text-blue-600" />
-              <span>https://github.com/Atik203/Scholar-Flow</span>
+              <SiGithub className="w-5 h-5 flex-shrink-0" />
+              <span className="text-xl font-bold">github.com/Atik203/Scholar-Flow</span>
             </a>
           </div>
         </div>
