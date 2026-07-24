@@ -15,7 +15,13 @@ const weeks2 = [
   { week: "W9 - Deploy", color: "bg-slate-600", items: ["Write comprehensive integration tests and end-to-end test coverage", "Performance optimization with caching, lazy loading, and code splitting", "Production deployment to Vercel (frontend) and Railway (backend)", "Create final documentation, demo preparation, and project handoff"] },
 ];
 
-function TimelineRow({ weeks, startIndex }: { weeks: typeof weeks; startIndex: number }) {
+interface TimelineWeek {
+  week: string;
+  color: string;
+  items: string[];
+}
+
+function TimelineRow({ weeks, startIndex }: { weeks: TimelineWeek[]; startIndex: number }) {
   return (
     <div className="grid grid-cols-5 gap-2 flex-1">
       {weeks.map((week, i) => (
