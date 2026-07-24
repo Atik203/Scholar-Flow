@@ -1,5 +1,6 @@
-import { BookOpen, ExternalLink, Globe, GraduationCap, Sparkles, User, Users } from "lucide-react";
+import { BookOpen, ExternalLink, Github, Globe, GraduationCap, Sparkles, User, Users } from "lucide-react";
 import Image from "next/image";
+import { SiGithub } from "react-icons/si";
 
 const teamMembers = [
   { id: "0112310298", name: "Md. Atikur Rahaman" },
@@ -99,16 +100,15 @@ export default function SlideLab01Title() {
           </div>
 
           {/* Live Link Footer */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center text-base">
             <a
               href="https://scholar-flow-ai.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2.5 text-blue-600 hover:text-blue-700 font-bold text-xl bg-blue-50 hover:bg-blue-100/80 px-5 py-2.5 rounded-xl transition-all duration-200 border border-blue-200 shadow-sm"
             >
-              <Globe className="w-5 h-5 text-blue-600" />
-              <span>scholar-flow-ai.vercel.app</span>
-              <ExternalLink className="w-4 h-4 text-blue-500" />
+              <SiGithub className="w-5 h-5 text-blue-600" />
+              <span>https://github.com/Atik203/Scholar-Flow</span>
             </a>
           </div>
         </div>
