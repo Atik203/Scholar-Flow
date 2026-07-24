@@ -3,10 +3,10 @@ import Image from "next/image";
 import { SiGithub } from "react-icons/si";
 
 const teamMembers = [
-  { id: "0112310298", name: "Md. Atikur Rahaman" },
-  { id: "0112310484", name: "Md. Salman Rohoman Nayeem" },
-  { id: "0112310163", name: "Pratay Paul" },
-  { id: "0112310302", name: "Md. Sarowar Alam Sourov" },
+  { id: "0112310298", name: "Md. Atikur Rahaman", initial: "A" },
+  { id: "0112310484", name: "Md. Salman Rohoman Nayeem", initial: "S" },
+  { id: "0112310163", name: "Pratay Paul", initial: "P" },
+  { id: "0112310302", name: "Md. Sarowar Alam Sourov", initial: "S" },
 ];
 
 export default function SlideLab01Title() {
@@ -77,9 +77,7 @@ export default function SlideLab01Title() {
                 <User className="w-5 h-5 text-blue-600" />
                 Team Members
               </span>
-              <span className="text-sm font-bold text-slate-600 bg-white px-2.5 py-1 rounded-md border border-slate-200">
-                4 Members
-              </span>
+            
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -87,7 +85,7 @@ export default function SlideLab01Title() {
                 <div key={member.id} className="bg-white border border-slate-200/90 rounded-xl p-3 flex items-center justify-between shadow-sm hover:border-blue-300 transition-colors">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 font-bold text-base flex items-center justify-center flex-shrink-0 border border-blue-100">
-                      {member.name.charAt(0)}
+                      {member.initial}
                     </div>
                     <span className="text-xl font-bold text-slate-900 truncate">{member.name}</span>
                   </div>
@@ -105,7 +103,7 @@ export default function SlideLab01Title() {
               href="https://scholar-flow-ai.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 text-blue-600 hover:text-blue-700 font-bold text-xl bg-blue-50 hover:bg-blue-100/80 px-5 py-2.5 rounded-xl transition-all duration-200 border border-blue-200 shadow-sm"
+              className="inline-flex items-center gap-2.5 text-blue-600 hover:text-blue-700 font-bold bg-blue-50 hover:bg-blue-100/80 px-5 py-2.5 rounded-xl transition-all duration-200 border border-blue-200 shadow-sm"
             >
               <SiGithub className="w-5 h-5 text-blue-600" />
               <span>https://github.com/Atik203/Scholar-Flow</span>
