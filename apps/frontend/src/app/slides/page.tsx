@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import SlidesPresentation from "./SlidesPresentation";
 
 export const metadata: Metadata = {
-  title: "Feasibility Analysis Slides - ScholarFlow",
+  title: "SE Lab Project Proposal - ScholarFlow",
   description:
-    "Survey-backed feasibility deck covering attendee statistics, key results, selected features, and SWOT with strategy.",
+    "Software Engineering Lab project proposal presentation for ScholarFlow — an AI-powered collaborative research management platform.",
 };
 
 export default function SlidesPage() {
