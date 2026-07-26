@@ -252,5 +252,4 @@ Fix: This is normal if you already applied the migration. If you need to force a
 
 - [Setup Guide](./SETUP.md) — full environment setup
 - [Environment Variables](./ENVIRONMENT.md) — env var reference
-- [ERD Reference](./ERD.md) — entity relationship diagrams
 - [Redis Setup](./REDIS_SETUP.md) — optional Redis for background jobs
