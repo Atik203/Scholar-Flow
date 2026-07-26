@@ -46,6 +46,8 @@ import rehypeHighlight from "rehype-highlight";
 import { useAIVisibility } from "@/lib/aiVisibilityContext";
 import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { showErrorToast } from "@/components/providers/ToastProvider";
+import { isDashboardRoute } from "@/components/layout/ConditionalLayout";
+import { usePathname } from "next/navigation";
 
 interface Message {
   id: string;
@@ -105,6 +107,9 @@ export function FloatingAiAssistant() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
+  const pathname = usePathname();
+
+  if (!isDashboardRoute(pathname)) return null;
 
   const { showFloatingButton } = useAIVisibility();
   const { currentContext } = useAiContext();
