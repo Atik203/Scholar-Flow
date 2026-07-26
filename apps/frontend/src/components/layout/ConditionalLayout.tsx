@@ -9,34 +9,35 @@ interface ConditionalLayoutProps {
   children: React.ReactNode;
 }
 
-// Dashboard-like pages that should not show the traditional navbar/footer
-const dashboardPages = [
-  "/dashboard",
-  "/papers",
-  "/collections",
-  "/workspaces",
-  "/research",
-  "/collaborations",
-  "/ai-insights",
-  "/collaborate",
-  "/teams",
-  "/projects",
-  "/analytics",
-  "/search",
-  "/trends",
-  "/dashboard/researcher",
-  "/dashboard/pro-researcher",
-  "/dashboard/team-lead",
-  "/dashboard/admin",
-];
+export function isDashboardRoute(pathname: string): boolean {
+  const dashboardPages = [
+    "/dashboard",
+    "/papers",
+    "/collections",
+    "/workspaces",
+    "/research",
+    "/collaborations",
+    "/ai-insights",
+    "/collaborate",
+    "/teams",
+    "/projects",
+    "/analytics",
+    "/search",
+    "/trends",
+    "/dashboard/researcher",
+    "/dashboard/pro-researcher",
+    "/dashboard/team-lead",
+    "/dashboard/admin",
+  ];
+  return dashboardPages.some(
+    (page) => pathname === page || pathname.startsWith(page + "/")
+  );
+}
 
 export function ConditionalLayout({ children }: ConditionalLayoutProps) {
   const pathname = usePathname();
 
-  // Check if current page is a dashboard-style page
-  const isDashboardPage = dashboardPages.some(
-    (page) => pathname === page || pathname.startsWith(page + "/")
-  );
+  const isDashboardPage = isDashboardRoute(pathname);
 
   if (isDashboardPage) {
     // Dashboard pages handle their own layout with sidebar
