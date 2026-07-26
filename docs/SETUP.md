@@ -1,51 +1,38 @@
 # Scholar-Flow Setup Guide
 
-This guide walks you through setting up Scholar-Flow for local development from scratch. By the end, you'll have the frontend, backend API, and WebSocket server running on your machine.
+From zero to running frontend + backend + WebSocket on your machine.
 
-## Prerequisites
+**Prerequisites:** Node.js 24+, Yarn 4.9.2+, Git, PostgreSQL 15+ with pgvector
 
-Before starting, make sure you have these installed:
+> **New here?** Start with [Quickstart Guide](./QUICKSTART.md) for the 5-minute version, then come here for details.
 
-- **Node.js >= 24.0.0** — check with `node --version`
-- **Yarn >= 4.9.2** (Berry) — check with `yarn --version`
-- **PostgreSQL 15+** — running locally or via Docker
-- **pgvector extension** — enabled in your PostgreSQL database
-- **Git** — for cloning the repo
+---
 
-If you don't have PostgreSQL yet, see the [Database Setup Guide](./DATABASE.md) for installation instructions.
+## Progress Tracker
 
-## Architecture Overview
+- [ ] Clone + env files
+- [ ] Database connection
+- [ ] Install dependencies
+- [ ] Run migrations
+- [ ] Seed data (optional)
+- [ ] Start servers
+- [ ] Verify
 
-This is a Turborepo monorepo with three apps:
+---
 
-```
-Scholar-Flow/
-├── apps/
-│   ├── frontend/          # Next.js 16 web app (port 3000)
-│   │   ├── src/app/       # App Router pages
-│   │   ├── components/    # UI components (shadcn/ui)
-│   │   └── redux/         # RTK Query state management
-│   ├── backend/           # Express.js REST API (port 5000)
-│   │   ├── src/app/       # Controllers, routes, middleware
-│   │   └── prisma/        # Schema + migrations
-│   └── socket-server/     # Socket.io real-time server (port 5001)
-├── docs/                  # All documentation
-└── .github/               # CI/CD workflows
-```
+## Step-by-Step
 
-Data flows: **Frontend** → HTTP/REST → **Backend** → Prisma → **PostgreSQL**.
-Real-time features: **Frontend** → WebSocket → **Socket-server** (no database access).
+<details>
+<summary><strong>Step 1</strong> — Clone repository & copy env files</summary>
 
-## Step-by-Step Setup
-
-### Step 1: Clone the repository
+**Clone the repo:**
 
 ```bash
 git clone https://github.com/Atik203/Scholar-Flow.git
 cd Scholar-Flow
 ```
 
-### Step 2: Copy environment files
+**Copy environment templates:**
 
 ```bash
 cp apps/backend/.env.example apps/backend/.env
@@ -53,64 +40,99 @@ cp apps/frontend/.env.example apps/frontend/.env.local
 cp apps/socket-server/.env.example apps/socket-server/.env
 ```
 
-Run this from: the repo root (`/path/to/Scholar-Flow`)
+`Run from:` repo root
 
-These are template files. You'll need to fill in your own values for secrets and API keys. For now, the defaults are enough to get the dev servers running.
+The `.env` files already have safe development defaults. You only need to fill in your PostgreSQL connection string (next step) to get started. OAuth keys, S3 credentials, etc. can be added later.
 
-### Step 3: Configure database connection
+</details>
 
-Open `apps/backend/.env` and set your PostgreSQL connection string:
+<details>
+<summary><strong>Step 2</strong> — Configure database connection</summary>
+
+Open `apps/backend/.env` and update the two connection strings:
 
 ```env
 DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
 DIRECT_DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
 ```
 
-Replace `postgres:admin` with your actual PostgreSQL username and password. The database must already exist — create it with:
+> `DATABASE_URL` is used by Prisma Accelerate at runtime. `DIRECT_DATABASE_URL` is used by migrations and the pg adapter. Both point to the same local DB in development.
+
+Replace `postgres:admin` with your actual PostgreSQL username and password. The database must exist before continuing:
 
 ```bash
+# Option A: createdb
 createdb scholarflow_dev
-```
 
-Or via psql:
-
-```bash
+# Option B: psql
 sudo -u postgres psql -c "CREATE DATABASE scholarflow_dev;"
 ```
 
-### Step 4: Install dependencies and generate Prisma client
+**Expected:** `CREATE DATABASE`
+
+</details>
+
+<details>
+<summary><strong>Step 3</strong> — Install dependencies & generate Prisma client</summary>
 
 ```bash
 yarn setup
 ```
 
-Run this from: the repo root
+`Run from:` repo root
 
-This command runs `yarn install` (installs all dependencies for all three apps) followed by `prisma generate --sql` (generates the Prisma client with typed SQL queries).
+What this does:
+1. `yarn install` — installs all dependencies for frontend, backend, and socket-server
+2. `prisma generate --sql` — generates the Prisma client with typed SQL queries
 
-**Expected output:** You should see `Done in Xs` from Yarn, followed by Prisma generation messages with no errors.
+**Expected output:**
 
-### Step 5: Run database migrations
+```
+Done in 30.5s
+✔ Generated Prisma Client (v7.8.0) to ./.yarn/...
+$ prisma generate --sql
+✔ Generated Prisma Client (v7.8.0) to ./.yarn/...
+```
+
+**Takes ~30-60 seconds.** If you see module errors, run `yarn clean && yarn setup` to rebuild native addons.
+
+</details>
+
+<details>
+<summary><strong>Step 4</strong> — Run database migrations</summary>
 
 ```bash
 yarn db:migrate
 ```
 
-Run this from: the repo root
+`Run from:` repo root
 
-This creates all the database tables defined in `apps/backend/prisma/schema.prisma`. The first time you run it, Prisma will prompt you for a migration name — enter something like `initial_setup`.
+This creates all tables defined in `apps/backend/prisma/schema.prisma`.
 
-**Expected output:** `Your database is now in sync with your schema.`
+**First time only:** Prisma will prompt for a migration name. Enter something descriptive:
 
-### Step 6: (Optional) Seed sample data
+```
+? Name of migration » initial_setup
+```
+
+**Expected output:**
+
+```
+Your database is now in sync with your schema.
+```
+
+</details>
+
+<details>
+<summary><strong>Step 5</strong> — (Optional) Seed sample data</summary>
 
 ```bash
 yarn db:seed
 ```
 
-Run this from: the repo root
+`Run from:` repo root
 
-This populates the database with demo users and sample data. Demo accounts created:
+Creates demo users so you can log in immediately:
 
 | Email | Password | Role |
 |-------|----------|------|
@@ -119,56 +141,58 @@ This populates the database with demo users and sample data. Demo accounts creat
 | pro.researcher@scholarflow.com | password123 | Pro Researcher |
 | teamlead@scholarflow.com | password123 | Team Lead |
 
-### Step 7: Start development servers
+</details>
+
+<details>
+<summary><strong>Step 6</strong> — Start development servers</summary>
 
 ```bash
 yarn dev:turbo
 ```
 
-Run this from: the repo root
+`Run from:` repo root
 
-This starts all three apps simultaneously using Turborepo's parallel execution:
+Starts all three apps in parallel via Turborepo:
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| Frontend | http://localhost:3000 | Next.js web app |
+| Frontend | http://localhost:3000 | Next.js 16 web app |
 | Backend API | http://localhost:5000 | Express.js REST API |
 | WebSocket | http://localhost:5001 | Socket.io real-time server |
 
-**Expected output:** You'll see logs from all three services. Look for lines like `ready started server on http://localhost:3000` and `Server running on port 5000`.
+**Expected output:**
 
-## Running Individual Apps
-
-If you only need one service (e.g., working only on the backend):
-
-```bash
-yarn dev:backend     # Backend only on port 5000
-yarn dev:frontend    # Frontend only on port 3000
+```
+ready - started server on http://localhost:3000
+Server running on port 5000
+Socket server running on port 5001
 ```
 
-Run this from: the repo root
+> **Tip:** `yarn dev:frontend` and `yarn dev:backend` start individual apps if you only need one.
 
-> Note: `yarn dev` also works — it starts all three apps using background processes. `yarn dev:turbo` is preferred because it gives cleaner parallel output.
+</details>
 
-## Verify Everything Works
+<details>
+<summary><strong>Step 7</strong> — Verify everything works</summary>
 
-Once the dev servers are running, run these checks:
+In a new terminal:
 
 ```bash
-# Check the backend health endpoint
+# Backend health check
 curl http://localhost:5000/api/health
-
-# Expected: { "status": "ok", ... }
 ```
 
-```bash
-# Check the frontend loads
-curl -s -o /dev/null -w "%{http_code}" http://localhost:3000
+**Expected response:**
 
-# Expected: 200
+```json
+{"status":"ok","timestamp":"2026-07-26T12:00:00.000Z"}
 ```
 
-Open http://localhost:3000 in your browser. You should see the Scholar-Flow login page.
+Open http://localhost:3000 in your browser. If you seeded the database, log in with `admin@scholarflow.com` / `password123`.
+
+</details>
+
+---
 
 ## Available Scripts
 
@@ -190,27 +214,20 @@ Open http://localhost:3000 in your browser. You should see the Scholar-Flow logi
 | `yarn format` | Format with Prettier |
 | `yarn clean` | Remove build artifacts |
 
+---
+
 ## Troubleshooting
 
-**Problem: `Error: Cannot find module '@prisma/client'`**
-Cause: Prisma client hasn't been generated.
-Fix: Run `yarn db:generate`.
+| Problem | Cause | Fix |
+|---------|-------|-----|
+| `Cannot find module '@prisma/client'` | Prisma client not generated | `yarn db:generate` |
+| `getaddrinfo ENOTFOUND` at database | PostgreSQL not running | `sudo pg_ctlcluster 18 main start` or start Docker |
+| `Port 3000 already in use` | Another process on the port | `lsof -ti:3000 \| xargs kill -9` |
+| `ERR_DLOPEN_FAILED` | Node.js version mismatch | `yarn clean && yarn setup` |
+| pgvector not found | Extension not installed | See [Database Setup Guide](./DATABASE.md) |
+| Migration "no changes detected" | Schema up to date already | Make a real change to `schema.prisma` first |
 
-**Problem: `Error: getaddrinfo ENOTFOUND` at database connection**
-Cause: PostgreSQL isn't running or the connection URL is wrong.
-Fix: Start PostgreSQL (`sudo pg_ctlcluster 18 main start`) and verify `DATABASE_URL` in `apps/backend/.env`.
-
-**Problem: `Port 3000 already in use`**
-Cause: Another process is using the port.
-Fix: Kill the process or change the port in `apps/frontend/package.json` (`next dev -p 3001`).
-
-**Problem: `ERR_DLOPEN_FAILED` or native module errors**
-Cause: Node.js version mismatch with compiled native addons.
-Fix: Run `yarn clean && yarn setup` to rebuild everything.
-
-**Problem: pgvector extension not found**
-Cause: PostgreSQL doesn't have the vector extension installed.
-Fix: See the [Database Setup Guide](./DATABASE.md) for pgvector installation.
+---
 
 ## Related Docs
 
@@ -220,4 +237,3 @@ Fix: See the [Database Setup Guide](./DATABASE.md) for pgvector installation.
 - [Redis Setup](./REDIS_SETUP.md) — optional Redis for background jobs
 - [Development Guide](./DEVELOPMENT.md) — day-to-day dev workflow
 - [Deployment Guide](./DEPLOY.md) — deploy to production
-- [Branch Flow](./BRANCH_FLOW.md) — git strategy

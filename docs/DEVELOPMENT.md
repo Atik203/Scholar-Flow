@@ -183,7 +183,7 @@ Fix: `lsof -ti:3000 | xargs kill -9` (replace 3000 with the port number).
 
 - [Setup Guide](./SETUP.md) — initial environment setup
 - [Quickstart Guide](./QUICKSTART.md) — get running in 5 minutes
-- [Branch Flow](./BRANCH_FLOW.md) — git branching strategy
+- [Contributing Guide](../CONTRIBUTING.md) — how to contribute
 - [Contributing Guide](../CONTRIBUTING.md) — how to submit PRs
 - [Database Setup](./DATABASE.md) — PostgreSQL + pgvector + Prisma
 - [Environment Variables](./ENVIRONMENT.md) — full env var reference
