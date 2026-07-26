@@ -1,9 +1,0 @@
-export { Comparison } from "./Comparison";
-export { CTA } from "./CTA";
-export { FAQ } from "./FAQ";
-export { Features } from "./Features";
-export { Hero } from "./Hero";
-export { HowItWorks } from "./HowItWorks";
-export { Integrations } from "./Integrations";
-export { Newsletter } from "./Newsletter";
-export { Testimonials } from "./Testimonials";
