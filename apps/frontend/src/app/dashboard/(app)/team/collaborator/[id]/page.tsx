@@ -28,7 +28,6 @@ import {
   Share2,
   Star,
   TrendingUp,
-  Twitter,
   UserCheck,
   UserPlus,
   Users,
