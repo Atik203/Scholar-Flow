@@ -127,8 +127,8 @@ export default function SlideLab11Architecture() {
               <Bot className="w-7 h-7 flex-shrink-0" />
               <span className="text-2xl font-extrabold">AI APIs</span>
             </div>
-            <span className="text-xl font-bold text-blue-100">Gemini 2.5 Flash Pro</span>
-            <span className="text-xl font-bold text-blue-100">OpenAI GPT-4o</span>
+            <span className="text-xl font-bold text-blue-100">Gemini 3.5 Flash</span>
+            <span className="text-xl font-bold text-blue-100">OpenAI GPT-5.5</span>
             <span className="text-xl font-bold text-blue-100">Multi-provider fallback</span>
           </div>
         </div>
