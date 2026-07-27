@@ -62,7 +62,7 @@ export default function SlideLab03Motivation() {
             </div>
             <div>
               <p className="text-base font-extrabold uppercase tracking-widest text-purple-600 mb-0.5">Motivation</p>
-              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Why We Built ScholarFlow</h1>
+              <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Why We're Building ScholarFlow</h1>
             </div>
           </div>
 
@@ -132,7 +132,7 @@ export default function SlideLab03Motivation() {
 
           {/* Vision statement — amber left border */}
           <p className="text-xl font-bold text-white leading-snug mb-3 border-l-4 border-amber-400 pl-3">
-            Built by researchers, for researchers — to eliminate the pain we faced ourselves.
+            Designed by researchers, for researchers — to eliminate the pain we experience every day.
           </p>
 
           {/* Goals list — subtitles at text-lg (bumped from text-base) */}
@@ -153,7 +153,7 @@ export default function SlideLab03Motivation() {
       {/* ── Footer Quote Banner — solid blue gradient, text-xl non-italic ── */}
       <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-xl px-6 py-3 shadow-lg shadow-purple-500/20 border border-purple-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white tracking-wide">
-          ✨ &ldquo;Researchers deserve tools as intelligent as the work they do — <span className="text-amber-300">ScholarFlow makes that possible.</span>&rdquo;
+          ✨ &ldquo;Researchers deserve tools as intelligent as the work they do — <span className="text-amber-300">ScholarFlow will make that possible.</span>&rdquo;
         </p>
       </div>
     </div>
