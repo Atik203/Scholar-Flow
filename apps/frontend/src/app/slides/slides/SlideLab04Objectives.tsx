@@ -71,7 +71,7 @@ export default function SlideLab04Objectives() {
               <Target className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Slide 04 · Objectives</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Objectives</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">What We Aim to Achieve</h1>
             </div>
           </div>

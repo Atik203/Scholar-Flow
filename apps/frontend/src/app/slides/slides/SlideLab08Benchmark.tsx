@@ -61,7 +61,7 @@ export default function SlideLab08Benchmark() {
               <BarChart3 className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Slide 08 · Benchmark Analysis</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Benchmark Analysis</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">ScholarFlow vs. Market Leaders</h1>
             </div>
           </div>
