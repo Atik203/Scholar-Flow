@@ -74,7 +74,7 @@ export default function SlideLab07FeaturesB() {
               <Sparkles className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-indigo-600 mb-0.5">Slide 07 · Advanced Features</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-indigo-600 mb-0.5">Advanced Features</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Core Features <span className="text-indigo-600">(Part 2 of 2)</span></h1>
             </div>
           </div>

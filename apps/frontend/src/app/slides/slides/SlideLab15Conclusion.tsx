@@ -18,7 +18,7 @@ const takeaways = [
   },
   {
     icon: "📅",
-    title: "Clear 9-Week Plan",
+    title: "Clear 8-Week Plan",
     desc: "Structured milestones with concrete deliverables per week. CI/CD, automated testing, and typed monorepo from day one.",
     color: "from-purple-500 to-indigo-600",
     accent: "border-purple-200 bg-purple-50/60",
@@ -47,7 +47,7 @@ export default function SlideLab15Conclusion() {
               <Target className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-emerald-600 mb-0.5">Slide 15 · Conclusion</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-emerald-600 mb-0.5">Conclusion</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Why ScholarFlow is Ready</h1>
             </div>
           </div>
