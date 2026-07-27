@@ -57,7 +57,7 @@ export default function SlideLab14Timeline() {
               <Calendar className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Slide 14 · Timeline</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Timeline</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">8-Week Implementation Plan</h1>
             </div>
           </div>
