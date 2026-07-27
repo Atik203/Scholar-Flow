@@ -137,7 +137,7 @@ export default function SlideLab04Objectives() {
       {/* ── Footer Banner ── */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-xl px-6 py-3 shadow-lg shadow-blue-500/20 border border-blue-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white tracking-wide">
-          🚀 All 5 objectives are fully implemented and live at <span className="text-amber-300">scholar-flow-ai.vercel.app</span>
+          🚀 All 5 objectives will guide every phase of ScholarFlow's <span className="text-amber-300">development and delivery roadmap</span>
         </p>
       </div>
     </div>
