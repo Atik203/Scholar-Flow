@@ -10,16 +10,16 @@ h# ScholarFlow — SE Lab Presentation Speech Script
 
 | Order | Member     | Slides            | Topics                                              |
 | ----- | ---------- | ----------------- | --------------------------------------------------- |
-| 1st   | **Sourov** | 1 · 2 · 3 · 4     | Title, Problem, Motivation, Objectives              |
-| 2nd   | **Salman** | 5 · 6 · 7 · 8     | Scope, Features (1/2), Features (2/2), Benchmark    |
-| 3rd   | **Atikur** | 9 · 10 · 11       | Comparison, Tech Stack, Architecture                |
-| 4th   | **Pratay** | 12 · 13 · 14 · 15 | UI (1/2), UI (2/2), Timeline, Conclusion, Thank You |
+| 1st   | **Pratay** | 1 · 2 · 3 · 4          | Title, Problem, Motivation, Objectives              |
+| 2nd   | **Salman** | 5 · 6 · 7 · 8          | Scope, Features (1/2), Features (2/2), Benchmark    |
+| 3rd   | **Atikur** | 9 · 10 · 11            | Comparison, Tech Stack, Architecture                |
+| 4th   | **Sourov** | 12 · 13 · 14 · 15 · 16 | UI (1/2), UI (2/2), Timeline, Conclusion, Thank You |
 
 ---
 
 ---
 
-# 🅦 SOUROV — Slides 1–4 · ~2 min total
+# 🅟 PRATAY — Slides 1–4 · ~2 min total
 
 ---
 
@@ -73,7 +73,7 @@ These five objectives guide our entire development plan.
 
 ---
 
-> **Sourov total: ~135 words → approx 1 min 30 sec to 2 min**
+> **Pratay total: ~135 words → approx 1 min 30 sec to 2 min**
 
 ---
 
@@ -200,7 +200,7 @@ Frontend and backend communicate only through REST API. No shared code.
 
 ---
 
-# 🅟 PRATAY — Slides 12–16 · ~2.5 min total
+# 🅮 SOUROV — Slides 12–16 · ~2.5 min total
 
 ---
 
@@ -220,7 +220,7 @@ Clean, modern, and simple for any researcher.
 
 ### Slide 13 — UI Preview (2 of 2) _(~30 sec)_
 
-Thank you. Two more screens.
+Thank you Atikur. Two more screens.
 
 **Screen three — PDF Annotations.** Highlight text, add notes, bookmark — directly on the PDF. Saved and shareable with the team.
 
@@ -270,7 +270,7 @@ GitHub: **github.com/Atik203/Scholar-Flow**
 
 ---
 
-> **Pratay total: ~125 words → approx 1 min 20 sec to 1 min 50 sec**
+> **Sourov total: ~125 words → approx 1 min 20 sec to 1 min 50 sec**
 
 ---
 
