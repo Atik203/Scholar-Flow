@@ -24,9 +24,9 @@ const takeaways = [
     accent: "border-purple-200 bg-purple-50/60",
   },
   {
-    icon: "👥",
-    title: "Team Ready to Deliver",
-    desc: "4-member full-stack team with expertise in Next.js, Express.js, AI integration, and cloud architecture — ready to execute.",
+    icon: "📈",
+    title: "Scalable & Sustainable",
+    desc: "Designed with a cloud-native, decoupled architecture — ScholarFlow can scale from individual students to large research institutions without re-engineering.",
     color: "from-amber-500 to-orange-600",
     accent: "border-amber-200 bg-amber-50/60",
   },
