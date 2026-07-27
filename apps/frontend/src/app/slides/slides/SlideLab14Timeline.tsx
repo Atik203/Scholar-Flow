@@ -63,7 +63,7 @@ export default function SlideLab14Timeline() {
           </div>
           <div className="flex items-center gap-2 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-md">
             <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-            <span className="text-xl font-bold text-slate-900">4 Members · 8 Weeks · 32 Deliverables</span>
+            <span className="text-xl font-bold text-slate-900">8 Weeks · 32 Deliverables</span>
           </div>
         </div>
       </div>
@@ -81,7 +81,7 @@ export default function SlideLab14Timeline() {
       {/* ── Footer ── */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-slate-700 rounded-xl px-6 py-3 shadow-lg border border-blue-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white">
-          ⏱️ <span className="text-amber-300">8 weeks · 32 deliverables · 4 team members</span> — Turborepo monorepo with CI/CD from day one
+          ⏱️ <span className="text-amber-300">8 weeks · 32 deliverables</span> — Turborepo monorepo with CI/CD from day one
         </p>
       </div>
     </div>
