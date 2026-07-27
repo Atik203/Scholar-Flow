@@ -8,12 +8,12 @@ h# ScholarFlow — SE Lab Presentation Speech Script
 
 ## 👥 Member Assignment
 
-| Order | Member     | Slides            | Topics                                           |
-| ----- | ---------- | ----------------- | ------------------------------------------------ |
-| 1st   | **Sourov** | 1 · 2 · 3 · 4     | Title, Problem, Motivation, Objectives           |
-| 2nd   | **Salman** | 5 · 6 · 7 · 8     | Scope, Features (1/2), Features (2/2), Benchmark |
-| 3rd   | **Atikur** | 9 · 10 · 11 · 12  | Comparison, Tech Stack, Architecture, UI (1/2)   |
-| 4th   | **Pratay** | 13 · 14 · 15 · 16 | UI (2/2), Timeline, Conclusion, Thank You        |
+| Order | Member     | Slides            | Topics                                              |
+| ----- | ---------- | ----------------- | --------------------------------------------------- |
+| 1st   | **Sourov** | 1 · 2 · 3 · 4     | Title, Problem, Motivation, Objectives              |
+| 2nd   | **Salman** | 5 · 6 · 7 · 8     | Scope, Features (1/2), Features (2/2), Benchmark    |
+| 3rd   | **Atikur** | 9 · 10 · 11       | Comparison, Tech Stack, Architecture                |
+| 4th   | **Pratay** | 12 · 13 · 14 · 15 | UI (1/2), UI (2/2), Timeline, Conclusion, Thank You |
 
 ---
 
@@ -143,7 +143,7 @@ This is a clear market gap we are targeting.
 
 ---
 
-# 🅐 ATIKUR — Slides 9–12 · ~2.5 min total
+# 🅐 ATIKUR — Slides 9–11 · ~2 min total
 
 ---
 
@@ -194,27 +194,27 @@ Gemini 3.5 Flash and OpenAI GPT-5.5 for AI — with automatic fallback.
 
 Frontend and backend communicate only through REST API. No shared code.
 
+> **Atikur total: ~100 words → approx 1 min 10 sec to 1 min 40 sec**
+
+---
+
+---
+
+# 🅟 PRATAY — Slides 12–16 · ~2.5 min total
+
+---
+
 ---
 
 ### Slide 12 — UI Preview (1 of 2) _(~30 sec)_
 
-Now let me show the interface.
+Now let me show you what ScholarFlow will look like.
 
 **Screen one — Dashboard.** See all papers, recent uploads, and progress. Upload, share, or export in one click.
 
 **Screen two — Rich Text Editor.** Write research notes with full formatting. Auto-saves. Export to PDF or DOCX.
 
 Clean, modern, and simple for any researcher.
-
----
-
-> **Atikur total: ~145 words → approx 1 min 35 sec to 2 min 10 sec**
-
----
-
----
-
-# 🅟 PRATAY — Slides 13–16 · ~2 min total
 
 ---
 
