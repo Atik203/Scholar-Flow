@@ -24,7 +24,7 @@ export default function SlideLab11Architecture() {
               <Server className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-purple-600 mb-0.5">Slide 11 · Architecture</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-purple-600 mb-0.5">Architecture</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">System Architecture Overview</h1>
             </div>
           </div>
