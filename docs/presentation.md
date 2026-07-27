@@ -1,4 +1,4 @@
-# ScholarFlow — SE Lab Presentation Speech Script
+h# ScholarFlow — SE Lab Presentation Speech Script
 
 > **Simple words. Short sentences. Easy to remember.**
 > Each member's TOTAL speaking time = **2 to 2.5 minutes max**.
@@ -8,12 +8,12 @@
 
 ## 👥 Member Assignment
 
-| Order | Member | Slides | Topics |
-|-------|--------|--------|--------|
-| 1st | **Sourov** | 1 · 2 · 3 · 4 | Title, Problem, Motivation, Objectives |
-| 2nd | **Salman** | 5 · 6 · 7 · 8 | Scope, Features (1/2), Features (2/2), Benchmark |
-| 3rd | **Atikur** | 9 · 10 · 11 · 12 | Comparison, Tech Stack, Architecture, UI (1/2) |
-| 4th | **Pratay** | 13 · 14 · 15 · 16 | UI (2/2), Timeline, Conclusion, Thank You |
+| Order | Member     | Slides            | Topics                                              |
+| ----- | ---------- | ----------------- | --------------------------------------------------- |
+| 1st   | **Sourov** | 1 · 2 · 3 · 4     | Title, Problem, Motivation, Objectives              |
+| 2nd   | **Salman** | 5 · 6 · 7 · 8     | Scope, Features (1/2), Features (2/2), Benchmark    |
+| 3rd   | **Atikur** | 9 · 10 · 11       | Comparison, Tech Stack, Architecture                |
+| 4th   | **Pratay** | 12 · 13 · 14 · 15 | UI (1/2), UI (2/2), Timeline, Conclusion, Thank You |
 
 ---
 
@@ -23,7 +23,7 @@
 
 ---
 
-### Slide 1 — Title *(~30 sec)*
+### Slide 1 — Title _(~30 sec)_
 
 Good morning everyone.
 We are Team Phantom Devs.
@@ -32,7 +32,7 @@ It helps researchers upload papers, get AI summaries, annotate, and collaborate 
 
 ---
 
-### Slide 2 — Problem *(~35 sec)*
+### Slide 2 — Problem _(~35 sec)_
 
 Researchers today have **four big problems**.
 
@@ -45,7 +45,7 @@ ScholarFlow solves all four problems — in one affordable platform.
 
 ---
 
-### Slide 3 — Motivation *(~35 sec)*
+### Slide 3 — Motivation _(~35 sec)_
 
 Why are we building ScholarFlow?
 
@@ -59,7 +59,7 @@ Our goal is one unified platform — with AI, affordable pricing, and team colla
 
 ---
 
-### Slide 4 — Objectives *(~35 sec)*
+### Slide 4 — Objectives _(~35 sec)_
 
 ScholarFlow has five objectives.
 
@@ -83,7 +83,7 @@ These five objectives guide our entire development plan.
 
 ---
 
-### Slide 5 — Project Scope *(~35 sec)*
+### Slide 5 — Project Scope _(~35 sec)_
 
 Thank you. Now let me explain what ScholarFlow will deliver.
 
@@ -96,7 +96,7 @@ Four — Rich Text Editor with auto-save, export, and Stripe billing.
 
 ---
 
-### Slide 6 — Features (1 of 2) *(~35 sec)*
+### Slide 6 — Features (1 of 2) _(~35 sec)_
 
 Our first six features:
 
@@ -109,7 +109,7 @@ Six — Team Workspaces — shared library with role management.
 
 ---
 
-### Slide 7 — Features (2 of 2) *(~35 sec)*
+### Slide 7 — Features (2 of 2) _(~35 sec)_
 
 Six more features:
 
@@ -124,7 +124,7 @@ All twelve are in our development roadmap.
 
 ---
 
-### Slide 8 — Benchmark *(~30 sec)*
+### Slide 8 — Benchmark _(~30 sec)_
 
 We compared with Paperpal, EndNote, Mendeley, and Zotero.
 
@@ -143,11 +143,11 @@ This is a clear market gap we are targeting.
 
 ---
 
-# 🅐 ATIKUR — Slides 9–12 · ~2.5 min total
+# 🅐 ATIKUR — Slides 9–11 · ~2 min total
 
 ---
 
-### Slide 9 — Comparison Matrix *(~35 sec)*
+### Slide 9 — Comparison Matrix _(~35 sec)_
 
 Thank you. This table compares twelve features across five platforms.
 
@@ -161,7 +161,7 @@ ScholarFlow will be the first.
 
 ---
 
-### Slide 10 — Tech Stack *(~40 sec)*
+### Slide 10 — Tech Stack _(~40 sec)_
 
 Our technology stack has three layers.
 
@@ -177,7 +177,7 @@ One full-stack TypeScript monorepo — type-safe from end to end.
 
 ---
 
-### Slide 11 — Architecture *(~40 sec)*
+### Slide 11 — Architecture _(~40 sec)_
 
 ScholarFlow uses a **three-tier decoupled architecture**.
 
@@ -194,11 +194,21 @@ Gemini 3.5 Flash and OpenAI GPT-5.5 for AI — with automatic fallback.
 
 Frontend and backend communicate only through REST API. No shared code.
 
+> **Atikur total: ~100 words → approx 1 min 10 sec to 1 min 40 sec**
+
 ---
 
-### Slide 12 — UI Preview (1 of 2) *(~30 sec)*
+---
 
-Now let me show the interface.
+# 🅟 PRATAY — Slides 12–16 · ~2.5 min total
+
+---
+
+---
+
+### Slide 12 — UI Preview (1 of 2) _(~30 sec)_
+
+Now let me show you what ScholarFlow will look like.
 
 **Screen one — Dashboard.** See all papers, recent uploads, and progress. Upload, share, or export in one click.
 
@@ -208,17 +218,7 @@ Clean, modern, and simple for any researcher.
 
 ---
 
-> **Atikur total: ~145 words → approx 1 min 35 sec to 2 min 10 sec**
-
----
-
----
-
-# 🅟 PRATAY — Slides 13–16 · ~2 min total
-
----
-
-### Slide 13 — UI Preview (2 of 2) *(~30 sec)*
+### Slide 13 — UI Preview (2 of 2) _(~30 sec)_
 
 Thank you. Two more screens.
 
@@ -228,7 +228,7 @@ Thank you. Two more screens.
 
 ---
 
-### Slide 14 — Timeline *(~40 sec)*
+### Slide 14 — Timeline _(~40 sec)_
 
 Our **eight-week plan**:
 
@@ -245,7 +245,7 @@ Eight weeks. Thirty-two deliverables. Turborepo monorepo with CI/CD from day one
 
 ---
 
-### Slide 15 — Conclusion *(~35 sec)*
+### Slide 15 — Conclusion _(~35 sec)_
 
 ScholarFlow solves four real problems that researchers face every day.
 
@@ -257,7 +257,7 @@ Clear roadmap. Strong technical foundation. ScholarFlow is ready to be built.
 
 ---
 
-### Slide 16 — Thank You *(~20 sec)*
+### Slide 16 — Thank You _(~20 sec)_
 
 Thank you for listening.
 
