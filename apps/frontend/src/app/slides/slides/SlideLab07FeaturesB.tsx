@@ -113,7 +113,7 @@ export default function SlideLab07FeaturesB() {
       {/* ── Footer Banner ── */}
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 rounded-xl px-6 py-3 shadow-lg shadow-indigo-500/20 border border-indigo-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white tracking-wide">
-          ✅ All 12 features are <span className="text-amber-300">fully implemented and live</span> — ScholarFlow is production-ready
+          ✅ All 12 features are <span className="text-amber-300">planned for development</span> — ScholarFlow's complete feature roadmap for the project
         </p>
       </div>
     </div>
