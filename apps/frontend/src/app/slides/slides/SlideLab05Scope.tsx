@@ -50,7 +50,7 @@ export default function SlideLab05Scope() {
               <CheckCircle2 className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-emerald-600 mb-0.5">Slide 05 · Project Scope</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-emerald-600 mb-0.5">Project Scope</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">What Is Included & What Is Not</h1>
             </div>
           </div>
