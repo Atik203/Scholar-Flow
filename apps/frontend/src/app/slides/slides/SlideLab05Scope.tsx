@@ -128,7 +128,7 @@ export default function SlideLab05Scope() {
       {/* ── Footer Banner ── */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600 rounded-xl px-6 py-3 shadow-lg shadow-emerald-500/20 border border-emerald-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white tracking-wide">
-          🎯 All In-Scope features are <span className="text-amber-300">fully implemented and deployed</span> — live at scholar-flow-ai.vercel.app
+          🎯 All In-Scope features are <span className="text-amber-300">prioritized and planned</span> for the initial release — out-of-scope items are deferred intentionally
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { CheckCircle, Globe, Target } from "lucide-react";
+import { CheckCircle, Target } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 
 const takeaways = [
@@ -11,8 +11,8 @@ const takeaways = [
   },
   {
     icon: "🛠️",
-    title: "Technically Proven",
-    desc: "Next.js 16 + Express.js + pgvector + AWS S3 + multi-AI providers. Production-deployed, fully scalable, cloud-native.",
+    title: "Technically Sound",
+    desc: "Next.js 16 + Express.js + pgvector + AWS S3 + multi-AI providers — a modern, scalable, cloud-native tech stack chosen for reliability and growth.",
     color: "from-blue-500 to-indigo-600",
     accent: "border-blue-200 bg-blue-50/60",
   },
@@ -26,7 +26,7 @@ const takeaways = [
   {
     icon: "👥",
     title: "Team Ready to Deliver",
-    desc: "4-member full-stack team. Existing codebase with 20+ features already built and live at scholar-flow-ai.vercel.app.",
+    desc: "4-member full-stack team with expertise in Next.js, Express.js, AI integration, and cloud architecture — ready to execute.",
     color: "from-amber-500 to-orange-600",
     accent: "border-amber-200 bg-amber-50/60",
   },
@@ -77,16 +77,12 @@ export default function SlideLab15Conclusion() {
       <div className="flex items-stretch gap-3 relative z-10">
         <div className="flex-1 bg-gradient-to-r from-emerald-600 via-blue-600 to-indigo-600 rounded-xl px-6 py-3 shadow-lg border border-emerald-400/30 flex items-center justify-center">
           <p className="text-xl font-extrabold text-white text-center">
-            ✅ All features <span className="text-amber-300">built, tested & deployed</span> — ScholarFlow is production-ready today
+            🚀 Clear roadmap, strong team & proven tech stack — <span className="text-amber-300">ScholarFlow is ready to be built</span>
           </p>
         </div>
         <a href="https://github.com/Atik203/Scholar-Flow" target="_blank" rel="noopener noreferrer"
           className="flex items-center gap-2.5 bg-slate-900 text-white px-6 py-3 rounded-xl font-extrabold text-xl shadow-md hover:bg-slate-800 transition-colors flex-shrink-0">
           <SiGithub className="w-6 h-6" /> GitHub
-        </a>
-        <a href="https://scholar-flow-ai.vercel.app" target="_blank" rel="noopener noreferrer"
-          className="flex items-center gap-2.5 bg-blue-600 text-white px-6 py-3 rounded-xl font-extrabold text-xl shadow-md hover:bg-blue-700 transition-colors flex-shrink-0">
-          <Globe className="w-6 h-6" /> Live Demo
         </a>
       </div>
     </div>
