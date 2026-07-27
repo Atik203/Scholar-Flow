@@ -61,7 +61,7 @@ export default function SlideLab03Motivation() {
               <Target className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-purple-600 mb-0.5">Slide 03 · Motivation</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-purple-600 mb-0.5">Motivation</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Why We Built ScholarFlow</h1>
             </div>
           </div>

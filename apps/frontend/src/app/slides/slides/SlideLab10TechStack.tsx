@@ -81,7 +81,7 @@ export default function SlideLab10TechStack() {
               <Layers className="w-7 h-7 text-white" />
             </div>
             <div>
-              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Slide 10 · Technology Stack</p>
+              <p className="text-base font-extrabold uppercase tracking-widest text-blue-600 mb-0.5">Technology Stack</p>
               <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight leading-none">Tech Stack Overview</h1>
             </div>
           </div>
