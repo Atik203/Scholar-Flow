@@ -63,7 +63,7 @@ export default function SlideLab13UI2() {
       {/* ── Footer ── */}
       <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-rose-600 rounded-xl px-6 py-3 shadow-lg border border-purple-400/30 relative z-10">
         <p className="text-center text-xl font-extrabold text-white">
-          🤖 AI features powered by <span className="text-amber-300">Gemini 2.5 Flash Pro + OpenAI GPT-4o</span> with multi-provider fallback
+          🤖 AI features powered by <span className="text-amber-300">Gemini + OpenAI</span> with multi-provider fallback
         </p>
       </div>
     </div>
