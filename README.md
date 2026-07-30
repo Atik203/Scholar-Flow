@@ -9,7 +9,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
 
-> **Note on licensing:** The project `package.json` declares `"license": "UNLICENSED"`. See [LICENSE.md](./LICENSE.md) for details.
+> **Note on licensing:** See [LICENSE.md](./LICENSE.md) for details.
 
 ## 📦 Recent Releases
 
