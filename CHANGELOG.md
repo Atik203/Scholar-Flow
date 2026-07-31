@@ -15,7 +15,7 @@
 - **Context-aware chat**: `AiContextProvider` (Ref-based, no re-render overhead) wraps the page tree. Paper detail, workspace, and dashboard pages set context. AI assistant injects context on conversation creation.
 - **Chat UI overhaul**: Edit & resend (pencil icon → inline edit → re-submit to stream endpoint). Context-aware suggested prompts (paper-specific: methodology/summaries; workspace-specific: activity/themes; dashboard-specific: search/focus).
 - **Inline paper Q&A**: `AiPaperChat` component on paper detail page (below key points). Uses existing `generateInsight` endpoint with animated streaming.
-- **Token optimization**: `getSummarySourceText` checks `AIContextCache` first before querying `PaperChunk`. Parsed text cached on first read. All AI features (summary, key points, metadata, insights) reuse pre-parsed text.
+- **Token optimization**: `getSummarySourceText` checks `AIContextCache` first before querying `PaperChunk`. Parsed tll AI features (summary, key points, metadata, insights) reuse pre-parsed text.
 
 ### Vercel Production Stability
 
@@ -116,6 +116,7 @@
 ### Stream A+B: Final Pages + Invitation Backend
 
 **8 new pages (98/102 figma-make covered — 96.1%):**
+
 - `/dashboard/(app)/page-enhanced.tsx` — Enhanced Dashboard (6 stat cards + 2x2 activity grid)
 - `/dashboard/(modules)/activity-log/recent/page.tsx` — Recent Activity (filter tabs + pagination)
 - `/dashboard/(app)/papers/[id]/relations/page.tsx` — Paper Relations (citations + related papers)
@@ -127,6 +128,7 @@
 - `/dashboard-enhanced/page.tsx` → redirects to /dashboard
 
 **Backend — Public Invitation Endpoints:**
+
 - `GET /api/invitations/:token` — public, returns workspace/inviter/role details
 - `POST /api/invitations/:token/accept` — auth required, creates membership + activity log
 - `POST /api/invitations/:token/decline` — auth required
@@ -147,7 +149,7 @@
 
 ### Stream E: Lighthouse Optimization
 
-- Backend: `Cache-Control: private, max-age=30` on all GET /api/* responses
+- Backend: `Cache-Control: private, max-age=30` on all GET /api/\* responses
 - Backend: `Vary: Authorization` header for proper cache keying
 - Backend: Root handler version updated to 1.2.9
 - Frontend: Next.js defaults (SWC minification, Turbopack tree-shaking, CSS optimization)
@@ -161,6 +163,7 @@
 ### Page Coverage: 98/102 figma-make (96.1%)
 
 Remaining 4 pages (Phase 10):
+
 - #10 EnhancedDashboardPage (alternate URL, redirect exists)
 - #11 RecentActivityPage (alternate URL, redirect exists)
 - #45 InvitationResponsePage (alternate URL, public page exists)
@@ -181,7 +184,7 @@ Remaining 4 pages (Phase 10):
 - **CD-2: Removed dead errorHandler.ts** — deprecated by `globalErrorHandler.ts` (which handles Zod/Prisma/Postgres/JWT/Mongo errors). Verified zero references
 - **CD-3: Killed phase2Api separate RTK instance** — migrated all 16 endpoints into existing slices (citationApi, discussionApi), unwrapped response types, extended DiscussionThread interface with author/participants, added ActivityLog tagType, removed from store.ts. Single apiSlice with shared cache invalidation across all 22 slices
 - **CD-4: Removed AppError class** — migrated 3 files (auth.controller, oauth.controller, admin.service) to ApiError. ApiError has identical constructor + errorCode field
-- **HD-5: Fixed any types** — 6 RTK endpoints + all nested fields (`metadata`, `filters`, `details`) replaced with proper interfaces (`TeamMember`, `WorkspaceSettings`, `CollectionStats`, `SaveSearchQueryRequest`, `TeamActivitySummary`, `PaginationMeta`). Extended TeamMember type with firstName/lastName/institution/fieldOfStudy/createdAt/_count
+- **HD-5: Fixed any types** — 6 RTK endpoints + all nested fields (`metadata`, `filters`, `details`) replaced with proper interfaces (`TeamMember`, `WorkspaceSettings`, `CollectionStats`, `SaveSearchQueryRequest`, `TeamActivitySummary`, `PaginationMeta`). Extended TeamMember type with firstName/lastName/institution/fieldOfStudy/createdAt/\_count
 
 ### Stream B: Architecture Normalization (Structure)
 
@@ -201,35 +204,41 @@ Remaining 4 pages (Phase 10):
 
 - **Shared `EmptyState` component** — icon + title + description + action button pattern, reusable across all 47 dashboard pages
 - **Shared `ErrorState` component** — AlertCircle icon + error details + retry button with RefreshCcw icon
-- **Proxy.ts overhaul** — added 28 missing public routes (forgot-password, reset-password, verify-email, onboarding, resources/*, products/*, company/*, enterprise, careers, integrations, support, press, legal, license, security, etc.), removed dead `getRoleFromCookies` function (always returned undefined), removed unused `legacyRoleSegments` constant, fixed authenticated redirect from `/dashboard/undefined` to `/dashboard`
+- **Proxy.ts overhaul** — added 28 missing public routes (forgot-password, reset-password, verify-email, onboarding, resources/_, products/_, company/\*, enterprise, careers, integrations, support, press, legal, license, security, etc.), removed dead `getRoleFromCookies` function (always returned undefined), removed unused `legacyRoleSegments` constant, fixed authenticated redirect from `/dashboard/undefined` to `/dashboard`
 - Removed 6 redundant `.enhanceEndpoints({ addTagTypes })` calls — tags already in apiSlice.tagTypes
 - Moved `Notebook/notebook.validation.test.ts` to `__tests__/Notebook/`
 
 ### Phase 8 Features: 14 New Pages (Matching figma-make)
 
 **Onboarding:**
+
 - `/dashboard/onboarding/role` — Role selection page
 - `/dashboard/onboarding/workspace` — Workspace create page
 
 **Settings:**
+
 - `/dashboard/settings/export` — Data export (CSV/JSON) with format selection
 - `/dashboard/settings/integrations` — Integration settings (Slack, Discord, custom webhooks)
 
 **Security:**
+
 - `/dashboard/security` — Security dashboard with 2FA/sessions/privacy status
 - `/dashboard/security/2fa` — TOTP authenticator setup/verify/disable
 - `/dashboard/security/sessions` — Active sessions list with terminate action
 - `/dashboard/privacy` — Privacy settings (profile visibility, activity tracking, data sharing)
 
 **Help:**
+
 - `/dashboard/help` — Help center with FAQ
 - `/dashboard/help/shortcuts` — Keyboard shortcuts reference
 
 **Research:**
+
 - `/dashboard/research/citation-graph` — Citation network visualization
 - `/dashboard/research/map` — Research topic map
 
 **Notifications:**
+
 - `/dashboard/notifications` — Root redirect to center
 
 ### New Backend Endpoints
@@ -252,5 +261,3 @@ Remaining 4 pages (Phase 10):
 - Consolidated 13 admin items under single `adminFeatures` array
 
 ---
-
-
