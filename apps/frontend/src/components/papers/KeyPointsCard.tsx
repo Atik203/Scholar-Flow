@@ -42,6 +42,14 @@ const accentIconColors = [
 ];
 
 const highlightTerms = (text: string) => {
+  // Escape first — AI-generated content must never inject HTML.
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
   const patterns = [
     /\b(\d+(?:\.\d+)?%)\b/g,
     /\b(BLEU|CER|WER|F1|ROUGE|BLEURT)\b/gi,
@@ -49,7 +57,7 @@ const highlightTerms = (text: string) => {
     /\b(state-of-the-art|novel|significant|achieves|outperforms|improves|reduces|increases)\b/gi,
   ];
 
-  let result = text;
+  let result = escaped;
   for (const pattern of patterns) {
     result = result.replace(
       pattern,
