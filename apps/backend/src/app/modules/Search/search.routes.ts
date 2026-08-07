@@ -8,8 +8,8 @@ const router: import("express").Router = express.Router();
 router.get("/history", authMiddleware as any, SearchController.getSearchHistory as any);
 router.post("/history", authMiddleware as any, SearchController.saveSearchQuery as any);
 
-// Discovery
-router.get("/trending", SearchController.getTrending as any);
+// Discovery (auth required — results are scoped to the user's access)
+router.get("/trending", authMiddleware as any, SearchController.getTrending as any);
 router.get("/recommendations", authMiddleware as any, SearchController.getRecommendations as any);
 
 // Phase D.2 — AI search (Perplexity-style summary) and source citations.
