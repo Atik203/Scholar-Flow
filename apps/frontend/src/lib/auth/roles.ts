@@ -6,22 +6,8 @@ export const USER_ROLES = {
   ADMIN: "ADMIN",
 } as const;
 
-export const ROLE_SLUGS = {
-  [USER_ROLES.RESEARCHER]: "researcher",
-  [USER_ROLES.PRO_RESEARCHER]: "pro-researcher",
-  [USER_ROLES.TEAM_LEAD]: "team-lead",
-  [USER_ROLES.ADMIN]: "admin",
-} as const;
-
-export const DEFAULT_ROLE_SLUG = ROLE_SLUGS[USER_ROLES.RESEARCHER];
-
-export const getRoleSlug = (role?: string) => {
-  if (!role) return DEFAULT_ROLE_SLUG;
-  return ROLE_SLUGS[role as keyof typeof ROLE_SLUGS] ?? DEFAULT_ROLE_SLUG;
-};
-
 /**
- * New canonical dashboard base path (Phase 3+).
+ * Canonical dashboard base path (Phase 3+).
  * - Admin → /dashboard/admin (admin console)
  * - Everyone else → /dashboard (shared app home)
  */
@@ -30,51 +16,6 @@ export const getDashboardBasePath = (role?: string): string => {
     return "/dashboard/admin";
   }
   return "/dashboard";
-};
-
-/**
- * @deprecated Use getDashboardBasePath instead.
- * Kept for backward-compat with legacy role-segmented URLs during migration.
- */
-export const getRoleDashboardBasePath = (role?: string) =>
-  `/dashboard/${getRoleSlug(role)}`;
-
-export const buildRoleScopedPath = (role: string | undefined, segment = "") => {
-  const basePath = getRoleDashboardBasePath(role);
-  if (!segment) return basePath;
-  return segment.startsWith("/")
-    ? `${basePath}${segment}`
-    : `${basePath}/${segment}`;
-};
-
-export const resolveRoleScopedHref = (
-  role: string | undefined,
-  href: string
-) => {
-  const [pathPart, search = ""] = href.split("?");
-  const stripped = pathPart.startsWith("/dashboard")
-    ? pathPart.slice("/dashboard".length)
-    : pathPart;
-  const segment = stripped.startsWith("/")
-    ? stripped
-    : stripped
-      ? `/${stripped}`
-      : "";
-  const resolved = buildRoleScopedPath(role, segment);
-  return search ? `${resolved}?${search}` : resolved;
-};
-
-export const ROLE_BY_SLUG = Object.entries(ROLE_SLUGS).reduce(
-  (acc, [roleKey, slug]) => {
-    acc[slug] = roleKey as keyof typeof USER_ROLES;
-    return acc;
-  },
-  {} as Record<string, keyof typeof USER_ROLES>
-);
-
-export const getRoleBySlug = (slug?: string) => {
-  if (!slug) return undefined;
-  return ROLE_BY_SLUG[slug];
 };
 
 export const ROLE_HIERARCHY = {
@@ -267,78 +208,6 @@ export const ROLE_PERMISSIONS = {
 } as const;
 
 export type UserRole = keyof typeof USER_ROLES;
-
-// Role-based navigation items
-type NavigationLink = {
-  label: string;
-  href: string;
-  permission: string;
-};
-
-const resolveNavigationLinks = (
-  userRole: string | undefined,
-  links: NavigationLink[]
-) =>
-  links.map((link) => ({
-    ...link,
-    href: buildRoleScopedPath(userRole, link.href),
-  }));
-
-export const getNavigationItems = (userRole?: string) => {
-  const baseItems: NavigationLink[] = [
-    { label: "Dashboard", href: "", permission: "paper:read" },
-    { label: "Papers", href: "/papers", permission: "paper:read" },
-    {
-      label: "Collections",
-      href: "/collections",
-      permission: "collection:read",
-    },
-  ];
-
-  const proItems: NavigationLink[] = [
-    {
-      label: "Analytics",
-      href: "/analytics",
-      permission: "analytics:read_own",
-    },
-    {
-      label: "Workspaces",
-      href: "/workspaces",
-      permission: "workspace:create",
-    },
-    {
-      label: "Collaboration",
-      href: "/collaborate",
-      permission: "collaboration:join",
-    },
-  ];
-
-  const teamLeadItems: NavigationLink[] = [
-    { label: "Team", href: "/team", permission: "profile:read_team" },
-  ];
-
-  const adminItems: NavigationLink[] = [
-    { label: "Admin", href: "/admin-overview", permission: "admin:dashboard" },
-    { label: "Users", href: "/users", permission: "user:read" },
-    { label: "Settings", href: "/dashboard/admin/settings", permission: "admin:settings" },
-  ];
-
-  let items = [...resolveNavigationLinks(userRole, baseItems)];
-
-  if (hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER)) {
-    items = [...items, ...resolveNavigationLinks(userRole, proItems)];
-  }
-
-  if (hasRoleAccess(userRole, USER_ROLES.TEAM_LEAD)) {
-    items = [...items, ...resolveNavigationLinks(userRole, teamLeadItems)];
-  }
-
-  if (hasRoleAccess(userRole, USER_ROLES.ADMIN)) {
-    items = [...items, ...resolveNavigationLinks(userRole, adminItems)];
-  }
-
-  return items;
-};
 
 // Utility functions
 export const hasPermission = (

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
 import {
   useDeleteExportMutation as useDeleteCitationExportMutation,
   useGetHistoryQuery as useGetCitationExportHistoryQuery,
@@ -30,9 +29,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function CitationHistoryPage() {
-  const { user } = useProtectedRoute();
-  const scopedPath = (segment: string) =>
-    buildRoleScopedPath(user?.role, segment);
+  const scopedPath = (segment: string) => `/dashboard${segment}`;
   const [searchTerm, setSearchTerm] = useState("");
   const [formatFilter, setFormatFilter] = useState("");
 
