@@ -8,7 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation, useGenerateMetadataMutation } from "@/redux/api/paperApi";
 import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
-import { AiPaperChat } from "@/components/papers/AiPaperChat";
+import { AiInsightsPanel } from "@/components/papers/AiInsightsPanel";
+import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
 import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
@@ -228,8 +229,15 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
       {/* AI Key Points */}
       {showAiSummary && <KeyPointsCard paperId={paper.id} />}
 
-      {/* Inline Paper Q&A */}
-      {showAiSummary && <AiPaperChat paperId={paper.id} />}
+      {/* AI Summary (tone/audience/focus options, cache-aware) */}
+      {showAiSummary && (
+        <AiSummaryPanel paperId={paper.id} paperTitle={paper.title} />
+      )}
+
+      {/* AI Insights — thread-based chat with history + model selector */}
+      {showAiSummary && (
+        <AiInsightsPanel paperId={paper.id} paperTitle={paper.title} />
+      )}
 
       {/* PDF Preview */}
       {showPreview && previewUrlData?.data?.url && (
