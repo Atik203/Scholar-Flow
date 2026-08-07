@@ -12,13 +12,11 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import {
-  buildRoleScopedPath,
   getRoleBadgeVariant,
   ROLE_LABELS,
 } from "@/lib/auth/roles";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
 
 import { RESEARCHER_PAGES_BY_ID } from "../pages.data";
 
@@ -27,12 +25,7 @@ export default function ResearcherPageDetail() {
   const id = params.id as string;
   const { user, isAuthenticated } = useProtectedRoute();
 
-  const scopedPath = useCallback(
-    (segment: string) => buildRoleScopedPath(user?.role, segment),
-    [user?.role]
-  );
-
-  const detail = useMemo(() => RESEARCHER_PAGES_BY_ID[id], [id]);
+  const detail = RESEARCHER_PAGES_BY_ID[id];
 
   if (!detail) {
     notFound();
@@ -93,7 +86,7 @@ export default function ResearcherPageDetail() {
                 variant={action.variant ?? "outline"}
                 asChild
               >
-                <Link href={scopedPath(action.path)}>{action.label}</Link>
+                <Link href={`/dashboard${action.path}`}>{action.label}</Link>
               </Button>
             ))}
           </CardContent>
@@ -103,10 +96,10 @@ export default function ResearcherPageDetail() {
 
         <div className="flex items-center justify-between">
           <Button variant="ghost" asChild>
-            <Link href={scopedPath("/pages")}>Back to researcher pages</Link>
+            <Link href="/dashboard/pages">Back to researcher pages</Link>
           </Button>
           <Button asChild>
-            <Link href={scopedPath("")}>Go to researcher hub</Link>
+            <Link href="/dashboard">Go to researcher hub</Link>
           </Button>
         </div>
       </div>

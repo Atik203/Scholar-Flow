@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { USER_ROLES, resolveRoleScopedHref } from "@/lib/auth/roles";
+import { USER_ROLES } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetAllUsersQuery } from "@/redux/api/adminApi";
@@ -390,10 +390,10 @@ export default function DashboardPage() {
 
   const userRole = user?.role || USER_ROLES.RESEARCHER;
 
-  const scopedHref = useCallback(
-    (href: string) => resolveRoleScopedHref(user?.role, href),
-    [user?.role]
-  );
+  // Canonical href resolver — the shared /dashboard layout serves all
+  // roles, so every dashboard link is /dashboard + segment.
+  const scopedHref = (href: string) =>
+    href.startsWith("/dashboard") ? href : `/dashboard${href}`;
 
   if (isLoading) {
     return (
