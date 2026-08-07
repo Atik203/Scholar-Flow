@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports, react/display-name */
 require('@testing-library/jest-dom')
 
 // Mock Next.js router
