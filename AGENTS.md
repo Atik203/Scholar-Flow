@@ -222,8 +222,8 @@ Before touching billing code: read the webhook handler first.
 
 ### Local Stripe CLI
 - Binary: `O:\stripe.exe`. Config: `%USERPROFILE%\.config\stripe\config.toml`
-  (test_mode_api_key). Global `npx`/`npm` are BROKEN on this machine
-  (SyntaxError) — always use `yarn dlx` instead of `npx`.
+  (test_mode_api_key). Global npm was reinstalled (2026-08, was corrupted by
+  malware) — npm/npx now work (11.11.0), but the project still uses Yarn.
 
 ## Stripe Skills & MCP (installed)
 - Official Stripe skills live in `.agents/skills/`: `stripe-best-practices`,
@@ -396,8 +396,9 @@ Do not generate any code before completing steps 1-5.
 - Never call revalidateTag with one argument — requires 'max' second arg
 - Never reintroduce role-scoped dashboard URLs (/dashboard/{roleSlug}) —
   canonical /dashboard/* only
-- Never use npx — the global npm install on this machine is broken
-  (SyntaxError); use yarn dlx
+- Never use npx — the global npm install on this machine was corrupted by
+  malware (fixed 2026-08, npm 11.11.0 works) but the project still uses Yarn;
+  use yarn dlx for one-off tools
 - Never edit the dual-copy cast in next.config.ts or the
   patch-next-themes.cjs dual-file patch — both are load-bearing
 
