@@ -84,6 +84,29 @@ const getPlanTierFromPriceId = (priceId: string): string => {
 };
 
 /**
+ * Public price catalog — configured Stripe price IDs per plan/interval.
+ * Used by GET /billing/prices so the frontend can start checkout
+ * without knowing the raw price IDs.
+ */
+export const getAvailablePrices = () => {
+  const prices = config.stripe.prices;
+  return {
+    pro: {
+      monthly: prices.pro.monthly ?? null,
+      annual: prices.pro.annual ?? null,
+    },
+    team: {
+      monthly: prices.team.monthly ?? null,
+      annual: prices.team.annual ?? null,
+    },
+    enterprise: {
+      monthly: prices.enterprise?.monthly ?? null,
+      annual: prices.enterprise?.annual ?? null,
+    },
+  };
+};
+
+/**
  * Get or create Stripe customer for a user
  */
 const getOrCreateStripeCustomer = async (
@@ -448,4 +471,5 @@ export const billingService = {
   reactivateSubscription,
   getPriceId,
   getOrCreateStripeCustomer,
+  getAvailablePrices,
 };
