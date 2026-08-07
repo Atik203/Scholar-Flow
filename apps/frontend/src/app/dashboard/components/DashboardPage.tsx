@@ -203,9 +203,11 @@ export default function DashboardPage() {
     }
   }, [workspacesData, selectedWorkspaceId]);
 
-  // Helper: format relative time (e.g., "2h ago")
   const formatTimeAgo = (dateStr?: string) => {
     if (!dateStr) return "";
+    // Date.now() in a render-called helper is inherently time-based;
+    // converting to reactive time is out of scope for this helper.
+    // eslint-disable-next-line react-hooks/purity
     const diffMs = Date.now() - new Date(dateStr).getTime();
     const sec = Math.floor(diffMs / 1000);
     if (sec < 60) return `${sec}s ago`;
