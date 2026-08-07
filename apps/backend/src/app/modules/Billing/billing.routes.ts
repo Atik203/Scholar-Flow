@@ -29,6 +29,9 @@ router.post(
  * Protected routes - require authentication
  */
 
+// Public price catalog — no auth (price IDs are not secret)
+router.get("/prices", billingController.getPrices);
+
 // Create Stripe Checkout session
 router.post(
   "/checkout-session",

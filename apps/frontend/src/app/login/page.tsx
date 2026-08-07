@@ -52,6 +52,7 @@ const particles = Array.from({ length: 20 }, (_, i) => ({
   size: Math.random() * 4 + 2,
   duration: Math.random() * 20 + 10,
   delay: Math.random() * 5,
+  dx: Math.random() * 50 - 25,
 }));
 
 export default function LoginPage() {
@@ -179,7 +180,7 @@ export default function LoginPage() {
             }}
             animate={{
               y: [0, -100, 0],
-              x: [0, Math.random() * 50 - 25, 0],
+              x: [0, particle.dx, 0],
               opacity: [0.2, 0.6, 0.2],
               scale: [1, 1.5, 1],
             }}

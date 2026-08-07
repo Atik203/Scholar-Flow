@@ -119,9 +119,25 @@ const managePlan = catchAsync(
   }
 );
 
+/**
+ * GET /billing/prices
+ * Public — returns the configured Stripe price IDs per plan/interval so
+ * the frontend can build checkout links without knowing the raw IDs.
+ * Stripe price IDs are public (they appear in checkout URLs).
+ */
+const getPrices = catchAsync(async (_req: AuthRequest, res: Response) => {
+  const prices = billingService.getAvailablePrices();
+  res.status(200).json({
+    success: true,
+    message: "Prices retrieved successfully",
+    data: prices,
+  });
+});
+
 export const billingController = {
   createCheckoutSession,
   createPortalSession,
   getSubscription,
   managePlan,
+  getPrices,
 };
