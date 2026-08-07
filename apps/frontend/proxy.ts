@@ -154,7 +154,8 @@ export function proxy(request: Request) {
   }
 
   if (!authenticated && matchesRoute(protectedRoutes, pathname)) {
-    return NextResponse.next();
+    // Preserve the requested path so the user returns after login
+    return createRedirect(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
   }
 
   if (matchesRoute(publicRoutes, pathname)) {

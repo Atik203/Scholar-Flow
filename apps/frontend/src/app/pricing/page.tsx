@@ -80,7 +80,7 @@ export default function PricingPage() {
       const result = await createCheckout({ priceId }).unwrap();
       const url = result.data?.url;
       if (url) {
-        window.location.href = url;
+        window.location.assign(url);
       } else {
         showErrorToast("Could not start checkout. Please try again.");
       }

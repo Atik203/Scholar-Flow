@@ -88,6 +88,46 @@ function Skeleton() {
   );
 }
 
+// Hoisted to module scope — defining components inside render breaks
+// React Compiler optimization (create-components-during-render).
+function SortButton({
+  sort,
+  onSortChange,
+}: {
+  sort: SortMode;
+  onSortChange: (next: SortMode) => void;
+}) {
+  const next: Record<SortMode, SortMode> = {
+    "page-asc": "page-desc",
+    "page-desc": "date-desc",
+    "date-desc": "date-asc",
+    "date-asc": "page-asc",
+  };
+
+  const labels: Record<SortMode, string> = {
+    "page-asc": "Page \u2191",
+    "page-desc": "Page \u2193",
+    "date-desc": "Newest",
+    "date-asc": "Oldest",
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-8 text-xs gap-1"
+      onClick={() => onSortChange(next[sort])}
+    >
+      {sort === "page-desc" || sort === "date-desc" ? (
+        <ChevronDown className="h-3 w-3" />
+      ) : (
+        <ChevronUp className="h-3 w-3" />
+      )}
+      {labels[sort]}
+    </Button>
+  );
+}
+
 export function AnnotationList({
   annotations,
   totalPages,
@@ -166,38 +206,6 @@ export function AnnotationList({
     setSearch("");
     setTypeFilter(null);
     setColorFilter(null);
-  };
-
-  const SortButton = () => {
-    const next: Record<SortMode, SortMode> = {
-      "page-asc": "page-desc",
-      "page-desc": "date-desc",
-      "date-desc": "date-asc",
-      "date-asc": "page-asc",
-    };
-
-    const labels: Record<SortMode, string> = {
-      "page-asc": "Page ↑",
-      "page-desc": "Page ↓",
-      "date-desc": "Newest",
-      "date-asc": "Oldest",
-    };
-
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-8 text-xs gap-1"
-        onClick={() => setSort(next[sort])}
-      >
-        {sort === "page-desc" || sort === "date-desc" ? (
-          <ChevronDown className="h-3 w-3" />
-        ) : (
-          <ChevronUp className="h-3 w-3" />
-        )}
-        {labels[sort]}
-      </Button>
-    );
   };
 
   if (isLoading) {
@@ -293,7 +301,7 @@ export function AnnotationList({
             />
           ))}
         </div>
-        <SortButton />
+        <SortButton sort={sort} onSortChange={setSort} />
       </div>
 
       {/* List */}

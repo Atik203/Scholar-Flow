@@ -50,7 +50,7 @@ import {
 } from "@/redux/api/paperApi";
 import { Calendar, Eye, FileText, Play, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useState } from "react";
 // Using native date formatting to avoid external dependency
 
 interface PapersListProps {
@@ -236,52 +236,44 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
   const { data: previewUrlData, isFetching: previewLoading } =
     useGetPaperFileUrlQuery(previewPaperId || "", { skip: !previewPaperId });
 
-  // Filter papers based on search term - memoized to prevent recalculation on every render
-  const filteredPapers: Paper[] = useMemo(() => {
-    if (!papersData?.items || !searchTerm.trim()) {
-      return papersData?.items || [];
+  // Filter papers based on search term — plain computation; the React
+  // Compiler memoizes this automatically (no manual useMemo).
+  const filteredPapers: Paper[] =
+    !papersData?.items || !searchTerm.trim()
+      ? papersData?.items || []
+      : (() => {
+          const searchTermLower = searchTerm.toLowerCase();
+          return papersData.items.filter(
+            (paper) =>
+              paper.title.toLowerCase().includes(searchTermLower) ||
+              paper.abstract?.toLowerCase().includes(searchTermLower) ||
+              paper.metadata?.authors?.some((author) =>
+                author.toLowerCase().includes(searchTermLower)
+              )
+          );
+        })();
+
+  const handleDeletePaper = async (paperId: string, paperTitle: string) => {
+    try {
+      await deletePaper(paperId).unwrap();
+      showSuccessToast(`Paper "${paperTitle}" deleted successfully`);
+    } catch (error) {
+      showErrorToast("Failed to delete paper");
+      console.error("Delete error:", error);
     }
+  };
 
-    const searchTermLower = searchTerm.toLowerCase();
-    return papersData.items.filter(
-      (paper) =>
-        paper.title.toLowerCase().includes(searchTermLower) ||
-        paper.abstract?.toLowerCase().includes(searchTermLower) ||
-        paper.metadata?.authors?.some((author) =>
-          author.toLowerCase().includes(searchTermLower)
-        )
-    );
-  }, [papersData?.items, searchTerm]);
+  const handleProcessPDF = async (paperId: string, paperTitle: string) => {
+    try {
+      await processPDF(paperId).unwrap();
+      showSuccessToast(`PDF processing started for "${paperTitle}"`);
+    } catch (error) {
+      showErrorToast("Failed to start PDF processing");
+      console.error("Processing error:", error);
+    }
+  };
 
-  // Memoized handlers to prevent recreation on every render
-  const handleDeletePaper = useCallback(
-    async (paperId: string, paperTitle: string) => {
-      try {
-        await deletePaper(paperId).unwrap();
-        showSuccessToast(`Paper "${paperTitle}" deleted successfully`);
-      } catch (error) {
-        showErrorToast("Failed to delete paper");
-        console.error("Delete error:", error);
-      }
-    },
-    [deletePaper]
-  );
-
-  const handleProcessPDF = useCallback(
-    async (paperId: string, paperTitle: string) => {
-      try {
-        await processPDF(paperId).unwrap();
-        showSuccessToast(`PDF processing started for "${paperTitle}"`);
-      } catch (error) {
-        showErrorToast("Failed to start PDF processing");
-        console.error("Processing error:", error);
-      }
-    },
-    [processPDF]
-  );
-
-  // Memoized utility functions
-  const getProcessingStatusBadge = useCallback((status: string) => {
+  const getProcessingStatusBadge = (status: string) => {
     const statusMap = {
       UPLOADED: { variant: "secondary" as const, label: "Uploaded" },
       PROCESSING: { variant: "default" as const, label: "Processing" },
@@ -289,21 +281,21 @@ export function PapersList({ searchTerm = "", workspaceId }: PapersListProps) {
       FAILED: { variant: "destructive" as const, label: "Failed" },
     };
     return statusMap[status as keyof typeof statusMap] || statusMap.UPLOADED;
-  }, []);
+  };
 
-  const formatDate = useCallback((dateString: string) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  }, []);
+  };
 
-  const formatFileSize = useCallback((bytes?: number) => {
+  const formatFileSize = (bytes?: number) => {
     if (!bytes) return "N/A";
     const mb = bytes / (1024 * 1024);
     return mb < 1 ? `${(bytes / 1024).toFixed(1)} KB` : `${mb.toFixed(1)} MB`;
-  }, []);
+  };
 
   if (isLoading) {
     return (
