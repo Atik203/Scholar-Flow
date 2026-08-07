@@ -93,6 +93,12 @@ function CopyButton({ content }: { content: string }) {
 }
 
 export function FloatingAiAssistant() {
+  const pathname = usePathname();
+  if (!isDashboardRoute(pathname)) return null;
+  return <FloatingAiAssistantContent />;
+}
+
+function FloatingAiAssistantContent() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
@@ -107,9 +113,6 @@ export function FloatingAiAssistant() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
-  const pathname = usePathname();
-
-  if (!isDashboardRoute(pathname)) return null;
 
   const { showFloatingButton } = useAIVisibility();
   const { currentContext } = useAiContext();
