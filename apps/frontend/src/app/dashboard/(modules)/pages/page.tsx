@@ -10,19 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
 import Link from "next/link";
-import { useCallback } from "react";
 
 import { RESEARCHER_PAGES } from "./pages.data";
 
 export default function ResearcherPagesIndex() {
-  const { user, isAuthenticated } = useProtectedRoute();
-
-  const scopedPath = useCallback(
-    (segment: string) => buildRoleScopedPath(user?.role, segment),
-    [user?.role]
-  );
+  const { isAuthenticated } = useProtectedRoute();
 
   if (!isAuthenticated) {
     return null;
@@ -57,7 +50,7 @@ export default function ResearcherPagesIndex() {
                   Last updated {page.updatedAt}
                 </p>
                 <Button size="sm" asChild>
-                  <Link href={scopedPath(`/pages/${page.id}`)}>Open</Link>
+                  <Link href={`/dashboard/pages/${page.id}`}>Open</Link>
                 </Button>
               </CardContent>
             </Card>
