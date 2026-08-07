@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 import {
   USER_ROLES,
-  buildRoleScopedPath,
   hasRoleAccess,
 } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
