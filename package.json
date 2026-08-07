@@ -15,7 +15,6 @@
     "dev:backend": "yarn workspace @scholar-flow/backend dev",
     "dev:frontend": "yarn workspace @scholar-flow/frontend dev",
     "build": "corepack enable 2>/dev/null; turbo run build",
-    "test": "turbo run test",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean && rimraf node_modules",
