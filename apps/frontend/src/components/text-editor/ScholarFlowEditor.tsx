@@ -202,6 +202,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   });
 
   // Auto-save function
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleAutoSave = useCallback(async () => {
     if (!editor || !hasUnsavedChanges || isSaving) return;
 
@@ -220,6 +221,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       console.error("Auto-save failed:", error);
       showErrorToast("Auto-save failed", error?.data?.message);
     }
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [editor, paperId, hasUnsavedChanges, isSaving, updateContent, title]);
 
   // Debounced auto-save - wait for user to stop typing
