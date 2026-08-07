@@ -11,8 +11,8 @@
  *    results (calls useAiSearchMutation). On fallback, shows a
  *    gentle message but still renders the citation list.
  *  - Tab "All" combines every active section in a grouped view.
- *  - Tab "Internet" is a "coming soon" panel (per the user's
- *    earlier decision — no third-party search API configured).
+ *  - People search is admin-only (results scoped to the admin's team
+ *    members) — the tab is hidden for all other roles.
  *  - Perplexity/ChatGPT-style citation chips with [n] inline.
  */
 
@@ -23,8 +23,9 @@ import {
   Compass,
   ExternalLink,
   FileText,
-  Globe,
+  FolderOpen,
   Loader2,
+  NotebookPen,
   Search as SearchIcon,
   Sparkles,
   User as UserIcon,
@@ -38,22 +39,32 @@ import {
   useAiSearchMutation,
   useGetSearchSourcesQuery,
   useGlobalSearchQuery,
-  useLazyGlobalSearchQuery,
   type AISearchSource,
   type SearchResults,
   type SearchTabType,
 } from "@/redux/api/searchApi";
 import { showErrorToast } from "@/components/providers/ToastProvider";
+import { useAuth } from "@/redux/auth/useAuth";
+import { USER_ROLES } from "@/lib/auth/roles";
 
 const TABS: Array<{ id: SearchTabType; label: string; icon: any }> = [
   { id: "all", label: "All", icon: SearchIcon },
   { id: "papers", label: "Papers", icon: FileText },
-  { id: "people", label: "People", icon: Users },
+  { id: "collections", label: "Collections", icon: FolderOpen },
   { id: "workspaces", label: "Workspaces", icon: Building2 },
-  { id: "internet", label: "Internet", icon: Globe },
+  { id: "notes", label: "Notes", icon: NotebookPen },
 ];
 
+// People tab renders only for admins (see GlobalSearchPage).
+const PEOPLE_TAB: { id: SearchTabType; label: string; icon: any } = {
+  id: "people",
+  label: "People",
+  icon: Users,
+};
+
 export default function GlobalSearchPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === USER_ROLES.ADMIN;
   const [tab, setTab] = useState<SearchTabType>("all");
   const [inputValue, setInputValue] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
@@ -63,6 +74,9 @@ export default function GlobalSearchPage() {
     fallback: string | null;
   } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // People tab is admin-only; hidden for all other roles.
+  const tabs = isAdmin ? [...TABS, PEOPLE_TAB] : TABS;
 
   // Debounce: commit query 250ms after the user stops typing.
   useEffect(() => {
@@ -82,11 +96,10 @@ export default function GlobalSearchPage() {
     error,
   } = useGlobalSearchQuery(
     { q: activeQuery, type: tab === "all" ? "all" : tab, limit: 20 },
-    { skip: !activeQuery || tab === "internet" }
+    { skip: !activeQuery }
   );
 
   // AI summary — fires only on the "all" tab when a query is present.
-  const [triggerAi, { isLoading: aiLoading }] = useLazyGlobalSearchQuery();
   const [aiSearch, { isLoading: aiMutating }] = useAiSearchMutation();
   useEffect(() => {
     setAiResult(null);
@@ -115,9 +128,6 @@ export default function GlobalSearchPage() {
       cancelled = true;
     };
   }, [activeQuery, tab, aiSearch]);
-
-  // Suppress unused-warning for triggerAi (kept for future use).
-  void triggerAi;
 
   // Source list for the citation strip under the AI summary.
   const { data: sourcesData } = useGetSearchSourcesQuery(
@@ -168,7 +178,7 @@ export default function GlobalSearchPage() {
       {/* Tabs */}
       <div className="border-b">
         <nav className="flex flex-wrap gap-1">
-          {TABS.map((t) => {
+          {tabs.map((t) => {
             const Icon = t.icon;
             return (
               <button
@@ -205,34 +215,21 @@ export default function GlobalSearchPage() {
       {/* AI Summary card (All tab) */}
       {activeQuery && tab === "all" && (
         <AiSummaryCard
-          loading={aiLoading || aiMutating}
+          loading={aiMutating}
           summary={aiResult?.summary}
           sources={citationSources}
           fallback={aiResult?.fallback}
         />
       )}
 
-      {/* Internet stub */}
-      {activeQuery && tab === "internet" && (
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <Globe className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p className="text-muted-foreground">
-            Internet search is coming soon.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Use the tabs above to search across your papers, collections,
-            workspaces, notes, and people.
-          </p>
-        </div>
-      )}
-
       {/* Results */}
-      {activeQuery && tab !== "internet" && (
+      {activeQuery && (
         <ResultsSection
           tab={tab}
           isFetching={isFetching}
           error={error}
           results={allResults}
+          isAdmin={isAdmin}
         />
       )}
     </div>
@@ -304,11 +301,13 @@ function ResultsSection({
   isFetching,
   error,
   results,
+  isAdmin,
 }: {
   tab: SearchTabType;
   isFetching: boolean;
   error: any;
   results: SearchResults;
+  isAdmin: boolean;
 }) {
   if (error) {
     return (
@@ -347,18 +346,32 @@ function ResultsSection({
           }))}
         />
         <ResultGroup
-          title="People"
-          count={results.people?.total ?? 0}
-          emptyText="No matching people."
-          items={(results.people?.items ?? []).map((u) => ({
-            key: u.id,
-            title: u.name ?? u.email ?? "Unknown user",
-            subtitle: [u.role, u.institution].filter(Boolean).join(" · "),
-            icon: UserIcon,
-            href: `/dashboard/team?userId=${u.id}`,
-            avatarUrl: u.image ?? null,
+          title="Collections"
+          count={results.collections?.total ?? 0}
+          emptyText="No matching collections."
+          items={(results.collections?.items ?? []).map((c) => ({
+            key: c.id,
+            title: c.name ?? "Untitled collection",
+            subtitle: c.description ?? "",
+            icon: FolderOpen,
+            href: `/dashboard/collections/${c.id}`,
           }))}
         />
+        {isAdmin && (
+          <ResultGroup
+            title="People"
+            count={results.people?.total ?? 0}
+            emptyText="No matching people."
+            items={(results.people?.items ?? []).map((u) => ({
+              key: u.id,
+              title: u.name ?? u.email ?? "Unknown user",
+              subtitle: [u.role, u.institution].filter(Boolean).join(" · "),
+              icon: UserIcon,
+              href: `/dashboard/team?userId=${u.id}`,
+              avatarUrl: u.image ?? null,
+            }))}
+          />
+        )}
         <ResultGroup
           title="Workspaces"
           count={results.workspaces?.total ?? 0}
@@ -380,7 +393,7 @@ function ResultsSection({
             title: n.title ?? "Untitled note",
             subtitle: n.excerpt ?? "",
             icon: Atom,
-            href: `/dashboard/notes?noteId=${n.id}`,
+            href: `/dashboard/notes/${n.id}`,
           }))}
         />
       </div>
@@ -404,7 +417,24 @@ function ResultsSection({
       />
     );
   }
+  if (tab === "collections") {
+    return (
+      <ResultGroup
+        title="Collections"
+        count={results.collections?.total ?? 0}
+        emptyText="No matching collections."
+        items={(results.collections?.items ?? []).map((c) => ({
+          key: c.id,
+          title: c.name ?? "Untitled collection",
+          subtitle: c.description ?? "",
+          icon: FolderOpen,
+          href: `/dashboard/collections/${c.id}`,
+        }))}
+      />
+    );
+  }
   if (tab === "people") {
+    if (!isAdmin) return null;
     return (
       <ResultGroup
         title="People"
@@ -433,6 +463,22 @@ function ResultsSection({
           subtitle: w.description ?? "",
           icon: Building2,
           href: `/dashboard/workspaces/${w.id}`,
+        }))}
+      />
+    );
+  }
+  if (tab === "notes") {
+    return (
+      <ResultGroup
+        title="Notes"
+        count={results.notes?.total ?? 0}
+        emptyText="No matching notes."
+        items={(results.notes?.items ?? []).map((n) => ({
+          key: n.id,
+          title: n.title ?? "Untitled note",
+          subtitle: n.excerpt ?? "",
+          icon: Atom,
+          href: `/dashboard/notes/${n.id}`,
         }))}
       />
     );
