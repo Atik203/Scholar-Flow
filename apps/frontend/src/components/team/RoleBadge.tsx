@@ -45,6 +45,8 @@ export function getRoleIcon(role: string) {
 }
 
 export function RoleBadge({ role, className }: { role: string; className?: string }) {
+  // Icon is a stable component from a module-level map; the compiler
+  // static-components rule cannot see through the lookup, so disable here.
   const Icon = getRoleIcon(role);
   return (
     <span
@@ -54,6 +56,7 @@ export function RoleBadge({ role, className }: { role: string; className?: strin
         className
       )}
     >
+      {/* eslint-disable-next-line react-hooks/static-components */}
       <Icon className="h-3 w-3" />
       {getRoleLabel(role)}
     </span>

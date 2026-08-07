@@ -54,6 +54,12 @@ export function AnnotationPopup({
     }
   }, [isOpen, defaultColor, defaultType]);
 
+  const handleSubmit = () => {
+    if (!text.trim()) return;
+    onSubmit({ text: text.trim(), color, type });
+    onClose();
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
@@ -68,12 +74,6 @@ export function AnnotationPopup({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, text, color, type]);
-
-  const handleSubmit = () => {
-    if (!text.trim()) return;
-    onSubmit({ text: text.trim(), color, type });
-    onClose();
-  };
 
   if (!isOpen || !position) return null;
 

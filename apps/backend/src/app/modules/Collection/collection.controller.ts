@@ -3,6 +3,7 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { emailService } from "../../shared/emailService";
+import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
@@ -1743,28 +1744,24 @@ export const collectionController = {
       );
     }
 
-    // Build update dynamically based on provided fields
-    const setClauses: string[] = [];
-    setClauses.push(`"updatedAt" = NOW()`);
-
+    // Build update dynamically based on provided fields (typed ORM update —
+    // avoids $executeRawUnsafe and keeps the query parameterized)
+    const updateData: Prisma.CollectionPaperUpdateInput = {};
     if (status !== undefined) {
-      setClauses.push(`status = ${status}::"CollectionPaperStatus"`);
+      updateData.status = status;
     }
     if (isStarred !== undefined) {
-      setClauses.push(`"isStarred" = ${isStarred}`);
+      updateData.isStarred = isStarred;
     }
 
-    if (setClauses.length <= 1) {
+    if (Object.keys(updateData).length === 0) {
       throw new ApiError(400, "No fields to update");
     }
 
-    const setSql = setClauses.join(", ");
-
-    await prisma.$executeRawUnsafe(`
-      UPDATE "CollectionPaper"
-      SET ${setSql}
-      WHERE id = ${cpRows[0].id}
-    `);
+    await prisma.collectionPaper.update({
+      where: { id: cpRows[0].id },
+      data: updateData,
+    });
 
     sendSuccessResponse(res, null, "Collection paper updated successfully");
   }),

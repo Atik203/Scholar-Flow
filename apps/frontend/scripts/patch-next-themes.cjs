@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Patch next-themes@0.4.6 to fix React 19/Next.js 16 script-in-component error.
  *
