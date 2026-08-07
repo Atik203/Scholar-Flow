@@ -83,6 +83,12 @@ export interface ManagePlanRequest {
   seats?: number;
 }
 
+export interface BillingPrices {
+  pro: { monthly: string | null; annual: string | null };
+  team: { monthly: string | null; annual: string | null };
+  enterprise: { monthly: string | null; annual: string | null };
+}
+
 export const billingApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
@@ -140,6 +146,15 @@ export const billingApi = apiSlice.injectEndpoints({
     }),
 
     /**
+     * Public price catalog — configured Stripe price IDs per plan
+     */
+    getBillingPrices: builder.query<BillingPrices, void>({
+      query: () => "/billing/prices",
+      transformResponse: (response: { data: BillingPrices }) => response.data,
+      keepUnusedDataFor: 300,
+    }),
+
+    /**
      * Manage subscription plan
      */
     managePlan: builder.mutation<{ message: string }, ManagePlanRequest>({
@@ -189,4 +204,5 @@ export const {
   useGetSubscriptionQuery,
   useLazyGetSubscriptionQuery,
   useManagePlanMutation,
+  useGetBillingPricesQuery,
 } = billingApi;
