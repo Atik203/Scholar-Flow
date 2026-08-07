@@ -22,9 +22,10 @@ import {
 
 // Initialize queue processing (lazy on Vercel to avoid cold start issues)
 if (process.env.VERCEL !== "1") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require("./app/services/pdfProcessingQueue");
 } else {
-  console.log("[Boot] Vercel environment — deferring queue init");
+  console.log("[Boot] Vercel environment - deferring queue init");
 }
 
 const app: import("express").Express = express();
@@ -203,7 +204,8 @@ app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
-  // Phase 10 — WebSocket server
+  // Phase 10 - WebSocket server
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
 
   const httpServer = http.createServer(app);
@@ -257,5 +259,4 @@ export default app;
 
 // Also expose CommonJS export for Vercel @vercel/node when using dist/server.js directly
 // Note: TypeScript will emit both default and CJS exports under commonjs module target
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (module as any).exports = app;
