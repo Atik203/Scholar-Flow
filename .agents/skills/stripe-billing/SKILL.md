@@ -1,3 +1,8 @@
+---
+name: stripe-billing
+description: Use when working on billing, subscriptions, plans, checkout, webhooks, customer portal, payment methods, or invoices in Scholar-Flow. Load BEFORE writing Stripe code.
+---
+
 # Stripe Billing Skill
 
 ## When to use this skill
@@ -24,6 +29,13 @@ Role sync: webhook handler updates user role in DB — this is the only path
 - Webhook handlers must be idempotent (safe to process twice)
 - Test keys (sk_test_) and live keys (sk_live_) are never mixed
 - Customer portal URL comes from backend endpoint only
+- Plan lookup in checkout webhooks is by stripePriceId, falling back to
+  code `${planTier}_${interval}` — the Plan table MUST be seeded with
+  seedPlans.js (codes pro_monthly/pro_annual/team_monthly/team_annual)
+  or webhooks fail with "Plan not found" and users never get their role
+- Subscription expiry/grace downgrade is handled by the hourly
+  subscriptionSweeper (SUB_GRACE_DAYS, default 7) — not webhooks alone
 
 ## Files to read first
-apps/backend/src/app/ → billing routes and webhook handlers
+apps/backend/src/app/modules/Billing/ → billing routes, webhook handlers,
+subscriptionSweeper.ts

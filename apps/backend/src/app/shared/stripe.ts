@@ -84,7 +84,9 @@ export type StripePriceId = keyof typeof STRIPE_PRICE_IDS;
 
 /**
  * Helper function to determine user role based on Stripe price ID
- * Maps subscription tiers to application roles
+ * Maps subscription tiers to application roles.
+ * Enterprise is contact-sales only (never reaches checkout) — unknown price
+ * IDs (including enterprise) deliberately resolve to RESEARCHER.
  */
 export function getRoleFromPriceId(
   priceId: string
