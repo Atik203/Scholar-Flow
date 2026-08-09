@@ -46,10 +46,11 @@ collectionRoutes.get(
   collectionController.getPublicCollections as any
 );
 
-// Search collections
+// Search collections (auth required — scoped to accessible collections)
 collectionRoutes.get(
   "/search",
   rateLimiter,
+  authMiddleware as any,
   collectionController.search as any
 );
 
@@ -77,10 +78,11 @@ collectionRoutes.get(
   collectionController.getInvitesReceived as any
 );
 
-// Get collection statistics
+// Get collection statistics (auth required — scoped to the user's collections)
 collectionRoutes.get(
   "/stats",
   rateLimiter,
+  authMiddleware as any,
   collectionController.getStats as any
 );
 

@@ -48,53 +48,10 @@ export const collectionController = {
     `;
 
     if (!workspaceRows.length) {
-      try {
-        const workspaceName = `${
-          (authReq.user as any)?.name || authReq.user.email
-        }'s Workspace`;
-
-        await prisma.$executeRaw`
-          INSERT INTO "Workspace" (
-            id,
-            name,
-            "ownerId",
-            "createdAt",
-            "updatedAt",
-            "isDeleted"
-          ) VALUES (
-            ${workspaceId},
-            ${workspaceName},
-            ${userId},
-            NOW(),
-            NOW(),
-            false
-          )
-        `;
-
-        await prisma.$executeRaw`
-          INSERT INTO "WorkspaceMember" (
-            id,
-            "workspaceId",
-            "userId",
-            role,
-            "createdAt",
-            "updatedAt",
-            "isDeleted"
-          ) VALUES (
-            gen_random_uuid(),
-            ${workspaceId},
-            ${userId},
-            'RESEARCHER'::"Role",
-            NOW(),
-            NOW(),
-            false
-          )
-          ON CONFLICT ("workspaceId", "userId") DO NOTHING
-        `;
-      } catch (workspaceError) {
-        console.error("Error creating workspace:", workspaceError);
-        throw new ApiError(500, "Failed to create workspace for collection");
-      }
+      throw new ApiError(
+        403,
+        "Workspace not found or you don't own it — collections must be created in a workspace you own"
+      );
     }
 
     try {
@@ -572,8 +529,10 @@ export const collectionController = {
     }
     const { id } = req.params;
 
-    const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const memberRows = await prisma.$queryRaw<
+      Array<{ id: string; status: string }>
+    >`
+      SELECT id, status
       FROM "CollectionMember"
       WHERE "collectionId" = ${id}
         AND "userId" = ${authReq.user.id}
@@ -584,6 +543,9 @@ export const collectionController = {
     const member = memberRows[0];
     if (!member) {
       throw new ApiError(404, "Invitation not found");
+    }
+    if (member.status !== "PENDING") {
+      throw new ApiError(400, "Only pending invitations can be accepted");
     }
 
     const updatedRows = await prisma.$queryRaw<
@@ -1206,8 +1168,13 @@ export const collectionController = {
     sendSuccessResponse(res, null, "Collection deleted successfully");
   }),
 
-  // Search collections
+  // Search collections (auth required — scoped to accessible collections)
   search: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
     const { q } = req.query;
     if (!q || typeof q !== "string") {
       throw new ApiError(400, "Search query is required");
@@ -1217,7 +1184,12 @@ export const collectionController = {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const result = await CollectionService.searchCollections(q, limit, skip);
+    const result = await CollectionService.searchCollections(
+      q,
+      authReq.user.id,
+      limit,
+      skip
+    );
 
     sendPaginatedResponse(
       res,
@@ -1233,9 +1205,13 @@ export const collectionController = {
     );
   }),
 
-  // Get collection statistics
+  // Get collection statistics (auth required — scoped to the user's collections)
   getStats: catchAsync(async (req: Request, res: Response) => {
-    const stats = await CollectionService.getCollectionStats();
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const stats = await CollectionService.getCollectionStats(authReq.user.id);
     sendSuccessResponse(
       res,
       stats,
