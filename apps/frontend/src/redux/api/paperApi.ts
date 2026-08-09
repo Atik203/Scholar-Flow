@@ -360,13 +360,6 @@ export const paperApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, id) => [{ type: "Paper", id }, "Paper"],
     }),
 
-    getDevWorkspace: builder.query<
-      { data: { workspace: { id: string; name: string } } },
-      void
-    >({
-      query: () => "/papers/dev/workspace",
-    }),
-
     // PDF Processing endpoints
     processPDF: builder.mutation<{ data: { message: string } }, string>({
       query: (paperId) => ({
@@ -671,13 +664,6 @@ export const paperApi = apiSlice.injectEndpoints({
       providesTags: ["AIProvider"],
     }),
 
-    // Upload summary — paper count for the signed-in user (dashboard widget)
-    getMyUploadsSummary: builder.query<{ count: number }, void>({
-      query: () => "/papers/me/summary",
-      transformResponse: (response: { data: { count: number } }) =>
-        response.data,
-    }),
-
     // AI Tools — rewriter
     aiRewriteText: builder.mutation<
       { original: string; rewritten: string; provider: string },
@@ -816,7 +802,6 @@ export const {
   useGetPaperPreviewUrlQuery,
   useUpdatePaperMetadataMutation,
   useDeletePaperMutation,
-  useGetDevWorkspaceQuery,
   useProcessPDFMutation,
   useGetProcessingStatusQuery,
   useGetAllChunksQuery,
@@ -841,7 +826,6 @@ export const {
   useRestorePaperVersionMutation,
   useExtractKeyPointsMutation,
   useGenerateMetadataMutation,
-  useGetMyUploadsSummaryQuery,
   useAiRewriteTextMutation,
   useAiComparePapersMutation,
   useAiTranslateTextMutation,
