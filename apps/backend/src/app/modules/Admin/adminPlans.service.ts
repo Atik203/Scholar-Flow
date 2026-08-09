@@ -2,14 +2,14 @@
  * Admin Plans Service
  *
  * Plan catalog view + stats for the admin Plans page, plus CRUD.
- * NOTE: price fields are display metadata only — the Stripe catalog stays
- * env-driven (STRIPE_PRICE_*) so edits never desync what customers pay.
- * MRR here matches the analytics page: paying subscribers only
- * (ACTIVE, non-trial, not canceled-at-period-end).
+ * Price/currency/interval edits create a NEW Stripe price (Stripe prices are
+ * immutable) and repoint Plan.stripePriceId at it; existing subscribers keep
+ * their current price until renewal. Name edits sync to the Stripe product.
  */
 
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
+import stripe, { isStripeError, logStripeError } from "../../shared/stripe";
 
 export type PlanUpsertInput = {
   code: string;
@@ -19,6 +19,7 @@ export type PlanUpsertInput = {
   interval: string;
   active?: boolean;
   features?: Record<string, unknown>;
+  stripePriceId?: string;
 };
 
 export const adminPlansService = {
@@ -120,6 +121,72 @@ export const adminPlansService = {
       }
     }
 
+    const nameChanged = patch.name && patch.name !== plan.name;
+    const priceChanged =
+      (patch.priceCents != null && patch.priceCents !== plan.priceCents) ||
+      (patch.currency && patch.currency !== plan.currency) ||
+      (patch.interval && patch.interval !== plan.interval);
+
+    // --- Sync to Stripe BEFORE touching the DB row (fail-fast) ---
+    if (priceChanged && plan.stripePriceId) {
+      let productId: string | null = null;
+      try {
+        const oldPrice = await stripe.prices.retrieve(plan.stripePriceId);
+        productId =
+          typeof oldPrice.product === "string"
+            ? oldPrice.product
+            : (oldPrice.product?.id ?? null);
+      } catch (error) {
+        if (isStripeError(error)) logStripeError(error, "plan edit: retrieve price");
+        throw new ApiError(
+          400,
+          `Stripe price lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
+
+      if (!productId) {
+        throw new ApiError(400, "Existing Stripe price has no product reference");
+      }
+
+      const interval =
+        (patch.interval ?? plan.interval) === "year" ? "year" : "month";
+
+      try {
+        const newPrice = await stripe.prices.create({
+          product: productId,
+          unit_amount: patch.priceCents ?? plan.priceCents,
+          currency: patch.currency ?? plan.currency,
+          recurring: { interval },
+          nickname: `${patch.name ?? plan.name} (${interval})`,
+        });
+        patch.stripePriceId = newPrice.id;
+      } catch (error) {
+        if (isStripeError(error)) logStripeError(error, "plan edit: create price");
+        throw new ApiError(
+          400,
+          `Stripe price creation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
+    } else if (nameChanged && plan.stripePriceId) {
+      // Rename the Stripe product (shared by monthly + annual variants)
+      try {
+        const oldPrice = await stripe.prices.retrieve(plan.stripePriceId);
+        const productId =
+          typeof oldPrice.product === "string"
+            ? oldPrice.product
+            : (oldPrice.product?.id ?? null);
+        if (productId) {
+          await stripe.products.update(productId, { name: patch.name! });
+        }
+      } catch (error) {
+        if (isStripeError(error)) logStripeError(error, "plan edit: update product");
+        throw new ApiError(
+          400,
+          `Stripe product rename failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        );
+      }
+    }
+
     return prisma.plan.update({
       where: { id },
       data: {
@@ -130,6 +197,7 @@ export const adminPlansService = {
         ...(patch.interval ? { interval: patch.interval } : {}),
         ...(patch.active != null ? { active: patch.active } : {}),
         ...(patch.features ? { features: patch.features as object } : {}),
+        ...(patch.stripePriceId ? { stripePriceId: patch.stripePriceId } : {}),
       },
     });
   },

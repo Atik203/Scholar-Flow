@@ -414,7 +414,7 @@ export interface ContentReport {
 export const adminModerationApi = apiSlice
   .injectEndpoints({
     endpoints: (builder) => ({
-      listReports: builder.query<
+      listContentReports: builder.query<
         {
           success: boolean;
           data: ContentReport[];
@@ -441,7 +441,7 @@ export const adminModerationApi = apiSlice
             : [{ type: "AdminModeration", id: "LIST" }],
       }),
 
-      getReport: builder.query<
+      getContentReport: builder.query<
         { success: boolean; data: ContentReport },
         string
       >({
@@ -517,8 +517,8 @@ export const adminModerationApi = apiSlice
   });
 
 export const {
-  useListReportsQuery,
-  useGetReportQuery,
+  useListContentReportsQuery,
+  useGetContentReportQuery,
   useAssignReportMutation,
   useResolveReportMutation,
   useDismissReportMutation,
