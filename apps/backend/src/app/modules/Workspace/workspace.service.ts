@@ -285,6 +285,13 @@ export class WorkspaceService {
       member.ownerId === requestorId;
     if (!isManager) throw new ApiError(403, "Insufficient permissions");
 
+    // Only the actual owner may mint OWNER roles
+    const isOwner = member.role === "OWNER" || member.ownerId === requestorId;
+    const requestedRole = payload.role || "EDITOR";
+    if (requestedRole === "OWNER" && !isOwner) {
+      throw new ApiError(403, "Only the workspace owner can add members as OWNER");
+    }
+
     let targetUserId = payload.userId as string | undefined;
     if (!targetUserId && payload.email) {
       const u = await prisma.$queryRaw<any[]>`
@@ -298,7 +305,7 @@ export class WorkspaceService {
     // Upsert membership; if exists and soft-deleted, reactivate
     await prisma.$executeRaw`
       INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${payload.role || "EDITOR"}, now(), now(), now(), false)
+      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${requestedRole}, now(), now(), now(), false)
       ON CONFLICT ("workspaceId", "userId") DO UPDATE SET role = EXCLUDED.role, "isDeleted" = false, "updatedAt" = now()
     `;
     await prisma.$executeRaw`
@@ -394,6 +401,12 @@ export class WorkspaceService {
         403,
         "Only workspace owners and managers can invite members"
       );
+    }
+
+    // Only the actual owner may invite OWNER roles
+    const requestedRole = payload.role || "EDITOR";
+    if (requestedRole === "OWNER" && !isOwner) {
+      throw new ApiError(403, "Only the workspace owner can invite members as OWNER");
     }
 
     // Find user by email

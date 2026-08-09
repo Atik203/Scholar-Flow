@@ -609,6 +609,7 @@ model CollectionMember {
   id           String               @id @default(uuid())
   collectionId String
   userId       String
+  role         Role                 @default(RESEARCHER) // mirrors User.role; added 2026-08-10 (raw SQL used it since Phase 4 but the column was never migrated)
   permission   CollectionPermission @default(EDIT) // Collection-specific permission (VIEW or EDIT)
   invitedAt    DateTime             @default(now())
   // Invitation workflow fields
