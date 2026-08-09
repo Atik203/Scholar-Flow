@@ -70,10 +70,10 @@ const adminActions = [
     color: "bg-red-500 hover:bg-red-600",
   },
   {
-    title: "Analytics Dashboard",
-    description: "View detailed platform analytics and reports",
+    title: "Revenue & Subscriptions",
+    description: "Revenue analytics, MRR, and subscription management",
     icon: Activity,
-    href: "/dashboard/admin/analytics",
+    href: "/dashboard/admin/subscriptions",
     color: "bg-purple-500 hover:bg-purple-600",
   },
 ];
