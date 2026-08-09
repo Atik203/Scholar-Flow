@@ -164,16 +164,6 @@ export function DocumentPreview({
 
   const effectiveType = getEffectiveType();
 
-  // Debug logging to understand MIME type detection
-  console.log("[DocumentPreview] Debug info:", {
-    mimeType,
-    fileExtension,
-    effectiveType,
-    fileUrl: fileUrl?.substring(0, 100) + "...",
-    fileName,
-    originalFilename,
-  });
-
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = fileUrl;
