@@ -4930,6 +4930,7 @@ export const CollectionMemberScalarFieldEnum = {
   id: 'id',
   collectionId: 'collectionId',
   userId: 'userId',
+  role: 'role',
   permission: 'permission',
   invitedAt: 'invitedAt',
   status: 'status',
