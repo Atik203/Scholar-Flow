@@ -8,6 +8,37 @@ import prisma from "../../shared/prisma";
 import { sendSuccessResponse } from "../../shared/sendResponse";
 import { ImportService } from "./import.service";
 
+/**
+ * Verify the user owns or is an active member of the target workspace.
+ */
+async function assertWorkspaceAccess(
+  workspaceId: string,
+  userId: string
+): Promise<void> {
+  const access = await prisma.$queryRaw<Array<{ isMember: boolean }>>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM "Workspace" w
+      WHERE w.id = ${workspaceId}
+        AND w."isDeleted" = false
+        AND (
+          w."ownerId" = ${userId}
+          OR EXISTS (
+            SELECT 1
+            FROM "WorkspaceMember" m
+            WHERE m."workspaceId" = w.id
+              AND m."userId" = ${userId}
+              AND m."isDeleted" = false
+          )
+        )
+    ) AS "isMember"
+  `;
+
+  if (!access[0]?.isMember) {
+    throw new ApiError(403, "You do not have access to this workspace");
+  }
+}
+
 export const importController = {
   importByDOI: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
@@ -15,6 +46,7 @@ export const importController = {
     if (!doi || !workspaceId) {
       throw new ApiError(400, "doi and workspaceId are required");
     }
+    await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importByDOI(doi, workspaceId, authReq.user.id);
     sendSuccessResponse(res, result, "Paper imported via DOI", 201);
   }),
@@ -25,6 +57,7 @@ export const importController = {
     if (!arxivId || !workspaceId) {
       throw new ApiError(400, "arxivId and workspaceId are required");
     }
+    await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importByArxiv(arxivId, workspaceId, authReq.user.id);
     sendSuccessResponse(res, result, "Paper imported via arXiv", 201);
   }),
@@ -35,6 +68,7 @@ export const importController = {
     if (!url || !workspaceId) {
       throw new ApiError(400, "url and workspaceId are required");
     }
+    await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importByURL(url, workspaceId, authReq.user.id);
     sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title }, "Paper imported via URL", 201);
   }),
@@ -45,6 +79,7 @@ export const importController = {
     if (!url || !workspaceId) {
       throw new ApiError(400, "url and workspaceId are required");
     }
+    await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importBySmartURL(url, workspaceId, authReq.user.id);
     sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title, hasPdf: result.hasPdf }, "Paper imported via Smart URL", 201);
   }),
@@ -55,6 +90,7 @@ export const importController = {
     if (!content || !format || !workspaceId) {
       throw new ApiError(400, "content, format, and workspaceId are required");
     }
+    await assertWorkspaceAccess(workspaceId, authReq.user.id);
 
     let papers;
     if (format === "bibtex") {
