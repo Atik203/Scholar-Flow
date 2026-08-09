@@ -28,6 +28,7 @@ export type CollectionMemberMinAggregateOutputType = {
   id: string | null
   collectionId: string | null
   userId: string | null
+  role: $Enums.Role | null
   permission: $Enums.CollectionPermission | null
   invitedAt: Date | null
   status: $Enums.MembershipStatus | null
@@ -43,6 +44,7 @@ export type CollectionMemberMaxAggregateOutputType = {
   id: string | null
   collectionId: string | null
   userId: string | null
+  role: $Enums.Role | null
   permission: $Enums.CollectionPermission | null
   invitedAt: Date | null
   status: $Enums.MembershipStatus | null
@@ -58,6 +60,7 @@ export type CollectionMemberCountAggregateOutputType = {
   id: number
   collectionId: number
   userId: number
+  role: number
   permission: number
   invitedAt: number
   status: number
@@ -75,6 +78,7 @@ export type CollectionMemberMinAggregateInputType = {
   id?: true
   collectionId?: true
   userId?: true
+  role?: true
   permission?: true
   invitedAt?: true
   status?: true
@@ -90,6 +94,7 @@ export type CollectionMemberMaxAggregateInputType = {
   id?: true
   collectionId?: true
   userId?: true
+  role?: true
   permission?: true
   invitedAt?: true
   status?: true
@@ -105,6 +110,7 @@ export type CollectionMemberCountAggregateInputType = {
   id?: true
   collectionId?: true
   userId?: true
+  role?: true
   permission?: true
   invitedAt?: true
   status?: true
@@ -193,6 +199,7 @@ export type CollectionMemberGroupByOutputType = {
   id: string
   collectionId: string
   userId: string
+  role: $Enums.Role
   permission: $Enums.CollectionPermission
   invitedAt: Date
   status: $Enums.MembershipStatus
@@ -229,6 +236,7 @@ export type CollectionMemberWhereInput = {
   id?: Prisma.StringFilter<"CollectionMember"> | string
   collectionId?: Prisma.StringFilter<"CollectionMember"> | string
   userId?: Prisma.StringFilter<"CollectionMember"> | string
+  role?: Prisma.EnumRoleFilter<"CollectionMember"> | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFilter<"CollectionMember"> | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   status?: Prisma.EnumMembershipStatusFilter<"CollectionMember"> | $Enums.MembershipStatus
@@ -247,6 +255,7 @@ export type CollectionMemberOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   collectionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   permission?: Prisma.SortOrder
   invitedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -269,6 +278,7 @@ export type CollectionMemberWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.CollectionMemberWhereInput | Prisma.CollectionMemberWhereInput[]
   collectionId?: Prisma.StringFilter<"CollectionMember"> | string
   userId?: Prisma.StringFilter<"CollectionMember"> | string
+  role?: Prisma.EnumRoleFilter<"CollectionMember"> | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFilter<"CollectionMember"> | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   status?: Prisma.EnumMembershipStatusFilter<"CollectionMember"> | $Enums.MembershipStatus
@@ -287,6 +297,7 @@ export type CollectionMemberOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   collectionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   permission?: Prisma.SortOrder
   invitedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -308,6 +319,7 @@ export type CollectionMemberScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"CollectionMember"> | string
   collectionId?: Prisma.StringWithAggregatesFilter<"CollectionMember"> | string
   userId?: Prisma.StringWithAggregatesFilter<"CollectionMember"> | string
+  role?: Prisma.EnumRoleWithAggregatesFilter<"CollectionMember"> | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionWithAggregatesFilter<"CollectionMember"> | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionMember"> | Date | string
   status?: Prisma.EnumMembershipStatusWithAggregatesFilter<"CollectionMember"> | $Enums.MembershipStatus
@@ -321,6 +333,7 @@ export type CollectionMemberScalarWhereWithAggregatesInput = {
 
 export type CollectionMemberCreateInput = {
   id?: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -338,6 +351,7 @@ export type CollectionMemberUncheckedCreateInput = {
   id?: string
   collectionId: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -351,6 +365,7 @@ export type CollectionMemberUncheckedCreateInput = {
 
 export type CollectionMemberUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -368,6 +383,7 @@ export type CollectionMemberUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -383,6 +399,7 @@ export type CollectionMemberCreateManyInput = {
   id?: string
   collectionId: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -396,6 +413,7 @@ export type CollectionMemberCreateManyInput = {
 
 export type CollectionMemberUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -410,6 +428,7 @@ export type CollectionMemberUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -440,6 +459,7 @@ export type CollectionMemberCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   collectionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   permission?: Prisma.SortOrder
   invitedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -455,6 +475,7 @@ export type CollectionMemberMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   collectionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   permission?: Prisma.SortOrder
   invitedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -470,6 +491,7 @@ export type CollectionMemberMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   collectionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   permission?: Prisma.SortOrder
   invitedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -613,6 +635,7 @@ export type EnumCollectionPermissionFieldUpdateOperationsInput = {
 
 export type CollectionMemberCreateWithoutInvitedByInput = {
   id?: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -629,6 +652,7 @@ export type CollectionMemberUncheckedCreateWithoutInvitedByInput = {
   id?: string
   collectionId: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -651,6 +675,7 @@ export type CollectionMemberCreateManyInvitedByInputEnvelope = {
 
 export type CollectionMemberCreateWithoutUserInput = {
   id?: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -666,6 +691,7 @@ export type CollectionMemberCreateWithoutUserInput = {
 export type CollectionMemberUncheckedCreateWithoutUserInput = {
   id?: string
   collectionId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -710,6 +736,7 @@ export type CollectionMemberScalarWhereInput = {
   id?: Prisma.StringFilter<"CollectionMember"> | string
   collectionId?: Prisma.StringFilter<"CollectionMember"> | string
   userId?: Prisma.StringFilter<"CollectionMember"> | string
+  role?: Prisma.EnumRoleFilter<"CollectionMember"> | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFilter<"CollectionMember"> | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   status?: Prisma.EnumMembershipStatusFilter<"CollectionMember"> | $Enums.MembershipStatus
@@ -739,6 +766,7 @@ export type CollectionMemberUpdateManyWithWhereWithoutUserInput = {
 
 export type CollectionMemberCreateWithoutCollectionInput = {
   id?: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -754,6 +782,7 @@ export type CollectionMemberCreateWithoutCollectionInput = {
 export type CollectionMemberUncheckedCreateWithoutCollectionInput = {
   id?: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -795,6 +824,7 @@ export type CollectionMemberCreateManyInvitedByInput = {
   id?: string
   collectionId: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -808,6 +838,7 @@ export type CollectionMemberCreateManyInvitedByInput = {
 export type CollectionMemberCreateManyUserInput = {
   id?: string
   collectionId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -821,6 +852,7 @@ export type CollectionMemberCreateManyUserInput = {
 
 export type CollectionMemberUpdateWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -837,6 +869,7 @@ export type CollectionMemberUncheckedUpdateWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -851,6 +884,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutInvitedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -863,6 +897,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutInvitedByInput = {
 
 export type CollectionMemberUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -878,6 +913,7 @@ export type CollectionMemberUpdateWithoutUserInput = {
 export type CollectionMemberUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -892,6 +928,7 @@ export type CollectionMemberUncheckedUpdateWithoutUserInput = {
 export type CollectionMemberUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   collectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -906,6 +943,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutUserInput = {
 export type CollectionMemberCreateManyCollectionInput = {
   id?: string
   userId: string
+  role?: $Enums.Role
   permission?: $Enums.CollectionPermission
   invitedAt?: Date | string
   status?: $Enums.MembershipStatus
@@ -919,6 +957,7 @@ export type CollectionMemberCreateManyCollectionInput = {
 
 export type CollectionMemberUpdateWithoutCollectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -934,6 +973,7 @@ export type CollectionMemberUpdateWithoutCollectionInput = {
 export type CollectionMemberUncheckedUpdateWithoutCollectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -948,6 +988,7 @@ export type CollectionMemberUncheckedUpdateWithoutCollectionInput = {
 export type CollectionMemberUncheckedUpdateManyWithoutCollectionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   permission?: Prisma.EnumCollectionPermissionFieldUpdateOperationsInput | $Enums.CollectionPermission
   invitedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
@@ -965,6 +1006,7 @@ export type CollectionMemberSelect<ExtArgs extends runtime.Types.Extensions.Inte
   id?: boolean
   collectionId?: boolean
   userId?: boolean
+  role?: boolean
   permission?: boolean
   invitedAt?: boolean
   status?: boolean
@@ -983,6 +1025,7 @@ export type CollectionMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   collectionId?: boolean
   userId?: boolean
+  role?: boolean
   permission?: boolean
   invitedAt?: boolean
   status?: boolean
@@ -1001,6 +1044,7 @@ export type CollectionMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   id?: boolean
   collectionId?: boolean
   userId?: boolean
+  role?: boolean
   permission?: boolean
   invitedAt?: boolean
   status?: boolean
@@ -1019,6 +1063,7 @@ export type CollectionMemberSelectScalar = {
   id?: boolean
   collectionId?: boolean
   userId?: boolean
+  role?: boolean
   permission?: boolean
   invitedAt?: boolean
   status?: boolean
@@ -1030,7 +1075,7 @@ export type CollectionMemberSelectScalar = {
   isDeleted?: boolean
 }
 
-export type CollectionMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "userId" | "permission" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionMember"]>
+export type CollectionMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "userId" | "role" | "permission" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionMember"]>
 export type CollectionMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection?: boolean | Prisma.CollectionDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1058,6 +1103,7 @@ export type $CollectionMemberPayload<ExtArgs extends runtime.Types.Extensions.In
     id: string
     collectionId: string
     userId: string
+    role: $Enums.Role
     permission: $Enums.CollectionPermission
     invitedAt: Date
     status: $Enums.MembershipStatus
@@ -1496,6 +1542,7 @@ export interface CollectionMemberFieldRefs {
   readonly id: Prisma.FieldRef<"CollectionMember", 'String'>
   readonly collectionId: Prisma.FieldRef<"CollectionMember", 'String'>
   readonly userId: Prisma.FieldRef<"CollectionMember", 'String'>
+  readonly role: Prisma.FieldRef<"CollectionMember", 'Role'>
   readonly permission: Prisma.FieldRef<"CollectionMember", 'CollectionPermission'>
   readonly invitedAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
   readonly status: Prisma.FieldRef<"CollectionMember", 'MembershipStatus'>
