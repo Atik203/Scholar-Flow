@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { authMiddleware, optionalAuth } from "../../middleware/auth";
+import { authMiddleware } from "../../middleware/auth";
 import {
   paperListLimiter,
   paperOperationLimiter,
@@ -19,7 +19,11 @@ import {
 } from "./paper.validation";
 
 // Memory storage is fine for MVP; switch to streaming for large PDFs later.
-const upload = multer({ storage: multer.memoryStorage() });
+// 50MB cap prevents OOM abuse — papers are bounded at upload time.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+});
 
 export const paperRoutes: express.Router = express.Router();
 
@@ -48,11 +52,11 @@ paperRoutes.get(
   paperController.getAiProviders as any
 );
 
-// Get single paper (protected, but allow dev fallback)
+// Get single paper (protected + access checked in controller)
 paperRoutes.get(
   "/:id",
   paperOperationLimiter,
-  optionalAuth as any,
+  authMiddleware as any,
   paperController.getOne as any
 );
 
@@ -60,7 +64,7 @@ paperRoutes.get(
 paperRoutes.get(
   "/:id/file-url",
   paperOperationLimiter,
-  optionalAuth as any,
+  authMiddleware as any,
   paperController.getFileUrl as any
 );
 
@@ -68,7 +72,7 @@ paperRoutes.get(
 paperRoutes.get(
   "/:id/preview-url",
   paperOperationLimiter,
-  optionalAuth as any,
+  authMiddleware as any,
   paperController.getPreviewUrl as any
 );
 
@@ -81,25 +85,22 @@ paperRoutes.post(
   paperController.generateSummary as any
 );
 
-// Update metadata (protected, but allow dev fallback)
+// Update metadata (protected + access checked in controller)
 paperRoutes.patch(
   "/:id",
   paperOperationLimiter,
-  optionalAuth as any,
+  authMiddleware as any,
   validateRequestBody(updatePaperMetadataSchema) as any,
   paperController.updateMetadata as any
 );
 
-// Delete paper (protected, but allow dev fallback)
+// Delete paper (protected + access checked in controller)
 paperRoutes.delete(
   "/:id",
   paperOperationLimiter,
-  optionalAuth as any,
+  authMiddleware as any,
   paperController.delete as any
 );
-
-// Debug endpoint to get dev workspace
-paperRoutes.get("/dev/workspace", paperController.getDevWorkspace as any);
 
 // Authenticated helper to verify uploadedPapers relation
 paperRoutes.get(
