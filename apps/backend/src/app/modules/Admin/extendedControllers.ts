@@ -8,11 +8,15 @@ import { adminModerationService } from "./adminModeration.service";
 import { adminPaymentsService } from "./adminPayments.service";
 import { adminPlansService } from "./adminPlans.service";
 import { systemAlertsService } from "./systemAlerts.service";
+import { CACHE_DURATIONS } from "./admin.constant";
 
 // Plans
 export const adminPlansController = {
   list: catchAsync(async (_req: Request, res: Response) => {
     const items = await adminPlansService.listPlansWithStats();
+    res.set({
+      "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+    });
     sendSuccessResponse(res, items, "Plans retrieved");
   }),
 };
@@ -36,6 +40,10 @@ export const adminPaymentsController = {
       status,
       provider,
       search,
+    });
+    // Short TTL — refunds flip payment status, so stale caches mislead admins
+    res.set({
+      "Cache-Control": `private, max-age=30`,
     });
     sendPaginatedResponse(
       res,
