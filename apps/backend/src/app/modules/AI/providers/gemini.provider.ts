@@ -353,7 +353,9 @@ export class GeminiProvider extends BaseAiProvider {
       );
     }
 
-    const model = DEFAULT_MODEL;
+    const model = isValidGeminiModel(input.model ?? "")
+      ? (input.model as string)
+      : DEFAULT_MODEL;
 
     const systemPrompt = `You are an expert research summarization assistant. Strictly respond with JSON matching this TypeScript type: { "summary": string; "highlights"?: string[]; "followUpQuestions"?: string[]; "tokensUsed"?: number }. The summary must stay within ${input.wordLimit ?? 220} sentences or less and focus on methodology, findings, and implications.`;
 
