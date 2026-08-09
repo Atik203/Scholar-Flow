@@ -1,5 +1,4 @@
 import { Prisma } from "../../shared/prisma";
-import Stripe from "stripe";
 import config from "../../config";
 import prismaClient from "../../shared/prisma";
 import stripe, {
@@ -10,7 +9,6 @@ import stripe, {
   STRIPE_PRICE_IDS,
 } from "../../shared/stripe";
 import {
-  BILLING_INTERVALS,
   PLAN_FEATURES,
   PLAN_TIERS,
   TRIAL_PERIOD_DAYS,
@@ -27,35 +25,9 @@ import type {
  */
 
 /**
- * Get Stripe Price ID for a plan tier and interval
- */
-const getPriceId = (planTier: string, interval: string): string | undefined => {
-  const prices = config.stripe.prices;
-
-  if (planTier === PLAN_TIERS.PRO) {
-    return interval === BILLING_INTERVALS.MONTHLY
-      ? prices.pro.monthly
-      : prices.pro.annual;
-  }
-
-  if (planTier === PLAN_TIERS.TEAM) {
-    return interval === BILLING_INTERVALS.MONTHLY
-      ? prices.team.monthly
-      : prices.team.annual;
-  }
-
-  if (planTier === PLAN_TIERS.ENTERPRISE) {
-    return interval === BILLING_INTERVALS.MONTHLY
-      ? prices.enterprise?.monthly
-      : prices.enterprise?.annual;
-  }
-
-  return undefined;
-};
-
-/**
  * Get plan tier from Stripe price ID
- * Maps price IDs to plan tier codes
+ * Maps price IDs to plan tier codes. Only pro/team are purchasable via
+ * checkout — enterprise is contact-sales only and never reaches here.
  */
 const getPlanTierFromPriceId = (priceId: string): string => {
   const prices = config.stripe.prices;
@@ -68,14 +40,6 @@ const getPlanTierFromPriceId = (priceId: string): string => {
   // Check Team plans
   if (priceId === prices.team.monthly || priceId === prices.team.annual) {
     return PLAN_TIERS.TEAM;
-  }
-
-  // Check Enterprise plans
-  if (
-    priceId === prices.enterprise?.monthly ||
-    priceId === prices.enterprise?.annual
-  ) {
-    return PLAN_TIERS.ENTERPRISE;
   }
 
   throw BillingError.checkoutSessionCreationFailed(
@@ -193,8 +157,35 @@ export const createCheckoutSession = async (
     LIMIT 1
   `;
 
-  const mode: Stripe.Checkout.SessionCreateParams.Mode =
-    existingSubscription.length > 0 ? "subscription" : "subscription";
+  if (existingSubscription.length > 0) {
+    throw BillingError.alreadySubscribed(userId);
+  }
+
+  // Verify workspace ownership/membership when a workspace is attached
+  if (workspaceId) {
+    const access = await prismaClient.$queryRaw<Array<{ isMember: boolean }>>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM "Workspace" w
+        WHERE w.id = ${workspaceId}
+          AND w."isDeleted" = false
+          AND (
+            w."ownerId" = ${userId}
+            OR EXISTS (
+              SELECT 1
+              FROM "WorkspaceMember" m
+              WHERE m."workspaceId" = w.id
+                AND m."userId" = ${userId}
+                AND m."isDeleted" = false
+            )
+          )
+      ) AS "isMember"
+    `;
+
+    if (!access[0]?.isMember) {
+      throw BillingError.workspaceAccessDenied(workspaceId);
+    }
+  }
 
   // Determine trial eligibility
   const hasUsedTrial = await prismaClient.$queryRaw<Array<{ count: bigint }>>`
@@ -210,13 +201,14 @@ export const createCheckoutSession = async (
     existingSubscription.length === 0;
 
   try {
-    // Create Checkout session with idempotency key
-    const idempotencyKey = `checkout_${userId}_${priceId}_${Date.now()}`;
+    // Create Checkout session with stable idempotency key
+    // (unique per user+price+workspace — retries reuse it, preventing duplicates)
+    const idempotencyKey = `checkout_${userId}_${priceId}_${workspaceId || "personal"}`;
 
     const session = await stripe.checkout.sessions.create(
       {
         customer: customerId,
-        mode,
+        mode: "subscription",
         payment_method_types: ["card"],
         line_items: [
           {
@@ -229,7 +221,7 @@ export const createCheckoutSession = async (
           `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url:
           cancelUrl ||
-          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/pricing`,
+          `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing/cancel`,
         subscription_data: allowTrial
           ? {
               trial_period_days: TRIAL_PERIOD_DAYS,
@@ -354,7 +346,13 @@ export const getUserSubscription = async (
     WHERE s."userId" = ${userId}
       ${workspaceId ? Prisma.sql`AND s."workspaceId" = ${workspaceId}` : Prisma.empty}
       AND s."isDeleted" = false
-    ORDER BY s."createdAt" DESC
+    ORDER BY
+      CASE s.status
+        WHEN 'ACTIVE' THEN 0
+        WHEN 'PAST_DUE' THEN 1
+        ELSE 2
+      END,
+      s."createdAt" DESC
     LIMIT 1
   `;
 
@@ -380,9 +378,22 @@ export const getUserSubscription = async (
   return {
     ...subscription[0],
     plan: plan[0] || null,
-    features:
-      PLAN_FEATURES[subscription[0].planId as keyof typeof PLAN_FEATURES] || {},
+    features: getPlanFeatures(plan[0]?.code),
   };
+};
+
+/**
+ * Resolve the feature set for a plan code (e.g. "pro_monthly" → "pro").
+ * PLAN_FEATURES is keyed by tier, so strip any interval suffix from the code.
+ */
+const getPlanFeatures = (planCode?: string | null): Record<string, unknown> => {
+  if (!planCode) {
+    return {};
+  }
+
+  const tier = planCode.split("_")[0] as keyof typeof PLAN_FEATURES;
+
+  return PLAN_FEATURES[tier] || {};
 };
 
 /**
@@ -469,7 +480,6 @@ export const billingService = {
   getUserSubscription,
   cancelSubscription,
   reactivateSubscription,
-  getPriceId,
   getOrCreateStripeCustomer,
   getAvailablePrices,
 };

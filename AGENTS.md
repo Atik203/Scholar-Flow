@@ -170,6 +170,9 @@ Customer portal accessed via backend endpoint only.
 Webhook handlers MUST be idempotent (safe to replay).
 Test mode and live mode keys are different — never mix them.
 Before touching billing code: read the webhook handler first.
+Subscription expiry/grace downgrades run in subscriptionSweeper.ts (hourly
+node-cron, SUB_GRACE_DAYS default 7) — never rely on webhooks alone for
+downgrades: Stripe keeps failed payments in PAST_DUE dunning for days/weeks.
 
 ## Architecture Learnings (Release 1.3.2 hardening)
 
@@ -835,6 +838,14 @@ Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `
 - Default password for all demo users: `password123`
 - Demo users: admin@scholarflow.com, researcher@scholarflow.com, pro.researcher@scholarflow.com, teamlead@scholarflow.com
 - Must override `DATABASE_URL` + `DIRECT_DATABASE_URL` to local URL when seeding local DB (WSL fallback) or Prisma Cloud URLs when seeding cloud DB
+- **Plan catalog (learned the hard way):** the checkout webhook resolves plans by
+  `stripePriceId` then code `{tier}_{interval}`. `seed.js` creates only
+  free/pro/institutional (no price IDs) — running it leaves the DB without
+  pro_monthly/team_* rows and EVERY checkout webhook fails with
+  "Plan not found" (user charged, no role granted). Run
+  `seedPlans.js` too: `yarn ts-node prisma/seedPlans.js` with
+  STRIPE_PRICE_* env vars set — it now uses the PrismaPg adapter like seed.js.
+  The 2026-08-09 incident: user's Pro trial was never granted for exactly this.
 
 ### Performance Verification Workflow
 1. Ensure local PG18 is running: `sudo pg_ctlcluster 18 main start`

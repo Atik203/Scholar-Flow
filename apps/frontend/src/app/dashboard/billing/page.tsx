@@ -2,6 +2,10 @@
 
 import { ManageSubscriptionButton } from "@/components/billing/ManageSubscriptionButton";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import {
+  showInfoToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +22,7 @@ import { useGetSubscriptionQuery } from "@/redux/api/billingApi";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useAppDispatch } from "@/redux/hooks";
 import {
+  AlertTriangle,
   CheckCircle,
   Clock,
   CreditCard,
@@ -29,7 +34,10 @@ import {
 import Link from "next/link";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+
+const GRACE_DAYS = 7;
+
+const PAID_ROLES = ["PRO_RESEARCHER", "TEAM_LEAD"] as const;
 
 const PLAN_DISPLAY = {
   RESEARCHER: {
@@ -85,6 +93,7 @@ export default function BillingPage() {
   const {
     data: subscription,
     isLoading: isLoadingSubscription,
+    isError: isSubscriptionError,
     refetch,
   } = useGetSubscriptionQuery({}, { refetchOnMountOrArgChange: true });
   const searchParams = useSearchParams();
@@ -108,7 +117,7 @@ export default function BillingPage() {
 
       // Show success toast only once
       if (!hasShownSuccessToast) {
-        toast.success("Subscription updated successfully!");
+        showSuccessToast("Subscription updated successfully!");
         setHasShownSuccessToast(true);
       }
 
@@ -120,7 +129,7 @@ export default function BillingPage() {
     onSyncTimeout: useCallback(() => {
       console.warn("[BillingPage] Subscription sync timed out");
       setShouldSync(false);
-      toast.info(
+      showInfoToast(
         "Subscription data may take a moment to update. Please refresh if needed."
       );
 
@@ -165,7 +174,7 @@ export default function BillingPage() {
   }, [dispatch, isAuthenticated, sessionId]);
 
   if (!isLoading && !isAuthenticated) {
-    redirect("/signin");
+    redirect("/login");
   }
 
   if (isLoading || !user || isLoadingSubscription) {
@@ -176,6 +185,33 @@ export default function BillingPage() {
             <Skeleton className="h-10 w-64" />
             <Skeleton className="h-64 w-full" />
           </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (isSubscriptionError) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto max-w-6xl px-4 py-10">
+          <Card className="border-destructive/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Could not load your subscription
+              </CardTitle>
+              <CardDescription>
+                We couldn&apos;t fetch your billing details right now. This
+                doesn&apos;t affect your account or access.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={refetch} variant="outline" className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Try again
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     );
@@ -195,12 +231,20 @@ export default function BillingPage() {
     PLAN_DISPLAY[userRole as keyof typeof PLAN_DISPLAY] ||
     PLAN_DISPLAY.RESEARCHER;
   const Icon = planDisplay.icon;
-  const hasActiveSubscription =
-    subscription && subscription.status === "ACTIVE";
+
+  // Paid access = ACTIVE/PAST_DUE subscription OR a paid role. A PRO/TEAM
+  // user must NEVER see "Upgrade plan" — even if the subscription row is
+  // missing (webhook lag, admin-assigned role) they manage, not upgrade.
+  const hasPaidRole = (PAID_ROLES as readonly string[]).includes(userRole);
+  const subscriptionStatus = subscription?.status ?? null;
+  const isSubscriptionActive = subscriptionStatus === "ACTIVE";
+  const isSubscriptionPastDue = subscriptionStatus === "PAST_DUE";
+  const hasPaidAccess =
+    isSubscriptionActive || isSubscriptionPastDue || hasPaidRole;
 
   const planName = subscription?.plan?.name ?? planDisplay.name;
   const planCode = subscription?.plan?.code ?? `${userRole.toLowerCase()}`;
-  const billingIntervalLabel = hasActiveSubscription
+  const billingIntervalLabel = isSubscriptionActive
     ? planCode.includes("annual")
       ? "Annual billing"
       : "Monthly billing"
@@ -218,6 +262,14 @@ export default function BillingPage() {
     subscription?.seats && subscription.seats > 1
       ? `${subscription.seats} seats`
       : `${subscription?.seats ?? 1} seat`;
+
+  // Grace window: access continues for GRACE_DAYS after the period ends
+  const graceEndsAt = nextPeriodEnd
+    ? new Date(new Date(nextPeriodEnd).getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000)
+    : null;
+  const graceEndsLabel = graceEndsAt
+    ? formatDate(graceEndsAt)
+    : "N/A";
 
   const STATUS_META = {
     ACTIVE: {
@@ -249,7 +301,8 @@ export default function BillingPage() {
   const statusKey =
     (subscription?.status as keyof typeof STATUS_META | undefined) ?? "FREE";
   const statusMeta = STATUS_META[statusKey] ?? STATUS_META.FREE;
-  const showUpgradeCard = userRole === "RESEARCHER" && !hasActiveSubscription;
+  const showUpgradeCard = userRole === "RESEARCHER" && !hasPaidAccess;
+  const showSyncIssueNote = hasPaidRole && !subscription;
 
   return (
     <DashboardLayout>
@@ -323,7 +376,7 @@ export default function BillingPage() {
                           : "No upcoming renewal scheduled"}
                       </span>
                     </div>
-                    {hasActiveSubscription && trialEndsAt && (
+                    {isSubscriptionActive && trialEndsAt && (
                       <div className="flex items-center gap-2 md:justify-end">
                         <Clock className="h-4 w-4 text-primary" />
                         <span>Trial ends • {trialEndsLabel}</span>
@@ -334,6 +387,50 @@ export default function BillingPage() {
               </div>
             </CardContent>
           </Card>
+
+          {isSubscriptionPastDue && (
+            <Card className="border-amber-500/40 bg-amber-500/5">
+              <CardContent className="p-5">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold">Payment failed</p>
+                      <p className="text-sm text-muted-foreground">
+                        We couldn&apos;t charge your card. Your {planName}{" "}
+                        access continues until {graceEndsLabel} — update your
+                        payment method to keep your plan active.
+                      </p>
+                    </div>
+                  </div>
+                  <ManageSubscriptionButton variant="outline" />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {isSubscriptionActive && subscription?.cancelAtPeriodEnd && (
+            <Card className="border-rose-500/30 bg-rose-500/5">
+              <CardContent className="p-5">
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    Subscription canceled.
+                  </span>{" "}
+                  Your {planName} access continues until {nextRenewalLabel}.
+                  You can reactivate anytime from the customer portal.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {showSyncIssueNote && (
+            <div className="flex items-center gap-2 rounded-lg border border-muted/40 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground">
+              <RefreshCw className="h-4 w-4 text-primary" />
+              Your {planDisplay.name} plan is active. Subscription details are
+              still syncing — you can manage your plan from the customer
+              portal.
+            </div>
+          )}
 
           <div className="grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
@@ -373,7 +470,7 @@ export default function BillingPage() {
                           Billing interval
                         </span>
                         <span className="font-medium">
-                          {hasActiveSubscription ? billingIntervalLabel : "—"}
+                          {isSubscriptionActive ? billingIntervalLabel : "—"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -386,7 +483,7 @@ export default function BillingPage() {
                         <span className="text-muted-foreground">Seats</span>
                         <span className="font-medium">{seatsLabel}</span>
                       </div>
-                      {hasActiveSubscription && (
+                      {isSubscriptionActive && (
                         <>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">
@@ -420,7 +517,7 @@ export default function BillingPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 pt-4">
-                  {hasActiveSubscription ? (
+                  {hasPaidAccess ? (
                     <>
                       <ManageSubscriptionButton variant="default" />
                       <Link href="/pricing">
