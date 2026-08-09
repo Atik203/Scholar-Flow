@@ -103,7 +103,8 @@ export class TeamService {
    *
    * "Team" in Phase 5 = the set of users that the requesting team_lead / admin can manage.
    * Since the platform has no org model yet, this returns users that share at least one
-   * workspace membership with the requester (excluding soft-deleted users).
+   * workspace membership with the requester (excluding soft-deleted users). Never
+   * lists platform-wide users — that would leak every account's email/role.
    */
   static async listMembers(
     userId: string,
@@ -117,6 +118,15 @@ export class TeamService {
   ) {
     const take = limit + 1;
     const where: Prisma.UserWhereInput = { isDeleted: false };
+
+    // Scope: users sharing at least one non-deleted workspace with the requester
+    const workspaceIds = await this._requesterWorkspaceIds(userId);
+    if (workspaceIds.length === 0) {
+      return { result: [], meta: { total: 0, limit, hasMore: false, nextCursor: null } };
+    }
+    where.memberships = {
+      some: { workspaceId: { in: workspaceIds }, isDeleted: false },
+    };
 
     if (filters.search) {
       where.OR = [
@@ -201,10 +211,31 @@ export class TeamService {
 
   /**
    * Get a single team member by ID.
+   * Scoped: the target must share a workspace with the requester (ADMIN may
+   * view anyone).
    */
   static async getMember(userId: string, targetUserId: string) {
+    const requestor = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    const isAdmin = requestor?.role === "ADMIN";
+
     const user = await prisma.user.findFirst({
-      where: { id: targetUserId, isDeleted: false },
+      where: {
+        id: targetUserId,
+        isDeleted: false,
+        ...(isAdmin
+          ? {}
+          : {
+              memberships: {
+                some: {
+                  workspaceId: { in: await this._requesterWorkspaceIds(userId) },
+                  isDeleted: false,
+                },
+              },
+            }),
+      },
       select: {
         id: true,
         name: true,
@@ -235,23 +266,55 @@ export class TeamService {
   }
 
   /**
-   * Update a team member's role. Only TEAM_LEAD+ can do this.
+   * Update a team member's role.
+   * Rules (locked 2026-08-10):
+   *  - TEAM_LEAD can only change users sharing a workspace with them
+   *  - only ADMIN can grant/revoke ADMIN and can modify an ADMIN's role
+   *  - nobody can change their own role (prevents self-lockout)
    */
   static async updateMember(
     requestorId: string,
     targetUserId: string,
     data: { role?: string }
   ) {
-    if (data.role) {
-      const validRoles = Object.values(USER_ROLES);
-      if (!validRoles.includes(data.role as any)) {
-        throw new ApiError(400, "Invalid role");
-      }
-      await prisma.user.update({
-        where: { id: targetUserId },
-        data: { role: data.role as any },
-      });
+    if (requestorId === targetUserId) {
+      throw new ApiError(400, "You cannot change your own role");
     }
+    if (!data.role) return { success: true };
+
+    const requestor = await prisma.user.findUnique({
+      where: { id: requestorId },
+      select: { role: true },
+    });
+    const target = await prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { role: true, isDeleted: true },
+    });
+    if (!target || target.isDeleted) throw new ApiError(404, "Team member not found");
+
+    const validRoles = Object.values(USER_ROLES);
+    if (!validRoles.includes(data.role as any)) {
+      throw new ApiError(400, "Invalid role");
+    }
+
+    const isAdmin = requestor?.role === "ADMIN";
+
+    if (!isAdmin) {
+      // Only ADMIN can touch an ADMIN, and only ADMIN can grant ADMIN
+      if (target.role === "ADMIN" || data.role === "ADMIN") {
+        throw new ApiError(403, "Only admins can manage admin roles");
+      }
+      // Non-admins must share a workspace with the target
+      const shared = await this._sharesWorkspace(requestorId, targetUserId);
+      if (!shared) {
+        throw new ApiError(403, "User is not part of your team");
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: targetUserId },
+      data: { role: data.role as any },
+    });
     return { success: true };
   }
 
@@ -445,11 +508,24 @@ export class TeamService {
 
   /**
    * Get team-wide stats: total members, active, pending (invitations), inactive,
-   * total papers, total collections.
+   * total papers, total collections. All counts are scoped to the requester's
+   * workspaces — never platform-wide.
    */
   static async getStats(userId: string) {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const workspaceIds = await this._requesterWorkspaceIds(userId);
+    const memberWhere: Prisma.UserWhereInput = {
+      isDeleted: false,
+      ...(workspaceIds.length
+        ? {
+            memberships: {
+              some: { workspaceId: { in: workspaceIds }, isDeleted: false },
+            },
+          }
+        : {}),
+    };
 
     const [
       totalMembers,
@@ -457,29 +533,44 @@ export class TeamService {
       totalPapers,
       totalCollections,
       recentActivity,
+      usersWithActivity,
     ] = await Promise.all([
-      prisma.user.count({ where: { isDeleted: false } }),
+      prisma.user.count({ where: memberWhere }),
       prisma.workspaceInvitation.count({
-        where: { isDeleted: false, status: "PENDING" },
+        where: {
+          isDeleted: false,
+          status: "PENDING",
+          workspaceId: { in: workspaceIds },
+        },
       }),
-      prisma.paper.count({ where: { isDeleted: false } }),
-      prisma.collection.count({ where: { isDeleted: false } }),
+      prisma.paper.count({
+        where: { isDeleted: false, workspaceId: { in: workspaceIds } },
+      }),
+      prisma.collection.count({
+        where: { isDeleted: false, workspaceId: { in: workspaceIds } },
+      }),
       prisma.activityLogEntry.count({
-        where: { isDeleted: false, createdAt: { gte: sevenDaysAgo } },
+        where: {
+          isDeleted: false,
+          createdAt: { gte: sevenDaysAgo },
+          OR: [{ workspaceId: { in: workspaceIds } }, { userId }],
+        },
+      }),
+      prisma.user.findMany({
+        where: memberWhere,
+        select: { id: true, createdAt: true },
       }),
     ]);
 
-    // "Active" / "inactive" approximations: we don't have lastActiveAt, so we use
-    // createdAt as a rough proxy. Recently created users are "invited/active";
-    // older users are "inactive" only if they have no recent activity log entries.
-    const usersWithActivity = await prisma.user.findMany({
-      where: { isDeleted: false },
-      select: { id: true, createdAt: true },
-    });
+    const memberIds = usersWithActivity.map((u) => u.id);
     const activeUserIds = new Set(
       (
         await prisma.activityLogEntry.findMany({
-          where: { isDeleted: false, createdAt: { gte: sevenDaysAgo } },
+          where: {
+            isDeleted: false,
+            createdAt: { gte: sevenDaysAgo },
+            userId: { in: memberIds },
+          },
           select: { userId: true },
           distinct: ["userId"],
         })
@@ -543,6 +634,24 @@ export class TeamService {
       throw new ApiError(400, "You cannot invite yourself");
     }
 
+    // Global Role -> WorkspaceRole mapping (WorkspaceInvitation.role is a
+    // WorkspaceRole; storing global roles like RESEARCHER crashes the enum cast)
+    const inviter = await prisma.user.findUnique({
+      where: { id: inviterId },
+      select: { role: true, name: true, firstName: true, lastName: true, email: true },
+    });
+    const requestedGlobalRole = (payload.role as string) || "RESEARCHER";
+    if (requestedGlobalRole === "ADMIN" && inviter?.role !== "ADMIN") {
+      throw new ApiError(403, "Only admins can invite as ADMIN");
+    }
+    const roleMap: Record<string, string> = {
+      RESEARCHER: "VIEWER",
+      PRO_RESEARCHER: "EDITOR",
+      TEAM_LEAD: "MANAGER",
+      ADMIN: "OWNER",
+    };
+    const workspaceRole = roleMap[requestedGlobalRole] || "EDITOR";
+
     // Check if already a member of any of the inviter's workspaces
     const inviterWorkspaces = await prisma.workspace.findMany({
       where: { isDeleted: false, ownerId: inviterId },
@@ -577,13 +686,13 @@ export class TeamService {
       create: {
         workspaceId: targetWorkspaceId,
         userId: user.id,
-        role: (payload.role as any) || "RESEARCHER",
+        role: workspaceRole as any,
         invitedById: inviterId,
         status: "PENDING",
         invitedAt: new Date(),
       },
       update: {
-        role: (payload.role as any) || "RESEARCHER",
+        role: workspaceRole as any,
         invitedById: inviterId,
         status: "PENDING",
         invitedAt: new Date(),
@@ -596,10 +705,6 @@ export class TeamService {
     // Try to send email (non-blocking — failure doesn't break the API)
     try {
       const { default: emailService } = await import("../../shared/emailService");
-      const inviter = await prisma.user.findUnique({
-        where: { id: inviterId },
-        select: { name: true, firstName: true, lastName: true, email: true },
-      });
       await emailService.sendTeamInvitationEmail({
         email: user.email,
         name: user.name || `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
@@ -795,6 +900,38 @@ export class TeamService {
   // -------------------------------------------------------------------------
   // Internal helpers
   // -------------------------------------------------------------------------
+
+  /** Workspace IDs the user owns or is an active member of (non-deleted). */
+  private static async _requesterWorkspaceIds(userId: string): Promise<string[]> {
+    const workspaces = await prisma.workspace.findMany({
+      where: {
+        isDeleted: false,
+        OR: [
+          { ownerId: userId },
+          { members: { some: { userId, isDeleted: false } } },
+        ],
+      },
+      select: { id: true },
+    });
+    return workspaces.map((w) => w.id);
+  }
+
+  /** True when both users are active members of at least one non-deleted workspace. */
+  private static async _sharesWorkspace(
+    userIdA: string,
+    userIdB: string
+  ): Promise<boolean> {
+    const shared = await prisma.$queryRaw<Array<{ count: number }>>`
+      SELECT COUNT(*)::int as count
+      FROM "WorkspaceMember" a
+      JOIN "WorkspaceMember" b ON b."workspaceId" = a."workspaceId"
+        AND b."userId" = ${userIdB} AND b."isDeleted" = false
+      JOIN "Workspace" w ON w.id = a."workspaceId" AND w."isDeleted" = false
+      WHERE a."userId" = ${userIdA} AND a."isDeleted" = false
+      LIMIT 1
+    `;
+    return (shared[0]?.count ?? 0) > 0;
+  }
 
   private static _mergeSettings(stored: TeamSettingsPayload): TeamSettingsPayload {
     return {

@@ -7,6 +7,7 @@ import { personalAnalyticsService } from "./personal.service";
 import { usageReportsService } from "./usage.service";
 import { workspaceAnalyticsService } from "./workspace.service";
 import { aiUsageService } from "./aiUsage.service";
+import prisma from "../../shared/prisma";
 
 export const analyticsController = {
   personal: catchAsync(async (req: Request, res: Response) => {
@@ -58,6 +59,21 @@ export const analyticsController = {
       | "month"
       | "quarter"
       | "year");
+    // Access control: only owner or active members may read workspace analytics
+    const membership = await prisma.workspace.findFirst({
+      where: {
+        id: workspaceId,
+        isDeleted: false,
+        OR: [
+          { ownerId: authReq.user.id },
+          { members: { some: { userId: authReq.user.id, isDeleted: false } } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!membership) {
+      throw new ApiError(403, "Access denied: not a member of this workspace");
+    }
     const summary = await workspaceAnalyticsService.getSummary(
       workspaceId,
       timeRange
