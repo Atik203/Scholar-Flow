@@ -24,20 +24,23 @@ import {
   useCreateWorkspaceMutation,
   useListWorkspacesQuery,
 } from "@/redux/api/workspaceApi";
+import { selectAccessToken } from "@/redux/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
 import { Building2, ChevronsUpDown, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 interface WorkspaceSwitcherProps {
   currentWorkspaceId?: string;
-  variant?: "app" | "admin";
 }
 
-export function WorkspaceSwitcher({
-  currentWorkspaceId,
-  variant: _variant = "app",
-}: WorkspaceSwitcherProps) {
-  const { data, isLoading } = useListWorkspacesQuery({ scope: "all" });
+export function WorkspaceSwitcher({ currentWorkspaceId }: WorkspaceSwitcherProps) {
+  const accessToken = useAppSelector(selectAccessToken);
+  const shouldFetch = Boolean(accessToken && accessToken.length > 0);
+  const { data, isLoading } = useListWorkspacesQuery(
+    { scope: "all" },
+    { skip: !shouldFetch }
+  );
   const [createWorkspace, { isLoading: creating }] =
     useCreateWorkspaceMutation();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
