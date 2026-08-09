@@ -63,7 +63,7 @@ export default function FAQPage() {
         },
         {
           question: "Is ScholarFlow free to use?",
-          answer: "Yes! We offer a generous free plan that includes up to 50 papers, basic organization, and essential features. For more advanced features like AI summaries and unlimited papers, you can upgrade to Pro.",
+          answer: "Yes! We offer a generous free plan that includes up to 10 papers, basic organization, and essential features. For more advanced features like AI summaries and unlimited papers, you can upgrade to Pro.",
         },
         {
           question: "What file formats are supported?",

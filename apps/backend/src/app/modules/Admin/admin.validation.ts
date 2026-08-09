@@ -25,5 +25,9 @@ export const dateRangeSchema = z
     message: "Start date must be before or equal to end date",
   });
 
+export const updateUserRoleSchema = z.object({
+  role: z.enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"]),
+});
+
 export type AdminFiltersInput = z.infer<typeof adminFiltersSchema>;
 export type DateRangeInput = z.infer<typeof dateRangeSchema>;
