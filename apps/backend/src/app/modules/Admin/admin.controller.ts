@@ -215,7 +215,9 @@ class AdminController {
    */
   getTopCustomers: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const limit = req.query.limit
+        ? Math.min(parseInt(req.query.limit as string), 50)
+        : 10;
       const customers = await analyticsService.getTopCustomers(limit);
 
       res.set({
@@ -239,7 +241,9 @@ class AdminController {
   getSubscriberDetails: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const page = req.query.page ? parseInt(req.query.page as string) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const limit = req.query.limit
+        ? Math.min(parseInt(req.query.limit as string), 100)
+        : 20;
       const status = req.query.status as string | undefined;
       const planId = req.query.planId as string | undefined;
 
