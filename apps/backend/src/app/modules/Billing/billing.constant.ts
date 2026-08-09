@@ -115,6 +115,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
   CUSTOMER_SUBSCRIPTION_CREATED: "customer.subscription.created",
   CUSTOMER_SUBSCRIPTION_UPDATED: "customer.subscription.updated",
   CUSTOMER_SUBSCRIPTION_DELETED: "customer.subscription.deleted",
+  CHARGE_REFUNDED: "charge.refunded",
   INVOICE_PAID: "invoice.paid",
   INVOICE_PAYMENT_FAILED: "invoice.payment_failed",
   INVOICE_PAYMENT_ACTION_REQUIRED: "invoice.payment_action_required",
