@@ -368,8 +368,24 @@ const getUserAnalytics = async (user: IAuthUser) => {
 
     const userData = existingUsers[0];
 
-    // Determine user plan (Free or Pro based on Stripe subscription)
-    const plan = userData.stripeSubscriptionId ? "PRO" : "FREE";
+    // Determine user plan from subscription state (not just stripeSubscriptionId,
+    // which persists after cancellation). ACTIVE/PAST_DUE = paid tier by role.
+    let plan = "FREE";
+
+    if (userData.stripeSubscriptionId) {
+      const sub = await prisma.$queryRaw<Array<{ status: string }>>`
+        SELECT status
+        FROM "Subscription"
+        WHERE "userId" = ${user.id}
+          AND "providerSubscriptionId" = ${userData.stripeSubscriptionId}
+          AND "isDeleted" = false
+        LIMIT 1
+      `;
+
+      if (sub[0]?.status === "ACTIVE" || sub[0]?.status === "PAST_DUE") {
+        plan = userData.role === "TEAM_LEAD" ? "TEAM" : "PRO";
+      }
+    }
 
     // Get papers count and storage used
     const paperStats = await prisma.$queryRaw<any[]>`
