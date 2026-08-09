@@ -131,8 +131,25 @@ export const handleStripeWebhook = catchAsync(
 async function processStripeEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_COMPLETED:
+    case STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED:
       await handleCheckoutSessionCompleted(
         event.data.object as Stripe.Checkout.Session
+      );
+      break;
+
+    case STRIPE_WEBHOOK_EVENTS.CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED:
+      // Asynchronous payment methods only; checkout is card-only today,
+      // so this is a graceful no-op when it arrives.
+      logDebug(
+        `Async checkout payment failed: ${(event.data.object as Stripe.Checkout.Session).id}`
+      );
+      break;
+
+    case STRIPE_WEBHOOK_EVENTS.INVOICE_PAYMENT_ACTION_REQUIRED:
+      // Customer must complete an additional authentication step. The
+      // subscription stays as-is until the outcome event arrives.
+      logDebug(
+        `Payment action required on invoice ${(event.data.object as Stripe.Invoice).id}`
       );
       break;
 
@@ -154,6 +171,10 @@ async function processStripeEvent(event: Stripe.Event): Promise<void> {
 
     case STRIPE_WEBHOOK_EVENTS.INVOICE_PAYMENT_FAILED:
       await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      break;
+
+    case STRIPE_WEBHOOK_EVENTS.CHARGE_REFUNDED:
+      await handleChargeRefunded(event.data.object as Stripe.Charge);
       break;
 
     default:
@@ -657,6 +678,24 @@ async function handleInvoicePaymentFailed(
       ? subscriptionField
       : subscriptionField.id;
 
+  // Find subscription (needed for the payment record + notification)
+  const subscription = await prismaClient.$queryRaw<
+    Array<{ id: string; userId: string }>
+  >`
+    SELECT id, "userId"
+    FROM "Subscription"
+    WHERE "providerSubscriptionId" = ${subscriptionId}
+      AND "isDeleted" = false
+    LIMIT 1
+  `;
+
+  if (subscription.length === 0) {
+    console.warn(
+      `Subscription not found for failed invoice: ${invoice.id}`
+    );
+    return;
+  }
+
   // Update subscription status
   await prismaClient.$executeRaw`
     UPDATE "Subscription"
@@ -666,31 +705,57 @@ async function handleInvoicePaymentFailed(
     WHERE "providerSubscriptionId" = ${subscriptionId}
   `;
 
+  // Record the failed payment attempt (feeds the failed-payment metric
+  // and gives the admin a visible failure trail). Idempotent per invoice.
+  await prismaClient.$executeRaw`
+    INSERT INTO "Payment" (
+      id,
+      "userId",
+      "subscriptionId",
+      provider,
+      "amountCents",
+      currency,
+      "transactionId",
+      status,
+      raw,
+      "createdAt",
+      "updatedAt",
+      "isDeleted"
+    ) VALUES (
+      gen_random_uuid(),
+      ${subscription[0].userId},
+      ${subscription[0].id},
+      'STRIPE',
+      ${invoice.amount_due},
+      ${invoice.currency.toUpperCase()},
+      ${invoice.id},
+      'FAILED',
+      ${JSON.stringify(invoice)}::jsonb,
+      NOW(),
+      NOW(),
+      false
+    )
+    ON CONFLICT ("transactionId")
+    DO UPDATE SET
+      status = 'FAILED',
+      "updatedAt" = NOW()
+  `;
+
   // Notify the user about the failed payment (grace period is running)
   try {
     const { notificationService } = await import(
       "../Notification/notification.service"
     );
 
-    const subscriber = await prismaClient.$queryRaw<Array<{ userId: string }>>`
-      SELECT "userId"
-      FROM "Subscription"
-      WHERE "providerSubscriptionId" = ${subscriptionId}
-        AND "isDeleted" = false
-      LIMIT 1
-    `;
-
-    if (subscriber[0]) {
-      await notificationService.createNotification({
-        userId: subscriber[0].userId,
-        type: "SYSTEM",
-        title: "Payment failed",
-        message:
-          "We couldn't charge your card for your subscription. Your paid plan continues during the grace period — update your payment method to avoid losing access.",
-        actionUrl: "/dashboard/billing",
-        resourceId: subscriptionId,
-      });
-    }
+    await notificationService.createNotification({
+      userId: subscription[0].userId,
+      type: "SYSTEM",
+      title: "Payment failed",
+      message:
+        "We couldn't charge your card for your subscription. Your paid plan continues during the grace period — update your payment method to avoid losing access.",
+      actionUrl: "/dashboard/billing",
+      resourceId: subscriptionId,
+    });
   } catch (error) {
     // Notification failures must never fail the webhook itself
     if (process.env.NODE_ENV !== "production") {
@@ -702,6 +767,57 @@ async function handleInvoicePaymentFailed(
   }
 
   logDebug(`Invoice payment failed: ${invoice.id}`);
+}
+
+/**
+ * Handle charge.refunded event — sync refunds issued from the Stripe
+ * dashboard back to the local Payment row. Only full refunds flip the row;
+ * partial refunds leave the payment SUCCEEDED.
+ */
+async function handleChargeRefunded(charge: Stripe.Charge): Promise<void> {
+  // charge.invoice was removed from the SDK types on recent API versions —
+  // probe the raw payload defensively.
+  const invoiceId = (charge as unknown as { invoice?: string | null }).invoice;
+
+  if (!invoiceId) {
+    logDebug(`Charge ${charge.id} has no invoice reference, skipping`);
+    return;
+  }
+
+  const isFullyRefunded = charge.amount_refunded >= charge.amount;
+
+  const payment = await prismaClient.$queryRaw<
+    Array<{ id: string; status: string }>
+  >`
+    SELECT id, status::text
+    FROM "Payment"
+    WHERE "transactionId" = ${invoiceId}
+      AND "isDeleted" = false
+    LIMIT 1
+  `;
+
+  if (payment.length === 0) {
+    logDebug(`No local payment for refunded charge ${charge.id}`);
+    return;
+  }
+
+  if (payment[0].status !== "SUCCEEDED" || !isFullyRefunded) {
+    logDebug(
+      `Charge ${charge.id}: status ${payment[0].status}, fully refunded ${isFullyRefunded} — skipping`
+    );
+    return;
+  }
+
+  await prismaClient.$executeRaw`
+    UPDATE "Payment"
+    SET
+      status = 'REFUNDED',
+      raw = raw || ${JSON.stringify({ refundedAt: new Date().toISOString(), refundedBy: "stripe_dashboard" })}::jsonb,
+      "updatedAt" = NOW()
+    WHERE id = ${payment[0].id}
+  `;
+
+  logDebug(`Payment ${payment[0].id} marked REFUNDED (charge.refunded)`);
 }
 
 /**
