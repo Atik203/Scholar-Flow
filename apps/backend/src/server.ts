@@ -125,7 +125,6 @@ app.post(
   captureStripeRawBody,
   webhookController.handleStripeWebhook as unknown as RequestHandler
 );
-
 // Request parsing
 const jsonParser = express.json({ limit: "50mb" });
 const urlencodedParser = express.urlencoded({
@@ -207,6 +206,13 @@ if (process.env.VERCEL !== "1") {
   // Phase 10 - WebSocket server
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
+
+  // Billing - subscription expiry/grace sweeper (hourly cron)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startSubscriptionSweeper } = require(
+    "./app/modules/Billing/subscriptionSweeper"
+  );
+  startSubscriptionSweeper();
 
   const httpServer = http.createServer(app);
   setupWebSocket(httpServer);

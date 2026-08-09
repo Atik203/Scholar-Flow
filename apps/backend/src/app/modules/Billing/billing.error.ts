@@ -147,4 +147,22 @@ export class BillingError extends ApiError {
       { userId }
     );
   }
+
+  static alreadySubscribed(userId: string) {
+    return new BillingError(
+      400,
+      "You already have an active subscription. Manage it from the billing page.",
+      "ALREADY_SUBSCRIBED",
+      { userId }
+    );
+  }
+
+  static workspaceAccessDenied(workspaceId: string) {
+    return new BillingError(
+      403,
+      "You do not have access to this workspace",
+      "WORKSPACE_ACCESS_DENIED",
+      { workspaceId }
+    );
+  }
 }

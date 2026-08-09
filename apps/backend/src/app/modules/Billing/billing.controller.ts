@@ -99,11 +99,6 @@ const managePlan = catchAsync(
         result = { message: "Subscription reactivated successfully" };
         break;
 
-      case "update_seats":
-        // TODO: Implement seat update logic
-        result = { message: "Seat update not yet implemented" };
-        break;
-
       default:
         res.status(400).json({
           success: false,
