@@ -27,7 +27,7 @@ export const analyticsService = {
       GROUP BY status
     `;
 
-    // Get subscription counts by plan
+    // Get subscription counts by plan (paying = ACTIVE, non-trial)
     const subscriptionsByPlan = await prisma.$queryRaw<
       Array<{ planName: string; count: bigint }>
     >`
@@ -38,11 +38,13 @@ export const analyticsService = {
       JOIN "Plan" p ON s."planId" = p.id
       WHERE s."isDeleted" = false 
         AND s.status = 'ACTIVE'
+        AND (s."trialEnd" IS NULL OR s."trialEnd" <= NOW())
       GROUP BY p.name
       ORDER BY count DESC
     `;
 
-    // Calculate MRR (Monthly Recurring Revenue)
+    // Calculate MRR (Monthly Recurring Revenue) — paying subscriptions only:
+    // ACTIVE, not canceled-at-period-end, and not in a free trial.
     const mrrData = await prisma.$queryRaw<
       Array<{ totalMrr: string; currency: string }>
     >`
@@ -50,7 +52,7 @@ export const analyticsService = {
         SUM(
           CASE 
             WHEN p.interval = 'month' THEN p."priceCents"
-            WHEN p.interval = 'year' THEN p."priceCents" / 12
+            WHEN p.interval = 'year' THEN ROUND(p."priceCents"::numeric / 12)
             ELSE 0
           END
         )::numeric / 100 as "totalMrr",
@@ -60,6 +62,7 @@ export const analyticsService = {
       WHERE s."isDeleted" = false 
         AND s.status = 'ACTIVE'
         AND s."cancelAtPeriodEnd" = false
+        AND (s."trialEnd" IS NULL OR s."trialEnd" <= NOW())
       GROUP BY p.currency
     `;
 
@@ -77,6 +80,7 @@ export const analyticsService = {
         currency
       FROM "Payment"
       WHERE status = 'SUCCEEDED'
+        AND "isDeleted" = false
         AND "createdAt" >= ${startDate}
       GROUP BY currency
     `;
@@ -91,6 +95,7 @@ export const analyticsService = {
         COUNT(*)::bigint as count
       FROM "Payment"
       WHERE status = 'SUCCEEDED'
+        AND "isDeleted" = false
         AND "createdAt" >= ${startDate}
       GROUP BY DATE("createdAt")
       ORDER BY date ASC
@@ -101,6 +106,7 @@ export const analyticsService = {
       SELECT COUNT(*)::bigint as count
       FROM "Payment"
       WHERE status = 'FAILED'
+        AND "isDeleted" = false
         AND "createdAt" >= ${startDate}
     `;
 
@@ -122,19 +128,20 @@ export const analyticsService = {
         AND "isDeleted" = false
     `;
 
-    // Get average revenue per user (ARPU)
-    const arpuData = await prisma.$queryRaw<
-      Array<{ arpu: string; activeUsers: bigint }>
+    // Get count of paying users (ACTIVE, non-trial, not cancel-at-period-end)
+    // ARPU is derived from MRR over this same population.
+    const activeUsersData = await prisma.$queryRaw<
+      Array<{ activeUsers: bigint }>
     >`
-      SELECT 
-        (SUM(p."priceCents")::numeric / COUNT(DISTINCT s."userId")::numeric / 100) as arpu,
-        COUNT(DISTINCT s."userId")::bigint as "activeUsers"
+      SELECT COUNT(DISTINCT s."userId")::bigint as "activeUsers"
       FROM "Subscription" s
-      JOIN "Plan" p ON s."planId" = p.id
       WHERE s."isDeleted" = false 
         AND s.status = 'ACTIVE'
         AND s."cancelAtPeriodEnd" = false
+        AND (s."trialEnd" IS NULL OR s."trialEnd" <= NOW())
     `;
+
+    const activeUsers = Number(activeUsersData[0]?.activeUsers || 0);
 
     // Churn rate calculation (canceled / total active at start of period)
     const churnData = await prisma.$queryRaw<
@@ -195,11 +202,10 @@ export const analyticsService = {
         failed: Number(failedPayments[0]?.count || 0),
       },
       metrics: {
+        // ARPU = MRR / paying users (same population as the MRR query)
         arpu:
-          arpuData.length > 0 && arpuData[0].arpu
-            ? parseFloat(arpuData[0].arpu)
-            : 0,
-        activeUsers: Number(arpuData[0]?.activeUsers || 0),
+          mrr > 0 && activeUsers > 0 ? mrr / activeUsers : 0,
+        activeUsers,
         churnRate:
           churnData.length > 0 && churnData[0].churnRate
             ? parseFloat(churnData[0].churnRate)
@@ -218,6 +224,7 @@ export const analyticsService = {
    * Get top paying customers
    */
   async getTopCustomers(limit: number = 10) {
+    const safeLimit = Math.min(Math.max(limit, 1), 50);
     const topCustomers = await prisma.$queryRaw<
       Array<{
         userId: string;
@@ -236,13 +243,29 @@ export const analyticsService = {
         s.status::text as "subscriptionStatus",
         p.name as "planName"
       FROM "User" u
-      LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false
+      LEFT JOIN LATERAL (
+        SELECT s2.status, s2."planId"
+        FROM "Subscription" s2
+        WHERE s2."userId" = u.id
+          AND s2."isDeleted" = false
+        ORDER BY
+          CASE s2.status
+            WHEN 'ACTIVE' THEN 0
+            WHEN 'PAST_DUE' THEN 1
+            ELSE 2
+          END,
+          s2."createdAt" DESC
+        LIMIT 1
+      ) s ON true
       LEFT JOIN "Plan" p ON s."planId" = p.id
-      LEFT JOIN "Payment" pay ON u.id = pay."userId" AND pay.status = 'SUCCEEDED'
+      LEFT JOIN "Payment" pay
+        ON u.id = pay."userId"
+        AND pay.status = 'SUCCEEDED'
+        AND pay."isDeleted" = false
       WHERE u."isDeleted" = false
       GROUP BY u.id, u.name, u.email, s.status, p.name
       ORDER BY "totalSpent" DESC
-      LIMIT ${limit}
+      LIMIT ${safeLimit}
     `;
 
     return topCustomers.map((c) => ({
@@ -269,6 +292,11 @@ export const analyticsService = {
     const hasStatusFilter = status && status !== "all";
     const hasPlanFilter = !!planId;
 
+    // TRIALING is not a SubscriptionStatus enum value (trials are stored as
+    // ACTIVE) — map it gracefully instead of letting the cast 500.
+    const normalizedStatus =
+      hasStatusFilter && status === "TRIALING" ? "ACTIVE" : status;
+
     // Determine which query variant to use based on filters
     let countResult: Array<{ count: bigint }>;
     let subscribers: Array<{
@@ -293,7 +321,7 @@ export const analyticsService = {
         SELECT COUNT(*)::bigint as count
         FROM "Subscription" s
         WHERE s."isDeleted" = false
-          AND s.status = ${status}::"SubscriptionStatus"
+          AND s.status = ${normalizedStatus}::"SubscriptionStatus"
           AND s."planId" = ${planId}
       `;
 
@@ -314,7 +342,7 @@ export const analyticsService = {
             (
               SELECT SUM(pay."amountCents")::numeric / 100
               FROM "Payment" pay
-              WHERE pay."userId" = u.id 
+              WHERE pay."subscriptionId" = s.id 
                 AND pay.status = 'SUCCEEDED'
                 AND pay."isDeleted" = false
             ), 
@@ -332,7 +360,7 @@ export const analyticsService = {
         JOIN "Plan" p ON s."planId" = p.id
         WHERE s."isDeleted" = false
           AND u."isDeleted" = false
-          AND s.status = ${status}::"SubscriptionStatus"
+          AND s.status = ${normalizedStatus}::"SubscriptionStatus"
           AND s."planId" = ${planId}
         ORDER BY s."createdAt" DESC
         LIMIT ${limit}
@@ -344,7 +372,7 @@ export const analyticsService = {
         SELECT COUNT(*)::bigint as count
         FROM "Subscription" s
         WHERE s."isDeleted" = false
-          AND s.status = ${status}::"SubscriptionStatus"
+          AND s.status = ${normalizedStatus}::"SubscriptionStatus"
       `;
 
       subscribers = await prisma.$queryRaw`
@@ -364,7 +392,7 @@ export const analyticsService = {
             (
               SELECT SUM(pay."amountCents")::numeric / 100
               FROM "Payment" pay
-              WHERE pay."userId" = u.id 
+              WHERE pay."subscriptionId" = s.id 
                 AND pay.status = 'SUCCEEDED'
                 AND pay."isDeleted" = false
             ), 
@@ -382,7 +410,7 @@ export const analyticsService = {
         JOIN "Plan" p ON s."planId" = p.id
         WHERE s."isDeleted" = false
           AND u."isDeleted" = false
-          AND s.status = ${status}::"SubscriptionStatus"
+          AND s.status = ${normalizedStatus}::"SubscriptionStatus"
         ORDER BY s."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -413,7 +441,7 @@ export const analyticsService = {
             (
               SELECT SUM(pay."amountCents")::numeric / 100
               FROM "Payment" pay
-              WHERE pay."userId" = u.id 
+              WHERE pay."subscriptionId" = s.id 
                 AND pay.status = 'SUCCEEDED'
                 AND pay."isDeleted" = false
             ), 
@@ -461,7 +489,7 @@ export const analyticsService = {
             (
               SELECT SUM(pay."amountCents")::numeric / 100
               FROM "Payment" pay
-              WHERE pay."userId" = u.id 
+              WHERE pay."subscriptionId" = s.id 
                 AND pay.status = 'SUCCEEDED'
                 AND pay."isDeleted" = false
             ), 

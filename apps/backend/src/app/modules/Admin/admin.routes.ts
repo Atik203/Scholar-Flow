@@ -314,7 +314,7 @@ router.get(
  *         name: status
  *         schema:
  *           type: string
- *           enum: [ACTIVE, TRIALING, CANCELED, EXPIRED, PAST_DUE, all]
+ *           enum: [ACTIVE, CANCELED, EXPIRED, PAST_DUE, all]
  *         description: Filter by subscription status
  *       - in: query
  *         name: planId

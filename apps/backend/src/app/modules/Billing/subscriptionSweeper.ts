@@ -72,7 +72,10 @@ export const runSubscriptionSweep = async (): Promise<number> => {
 
       await prismaClient.$executeRaw`
         UPDATE "Subscription"
-        SET status = ${SUBSCRIPTION_STATUS.EXPIRED}::"SubscriptionStatus", "updatedAt" = NOW()
+        SET
+          status = ${SUBSCRIPTION_STATUS.EXPIRED}::"SubscriptionStatus",
+          "canceledAt" = NOW(),
+          "updatedAt" = NOW()
         WHERE id = ${subscription.id}
       `;
 
