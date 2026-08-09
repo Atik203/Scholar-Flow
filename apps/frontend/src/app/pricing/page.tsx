@@ -29,7 +29,7 @@ import { showErrorToast } from "@/components/providers/ToastProvider";
 import { useAuth } from "@/redux/auth/useAuth";
 import {
   useCreateCheckoutSessionMutation,
-  useGetBillingPricesQuery,
+  useGetBillingCatalogQuery,
 } from "@/redux/api/billingApi";
 
 type PlanKey = "free" | "pro" | "team" | "enterprise";
@@ -48,10 +48,10 @@ export default function PricingPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const {
-    data: prices,
-    isLoading: isPricesLoading,
-    isError: isPricesError,
-  } = useGetBillingPricesQuery();
+    data: catalog,
+    isLoading: isCatalogLoading,
+    isError: isCatalogError,
+  } = useGetBillingCatalogQuery(undefined, { refetchOnMountOrArgChange: true });
   const [createCheckout, { isLoading: isStartingCheckout }] =
     useCreateCheckoutSessionMutation();
 
@@ -74,12 +74,17 @@ export default function PricingPage() {
       return;
     }
 
-    const priceId = prices?.[planKey]?.[isAnnual ? "annual" : "monthly"];
+    const variant =
+      planKey === "pro" || planKey === "team"
+        ? catalog?.[planKey]?.[isAnnual ? "annual" : "monthly"]
+        : null;
+    const priceId = variant?.stripePriceId ?? null;
+
     if (!priceId) {
       showErrorToast(
-        isPricesError
+        isCatalogError
           ? "Could not load pricing. Please refresh and try again."
-          : "Billing is not configured for this plan yet."
+          : "This plan is not available right now."
       );
       return;
     }
@@ -152,6 +157,13 @@ export default function PricingPage() {
     { feature: "On-premise Deployment", free: false, pro: false, team: false, enterprise: true },
   ];
 
+  // Pro/Team cards are driven by the admin-managed plan catalog — name,
+  // price, and availability reflect admin panel changes (null = unavailable).
+  const proMonthly = catalog?.pro?.monthly ?? null;
+  const proAnnual = catalog?.pro?.annual ?? null;
+  const teamMonthly = catalog?.team?.monthly ?? null;
+  const teamAnnual = catalog?.team?.annual ?? null;
+
   const plans = [
     {
       name: "Free",
@@ -172,13 +184,14 @@ export default function PricingPage() {
       color: "primary",
       popular: false,
       cta: "Get Started",
+      unavailable: false,
     },
     {
-      name: "Pro",
+      name: proMonthly?.name ?? "Pro",
       planKey: "pro",
       description: "Ideal for active researchers and small teams",
-      monthlyPrice: 29,
-      annualPrice: 24,
+      monthlyPrice: proMonthly ? proMonthly.priceCents / 100 : null,
+      annualPrice: proAnnual ? proAnnual.priceCents / 100 : null,
       icon: Zap,
       features: [
         "Unlimited papers",
@@ -194,13 +207,14 @@ export default function PricingPage() {
       color: "chart-1",
       popular: true,
       cta: "Start Pro Trial",
+      unavailable: !proMonthly && !proAnnual,
     },
     {
-      name: "Team",
+      name: teamMonthly?.name ?? "Team",
       planKey: "team",
       description: "Built for research teams and departments",
-      monthlyPrice: 89,
-      annualPrice: 74,
+      monthlyPrice: teamMonthly ? teamMonthly.priceCents / 100 : null,
+      annualPrice: teamAnnual ? teamAnnual.priceCents / 100 : null,
       icon: Users,
       features: [
         "Everything in Pro",
@@ -216,6 +230,7 @@ export default function PricingPage() {
       color: "chart-2",
       popular: false,
       cta: "Start Team Trial",
+      unavailable: !teamMonthly && !teamAnnual,
     },
     {
       name: "Enterprise",
@@ -238,8 +253,9 @@ export default function PricingPage() {
       color: "chart-3",
       popular: false,
       cta: "Contact Sales",
+      unavailable: false,
     },
-  ];
+  ] as const;
 
   const faqs = [
     {
@@ -358,7 +374,9 @@ export default function PricingPage() {
 
                     <div className="text-center mb-8">
                       <div className="text-4xl font-bold">
-                        {plan.monthlyPrice !== null ? (
+                        {plan.unavailable ? (
+                          "—"
+                        ) : plan.monthlyPrice !== null ? (
                           <>
                             ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
                             <span className="text-lg font-normal text-muted-foreground">
@@ -369,9 +387,18 @@ export default function PricingPage() {
                           "Custom"
                         )}
                       </div>
-                      {isAnnual && plan.monthlyPrice !== null && plan.monthlyPrice > 0 && (
+                      {!plan.unavailable &&
+                        isAnnual &&
+                        plan.monthlyPrice !== null &&
+                        plan.monthlyPrice > 0 && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            ${Math.round((plan.annualPrice ?? 0) / 12)}/month
+                            billed annually
+                          </div>
+                        )}
+                      {plan.unavailable && (
                         <div className="text-sm text-muted-foreground mt-1">
-                          ${Math.round((plan.annualPrice ?? 0) / 12)}/month billed annually
+                          Currently unavailable
                         </div>
                       )}
                     </div>
@@ -405,7 +432,9 @@ export default function PricingPage() {
                     ) : (
                       <Button
                         onClick={() => handlePlanCta(plan.planKey as PlanKey)}
-                        disabled={isStartingCheckout || isPricesLoading}
+                        disabled={
+                          isStartingCheckout || isCatalogLoading || plan.unavailable
+                        }
                         className={
                           plan.popular
                             ? "w-full py-3 px-4 font-semibold bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
@@ -413,7 +442,7 @@ export default function PricingPage() {
                         }
                         variant={plan.popular ? "default" : "outline"}
                       >
-                        {plan.cta}
+                        {plan.unavailable ? "Not available" : plan.cta}
                       </Button>
                     )}
                   </CardWithVariants>

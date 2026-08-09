@@ -2,11 +2,9 @@ import { Prisma } from "../../shared/prisma";
 import config from "../../config";
 import prismaClient from "../../shared/prisma";
 import stripe, {
-  getPlanNameFromPriceId,
   isStripeError,
   isValidPriceId,
   logStripeError,
-  STRIPE_PRICE_IDS,
 } from "../../shared/stripe";
 import {
   PLAN_FEATURES,
@@ -66,6 +64,73 @@ export const getAvailablePrices = () => {
     enterprise: {
       monthly: prices.enterprise?.monthly ?? null,
       annual: prices.enterprise?.annual ?? null,
+    },
+  };
+};
+
+type CatalogPlan = {
+  name: string;
+  priceCents: number;
+  currency: string;
+  interval: string;
+  stripePriceId: string | null;
+};
+
+/**
+ * Public plan catalog for the pricing page — derived from the Plan table so
+ * admin edits (name, price, active toggle) show up immediately. Only ACTIVE
+ * plans are listed; enterprise stays contact-sales only.
+ */
+export const getPublicCatalog = async (): Promise<{
+  free: CatalogPlan;
+  pro: { monthly: CatalogPlan | null; annual: CatalogPlan | null };
+  team: { monthly: CatalogPlan | null; annual: CatalogPlan | null };
+}> => {
+  const plans = await prismaClient.$queryRaw<
+    Array<{
+      code: string;
+      name: string;
+      priceCents: number;
+      currency: string;
+      interval: string;
+      active: boolean;
+      stripePriceId: string | null;
+    }>
+  >`
+    SELECT code, name, "priceCents", currency, interval, active, "stripePriceId"
+    FROM "Plan"
+    WHERE "isDeleted" = false
+      AND active = true
+    ORDER BY "priceCents" ASC
+  `;
+
+  const pick = (code: string): CatalogPlan | null => {
+    const plan = plans.find((p) => p.code === code);
+    if (!plan) return null;
+    return {
+      name: plan.name,
+      priceCents: plan.priceCents,
+      currency: plan.currency,
+      interval: plan.interval,
+      stripePriceId: plan.stripePriceId,
+    };
+  };
+
+  return {
+    free: {
+      name: "Free",
+      priceCents: 0,
+      currency: "USD",
+      interval: "month",
+      stripePriceId: null,
+    },
+    pro: {
+      monthly: pick("pro_monthly"),
+      annual: pick("pro_annual"),
+    },
+    team: {
+      monthly: pick("team_monthly"),
+      annual: pick("team_annual"),
     },
   };
 };
@@ -132,15 +197,35 @@ export const createCheckoutSession = async (
 ): Promise<{ sessionId: string; url: string }> => {
   const { priceId, workspaceId, successUrl, cancelUrl } = input;
 
-  // Validate price ID
-  if (!isValidPriceId(priceId)) {
-    throw BillingError.checkoutSessionCreationFailed(
-      `Invalid or unconfigured Stripe price ID: ${priceId}. Update STRIPE_PRICE_* env variables.`
-    );
-  }
+  // Resolve the plan from the DB (plan edits repoint stripePriceId at newly
+  // created Stripe prices, so the env list alone is stale). Env-configured
+  // price IDs remain valid as a legacy fallback for plans without a row.
+  const planRow = await prismaClient.$queryRaw<Array<{ active: boolean; code: string }>>`
+    SELECT active, code
+    FROM "Plan"
+    WHERE "stripePriceId" = ${priceId}
+      AND "isDeleted" = false
+    LIMIT 1
+  `;
 
-  // Derive plan tier from price ID
-  const planTier = getPlanTierFromPriceId(priceId);
+  let planTier: string;
+
+  if (planRow.length > 0) {
+    // A plan deactivated in the admin panel must not accept new checkouts
+    if (!planRow[0].active) {
+      throw BillingError.planUnavailable();
+    }
+    // Tier from the stable plan code (e.g. pro_monthly -> pro) — the price ID
+    // itself changes whenever the plan price is edited.
+    planTier = planRow[0].code.split("_")[0];
+  } else {
+    if (!isValidPriceId(priceId)) {
+      throw BillingError.checkoutSessionCreationFailed(
+        `Invalid or unconfigured Stripe price ID: ${priceId}. Update STRIPE_PRICE_* env variables.`
+      );
+    }
+    planTier = getPlanTierFromPriceId(priceId);
+  }
 
   // Get or create Stripe customer
   const customerId = await getOrCreateStripeCustomer(userId, email, name);
@@ -482,4 +567,5 @@ export const billingService = {
   reactivateSubscription,
   getOrCreateStripeCustomer,
   getAvailablePrices,
+  getPublicCatalog,
 };
