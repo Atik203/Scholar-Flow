@@ -385,6 +385,7 @@ export const paperController = {
       wordLimit: options.wordLimit,
       workspaceId: paperRecord.workspaceId,
       uploaderId: paperRecord.uploaderId,
+      model: options.model,
     };
 
     const textHash = createHash("sha1")
@@ -1182,6 +1183,18 @@ export const paperController = {
         update: { ...aiMetadata },
       });
 
+      // Persist the extracted title/abstract back to the Paper row so the
+      // detail page reflects them immediately (user can fine-tune after).
+      if (md.title || md.abstract) {
+        await prisma.paper.update({
+          where: { id: paperId },
+          data: {
+            ...(md.title ? { title: String(md.title).slice(0, 500) } : {}),
+            ...(md.abstract ? { abstract: String(md.abstract) } : {}),
+          },
+        });
+      }
+
       // Also return authors for the edit form
       const authors = Array.isArray(md.authors)
         ? md.authors
@@ -1249,6 +1262,10 @@ export const paperController = {
           Math.min(parseInt(limit as string, 10) || 20, 50)
         );
 
+        const totalMessages = await prisma.aIInsightMessage.count({
+          where: { threadId: threadId as string, isDeleted: false },
+        });
+
         sendSuccessResponse(
           res,
           {
@@ -1257,7 +1274,7 @@ export const paperController = {
             pagination: {
               page: parseInt(page as string, 10) || 1,
               limit: Math.min(parseInt(limit as string, 10) || 20, 50),
-              total: messages.length, // This would ideally be total count
+              total: totalMessages,
             },
           },
           "Insight history retrieved"

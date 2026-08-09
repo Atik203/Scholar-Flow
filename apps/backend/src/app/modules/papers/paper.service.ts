@@ -1195,18 +1195,59 @@ export const paperService = {
       ORDER BY t."updatedAt" DESC
     `;
 
-    const messagesByThread = await Promise.all(
-      rows.map((row) => this.getRecentInsightMessages(row.id, 10))
-    );
+    const threadIds = rows.map((row) => row.id);
 
-    return rows.map((row, index) => ({
+    // Single query for the latest messages of ALL threads (avoids N+1)
+    const recentRows = threadIds.length
+      ? await prisma.$queryRaw<
+          Array<{
+            id: string;
+            threadId: string;
+            paperId: string;
+            role: string;
+            content: string;
+            metadata: unknown;
+            createdAt: Date;
+            createdById: string | null;
+          }>
+        >`
+          SELECT m.id, m."threadId", m."paperId", m.role, m.content, m.metadata, m."createdAt", m."createdById"
+          FROM (
+            SELECT m2.*,
+              ROW_NUMBER() OVER (PARTITION BY m2."threadId" ORDER BY m2."createdAt" DESC) AS rn
+            FROM "AIInsightMessage" m2
+            WHERE m2."isDeleted" = false
+              AND m2."threadId" = ANY(${threadIds})
+          ) m
+          WHERE m.rn <= 10
+          ORDER BY m."threadId" ASC, m."createdAt" ASC
+        `
+      : [];
+
+    const messagesByThreadId = new Map<string, InsightMessageRecord[]>();
+    for (const row of recentRows) {
+      const list = messagesByThreadId.get(row.threadId) ?? [];
+      list.push({
+        id: row.id,
+        threadId: row.threadId,
+        paperId: row.paperId,
+        role: row.role,
+        content: row.content,
+        metadata: normalizeInsightMetadata(row.metadata),
+        createdAt: row.createdAt,
+        createdById: row.createdById,
+      });
+      messagesByThreadId.set(row.threadId, list);
+    }
+
+    return rows.map((row) => ({
       id: row.id,
       paperId: row.paperId,
       userId: row.userId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       _count: { messages: Number(row.messageCount) },
-      messages: messagesByThread[index],
+      messages: messagesByThreadId.get(row.id) ?? [],
     }));
   },
 
