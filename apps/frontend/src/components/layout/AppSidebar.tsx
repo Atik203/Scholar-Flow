@@ -271,6 +271,12 @@ const adminFeatures: SidebarItem[] = [
     minRole: USER_ROLES.ADMIN,
   },
   {
+    title: "Subscribers",
+    path: "/dashboard/admin/subscribers",
+    icon: Users,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
     title: "Plans",
     path: "/dashboard/admin/plans",
     icon: Crown,
