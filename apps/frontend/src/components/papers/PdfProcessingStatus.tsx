@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import {
   useGetProcessingStatusQuery,
   useProcessPDFDirectMutation,
@@ -308,16 +307,18 @@ export function PdfProcessingStatus({
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Processing Progress */}
+        {/* Processing Progress — indeterminate (no fake percentage) */}
         {status === "PROCESSING" && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Processing PDF...</span>
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Processing PDF...
+              </span>
               <span className="text-muted-foreground">
                 {isPolling ? "Updating..." : "Please wait"}
               </span>
             </div>
-            <Progress value={45} className="h-2" />
             <p className="text-xs text-muted-foreground">
               This may take a few moments depending on the PDF size
             </p>

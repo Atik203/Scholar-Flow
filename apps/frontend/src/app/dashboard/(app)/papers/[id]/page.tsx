@@ -6,15 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { useDeletePaperMutation, useGetPaperFileUrlQuery, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation, useGenerateMetadataMutation } from "@/redux/api/paperApi";
+import { useDeletePaperMutation, useGetPaperPreviewUrlQuery, useGetPaperQuery, useProcessPDFMutation, useUpdatePaperMetadataMutation, useGenerateMetadataMutation } from "@/redux/api/paperApi";
 import { KeyPointsCard } from "@/components/papers/KeyPointsCard";
 import { AiInsightsPanel } from "@/components/papers/AiInsightsPanel";
 import { AiSummaryPanel } from "@/components/papers/AiSummaryPanel";
+import { AiToolsCard } from "@/components/papers/AiToolsCard";
 import { useAiContext } from "@/components/ai-assistant/AiContextProvider";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { motion } from "motion/react";
 import {
-  ArrowLeft, Bot, Calendar, Download, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Sparkles, Trash2, Users, X,
+  ArrowLeft, Bot, Calendar, Download, Edit, Eye, FileText, Loader2, Play, RefreshCw, Save, Sparkles, Trash2, Users, Wand2, X,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
@@ -22,6 +23,8 @@ import { use, useEffect, useState } from "react";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/lib/apiUrl";
+import { useAppSelector } from "@/redux/hooks";
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -48,18 +51,46 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const [editAbstract, setEditAbstract] = useState("");
   const [editAuthors, setEditAuthors] = useState("");
   const [editTags, setEditTags] = useState("");
-  const [showAiSummary, setShowAiSummary] = useState(false);
-  const [fetchFileUrl, setFetchFileUrl] = useState(false);
-  const { data: fileUrlData } = useGetPaperFileUrlQuery(resolvedParams.id, {
-    skip: !fetchFileUrl,
-  });
+  const [showKeyPoints, setShowKeyPoints] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+  const [showAiTools, setShowAiTools] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const accessToken = useAppSelector((s) => s.auth.accessToken);
 
-  useEffect(() => {
-    if (fileUrlData?.data?.url && fetchFileUrl) {
-      window.open(fileUrlData.data.url, "_blank");
-      setFetchFileUrl(false);
+  /**
+   * DOCX original download: fetch the signed URL via the API and save the
+   * blob — window.open in an async effect gets popup-blocked.
+   */
+  const handleDownloadOriginal = async () => {
+    if (!paper?.id) return;
+    setDownloading(true);
+    try {
+      const urlRes = await fetch(
+        `${API_BASE_URL}/papers/${paper.id}/file-url`,
+        { headers: { Authorization: `Bearer ${accessToken ?? ""}` } }
+      );
+      if (!urlRes.ok) throw new Error("Could not get file URL");
+      const { data } = (await urlRes.json()) as { data: { url: string } };
+      const fileRes = await fetch(data.url);
+      if (!fileRes.ok) throw new Error("Could not download file");
+      const blob = await fileRes.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = paper.file?.originalFilename || "paper.docx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+      showSuccessToast("Download started");
+    } catch {
+      showApiErrorToast({ data: { message: "Could not download the file" } } as never);
+    } finally {
+      setDownloading(false);
     }
-  }, [fileUrlData, fetchFileUrl]);
+  };
 
   useEffect(() => {
     if (!showPreview) setPreviewLoading(true);
@@ -195,11 +226,11 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex gap-2 mt-4 pt-4 border-t">
-          {paper.file && <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}><Eye className="mr-2 h-4 w-4" />{showPreview ? "Hide Preview" : "Preview PDF"}</Button>}
+          {paper.file && <Button variant="outline" size="sm" onClick={() => { setShowPreview(!showPreview); setPreviewError(false); }}><Eye className="mr-2 h-4 w-4" />{showPreview ? "Hide Preview" : "Preview PDF"}</Button>}
           {paper.file && isDocx && (
-            <Button variant="outline" size="sm" onClick={() => setFetchFileUrl(true)}>
-              <Download className="mr-2 h-4 w-4" />
-              Download original
+            <Button variant="outline" size="sm" onClick={handleDownloadOriginal} disabled={downloading}>
+              {downloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              {downloading ? "Downloading..." : "Download original"}
             </Button>
           )}
           {paper.processingStatus === "UPLOADED" && (
@@ -218,7 +249,10 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
               <RefreshCw className="mr-2 h-4 w-4" /> Retry
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => setShowAiSummary(!showAiSummary)}><Bot className="mr-2 h-4 w-4" />{showAiSummary ? "Hide AI Summary" : "AI Summary"}</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowKeyPoints(!showKeyPoints)}><Sparkles className="mr-2 h-4 w-4" />Key Points</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowSummary(!showSummary)}><Bot className="mr-2 h-4 w-4" />{showSummary ? "Hide Summary" : "AI Summary"}</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowInsights(!showInsights)}><Users className="mr-2 h-4 w-4" />Insights</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowAiTools(!showAiTools)}><Wand2 className="mr-2 h-4 w-4" />AI Tools</Button>
           <Button variant="outline" size="sm" asChild><Link href={`/dashboard/papers/${paper.id}/relations`}><FileText className="mr-2 h-4 w-4" />Relations</Link></Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/dashboard/papers/${paper.id}/collaborate`}><Users className="mr-2 h-4 w-4" />Collaborate</Link>
@@ -226,33 +260,34 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
         </div>
       </motion.div>
 
-      {/* AI Key Points */}
-      {showAiSummary && <KeyPointsCard paperId={paper.id} />}
-
-      {/* AI Summary (tone/audience/focus options, cache-aware) */}
-      {showAiSummary && (
-        <AiSummaryPanel paperId={paper.id} paperTitle={paper.title} />
-      )}
-
-      {/* AI Insights — thread-based chat with history + model selector */}
-      {showAiSummary && (
-        <AiInsightsPanel paperId={paper.id} paperTitle={paper.title} />
-      )}
+      {/* AI panels — independently toggled */}
+      {showKeyPoints && <KeyPointsCard paperId={paper.id} />}
+      {showSummary && <AiSummaryPanel paperId={paper.id} paperTitle={paper.title} />}
+      {showInsights && <AiInsightsPanel paperId={paper.id} paperTitle={paper.title} />}
+      {showAiTools && <AiToolsCard paperId={paper.id} paperTitle={paper.title} />}
 
       {/* PDF Preview */}
       {showPreview && previewUrlData?.data?.url && (
         <Card>
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-lg">Preview</CardTitle>
-            {previewLoading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            {previewLoading && !previewError && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           </CardHeader>
           <CardContent>
-            <iframe
-              src={previewUrlData.data.url}
-              className="w-full h-[85vh] border rounded-lg"
-              title="PDF Preview"
-              onLoad={() => setPreviewLoading(false)}
-            />
+            {previewError ? (
+              <p className="py-12 text-center text-muted-foreground">
+                The preview could not be loaded. Try refreshing the page or
+                downloading the file instead.
+              </p>
+            ) : (
+              <iframe
+                src={previewUrlData.data.url}
+                className="w-full h-[85vh] border rounded-lg"
+                title="PDF Preview"
+                onLoad={() => setPreviewLoading(false)}
+                onError={() => { setPreviewLoading(false); setPreviewError(true); }}
+              />
+            )}
           </CardContent>
         </Card>
       )}
