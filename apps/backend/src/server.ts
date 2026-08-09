@@ -214,6 +214,13 @@ if (process.env.VERCEL !== "1") {
   );
   startSubscriptionSweeper();
 
+  // Papers - embedding backfill sweep (hourly cron, unembedded chunks)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startEmbeddingBackfill } = require(
+    "./app/services/embeddingBackfill"
+  );
+  startEmbeddingBackfill();
+
   const httpServer = http.createServer(app);
   setupWebSocket(httpServer);
 

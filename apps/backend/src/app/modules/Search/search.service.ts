@@ -630,6 +630,10 @@ export class SearchService {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
 
+      // Must match the embedding model used at chunk-index time
+      const EMBEDDING_MODEL =
+        process.env.EMBEDDING_MODEL || "text-embedding-3-small";
+
       const response = await fetch(
         "https://api.openai.com/v1/embeddings",
         {
@@ -639,7 +643,7 @@ export class SearchService {
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "text-embedding-3-small",
+            model: EMBEDDING_MODEL,
             input: query.trim().slice(0, 8000),
           }),
           signal: controller.signal,
@@ -686,16 +690,26 @@ export class SearchService {
         c.idx,
         c.page,
         c.content,
-        c.embedding <-> ${vectorStr}::vector AS distance,
+        c.embedding <=> ${vectorStr}::vector AS distance,
         p.title
       FROM "PaperChunk" c
       JOIN "Paper" p ON p.id = c."paperId"
         AND p."isDeleted" = false
-        AND p."uploaderId" = ${userId}
-        ${workspaceFilter}
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      LEFT JOIN "WorkspaceMember" m
+        ON m."workspaceId" = p."workspaceId"
+        AND m."userId" = ${userId}
+        AND m."isDeleted" = false
+      ${workspaceFilter}
       WHERE c.embedding IS NOT NULL
         AND c."isDeleted" = false
-      ORDER BY c.embedding <-> ${vectorStr}::vector
+        AND (
+          p."uploaderId" = ${userId}
+          OR w."ownerId" = ${userId}
+          OR m.id IS NOT NULL
+        )
+      ORDER BY c.embedding <=> ${vectorStr}::vector
       LIMIT ${limit}
     `;
 
