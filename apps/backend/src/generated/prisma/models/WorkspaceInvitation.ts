@@ -34,6 +34,7 @@ export type WorkspaceInvitationMinAggregateOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -49,6 +50,7 @@ export type WorkspaceInvitationMaxAggregateOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -64,6 +66,7 @@ export type WorkspaceInvitationCountAggregateOutputType = {
   invitedById: number
   acceptedAt: number
   declinedAt: number
+  expiresAt: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -81,6 +84,7 @@ export type WorkspaceInvitationMinAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -96,6 +100,7 @@ export type WorkspaceInvitationMaxAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -111,6 +116,7 @@ export type WorkspaceInvitationCountAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -199,6 +205,7 @@ export type WorkspaceInvitationGroupByOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -235,6 +242,7 @@ export type WorkspaceInvitationWhereInput = {
   invitedById?: Prisma.StringNullableFilter<"WorkspaceInvitation"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"WorkspaceInvitation"> | boolean
@@ -253,6 +261,7 @@ export type WorkspaceInvitationOrderByWithRelationInput = {
   invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -275,6 +284,7 @@ export type WorkspaceInvitationWhereUniqueInput = Prisma.AtLeast<{
   invitedById?: Prisma.StringNullableFilter<"WorkspaceInvitation"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"WorkspaceInvitation"> | boolean
@@ -293,6 +303,7 @@ export type WorkspaceInvitationOrderByWithAggregationInput = {
   invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -314,6 +325,7 @@ export type WorkspaceInvitationScalarWhereWithAggregatesInput = {
   invitedById?: Prisma.StringNullableWithAggregatesFilter<"WorkspaceInvitation"> | string | null
   acceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WorkspaceInvitation"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WorkspaceInvitation"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"WorkspaceInvitation"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"WorkspaceInvitation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"WorkspaceInvitation"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"WorkspaceInvitation"> | boolean
@@ -326,6 +338,7 @@ export type WorkspaceInvitationCreateInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -344,6 +357,7 @@ export type WorkspaceInvitationUncheckedCreateInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -356,6 +370,7 @@ export type WorkspaceInvitationUpdateInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -374,6 +389,7 @@ export type WorkspaceInvitationUncheckedUpdateInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -389,6 +405,7 @@ export type WorkspaceInvitationCreateManyInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -401,6 +418,7 @@ export type WorkspaceInvitationUpdateManyMutationInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -416,6 +434,7 @@ export type WorkspaceInvitationUncheckedUpdateManyInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -446,6 +465,7 @@ export type WorkspaceInvitationCountOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -461,6 +481,7 @@ export type WorkspaceInvitationMaxOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -476,6 +497,7 @@ export type WorkspaceInvitationMinOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -618,6 +640,7 @@ export type WorkspaceInvitationCreateWithoutUserInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -634,6 +657,7 @@ export type WorkspaceInvitationUncheckedCreateWithoutUserInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -656,6 +680,7 @@ export type WorkspaceInvitationCreateWithoutInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -672,6 +697,7 @@ export type WorkspaceInvitationUncheckedCreateWithoutInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -716,6 +742,7 @@ export type WorkspaceInvitationScalarWhereInput = {
   invitedById?: Prisma.StringNullableFilter<"WorkspaceInvitation"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"WorkspaceInvitation"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"WorkspaceInvitation"> | Date | string
   isDeleted?: Prisma.BoolFilter<"WorkspaceInvitation"> | boolean
@@ -744,6 +771,7 @@ export type WorkspaceInvitationCreateWithoutWorkspaceInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -760,6 +788,7 @@ export type WorkspaceInvitationUncheckedCreateWithoutWorkspaceInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -800,6 +829,7 @@ export type WorkspaceInvitationCreateManyUserInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -814,6 +844,7 @@ export type WorkspaceInvitationCreateManyInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -826,6 +857,7 @@ export type WorkspaceInvitationUpdateWithoutUserInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -842,6 +874,7 @@ export type WorkspaceInvitationUncheckedUpdateWithoutUserInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -856,6 +889,7 @@ export type WorkspaceInvitationUncheckedUpdateManyWithoutUserInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -868,6 +902,7 @@ export type WorkspaceInvitationUpdateWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -884,6 +919,7 @@ export type WorkspaceInvitationUncheckedUpdateWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -898,6 +934,7 @@ export type WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -912,6 +949,7 @@ export type WorkspaceInvitationCreateManyWorkspaceInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -924,6 +962,7 @@ export type WorkspaceInvitationUpdateWithoutWorkspaceInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -940,6 +979,7 @@ export type WorkspaceInvitationUncheckedUpdateWithoutWorkspaceInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -954,6 +994,7 @@ export type WorkspaceInvitationUncheckedUpdateManyWithoutWorkspaceInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -971,6 +1012,7 @@ export type WorkspaceInvitationSelect<ExtArgs extends runtime.Types.Extensions.I
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -989,6 +1031,7 @@ export type WorkspaceInvitationSelectCreateManyAndReturn<ExtArgs extends runtime
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1007,6 +1050,7 @@ export type WorkspaceInvitationSelectUpdateManyAndReturn<ExtArgs extends runtime
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1025,12 +1069,13 @@ export type WorkspaceInvitationSelectScalar = {
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type WorkspaceInvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "userId" | "role" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["workspaceInvitation"]>
+export type WorkspaceInvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "workspaceId" | "userId" | "role" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "expiresAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["workspaceInvitation"]>
 export type WorkspaceInvitationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   workspace?: boolean | Prisma.WorkspaceDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1064,6 +1109,7 @@ export type $WorkspaceInvitationPayload<ExtArgs extends runtime.Types.Extensions
     invitedById: string | null
     acceptedAt: Date | null
     declinedAt: Date | null
+    expiresAt: Date | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1502,6 +1548,7 @@ export interface WorkspaceInvitationFieldRefs {
   readonly invitedById: Prisma.FieldRef<"WorkspaceInvitation", 'String'>
   readonly acceptedAt: Prisma.FieldRef<"WorkspaceInvitation", 'DateTime'>
   readonly declinedAt: Prisma.FieldRef<"WorkspaceInvitation", 'DateTime'>
+  readonly expiresAt: Prisma.FieldRef<"WorkspaceInvitation", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"WorkspaceInvitation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"WorkspaceInvitation", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"WorkspaceInvitation", 'Boolean'>
