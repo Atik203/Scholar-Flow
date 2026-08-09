@@ -7,6 +7,7 @@ import express from "express";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { performanceMonitor } from "../../middleware/performanceMonitor";
 import { rateLimiter } from "../../middleware/rateLimiter";
+import { validateRequestBody } from "../../middleware/validateRequest";
 import { adminController } from "./admin.controller";
 import {
   adminApiKeysController,
@@ -15,6 +16,7 @@ import {
   adminPlansController,
   systemAlertsController,
 } from "./extendedControllers";
+import * as adminValidation from "./admin.validation";
 
 const router = express.Router();
 
@@ -449,6 +451,7 @@ router.patch(
   "/users/:id/role",
   authMiddleware,
   requireAdmin,
+  validateRequestBody(adminValidation.updateUserRoleSchema),
   rateLimiter,
   adminController.updateUserRole
 );

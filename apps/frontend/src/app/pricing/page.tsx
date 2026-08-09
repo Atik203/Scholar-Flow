@@ -47,14 +47,18 @@ export default function PricingPage() {
   });
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const { data: prices } = useGetBillingPricesQuery();
+  const {
+    data: prices,
+    isLoading: isPricesLoading,
+    isError: isPricesError,
+  } = useGetBillingPricesQuery();
   const [createCheckout, { isLoading: isStartingCheckout }] =
     useCreateCheckoutSessionMutation();
 
   const handlePlanCta = async (planKey: PlanKey) => {
-    // Unauthenticated → login first (existing behavior)
+    // Unauthenticated → login first, return to pricing after signing in
     if (!isAuthenticated) {
-      router.push("/login");
+      router.push("/login?callbackUrl=/pricing");
       return;
     }
 
@@ -72,7 +76,11 @@ export default function PricingPage() {
 
     const priceId = prices?.[planKey]?.[isAnnual ? "annual" : "monthly"];
     if (!priceId) {
-      showErrorToast("Billing is not configured for this plan yet.");
+      showErrorToast(
+        isPricesError
+          ? "Could not load pricing. Please refresh and try again."
+          : "Billing is not configured for this plan yet."
+      );
       return;
     }
 
@@ -240,7 +248,7 @@ export default function PricingPage() {
     },
     {
       question: "What happens when I exceed my paper limit?",
-      answer: "On the Free plan, you'll be prompted to upgrade when you reach 50 papers. Your existing papers remain accessible.",
+      answer: "On the Free plan, you'll be prompted to upgrade when you reach 10 papers. Your existing papers remain accessible.",
     },
     {
       question: "Can I change plans later?",
@@ -397,7 +405,7 @@ export default function PricingPage() {
                     ) : (
                       <Button
                         onClick={() => handlePlanCta(plan.planKey as PlanKey)}
-                        disabled={isStartingCheckout}
+                        disabled={isStartingCheckout || isPricesLoading}
                         className={
                           plan.popular
                             ? "w-full py-3 px-4 font-semibold bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
