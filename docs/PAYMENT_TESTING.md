@@ -27,6 +27,13 @@
 
 ## 1. Pricing page (`/pricing`)
 
+- [ ] **Dynamic catalog**: prices/names come from the Plan table — edit a
+      plan's price in admin (`/dashboard/admin/plans`), refresh `/pricing`,
+      the card shows the new price. (Pro was $29 hardcoded; now reads the DB.)
+- [ ] **Deactivated plan disappears**: toggle a plan inactive in admin →
+      after refresh the plan card shows "— / Currently unavailable" and the
+      CTA is disabled ("Not available"); checkout of that price is rejected
+      with 400 PLAN_UNAVAILABLE.
 - [ ] Unauthenticated → click a paid plan CTA → lands on `/login` with
       `callbackUrl=/pricing` → after login returns to `/pricing`.
 - [ ] Authenticated → Pro CTA → Stripe hosted checkout opens (14-day trial,
@@ -137,12 +144,20 @@
 
 - [ ] **New plan** dialog: create a test plan (code/name/price/interval) →
       card appears with interval label + short price ID.
-- [ ] **Edit** → change name/price → card updates.
-- [ ] **Deactivate/Activate** toggle → "Inactive" badge appears/disappears.
-- [ ] **Delete** a plan without subscribers → removed from the list
-      (soft-delete).
-- [ ] **Delete blocked** for a plan that has ACTIVE subscribers (error
-      toast) — plan must be deactivated instead.
+- [ ] **Edit price** → a NEW Stripe price is created (check Stripe dashboard →
+      Products → the price list shows the new amount) and the card's price
+      ID changes; `/pricing` shows the new price after refresh.
+- [ ] **Edit name** → Stripe product renamed (both monthly + annual variants
+      share the product).
+- [ ] **Checkout with edited price**: after an edit, a new user can still
+      start checkout with the plan's new price ID (DB-driven validation) and
+      the webhook still grants the correct role (plan-code-based mapping).
+- [ ] Existing subscribers keep their price until renewal (reprice per-user
+      via Subscribers → Change plan).
+- [ ] **Deactivate/Activate** toggle → "Inactive" badge; deactivated plans
+      vanish from `/pricing` and checkout rejects them (400 PLAN_UNAVAILABLE).
+- [ ] **Delete** a plan without subscribers → removed (soft-delete);
+      delete blocked for plans with ACTIVE subscribers.
 - [ ] Creating a duplicate `code` → error toast.
 
 ## 10. Admin panel — Reports (`/dashboard/admin/reports`)
