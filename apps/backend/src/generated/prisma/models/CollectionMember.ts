@@ -35,6 +35,7 @@ export type CollectionMemberMinAggregateOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -51,6 +52,7 @@ export type CollectionMemberMaxAggregateOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   isDeleted: boolean | null
@@ -67,6 +69,7 @@ export type CollectionMemberCountAggregateOutputType = {
   invitedById: number
   acceptedAt: number
   declinedAt: number
+  expiresAt: number
   createdAt: number
   updatedAt: number
   isDeleted: number
@@ -85,6 +88,7 @@ export type CollectionMemberMinAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -101,6 +105,7 @@ export type CollectionMemberMaxAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -117,6 +122,7 @@ export type CollectionMemberCountAggregateInputType = {
   invitedById?: true
   acceptedAt?: true
   declinedAt?: true
+  expiresAt?: true
   createdAt?: true
   updatedAt?: true
   isDeleted?: true
@@ -206,6 +212,7 @@ export type CollectionMemberGroupByOutputType = {
   invitedById: string | null
   acceptedAt: Date | null
   declinedAt: Date | null
+  expiresAt: Date | null
   createdAt: Date
   updatedAt: Date
   isDeleted: boolean
@@ -243,6 +250,7 @@ export type CollectionMemberWhereInput = {
   invitedById?: Prisma.StringNullableFilter<"CollectionMember"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionMember"> | boolean
@@ -262,6 +270,7 @@ export type CollectionMemberOrderByWithRelationInput = {
   invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -285,6 +294,7 @@ export type CollectionMemberWhereUniqueInput = Prisma.AtLeast<{
   invitedById?: Prisma.StringNullableFilter<"CollectionMember"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionMember"> | boolean
@@ -304,6 +314,7 @@ export type CollectionMemberOrderByWithAggregationInput = {
   invitedById?: Prisma.SortOrderInput | Prisma.SortOrder
   acceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   declinedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -326,6 +337,7 @@ export type CollectionMemberScalarWhereWithAggregatesInput = {
   invitedById?: Prisma.StringNullableWithAggregatesFilter<"CollectionMember"> | string | null
   acceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CollectionMember"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CollectionMember"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"CollectionMember"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionMember"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"CollectionMember"> | Date | string
   isDeleted?: Prisma.BoolWithAggregatesFilter<"CollectionMember"> | boolean
@@ -339,6 +351,7 @@ export type CollectionMemberCreateInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -358,6 +371,7 @@ export type CollectionMemberUncheckedCreateInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -371,6 +385,7 @@ export type CollectionMemberUpdateInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -390,6 +405,7 @@ export type CollectionMemberUncheckedUpdateInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -406,6 +422,7 @@ export type CollectionMemberCreateManyInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -419,6 +436,7 @@ export type CollectionMemberUpdateManyMutationInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -435,6 +453,7 @@ export type CollectionMemberUncheckedUpdateManyInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -466,6 +485,7 @@ export type CollectionMemberCountOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -482,6 +502,7 @@ export type CollectionMemberMaxOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -498,6 +519,7 @@ export type CollectionMemberMinOrderByAggregateInput = {
   invitedById?: Prisma.SortOrder
   acceptedAt?: Prisma.SortOrder
   declinedAt?: Prisma.SortOrder
+  expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
@@ -641,6 +663,7 @@ export type CollectionMemberCreateWithoutInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -658,6 +681,7 @@ export type CollectionMemberUncheckedCreateWithoutInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -681,6 +705,7 @@ export type CollectionMemberCreateWithoutUserInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -698,6 +723,7 @@ export type CollectionMemberUncheckedCreateWithoutUserInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -743,6 +769,7 @@ export type CollectionMemberScalarWhereInput = {
   invitedById?: Prisma.StringNullableFilter<"CollectionMember"> | string | null
   acceptedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   declinedAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
+  expiresAt?: Prisma.DateTimeNullableFilter<"CollectionMember"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CollectionMember"> | Date | string
   isDeleted?: Prisma.BoolFilter<"CollectionMember"> | boolean
@@ -772,6 +799,7 @@ export type CollectionMemberCreateWithoutCollectionInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -789,6 +817,7 @@ export type CollectionMemberUncheckedCreateWithoutCollectionInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -830,6 +859,7 @@ export type CollectionMemberCreateManyInvitedByInput = {
   status?: $Enums.MembershipStatus
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -845,6 +875,7 @@ export type CollectionMemberCreateManyUserInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -858,6 +889,7 @@ export type CollectionMemberUpdateWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -875,6 +907,7 @@ export type CollectionMemberUncheckedUpdateWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -890,6 +923,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutInvitedByInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -903,6 +937,7 @@ export type CollectionMemberUpdateWithoutUserInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -920,6 +955,7 @@ export type CollectionMemberUncheckedUpdateWithoutUserInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -935,6 +971,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutUserInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -950,6 +987,7 @@ export type CollectionMemberCreateManyCollectionInput = {
   invitedById?: string | null
   acceptedAt?: Date | string | null
   declinedAt?: Date | string | null
+  expiresAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   isDeleted?: boolean
@@ -963,6 +1001,7 @@ export type CollectionMemberUpdateWithoutCollectionInput = {
   status?: Prisma.EnumMembershipStatusFieldUpdateOperationsInput | $Enums.MembershipStatus
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -980,6 +1019,7 @@ export type CollectionMemberUncheckedUpdateWithoutCollectionInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -995,6 +1035,7 @@ export type CollectionMemberUncheckedUpdateManyWithoutCollectionInput = {
   invitedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   acceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   declinedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1013,6 +1054,7 @@ export type CollectionMemberSelect<ExtArgs extends runtime.Types.Extensions.Inte
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1032,6 +1074,7 @@ export type CollectionMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1051,6 +1094,7 @@ export type CollectionMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
@@ -1070,12 +1114,13 @@ export type CollectionMemberSelectScalar = {
   invitedById?: boolean
   acceptedAt?: boolean
   declinedAt?: boolean
+  expiresAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   isDeleted?: boolean
 }
 
-export type CollectionMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "userId" | "role" | "permission" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionMember"]>
+export type CollectionMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "collectionId" | "userId" | "role" | "permission" | "invitedAt" | "status" | "invitedById" | "acceptedAt" | "declinedAt" | "expiresAt" | "createdAt" | "updatedAt" | "isDeleted", ExtArgs["result"]["collectionMember"]>
 export type CollectionMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   collection?: boolean | Prisma.CollectionDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1110,6 +1155,7 @@ export type $CollectionMemberPayload<ExtArgs extends runtime.Types.Extensions.In
     invitedById: string | null
     acceptedAt: Date | null
     declinedAt: Date | null
+    expiresAt: Date | null
     createdAt: Date
     updatedAt: Date
     isDeleted: boolean
@@ -1549,6 +1595,7 @@ export interface CollectionMemberFieldRefs {
   readonly invitedById: Prisma.FieldRef<"CollectionMember", 'String'>
   readonly acceptedAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
   readonly declinedAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
+  readonly expiresAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"CollectionMember", 'DateTime'>
   readonly isDeleted: Prisma.FieldRef<"CollectionMember", 'Boolean'>
