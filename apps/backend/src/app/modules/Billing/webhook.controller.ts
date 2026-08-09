@@ -253,6 +253,15 @@ async function handleCheckoutSessionCompleted(
     throw new Error("Missing required metadata in checkout session");
   }
 
+  // Only grant access when payment actually settled. Checkout with
+  // asynchronous payment methods completes before payment succeeds.
+  if (session.payment_status !== "paid") {
+    logDebug(
+      `Checkout session ${session.id} not paid (${session.payment_status}), skipping subscription grant`
+    );
+    return;
+  }
+
   // Get subscription from Stripe
   if (!session.subscription) {
     throw new Error("No subscription in checkout session");
@@ -459,10 +468,19 @@ async function handleSubscriptionUpdated(
 
   if (stripePriceId) {
     // Find user by Stripe customer ID
+    const customerId = getCustomerIdFromSubscription(subscription);
+
+    if (!customerId) {
+      logDebug(
+        `Subscription ${subscription.id} has no customer reference, skipping user update`
+      );
+      return;
+    }
+
     const user = await prismaClient.$queryRaw<Array<{ id: string }>>`
       SELECT id
       FROM "User"
-      WHERE "stripeCustomerId" = ${subscription.customer as string}
+      WHERE "stripeCustomerId" = ${customerId}
       LIMIT 1
     `;
 
@@ -518,10 +536,19 @@ async function handleSubscriptionDeleted(
   `;
 
   // Find user by Stripe customer ID and revert to free tier
+  const customerId = getCustomerIdFromSubscription(subscription);
+
+  if (!customerId) {
+    logDebug(
+      `Subscription ${subscription.id} has no customer reference, skipping role revert`
+    );
+    return;
+  }
+
   const user = await prismaClient.$queryRaw<Array<{ id: string }>>`
     SELECT id
     FROM "User"
-    WHERE "stripeCustomerId" = ${subscription.customer as string}
+    WHERE "stripeCustomerId" = ${customerId}
     LIMIT 1
   `;
 
@@ -639,7 +666,40 @@ async function handleInvoicePaymentFailed(
     WHERE "providerSubscriptionId" = ${subscriptionId}
   `;
 
-  // TODO: Send notification to user about failed payment
+  // Notify the user about the failed payment (grace period is running)
+  try {
+    const { notificationService } = await import(
+      "../Notification/notification.service"
+    );
+
+    const subscriber = await prismaClient.$queryRaw<Array<{ userId: string }>>`
+      SELECT "userId"
+      FROM "Subscription"
+      WHERE "providerSubscriptionId" = ${subscriptionId}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+
+    if (subscriber[0]) {
+      await notificationService.createNotification({
+        userId: subscriber[0].userId,
+        type: "SYSTEM",
+        title: "Payment failed",
+        message:
+          "We couldn't charge your card for your subscription. Your paid plan continues during the grace period — update your payment method to avoid losing access.",
+        actionUrl: "/dashboard/billing",
+        resourceId: subscriptionId,
+      });
+    }
+  } catch (error) {
+    // Notification failures must never fail the webhook itself
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[Webhook] Failed to notify user about payment failure:",
+        error
+      );
+    }
+  }
 
   logDebug(`Invoice payment failed: ${invoice.id}`);
 }
@@ -670,6 +730,18 @@ type SubscriptionPeriodBounds = {
   currentPeriodEnd: number | null;
 };
 
+/**
+ * Extract Stripe customer ID from a subscription, tolerating both the
+ * string form and the expanded customer object.
+ */
+function getCustomerIdFromSubscription(
+  subscription: Stripe.Subscription
+): string | null {
+  return typeof subscription.customer === "string"
+    ? subscription.customer
+    : (subscription.customer?.id ?? null);
+}
+
 function toTimestampSql(seconds: number | null | undefined): Prisma.Sql {
   return seconds != null
     ? Prisma.sql`to_timestamp(${seconds})`
@@ -678,8 +750,7 @@ function toTimestampSql(seconds: number | null | undefined): Prisma.Sql {
 
 function getSubscriptionPeriodBounds(
   subscription: Stripe.Subscription
-): SubscriptionPeriodBounds {
-  const items = subscription.items?.data ?? [];
+): SubscriptionPeriodBounds {  const items = subscription.items?.data ?? [];
 
   const referenceItem = items.reduce<Stripe.SubscriptionItem | undefined>(
     (latest, item) => {
@@ -710,13 +781,27 @@ function getSubscriptionPeriodBounds(
 function getSubscriptionFromInvoice(
   invoice: Stripe.Invoice
 ): string | Stripe.Subscription | null {
+  // Modern API versions (Basil+) link the invoice to its subscription
+  // via the parent object, not the (now deprecated) top-level field.
   const subscriptionDetails = invoice.parent?.subscription_details;
 
-  if (!subscriptionDetails?.subscription) {
-    return null;
+  if (subscriptionDetails?.subscription) {
+    return subscriptionDetails.subscription;
   }
 
-  return subscriptionDetails.subscription;
+  // Defensive fallbacks for older versions / other invoice shapes.
+  // invoice.subscription no longer exists in current API types — probe it
+  // defensively via unknown for the rare legacy payload.
+  const parentSubscription =
+    (invoice.parent as { subscription?: string | Stripe.Subscription } | null)
+      ?.subscription ?? null;
+
+  if (parentSubscription) {
+    return parentSubscription;
+  }
+
+  return ((invoice as unknown as { subscription?: string | null })
+    .subscription ?? null);
 }
 
 export const webhookController = {
