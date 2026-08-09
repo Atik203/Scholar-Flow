@@ -3,6 +3,7 @@ import htmlDocx from "html-docx-js";
 import puppeteer from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
+import ApiError from "../../errors/ApiError";
 import prisma, { Prisma } from "../../shared/prisma";
 import {
   CreateEditorPaperInput,
@@ -692,6 +693,63 @@ export const paperService = {
     return membership.length > 0;
   },
 
+  /**
+   * Access gate for paper resources: uploader OR workspace owner OR active
+   * workspace member. Papers without a workspace are uploader-only.
+   * Throws 404 (missing) / 403 (no access) — mirrors the summary-access rule
+   * but tolerates null/deleted workspaces (LEFT JOIN).
+   */
+  async assertPaperAccess(
+    paperId: string,
+    userId: string
+  ): Promise<void> {
+    const rows = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        uploaderId: string;
+        workspaceId: string | null;
+        workspaceOwnerId: string | null;
+      }>
+    >`
+      SELECT
+        p.id,
+        p."uploaderId",
+        p."workspaceId",
+        w."ownerId" AS "workspaceOwnerId"
+      FROM "Paper" p
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+      LIMIT 1
+    `;
+
+    const row = rows[0];
+    if (!row) {
+      throw new ApiError(404, "Paper not found");
+    }
+
+    if (row.uploaderId === userId || row.workspaceOwnerId === userId) {
+      return;
+    }
+
+    if (row.workspaceId) {
+      const membership = await prisma.$queryRaw<Array<{ exists: number }>>`
+        SELECT 1 as exists
+        FROM "WorkspaceMember"
+        WHERE "workspaceId" = ${row.workspaceId}
+          AND "userId" = ${userId}
+          AND "isDeleted" = false
+        LIMIT 1
+      `;
+
+      if (membership.length > 0) {
+        return;
+      }
+    }
+
+    throw new ApiError(403, "You do not have access to this paper");
+  },
+
   async getSummarySourceText(
     paperId: string,
     record: PaperSummaryRecord
@@ -1330,6 +1388,34 @@ export const editorPaperService = {
     return result[0] || null;
   },
 
+  /**
+   * Access gate for editor papers: uploader OR active workspace member
+   * (membership isDeleted=false — deleted memberships grant nothing).
+   * Throws 403 when the user has no access.
+   */
+  async assertEditorPaperAccess(
+    paperId: string,
+    userId: string
+  ): Promise<void> {
+    const rows = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id
+      FROM "Paper" p
+      LEFT JOIN "WorkspaceMember" wm
+        ON wm."workspaceId" = p."workspaceId"
+        AND wm."userId" = ${userId}
+        AND wm."isDeleted" = false
+      WHERE p.id = ${paperId}
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+        AND (p."uploaderId" = ${userId} OR wm.id IS NOT NULL)
+      LIMIT 1
+    `;
+
+    if (!rows[0]) {
+      throw new ApiError(403, "You do not have access to this editor paper");
+    }
+  },
+
   // Update editor paper content
   async updateEditorContent(
     paperId: string,
@@ -1756,111 +1842,8 @@ export const exportService = {
   },
 };
 
-// Development helpers (not for production) to ensure uploader/workspace exist during early integration tests
-export async function ensureDevUserAndWorkspace(devEmail?: string) {
-  const email =
-    devEmail || process.env.DEV_UPLOAD_USER_EMAIL || "dev-uploader@example.com";
-  let [user] = await prisma.$queryRaw<
-    Array<{
-      id: string;
-      email: string;
-      name: string | null;
-      role: string;
-    }>
-  >`
-    SELECT id, email, name, role
-    FROM "User"
-    WHERE email = ${email}
-    LIMIT 1
-  `;
-
-  if (!user) {
-    const insertedUsers = await prisma.$queryRaw<
-      Array<{
-        id: string;
-        email: string;
-        name: string | null;
-        role: string;
-      }>
-    >`
-      INSERT INTO "User" (id, email, name, role, "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${email}, 'Dev Uploader', 'RESEARCHER'::"Role", NOW(), NOW(), false)
-      RETURNING id, email, name, role
-    `;
-    user = insertedUsers[0];
-  }
-
-  if (!user) {
-    throw new Error("Failed to ensure development user");
-  }
-
-  let [workspace] = await prisma.$queryRaw<
-    Array<{
-      id: string;
-      name: string;
-      ownerId: string;
-    }>
-  >`
-    SELECT id, name, "ownerId"
-    FROM "Workspace"
-    WHERE "ownerId" = ${user.id}
-    ORDER BY "createdAt" ASC
-    LIMIT 1
-  `;
-
-  if (!workspace) {
-    const insertedWorkspaces = await prisma.$queryRaw<
-      Array<{
-        id: string;
-        name: string;
-        ownerId: string;
-      }>
-    >`
-      INSERT INTO "Workspace" (id, name, "ownerId", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), 'Dev Workspace', ${user.id}, NOW(), NOW(), false)
-      RETURNING id, name, "ownerId"
-    `;
-    workspace = insertedWorkspaces[0];
-  }
-
-  if (!workspace) {
-    throw new Error("Failed to ensure development workspace");
-  }
-
-  const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
-    SELECT id
-    FROM "WorkspaceMember"
-    WHERE "workspaceId" = ${workspace.id}
-      AND "userId" = ${user.id}
-    LIMIT 1
-  `;
-
-  if (!memberRows.length) {
-    await prisma.$executeRaw`
-      INSERT INTO "WorkspaceMember" (
-        id,
-        "workspaceId",
-        "userId",
-        role,
-        "createdAt",
-        "updatedAt",
-        "isDeleted"
-      ) VALUES (
-        gen_random_uuid(),
-        ${workspace.id},
-        ${user.id},
-        'RESEARCHER'::"Role",
-        NOW(),
-        NOW(),
-        false
-      )
-      ON CONFLICT ("workspaceId", "userId") DO NOTHING
-    `;
-  }
-
-  return { user, workspace };
-}
-
+// ============================================================================
+// Paper Version History Service
 // ============================================================================
 // Paper Version History Service
 // ============================================================================
