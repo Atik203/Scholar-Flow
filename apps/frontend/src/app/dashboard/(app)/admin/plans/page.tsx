@@ -319,8 +319,9 @@ export default function AdminPlansPage() {
           <DialogHeader>
             <DialogTitle>{form.id ? "Edit plan" : "New plan"}</DialogTitle>
             <DialogDescription>
-              Prices are display metadata — the Stripe catalog stays
-              env-driven, so edits never desync what customers pay.
+              Changing the price creates a new Stripe price — existing
+              subscribers renew at their current price until the next cycle.
+              Name changes sync to the Stripe product.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

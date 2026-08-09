@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import config from "../../config";
 import catchAsync from "../../shared/catchAsync";
 import prismaClient from "../../shared/prisma";
-import stripe, { getRoleFromPriceId } from "../../shared/stripe";
+import stripe from "../../shared/stripe";
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_STATUS } from "./billing.constant";
 import { BillingError } from "./billing.error";
 
@@ -260,7 +260,38 @@ async function getRawBodyBuffer(req: RawBodyRequest): Promise<Buffer> {
 }
 
 /**
- * Handle checkout.session.completed event
+ * Map a plan tier/code to the app role. Plan codes are `pro_*` / `team_*`
+ * (Stripe price IDs are repointed when plans are edited, so matching on the
+ * price ID would go stale — the code is stable).
+ */
+function getRoleFromPlanTier(
+  tier: string
+): "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" {
+  if (tier === "pro") return "PRO_RESEARCHER";
+  if (tier === "team") return "TEAM_LEAD";
+  return "RESEARCHER";
+}
+
+/**
+ * Resolve the user role for a Stripe price ID by looking up the Plan code.
+ * Falls back to RESEARCHER when no plan row exists.
+ */
+async function getRoleFromStripePriceId(
+  priceId: string
+): Promise<"RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD"> {
+  const plan = await prismaClient.$queryRaw<Array<{ code: string }>>`
+    SELECT code
+    FROM "Plan"
+    WHERE "stripePriceId" = ${priceId}
+      AND "isDeleted" = false
+    LIMIT 1
+  `;
+
+  return getRoleFromPlanTier(plan[0]?.code?.split("_")[0] ?? "");
+}
+
+/**
+ * Handle checkout session completed event
  */
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session
@@ -429,9 +460,9 @@ async function handleCheckoutSessionCompleted(
     `;
   }
 
-  // Update user role and Stripe subscription fields based on price ID
-  // stripePriceId comes from session metadata at function start
-  const userRole = getRoleFromPriceId(stripePriceId);
+  // Update user role and Stripe subscription fields based on the plan tier
+  // (metadata.planTier is set at checkout creation and stays stable)
+  const userRole = getRoleFromPlanTier(planTier ?? "");
 
   await prismaClient.$executeRaw`
     UPDATE "User"
@@ -507,7 +538,7 @@ async function handleSubscriptionUpdated(
 
     if (user.length > 0) {
       const userId = user[0].id;
-      const userRole = getRoleFromPriceId(stripePriceId);
+      const userRole = await getRoleFromStripePriceId(stripePriceId);
 
       // Only update role if subscription is active
       if (status === SUBSCRIPTION_STATUS.ACTIVE) {
