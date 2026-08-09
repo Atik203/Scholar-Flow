@@ -4,7 +4,7 @@
  * Admin Payments Page
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CreditCard, DollarSign, RefreshCw, RotateCcw, Search, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,8 +26,23 @@ const formatAmount = (cents: number, currency: string) =>
   `${currency === "USD" ? "$" : ""}${(cents / 100).toFixed(2)}${currency !== "USD" ? ` ${currency}` : ""}`;
 
 export default function AdminPaymentsPage() {
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [refundingId, setRefundingId] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 300ms debounce — a request per keystroke is wasteful on a paginated list
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [searchInput]);
 
   const { data, isLoading, refetch } = useListPaymentsQuery({
     page,
@@ -38,6 +53,20 @@ export default function AdminPaymentsPage() {
   const payments = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = data?.meta?.totalPage ?? 1;
+
+  const handleRefund = async (paymentId: string) => {
+    if (!confirm("Refund this payment through Stripe?")) return;
+    setRefundingId(paymentId);
+    try {
+      await refund(paymentId).unwrap();
+      showSuccessToast("Refunded", "Payment refunded");
+      // RTK invalidates PAYMENTS (and revenue) tags — no manual refetch needed
+    } catch {
+      showErrorToast("Failed", "Could not refund payment");
+    } finally {
+      setRefundingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -53,7 +82,7 @@ export default function AdminPaymentsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
@@ -68,7 +97,7 @@ export default function AdminPaymentsPage() {
               "USD"
             )}
           </p>
-          <p className="text-sm text-muted-foreground">Page total</p>
+          <p className="text-sm text-muted-foreground">This page revenue</p>
         </Card>
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
@@ -87,11 +116,8 @@ export default function AdminPaymentsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search by email or transaction id..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-9"
             />
           </div>
@@ -147,20 +173,15 @@ export default function AdminPaymentsPage() {
                             size="sm"
                             variant="outline"
                             className="gap-1"
-                            onClick={async () => {
-                              if (confirm("Refund this payment?")) {
-                                try {
-                                  await refund(p.id).unwrap();
-                                  showSuccessToast("Refunded", "Payment refunded");
-                                  refetch();
-                                } catch {
-                                  showErrorToast("Failed", "Could not refund");
-                                }
-                              }
-                            }}
+                            disabled={refundingId === p.id}
+                            onClick={() => handleRefund(p.id)}
                           >
-                            <RotateCcw className="h-3 w-3" />
-                            Refund
+                            {refundingId === p.id ? (
+                              <RefreshCw className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <RotateCcw className="h-3 w-3" />
+                            )}
+                            {refundingId === p.id ? "Refunding..." : "Refund"}
                           </Button>
                         )}
                       </td>
