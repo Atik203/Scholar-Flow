@@ -13,6 +13,9 @@ import { useListPlansQuery } from "@/redux/api/adminExtendedApi";
 
 const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
+const formatInterval = (interval: string) =>
+  interval === "year" ? "year" : interval === "month" ? "month" : interval;
+
 export default function AdminPlansPage() {
   const { data, isLoading } = useListPlansQuery();
   const plans = data?.data ?? [];
@@ -31,6 +34,12 @@ export default function AdminPlansPage() {
             <Skeleton key={i} className="h-64" />
           ))}
         </div>
+      ) : plans.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center text-muted-foreground">
+            No plans configured yet.
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {plans.map((p, i) => (
@@ -61,6 +70,11 @@ export default function AdminPlansPage() {
                       <Badge variant="outline" className="mt-1">
                         {p.code}
                       </Badge>
+                      {p.stripePriceId && (
+                        <span className="ml-2 font-mono text-xs">
+                          {p.stripePriceId.slice(0, 12)}…
+                        </span>
+                      )}
                     </CardDescription>
                   </div>
                   {!p.active && <Badge variant="secondary">Inactive</Badge>}
@@ -71,7 +85,7 @@ export default function AdminPlansPage() {
                   <p className="text-3xl font-bold">
                     {formatPrice(p.priceCents)}
                     <span className="text-sm text-muted-foreground font-normal">
-                      /{p.interval}
+                      /{formatInterval(p.interval)}
                     </span>
                   </p>
                 </div>
@@ -79,7 +93,7 @@ export default function AdminPlansPage() {
                   <div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Users className="h-3 w-3" />
-                      Active
+                      Paying
                     </div>
                     <p className="text-xl font-bold">{p.activeSubscribers}</p>
                   </div>
