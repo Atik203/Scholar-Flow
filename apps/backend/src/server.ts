@@ -214,6 +214,13 @@ if (process.env.VERCEL !== "1") {
   );
   startSubscriptionSweeper();
 
+  // Invitations - expiry sweeper (hourly cron, stale PENDING -> EXPIRED)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startInvitationSweeper } = require(
+    "./app/modules/Invitation/invitationSweeper"
+  );
+  startInvitationSweeper();
+
   // Papers - embedding backfill sweep (hourly cron, unembedded chunks)
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { startEmbeddingBackfill } = require(
