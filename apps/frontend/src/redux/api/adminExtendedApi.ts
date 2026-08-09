@@ -33,10 +33,59 @@ export const adminPlansApi = apiSlice.injectEndpoints({
       query: () => "/admin/plans",
       providesTags: [{ type: "Admin", id: "PLANS" }],
     }),
+
+    createPlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      {
+        code: string;
+        name: string;
+        priceCents: number;
+        currency: string;
+        interval: "month" | "year";
+        active?: boolean;
+      }
+    >({
+      query: (body) => ({ url: "/admin/plans", method: "POST", body }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    updatePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      { id: string; patch: Partial<{ code: string; name: string; priceCents: number; currency: string; interval: string; active: boolean }> }
+    >({
+      query: ({ id, patch }) => ({
+        url: `/admin/plans/${id}`,
+        method: "PATCH",
+        body: patch,
+      }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    deletePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      string
+    >({
+      query: (id) => ({ url: `/admin/plans/${id}`, method: "DELETE" }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    togglePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      string
+    >({
+      query: (id) => ({ url: `/admin/plans/${id}/toggle`, method: "POST" }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
   }),
 });
 
-export const { useListPlansQuery } = adminPlansApi;
+export const {
+  useListPlansQuery,
+  useCreatePlanMutation,
+  useUpdatePlanMutation,
+  useDeletePlanMutation,
+  useTogglePlanMutation,
+} = adminPlansApi;
 
 // ============================================================================
 // Payments
@@ -96,6 +145,114 @@ export const adminPaymentsApi = apiSlice.injectEndpoints({
 });
 
 export const { useListPaymentsQuery, useRefundPaymentMutation } = adminPaymentsApi;
+
+// ============================================================================
+// Subscribers (admin subscription management)
+// ============================================================================
+
+export interface AdminSubscriber {
+  subscriptionId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  planName: string;
+  status: string;
+  seats: number;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  totalSpent: number;
+  lastPaymentDate: string | null;
+}
+
+export const adminSubscribersApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    listSubscribers: builder.query<
+      {
+        success: boolean;
+        data: AdminSubscriber[];
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { page?: number; limit?: number; status?: string; planId?: string }
+    >({
+      query: (params) => ({ url: "/admin/subscribers", params }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((s) => ({
+                type: "Admin" as const,
+                id: `SUBSCRIBER-${s.subscriptionId}`,
+              })),
+              { type: "Admin", id: "SUBSCRIBERS" },
+            ]
+          : [{ type: "Admin", id: "SUBSCRIBERS" }],
+    }),
+
+    cancelSubscriberAtPeriodEnd: builder.mutation<
+      { success: boolean },
+      string
+    >({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/cancel-at-period-end`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    reactivateSubscriber: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/reactivate`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    cancelSubscriberNow: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/cancel-now`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    changeSubscriberPlan: builder.mutation<
+      { success: boolean },
+      { id: string; priceId: string }
+    >({
+      query: ({ id, priceId }) => ({
+        url: `/admin/subscribers/${id}/change-plan`,
+        method: "POST",
+        body: { priceId },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Admin", id: `SUBSCRIBER-${arg.id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useListSubscribersQuery,
+  useCancelSubscriberAtPeriodEndMutation,
+  useReactivateSubscriberMutation,
+  useCancelSubscriberNowMutation,
+  useChangeSubscriberPlanMutation,
+} = adminSubscribersApi;
 
 // ============================================================================
 // API Keys
