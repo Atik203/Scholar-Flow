@@ -86,7 +86,11 @@ export const adminPaymentsApi = apiSlice.injectEndpoints({
         url: `/admin/payments/${id}/refund`,
         method: "POST",
       }),
-      invalidatesTags: [{ type: "Admin", id: "PAYMENTS" }],
+      // Payment list + revenue analytics both refresh (refunds change both)
+      invalidatesTags: [
+        { type: "Admin", id: "PAYMENTS" },
+        { type: "Admin" },
+      ],
     }),
   }),
 });
