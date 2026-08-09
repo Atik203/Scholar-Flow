@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { authMiddleware } from "../../middleware/auth";
 import {
+  aiGenerationLimiter,
   paperListLimiter,
   paperOperationLimiter,
   paperUploadLimiter,
@@ -76,10 +77,10 @@ paperRoutes.get(
   paperController.getPreviewUrl as any
 );
 
-// Generate AI summary for a paper
+// Generate AI summary for a paper (LLM cost — AI rate limiter)
 paperRoutes.post(
   "/:id/summary",
-  paperOperationLimiter,
+  aiGenerationLimiter,
   authMiddleware as any,
   validateRequestBody(generatePaperSummarySchema) as any,
   paperController.generateSummary as any
@@ -150,10 +151,10 @@ paperRoutes.post(
   paperController.shareViaEmail as any
 );
 
-// Generate AI insights for a paper (chat-like conversation)
+// Generate AI insights for a paper (chat-like conversation — LLM cost)
 paperRoutes.post(
   "/:id/insights",
-  paperOperationLimiter,
+  aiGenerationLimiter,
   authMiddleware as any,
   validateRequestBody(generatePaperInsightSchema),
   paperController.generateInsight as any
@@ -167,18 +168,18 @@ paperRoutes.get(
   paperController.getInsightHistory as any
 );
 
-// Phase 10 — AI Key Points extraction
+// Phase 10 — AI Key Points extraction (LLM cost)
 paperRoutes.post(
   "/:id/key-points",
-  paperOperationLimiter,
+  aiGenerationLimiter,
   authMiddleware as any,
   paperController.generateKeyPoints as any
 );
 
-// Phase 10 — AI Metadata Generation
+// Phase 10 — AI Metadata Generation (LLM cost)
 paperRoutes.post(
   "/:id/generate-metadata",
-  paperOperationLimiter,
+  aiGenerationLimiter,
   authMiddleware as any,
   paperController.generateMetadata as any
 );
