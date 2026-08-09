@@ -4730,6 +4730,7 @@ export const WorkspaceInvitationScalarFieldEnum = {
   invitedById: 'invitedById',
   acceptedAt: 'acceptedAt',
   declinedAt: 'declinedAt',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -4937,6 +4938,7 @@ export const CollectionMemberScalarFieldEnum = {
   invitedById: 'invitedById',
   acceptedAt: 'acceptedAt',
   declinedAt: 'declinedAt',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
