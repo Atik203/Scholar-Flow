@@ -165,4 +165,12 @@ export class BillingError extends ApiError {
       { workspaceId }
     );
   }
+
+  static planUnavailable() {
+    return new BillingError(
+      400,
+      "This plan is not available right now. Please choose another plan.",
+      "PLAN_UNAVAILABLE"
+    );
+  }
 }
