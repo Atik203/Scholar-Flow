@@ -1,12 +1,25 @@
 /**
  * Admin Plans Service
  *
- * Read-only view over Plan + subscriber counts + monthly revenue
- * for the admin Plans page. MRR here matches the analytics page:
- * paying subscribers only (ACTIVE, non-trial, not canceled-at-period-end).
+ * Plan catalog view + stats for the admin Plans page, plus CRUD.
+ * NOTE: price fields are display metadata only — the Stripe catalog stays
+ * env-driven (STRIPE_PRICE_*) so edits never desync what customers pay.
+ * MRR here matches the analytics page: paying subscribers only
+ * (ACTIVE, non-trial, not canceled-at-period-end).
  */
 
 import prisma from "../../shared/prisma";
+import ApiError from "../../errors/ApiError";
+
+export type PlanUpsertInput = {
+  code: string;
+  name: string;
+  priceCents: number;
+  currency: string;
+  interval: string;
+  active?: boolean;
+  features?: Record<string, unknown>;
+};
 
 export const adminPlansService = {
   async listPlansWithStats() {
@@ -70,6 +83,93 @@ export const adminPlansService = {
         totalSubscribers: s.total,
         monthlyRevenueCents,
       };
+    });
+  },
+
+  async createPlan(input: PlanUpsertInput) {
+    const existing = await prisma.plan.findUnique({
+      where: { code: input.code },
+    });
+    if (existing) {
+      throw new ApiError(400, `Plan code "${input.code}" already exists`);
+    }
+
+    return prisma.plan.create({
+      data: {
+        code: input.code,
+        name: input.name,
+        priceCents: input.priceCents,
+        currency: input.currency,
+        interval: input.interval,
+        active: input.active ?? true,
+        features: (input.features ?? {}) as object,
+      },
+    });
+  },
+
+  async updatePlan(id: string, patch: Partial<PlanUpsertInput>) {
+    const plan = await prisma.plan.findFirst({
+      where: { id, isDeleted: false },
+    });
+    if (!plan) throw new ApiError(404, "Plan not found");
+
+    if (patch.code && patch.code !== plan.code) {
+      const clash = await prisma.plan.findUnique({ where: { code: patch.code } });
+      if (clash && clash.id !== id) {
+        throw new ApiError(400, `Plan code "${patch.code}" already exists`);
+      }
+    }
+
+    return prisma.plan.update({
+      where: { id },
+      data: {
+        ...(patch.code ? { code: patch.code } : {}),
+        ...(patch.name ? { name: patch.name } : {}),
+        ...(patch.priceCents != null ? { priceCents: patch.priceCents } : {}),
+        ...(patch.currency ? { currency: patch.currency } : {}),
+        ...(patch.interval ? { interval: patch.interval } : {}),
+        ...(patch.active != null ? { active: patch.active } : {}),
+        ...(patch.features ? { features: patch.features as object } : {}),
+      },
+    });
+  },
+
+  async deletePlan(id: string) {
+    const plan = await prisma.plan.findFirst({
+      where: { id, isDeleted: false },
+    });
+    if (!plan) throw new ApiError(404, "Plan not found");
+
+    const subscribers = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*)::bigint as count
+      FROM "Subscription"
+      WHERE "planId" = ${id}
+        AND status = 'ACTIVE'
+        AND "isDeleted" = false
+    `;
+
+    if (Number(subscribers[0]?.count || 0) > 0) {
+      throw new ApiError(
+        400,
+        "Plan has active subscribers — mark it inactive instead of deleting"
+      );
+    }
+
+    return prisma.plan.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
+  },
+
+  async toggleActive(id: string) {
+    const plan = await prisma.plan.findFirst({
+      where: { id, isDeleted: false },
+    });
+    if (!plan) throw new ApiError(404, "Plan not found");
+
+    return prisma.plan.update({
+      where: { id },
+      data: { active: !plan.active },
     });
   },
 };
