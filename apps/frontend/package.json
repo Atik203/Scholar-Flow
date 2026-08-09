@@ -93,7 +93,7 @@
     "react-markdown": "^10.1.0",
     "react-pdf": "^10.2.0",
     "react-redux": "^9.2.0",
-    "recharts": "^3.2.1",
+    "recharts": "^3.10.1",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
     "rehype-highlight": "^7.0.2",
