@@ -1,7 +1,7 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import config from "../../config";
+import prisma from "../../shared/prisma";
 
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -9,6 +9,106 @@ interface AuthenticatedSocket extends Socket {
 }
 
 type RoomName = `workspace:${string}` | `paper:${string}` | `discussion:${string}`;
+
+// NOTE: no ^/$ anchors inside the fragment — they'd break the combined regex
+// (a ^ in the middle of a pattern only matches position 0).
+const UUID_SOURCE = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
+const ROOM_RE = new RegExp(
+  `^(paper|discussion|workspace):(${UUID_SOURCE})$`,
+  "i"
+);
+
+/**
+ * Membership check for live rooms. The REST layer enforces access on every
+ * endpoint, but socket rooms were previously joinable by ANY authenticated
+ * user — a caller could join `paper:<id>` or `discussion:<id>` rooms and
+ * receive presence/typing/editor events for content they cannot read.
+ *
+ * Rules (mirror the paper module's access model):
+ *  - workspace:<id>     owner or active member
+ *  - paper:<id>         uploader, or member of the paper's workspace
+ *  - discussion:<id>    thread author, or access to the thread's scope
+ *                       (paper / collection member / workspace member)
+ */
+async function canAccessRoom(userId: string, room: string): Promise<boolean> {
+  const match = ROOM_RE.exec(room);
+  if (!match) return false;
+  const kind = match[1].toLowerCase();
+  const id = match[2];
+
+  switch (kind) {
+    case "workspace": {
+      const ws = await prisma.workspace.findFirst({
+        where: {
+          id,
+          isDeleted: false,
+          OR: [
+            { ownerId: userId },
+            { members: { some: { userId, isDeleted: false } } },
+          ],
+        },
+        select: { id: true },
+      });
+      return Boolean(ws);
+    }
+    case "paper": {
+      const paper = await prisma.paper.findFirst({
+        where: {
+          id,
+          isDeleted: false,
+          OR: [
+            { uploaderId: userId },
+            {
+              workspace: {
+                isDeleted: false,
+                OR: [
+                  { ownerId: userId },
+                  { members: { some: { userId, isDeleted: false } } },
+                ],
+              },
+            },
+          ],
+        },
+        select: { id: true },
+      });
+      return Boolean(paper);
+    }
+    case "discussion": {
+      const thread = await prisma.discussionThread.findFirst({
+        where: { id, isDeleted: false },
+        select: { userId: true, paperId: true, collectionId: true, workspaceId: true },
+      });
+      if (!thread) return false;
+      if (thread.userId === userId) return true;
+      if (thread.paperId) return canAccessRoom(userId, `paper:${thread.paperId}`);
+      if (thread.collectionId) {
+        const col = await prisma.collection.findFirst({
+          where: {
+            id: thread.collectionId,
+            isDeleted: false,
+            OR: [
+              { ownerId: userId },
+              {
+                members: {
+                  some: { userId, isDeleted: false, status: "ACCEPTED" },
+                },
+              },
+            ],
+          },
+          select: { id: true },
+        });
+        return Boolean(col);
+      }
+      if (thread.workspaceId) {
+        return canAccessRoom(userId, `workspace:${thread.workspaceId}`);
+      }
+      return false;
+    }
+    default:
+      return false;
+  }
+}
 
 const onlineUsers = new Map<string, Set<string>>(); // userId -> Set<socketId>
 
@@ -24,6 +124,10 @@ export function setupWebSocket(server: HttpServer): Server {
   });
 
   // JWT auth middleware for socket connections
+  // NOTE: access tokens are signed with NEXTAUTH_SECRET (see middleware/auth.ts
+  // + auth controller signIn). The refresh-token secret (config.jwt.jwt_secret /
+  // JWT_SECRET) is a DIFFERENT key — verifying with it rejected every client
+  // until 2026-08-10. Keep this in sync with the standalone socket-server.
   io.use((socket: Socket, next) => {
     const token =
       socket.handshake.auth.token ||
@@ -33,13 +137,26 @@ export function setupWebSocket(server: HttpServer): Server {
       return next(new Error("Authentication required"));
     }
 
+    const jwtSecret = process.env.NEXTAUTH_SECRET;
+    if (!jwtSecret) {
+      return next(new Error("JWT secret not configured"));
+    }
+
     try {
-      const decoded = jwt.verify(token, config.jwt.jwt_secret!) as {
-        id: string;
+      // Access tokens carry the user id in `sub` (see middleware/auth.ts) —
+      // reading only `decoded.id` left userId undefined and disconnected
+      // every client immediately after connect (fixed 2026-08-10).
+      const decoded = jwt.verify(token, jwtSecret) as {
+        sub?: string;
+        id?: string;
         name?: string;
       };
+      const userId = decoded.sub || decoded.id;
+      if (!userId) {
+        return next(new Error("Invalid token: missing user identifier"));
+      }
 
-      (socket as AuthenticatedSocket).userId = decoded.id;
+      (socket as AuthenticatedSocket).userId = userId;
       (socket as AuthenticatedSocket).userName = decoded.name || "Unknown";
       next();
     } catch {
@@ -74,7 +191,19 @@ export function setupWebSocket(server: HttpServer): Server {
 
     // --- Room management ---
 
-    socket.on("room:join", (room: string) => {
+    socket.on("room:join", async (room: string) => {
+      // Authorization: only join rooms the user may access (2026-08-10)
+      try {
+        const allowed = await canAccessRoom(userId!, room);
+        if (!allowed) {
+          socket.emit("room:error", { room, message: "Access denied" });
+          return;
+        }
+      } catch {
+        socket.emit("room:error", { room, message: "Access denied" });
+        return;
+      }
+
       socket.join(room);
       const memberCount = io.sockets.adapter.rooms.get(room)?.size || 0;
       socket.emit("room:joined", { room, memberCount });
