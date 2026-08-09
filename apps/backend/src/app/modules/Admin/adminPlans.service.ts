@@ -2,7 +2,8 @@
  * Admin Plans Service
  *
  * Read-only view over Plan + subscriber counts + monthly revenue
- * for the admin Plans page.
+ * for the admin Plans page. MRR here matches the analytics page:
+ * paying subscribers only (ACTIVE, non-trial, not canceled-at-period-end).
  */
 
 import prisma from "../../shared/prisma";
@@ -14,12 +15,31 @@ export const adminPlansService = {
       orderBy: { priceCents: "asc" },
     });
 
-    // Subscriber count + monthly revenue per plan
-    const stats = await prisma.subscription.groupBy({
-      by: ["planId", "status"],
-      where: { isDeleted: false },
-      _count: { _all: true },
-    });
+    // Subscriber counts + paying-subscriber count per plan. "active" is the
+    // MRR population: ACTIVE, non-trial, not canceled-at-period-end.
+    const stats = await prisma.$queryRaw<
+      Array<{
+        planId: string;
+        status: string;
+        active: bigint;
+        canceled: bigint;
+        total: bigint;
+      }>
+    >`
+      SELECT
+        s."planId",
+        s.status::text,
+        COUNT(*) FILTER (
+          WHERE s.status = 'ACTIVE'
+            AND s."cancelAtPeriodEnd" = false
+            AND (s."trialEnd" IS NULL OR s."trialEnd" <= NOW())
+        )::bigint AS active,
+        COUNT(*) FILTER (WHERE s.status = 'CANCELED')::bigint AS canceled,
+        COUNT(*)::bigint AS total
+      FROM "Subscription" s
+      WHERE s."isDeleted" = false
+      GROUP BY s."planId", s.status
+    `;
 
     const aggregated = new Map<
       string,
@@ -31,9 +51,9 @@ export const adminPlansService = {
         canceled: 0,
         total: 0,
       };
-      entry.total += row._count._all;
-      if (row.status === "ACTIVE") entry.active += row._count._all;
-      if (row.status === "CANCELED") entry.canceled += row._count._all;
+      entry.total += Number(row.total);
+      entry.active += Number(row.active);
+      entry.canceled += Number(row.canceled);
       aggregated.set(row.planId, entry);
     }
 
