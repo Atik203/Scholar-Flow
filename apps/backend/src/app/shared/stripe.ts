@@ -83,29 +83,6 @@ export const STRIPE_PRICE_IDS = {
 export type StripePriceId = keyof typeof STRIPE_PRICE_IDS;
 
 /**
- * Helper function to determine user role based on Stripe price ID
- * Maps subscription tiers to application roles.
- * Enterprise is contact-sales only (never reaches checkout) — unknown price
- * IDs (including enterprise) deliberately resolve to RESEARCHER.
- */
-export function getRoleFromPriceId(
-  priceId: string
-): "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" {
-  if (
-    priceId === STRIPE_PRICE_IDS.pro_monthly ||
-    priceId === STRIPE_PRICE_IDS.pro_annual
-  ) {
-    return "PRO_RESEARCHER";
-  } else if (
-    priceId === STRIPE_PRICE_IDS.team_monthly ||
-    priceId === STRIPE_PRICE_IDS.team_annual
-  ) {
-    return "TEAM_LEAD";
-  }
-  return "RESEARCHER";
-}
-
-/**
  * Helper function to get human-readable plan name from price ID
  */
 export function getPlanNameFromPriceId(priceId: string): string {

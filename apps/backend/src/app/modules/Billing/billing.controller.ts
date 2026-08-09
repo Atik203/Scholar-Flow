@@ -121,11 +121,29 @@ const managePlan = catchAsync(
  * Stripe price IDs are public (they appear in checkout URLs).
  */
 const getPrices = catchAsync(async (_req: AuthRequest, res: Response) => {
-  const prices = billingService.getAvailablePrices();
-  res.status(200).json({
+  const prices = billingService.getAvailablePrices();  res.status(200).json({
     success: true,
     message: "Prices retrieved successfully",
     data: prices,
+  });
+});
+
+/**
+ * GET /billing/catalog
+ * Public — full plan catalog (name, price, interval, price ID) for ACTIVE
+ * plans, so the pricing page renders admin-managed plans dynamically.
+ */
+const getCatalog = catchAsync(async (_req: AuthRequest, res: Response) => {
+  const catalog = await billingService.getPublicCatalog();
+
+  res.set({
+    "Cache-Control": "public, max-age=60",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Plan catalog retrieved successfully",
+    data: catalog,
   });
 });
 
@@ -135,4 +153,5 @@ export const billingController = {
   getSubscription,
   managePlan,
   getPrices,
+  getCatalog,
 };
