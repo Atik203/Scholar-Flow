@@ -1,6 +1,9 @@
 import express from "express";
 import { authMiddleware } from "../../middleware/auth";
-import { rateLimiter } from "../../middleware/rateLimiter";
+import {
+  collectionMutationLimiter,
+  rateLimiter,
+} from "../../middleware/rateLimiter";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -10,6 +13,7 @@ import { collectionController } from "./collection.controller";
 import {
   addPaperToCollectionSchema,
   collectionIdParamsSchema,
+  collectionMemberParamsSchema,
   collectionParamsSchema,
   createCollectionSchema,
   inviteMemberSchema,
@@ -24,7 +28,7 @@ export const collectionRoutes: express.Router = express.Router();
 // Create a new collection
 collectionRoutes.post(
   "/",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestBody(createCollectionSchema) as any,
   collectionController.create as any
@@ -98,7 +102,7 @@ collectionRoutes.get(
 // Update a collection
 collectionRoutes.patch(
   "/:id",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   validateRequestBody(updateCollectionSchema) as any,
@@ -108,7 +112,7 @@ collectionRoutes.patch(
 // Delete a collection
 collectionRoutes.delete(
   "/:id",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   collectionController.delete as any
@@ -117,7 +121,7 @@ collectionRoutes.delete(
 // Add paper to collection
 collectionRoutes.post(
   "/:collectionId/papers",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionIdParamsSchema) as any,
   validateRequestBody(addPaperToCollectionSchema) as any,
@@ -127,7 +131,7 @@ collectionRoutes.post(
 // Remove paper from collection
 collectionRoutes.delete(
   "/:collectionId/papers/:paperId",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(paperCollectionParamsSchema) as any,
   collectionController.removePaper as any
@@ -145,7 +149,7 @@ collectionRoutes.get(
 // Invite member to collection by email
 collectionRoutes.post(
   "/:id/invite",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   validateRequestBody(inviteMemberSchema) as any,
@@ -155,7 +159,7 @@ collectionRoutes.post(
 // Respond to an invite (accept)
 collectionRoutes.post(
   "/:id/accept",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   collectionController.acceptInvite as any
@@ -164,7 +168,7 @@ collectionRoutes.post(
 // Respond to an invite (decline)
 collectionRoutes.post(
   "/:id/decline",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(collectionParamsSchema) as any,
   collectionController.declineInvite as any
@@ -179,10 +183,28 @@ collectionRoutes.get(
   collectionController.getMembers as any
 );
 
+// Revoke a pending invite / remove a member (owner only)
+collectionRoutes.delete(
+  "/:collectionId/members/:memberId",
+  collectionMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(collectionMemberParamsSchema) as any,
+  collectionController.revokeMember as any
+);
+
+// Resend a pending invite (owner only)
+collectionRoutes.post(
+  "/:collectionId/invites/:memberId/resend",
+  collectionMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(collectionMemberParamsSchema) as any,
+  collectionController.resendInvite as any
+);
+
 // Phase 4: Update paper status/starred within a collection
 collectionRoutes.patch(
   "/:collectionId/papers/:paperId",
-  rateLimiter,
+  collectionMutationLimiter,
   authMiddleware as any,
   validateRequestParams(paperCollectionParamsSchema) as any,
   validateRequestBody(updateCollectionPaperSchema) as any,
