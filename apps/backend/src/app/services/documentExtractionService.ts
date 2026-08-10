@@ -863,12 +863,6 @@ export class DocumentExtractionService {
       tokenCount?: number;
     }>
   ): Promise<void> {
-    // Delete existing chunks first
-    await prisma.$executeRaw`
-      DELETE FROM "PaperChunk"
-      WHERE "paperId" = ${paperId}
-    `;
-
     // Prepare chunks for insertion
     const prepared = chunks
       .map((chunk) => ({
@@ -881,19 +875,28 @@ export class DocumentExtractionService {
       }))
       .filter((c) => c.content && c.content.length > 0);
 
-    if (prepared.length > 0) {
-      const values = prepared.map(
-        (chunk) =>
-          Prisma.sql`(gen_random_uuid(), ${paperId}, ${chunk.idx}, ${chunk.page ?? null}, ${chunk.content}, ${chunk.tokenCount ?? null}, NOW(), NOW(), false)`
-      );
+    // Delete + insert atomically — an interruption must not leave the paper
+    // with a half-written chunk set.
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        DELETE FROM "PaperChunk"
+        WHERE "paperId" = ${paperId}
+      `;
 
-      await prisma.$executeRaw(
-        Prisma.sql`
-          INSERT INTO "PaperChunk" (id, "paperId", "idx", "page", "content", "tokenCount", "createdAt", "updatedAt", "isDeleted")
-          VALUES ${Prisma.join(values)}
-        `
-      );
-    }
+      if (prepared.length > 0) {
+        const values = prepared.map(
+          (chunk) =>
+            Prisma.sql`(gen_random_uuid(), ${paperId}, ${chunk.idx}, ${chunk.page ?? null}, ${chunk.content}, ${chunk.tokenCount ?? null}, NOW(), NOW(), false)`
+        );
+
+        await tx.$executeRaw(
+          Prisma.sql`
+            INSERT INTO "PaperChunk" (id, "paperId", "idx", "page", "content", "tokenCount", "createdAt", "updatedAt", "isDeleted")
+            VALUES ${Prisma.join(values)}
+          `
+        );
+      }
+    });
   }
 
   /**
@@ -1022,6 +1025,12 @@ export class DocumentExtractionService {
       return;
     }
 
+    // Model is env-configurable; the vector column is fixed at 1536 dims
+    // (PaperChunk.embedding vector(1536)) — switching models to a different
+    // dimension requires a column migration.
+    const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL || "text-embedding-3-small";
+    const EMBEDDING_DIM = 1536;
+
     const chunks = await prisma.paperChunk.findMany({
       where: { paperId, isDeleted: false },
       select: { id: true, content: true },
@@ -1051,7 +1060,7 @@ export class DocumentExtractionService {
               Authorization: `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-              model: "text-embedding-3-small",
+              model: EMBEDDING_MODEL,
               input: batch.map((c) => c.content.replace(/\s+/g, " ").trim().slice(0, 8000)),
             }),
             signal: controller.signal,
@@ -1065,7 +1074,9 @@ export class DocumentExtractionService {
           console.error(
             `[DocumentExtraction] Embedding API error: ${response.status} ${errText}`
           );
-          return;
+          // Continue with the next batch — one failure must not orphan the
+          // remaining chunks (the backfill sweep will retry this paper).
+          continue;
         }
 
         const data = (await response.json()) as {
@@ -1074,7 +1085,7 @@ export class DocumentExtractionService {
 
         for (let j = 0; j < batch.length; j++) {
           const embedding = data.data[j]?.embedding;
-          if (!embedding || embedding.length !== 1536) continue;
+          if (!embedding || embedding.length !== EMBEDDING_DIM) continue;
 
           const vectorStr = `[${embedding.join(",")}]`;
           await prisma.$executeRaw`

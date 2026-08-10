@@ -10,15 +10,10 @@ export const PLAN_TIERS = {
   ENTERPRISE: "enterprise",
 } as const;
 
-export type PlanTier = (typeof PLAN_TIERS)[keyof typeof PLAN_TIERS];
-
 export const BILLING_INTERVALS = {
   MONTHLY: "monthly",
   ANNUAL: "annual",
 } as const;
-
-export type BillingInterval =
-  (typeof BILLING_INTERVALS)[keyof typeof BILLING_INTERVALS];
 
 /**
  * Plan metadata - features and limits per tier
@@ -120,25 +115,8 @@ export const STRIPE_WEBHOOK_EVENTS = {
   CUSTOMER_SUBSCRIPTION_CREATED: "customer.subscription.created",
   CUSTOMER_SUBSCRIPTION_UPDATED: "customer.subscription.updated",
   CUSTOMER_SUBSCRIPTION_DELETED: "customer.subscription.deleted",
+  CHARGE_REFUNDED: "charge.refunded",
   INVOICE_PAID: "invoice.paid",
   INVOICE_PAYMENT_FAILED: "invoice.payment_failed",
   INVOICE_PAYMENT_ACTION_REQUIRED: "invoice.payment_action_required",
-} as const;
-
-/**
- * Rate limiter configuration for billing endpoints
- */
-export const BILLING_RATE_LIMITS = {
-  CHECKOUT: {
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // 10 checkout attempts per hour
-  },
-  PORTAL: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // 20 portal requests per 15 minutes
-  },
-  SUBSCRIPTION_READ: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 reads per 15 minutes
-  },
 } as const;

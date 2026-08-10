@@ -335,7 +335,7 @@ export default function TeamMembersPage() {
                       </div>
 
                       {/* Role Badge */}
-                      <RoleBadge role={member.role.toLowerCase().replace("_", "_")} />
+                      <RoleBadge role={member.role} />
 
                       {/* Actions */}
                       <Button

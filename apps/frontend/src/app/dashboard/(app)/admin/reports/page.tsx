@@ -35,8 +35,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateReportMutation, useDeleteReportMutation, useGenerateReportMutation, useListReportsQuery, type AdminReportType, type AdminReportFormat } from "@/redux/api/adminReportsApi";
+import { useCreateReportMutation, useDeleteReportMutation, useListReportsQuery, type AdminReportType, type AdminReportFormat } from "@/redux/api/adminReportsApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
+import { API_BASE_URL } from "@/lib/apiUrl";
+import { useAppSelector } from "@/redux/hooks";
 
 const STATUS_COLOR: Record<string, string> = {
   READY: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -58,13 +60,55 @@ export default function AdminReportsPage() {
   });
   const [createReport, { isLoading: isCreating }] = useCreateReportMutation();
   const [deleteReport] = useDeleteReportMutation();
-  const [generateReport, { isLoading: isGenerating }] = useGenerateReportMutation();
+  const accessToken = useAppSelector((s) => s.auth.accessToken);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   const reports = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const ready = reports.filter((r) => r.status === "READY").length;
   const failed = reports.filter((r) => r.status === "FAILED").length;
   const scheduled = reports.filter((r) => r.status === "SCHEDULED").length;
+
+  /**
+   * Generate + download a report file. The backend endpoint returns the file
+   * itself (Content-Disposition: attachment), so this is a token-authenticated
+   * fetch that saves the blob — not a JSON mutation.
+   */
+  const handleGenerate = async (reportId: string) => {
+    setGeneratingId(reportId);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/reports/${reportId}/generate`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken ?? ""}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error(`Generate failed (${res.status})`);
+      }
+
+      const disposition = res.headers.get("Content-Disposition") ?? "";
+      const match = /filename="?([^";]+)"?/.exec(disposition);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = match?.[1] ?? `report-${reportId}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("Report generated", "Download started");
+      setTimeout(() => refetch(), 1000);
+    } catch {
+      showErrorToast("Failed", "Could not generate report");
+    } finally {
+      setGeneratingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -179,31 +223,16 @@ export default function AdminReportsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={async () => {
-                      try {
-                        // Open a hidden link to download the file
-                        const link = document.createElement("a");
-                        link.href = `/api/admin/reports/${r.id}/generate`;
-                        link.target = "_blank";
-                        link.rel = "noreferrer";
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        showSuccessToast("Generating", "Report download started");
-                        setTimeout(() => refetch(), 1500);
-                      } catch {
-                        showErrorToast("Failed", "Could not generate report");
-                      }
-                    }}
-                    disabled={isGenerating}
+                    onClick={() => handleGenerate(r.id)}
+                    disabled={generatingId === r.id}
                     className="gap-1"
                   >
-                    {isGenerating ? (
+                    {generatingId === r.id ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
                       <Download className="h-3 w-3" />
                     )}
-                    Generate
+                    {generatingId === r.id ? "Generating..." : "Generate"}
                   </Button>
                   <Button
                     size="sm"

@@ -62,7 +62,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
           AND u.role = ${role}::"Role"
@@ -99,7 +107,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
           AND u.role = ${role}::"Role"
@@ -136,7 +152,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
@@ -172,7 +196,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
           AND u.role = ${role}::"Role"
@@ -207,7 +239,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
           AND (u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})
@@ -242,7 +282,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
           AND u.role = ${role}::"Role"
@@ -277,7 +325,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = ${!activeStatus}
         GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
@@ -310,7 +366,15 @@ export const userManagementService = {
           pl.name as "planName"
         FROM "User" u
         LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
-        LEFT JOIN "Subscription" s ON u.id = s."userId" AND s."isDeleted" = false AND s.status = 'ACTIVE'
+        LEFT JOIN LATERAL (
+          SELECT s2.status, s2."planId"
+          FROM "Subscription" s2
+          WHERE s2."userId" = u.id
+            AND s2."isDeleted" = false
+            AND s2.status = 'ACTIVE'
+          ORDER BY s2."createdAt" DESC
+          LIMIT 1
+        ) s ON true
         LEFT JOIN "Plan" pl ON s."planId" = pl.id
         WHERE u."isDeleted" = false
         GROUP BY u.id, u.name, u.email, u.role, u."emailVerified", u.image, u."createdAt", u."updatedAt", u."isDeleted", s.status, pl.name
@@ -365,7 +429,12 @@ export const userManagementService = {
       SELECT 
         COUNT(*)::bigint as "totalUsers",
         COUNT(*) FILTER (WHERE "isDeleted" = false)::bigint as "activeUsers",
-        COUNT(*) FILTER (WHERE role = 'PRO_RESEARCHER' AND "isDeleted" = false)::bigint as "proUsers",
+        (
+          SELECT COUNT(DISTINCT s."userId")::bigint
+          FROM "Subscription" s
+          WHERE s."isDeleted" = false
+            AND s.status IN ('ACTIVE', 'PAST_DUE')
+        ) as "proUsers",
         COUNT(*) FILTER (WHERE role = 'ADMIN' AND "isDeleted" = false)::bigint as "adminUsers",
         COUNT(*) FILTER (WHERE "isDeleted" = true)::bigint as "deletedUsers",
         COUNT(*) FILTER (WHERE "emailVerified" = true AND "isDeleted" = false)::bigint as "verifiedUsers"

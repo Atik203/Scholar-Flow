@@ -165,18 +165,6 @@ export const collectionApi = apiSlice.injectEndpoints({
           : [{ type: "Collection", id: "LIST" }],
     }),
 
-    // Get public collections
-    getPublicCollections: builder.query<
-      { result: Collection[]; meta: any },
-      { page?: number; limit?: number }
-    >({
-      query: ({ page = 1, limit = 10 } = {}) => ({
-        url: "/collections/public",
-        params: { page, limit },
-      }),
-      providesTags: ["Collection"],
-    }),
-
     // Get collections shared with the user
     getSharedCollections: builder.query<
       { result: Collection[]; meta: any },
@@ -224,24 +212,6 @@ export const collectionApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    // Update collection
-    updateCollection: builder.mutation<
-      Collection,
-      { id: string; data: UpdateCollectionRequest }
-    >({
-      query: ({ id, data }) => ({
-        url: `/collections/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      transformResponse: (response: { data: Collection }) => response.data,
-      invalidatesTags: (result, error, { id }) => [
-        { type: "Collection", id },
-        { type: "Collection", id: "LIST" },
-        { type: "Collection", id: "SHARED" },
-      ],
-    }),
-
     // Delete collection
     deleteCollection: builder.mutation<void, string>({
       query: (id) => ({
@@ -254,24 +224,6 @@ export const collectionApi = apiSlice.injectEndpoints({
         { type: "Collection", id: "SHARED" },
         "Collection",
       ],
-    }),
-
-    // Search collections
-    searchCollections: builder.query<
-      { result: Collection[]; meta: any },
-      { q: string; page?: number; limit?: number }
-    >({
-      query: ({ q, page = 1, limit = 10 }) => ({
-        url: "/collections/search",
-        params: { q, page, limit },
-      }),
-      providesTags: ["Collection"],
-    }),
-
-    // Get collection statistics
-    getCollectionStats: builder.query<CollectionStats, void>({
-      query: () => "/collections/stats",
-      transformResponse: (response: { data: CollectionStats }) => response.data,
     }),
 
     // Invites sent by the authenticated user
@@ -382,17 +334,6 @@ export const collectionApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    // List members of a collection
-    getCollectionMembers: builder.query<CollectionMember[], string>({
-      query: (id) => `/collections/${id}/members`,
-      transformResponse: (response: { data: CollectionMember[] }) =>
-        response.data,
-      providesTags: (result, error, id) => [
-        { type: "CollectionMember", id },
-        { type: "Collection", id },
-      ],
-    }),
-
     // Invite a member by email
     inviteMember: builder.mutation<{ memberId: string }, InviteMemberRequest>({
       query: ({ id, email, role = "RESEARCHER", permission = "EDIT" }) => ({
@@ -460,18 +401,13 @@ export const collectionApi = apiSlice.injectEndpoints({
 
 export const {
   useGetMyCollectionsQuery,
-  useGetPublicCollectionsQuery,
   useGetSharedCollectionsQuery,
   useGetCollectionQuery,
   useCreateCollectionMutation,
-  useUpdateCollectionMutation,
   useDeleteCollectionMutation,
-  useSearchCollectionsQuery,
-  useGetCollectionStatsQuery,
   useGetCollectionPapersQuery,
   useAddPaperToCollectionMutation,
   useRemovePaperFromCollectionMutation,
-  useGetCollectionMembersQuery,
   useInviteMemberMutation,
   useAcceptInviteMutation,
   useDeclineInviteMutation,

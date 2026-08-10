@@ -7,13 +7,113 @@ import { adminApiKeysService } from "./adminApiKeys.service";
 import { adminModerationService } from "./adminModeration.service";
 import { adminPaymentsService } from "./adminPayments.service";
 import { adminPlansService } from "./adminPlans.service";
+import { adminSubscribersService } from "./adminSubscribers.service";
 import { systemAlertsService } from "./systemAlerts.service";
+import { CACHE_DURATIONS } from "./admin.constant";
 
 // Plans
 export const adminPlansController = {
   list: catchAsync(async (_req: Request, res: Response) => {
     const items = await adminPlansService.listPlansWithStats();
+    res.set({
+      "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+    });
     sendSuccessResponse(res, items, "Plans retrieved");
+  }),
+
+  create: catchAsync(async (req: Request, res: Response) => {
+    const plan = await adminPlansService.createPlan(req.body);
+    sendSuccessResponse(res, plan, "Plan created");
+  }),
+
+  update: catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Plan id is required");
+    const plan = await adminPlansService.updatePlan(id, req.body);
+    sendSuccessResponse(res, plan, "Plan updated");
+  }),
+
+  remove: catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Plan id is required");
+    const plan = await adminPlansService.deletePlan(id);
+    sendSuccessResponse(res, plan, "Plan deleted");
+  }),
+
+  toggle: catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Plan id is required");
+    const plan = await adminPlansService.toggleActive(id);
+    sendSuccessResponse(res, plan, "Plan availability toggled");
+  }),
+};
+
+// Subscribers (admin subscription management)
+export const adminSubscribersController = {
+  list: catchAsync(async (req: Request, res: Response) => {
+    const page = req.query.page ? parseInt(String(req.query.page), 10) : 1;
+    const limit = req.query.limit
+      ? Math.min(parseInt(String(req.query.limit), 10), 100)
+      : 20;
+    const status = req.query.status ? String(req.query.status) : undefined;
+    const planId = req.query.planId ? String(req.query.planId) : undefined;
+
+    const result = await adminSubscribersService.listSubscribers(
+      page,
+      limit,
+      status,
+      planId
+    );
+
+    sendPaginatedResponse(
+      res,
+      result.subscribers,
+      {
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        total: result.pagination.total,
+        totalPage: result.pagination.totalPages,
+      },
+      "Subscribers retrieved"
+    );
+  }),
+
+  cancelAtPeriodEnd: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Subscription id is required");
+    await adminSubscribersService.cancelAtPeriodEnd(id, authReq.user.id);
+    sendSuccessResponse(res, null, "Subscription will be canceled at period end");
+  }),
+
+  reactivate: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Subscription id is required");
+    await adminSubscribersService.reactivate(id, authReq.user.id);
+    sendSuccessResponse(res, null, "Subscription reactivated");
+  }),
+
+  cancelNow: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Subscription id is required");
+    await adminSubscribersService.cancelNow(id, authReq.user.id);
+    sendSuccessResponse(res, null, "Subscription canceled");
+  }),
+
+  changePlan: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Subscription id is required");
+    const { priceId } = req.body as { priceId?: string };
+    if (!priceId) throw new ApiError(400, "priceId is required");
+    await adminSubscribersService.changePlan(id, priceId, authReq.user.id);
+    sendSuccessResponse(res, null, "Plan changed");
   }),
 };
 
@@ -36,6 +136,10 @@ export const adminPaymentsController = {
       status,
       provider,
       search,
+    });
+    // Short TTL — refunds flip payment status, so stale caches mislead admins
+    res.set({
+      "Cache-Control": `private, max-age=30`,
     });
     sendPaginatedResponse(
       res,

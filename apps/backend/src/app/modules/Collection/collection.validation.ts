@@ -49,6 +49,11 @@ export const paperCollectionParamsSchema = z.object({
   paperId: z.string().uuid("Invalid paper ID"),
 });
 
+export const collectionMemberParamsSchema = z.object({
+  collectionId: z.string().uuid("Invalid collection ID"),
+  memberId: z.string().uuid("Invalid member ID"),
+});
+
 // Invite a member to a collection by email
 export const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),

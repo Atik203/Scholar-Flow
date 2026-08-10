@@ -1,5 +1,6 @@
 import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
+import { USER_ROLES } from "../Auth/auth.constant";
 
 export type GlobalSearchType =
   | "all"
@@ -7,20 +8,16 @@ export type GlobalSearchType =
   | "collections"
   | "workspaces"
   | "notes"
-  | "people"
-  | "internet";
+  | "people";
 
 export class SearchService {
   /**
    * Global multi-entity search
    *
-   * Phase D.1 — extended the `type` union to include "notes",
-   * "people", and "internet" (stub). "internet" returns an empty
-   * result set with `fallback: "INTERNET_SEARCH_DISABLED"` so the
-   * frontend can render a "coming soon" message. Real web search
-   * requires a third-party API key (SerpAPI / Brave) which is out
-   * of scope per the AGENTS.md package-install policy and the
-   * user's earlier decision.
+   * Phase D.1 — extended the `type` union to include "notes" and
+   * "people". People search is ADMIN-only and scoped to the
+   * requester's team members (users sharing a workspace with them);
+   * non-admin roles silently receive an empty people result set.
    */
   static async globalSearch(
     userId: string,
@@ -28,7 +25,8 @@ export class SearchService {
     type: GlobalSearchType = "all",
     limit: number,
     skip: number,
-    workspaceId?: string
+    workspaceId?: string,
+    role?: string
   ) {
     const results: Record<string, any> = {};
 
@@ -40,6 +38,10 @@ export class SearchService {
         ? Prisma.sql`AND p."workspaceId" = ${workspaceId}`
         : Prisma.empty;
 
+      // Access control: only papers the user uploaded, or that live in a
+      // non-deleted workspace where they are owner or an active member.
+      // Mirrors the access checks applied to collections/workspaces below
+      // and the semantic search filter (uploaderId).
       const items = await prisma.$queryRaw<any[]>`
         SELECT
           p.id,
@@ -59,6 +61,24 @@ export class SearchService {
             p.title % ${q}
             OR p.abstract % ${q}
           )
+          AND (
+            p."uploaderId" = ${userId}
+            OR EXISTS (
+              SELECT 1
+              FROM "Workspace" w
+              WHERE w.id = p."workspaceId"
+                AND w."isDeleted" = false
+                AND (
+                  w."ownerId" = ${userId}
+                  OR EXISTS (
+                    SELECT 1 FROM "WorkspaceMember" wm
+                    WHERE wm."workspaceId" = w.id
+                      AND wm."userId" = ${userId}
+                      AND wm."isDeleted" = false
+                  )
+                )
+            )
+          )
           ${workspaceFilter}
         ORDER BY "matchScore" DESC, p."createdAt" DESC
         LIMIT ${limit} OFFSET ${skip}
@@ -67,10 +87,28 @@ export class SearchService {
       const totalCount = await prisma.paper.count({
         where: {
           isDeleted: false,
-          workspaceId,
-          OR: [
-            { title: { contains: q, mode: "insensitive" } },
-            { abstract: { contains: q, mode: "insensitive" } },
+          AND: [
+            {
+              OR: [
+                { title: { contains: q, mode: "insensitive" } },
+                { abstract: { contains: q, mode: "insensitive" } },
+              ],
+            },
+            ...(workspaceId ? [{ workspaceId }] : []),
+            {
+              OR: [
+                { uploaderId: userId },
+                {
+                  workspace: {
+                    isDeleted: false,
+                    OR: [
+                      { ownerId: userId },
+                      { members: { some: { userId, isDeleted: false } } },
+                    ],
+                  },
+                },
+              ],
+            },
           ],
         },
       });
@@ -192,51 +230,63 @@ export class SearchService {
       results.notes = { total: totalCount, items };
     }
 
-    // 5. Search People (Users)
+    // 5. Search People (Users) — ADMIN only, scoped to the admin's team
+    // members (users sharing a workspace with them). Non-admins get an
+    // empty result set — never a 403 — because the "all" search runs
+    // every branch in a single request.
     if (type === "all" || type === "people") {
-      // Exclude soft-deleted; never expose the password hash.
-      const peopleWhere: Prisma.UserWhereInput = {
-        isDeleted: false,
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { email: { contains: q, mode: "insensitive" } },
-          { firstName: { contains: q, mode: "insensitive" } },
-          { lastName: { contains: q, mode: "insensitive" } },
-        ],
-      };
-      const [totalCount, items] = await Promise.all([
-        prisma.user.count({ where: peopleWhere }),
-        prisma.user.findMany({
-          where: peopleWhere,
-          take: limit,
-          skip,
-          orderBy: { name: "asc" },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-            role: true,
-            institution: true,
+      if (role !== USER_ROLES.ADMIN) {
+        results.people = { total: 0, items: [] };
+      } else {
+        const myWorkspaceIds = await prisma.workspace.findMany({
+          where: {
+            isDeleted: false,
+            OR: [
+              { ownerId: userId },
+              { members: { some: { userId, isDeleted: false } } },
+            ],
           },
-        }),
-      ]);
-      results.people = { total: totalCount, items };
-    }
+          select: { id: true },
+        });
 
-    // 6. Internet search — stub.
-    // Per the user's decision in clarifying questions, this returns
-    // an empty result with a `fallback` flag so the frontend can
-    // render "Internet search is coming soon". Wiring a real
-    // provider (SerpAPI / Brave / Google CSE) requires a new env
-    // var and possibly a new npm dep, which the user did not
-    // approve.
-    if (type === "internet") {
-      results.internet = {
-        total: 0,
-        items: [],
-        fallback: "INTERNET_SEARCH_DISABLED",
-      };
+        // Team members only: exclude soft-deleted users and self, never
+        // expose the password hash.
+        const peopleWhere: Prisma.UserWhereInput = {
+          isDeleted: false,
+          id: { not: userId },
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { email: { contains: q, mode: "insensitive" } },
+            { firstName: { contains: q, mode: "insensitive" } },
+            { lastName: { contains: q, mode: "insensitive" } },
+          ],
+          memberships: {
+            some: {
+              workspaceId: { in: myWorkspaceIds.map((w) => w.id) },
+              isDeleted: false,
+            },
+          },
+        };
+
+        const [totalCount, items] = await Promise.all([
+          prisma.user.count({ where: peopleWhere }),
+          prisma.user.findMany({
+            where: peopleWhere,
+            take: limit,
+            skip,
+            orderBy: { name: "asc" },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              role: true,
+              institution: true,
+            },
+          }),
+        ]);
+        results.people = { total: totalCount, items };
+      }
     }
 
     // Determine the total results sum
@@ -246,7 +296,6 @@ export class SearchService {
     if (results.workspaces) aggregateTotal += results.workspaces.total;
     if (results.notes) aggregateTotal += results.notes.total;
     if (results.people) aggregateTotal += results.people.total;
-    if (results.internet) aggregateTotal += results.internet.total;
 
     return {
       results,
@@ -312,7 +361,8 @@ export class SearchService {
     userId: string,
     query: string,
     limit: number,
-    workspaceId?: string
+    workspaceId?: string,
+    role?: string
   ): Promise<
     Array<{
       id: string;
@@ -329,7 +379,8 @@ export class SearchService {
       "all",
       limit,
       0,
-      workspaceId
+      workspaceId,
+      role
     );
 
     const out: Array<{
@@ -386,7 +437,8 @@ export class SearchService {
     userId: string,
     query: string,
     workspaceId?: string,
-    model = "gpt-4o-mini"
+    model = "gpt-4o-mini",
+    role?: string
   ): Promise<{
     summary: string;
     sources: Array<{
@@ -397,7 +449,7 @@ export class SearchService {
     }>;
     fallback: string | null;
   }> {
-    const sources = await SearchService.getTopSources(userId, query, 5, workspaceId);
+    const sources = await SearchService.getTopSources(userId, query, 5, workspaceId, role);
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -490,39 +542,70 @@ export class SearchService {
   }
   
   /**
-   * Get trending papers (placeholder for real trending algorithm)
+   * Get trending papers for a user (papers they can access, newest first).
+   * Access scope: own uploads, or papers in a non-deleted workspace where
+   * the user is owner or an active member. Never leaks rows from
+   * workspaces the user cannot see.
    */
-  static async getTrendingPapers(limit: number) {
-    // Basic implementation: papers with most recent activity or annotations
-    // We'll just return recently added ones across public/all platforms for now
-    // Actually, maybe order by views or some usage metric? 
-    // We'll return 10 random/recent papers.
+  static async getTrendingPapers(userId: string, limit: number) {
     return prisma.paper.findMany({
-      where: { isDeleted: false },
+      where: {
+        isDeleted: false,
+        OR: [
+          { uploaderId: userId },
+          {
+            workspace: {
+              isDeleted: false,
+              OR: [
+                { ownerId: userId },
+                { members: { some: { userId, isDeleted: false } } },
+              ],
+            },
+          },
+        ],
+      },
       take: limit,
-      orderBy: { createdAt: "desc" }, // fallback
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        abstract: true,
+        source: true,
+        createdAt: true,
+      },
     });
   }
 
   /**
-   * Get personalized recommendations (placeholder)
+   * Get personalized recommendations — papers the user can access,
+   * newest first. Same access scope as getTrendingPapers.
    */
   static async getRecommendations(userId: string, limit: number) {
-    // Very simple recommendation: papers in the workspaces the user is part of
     return prisma.paper.findMany({
       where: {
         isDeleted: false,
-        workspace: {
-          members: {
-            some: {
-              userId,
-              isDeleted: false
-            }
-          }
-        }
+        OR: [
+          { uploaderId: userId },
+          {
+            workspace: {
+              isDeleted: false,
+              OR: [
+                { ownerId: userId },
+                { members: { some: { userId, isDeleted: false } } },
+              ],
+            },
+          },
+        ],
       },
       take: limit,
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        abstract: true,
+        source: true,
+        createdAt: true,
+      },
     });
   }
 
@@ -547,6 +630,10 @@ export class SearchService {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
 
+      // Must match the embedding model used at chunk-index time
+      const EMBEDDING_MODEL =
+        process.env.EMBEDDING_MODEL || "text-embedding-3-small";
+
       const response = await fetch(
         "https://api.openai.com/v1/embeddings",
         {
@@ -556,7 +643,7 @@ export class SearchService {
             Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
-            model: "text-embedding-3-small",
+            model: EMBEDDING_MODEL,
             input: query.trim().slice(0, 8000),
           }),
           signal: controller.signal,
@@ -603,16 +690,26 @@ export class SearchService {
         c.idx,
         c.page,
         c.content,
-        c.embedding <-> ${vectorStr}::vector AS distance,
+        c.embedding <=> ${vectorStr}::vector AS distance,
         p.title
       FROM "PaperChunk" c
       JOIN "Paper" p ON p.id = c."paperId"
         AND p."isDeleted" = false
-        AND p."uploaderId" = ${userId}
-        ${workspaceFilter}
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      LEFT JOIN "WorkspaceMember" m
+        ON m."workspaceId" = p."workspaceId"
+        AND m."userId" = ${userId}
+        AND m."isDeleted" = false
+      ${workspaceFilter}
       WHERE c.embedding IS NOT NULL
         AND c."isDeleted" = false
-      ORDER BY c.embedding <-> ${vectorStr}::vector
+        AND (
+          p."uploaderId" = ${userId}
+          OR w."ownerId" = ${userId}
+          OR m.id IS NOT NULL
+        )
+      ORDER BY c.embedding <=> ${vectorStr}::vector
       LIMIT ${limit}
     `;
 
