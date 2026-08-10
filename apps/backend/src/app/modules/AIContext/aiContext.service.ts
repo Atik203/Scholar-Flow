@@ -112,8 +112,33 @@ ${userContext}`;
 
 async function buildPaperContext(
   paperId: string,
-  _userId: string
+  userId: string
 ): Promise<PaperContext> {
+  // Access gate: uploader OR workspace owner OR active member
+  const accessRows = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM "Paper" p
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      LEFT JOIN "WorkspaceMember" m
+        ON m."workspaceId" = p."workspaceId"
+        AND m."userId" = ${userId}
+        AND m."isDeleted" = false
+      WHERE p.id = ${paperId}
+        AND p."isDeleted" = false
+        AND (
+          p."uploaderId" = ${userId}
+          OR w."ownerId" = ${userId}
+          OR m.id IS NOT NULL
+        )
+    ) AS "allowed"
+  `;
+
+  if (!accessRows[0]?.allowed) {
+    throw new Error("You do not have access to this paper");
+  }
+
   const paper = await prisma.paper.findUnique({
     where: { id: paperId, isDeleted: false },
     include: {
@@ -190,8 +215,27 @@ async function buildPaperContext(
 
 async function buildWorkspaceContext(
   workspaceId: string,
-  _userId: string
+  userId: string
 ): Promise<WorkspaceContext> {
+  // Access gate: workspace owner OR active member
+  const accessRows = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM "Workspace" w
+      LEFT JOIN "WorkspaceMember" m
+        ON m."workspaceId" = w.id
+        AND m."userId" = ${userId}
+        AND m."isDeleted" = false
+      WHERE w.id = ${workspaceId}
+        AND w."isDeleted" = false
+        AND (w."ownerId" = ${userId} OR m.id IS NOT NULL)
+    ) AS "allowed"
+  `;
+
+  if (!accessRows[0]?.allowed) {
+    throw new Error("You do not have access to this workspace");
+  }
+
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId, isDeleted: false },
     include: {

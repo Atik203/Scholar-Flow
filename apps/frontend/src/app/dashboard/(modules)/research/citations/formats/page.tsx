@@ -4,8 +4,6 @@ import { CitationExportDialog } from "@/components/citations/CitationExportDialo
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { ArrowLeft, BookOpen, Download, FileText, Info } from "lucide-react";
@@ -13,9 +11,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function CitationFormatsPage() {
-  const { user } = useProtectedRoute();
-  const scopedPath = (segment: string) =>
-    buildRoleScopedPath(user?.role, segment);
+  const scopedPath = (segment: string) => `/dashboard${segment}`;
   const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);

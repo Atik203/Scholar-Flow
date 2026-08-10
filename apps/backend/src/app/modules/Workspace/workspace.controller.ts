@@ -226,6 +226,28 @@ export const workspaceController = {
     );
   }),
 
+  // Revoke (cancel) a pending invitation the user sent
+  cancelInvitation: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const result = await WorkspaceService.cancelInvitation(
+      authReq.user.id,
+      String(req.params.invitationId)
+    );
+    sendSuccessResponse(res, result, "Invitation revoked");
+  }),
+
+  // Resend a pending invitation the user sent
+  resendInvitation: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const result = await WorkspaceService.resendInvitation(
+      authReq.user.id,
+      String(req.params.invitationId)
+    );
+    sendSuccessResponse(res, result, "Invitation resent");
+  }),
+
   // ==========================================================================
   // Phase 5 — Settings, Activity, Stats, Papers, Collections
   // ==========================================================================

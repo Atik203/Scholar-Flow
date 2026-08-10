@@ -301,6 +301,7 @@ model WorkspaceInvitation {
   invitedById String?
   acceptedAt  DateTime?
   declinedAt  DateTime?
+  expiresAt   DateTime? // Invites expire (INVITE_EXPIRY_DAYS); swept hourly by invitationSweeper
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   user      User      @relation("WorkspaceInvitationUser", fields: [userId], references: [id])
@@ -609,6 +610,7 @@ model CollectionMember {
   id           String               @id @default(uuid())
   collectionId String
   userId       String
+  role         Role                 @default(RESEARCHER) // mirrors User.role; added 2026-08-10 (raw SQL used it since Phase 4 but the column was never migrated)
   permission   CollectionPermission @default(EDIT) // Collection-specific permission (VIEW or EDIT)
   invitedAt    DateTime             @default(now())
   // Invitation workflow fields
@@ -616,6 +618,7 @@ model CollectionMember {
   invitedById  String?
   acceptedAt   DateTime?
   declinedAt   DateTime?
+  expiresAt    DateTime? // Invites expire (INVITE_EXPIRY_DAYS); swept hourly by invitationSweeper
 
   collection Collection @relation(fields: [collectionId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
@@ -1074,6 +1077,7 @@ enum MembershipStatus {
   PENDING
   ACCEPTED
   DECLINED
+  EXPIRED
 }
 
 model ResearchNote {

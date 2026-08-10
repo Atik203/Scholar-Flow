@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../../middleware/auth";
-import { rateLimiter } from "../../middleware/rateLimiter";
+import { aiGenerationLimiter, rateLimiter } from "../../middleware/rateLimiter";
 import catchAsync from "../../shared/catchAsync";
 import { sendSuccessResponse } from "../../shared/sendResponse";
 import { AuthenticatedRequest } from "../../interfaces/common";
@@ -68,6 +68,7 @@ router.post(
 router.post(
   "/:id/messages/stream",
   authMiddleware as any,
+  aiGenerationLimiter as any,
   catchAsync(async (req, res) => {
     const authReq = req as AuthenticatedRequest;
     const { content } = req.body || {};
