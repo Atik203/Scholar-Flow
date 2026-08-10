@@ -8,6 +8,10 @@ import { useQueryErrorHandler } from "@/hooks/useErrorHandler";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
+  useAcceptWorkspaceInvitationMutation,
+  useDeclineWorkspaceInvitationMutation,
+} from "@/redux/api/workspaceApi";
+import {
   useCancelTeamInvitationMutation,
   useGetTeamInvitationsReceivedQuery,
   useGetTeamInvitationsSentQuery,
@@ -21,9 +25,7 @@ import { AnimatePresence, motion } from "motion/react";
 import {
   Check,
   Clock,
-  Copy,
   Folder,
-  Link as LinkIcon,
   Mail,
   RefreshCw,
   Search,
@@ -123,7 +125,6 @@ export default function TeamInvitationsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusKey>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const { data: sentData, isLoading: sentLoading, refetch: refetchSent } =
@@ -137,6 +138,8 @@ export default function TeamInvitationsPage() {
   const [sendInvite] = useSendTeamInvitationMutation();
   const [cancelInvite] = useCancelTeamInvitationMutation();
   const [resendInvite] = useResendTeamInvitationMutation();
+  const [acceptInvitation] = useAcceptWorkspaceInvitationMutation();
+  const [declineInvitation] = useDeclineWorkspaceInvitationMutation();
 
   const sent: TeamInvitation[] = sentData?.result || [];
   const received: TeamInvitation[] = receivedData?.result || [];
@@ -168,8 +171,10 @@ export default function TeamInvitationsPage() {
   const handleAccept = async (inv: TeamInvitation) => {
     setProcessingId(inv.id);
     try {
-      // For now, accept workspace invitation via the workspaceApi-style flow
-      showSuccessToast("Accepted — see Shared Workspaces");
+      // Team invitations are workspace invitations — accept against the
+      // workspace so membership is created with the invited role.
+      await acceptInvitation(inv.workspaceId).unwrap();
+      showSuccessToast("Invitation accepted");
       refetchReceived();
     } catch (err) {
       showApiErrorToast(err as any);
@@ -181,7 +186,11 @@ export default function TeamInvitationsPage() {
   const handleDecline = async (inv: TeamInvitation) => {
     setProcessingId(inv.id);
     try {
+      await declineInvitation(inv.workspaceId).unwrap();
+      showSuccessToast("Invitation declined");
       refetchReceived();
+    } catch (err) {
+      showApiErrorToast(err as any);
     } finally {
       setProcessingId(null);
     }
@@ -209,13 +218,6 @@ export default function TeamInvitationsPage() {
     } finally {
       setProcessingId(null);
     }
-  };
-
-  const handleCopyLink = () => {
-    if (typeof window === "undefined") return;
-    navigator.clipboard.writeText("https://scholarflow.app/invite/abc123");
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const isLoading = sentLoading || receivedLoading;
@@ -264,36 +266,6 @@ export default function TeamInvitationsPage() {
           color="text-green-600"
           bgColor="bg-green-100 dark:bg-green-900/50"
         />
-      </div>
-
-      {/* Quick Invite Link */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 rounded-xl border border-blue-200/50 dark:border-blue-700/50 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white dark:bg-gray-800 rounded-lg">
-              <LinkIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <h3 className="font-medium">Shareable Invite Link</h3>
-              <p className="text-sm text-muted-foreground">
-                Anyone with this link can request to join your workspace
-              </p>
-            </div>
-          </div>
-          <Button variant="outline" onClick={handleCopyLink}>
-            {copiedLink ? (
-              <>
-                <Check className="h-4 w-4 text-green-500 mr-1" />
-                Copied!
-              </>
-            ) : (
-              <>
-                <Copy className="h-4 w-4 mr-1" />
-                Copy Link
-              </>
-            )}
-          </Button>
-        </div>
       </div>
 
       {/* Filters */}

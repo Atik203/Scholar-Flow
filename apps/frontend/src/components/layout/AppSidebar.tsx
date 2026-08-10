@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 import {
   USER_ROLES,
-  buildRoleScopedPath,
   hasRoleAccess,
 } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
@@ -269,6 +268,12 @@ const adminFeatures: SidebarItem[] = [
     title: "Subscriptions",
     path: "/dashboard/admin/subscriptions",
     icon: CreditCard,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Subscribers",
+    path: "/dashboard/admin/subscribers",
+    icon: Users,
     minRole: USER_ROLES.ADMIN,
   },
   {

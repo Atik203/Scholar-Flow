@@ -99,11 +99,6 @@ const managePlan = catchAsync(
         result = { message: "Subscription reactivated successfully" };
         break;
 
-      case "update_seats":
-        // TODO: Implement seat update logic
-        result = { message: "Seat update not yet implemented" };
-        break;
-
       default:
         res.status(400).json({
           success: false,
@@ -119,9 +114,44 @@ const managePlan = catchAsync(
   }
 );
 
+/**
+ * GET /billing/prices
+ * Public — returns the configured Stripe price IDs per plan/interval so
+ * the frontend can build checkout links without knowing the raw IDs.
+ * Stripe price IDs are public (they appear in checkout URLs).
+ */
+const getPrices = catchAsync(async (_req: AuthRequest, res: Response) => {
+  const prices = billingService.getAvailablePrices();  res.status(200).json({
+    success: true,
+    message: "Prices retrieved successfully",
+    data: prices,
+  });
+});
+
+/**
+ * GET /billing/catalog
+ * Public — full plan catalog (name, price, interval, price ID) for ACTIVE
+ * plans, so the pricing page renders admin-managed plans dynamically.
+ */
+const getCatalog = catchAsync(async (_req: AuthRequest, res: Response) => {
+  const catalog = await billingService.getPublicCatalog();
+
+  res.set({
+    "Cache-Control": "public, max-age=60",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Plan catalog retrieved successfully",
+    data: catalog,
+  });
+});
+
 export const billingController = {
   createCheckoutSession,
   createPortalSession,
   getSubscription,
   managePlan,
+  getPrices,
+  getCatalog,
 };

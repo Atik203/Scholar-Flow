@@ -21,9 +21,18 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { CardWithVariants } from "@/components/ui/card-variants";
+import { showErrorToast } from "@/components/providers/ToastProvider";
+import { useAuth } from "@/redux/auth/useAuth";
+import {
+  useCreateCheckoutSessionMutation,
+  useGetBillingCatalogQuery,
+} from "@/redux/api/billingApi";
+
+type PlanKey = "free" | "pro" | "team" | "enterprise";
 
 export default function PricingPage() {
   const [isAnnual, setIsAnnual] = useState(true);
@@ -36,6 +45,62 @@ export default function PricingPage() {
     aiAnalysis: true,
     collaboration: true,
   });
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const {
+    data: catalog,
+    isLoading: isCatalogLoading,
+    isError: isCatalogError,
+  } = useGetBillingCatalogQuery(undefined, { refetchOnMountOrArgChange: true });
+  const [createCheckout, { isLoading: isStartingCheckout }] =
+    useCreateCheckoutSessionMutation();
+
+  const handlePlanCta = async (planKey: PlanKey) => {
+    // Unauthenticated → login first, return to pricing after signing in
+    if (!isAuthenticated) {
+      router.push("/login?callbackUrl=/pricing");
+      return;
+    }
+
+    // Free plan → straight to dashboard
+    if (planKey === "free") {
+      router.push("/dashboard");
+      return;
+    }
+
+    // Enterprise → contact sales
+    if (planKey === "enterprise") {
+      router.push("/contact");
+      return;
+    }
+
+    const variant =
+      planKey === "pro" || planKey === "team"
+        ? catalog?.[planKey]?.[isAnnual ? "annual" : "monthly"]
+        : null;
+    const priceId = variant?.stripePriceId ?? null;
+
+    if (!priceId) {
+      showErrorToast(
+        isCatalogError
+          ? "Could not load pricing. Please refresh and try again."
+          : "This plan is not available right now."
+      );
+      return;
+    }
+
+    try {
+      const result = await createCheckout({ priceId }).unwrap();
+      const url = result.data?.url;
+      if (url) {
+        window.location.assign(url);
+      } else {
+        showErrorToast("Could not start checkout. Please try again.");
+      }
+    } catch {
+      showErrorToast("Could not start checkout. Please try again.");
+    }
+  };
 
   const getRecommendedPlan = () => {
     const { papers, teamSize, aiAnalysis, collaboration } = calculatorValues;
@@ -92,9 +157,17 @@ export default function PricingPage() {
     { feature: "On-premise Deployment", free: false, pro: false, team: false, enterprise: true },
   ];
 
+  // Pro/Team cards are driven by the admin-managed plan catalog — name,
+  // price, and availability reflect admin panel changes (null = unavailable).
+  const proMonthly = catalog?.pro?.monthly ?? null;
+  const proAnnual = catalog?.pro?.annual ?? null;
+  const teamMonthly = catalog?.team?.monthly ?? null;
+  const teamAnnual = catalog?.team?.annual ?? null;
+
   const plans = [
     {
       name: "Free",
+      planKey: "free",
       description: "Perfect for individual researchers getting started",
       monthlyPrice: 0,
       annualPrice: 0,
@@ -111,12 +184,14 @@ export default function PricingPage() {
       color: "primary",
       popular: false,
       cta: "Get Started",
+      unavailable: false,
     },
     {
-      name: "Pro",
+      name: proMonthly?.name ?? "Pro",
+      planKey: "pro",
       description: "Ideal for active researchers and small teams",
-      monthlyPrice: 29,
-      annualPrice: 24,
+      monthlyPrice: proMonthly ? proMonthly.priceCents / 100 : null,
+      annualPrice: proAnnual ? proAnnual.priceCents / 100 : null,
       icon: Zap,
       features: [
         "Unlimited papers",
@@ -132,12 +207,14 @@ export default function PricingPage() {
       color: "chart-1",
       popular: true,
       cta: "Start Pro Trial",
+      unavailable: !proMonthly && !proAnnual,
     },
     {
-      name: "Team",
+      name: teamMonthly?.name ?? "Team",
+      planKey: "team",
       description: "Built for research teams and departments",
-      monthlyPrice: 89,
-      annualPrice: 74,
+      monthlyPrice: teamMonthly ? teamMonthly.priceCents / 100 : null,
+      annualPrice: teamAnnual ? teamAnnual.priceCents / 100 : null,
       icon: Users,
       features: [
         "Everything in Pro",
@@ -153,9 +230,11 @@ export default function PricingPage() {
       color: "chart-2",
       popular: false,
       cta: "Start Team Trial",
+      unavailable: !teamMonthly && !teamAnnual,
     },
     {
       name: "Enterprise",
+      planKey: "enterprise",
       description: "Custom solutions for large organizations",
       monthlyPrice: null,
       annualPrice: null,
@@ -174,8 +253,9 @@ export default function PricingPage() {
       color: "chart-3",
       popular: false,
       cta: "Contact Sales",
+      unavailable: false,
     },
-  ];
+  ] as const;
 
   const faqs = [
     {
@@ -184,7 +264,7 @@ export default function PricingPage() {
     },
     {
       question: "What happens when I exceed my paper limit?",
-      answer: "On the Free plan, you'll be prompted to upgrade when you reach 50 papers. Your existing papers remain accessible.",
+      answer: "On the Free plan, you'll be prompted to upgrade when you reach 10 papers. Your existing papers remain accessible.",
     },
     {
       question: "Can I change plans later?",
@@ -294,7 +374,9 @@ export default function PricingPage() {
 
                     <div className="text-center mb-8">
                       <div className="text-4xl font-bold">
-                        {plan.monthlyPrice !== null ? (
+                        {plan.unavailable ? (
+                          "—"
+                        ) : plan.monthlyPrice !== null ? (
                           <>
                             ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
                             <span className="text-lg font-normal text-muted-foreground">
@@ -305,9 +387,18 @@ export default function PricingPage() {
                           "Custom"
                         )}
                       </div>
-                      {isAnnual && plan.monthlyPrice !== null && plan.monthlyPrice > 0 && (
+                      {!plan.unavailable &&
+                        isAnnual &&
+                        plan.monthlyPrice !== null &&
+                        plan.monthlyPrice > 0 && (
+                          <div className="text-sm text-muted-foreground mt-1">
+                            ${Math.round((plan.annualPrice ?? 0) / 12)}/month
+                            billed annually
+                          </div>
+                        )}
+                      {plan.unavailable && (
                         <div className="text-sm text-muted-foreground mt-1">
-                          ${Math.round((plan.annualPrice ?? 0) / 12)}/month billed annually
+                          Currently unavailable
                         </div>
                       )}
                     </div>
@@ -338,21 +429,21 @@ export default function PricingPage() {
                           {plan.cta}
                         </Button>
                       </Link>
-                    ) : plan.popular ? (
-                      <Link href="/login">
-                        <Button className="w-full py-3 px-4 font-semibold bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300">
-                          {plan.cta}
-                        </Button>
-                      </Link>
                     ) : (
-                      <Link href="/login">
-                        <Button
-                          variant="outline"
-                          className="w-full py-3 px-4 font-semibold border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
-                        >
-                          {plan.cta}
-                        </Button>
-                      </Link>
+                      <Button
+                        onClick={() => handlePlanCta(plan.planKey as PlanKey)}
+                        disabled={
+                          isStartingCheckout || isCatalogLoading || plan.unavailable
+                        }
+                        className={
+                          plan.popular
+                            ? "w-full py-3 px-4 font-semibold bg-gradient-to-r from-primary to-chart-1 text-primary-foreground hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 transition-all duration-300"
+                            : "w-full py-3 px-4 font-semibold border border-border bg-background hover:bg-primary/5 hover:border-primary/30"
+                        }
+                        variant={plan.popular ? "default" : "outline"}
+                      >
+                        {plan.unavailable ? "Not available" : plan.cta}
+                      </Button>
                     )}
                   </CardWithVariants>
                 </motion.div>
@@ -731,15 +822,14 @@ export default function PricingPage() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to transform your research?</h2>
               <p className="text-xl text-muted-foreground mb-8">Start free today. No credit card required.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
-                  >
-                    <Rocket className="h-5 w-5 mr-2" />
-                    Get Started Free
-                  </Button>
-                </Link>
+                <Button
+                  size="lg"
+                  onClick={() => handlePlanCta("free")}
+                  className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground"
+                >
+                  <Rocket className="h-5 w-5 mr-2" />
+                  Get Started Free
+                </Button>
                 <Link href="/contact">
                   <Button size="lg" variant="outline">
                     <Zap className="h-5 w-5 mr-2" />

@@ -56,8 +56,20 @@ io.use((socket: Socket, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as unknown as { id: string; name?: string };
-    (socket as AuthenticatedSocket).userId = decoded.id;
+    // Access tokens carry the user id in `sub` (backend middleware/auth.ts);
+    // `decoded.id` alone leaves userId undefined and the server disconnects
+    // every client right after connect (fixed 2026-08-10, same fix as the
+    // in-process socket server).
+    const decoded = jwt.verify(token, JWT_SECRET) as unknown as {
+      sub?: string;
+      id?: string;
+      name?: string;
+    };
+    const userId = decoded.sub || decoded.id;
+    if (!userId) {
+      return next(new Error("Invalid token: missing user identifier"));
+    }
+    (socket as AuthenticatedSocket).userId = userId;
     (socket as AuthenticatedSocket).userName = decoded.name || "Unknown";
     next();
   } catch {
@@ -66,6 +78,17 @@ io.use((socket: Socket, next) => {
 });
 
 const onlineUsers = new Map<string, Set<string>>();
+
+// Strict room-name allowlist: only paper:/discussion:/workspace: + UUID.
+// The standalone server has no DB access — full membership checks run on the
+// in-process socket server (apps/backend .../WebSocket/socketServer.ts).
+// This guard stops arbitrary room names (e.g. any string) from being joined.
+// NOTE: no ^/$ anchors inside the fragment — a ^ mid-pattern only matches pos 0.
+const UUID_SOURCE = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+const ROOM_RE = new RegExp(
+  `^(paper|discussion|workspace):(${UUID_SOURCE})$`,
+  "i"
+);
 
 io.on("connection", (socket: AuthenticatedSocket) => {
   const { userId, userName } = socket;
@@ -81,6 +104,10 @@ io.on("connection", (socket: AuthenticatedSocket) => {
   });
 
   socket.on("room:join", (room: string) => {
+    if (typeof room !== "string" || !ROOM_RE.test(room)) {
+      socket.emit("room:error", { room, message: "Access denied: invalid room" });
+      return;
+    }
     socket.join(room);
     const count = io.sockets.adapter.rooms.get(room)?.size || 0;
     socket.emit("room:joined", { room, memberCount: count });

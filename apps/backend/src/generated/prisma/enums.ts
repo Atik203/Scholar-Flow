@@ -171,7 +171,8 @@ export type TokenType = (typeof TokenType)[keyof typeof TokenType]
 export const MembershipStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
-  DECLINED: 'DECLINED'
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED'
 } as const
 
 export type MembershipStatus = (typeof MembershipStatus)[keyof typeof MembershipStatus]

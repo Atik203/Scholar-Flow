@@ -117,7 +117,7 @@ function ChartSkeleton() {
       <div className="flex items-end gap-4 h-48">
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <Skeleton className="w-full" style={{ height: `${20 + Math.random() * 60}%` }} />
+            <Skeleton className="w-full" style={{ height: `${20 + (i % 5) * 15}%` }} />
             <Skeleton className="h-3 w-8" />
           </div>
         ))}

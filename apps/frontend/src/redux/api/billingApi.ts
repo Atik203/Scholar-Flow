@@ -83,6 +83,26 @@ export interface ManagePlanRequest {
   seats?: number;
 }
 
+export interface BillingPrices {
+  pro: { monthly: string | null; annual: string | null };
+  team: { monthly: string | null; annual: string | null };
+  enterprise: { monthly: string | null; annual: string | null };
+}
+
+export interface CatalogPlanVariant {
+  name: string;
+  priceCents: number;
+  currency: string;
+  interval: string;
+  stripePriceId: string | null;
+}
+
+export interface BillingCatalog {
+  free: CatalogPlanVariant;
+  pro: { monthly: CatalogPlanVariant | null; annual: CatalogPlanVariant | null };
+  team: { monthly: CatalogPlanVariant | null; annual: CatalogPlanVariant | null };
+}
+
 export const billingApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     /**
@@ -140,6 +160,25 @@ export const billingApi = apiSlice.injectEndpoints({
     }),
 
     /**
+     * Public price catalog — configured Stripe price IDs per plan
+     */
+    getBillingPrices: builder.query<BillingPrices, void>({
+      query: () => "/billing/prices",
+      transformResponse: (response: { data: BillingPrices }) => response.data,
+      keepUnusedDataFor: 300,
+    }),
+
+    /**
+     * Public plan catalog — active plans with name/price/interval/priceId
+     * so the pricing page reflects admin panel plan changes.
+     */
+    getBillingCatalog: builder.query<BillingCatalog, void>({
+      query: () => "/billing/catalog",
+      transformResponse: (response: { data: BillingCatalog }) => response.data,
+      keepUnusedDataFor: 30,
+    }),
+
+    /**
      * Manage subscription plan
      */
     managePlan: builder.mutation<{ message: string }, ManagePlanRequest>({
@@ -189,4 +228,6 @@ export const {
   useGetSubscriptionQuery,
   useLazyGetSubscriptionQuery,
   useManagePlanMutation,
+  useGetBillingPricesQuery,
+  useGetBillingCatalogQuery,
 } = billingApi;

@@ -178,7 +178,8 @@ export async function extractWithUnpdf(
 
   try {
     const { extractText } = await import("unpdf");
-    const result = await extractText(buffer as any);
+    // unpdf requires a Uint8Array — passing a Node Buffer throws
+    const result = await extractText(new Uint8Array(buffer));
 
     const text = typeof result === "string" ? result : (result as any).text || "";
     const elapsed = Date.now() - start;

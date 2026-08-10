@@ -10,9 +10,52 @@ import multer from "multer";
 import path from "path";
 import os from "os";
 import fs from "fs";
+import prisma from "../../shared/prisma";
+import ApiError from "../../errors/ApiError";
 
 const router: express.Router = express.Router();
 const upload = multer({ dest: os.tmpdir() });
+
+/**
+ * Access gate for LaTeX project routes: the authenticated user must own the
+ * paper or be a workspace owner/active member.
+ */
+const ensurePaperAccess: express.RequestHandler = async (req, res, next) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    const userId = authReq.user?.id;
+    const paperId = (req.params as { paperId?: string }).paperId;
+    if (!userId) throw new ApiError(401, "Authentication required");
+    if (!paperId) throw new ApiError(400, "paperId is required");
+
+    const access = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM "Paper" p
+        LEFT JOIN "Workspace" w
+          ON w.id = p."workspaceId" AND w."isDeleted" = false
+        LEFT JOIN "WorkspaceMember" m
+          ON m."workspaceId" = p."workspaceId"
+          AND m."userId" = ${userId}
+          AND m."isDeleted" = false
+        WHERE p.id = ${paperId}
+          AND p."isDeleted" = false
+          AND (
+            p."uploaderId" = ${userId}
+            OR w."ownerId" = ${userId}
+            OR m.id IS NOT NULL
+          )
+      ) AS "allowed"
+    `;
+
+    if (!access[0]?.allowed) {
+      throw new ApiError(403, "You do not have access to this paper");
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
 // GET /api/export/status — check available compilers
 router.get(
@@ -102,6 +145,7 @@ router.post(
 router.get(
   "/latex-project/:paperId/files",
   authMiddleware as any,
+  ensurePaperAccess as any,
   catchAsync(async (req, res) => {
     const files = await latexProjectService.getFiles(req.params.paperId);
     sendSuccessResponse(res, { files }, "Project files retrieved");
@@ -112,6 +156,7 @@ router.get(
 router.get(
   "/latex-project/:paperId/files/:fileId",
   authMiddleware as any,
+  ensurePaperAccess as any,
   catchAsync(async (req, res) => {
     const file = await latexProjectService.getFile(req.params.paperId, req.params.fileId);
     if (!file) {
@@ -126,6 +171,7 @@ router.get(
 router.put(
   "/latex-project/:paperId/files/:fileId",
   authMiddleware as any,
+  ensurePaperAccess as any,
   rateLimiter as any,
   catchAsync(async (req, res) => {
     const { content } = req.body || {};
@@ -142,6 +188,7 @@ router.put(
 router.post(
   "/latex-project/:paperId/files",
   authMiddleware as any,
+  ensurePaperAccess as any,
   rateLimiter as any,
   catchAsync(async (req, res) => {
     const { name, content, parentId } = req.body || {};
@@ -158,6 +205,7 @@ router.post(
 router.delete(
   "/latex-project/:paperId/files/:fileId",
   authMiddleware as any,
+  ensurePaperAccess as any,
   catchAsync(async (req, res) => {
     await latexProjectService.deleteFile(req.params.paperId, req.params.fileId);
     sendSuccessResponse(res, null, "File deleted");
@@ -168,6 +216,7 @@ router.delete(
 router.put(
   "/latex-project/:paperId/main/:fileId",
   authMiddleware as any,
+  ensurePaperAccess as any,
   catchAsync(async (req, res) => {
     await latexProjectService.setMainFile(req.params.paperId, req.params.fileId);
     sendSuccessResponse(res, null, "Main file updated");

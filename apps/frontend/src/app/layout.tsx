@@ -14,7 +14,6 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "@/lib/suppressDevScriptWarning";
 
 // Viewport configuration (separate from metadata in Next.js 15+)
 export const viewport: Viewport = {

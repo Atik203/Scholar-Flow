@@ -370,7 +370,9 @@ class EmailService {
     message?: string;
     invitationId?: string;
   }): Promise<void> {
-    const inviteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/team/invitations`;
+    // Team invitations are workspace invitations — the invitee accepts/declines
+    // on the shared-workspaces page (the team invitations page has no accept UI).
+    const inviteUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/dashboard/workspaces/shared`;
 
     const messageBlock = data.message
       ? `<p style="background:#f3f4f6;padding:12px 16px;border-radius:8px;font-style:italic;color:#374151;margin:16px 0;">"${data.message}"</p>`

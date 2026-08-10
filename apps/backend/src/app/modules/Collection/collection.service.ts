@@ -28,7 +28,7 @@ export class CollectionService {
    * Get collection statistics using $queryRaw for optimized aggregation
    * Source: optimized collection stats with paper counts and user activity
    */
-  static async getCollectionStats() {
+  static async getCollectionStats(userId: string) {
     try {
       const stats = await prisma.$queryRaw<
         Array<{
@@ -38,18 +38,30 @@ export class CollectionService {
           avgPapersPerCollection: number;
         }>
       >`
+        WITH accessible AS (
+          SELECT c.id, c."isPublic", c.visibility
+          FROM "Collection" c
+          LEFT JOIN "CollectionMember" cm
+            ON c.id = cm."collectionId" AND cm."isDeleted" = false
+          WHERE c."isDeleted" = false
+            AND (
+              c."ownerId" = ${userId}
+              OR (cm."userId" = ${userId} AND cm.status = 'ACCEPTED')
+            )
+          GROUP BY c.id
+        )
         SELECT 
           COUNT(*)::int as "totalCollections",
-          COUNT(CASE WHEN "isPublic" = true THEN 1 END)::int as "publicCollections",
-          COUNT(CASE WHEN "isPublic" = false THEN 1 END)::int as "privateCollections",
+          COUNT(CASE WHEN a."isPublic" = true OR a.visibility = 'PUBLIC' THEN 1 END)::int as "publicCollections",
+          COUNT(CASE WHEN a."isPublic" = false AND a.visibility <> 'PUBLIC' THEN 1 END)::int as "privateCollections",
           COALESCE(AVG(paper_counts.paper_count), 0)::float as "avgPapersPerCollection"
-        FROM "Collection" c
+        FROM accessible a
         LEFT JOIN (
           SELECT "collectionId", COUNT(*) as paper_count
           FROM "CollectionPaper"
+          WHERE "isDeleted" = false
           GROUP BY "collectionId"
-        ) paper_counts ON c.id = paper_counts."collectionId"
-        WHERE c."isDeleted" = false
+        ) paper_counts ON a.id = paper_counts."collectionId"
       `;
 
       return (
@@ -78,7 +90,7 @@ export class CollectionService {
     try {
       const visibilityFilter =
         isPublic !== undefined
-          ? Prisma.sql`AND c."isPublic" = ${isPublic}`
+          ? Prisma.sql`AND (c."isPublic" = ${isPublic} OR c.visibility = 'PUBLIC')`
           : Prisma.empty;
 
       const collections = await prisma.$queryRaw<CollectionAggregateRow[]>`
@@ -301,6 +313,7 @@ export class CollectionService {
 
   static async searchCollections(
     searchTerm: string,
+    userId: string,
     limit: number = 10,
     skip: number = 0
   ) {
@@ -349,6 +362,17 @@ export class CollectionService {
           AND (
             c.name ILIKE ${`%${searchTerm}%`} 
             OR c.description ILIKE ${`%${searchTerm}%`}
+          )
+          AND (
+            c."ownerId" = ${userId}
+            OR c.visibility IN ('TEAM', 'PUBLIC')
+            OR EXISTS (
+              SELECT 1 FROM "CollectionMember" m
+              WHERE m."collectionId" = c.id
+                AND m."userId" = ${userId}
+                AND m."isDeleted" = false
+                AND m.status = 'ACCEPTED'
+            )
           )
         ORDER BY relevance_score DESC, c."createdAt" DESC
         LIMIT ${limit} OFFSET ${skip}

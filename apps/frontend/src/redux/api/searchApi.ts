@@ -3,9 +3,10 @@ import { apiSlice } from './apiSlice';
 export type SearchTabType =
   | "all"
   | "papers"
-  | "people"
+  | "collections"
   | "workspaces"
-  | "internet";
+  | "notes"
+  | "people";
 
 export interface GlobalSearchQuery {
   q: string;
@@ -42,7 +43,6 @@ export interface SearchResults {
   workspaces?: { total: number; items: SearchResultItem[] };
   notes?: { total: number; items: SearchResultItem[] };
   people?: { total: number; items: SearchResultItem[] };
-  internet?: { total: number; items: SearchResultItem[]; fallback?: string };
 }
 
 export interface GlobalSearchResponse {

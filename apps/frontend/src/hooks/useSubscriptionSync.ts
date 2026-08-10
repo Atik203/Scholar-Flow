@@ -22,7 +22,7 @@ import { useGetSubscriptionQuery } from "@/redux/api/billingApi";
 import { useGetProfileQuery } from "@/redux/api/userApi";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useAppDispatch } from "@/redux/hooks";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface UseSubscriptionSyncOptions {
   /**
@@ -76,6 +76,10 @@ export function useSubscriptionSync({
   const hasCompletedRef = useRef(false);
   const initialSnapshotRef = useRef<SubscriptionSnapshot | null>(null);
   const lastKnownSnapshotRef = useRef<SubscriptionSnapshot | null>(null);
+
+  // State-driven progress (refs alone never re-render the UI)
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [isPolling, setIsPolling] = useState(false);
 
   // Query hooks - Always keep subscriptions active to allow refetch
   // The queries are cached and controlled via polling logic, not skip
@@ -174,8 +178,20 @@ export function useSubscriptionSync({
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
+    setIsPolling(false);
     attemptCountRef.current = 0;
+    setAttemptCount(0);
   }, []);
+
+  /**
+   * Complete the sync (stop polling + fire the success callback)
+   */
+  const completeSync = useCallback(() => {
+    stopPolling();
+    hasCompletedRef.current = true;
+    setIsPolling(false);
+    onSyncComplete?.();
+  }, [stopPolling, onSyncComplete]);
 
   /**
    * Main polling logic
@@ -188,6 +204,7 @@ export function useSubscriptionSync({
     }
 
     attemptCountRef.current += 1;
+    setAttemptCount(attemptCountRef.current);
 
     // Check if we've exceeded max attempts
     if (attemptCountRef.current > maxAttempts) {
@@ -199,10 +216,6 @@ export function useSubscriptionSync({
       onSyncTimeout?.();
       return;
     }
-
-    console.log(
-      `[useSubscriptionSync] Polling attempt ${attemptCountRef.current}/${maxAttempts}`
-    );
 
     // Refresh data
     const refreshSuccess = await forceRefresh();
@@ -218,6 +231,21 @@ export function useSubscriptionSync({
     if (!initialSnapshotRef.current) {
       initialSnapshotRef.current = currentSnapshot;
       lastKnownSnapshotRef.current = currentSnapshot;
+
+      // Already converged? If the webhook finished before we landed, the
+      // state is correct at poll #1 — completing immediately beats wasting
+      // 10 polls and showing a misleading "timeout" toast.
+      const hasPaidAccess =
+        currentSnapshot.status === "ACTIVE" ||
+        (currentSnapshot.role !== "RESEARCHER" &&
+          Boolean(currentSnapshot.subscriptionId));
+
+      if (hasPaidAccess) {
+        console.log(
+          "[useSubscriptionSync] State already converged, completing sync"
+        );
+        completeSync();
+      }
       return;
     }
 
@@ -237,15 +265,13 @@ export function useSubscriptionSync({
       lastKnownSnapshotRef.current = currentSnapshot;
 
       // Stop polling and mark as complete
-      stopPolling();
-      hasCompletedRef.current = true;
-      onSyncComplete?.();
+      completeSync();
     }
   }, [
     maxAttempts,
     onSyncTimeout,
-    onSyncComplete,
     stopPolling,
+    completeSync,
     forceRefresh,
     captureSnapshot,
     hasChanges,
@@ -262,6 +288,8 @@ export function useSubscriptionSync({
       initialSnapshotRef.current = null;
       lastKnownSnapshotRef.current = null;
       attemptCountRef.current = 0;
+      setAttemptCount(0);
+      setIsPolling(false);
       return;
     }
 
@@ -271,6 +299,7 @@ export function useSubscriptionSync({
     }
 
     console.log("[useSubscriptionSync] Starting subscription sync polling");
+    setIsPolling(true);
 
     // Do immediate poll
     poll();
@@ -285,8 +314,8 @@ export function useSubscriptionSync({
   }, [enabled, poll, pollingInterval, stopPolling]);
 
   return {
-    isPolling: enabled && !hasCompletedRef.current,
-    attemptCount: attemptCountRef.current,
+    isPolling,
+    attemptCount,
     maxAttempts,
     forceRefresh,
   };
