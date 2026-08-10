@@ -33,15 +33,19 @@ class AuthService {
   async createOrUpdateUser(userData: IUserData) {
     try {
       const userId = userData.id || randomUUID();
-      const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
-
+      // SECURITY (2026-08-10): NEW users are always RESEARCHER — the role
+      // comes from the request body and validateRole only checks the enum,
+      // so a forged body could self-register as ADMIN. Existing users keep
+      // the refresh behavior (never downgrade server-driven promotions).
       const existingUser = await prisma.user.findUnique({
         where: { email: userData.email },
         select: { name: true, image: true },
       });
 
       const updateData: Prisma.UserUpdateInput = {
-        role: role as Prisma.UserUpdateInput["role"],
+        role: this.validateRole(
+          userData.role || USER_ROLES.RESEARCHER
+        ) as Prisma.UserUpdateInput["role"],
       };
       if (!existingUser?.name) {
         updateData.name = userData.name ?? "";
@@ -58,7 +62,7 @@ class AuthService {
           email: userData.email,
           name: userData.name ?? "",
           image: userData.image ?? "",
-          role: role as any,
+          role: USER_ROLES.RESEARCHER as any,
         },
       });
 
@@ -81,7 +85,6 @@ class AuthService {
   async createOrUpdateUserWithOAuth(userData: IUserData) {
     try {
       const userId = userData.id || randomUUID();
-      const role = this.validateRole(userData.role || USER_ROLES.RESEARCHER);
 
       // First check if user exists and is deleted, and capture the current
       // name/image so we can preserve any user-uploaded custom values.
@@ -97,8 +100,10 @@ class AuthService {
         );
       }
 
-      // Build the update payload conditionally: only fill in name/image from
-      // the OAuth provider when the user has no custom value yet.
+      // SECURITY (2026-08-10): NEW users are always RESEARCHER (the OAuth
+      // callback role field is client-supplied; validateRole only checks the
+      // enum). Existing users keep their server-driven role — never
+      // downgraded, matching the "role refreshed on login" contract.
       const updateData: {
         name?: string;
         image?: string;
@@ -121,7 +126,7 @@ class AuthService {
           email: userData.email,
           name: userData.name ?? "",
           image: userData.image ?? "",
-          role: role as any,
+          role: USER_ROLES.RESEARCHER as any,
           emailVerified: new Date(), // Mark as verified for OAuth users
         },
       });
@@ -218,8 +223,11 @@ class AuthService {
         throw new ApiError(409, "User with this email already exists");
       }
 
-      // Validate role
-      const validRole = this.validateRole(role);
+      // SECURITY (2026-08-10): registration ALWAYS creates a RESEARCHER.
+      // validateRole only checks the enum, so a client could previously
+      // self-register as ADMIN/TEAM_LEAD. Paid roles come from billing
+      // webhooks; elevated roles from admin team management only.
+      const validRole = this.validateRole(USER_ROLES.RESEARCHER);
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 12);
