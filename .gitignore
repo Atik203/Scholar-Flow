@@ -1,5 +1,3 @@
-
-
 # Dependencies
 node_modules/
 .pnp
@@ -18,7 +16,6 @@ out/
 build/
 dist/
 
-
 # Misc
 .DS_Store
 *.pem
@@ -28,14 +25,16 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
-.env.development.local
-.env.test.local
-.env.production.local
-
-
-apps/backend/.env.production
-
+# Environment files — NEVER commit secrets
+# (keep .env.example tracked for documentation)
+.env
+.env.*
+!.env.example
+!*.env.example
+apps/**/.env
+apps/**/.env.local
+apps/**/.env.production
+apps/**/.env.development
 
 # Vercel
 .vercel
@@ -46,10 +45,8 @@ apps/backend/.env.production
 # IDE
 .vscode/
 
-
 # Database
 *.db
-
 
 # Logs
 logs
@@ -67,158 +64,10 @@ temp/
 
 # OS generated files
 Thumbs.db
-.DS_Store
 
 # Prisma
 prisma/migrations/dev.db*
 config.bat
-
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-.yarn/
-
-# Testing
-coverage/
-*.lcov
-
-# Next.js
-.next/
-out/
-
-# Production
-build/
-dist/
-
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env.development.local
-.env.test.local
-.env.production.local
-
-
-apps/backend/.env.production
-
-
-# Vercel
-.vercel
-
-# Turbo
-.turbo
-
-# IDE
-.vscode/
-
-
-# Database
-*.db
-
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Temporary folders
-tmp/
-temp/
-
-# OS generated files
-Thumbs.db
-.DS_Store
-
-# Prisma
-prisma/migrations/dev.db*
-config.bat
-
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
-.yarn/
-
-# Testing
-coverage/
-*.lcov
-
-# Next.js
-.next/
-out/
-
-# Production
-build/
-dist/
-
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env.development.local
-.env.test.local
-.env.production.local
-
-
-apps/backend/.env.production
-
-
-# Vercel
-.vercel
-
-# Turbo
-.turbo
-
-# IDE
-.vscode/
-
-
-# Database
-*.db
-
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Temporary folders
-tmp/
-temp/
-
-# OS generated files
-Thumbs.db
-.DS_Store
-
-# Prisma
-prisma/migrations/dev.db*
-config.bat
-
 
 temp_auto_push.bat
 temp_interactive_push.bat
