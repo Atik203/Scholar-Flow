@@ -209,7 +209,7 @@ router.get(
       const result = await ActivityLogService.getActivitySummary(
         req,
         req.query.workspaceId as string,
-        Number(req.query.days)
+        Number(req.query.days ?? 7)
       );
       
       res.json({
