@@ -182,6 +182,7 @@ const navigationItems: SidebarItem[] = [
     icon: Microscope,
     minRole: USER_ROLES.RESEARCHER,
     items: [
+      { title: "Research Hub", path: "/dashboard/research", icon: Microscope, minRole: USER_ROLES.RESEARCHER },
       { title: "PDF Text Extraction", path: "/dashboard/research/pdf-extraction", icon: TextCursor, minRole: USER_ROLES.RESEARCHER },
       { title: "Text Editor", path: "/dashboard/research/editor", icon: FileText, minRole: USER_ROLES.RESEARCHER },
       { title: "Citations", path: "/dashboard/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
