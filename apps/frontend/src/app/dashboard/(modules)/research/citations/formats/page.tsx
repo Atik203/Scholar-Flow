@@ -12,7 +12,9 @@ import { useMemo, useState } from "react";
 
 export default function CitationFormatsPage() {
   const scopedPath = (segment: string) => `/dashboard${segment}`;
-  const [selectedFormat, setSelectedFormat] = useState<string | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<
+    "BIBTEX" | "ENDNOTE" | "APA" | "MLA" | "IEEE" | "CHICAGO" | "HARVARD" | null
+  >(null);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
 
@@ -44,7 +46,16 @@ export default function CitationFormatsPage() {
   }, [collectionsData]);
 
   const handleExportClick = (formatId: string) => {
-    setSelectedFormat(formatId.toUpperCase());
+    setSelectedFormat(
+      formatId.toUpperCase() as
+        | "BIBTEX"
+        | "ENDNOTE"
+        | "APA"
+        | "MLA"
+        | "IEEE"
+        | "CHICAGO"
+        | "HARVARD"
+    );
     setIsExportDialogOpen(true);
   };
 
@@ -333,7 +344,7 @@ export default function CitationFormatsPage() {
         papers={papers}
         collections={collections}
         selectedPaperIds={selectedPapers}
-        preSelectedFormat={selectedFormat as any}
+        preSelectedFormat={selectedFormat ?? undefined}
       />
     </>
   );
