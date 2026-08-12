@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +18,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 import type { DiscussionThread } from "@/redux/api/discussionApi";
+import {
+  useTogglePinMutation,
+  useToggleResolveMutation,
+  useDeleteDiscussionMutation,
+} from "@/redux/api/discussionApi";
+import { useAuth } from "@/redux/auth/useAuth";
 import {
   MessageSquare,
   Pin,
@@ -50,7 +55,15 @@ export function DiscussionThreadCard({
   onThreadDelete,
   onReply
 }: DiscussionThreadCardProps) {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { user: authUser } = useAuth();
+  const effectiveUserId = currentUserId ?? authUser?.id;
+
+  const [toggleResolve, { isLoading: isTogglingResolve }] =
+    useToggleResolveMutation();
+  const [togglePin, { isLoading: isTogglingPin }] = useTogglePinMutation();
+  const [deleteThread, { isLoading: isDeleting }] =
+    useDeleteDiscussionMutation();
+  const isUpdating = isTogglingResolve || isTogglingPin || isDeleting;
 
   const getUserDisplayName = (user: DiscussionThread['author']) => {
     if (user.firstName && user.lastName) {
@@ -70,60 +83,26 @@ export function DiscussionThreadCard({
   };
 
   const handleToggleResolved = async () => {
-    setIsUpdating(true);
     try {
-      const response = await fetch(`/api/discussions/${thread.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          isResolved: !thread.isResolved
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update discussion');
-      }
-
+      await toggleResolve(thread.id).unwrap();
       showSuccessToast(
         thread.isResolved ? 'Discussion marked as unresolved' : 'Discussion marked as resolved'
       );
       onThreadUpdate?.();
-    } catch (error) {
-      console.error('Update discussion error:', error);
+    } catch (error: unknown) {
       showErrorToast('Failed to update discussion. Please try again.');
-    } finally {
-      setIsUpdating(false);
     }
   };
 
   const handleTogglePinned = async () => {
-    setIsUpdating(true);
     try {
-      const response = await fetch(`/api/discussions/${thread.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          isPinned: !thread.isPinned
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update discussion');
-      }
-
+      await togglePin(thread.id).unwrap();
       showSuccessToast(
         thread.isPinned ? 'Discussion unpinned' : 'Discussion pinned'
       );
       onThreadUpdate?.();
-    } catch (error) {
-      console.error('Update discussion error:', error);
+    } catch (error: unknown) {
       showErrorToast('Failed to update discussion. Please try again.');
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -132,27 +111,16 @@ export function DiscussionThreadCard({
       return;
     }
 
-    setIsUpdating(true);
     try {
-      const response = await fetch(`/api/discussions/${thread.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete discussion');
-      }
-
+      await deleteThread(thread.id).unwrap();
       showSuccessToast('Discussion deleted successfully');
       onThreadDelete?.();
-    } catch (error) {
-      console.error('Delete discussion error:', error);
+    } catch (error: unknown) {
       showErrorToast('Failed to delete discussion. Please try again.');
-    } finally {
-      setIsUpdating(false);
     }
   };
 
-  const isOwner = currentUserId === thread.author.id;
+  const isOwner = effectiveUserId === thread.author.id;
 
   return (
     <Card className={`transition-all hover:shadow-md ${thread.isPinned ? 'border-primary' : ''}`}>
