@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -31,11 +30,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { getRoleDashboardUrl } from "@/lib/auth/redirects";
 import {
   useGetPaperFileUrlQuery,
   useListPapersQuery,
 } from "@/redux/api/paperApi";
+import type { Paper } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
   AlertCircle,
@@ -49,27 +48,17 @@ import {
   Loader2,
   Microscope,
   RefreshCw,
-  Search,
   TextCursor,
   Upload,
   XCircle,
   Zap,
 } from "lucide-react";
-import { useAuth } from "@/redux/auth/useAuth";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function PdfExtractionPage() {
   const { isLoading } = useProtectedRoute();
-  const { session } = useAuth();
-  const userRole = session?.user?.role;
-  const [selectedPaper, setSelectedPaper] = useState<any>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterByPage, setFilterByPage] = useState<number | null>(null);
-  const [sortField, setSortField] = useState<"idx" | "page" | "createdAt">(
-    "idx"
-  );
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null);
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"extract" | "search" | "bulk">(
     "extract"
@@ -93,10 +82,10 @@ export default function PdfExtractionPage() {
     limit: 100,
   });
 
-  // Hook for signed file URL (only fetch when preview is needed)
+  // Hook for signed file URL (fetch when a paper is selected)
   const { data: fileUrlData, isFetching: isFetchingFileUrl } =
     useGetPaperFileUrlQuery(selectedPaper?.id || "", {
-      skip: !selectedPaper || !showPreview,
+      skip: !selectedPaper,
     });
 
   const papers = useMemo(() => papersData?.items || [], [papersData?.items]);
@@ -121,9 +110,6 @@ export default function PdfExtractionPage() {
     () => papers.filter((p) => p.processingStatus === "UPLOADED"),
     [papers]
   );
-
-  // Get unique pages for filtering - we'll get this from the chunks API when needed
-  const uniquePages: number[] = [];
 
   // Statistics
   const stats = useMemo(
@@ -154,7 +140,7 @@ export default function PdfExtractionPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href={getRoleDashboardUrl(userRole)}>
+            <Link href="/dashboard">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Dashboard
@@ -601,126 +587,6 @@ export default function PdfExtractionPage() {
                     {/* Text Extraction Mode */}
                     {viewMode === "extraction" && (
                       <>
-                        {/* Search Controls */}
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                              <TextCursor className="h-5 w-5" />
-                              Extract & Search Text
-                            </CardTitle>
-                            <CardDescription>
-                              Search through the extracted text content
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent className="space-y-4">
-                            {/* Search Input */}
-                            <div className="flex gap-2">
-                              <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  placeholder="Search in extracted text..."
-                                  value={searchQuery}
-                                  onChange={(e) =>
-                                    setSearchQuery(e.target.value)
-                                  }
-                                  className="pl-10"
-                                />
-                              </div>
-                              <Button
-                                variant="outline"
-                                onClick={() => setSearchQuery("")}
-                              >
-                                Clear
-                              </Button>
-                            </div>
-
-                            {/* Filters */}
-                            <div className="flex gap-4">
-                              <div className="flex-1">
-                                <Label htmlFor="page-filter">
-                                  Filter by Page
-                                </Label>
-                                <Select
-                                  value={
-                                    filterByPage !== null
-                                      ? String(filterByPage)
-                                      : "all"
-                                  }
-                                  onValueChange={(value) =>
-                                    setFilterByPage(
-                                      value === "all" ? null : parseInt(value)
-                                    )
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="All pages" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="all">
-                                      All pages
-                                    </SelectItem>
-                                    {uniquePages.map((page: number) => (
-                                      <SelectItem
-                                        key={page}
-                                        value={page.toString()}
-                                      >
-                                        Page {page}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="flex-1">
-                                <Label htmlFor="sort-field">Sort by</Label>
-                                <Select
-                                  value={sortField}
-                                  onValueChange={(
-                                    value: "idx" | "page" | "createdAt"
-                                  ) => setSortField(value)}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="idx">
-                                      Chunk Order
-                                    </SelectItem>
-                                    <SelectItem value="page">
-                                      Page Number
-                                    </SelectItem>
-                                    <SelectItem value="createdAt">
-                                      Created Date
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="flex-1">
-                                <Label htmlFor="sort-direction">
-                                  Direction
-                                </Label>
-                                <Select
-                                  value={sortDirection}
-                                  onValueChange={(value: "asc" | "desc") =>
-                                    setSortDirection(value)
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="asc">
-                                      Ascending
-                                    </SelectItem>
-                                    <SelectItem value="desc">
-                                      Descending
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-
                         {/* Enhanced Extraction Display using ExtractionViewer */}
                         <ExtractionViewer paperId={selectedPaper.id} />
                       </>
@@ -767,9 +633,18 @@ export default function PdfExtractionPage() {
                 <div className="text-center py-8 text-muted-foreground">
                   <FileSearch className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">
-                    Advanced Search
+                    Search All Papers
                   </h3>
-                  <p>This feature will be available in the next update.</p>
+                  <p className="max-w-md mx-auto mb-6">
+                    Use the full paper search to find text content across every
+                    paper you have access to, including semantic search.
+                  </p>
+                  <Link href="/dashboard/papers/search">
+                    <Button>
+                      <FileSearch className="h-4 w-4 mr-2" />
+                      Open Paper Search
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
