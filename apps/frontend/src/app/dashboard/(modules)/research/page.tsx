@@ -8,71 +8,117 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText, Highlighter, Quote, TextCursor, MessageSquare, Activity, Download, Calendar, BookOpen, Users } from "lucide-react";
+import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { hasRoleAccess, USER_ROLES } from "@/lib/auth/roles";
+import { FileText, Highlighter, Quote, TextCursor, MessageSquare, Activity, Download, Calendar, BookOpen, GitGraph, Globe, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
+interface ResearchTool {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  href: string;
+  color: string;
+  features: string[];
+  subRoutes?: { title: string; href: string; icon: LucideIcon }[];
+}
+
 export default function ResearchPage() {
-  const researchTools = [
+  const { user, isLoading } = useProtectedRoute();
+  const isProOrAbove = hasRoleAccess(user?.role, USER_ROLES.PRO_RESEARCHER);
+
+  const researchTools: ResearchTool[] = [
     {
       title: "Citations & References",
       description: "Export citations in 7 academic formats, manage export history",
       icon: Quote,
-      href: "/research/citations",
+      href: "/dashboard/research/citations",
       color: "bg-purple-50 border-purple-200",
       features: ["7 Formats", "Export History", "Batch Export"],
       subRoutes: [
-        { title: "Export Citations", href: "/research/citations/export", icon: Download },
-        { title: "Export History", href: "/research/citations/history", icon: Calendar },
-        { title: "Format Guide", href: "/research/citations/formats", icon: BookOpen },
-      ]
-    },
-    {
-      title: "Research Discussions",
-      description: "Threaded discussions for papers, collections, and workspaces",
-      icon: MessageSquare,
-      href: "/research/discussions",
-      color: "bg-blue-50 border-blue-200",
-      features: ["Threaded", "Real-time", "Collaboration"],
-      subRoutes: [
-        { title: "Create Discussion", href: "/research/discussions/create", icon: MessageSquare },
-      ]
-    },
-    {
-      title: "Activity Log",
-      description: "Comprehensive activity tracking with filtering and export",
-      icon: Activity,
-      href: "/research/activity-log",
-      color: "bg-green-50 border-green-200",
-      features: ["Real-time", "Filtering", "Export"],
-      subRoutes: [
-        { title: "Export Log", href: "/research/activity-log/export", icon: Download },
-      ]
-    },
-    {
-      title: "PDF Annotations",
-      description: "Annotate and highlight important sections in PDFs",
-      icon: Highlighter,
-      href: "/research/annotations",
-      color: "bg-orange-50 border-orange-200",
-      features: ["PDF View", "Highlights", "Comments"],
-    },
-    {
-      title: "Text Editor",
-      description: "Create and edit research papers with our rich text editor",
-      icon: FileText,
-      href: "/research/editor",
-      color: "bg-indigo-50 border-indigo-200",
-      features: ["Rich Text", "Auto-save", "Collaboration"],
+        { title: "Export Citations", href: "/dashboard/research/citations/export", icon: Download },
+        { title: "Export History", href: "/dashboard/research/citations/history", icon: Calendar },
+        { title: "Format Guide", href: "/dashboard/research/citations/formats", icon: BookOpen },
+      ],
     },
     {
       title: "PDF Text Extraction",
       description: "Extract and process text from PDF documents",
       icon: TextCursor,
-      href: "/research/pdf-extraction",
+      href: "/dashboard/research/pdf-extraction",
       color: "bg-teal-50 border-teal-200",
       features: ["OCR", "Text Processing", "Metadata"],
     },
+    {
+      title: "Text Editor",
+      description: "Create and edit research papers with our rich text editor",
+      icon: FileText,
+      href: "/dashboard/research/editor",
+      color: "bg-indigo-50 border-indigo-200",
+      features: ["Rich Text", "Auto-save", "Collaboration"],
+    },
+    {
+      title: "PDF Annotations",
+      description: "Annotate and highlight important sections in PDFs",
+      icon: Highlighter,
+      href: "/dashboard/research/annotations",
+      color: "bg-orange-50 border-orange-200",
+      features: ["PDF View", "Highlights", "Comments"],
+    },
+    {
+      title: "Research Discussions",
+      description: "Threaded discussions for papers, collections, and workspaces",
+      icon: MessageSquare,
+      href: "/dashboard/discussions",
+      color: "bg-blue-50 border-blue-200",
+      features: ["Threaded", "Real-time", "Collaboration"],
+      subRoutes: [
+        { title: "All Discussions", href: "/dashboard/discussions", icon: MessageSquare },
+        { title: "Create Discussion", href: "/dashboard/discussions/new", icon: MessageSquare },
+      ],
+    },
+    {
+      title: "Activity Log",
+      description: "Comprehensive activity tracking with filtering and export",
+      icon: Activity,
+      href: "/dashboard/research/activity-log",
+      color: "bg-green-50 border-green-200",
+      features: ["Real-time", "Filtering", "Export"],
+      subRoutes: [
+        { title: "Export Log", href: "/dashboard/research/activity-log/export", icon: Download },
+      ],
+    },
   ];
+
+  const proTools: ResearchTool[] = [
+    {
+      title: "Citation Graph",
+      description: "Visualize real citation relationships between your papers",
+      icon: GitGraph,
+      href: "/dashboard/research/citation-graph",
+      color: "bg-rose-50 border-rose-200",
+      features: ["Real Edges", "Paper Selection", "Pro Only"],
+    },
+    {
+      title: "Research Map",
+      description: "Explore your research landscape by topic frequency",
+      icon: Globe,
+      href: "/dashboard/research/map",
+      color: "bg-cyan-50 border-cyan-200",
+      features: ["Topic Cloud", "Tag Filtering", "Pro Only"],
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,7 +137,7 @@ export default function ResearchPage() {
 
           {/* Research Tools Grid */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {researchTools.map((tool) => (
+            {[...researchTools, ...(isProOrAbove ? proTools : [])].map((tool) => (
               <Card
                 key={tool.title}
                 className={`transition-all hover:shadow-lg hover:-translate-y-1 ${tool.color}`}
@@ -110,7 +156,7 @@ export default function ResearchPage() {
                   <CardDescription className="text-base">
                     {tool.description}
                   </CardDescription>
-                  
+
                   {/* Features */}
                   <div className="flex flex-wrap gap-2">
                     {tool.features.map((feature, index) => (
@@ -181,7 +227,7 @@ export default function ResearchPage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center space-x-2">
@@ -200,7 +246,7 @@ export default function ResearchPage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center space-x-2">
