@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-// import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { showErrorToast } from "@/components/providers/ToastProvider";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 import {
   Activity,
-  Calendar as CalendarIcon,
-  Filter,
   Download,
   Loader2,
   User,
@@ -32,33 +23,17 @@ import {
   Layers,
   MessageSquare,
   AlertCircle,
-  CheckCircle,
   Info,
   AlertTriangle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-interface ActivityLogEntry {
-  id: string;
-  entity: string;
-  entityId: string;
-  action: string;
-  details?: any;
-  severity: 'INFO' | 'WARNING' | 'ERROR' | 'CRITICAL';
-  createdAt: string;
-  user?: {
-    id: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    image?: string;
-  };
-  workspace?: {
-    id: string;
-    name: string;
-  };
-}
+import {
+  useGetActivityLogQuery,
+  useLazyExportActivityLogQuery,
+  type ActivityLogEntry,
+  type ActivityLogFilters,
+} from "@/redux/api/discussionApi";
 
 interface ActivityLogProps {
   workspaceId?: string;
@@ -101,51 +76,27 @@ const actionLabels = {
 };
 
 export function ActivityLog({ workspaceId, entity, entityId, limit = 50 }: ActivityLogProps) {
-  const [activities, setActivities] = useState<ActivityLogEntry[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     entity: entity || '',
     action: '',
     severity: '',
-    startDate: undefined as Date | undefined,
-    endDate: undefined as Date | undefined,
   });
 
-  const fetchActivities = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      
-      if (workspaceId) params.append('workspaceId', workspaceId);
-      if (entity) params.append('entity', entity);
-      if (entityId) params.append('entityId', entityId);
-      if (filters.entity) params.append('entity', filters.entity);
-      if (filters.action) params.append('action', filters.action);
-      if (filters.severity) params.append('severity', filters.severity);
-      if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
-      if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
-      
-      params.append('limit', limit.toString());
+  const queryArgs = useMemo<ActivityLogFilters>(() => {
+    const args: ActivityLogFilters = { limit };
+    if (workspaceId) args.workspaceId = workspaceId;
+    if (entityId) args.entityId = entityId;
+    if (filters.entity) args.entity = filters.entity;
+    if (filters.action) args.action = filters.action;
+    if (filters.severity) args.severity = filters.severity as ActivityLogFilters["severity"];
+    return args;
+  }, [workspaceId, entityId, filters, limit]);
 
-      const response = await fetch(`/api/activity-log?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch activity log');
-      }
+  const { data, isLoading, isError } = useGetActivityLogQuery(queryArgs);
+  const activities = data?.entries || [];
 
-      const result = await response.json();
-      setActivities(result.data.entries);
-    } catch (error) {
-      console.error('Activity log error:', error);
-      showErrorToast('Failed to load activity log');
-    } finally {
-      setLoading(false);
-    }
-  }, [workspaceId, entity, entityId, filters, limit]);
-
-  useEffect(() => {
-    fetchActivities();
-  }, [fetchActivities]);
+  const [exportActivityLog, { isFetching: isExporting }] =
+    useLazyExportActivityLogQuery();
 
   const getUserDisplayName = (user?: ActivityLogEntry['user']) => {
     if (!user) return 'System';
@@ -178,44 +129,27 @@ export function ActivityLog({ workspaceId, entity, entityId, limit = 50 }: Activ
 
   const handleExport = async () => {
     try {
-      const params = new URLSearchParams();
-      
-      if (workspaceId) params.append('workspaceId', workspaceId);
-      if (entity) params.append('entity', entity);
-      if (entityId) params.append('entityId', entityId);
-      if (filters.entity) params.append('entity', filters.entity);
-      if (filters.action) params.append('action', filters.action);
-      if (filters.severity) params.append('severity', filters.severity);
-      if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
-      if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
-      
-      params.append('format', 'csv');
+      const result = await exportActivityLog({
+        ...queryArgs,
+        format: 'csv',
+      }).unwrap();
 
-      const response = await fetch(`/api/activity-log/export?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to export activity log');
-      }
-
-      const result = await response.json();
-      
-      // Download the file
-      const blob = new Blob([result.data.content], { type: 'text/csv' });
+      const blob = new Blob([result.content], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = result.data.filename;
+      link.download = result.filename || 'activity-log.csv';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      showSuccessToast('Activity log exported');
     } catch (error) {
-      console.error('Export error:', error);
       showErrorToast('Failed to export activity log');
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -241,8 +175,12 @@ export function ActivityLog({ workspaceId, entity, entityId, limit = 50 }: Activ
             <Activity className="h-5 w-5" />
             Activity Log
           </CardTitle>
-          <Button onClick={handleExport} size="sm" variant="outline">
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={handleExport} size="sm" variant="outline" disabled={isExporting}>
+            {isExporting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
             Export
           </Button>
         </div>
@@ -299,39 +237,15 @@ export function ActivityLog({ workspaceId, entity, entityId, limit = 50 }: Activ
               <SelectItem value="CRITICAL">Critical</SelectItem>
             </SelectContent>
           </Select>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[140px] justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {filters.startDate ? format(filters.startDate, "MMM dd") : "Start Date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                Calendar component not available
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[140px] justify-start text-left font-normal">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {filters.endDate ? format(filters.endDate, "MMM dd") : "End Date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                Calendar component not available
-              </div>
-            </PopoverContent>
-          </Popover>
         </div>
 
         {/* Activity List */}
         <div className="space-y-3">
-          {activities.length === 0 ? (
+          {isError ? (
+            <div className="text-center py-8 text-destructive">
+              Failed to load activity log
+            </div>
+          ) : activities.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No activities found
             </div>
