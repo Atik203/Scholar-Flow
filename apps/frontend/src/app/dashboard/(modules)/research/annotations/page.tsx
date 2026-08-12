@@ -196,7 +196,8 @@ export default function ResearchAnnotationsPage() {
                               {year && <div>{year}</div>}
                               {paper.file && (
                                 <div className="text-xs text-blue-600 mt-1">
-                                  📄 {paper.file.originalFilename}
+                                  <FileText className="h-3 w-3 inline mr-1" />
+                                  {paper.file.originalFilename}
                                 </div>
                               )}
                             </div>
@@ -249,7 +250,7 @@ export default function ResearchAnnotationsPage() {
                   {/* Tab Navigation */}
                   <div className="border-b mt-4">
                     <nav className="flex space-x-8">
-                      {[
+                      {([
                         { id: "preview", label: "Preview", icon: Eye },
                         {
                           id: "annotations",
@@ -262,12 +263,16 @@ export default function ResearchAnnotationsPage() {
                           icon: MessageSquare,
                         },
                         { id: "notes", label: "Notes", icon: StickyNote },
-                      ].map((tab) => {
+                      ] as {
+                        id: "preview" | "annotations" | "comments" | "notes";
+                        label: string;
+                        icon: typeof Eye;
+                      }[]).map((tab) => {
                         const Icon = tab.icon;
                         return (
                           <button
                             key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
+                            onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                               activeTab === tab.id
                                 ? "border-primary text-primary"
@@ -346,13 +351,6 @@ export default function ResearchAnnotationsPage() {
                               The PDF file for this paper is not available for
                               preview.
                             </p>
-                            <div className="mt-4 text-xs text-muted-foreground">
-                              <p>Paper ID: {selectedPaperId}</p>
-                              <p>
-                                File URL Data:{" "}
-                                {fileUrlData ? "Available" : "Not available"}
-                              </p>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -409,13 +407,6 @@ export default function ResearchAnnotationsPage() {
                               The PDF file for this paper is not available for
                               annotation.
                             </p>
-                            <div className="mt-4 text-xs text-muted-foreground">
-                              <p>Paper ID: {selectedPaperId}</p>
-                              <p>
-                                File URL Data:{" "}
-                                {fileUrlData ? "Available" : "Not available"}
-                              </p>
-                            </div>
                           </div>
                         </div>
                       )}
