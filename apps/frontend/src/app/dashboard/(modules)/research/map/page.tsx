@@ -1,12 +1,16 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { hasRoleAccess, USER_ROLES } from "@/lib/auth/roles";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { motion } from "motion/react";
-import { Globe, Search, Tag, X } from "lucide-react";
+import { Globe, Lock, Search, Tag, X } from "lucide-react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 interface TagBubble {
   tag: string;
@@ -15,6 +19,8 @@ interface TagBubble {
 }
 
 export default function ResearchMapPage() {
+  const { user, isLoading: isAuthLoading } = useProtectedRoute();
+  const isProOrAbove = hasRoleAccess(user?.role, USER_ROLES.PRO_RESEARCHER);
   const { data: papersData, isLoading } = useListPapersQuery({ limit: 100 });
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -63,6 +69,38 @@ export default function ResearchMapPage() {
     const max = 160;
     return min + ((count - 1) / (maxCount - 1 || 1)) * (max - min);
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isProOrAbove) {
+    return (
+      <div className="max-w-md mx-auto py-20">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-muted-foreground" />
+              Research Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Exploring your research landscape by topic frequency is available
+              to Pro Researchers and above.
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/dashboard/billing">Upgrade to Pro</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 p-6">
