@@ -14,7 +14,6 @@ import {
   Calendar,
   Download,
   FileText,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -94,12 +93,6 @@ export default function CitationExportPage() {
                 Export citations in various academic formats
               </p>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Export Settings
-            </Button>
           </div>
         </div>
 
