@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,54 +11,88 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Download, Calendar, Filter, FileText, Database } from "lucide-react";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { useLazyExportActivityLogQuery } from "@/redux/api/discussionApi";
+import { ArrowLeft, Download, FileText, Filter, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function ActivityLogExportPage() {
   const [exportConfig, setExportConfig] = useState({
-    format: "json",
+    format: "json" as "json" | "csv",
     dateRange: "month",
-    severity: [] as string[],
-    entityTypes: [] as string[],
-    includeMetadata: true,
-    includeUserInfo: true,
-    customFields: "",
-    filename: "activity-log-export"
+    severity: "",
+    entity: "",
   });
 
-  const handleConfigChange = (field: string, value: any) => {
-    setExportConfig(prev => ({ ...prev, [field]: value }));
+  const [exportActivityLog, { isFetching: isExporting }] =
+    useLazyExportActivityLogQuery();
+
+  const handleConfigChange = (field: string, value: string) => {
+    setExportConfig((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSeverityToggle = (severity: string) => {
-    setExportConfig(prev => ({
-      ...prev,
-      severity: prev.severity.includes(severity)
-        ? prev.severity.filter(s => s !== severity)
-        : [...prev.severity, severity]
-    }));
+  const dateRangeToIso = (range: string): { startDate?: string; endDate?: string } => {
+    const now = new Date();
+    const start = new Date(now);
+    switch (range) {
+      case "today":
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start.toISOString() };
+      case "week": {
+        const day = (now.getDay() + 6) % 7;
+        start.setDate(now.getDate() - day);
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start.toISOString() };
+      }
+      case "month":
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start.toISOString() };
+      case "quarter":
+        start.setMonth(Math.floor(now.getMonth() / 3) * 3, 1);
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start.toISOString() };
+      case "year":
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        return { startDate: start.toISOString() };
+      default:
+        return {};
+    }
   };
 
-  const handleEntityTypeToggle = (entityType: string) => {
-    setExportConfig(prev => ({
-      ...prev,
-      entityTypes: prev.entityTypes.includes(entityType)
-        ? prev.entityTypes.filter(e => e !== entityType)
-        : [...prev.entityTypes, entityType]
-    }));
-  };
+  const handleExport = async () => {
+    try {
+      const dateRange = dateRangeToIso(exportConfig.dateRange);
+      const result = await exportActivityLog({
+        format: exportConfig.format,
+        ...(exportConfig.severity && {
+          severity: exportConfig.severity as "INFO" | "WARNING" | "ERROR" | "CRITICAL",
+        }),
+        ...(exportConfig.entity && { entity: exportConfig.entity }),
+        ...dateRange,
+      }).unwrap();
 
-  const handleExport = () => {
-    console.log("Exporting activity log with config:", exportConfig);
-    // Implement actual export logic
+      const mime =
+        exportConfig.format === "csv" ? "text/csv" : "application/json";
+      const blob = new Blob([result.content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = result.filename || `activity-log.${exportConfig.format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showSuccessToast("Activity log exported");
+    } catch (error: unknown) {
+      showErrorToast("Failed to export activity log");
+    }
   };
 
   const formatOptions = [
     { value: "json", label: "JSON", description: "Machine-readable format" },
     { value: "csv", label: "CSV", description: "Spreadsheet compatible" },
-    { value: "xlsx", label: "Excel", description: "Microsoft Excel format" },
-    { value: "pdf", label: "PDF", description: "Human-readable report" },
   ];
 
   const dateRangeOptions = [
@@ -69,17 +101,19 @@ export default function ActivityLogExportPage() {
     { value: "month", label: "This Month" },
     { value: "quarter", label: "This Quarter" },
     { value: "year", label: "This Year" },
-    { value: "custom", label: "Custom Range" },
+    { value: "all", label: "All Time" },
   ];
 
   const severityOptions = [
-    { value: "INFO", label: "Info", color: "text-blue-600" },
-    { value: "WARNING", label: "Warning", color: "text-yellow-600" },
-    { value: "ERROR", label: "Error", color: "text-red-600" },
-    { value: "CRITICAL", label: "Critical", color: "text-red-800" },
+    { value: "", label: "All Severities" },
+    { value: "INFO", label: "Info" },
+    { value: "WARNING", label: "Warning" },
+    { value: "ERROR", label: "Error" },
+    { value: "CRITICAL", label: "Critical" },
   ];
 
   const entityTypeOptions = [
+    { value: "", label: "All Entities" },
     { value: "paper", label: "Papers" },
     { value: "collection", label: "Collections" },
     { value: "discussion", label: "Discussions" },
@@ -88,13 +122,29 @@ export default function ActivityLogExportPage() {
     { value: "workspace", label: "Workspaces" },
   ];
 
+  const preview = useMemo(
+    () => ({
+      format: exportConfig.format.toUpperCase(),
+      dateRange:
+        dateRangeOptions.find((o) => o.value === exportConfig.dateRange)
+          ?.label || exportConfig.dateRange,
+      severity:
+        severityOptions.find((o) => o.value === exportConfig.severity)?.label ||
+        "All",
+      entity:
+        entityTypeOptions.find((o) => o.value === exportConfig.entity)?.label ||
+        "All",
+    }),
+    [exportConfig]
+  );
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Enhanced Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" asChild className="hover:bg-white/80">
-            <Link href="/research/activity-log">
+            <Link href="/dashboard/research/activity-log">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Activity Log
             </Link>
@@ -123,12 +173,13 @@ export default function ActivityLogExportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Format Selection */}
               <div>
                 <Label htmlFor="format">Export Format</Label>
                 <Select
                   value={exportConfig.format}
-                  onValueChange={(value) => handleConfigChange("format", value)}
+                  onValueChange={(value) =>
+                    handleConfigChange("format", value as "json" | "csv")
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select format" />
@@ -138,7 +189,9 @@ export default function ActivityLogExportPage() {
                       <SelectItem key={option.value} value={option.value}>
                         <div>
                           <div className="font-medium">{option.label}</div>
-                          <div className="text-xs text-muted-foreground">{option.description}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {option.description}
+                          </div>
                         </div>
                       </SelectItem>
                     ))}
@@ -146,7 +199,6 @@ export default function ActivityLogExportPage() {
                 </Select>
               </div>
 
-              {/* Date Range */}
               <div>
                 <Label htmlFor="dateRange">Date Range</Label>
                 <Select
@@ -165,21 +217,9 @@ export default function ActivityLogExportPage() {
                   </SelectContent>
                 </Select>
               </div>
-
-              {/* Filename */}
-              <div>
-                <Label htmlFor="filename">Filename</Label>
-                <Input
-                  id="filename"
-                  value={exportConfig.filename}
-                  onChange={(e) => handleConfigChange("filename", e.target.value)}
-                  placeholder="activity-log-export"
-                />
-              </div>
             </CardContent>
           </Card>
 
-          {/* Filter Options */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -188,95 +228,42 @@ export default function ActivityLogExportPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Severity Filter */}
               <div>
-                <Label className="text-base font-medium">Severity Levels</Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Select which severity levels to include
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  {severityOptions.map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`severity-${option.value}`}
-                        checked={exportConfig.severity.includes(option.value)}
-                        onCheckedChange={() => handleSeverityToggle(option.value)}
-                      />
-                      <Label
-                        htmlFor={`severity-${option.value}`}
-                        className={`text-sm ${option.color}`}
-                      >
+                <Label htmlFor="severity">Severity</Label>
+                <Select
+                  value={exportConfig.severity}
+                  onValueChange={(value) => handleConfigChange("severity", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {severityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Entity Types Filter */}
               <div>
-                <Label className="text-base font-medium">Entity Types</Label>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Select which entity types to include
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  {entityTypeOptions.map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`entity-${option.value}`}
-                        checked={exportConfig.entityTypes.includes(option.value)}
-                        onCheckedChange={() => handleEntityTypeToggle(option.value)}
-                      />
-                      <Label htmlFor={`entity-${option.value}`} className="text-sm">
+                <Label htmlFor="entity">Entity Type</Label>
+                <Select
+                  value={exportConfig.entity}
+                  onValueChange={(value) => handleConfigChange("entity", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Entity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {entityTypeOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Advanced Options */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="includeMetadata"
-                  checked={exportConfig.includeMetadata}
-                  onCheckedChange={(checked) => handleConfigChange("includeMetadata", checked)}
-                />
-                <Label htmlFor="includeMetadata" className="text-sm">
-                  Include metadata and timestamps
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="includeUserInfo"
-                  checked={exportConfig.includeUserInfo}
-                  onCheckedChange={(checked) => handleConfigChange("includeUserInfo", checked)}
-                />
-                <Label htmlFor="includeUserInfo" className="text-sm">
-                  Include user information
-                </Label>
-              </div>
-
-              <div>
-                <Label htmlFor="customFields">Custom Fields (JSON)</Label>
-                <Textarea
-                  id="customFields"
-                  placeholder='{"includeIP": true, "includeUserAgent": false}'
-                  value={exportConfig.customFields}
-                  onChange={(e) => handleConfigChange("customFields", e.target.value)}
-                  rows={3}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Optional: Specify additional fields to include in the export
-                </p>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -292,27 +279,19 @@ export default function ActivityLogExportPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Format:</span>
-                  <span className="font-medium">{exportConfig.format.toUpperCase()}</span>
+                  <span className="font-medium">{preview.format}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Date Range:</span>
-                  <span className="font-medium">{exportConfig.dateRange}</span>
+                  <span className="font-medium">{preview.dateRange}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Severity Levels:</span>
-                  <span className="font-medium">
-                    {exportConfig.severity.length === 0 ? "All" : exportConfig.severity.length}
-                  </span>
+                  <span className="text-muted-foreground">Severity:</span>
+                  <span className="font-medium">{preview.severity}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Entity Types:</span>
-                  <span className="font-medium">
-                    {exportConfig.entityTypes.length === 0 ? "All" : exportConfig.entityTypes.length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Estimated Records:</span>
-                  <span className="font-medium">~1,247</span>
+                  <span className="text-muted-foreground">Entity Type:</span>
+                  <span className="font-medium">{preview.entity}</span>
                 </div>
               </div>
             </CardContent>
@@ -323,40 +302,18 @@ export default function ActivityLogExportPage() {
               <CardTitle>Export Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button onClick={handleExport} className="w-full">
-                <Download className="h-4 w-4 mr-2" />
-                Download Export
+              <Button
+                onClick={handleExport}
+                className="w-full"
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {isExporting ? "Exporting..." : "Download Export"}
               </Button>
-              <Button variant="outline" className="w-full">
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Export
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Database className="h-4 w-4 mr-2" />
-                Save Configuration
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Export History</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>activity-log-2024-01-15.json</span>
-                  <span className="text-muted-foreground">2 days ago</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>research-activities.csv</span>
-                  <span className="text-muted-foreground">1 week ago</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>full-export.xlsx</span>
-                  <span className="text-muted-foreground">2 weeks ago</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>
