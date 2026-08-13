@@ -95,9 +95,14 @@ export const createEditorPaperSchema = z.object({
 });
 
 export const updateEditorContentSchema = z.object({
-  content: z.string(), // HTML content - required for updates
+  content: z.string().max(2_000_000), // HTML content - required for updates
   title: z.string().min(1).max(300).optional(),
   isDraft: z.boolean().optional(),
+});
+
+// Lighter schema for the debounced autosave endpoint (no version snapshot)
+export const autosaveContentSchema = z.object({
+  content: z.string().max(2_000_000), // HTML content - required for updates
 });
 
 export const publishDraftSchema = z.object({
