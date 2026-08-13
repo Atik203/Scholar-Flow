@@ -31,9 +31,11 @@ import {
   User as UserIcon,
   Users,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useAiSearchMutation,
@@ -43,11 +45,10 @@ import {
   type SearchResults,
   type SearchTabType,
 } from "@/redux/api/searchApi";
-import { showErrorToast } from "@/components/providers/ToastProvider";
 import { useAuth } from "@/redux/auth/useAuth";
 import { USER_ROLES } from "@/lib/auth/roles";
 
-const TABS: Array<{ id: SearchTabType; label: string; icon: any }> = [
+const TABS: Array<{ id: SearchTabType; label: string; icon: LucideIcon }> = [
   { id: "all", label: "All", icon: SearchIcon },
   { id: "papers", label: "Papers", icon: FileText },
   { id: "collections", label: "Collections", icon: FolderOpen },
@@ -56,7 +57,7 @@ const TABS: Array<{ id: SearchTabType; label: string; icon: any }> = [
 ];
 
 // People tab renders only for admins (see GlobalSearchPage).
-const PEOPLE_TAB: { id: SearchTabType; label: string; icon: any } = {
+const PEOPLE_TAB: { id: SearchTabType; label: string; icon: LucideIcon } = {
   id: "people",
   label: "People",
   icon: Users,
@@ -65,6 +66,7 @@ const PEOPLE_TAB: { id: SearchTabType; label: string; icon: any } = {
 export default function GlobalSearchPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === USER_ROLES.ADMIN;
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<SearchTabType>("all");
   const [inputValue, setInputValue] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
@@ -77,6 +79,16 @@ export default function GlobalSearchPage() {
 
   // People tab is admin-only; hidden for all other roles.
   const tabs = isAdmin ? [...TABS, PEOPLE_TAB] : TABS;
+
+  // Pre-fill from ?q= (search history "Research" button).
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && q.trim()) {
+      setInputValue(q.trim());
+      setActiveQuery(q.trim());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounce: commit query 250ms after the user stops typing.
   useEffect(() => {
@@ -499,7 +511,7 @@ function ResultGroup({
     key: string;
     title: string;
     subtitle?: string;
-    icon: any;
+    icon: LucideIcon;
     href: string;
     avatarUrl?: string | null;
   }>;
@@ -568,7 +580,3 @@ function ResultGroup({
     </div>
   );
 }
-
-// Suppress lint warning for showErrorToast (kept for future inline
-// error feedback on tab switches).
-void showErrorToast;
