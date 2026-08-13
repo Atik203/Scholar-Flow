@@ -246,6 +246,8 @@ const PDF_BYTES = buildPdf();
   // ============ CLEANUP ============
   await api(`/papers/${paperId}`, { method: "DELETE", token: researcherToken });
   if (edId) await api(`/editor/${edId}`, { method: "DELETE", token: researcherToken });
+  if (researcherWs?.id) await api(`/workspaces/${researcherWs.id}`, { method: "DELETE", token: researcherToken });
+  if (proWs?.id) await api(`/workspaces/${proWs.id}`, { method: "DELETE", token: proToken });
   ok("cleanup done", true);
 
   const failed = results.filter((r) => !r.pass);
