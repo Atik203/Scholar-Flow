@@ -43,9 +43,13 @@ class AuthController {
    */
   signIn: AsyncRequestHandler = catchAsync(
     async (req: Request, res: Response) => {
-      const { email, password } = req.body;
+      const { email, password, twoFactorCode } = req.body;
 
-      const user = await authService.signInWithPassword(email, password);
+      const user = await authService.signInWithPassword(
+        email,
+        password,
+        twoFactorCode
+      );
 
       // Generate JWT access token
       const jwtSecret = process.env.NEXTAUTH_SECRET;
