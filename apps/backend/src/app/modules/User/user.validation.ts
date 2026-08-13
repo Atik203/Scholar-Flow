@@ -49,7 +49,7 @@ export const privacySettingsSchema = z.object({
 });
 
 export const twoFactorSetupSchema = z.object({
-  token: z.string().length(6),
+  code: z.string().length(6),
 });
 
 export type ExportDataInput = z.infer<typeof exportDataSchema>;
