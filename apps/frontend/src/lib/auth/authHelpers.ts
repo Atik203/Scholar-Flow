@@ -25,21 +25,24 @@ interface AuthResponse {
 export async function signInWithCredentials(
   email: string,
   password: string,
-  dispatch: AppDispatch
-): Promise<{ success: boolean; error?: string }> {
+  dispatch: AppDispatch,
+  twoFactorCode?: string
+): Promise<{ success: boolean; error?: string; needsTwoFactor?: boolean }> {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/signin`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, twoFactorCode }),
     });
 
     const data: AuthResponse = await response.json();
 
     if (!response.ok || !data.success) {
+      const message = data.message || "Invalid email or password";
       return {
         success: false,
-        error: data.message || "Invalid email or password",
+        error: message,
+        needsTwoFactor: message === "TWO_FACTOR_REQUIRED",
       };
     }
 
