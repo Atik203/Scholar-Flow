@@ -259,6 +259,119 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["UserActivity"],
     }),
+
+    // -------- Security: sessions + 2FA + privacy --------
+
+    getSessions: builder.query<
+      {
+        success: boolean;
+        message: string;
+        data: Array<{
+          id: string;
+          expires: string | null;
+          createdAt: string;
+        }>;
+      },
+      void
+    >({
+      query: () => "/user/sessions",
+      providesTags: ["UserSessions"],
+    }),
+
+    terminateSession: builder.mutation<
+      { success: boolean; message: string },
+      string
+    >({
+      query: (id) => ({
+        url: `/user/sessions/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["UserSessions"],
+    }),
+
+    get2faStatus: builder.query<
+      { success: boolean; message: string; data: { enabled: boolean; emailVerified: boolean } },
+      void
+    >({
+      query: () => "/user/2fa/status",
+      providesTags: ["TwoFactor"],
+    }),
+
+    generate2fa: builder.mutation<
+      { success: boolean; message: string; data: { secret: string; qrCodeUrl: string } },
+      void
+    >({
+      query: () => ({
+        url: "/user/2fa/generate",
+        method: "POST",
+      }),
+    }),
+
+    verify2fa: builder.mutation<
+      { success: boolean; message: string; data: { enabled: boolean } },
+      { code: string }
+    >({
+      query: (body) => ({
+        url: "/user/2fa/verify",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["TwoFactor"],
+    }),
+
+    disable2fa: builder.mutation<
+      { success: boolean; message: string; data: { enabled: boolean } },
+      void
+    >({
+      query: () => ({
+        url: "/user/2fa/disable",
+        method: "POST",
+      }),
+      invalidatesTags: ["TwoFactor"],
+    }),
+
+    getPrivacySettings: builder.query<
+      {
+        success: boolean;
+        message: string;
+        data: {
+          profileVisibility: "public" | "private" | "team";
+          showActivity: boolean;
+          allowDataSharing: boolean;
+          showInDiscover: boolean;
+        };
+      },
+      void
+    >({
+      query: () => "/user/privacy",
+      providesTags: ["PrivacySettings"],
+    }),
+
+    updatePrivacySettings: builder.mutation<
+      {
+        success: boolean;
+        message: string;
+        data: {
+          profileVisibility: "public" | "private" | "team";
+          showActivity: boolean;
+          allowDataSharing: boolean;
+          showInDiscover: boolean;
+        };
+      },
+      Partial<{
+        profileVisibility: "public" | "private" | "team";
+        showActivity: boolean;
+        allowDataSharing: boolean;
+        showInDiscover: boolean;
+      }>
+    >({
+      query: (body) => ({
+        url: "/user/privacy",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["PrivacySettings"],
+    }),
   }),
 });
 
@@ -272,4 +385,12 @@ export const {
   useUpdatePreferencesMutation,
   useGetActivityQuery,
   useGetUserAnalyticsQuery,
+  useGetSessionsQuery,
+  useTerminateSessionMutation,
+  useGet2faStatusQuery,
+  useGenerate2faMutation,
+  useVerify2faMutation,
+  useDisable2faMutation,
+  useGetPrivacySettingsQuery,
+  useUpdatePrivacySettingsMutation,
 } = userApi;
