@@ -50,10 +50,10 @@ const severityIcons = {
 };
 
 const severityColors = {
-  INFO: 'bg-blue-100 text-blue-800',
-  WARNING: 'bg-yellow-100 text-yellow-800',
-  ERROR: 'bg-red-100 text-red-800',
-  CRITICAL: 'bg-red-100 text-red-800',
+  INFO: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  WARNING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+  ERROR: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+  CRITICAL: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
 };
 
 const entityIcons = {

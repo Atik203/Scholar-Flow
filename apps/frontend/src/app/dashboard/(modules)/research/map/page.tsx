@@ -156,7 +156,7 @@ export default function ResearchMapPage() {
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-                    className="rounded-full flex flex-col items-center justify-center gap-1 shadow-md transition-shadow hover:shadow-xl cursor-pointer"
+                    className="rounded-full flex flex-col items-center justify-center gap-1 shadow-md transition-shadow hover:shadow-xl cursor-pointer dark:brightness-[0.55]"
                     style={{
                       width: size,
                       height: size,
@@ -170,19 +170,17 @@ export default function ResearchMapPage() {
                     }}
                   >
                     <span
-                      className="font-semibold text-center px-2 line-clamp-2 leading-tight"
+                      className="font-semibold text-center px-2 line-clamp-2 leading-tight text-foreground/90"
                       style={{
                         fontSize: `${Math.max(11, size * 0.1)}px`,
-                        color: `hsl(${hue}, 40%, 20%)`,
                       }}
                     >
                       {tag}
                     </span>
                     <span
-                      className="font-bold"
+                      className="font-bold text-foreground/70"
                       style={{
                         fontSize: `${Math.max(10, size * 0.09)}px`,
-                        color: `hsl(${hue}, 50%, 35%)`,
                       }}
                     >
                       {count}
