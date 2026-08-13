@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useGetLoginSummaryQuery } from "@/redux/api/loginHistoryApi";
+import { useGet2faStatusQuery } from "@/redux/api/userApi";
 import { Shield, ShieldCheck, ShieldAlert, Smartphone, Laptop, EyeOff, Clock, ArrowRight, Fingerprint, History } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -65,8 +66,8 @@ const PROVIDER_LABELS: Record<string, string> = {
 
 export default function SecurityDashboardPage() {
   const { user } = useAuth();
-  const u = user as Record<string, unknown> | null;
-  const twoFa = (u?.twoFactorEnabled as boolean) ?? false;
+  const { data: twoFaData } = useGet2faStatusQuery();
+  const twoFa = Boolean(twoFaData?.data?.enabled);
 
   const { data: summary, isLoading } = useGetLoginSummaryQuery();
 
