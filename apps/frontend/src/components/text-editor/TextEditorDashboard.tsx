@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useListEditorPapersQuery } from "@/redux/api/paperApi";
 import { Download, FileText, Plus, Save } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { CreatePaperDialog } from "./CreatePaperDialog";
 import { EditorSkeleton } from "./EditorSkeleton";
@@ -30,8 +31,15 @@ const ScholarFlowEditor = dynamic(
 );
 
 export function TextEditorDashboard() {
-  const [activeTab, setActiveTab] = useState("papers");
-  const [currentPaper, setCurrentPaper] = useState<string | null>(null);
+  // Deep link support: /dashboard/research/editor?paper=<id> opens that
+  // paper in the editor directly.
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() =>
+    searchParams.get("paper") ? "editor" : "papers"
+  );
+  const [currentPaper, setCurrentPaper] = useState<string | null>(() =>
+    searchParams.get("paper")
+  );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   // Fetch all papers to calculate stats

@@ -66,16 +66,17 @@ import { CitationNode } from "@/components/tiptap-node/citation-node/citation-no
 import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lib
-import { handleImageUpload } from "@/lib/tiptap-utils";
 import TurndownService from "turndown";
 
 // Redux API
 import {
+  useAutoSaveEditorContentMutation,
   useExportPaperDocxMutation,
   useExportPaperPdfMutation,
   useGetEditorPaperQuery,
   usePublishDraftMutation,
   useUpdateEditorContentMutation,
+  useUploadImageForEditorMutation,
   useGetPaperVersionsQuery,
   useRestorePaperVersionMutation,
 } from "@/redux/api/paperApi";
@@ -117,14 +118,29 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     data: paperResponse,
     isLoading,
     error,
+    refetch,
   } = useGetEditorPaperQuery(paperId);
   const [updateContent, { isLoading: isSaving }] =
     useUpdateEditorContentMutation();
+  const [autoSaveEditorContent] = useAutoSaveEditorContentMutation();
+  const [uploadImage] = useUploadImageForEditorMutation();
   const [exportPaperPdf, { isLoading: isExportingPdf }] =
     useExportPaperPdfMutation();
   const [exportPaperDocx, { isLoading: isExportingDocx }] =
     useExportPaperDocxMutation();
   const [publishDraft, { isLoading: isPublishing }] = usePublishDraftMutation();
+
+  // RTK-based image uploader shared by the image node and the toolbar
+  // button (replaces the raw XHR path in tiptap-utils).
+  const uploadEditorImage = useCallback(
+    async (file: File): Promise<string> => {
+      const formData = new FormData();
+      formData.append("image", file);
+      const result = await uploadImage(formData).unwrap();
+      return result.url;
+    },
+    [uploadImage]
+  );
 
   const paper = paperResponse?.data;
 
@@ -158,9 +174,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         defaultWidth: 400,
         defaultHeight: 300,
         async onUpload(file: File) {
-          // Use our existing upload handler
+          // RTK-based upload (the raw XHR path bypassed the API layer)
           try {
-            const url = await handleImageUpload(file);
+            const url = await uploadEditorImage(file);
             return {
               src: url,
               "data-keep-ratio": true,
@@ -186,73 +202,116 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     ],
     content: "",
     onUpdate: () => {
+      // Dirty tracking lives in refs so the 2s-debounced callback never
+      // reads a stale `hasUnsavedChanges` closure (the old code could
+      // skip the first autosave entirely).
+      dirtyRef.current = true;
       setHasUnsavedChanges(true);
-      // Trigger debounced auto-save
-      if (debouncedAutoSaveTimeoutId) {
-        clearTimeout(debouncedAutoSaveTimeoutId);
-      }
-      const timeoutId = setTimeout(() => {
-        // Auto-save logic will be called here
-        if (hasUnsavedChanges && !isSaving && editor) {
-          handleAutoSave();
-        }
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        void handleAutoSave();
       }, 2000);
-      setDebouncedAutoSaveTimeoutId(timeoutId);
     },
   });
 
-  // Auto-save function
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const handleAutoSave = useCallback(async () => {
-    if (!editor || !hasUnsavedChanges || isSaving) return;
+  // --- Autosave plumbing (ref-based, no stale closures) ---
+  const dirtyRef = useRef(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const savingRef = useRef(false);
+  const mountedRef = useRef(true);
+  const editorRef = useRef(editor);
 
+  useEffect(() => {
+    mountedRef.current = true;
+    editorRef.current = editor;
+    return () => {
+      mountedRef.current = false;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // Flush any pending edits on unmount so navigation never loses up to
+      // 2s of typing (state updates are skipped — component is gone).
+      if (dirtyRef.current && editorRef.current) {
+        void autoSaveEditorContent({
+          id: paperId,
+          content: editorRef.current.getHTML(),
+        }).catch(() => {
+          // Best-effort flush; failure is silent on teardown.
+        });
+      }
+    };
+  }, [editor, paperId, autoSaveEditorContent]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
+
+  // Auto-save: PATCH /autosave — persists content WITHOUT a version snapshot
+  const handleAutoSave = useCallback(async () => {
+    if (!editor || !dirtyRef.current || savingRef.current) return;
+    savingRef.current = true;
     try {
       const content = editor.getHTML();
-      await updateContent({
-        id: paperId,
-        content,
-        title,
-        isDraft: true,
-      }).unwrap();
-
-      setHasUnsavedChanges(false);
-      setLastSaved(new Date());
+      await autoSaveEditorContent({ id: paperId, content }).unwrap();
+      // react-hooks/immutability: writing a ref that effects also read is a
+      // heuristic false positive here — this is exactly what refs are for.
+      // eslint-disable-next-line react-hooks/immutability
+      dirtyRef.current = false;
+      if (mountedRef.current) {
+        setHasUnsavedChanges(false);
+        setLastSaved(new Date());
+      }
     } catch (error: any) {
-      console.error("Auto-save failed:", error);
-      showErrorToast("Auto-save failed", error?.data?.message);
+      // Keep the dirty flag so the next keystroke retries the save
+      if (mountedRef.current) {
+        showErrorToast(
+          "Auto-save failed",
+          error?.data?.message ?? "Please try again"
+        );
+      }
+    } finally {
+      savingRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  }, [editor, paperId, hasUnsavedChanges, isSaving, updateContent, title]);
+  }, [editor, paperId, autoSaveEditorContent]);
 
-  // Debounced auto-save - wait for user to stop typing
-  const [debouncedAutoSaveTimeoutId, setDebouncedAutoSaveTimeoutId] =
-    useState<NodeJS.Timeout | null>(null);
-
-  // Manual save function - defined before useEffect that uses it
+  // Manual save: PUT /content — creates a version snapshot (Ctrl+S / button)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleSave = useCallback(async () => {
     if (!editor) return;
-
+    savingRef.current = true;
     try {
       const content = editor.getHTML();
       await updateContent({
         id: paperId,
         content,
         title,
-        isDraft: true,
+        isDraft: paper?.isDraft ?? true,
       }).unwrap();
 
+      // eslint-disable-next-line react-hooks/immutability
+      dirtyRef.current = false;
       setHasUnsavedChanges(false);
       setLastSaved(new Date());
       showSuccessToast("Paper saved successfully!");
     } catch (error: any) {
       console.error("Save failed:", error);
       showErrorToast("Failed to save paper", error?.data?.message);
+    } finally {
+      savingRef.current = false;
     }
-  }, [editor, paperId, title, updateContent]);
+  }, [editor, paperId, title, updateContent, paper?.isDraft]);
 
   // Track initialization to avoid repeated setContent that can reset alignment/selection
   const hasInitializedRef = useRef(false);
   const rafIdRef = useRef<number | null>(null);
+  // Bumped after a version restore so the content-sync effect re-runs
+  // with freshly refetched paper data (soft restore, no page reload).
+  const [restoreEpoch, setRestoreEpoch] = useState(0);
 
   // Reset initialization flag when switching papers
   useEffect(() => {
@@ -284,6 +343,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         // no-op
       }
       setHasUnsavedChanges(false);
+      dirtyRef.current = false;
     });
 
     // Cleanup any pending rAF on effect re-run or unmount
@@ -293,7 +353,19 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         rafIdRef.current = null;
       }
     };
-  }, [editor, paper]);
+  }, [editor, paper, restoreEpoch]);
+
+  // Soft version restore: refetch the paper (restored content) and let the
+  // init effect above re-seed the editor — replaces the old
+  // window.location.reload() that discarded any in-progress work.
+  const handleVersionRestored = useCallback(async () => {
+    hasInitializedRef.current = false;
+    // eslint-disable-next-line react-hooks/immutability
+    dirtyRef.current = false;
+    await refetch();
+    setRestoreEpoch((e) => e + 1);
+    showSuccessToast("Version restored");
+  }, [refetch]);
 
   // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
   useEffect(() => {
@@ -412,14 +484,8 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     }
   };
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (debouncedAutoSaveTimeoutId) {
-        clearTimeout(debouncedAutoSaveTimeoutId);
-      }
-    };
-  }, [debouncedAutoSaveTimeoutId]);
+  // Cleanup timeout on unmount — handled in the autosave plumbing effect
+  // above (debounceRef + flush of any dirty content).
 
   if (isLoading) {
     return (
@@ -456,7 +522,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               setTitle(e.target.value);
               setHasUnsavedChanges(true);
             }}
-            className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-white focus:border focus:border-gray-200 focus:rounded px-2 py-1 w-full max-w-2xl"
+            className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-background focus:border focus:border-border focus:rounded px-2 py-1 w-full max-w-2xl"
             placeholder="Untitled Paper"
           />
           <div className="flex items-center gap-4 mt-2">
@@ -622,7 +688,10 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <ToolbarSeparator />
 
               <ToolbarGroup>
-                <ResizableImageUploadButton text="Image" />
+                      <ResizableImageUploadButton
+                        text="Image"
+                        onUpload={uploadEditorImage}
+                      />
               </ToolbarGroup>
 
               <ToolbarGroup>
@@ -674,6 +743,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           paperId={paperId}
           open={isVersionDialogOpen}
           onClose={() => setIsVersionDialogOpen(false)}
+          onRestored={() => void handleVersionRestored()}
         />
       )}
 
