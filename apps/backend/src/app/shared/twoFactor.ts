@@ -25,6 +25,25 @@ const key = (): Buffer => {
   return createHmac("sha256", "scholarflow-2fa-key-v1").update(secret).digest();
 };
 
+const base32Encode = (buf: Buffer): string => {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let bits = 0;
+  let value = 0;
+  let out = "";
+  for (const byte of buf) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      out += alphabet[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) {
+    out += alphabet[(value << (5 - bits)) & 31];
+  }
+  return out;
+};
+
 const base32Decode = (b32: string): Buffer => {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   let bits = 0;
@@ -44,7 +63,8 @@ const base32Decode = (b32: string): Buffer => {
 };
 
 export const generateTotpSecret = (): string => {
-  return randomBytes(SECRET_LENGTH).toString("base64").replace(/=+$/, "").slice(0, 32);
+  // Base32 (RFC 4648 alphabet) — the format authenticator apps expect.
+  return base32Encode(randomBytes(SECRET_LENGTH));
 };
 
 const totpCounter = (now = Date.now()): number => {
