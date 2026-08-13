@@ -25,6 +25,7 @@ import {
   Loader2,
   Mail,
   Shield,
+  ShieldCheck,
   Sparkles,
   Wand2,
 } from "lucide-react";
@@ -62,6 +63,11 @@ export default function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [lastProvider, setLastProvider] = useState<string | null>(null);
+  const [twoFactorPending, setTwoFactorPending] = useState<{
+    email: string;
+    password: string;
+  } | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
@@ -100,11 +106,17 @@ export default function LoginPage() {
       const result = await signInWithCredentials(
         data.email,
         data.password,
-        dispatch
+        dispatch,
+        twoFactorPending ? twoFactorCode : undefined
       );
 
       if (!result.success) {
         dismissToast(loadingToast);
+        if (result.needsTwoFactor) {
+          setTwoFactorPending({ email: data.email, password: data.password });
+          setTwoFactorCode("");
+          return;
+        }
         showAuthErrorToast(result.error || "Invalid email or password");
         return;
       }
@@ -321,7 +333,73 @@ export default function LoginPage() {
               </div>
 
               <AnimatePresence mode="wait">
-                {loginMethod === "password" ? (
+                {twoFactorPending ? (
+                  <motion.form
+                    key="two-factor-form"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (twoFactorCode.length !== 6) {
+                        showAuthErrorToast("Enter the 6-digit code from your authenticator app");
+                        return;
+                      }
+                      onSubmit({
+                        email: twoFactorPending.email,
+                        password: twoFactorPending.password,
+                        rememberMe: false,
+                      });
+                    }}
+                    className="space-y-5"
+                  >
+                    <div className="text-center space-y-1">
+                      <ShieldCheck className="h-8 w-8 mx-auto text-primary" />
+                      <p className="font-medium">Two-factor authentication</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enter the 6-digit code from your authenticator app for
+                        {` ${twoFactorPending.email}`}.
+                      </p>
+                    </div>
+
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      value={twoFactorCode}
+                      onChange={(e) =>
+                        setTwoFactorCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                      }
+                      placeholder="000000"
+                      className="w-full text-center text-2xl tracking-[0.5em] py-3 rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+
+                    <Button
+                      type="submit"
+                      disabled={isLoading !== null || twoFactorCode.length !== 6}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 text-primary-foreground font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+                    >
+                      {isLoading === "credentials" ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                      )}
+                      Verify & Sign In
+                    </Button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTwoFactorPending(null);
+                        setTwoFactorCode("");
+                      }}
+                      className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Back to password sign-in
+                    </button>
+                  </motion.form>
+                ) : loginMethod === "password" ? (
                   <motion.form
                     key="password-form"
                     initial={{ opacity: 0, x: -20 }}
