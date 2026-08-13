@@ -146,8 +146,30 @@ function totp(secret, when = Date.now()) {
   ok("signin with valid code succeeds", s.status === 200 && Boolean(s.json?.data?.accessToken), `status=${s.status}`);
 
   // ---------- Sessions (real rows; ownership guard) ----------
+  // The valid-code signin above already created a session row; assert the
+  // full token round-trip: signin response carries sessionToken, the list
+  // returns it, a second sign-in adds a second row, and terminating one
+  // leaves the other untouched.
+  const sToken1 = s.json?.data?.sessionToken;
+  ok("signin response includes sessionToken", typeof sToken1 === "string" && sToken1.length > 0, `tok=${typeof sToken1}`);
+
   r = await api("/user/sessions", { token: aTok });
-  ok("sessions list 200 array", r.status === 200 && Array.isArray(r.json?.data), `status=${r.status} n=${r.json?.data?.length}`);
+  const row1 = (r.json?.data ?? []).find((x) => x.sessionToken === sToken1);
+  ok("sessions list has current row with matching sessionToken", r.status === 200 && Boolean(row1), `status=${r.status} n=${r.json?.data?.length}`);
+
+  const code3 = totp(secret);
+  s = await login(aEmail, code3);
+  const sToken2 = s.json?.data?.sessionToken;
+  r = await api("/user/sessions", { token: aTok });
+  ok("second signin creates second row", r.status === 200 && r.json?.data?.length >= 2 && r.json?.data.some((x) => x.sessionToken === sToken2), `status=${r.status} n=${r.json?.data?.length}`);
+
+  const otherRow = (r.json?.data ?? []).find((x) => x.sessionToken !== sToken2);
+  if (otherRow) {
+    r = await api(`/user/sessions/${otherRow.id}`, { method: "DELETE", token: aTok });
+    ok("terminate other session 200", r.status === 200, `status=${r.status}`);
+    r = await api("/user/sessions", { token: aTok });
+    ok("other session removed, current remains", r.status === 200 && r.json?.data.some((x) => x.sessionToken === sToken2) && !r.json?.data.some((x) => x.sessionToken === sToken1), `status=${r.status} n=${r.json?.data?.length}`);
+  }
   r = await api("/user/sessions/00000000-0000-0000-0000-000000000000", { method: "DELETE", token: aTok });
   ok("terminate unknown session 404", r.status === 404, `status=${r.status}`);
 

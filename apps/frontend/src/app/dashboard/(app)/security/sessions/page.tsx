@@ -6,12 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 import { useGetSessionsQuery, useTerminateSessionMutation } from "@/redux/api/userApi";
+import { useAuth } from "@/redux/auth/useAuth";
+import { handleSignOut } from "@/lib/auth/signout";
 import { Monitor, Clock, LogOut, Loader2, ArrowLeft, Shield, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface SessionRow {
   id: string;
+  sessionToken: string;
   expires: string | null;
   createdAt: string;
 }
@@ -26,21 +29,14 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// better-auth stores the current session id in this cookie.
-function readCurrentSessionId(): string | null {
-  const match = document.cookie.match(/(?:^|;\s*)better-auth.session_token=([^;]*)/);
-  return match ? match[1] : null;
-}
-
 export default function ActiveSessionsPage() {
   const { data, isLoading, error } = useGetSessionsQuery();
   const [terminateSession, { isLoading: isTerminating }] = useTerminateSessionMutation();
   const [showDialog, setShowDialog] = useState<SessionRow | null>(null);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setCurrentSessionId(readCurrentSessionId());
-  }, []);
+  // Backend session token returned at sign-in and persisted in Redux —
+  // the backend stores it as "sessionToken" on every session row, so
+  // matching it marks THIS device as the current session.
+  const { sessionToken } = useAuth();
 
   const sessions = data?.data ?? [];
 
@@ -78,7 +74,7 @@ export default function ActiveSessionsPage() {
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => {
-            const isCurrent = currentSessionId !== null && currentSessionId === session.id;
+            const isCurrent = sessionToken !== null && sessionToken === session.sessionToken;
             return (
               <Card key={session.id}>
                 <CardContent className="p-4">
