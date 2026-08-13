@@ -5,6 +5,10 @@ import config from "../../config";
 import { emailService } from "../../shared/emailService";
 import prisma from "../../shared/prisma";
 import { tokenService } from "../../shared/tokenService";
+import {
+  decryptTotpSecret,
+  verifyTotp,
+} from "../../shared/twoFactor";
 import { Prisma } from "../../../generated/prisma/client";
 import {
   AUTH_ERROR_MESSAGES,
@@ -156,11 +160,16 @@ class AuthService {
    * Sign in with email and password using $queryRaw for optimized user lookup
    * Source: optimized single query for authentication data retrieval
    */
-  async signInWithPassword(email: string, _password: string) {
+  async signInWithPassword(
+    email: string,
+    _password: string,
+    twoFactorCode?: string
+  ) {
     try {
       // Find user by email using $queryRaw for better performance
       const users = await prisma.$queryRaw<any[]>`
-        SELECT id, email, name, image, password, role, "onboardingCompleted", "onboardingStep"
+        SELECT id, email, name, image, password, role, "onboardingCompleted", "onboardingStep",
+               "twoFactorEnabled", "twoFactorSecret"
         FROM "User"
         WHERE email = ${email} AND "isDeleted" = false
         LIMIT 1
@@ -185,9 +194,22 @@ class AuthService {
         throw new ApiError(401, AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS);
       }
 
+      // Two-factor gate: when 2FA is enabled the code is mandatory.
+      if (user.twoFactorEnabled) {
+        if (!twoFactorCode) {
+          throw new ApiError(401, "TWO_FACTOR_REQUIRED");
+        }
+        const secret = user.twoFactorSecret
+          ? decryptTotpSecret(user.twoFactorSecret)
+          : null;
+        if (!secret || !verifyTotp(twoFactorCode, secret)) {
+          throw new ApiError(401, "INVALID_TWO_FACTOR_CODE");
+        }
+      }
+
       // Return user without password
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...userWithoutPassword } = user;
+      const { password, twoFactorSecret, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {
       if (error instanceof ApiError) {
