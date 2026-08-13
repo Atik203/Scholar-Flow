@@ -47,15 +47,6 @@ function resolveApiBaseUrl(): string {
 export function getApiBaseUrl(): string {
   if (_cachedApiUrl) return _cachedApiUrl;
   _cachedApiUrl = resolveApiBaseUrl();
-
-  if (typeof window !== "undefined") {
-    console.log(
-      `[apiUrl] Resolved API URL: ${_cachedApiUrl} ` +
-        `(NEXT_PUBLIC_API_BASE_URL=${ENV_API_BASE_URL || "unset"}, ` +
-        `NEXT_PUBLIC_SITE_URL=${ENV_SITE_URL || "unset"})`
-    );
-  }
-
   return _cachedApiUrl;
 }
 
