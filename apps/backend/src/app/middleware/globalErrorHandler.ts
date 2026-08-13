@@ -65,6 +65,24 @@ const globalErrorHandler = (
       },
     ];
   }
+  // Handle multer upload errors (oversized files, too many files).
+  // MUST come before the Postgres branch — MulterError also carries a
+  // string `code` ("LIMIT_FILE_SIZE") that would otherwise be treated
+  // as a Postgres error code.
+  else if ((err as any)?.name === "MulterError") {
+    const multerCode = (err as any)?.code as string | undefined;
+    statusCode = multerCode === "LIMIT_FILE_SIZE" ? 413 : 400;
+    message =
+      multerCode === "LIMIT_FILE_SIZE"
+        ? "File too large"
+        : `Upload failed: ${multerCode ?? "unknown multer error"}`;
+    errorSources = [
+      {
+        path: "upload",
+        message,
+      },
+    ];
+  }
   // Handle PostgreSQL errors
   else if ((err as any)?.code && typeof (err as any).code === "string") {
     const simplifiedError = handlePostgresError(err);
@@ -73,8 +91,7 @@ const globalErrorHandler = (
     errorSources = simplifiedError?.errorSources;
   }
   // Handle JWT errors
-  else if ((err as Error)?.name === "JsonWebTokenError") {
-    const simplifiedError = handleJWTError();
+  else if ((err as Error)?.name === "JsonWebTokenError") {    const simplifiedError = handleJWTError();
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSources = simplifiedError?.errorSources;
@@ -101,21 +118,6 @@ const globalErrorHandler = (
       {
         path: "",
         message: err?.message,
-      },
-    ];
-  }
-  // Handle multer upload errors (oversized files, too many files)
-  else if ((err as any)?.name === "MulterError") {
-    const multerCode = (err as any)?.code as string | undefined;
-    statusCode = multerCode === "LIMIT_FILE_SIZE" ? 413 : 400;
-    message =
-      multerCode === "LIMIT_FILE_SIZE"
-        ? "File too large"
-        : `Upload failed: ${multerCode ?? "unknown multer error"}`;
-    errorSources = [
-      {
-        path: "upload",
-        message,
       },
     ];
   }
