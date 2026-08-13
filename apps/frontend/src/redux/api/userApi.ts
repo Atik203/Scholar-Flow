@@ -268,6 +268,7 @@ export const userApi = apiSlice.injectEndpoints({
         message: string;
         data: Array<{
           id: string;
+          sessionToken: string;
           expires: string | null;
           createdAt: string;
         }>;
