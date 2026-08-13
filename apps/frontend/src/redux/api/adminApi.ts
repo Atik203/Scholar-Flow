@@ -218,13 +218,11 @@ export interface SystemMetrics {
       used: number;
       free: number;
       usagePercentage: number;
-      ioPercentage: number;
     };
     network: {
       bytesReceived: number;
       bytesSent: number;
       activeConnections: number;
-      bandwidth: number;
     };
   };
   systemInfo: {

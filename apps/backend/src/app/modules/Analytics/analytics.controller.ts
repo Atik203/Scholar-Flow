@@ -9,15 +9,21 @@ import { workspaceAnalyticsService } from "./workspace.service";
 import { aiUsageService } from "./aiUsage.service";
 import prisma from "../../shared/prisma";
 
+type TimeRangeKey = "week" | "month" | "quarter" | "year";
+const TIME_RANGES: TimeRangeKey[] = ["week", "month", "quarter", "year"];
+
+// Unvalidated timeRange values previously produced Invalid Dates deep in
+// the services (500s). Coerce anything unknown to the default.
+const safeTimeRange = (value: unknown, fallback: TimeRangeKey = "month"): TimeRangeKey => {
+  const v = String(value ?? "");
+  return (TIME_RANGES as string[]).includes(v) ? (v as TimeRangeKey) : fallback;
+};
+
 export const analyticsController = {
   personal: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const timeRange = (String(req.query.timeRange ?? "month") as
-      | "week"
-      | "month"
-      | "quarter"
-      | "year");
+    const timeRange = safeTimeRange(req.query.timeRange);
     const summary = await personalAnalyticsService.getSummary(
       authReq.user.id,
       timeRange
@@ -55,11 +61,7 @@ export const analyticsController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
     const workspaceId = String(req.params.workspaceId);
-    const timeRange = (String(req.query.timeRange ?? "month") as
-      | "week"
-      | "month"
-      | "quarter"
-      | "year");
+    const timeRange = safeTimeRange(req.query.timeRange);
     // Access control: only owner or active members may read workspace analytics
     const membership = await prisma.workspace.findFirst({
       where: {
@@ -85,11 +87,7 @@ export const analyticsController = {
   usage: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const timeRange = (String(req.query.timeRange ?? "month") as
-      | "week"
-      | "month"
-      | "quarter"
-      | "year");
+    const timeRange = safeTimeRange(req.query.timeRange);
     const report = await usageReportsService.getReport(
       authReq.user.id,
       timeRange
@@ -100,11 +98,7 @@ export const analyticsController = {
   aiUsage: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const timeRange = (String(req.query.timeRange ?? "month") as
-      | "week"
-      | "month"
-      | "quarter"
-      | "year");
+    const timeRange = safeTimeRange(req.query.timeRange);
     const report = await aiUsageService.getAiUsage(
       authReq.user.id,
       timeRange
@@ -115,11 +109,7 @@ export const analyticsController = {
   adminAiUsage: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
-    const timeRange = (String(req.query.timeRange ?? "month") as
-      | "week"
-      | "month"
-      | "quarter"
-      | "year");
+    const timeRange = safeTimeRange(req.query.timeRange);
     const report = await aiUsageService.getAdminAiUsage(timeRange);
     sendSuccessResponse(res, report, "Admin AI usage report retrieved");
   }),
