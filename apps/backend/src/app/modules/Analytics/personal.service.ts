@@ -7,6 +7,7 @@
  */
 
 import prisma from "../../shared/prisma";
+import ApiError from "../../errors/ApiError";
 
 type TimeRange = "week" | "month" | "quarter" | "year";
 
@@ -107,7 +108,17 @@ export const personalAnalyticsService = {
     });
   },
 
-  async stopReadingSession(eventId: string, units: number) {
+  async stopReadingSession(userId: string, eventId: string, units: number) {
+    // Ownership check: only the event owner may finalize their own
+    // reading session (was: any user could PATCH any event id — IDOR).
+    const owned = await prisma.usageEvent.findFirst({
+      where: { id: eventId, userId },
+      select: { id: true },
+    });
+    if (!owned) {
+      throw new ApiError(404, "Reading session not found");
+    }
+
     return prisma.usageEvent.update({
       where: { id: eventId },
       data: { units: Math.max(0, Math.floor(units)) },

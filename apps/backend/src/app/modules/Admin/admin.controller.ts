@@ -6,6 +6,7 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import catchAsync from "../../shared/catchAsync";
+import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 import sendResponse from "../../shared/sendResponse";
 import { AsyncAuthRequestHandler } from "../../types/express";
 import { ADMIN_SUCCESS_MESSAGES, CACHE_DURATIONS } from "./admin.constant";
@@ -13,6 +14,10 @@ import { IAdminFilters } from "./admin.interface";
 import { adminService } from "./admin.service";
 import { analyticsService } from "./analytics.service";
 import { userManagementService } from "./userManagement.service";
+
+// Admin responses carry user PII (emails, payments) — never shareable
+// via public caches, so Cache-Control must always be private.
+const privateCache = (maxAge: number) => `private, max-age=${maxAge}`;
 
 class AdminController {
   /**
@@ -25,7 +30,7 @@ class AdminController {
 
       // Set cache headers for performance
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
         "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
       });
 
@@ -45,8 +50,8 @@ class AdminController {
   getRecentUsers: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const filters: IAdminFilters = {
-        page: req.query.page ? parseInt(req.query.page as string) : 1,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        page: toPositiveInt(req.query.page, 1),
+        limit: toBoundedInt(req.query.limit, 10, 100),
         role: req.query.role as string | undefined,
         status: req.query.status as "active" | "inactive" | "all" | undefined,
       };
@@ -55,7 +60,7 @@ class AdminController {
 
       // Set cache headers
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.RECENT_USERS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.RECENT_USERS),
         "X-Cache-Duration": `${CACHE_DURATIONS.RECENT_USERS}s`,
       });
 
@@ -84,7 +89,7 @@ class AdminController {
 
       // Set cache headers
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.GROWTH_DATA}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.GROWTH_DATA),
         "X-Cache-Duration": `${CACHE_DURATIONS.GROWTH_DATA}s`,
       });
 
@@ -106,7 +111,7 @@ class AdminController {
       const distribution = await adminService.getRoleDistribution();
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
       });
 
       sendResponse(res, {
@@ -127,7 +132,7 @@ class AdminController {
       const paperStats = await adminService.getPaperStats();
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
       });
 
       sendResponse(res, {
@@ -148,7 +153,7 @@ class AdminController {
       const health = await adminService.getSystemHealth();
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.HEALTH_CHECK}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.HEALTH_CHECK),
         "X-Cache-Duration": `${CACHE_DURATIONS.HEALTH_CHECK}s`,
       });
 
@@ -171,7 +176,7 @@ class AdminController {
 
       // Set aggressive cache for real-time monitoring (10 seconds)
       res.set({
-        "Cache-Control": `public, max-age=10`,
+        "Cache-Control": `private, max-age=10`,
         "X-Cache-Duration": "10s",
       });
 
@@ -190,13 +195,15 @@ class AdminController {
    */
   getRevenueAnalytics: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
-      const timeRange =
-        (req.query.timeRange as "7d" | "30d" | "90d" | "1y") || "30d";
+      const rawRange = req.query.timeRange as string | undefined;
+      const timeRange = ["7d", "30d", "90d", "1y"].includes(rawRange ?? "")
+        ? (rawRange as "7d" | "30d" | "90d" | "1y")
+        : "30d";
       const analytics = await analyticsService.getRevenueAnalytics(timeRange);
 
       // Cache for 5 minutes - revenue data doesn't change frequently
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
         "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
       });
 
@@ -215,13 +222,11 @@ class AdminController {
    */
   getTopCustomers: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
-      const limit = req.query.limit
-        ? Math.min(parseInt(req.query.limit as string), 50)
-        : 10;
+      const limit = toBoundedInt(req.query.limit, 10, 50);
       const customers = await analyticsService.getTopCustomers(limit);
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.USER_ACTIVITY),
         "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
       });
 
@@ -240,10 +245,8 @@ class AdminController {
    */
   getSubscriberDetails: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
-      const page = req.query.page ? parseInt(req.query.page as string) : 1;
-      const limit = req.query.limit
-        ? Math.min(parseInt(req.query.limit as string), 100)
-        : 20;
+      const page = toPositiveInt(req.query.page, 1);
+      const limit = toBoundedInt(req.query.limit, 20, 100);
       const status = req.query.status as string | undefined;
       const planId = req.query.planId as string | undefined;
 
@@ -255,7 +258,7 @@ class AdminController {
       );
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.USER_ACTIVITY),
         "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
       });
 
@@ -280,8 +283,8 @@ class AdminController {
    */
   getAllUsers: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
-      const page = req.query.page ? parseInt(req.query.page as string) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+      const page = toPositiveInt(req.query.page, 1);
+      const limit = toBoundedInt(req.query.limit, 20, 100);
       const searchQuery = req.query.search as string | undefined;
       const role = req.query.role as string | undefined;
       const status = req.query.status as string | undefined;
@@ -295,7 +298,7 @@ class AdminController {
       );
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.RECENT_USERS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.RECENT_USERS),
         "X-Cache-Duration": `${CACHE_DURATIONS.RECENT_USERS}s`,
       });
 
@@ -325,7 +328,7 @@ class AdminController {
       const stats = await userManagementService.getUserStats();
 
       res.set({
-        "Cache-Control": `public, max-age=${CACHE_DURATIONS.SYSTEM_STATS}`,
+        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
         "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
       });
 
