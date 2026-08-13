@@ -886,14 +886,20 @@ export const userService = {
   getSessions: async (userId: string) => {
     const sessions = await prisma.session.findMany({
       where: { userId, isDeleted: false },
-      select: { id: true, expires: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        sessionToken: true,
+        expires: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       orderBy: { createdAt: "desc" },
     });
     return sessions.map((s) => ({
       id: s.id,
+      sessionToken: s.sessionToken,
       expires: s.expires,
       createdAt: s.createdAt,
-      isCurrent: false,
     }));
   },
 
