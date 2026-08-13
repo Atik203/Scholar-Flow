@@ -68,7 +68,7 @@ export default function CitationFormatsPage() {
       example:
         "@article{smith2024ml,\n  title={Machine Learning in Healthcare},\n  author={Smith, John and Johnson, Jane},\n  journal={Journal of Medical AI},\n  year={2024}\n}",
       icon: FileText,
-      color: "text-blue-600",
+      color: "text-blue-600 dark:text-blue-400",
     },
     {
       id: "endnote",
@@ -82,7 +82,7 @@ export default function CitationFormatsPage() {
       example:
         "%0 Journal Article\n%T Machine Learning in Healthcare\n%A Smith, John\n%A Johnson, Jane\n%J Journal of Medical AI\n%D 2024",
       icon: BookOpen,
-      color: "text-green-600",
+      color: "text-green-600 dark:text-green-400",
     },
     {
       id: "apa",
@@ -96,7 +96,7 @@ export default function CitationFormatsPage() {
       example:
         "Smith, J., & Johnson, J. (2024). Machine learning in healthcare: A comprehensive review. Journal of Medical AI, 15(3), 123-145.",
       icon: FileText,
-      color: "text-purple-600",
+      color: "text-purple-600 dark:text-purple-400",
     },
     {
       id: "mla",
@@ -110,7 +110,7 @@ export default function CitationFormatsPage() {
       example:
         'Smith, John, and Jane Johnson. "Machine Learning in Healthcare: A Comprehensive Review." Journal of Medical AI, vol. 15, no. 3, 2024, pp. 123-145.',
       icon: FileText,
-      color: "text-orange-600",
+      color: "text-orange-600 dark:text-orange-400",
     },
     {
       id: "ieee",
@@ -124,7 +124,7 @@ export default function CitationFormatsPage() {
       example:
         '[1] J. Smith and J. Johnson, "Machine learning in healthcare: A comprehensive review," Journal of Medical AI, vol. 15, no. 3, pp. 123-145, 2024.',
       icon: FileText,
-      color: "text-red-600",
+      color: "text-red-600 dark:text-red-400",
     },
     {
       id: "chicago",
@@ -138,7 +138,7 @@ export default function CitationFormatsPage() {
       example:
         'Smith, John, and Jane Johnson. "Machine Learning in Healthcare: A Comprehensive Review." Journal of Medical AI 15, no. 3 (2024): 123-145.',
       icon: FileText,
-      color: "text-indigo-600",
+      color: "text-indigo-600 dark:text-indigo-400",
     },
     {
       id: "harvard",
@@ -148,7 +148,7 @@ export default function CitationFormatsPage() {
       example:
         "Smith, J. & Johnson, J. 2024, 'Machine learning in healthcare: A comprehensive review', Journal of Medical AI, vol. 15, no. 3, pp. 123-145.",
       icon: FileText,
-      color: "text-teal-600",
+      color: "text-teal-600 dark:text-teal-400",
     },
   ];
 
@@ -158,7 +158,7 @@ export default function CitationFormatsPage() {
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild className="hover:bg-white/80">
+            <Button variant="ghost" asChild className="hover:bg-muted">
               <Link href={scopedPath("/research/citations")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Citations

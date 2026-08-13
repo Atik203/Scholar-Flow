@@ -143,7 +143,7 @@ export default function ActivityLogExportPage() {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" asChild className="hover:bg-white/80">
+          <Button variant="ghost" asChild className="hover:bg-muted">
             <Link href="/dashboard/research/activity-log">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Activity Log
