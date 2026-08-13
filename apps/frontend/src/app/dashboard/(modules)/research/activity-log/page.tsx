@@ -24,7 +24,7 @@ export default function ResearchActivityLogPage() {
       {/* Enhanced Header */}
       <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" asChild className="hover:bg-white/80">
+          <Button variant="ghost" asChild className="hover:bg-muted">
             <Link href="/dashboard/research">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Research
@@ -56,7 +56,7 @@ export default function ResearchActivityLogPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-blue-600" />
+              <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
                 <div className="text-2xl font-bold">
                   {isSummaryLoading
@@ -71,7 +71,7 @@ export default function ResearchActivityLogPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Info className="h-5 w-5 text-green-600" />
+              <Info className="h-5 w-5 text-green-600 dark:text-green-400" />
               <div>
                 <div className="text-2xl font-bold">
                   {isSummaryLoading ? "—" : severityCount("INFO")}
@@ -84,7 +84,7 @@ export default function ResearchActivityLogPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <div>
                 <div className="text-2xl font-bold">
                   {isSummaryLoading ? "—" : severityCount("WARNING")}
@@ -97,7 +97,7 @@ export default function ResearchActivityLogPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600" />
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
               <div>
                 <div className="text-2xl font-bold">
                   {isSummaryLoading ? "—" : errorCount}
