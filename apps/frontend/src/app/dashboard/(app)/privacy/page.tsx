@@ -6,10 +6,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } fr
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { useGetPrivacySettingsQuery, useUpdatePrivacySettingsMutation } from "@/redux/api/userApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EyeOff, Activity, Save, Loader2, ArrowLeft, Globe, Users } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -29,43 +30,40 @@ const visibilityItems = [
 ];
 
 export default function PrivacySettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
   const form = useForm<PrivacyFormValues>({
     resolver: zodResolver(privacySchema),
     defaultValues: { profileVisibility: "public", showActivity: true, allowDataSharing: false, showInDiscover: true },
   });
 
-  const fetchSettings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/user/privacy");
-      const data = await res.json();
-      form.reset({ profileVisibility: data.profileVisibility ?? "public", showActivity: data.showActivity ?? true, allowDataSharing: data.allowDataSharing ?? false, showInDiscover: data.showInDiscover ?? true });
-    } catch {
-      showErrorToast("Failed to load privacy settings");
-    } finally {
-      setLoading(false);
+  const { data: settingsData, isLoading: settingsLoading } =
+    useGetPrivacySettingsQuery();
+  const [updateSettings, { isLoading: isSaving }] =
+    useUpdatePrivacySettingsMutation();
+
+  useEffect(() => {
+    if (settingsData?.data) {
+      form.reset({
+        profileVisibility: settingsData.data.profileVisibility ?? "public",
+        showActivity: settingsData.data.showActivity ?? true,
+        allowDataSharing: settingsData.data.allowDataSharing ?? false,
+        showInDiscover: settingsData.data.showInDiscover ?? true,
+      });
     }
-  }, [form]);
+  }, [settingsData, form]);
 
-  useEffect(() => { fetchSettings(); }, [fetchSettings]);
-
-  const onSubmit = useCallback(async (values: PrivacyFormValues) => {
-    setSaving(true);
+  const onSubmit = async (values: PrivacyFormValues) => {
     try {
-      const res = await fetch("/api/user/privacy", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
-      if (!res.ok) throw new Error((await res.json()).message ?? "Unknown error");
+      await updateSettings(values).unwrap();
       showSuccessToast("Privacy settings saved");
-    } catch (e: unknown) {
-      showErrorToast("Failed to save settings", (e as Error).message);
-    } finally {
-      setSaving(false);
+    } catch (error: unknown) {
+      const message =
+        (error as { data?: { message?: string } })?.data?.message ??
+        "Failed to save settings";
+      showErrorToast("Save failed", message);
     }
-  }, []);
+  };
 
-  if (loading) {
+  if (settingsLoading) {
     return <div className="flex items-center justify-center py-24"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
   }
 
@@ -162,8 +160,8 @@ export default function PrivacySettingsPage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}<Save className="h-4 w-4 mr-2" />Save Settings
+            <Button type="submit" disabled={isSaving}>
+              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}<Save className="h-4 w-4 mr-2" />Save Settings
             </Button>
           </div>
         </form>
