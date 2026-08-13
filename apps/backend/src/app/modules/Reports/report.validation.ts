@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 
 export const listReportsQuerySchema = z.object({
   type: z
@@ -12,11 +13,8 @@ export const listReportsQuerySchema = z.object({
     .optional()
     .transform((v) => (v === undefined ? undefined : v === "true")),
   search: z.string().optional(),
-  page: z.string().optional().transform((v) => (v ? parseInt(v, 10) : 1)),
-  limit: z
-    .string()
-    .optional()
-    .transform((v) => (v ? Math.min(parseInt(v, 10), 100) : 20)),
+  page: z.string().optional().transform((v) => toPositiveInt(v, 1)),
+  limit: z.string().optional().transform((v) => toBoundedInt(v, 20, 100)),
 });
 
 export const createReportSchema = z.object({
@@ -39,7 +37,11 @@ export const updateReportSchema = z.object({
     .string()
     .datetime()
     .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
+    .transform((v) => {
+      if (!v) return undefined;
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? undefined : d;
+    }),
   recipients: z.array(z.string().email()).optional(),
   enabled: z.boolean().optional(),
   config: z.record(z.string(), z.unknown()).optional(),
