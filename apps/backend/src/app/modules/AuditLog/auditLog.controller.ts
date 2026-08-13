@@ -42,12 +42,14 @@ export const auditLogController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
-    const startDate = req.query.startDate
-      ? new Date(String(req.query.startDate))
-      : undefined;
-    const endDate = req.query.endDate
-      ? new Date(String(req.query.endDate))
-      : undefined;
+    // Unvalidated date strings previously produced Invalid Date -> 500.
+    const parseDate = (v: unknown): Date | undefined => {
+      if (!v) return undefined;
+      const d = new Date(String(v));
+      return Number.isNaN(d.getTime()) ? undefined : d;
+    };
+    const startDate = parseDate(req.query.startDate);
+    const endDate = parseDate(req.query.endDate);
 
     const summary = await auditLogService.getSummary({ startDate, endDate });
     sendSuccessResponse(res, summary, "Audit log summary retrieved");

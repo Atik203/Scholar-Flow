@@ -19,7 +19,12 @@ const buildCsv = (rows: ReportRow[]): string => {
   const headers = Object.keys(rows[0]);
   const escape = (v: unknown) => {
     if (v === null || v === undefined) return "";
-    const s = String(v);
+    let s = String(v);
+    // Neutralize CSV formula injection: cells starting with = + - @
+    // execute as formulas when the export is opened in Excel.
+    if (/^[=+\-@]/.test(s)) {
+      s = `'${s}`;
+    }
     if (s.includes(",") || s.includes('"') || s.includes("\n")) {
       return `"${s.replace(/"/g, '""')}"`;
     }

@@ -92,8 +92,8 @@ export interface ISystemMetrics {
   health: {
     database: "healthy" | "degraded" | "unhealthy";
     server: "healthy" | "degraded" | "unhealthy";
-    storage: "healthy" | "warning" | "critical";
-    cpu: "healthy" | "warning" | "critical";
+    storage: "healthy" | "degraded" | "warning" | "critical";
+    cpu: "healthy" | "degraded" | "warning" | "critical";
   };
   performance: {
     cpu: {
@@ -112,13 +112,11 @@ export interface ISystemMetrics {
       used: number; // bytes
       free: number; // bytes
       usagePercentage: number;
-      ioPercentage: number;
     };
     network: {
       bytesReceived: number;
       bytesSent: number;
       activeConnections: number;
-      bandwidth: number; // percentage
     };
   };
   systemInfo: {
