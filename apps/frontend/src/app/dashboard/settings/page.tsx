@@ -37,6 +37,7 @@ import {
   useGetUserAnalyticsQuery,
 } from "@/redux/api/userApi";
 import { useAuth } from "@/redux/auth/useAuth";
+import Link from "next/link";
 import {
   Bell,
   Database,
@@ -52,6 +53,7 @@ import {
   Sun,
   Trash2,
   Users,
+  ExternalLink,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -64,45 +66,20 @@ export default function DashboardSettingsPage() {
   const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
   const { data: analyticsData } = useGetUserAnalyticsQuery();
 
-  const [notifications, setNotifications] = useState({
-    email: true, push: false, newPapers: true, collaborations: true, comments: false,
-  });
-
-  const [privacy, setPrivacy] = useState({
-    profileVisible: true, researchVisible: true, collectionsPublic: false,
-  });
-
-  const [adminSettings, setAdminSettings] = useState({
-    systemMaintenance: false, userRegistration: true, dataRetention: "365",
-    maxFileSize: "100", allowGuestAccess: false,
-  });
-
   const user = session?.user;
   const userRole = user?.role || USER_ROLES.RESEARCHER;
   const userPlan = analyticsData?.data?.plan || "FREE";
-
-  const handleNotificationChange = (key: string, value: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast("Notification Settings", "Your notification preferences have been updated");
-  };
-
-  const handlePrivacyChange = (key: string, value: boolean) => {
-    setPrivacy((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast("Privacy Settings", "Your privacy settings have been updated");
-  };
-
-  const handleAdminChange = (key: string, value: boolean | string) => {
-    setAdminSettings((prev) => ({ ...prev, [key]: value }));
-    showSuccessToast("Admin Settings", "System settings have been updated");
-  };
 
   const handleDeleteAccount = async () => {
     try {
       await deleteAccount({ confirmDelete: true }).unwrap();
       showSuccessToast("Account Deleted", "Your account has been successfully deleted. You will be logged out.");
       await handleSignOut("/");
-    } catch (error: any) {
-      showErrorToast("Delete Failed", error?.data?.message || "Failed to delete account. Please try again.");
+    } catch (error: unknown) {
+      const message =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete account. Please try again.";
+      showErrorToast("Delete Failed", message);
     }
   };
 
@@ -174,25 +151,17 @@ export default function DashboardSettingsPage() {
                 <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" />Notification Preferences</CardTitle>
                 <CardDescription>Choose how you want to be notified about activity</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {[
-                  { key: "email", label: "Email notifications", desc: "Receive notifications via email" },
-                  { key: "push", label: "Push notifications", desc: "Get notified in your browser" },
-                  { key: "newPapers", label: "New papers in collections", desc: "When papers are added to your collections" },
-                  { key: "collaborations", label: "Collaboration invites", desc: "When someone invites you to collaborate" },
-                  { key: "comments", label: "Comments and mentions", desc: "When someone comments or mentions you" },
-                ].map(({ key, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>{label}</Label>
-                      <p className="text-sm text-muted-foreground">{desc}</p>
-                    </div>
-                    <Switch
-                      checked={notifications[key as keyof typeof notifications]}
-                      onCheckedChange={(v) => handleNotificationChange(key, v)}
-                    />
-                  </div>
-                ))}
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Manage channels, categories, quiet hours, and the email
+                  digest from the dedicated notification settings page.
+                </p>
+                <Button asChild>
+                  <Link href="/dashboard/notifications/settings">
+                    Open Notification Settings
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -204,37 +173,39 @@ export default function DashboardSettingsPage() {
                 <CardDescription>Control your privacy and security settings</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {[
-                  { key: "profileVisible", icon: Eye, label: "Public profile", desc: "Make your profile visible to other researchers" },
-                  { key: "researchVisible", icon: Database, label: "Research visibility", desc: "Show your research interests publicly" },
-                  { key: "collectionsPublic", icon: Globe, label: "Public collections", desc: "Make your collections discoverable" },
-                ].map(({ key, icon: Icon, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <div className="space-y-0.5 flex items-center gap-2">
-                      <Icon className="h-4 w-4 text-muted-foreground" />
-                      <div><Label>{label}</Label><p className="text-sm text-muted-foreground">{desc}</p></div>
-                    </div>
-                    <Switch
-                      checked={privacy[key as keyof typeof privacy]}
-                      onCheckedChange={(v) => handlePrivacyChange(key, v)}
-                    />
-                  </div>
-                ))}
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium mb-4">Data & Security</h3>
-                  <div className="flex items-center justify-between mb-4">
+                <div className="space-y-4">
+                  <Button asChild variant="outline" className="w-full justify-start gap-2">
+                    <Link href="/dashboard/privacy">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      Privacy settings
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full justify-start gap-2">
+                    <Link href="/dashboard/security">
+                      <Lock className="h-4 w-4 text-muted-foreground" />
+                      Security, sessions and login history
+                    </Link>
+                  </Button>
+                </div>
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="text-lg font-medium">Data & Security</h3>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Lock className="h-4 w-4 text-muted-foreground" />
                       <div><Label>Two-factor authentication</Label><p className="text-sm text-muted-foreground">Add an extra layer of security</p></div>
                     </div>
-                    <Badge variant="outline">Coming Soon</Badge>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/dashboard/security/2fa">Set up 2FA</Link>
+                    </Button>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Database className="h-4 w-4 text-muted-foreground" />
-                      <div><Label>Download your data</Label><p className="text-sm text-muted-foreground">Export all your research data</p></div>
+                      <div><Label>Download your data</Label><p className="text-sm text-muted-foreground">Export your usage data</p></div>
                     </div>
-                    <Button variant="outline" size="sm">Request Export</Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/dashboard/settings/export">Export Data</Link>
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -363,42 +334,48 @@ export default function DashboardSettingsPage() {
                     <CardTitle className="text-orange-600 dark:text-orange-400 flex items-center gap-2"><Shield className="h-5 w-5" />System Administration</CardTitle>
                     <CardDescription>System-wide settings and configurations (Admin/Team Lead only)</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    {[
-                      { key: "systemMaintenance", label: "System Maintenance Mode", desc: "Put the system in maintenance mode for updates" },
-                      { key: "userRegistration", label: "Allow User Registration", desc: "Allow new users to register accounts" },
-                      { key: "allowGuestAccess", label: "Allow Guest Access", desc: "Allow guests to browse public papers without accounts" },
-                    ].map(({ key, label, desc }) => (
-                      <div key={key} className="flex items-center justify-between">
-                        <div><Label>{label}</Label><p className="text-sm text-muted-foreground">{desc}</p></div>
-                        <Switch
-                          checked={adminSettings[key as keyof typeof adminSettings] as boolean}
-                          onCheckedChange={(checked) => handleAdminChange(key, checked)}
-                        />
-                      </div>
-                    ))}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="dataRetention">Data Retention (days)</Label>
-                        <Input id="dataRetention" type="number" value={adminSettings.dataRetention} onChange={(e) => handleAdminChange("dataRetention", e.target.value)} />
-                      </div>
-                      <div>
-                        <Label htmlFor="maxFileSize">Max File Size (MB)</Label>
-                        <Input id="maxFileSize" type="number" value={adminSettings.maxFileSize} onChange={(e) => handleAdminChange("maxFileSize", e.target.value)} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="border-red-200 dark:border-red-800">
-                  <CardHeader>
-                    <CardTitle className="text-red-600 dark:text-red-400 flex items-center gap-2"><Users className="h-5 w-5" />User Management Actions</CardTitle>
-                    <CardDescription>Bulk operations and system management</CardDescription>
-                  </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <Button variant="outline" onClick={() => showSuccessToast("Export Started", "User data export has been initiated")}>Export All Users</Button>
-                      <Button variant="outline" onClick={() => showSuccessToast("Cleanup Started", "System cleanup has been initiated")}>Clean Inactive Data</Button>
-                      <Button variant="destructive" onClick={() => showSuccessToast("Broadcast Sent", "System notification sent to all users")}>Send System Alert</Button>
+                    <p className="text-sm text-muted-foreground">
+                      System administration is handled from the admin
+                      dashboard. Use the shortcuts below.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/users">
+                          <Users className="h-4 w-4" />
+                          Manage Users
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/reports">
+                          <Database className="h-4 w-4" />
+                          Reports
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/alerts">
+                          <Bell className="h-4 w-4" />
+                          System Alerts
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/system">
+                          <Monitor className="h-4 w-4" />
+                          System Metrics
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/settings">
+                          <SettingsIcon className="h-4 w-4" />
+                          Admin Settings
+                        </Link>
+                      </Button>
+                      <Button asChild variant="outline" className="justify-start gap-2">
+                        <Link href="/dashboard/admin/audit">
+                          <Eye className="h-4 w-4" />
+                          Audit Log
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

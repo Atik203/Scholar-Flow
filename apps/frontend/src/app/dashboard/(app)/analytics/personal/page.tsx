@@ -91,8 +91,8 @@ export default function PersonalAnalyticsPage() {
             <StatCard
               label="Papers Read"
               value={summary.stats.papersRead}
-              change={`+${summary.stats.papersRead}`}
-              trend="up"
+              change={`${summary.streak.days} day streak`}
+              trend="neutral"
               icon={<BookOpen className="h-5 w-5" />}
               color="from-blue-500 to-indigo-600"
               delay={0}
@@ -100,8 +100,6 @@ export default function PersonalAnalyticsPage() {
             <StatCard
               label="Annotations"
               value={summary.stats.annotations}
-              change={`+${summary.stats.annotations}`}
-              trend="up"
               icon={<PenTool className="h-5 w-5" />}
               color="from-emerald-500 to-teal-600"
               delay={0.05}
@@ -109,8 +107,6 @@ export default function PersonalAnalyticsPage() {
             <StatCard
               label="Discussions"
               value={summary.stats.discussions}
-              change={`+${summary.stats.discussions}`}
-              trend="up"
               icon={<MessageSquare className="h-5 w-5" />}
               color="from-purple-500 to-violet-600"
               delay={0.1}
@@ -118,7 +114,7 @@ export default function PersonalAnalyticsPage() {
             <StatCard
               label="Reading Time"
               value={formatReadingMinutes(summary.stats.readingMinutes)}
-              change="Current"
+              change="This period"
               trend="neutral"
               icon={<Flame className="h-5 w-5" />}
               color="from-orange-500 to-red-600"
