@@ -9,7 +9,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Activity, BarChart3, Bot, Database, Download, FileText, HardDrive, Lock, MessageCircle, Zap } from "lucide-react";
+import { Activity, BarChart3, Bot, Database, Download, FileText, HardDrive, Loader2, Lock, MessageCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -20,6 +20,8 @@ import { TimeRangeSelector, type TimeRange } from "@/components/analytics/TimeRa
 import { useGetUsageReportQuery, useGetAiUsageQuery } from "@/redux/api/analyticsApi";
 import { USER_ROLES, hasRoleAccess } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
+import { downloadAuthenticatedFile } from "@/lib/downloadBlob";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 
 const COLORS = ["#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b", "#ef4444", "#ec4899"];
 
@@ -35,6 +37,23 @@ export default function UsageReportsPage() {
   const { session } = useAuth();
   const userRole = session?.user?.role ?? USER_ROLES.RESEARCHER;
   const hasAccess = hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await downloadAuthenticatedFile(
+        "/analytics/usage/export?format=csv",
+        session?.accessToken ?? null,
+        "usage-report.csv"
+      );
+      showSuccessToast("Download started", "Your CSV export is downloading.");
+    } catch {
+      showErrorToast("Export failed", "Could not download the usage report.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (!hasAccess) {
     return (
@@ -70,14 +89,17 @@ export default function UsageReportsPage() {
           <>
             <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
             <Button
-              asChild
               variant="default"
               className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              <a href="/api/analytics/usage/export?format=csv" target="_blank" rel="noreferrer">
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
                 <Download className="h-4 w-4" />
-                Export
-              </a>
+              )}
+              Export
             </Button>
           </>
         }
