@@ -257,8 +257,8 @@ const generateTwoFactorSecret = catchAsync(async (req: Request, res: Response) =
 
 const verifyTwoFactor = catchAsync(async (req: Request, res: Response) => {
   const user = (req as any).user as IAuthUser;
-  const { token } = req.body as { token: string };
-  const result = await userService.verifyTwoFactor(user.id, token);
+  const { code } = req.body as { code: string };
+  const result = await userService.verifyTwoFactor(user.id, code);
   sendResponse(res, {
     statusCode: 200,
     success: true,
