@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import sanitizeHtml from "sanitize-html";
 import { API_BASE_URL as apiUrl } from "@/lib/apiUrl";
 
 interface Props {
@@ -46,7 +47,24 @@ export default async function PublicViewPage({ params }: Props) {
         {paper.contentHtml ? (
           <article
             className="prose prose-gray max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: paper.contentHtml }}
+            // Defense-in-depth: content is sanitized on write, but this
+            // page is unauthenticated — re-sanitize before injecting.
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(paper.contentHtml, {
+                allowedTags: [
+                  "p", "br", "strong", "em", "u", "s", "code", "pre", "blockquote",
+                  "h1", "h2", "h3", "h4", "h5", "h6",
+                  "ul", "ol", "li", "a", "img", "table", "thead", "tbody",
+                  "tr", "th", "td", "hr", "span", "div",
+                ],
+                allowedAttributes: {
+                  a: ["href", "target", "rel", "title"],
+                  img: ["src", "alt", "title", "width", "height"],
+                  "*": ["class"],
+                },
+                allowedSchemes: ["http", "https", "mailto"],
+              }),
+            }}
           />
         ) : (
           <p className="text-gray-400">This paper has no content yet.</p>

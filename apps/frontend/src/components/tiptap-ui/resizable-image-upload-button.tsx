@@ -19,12 +19,17 @@ export interface ResizableImageUploadButtonProps {
    * Optional text to display alongside the icon.
    */
   text?: string;
+  /**
+   * Override the default uploader (e.g. an RTK mutation). Receives the
+   * File and must resolve to an image URL.
+   */
+  onUpload?: (file: File) => Promise<string>;
 }
 
 export const ResizableImageUploadButton = React.forwardRef<
   HTMLButtonElement,
   ResizableImageUploadButtonProps
->(({ editor: providedEditor, text, ...buttonProps }, ref) => {
+>(({ editor: providedEditor, text, onUpload, ...buttonProps }, ref) => {
   const { editor } = useTiptapEditor(providedEditor);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -41,7 +46,7 @@ export const ResizableImageUploadButton = React.forwardRef<
       event.target.value = "";
 
       try {
-        const url = await handleImageUpload(file);
+        const url = onUpload ? await onUpload(file) : await handleImageUpload(file);
 
         // Insert the image using insertContent with ResizableImage node
         const success = editor
@@ -76,7 +81,7 @@ export const ResizableImageUploadButton = React.forwardRef<
         );
       }
     },
-    [editor]
+    [editor, onUpload]
   );
 
   const canInsert = editor?.can?.().insertContent?.({ type: "image" }) ?? false;
