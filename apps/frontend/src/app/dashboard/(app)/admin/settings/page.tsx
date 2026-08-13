@@ -23,7 +23,7 @@ export default function AdminSettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-          <Settings className="h-8 w-8 text-gray-600" />
+          <Settings className="h-8 w-8 text-muted-foreground" />
           System Settings
         </h1>
           <p className="text-muted-foreground mt-2">
