@@ -1,9 +1,12 @@
 "use client";
 
+import "./ai-markdown.css";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -13,22 +16,30 @@ import {
 } from "@/components/ui/select";
 import { useGetAiProvidersQuery } from "@/redux/api/paperApi";
 import {
+  aiChatApi,
   useListConversationsQuery,
   useCreateConversationMutation,
   useGetConversationQuery,
   useDeleteConversationMutation,
   useSendMessageMutation,
 } from "@/redux/api/aiChatApi";
+import { useAppDispatch } from "@/redux/hooks";
 import { AnimatePresence, motion } from "motion/react";
 import {
+  Bold,
   Bot,
   Check,
+  Code,
   Copy,
   Expand,
+  Italic,
+  List,
+  ListOrdered,
   MessageCircle,
   Minimize2,
   Pencil,
   Plus,
+  Quote,
   RefreshCw,
   Search,
   Send,
@@ -102,6 +113,7 @@ function FloatingAiAssistantContent() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [localMessages, setLocalMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -113,6 +125,21 @@ function FloatingAiAssistantContent() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const dispatch = useAppDispatch();
+
+  // Small screens get the full viewport automatically — a floating 480px
+  // panel leaves too little room for sidebar + message list on phones.
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      if (mobile) setFullscreen(true);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const { showFloatingButton } = useAIVisibility();
   const { currentContext } = useAiContext();
@@ -295,13 +322,26 @@ function FloatingAiAssistantContent() {
 
   const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    // Optimistic: remove the conversation from the cached list instantly so
+    // the sidebar responds immediately, roll back if the server rejects.
+    const patchResult = dispatch(
+      aiChatApi.util.updateQueryData(
+        "listConversations",
+        undefined,
+        (conversations) => conversations.filter((c) => c.id !== id)
+      )
+    );
+
+    if (activeConvId === id) {
+      setActiveConvId(null);
+      setLocalMessages([]);
+    }
+
     try {
       await deleteConversation(id).unwrap();
-      if (activeConvId === id) {
-        setActiveConvId(null);
-        setLocalMessages([]);
-      }
     } catch {
+      patchResult.undo();
       showErrorToast("Failed to delete conversation");
     }
   };
@@ -313,6 +353,42 @@ function FloatingAiAssistantContent() {
     }
     setSending(false);
   };
+
+  // Wrap the current textarea selection in markdown (formatting toolbar).
+  const applyFormat = (
+    before: string,
+    after: string,
+    placeholder = "text"
+  ) => {
+    const el = inputRef.current;
+    const start = el ? el.selectionStart : input.length;
+    const end = el ? el.selectionEnd : input.length;
+    const selected = (input.slice(start, end) || placeholder).trim() || placeholder;
+    setInput(
+      `${input.slice(0, start)}${before}${selected}${after}${input.slice(end)}`
+    );
+    requestAnimationFrame(() => {
+      if (!inputRef.current) return;
+      inputRef.current.focus();
+      const selStart = start + before.length;
+      inputRef.current.setSelectionRange(selStart, selStart + selected.length);
+    });
+  };
+
+  const FORMAT_BUTTONS: Array<{
+    title: string;
+    icon: typeof Bold;
+    before: string;
+    after: string;
+    placeholder: string;
+  }> = [
+    { title: "Bold", icon: Bold, before: "**", after: "**", placeholder: "bold text" },
+    { title: "Italic", icon: Italic, before: "_", after: "_", placeholder: "italic text" },
+    { title: "Bullet list", icon: List, before: "\n- ", after: "", placeholder: "item" },
+    { title: "Numbered list", icon: ListOrdered, before: "\n1. ", after: "", placeholder: "item" },
+    { title: "Inline code", icon: Code, before: "`", after: "`", placeholder: "code" },
+    { title: "Quote", icon: Quote, before: "\n> ", after: "", placeholder: "quote" },
+  ];
 
   const sendMessage = useCallback(async () => {
     const trimmed = input.trim();
@@ -537,7 +613,7 @@ function FloatingAiAssistantContent() {
             style={{
               width: fullscreen ? undefined : panelWidth,
               height: fullscreen ? undefined : panelHeight,
-              resize: fullscreen ? "none" : "both",
+              resize: fullscreen || isMobile ? "none" : "both",
               overflow: "auto",
             }}
           >
@@ -689,7 +765,7 @@ function FloatingAiAssistantContent() {
                           {msg.role === "assistant" ? (
                             <div className="bg-muted rounded-lg px-3 py-2 pr-8">
                               {msg.content ? (
-                                <div className="ai-message prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-li:text-foreground/90 prose-code:text-primary prose-code:bg-primary/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs prose-pre:bg-muted-foreground/10 prose-pre:border prose-pre:rounded-lg">
+                                <div className="ai-message max-w-none">
                                   <ReactMarkdown
                                     remarkPlugins={[remarkGfm]}
                                     rehypePlugins={[rehypeHighlight]}
@@ -712,8 +788,12 @@ function FloatingAiAssistantContent() {
                               )}
                             </div>
                           ) : (
-                            <div className="whitespace-pre-wrap break-words group">
-                              {msg.content}
+                            <div className="group">
+                              <div className="ai-message ai-message-user whitespace-pre-wrap break-words">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {msg.content}
+                                </ReactMarkdown>
+                              </div>
                               <button
                                 onClick={() => handleEditAndResend(msg.id)}
                                 className="ml-2 opacity-0 group-hover:opacity-100 inline-flex items-center text-muted-foreground hover:text-foreground align-middle"
@@ -730,53 +810,78 @@ function FloatingAiAssistantContent() {
                 </ScrollArea>
 
                 {/* Input bar */}
-                <div className="p-3 border-t flex gap-2 shrink-0 bg-card">
+                <div className="p-3 border-t shrink-0 bg-card space-y-2">
                   {lastUserPrompt && !sending && activeConvId && (
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-8 px-2 shrink-0"
+                      className="h-8 px-2"
                       onClick={regenerateLast}
                       title="Regenerate last response"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                     </Button>
                   )}
-                  <div className="flex-1 relative">
-                    <Input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Ask about your research..."
-                      className="text-sm h-8 pr-8"
-                      disabled={sending}
-                    />
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Textarea
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder="Ask about your research... (Shift+Enter for new line)"
+                        className="text-sm min-h-8 max-h-40 resize-none pr-8 leading-5"
+                        disabled={sending}
+                        rows={1}
+                      />
+                    </div>
+                    {sending ? (
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="h-8 shrink-0"
+                        onClick={stopStream}
+                        title="Stop generating"
+                      >
+                        <Square className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="h-8 shrink-0"
+                        onClick={sendMessage}
+                        disabled={!input.trim()}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
                   </div>
-                  {sending ? (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="h-8 shrink-0"
-                      onClick={stopStream}
-                      title="Stop generating"
-                    >
-                      <Square className="h-3.5 w-3.5" />
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="h-8 shrink-0"
-                      onClick={sendMessage}
-                      disabled={!input.trim()}
-                    >
-                      <Send className="h-3.5 w-3.5" />
-                    </Button>
-                  )}
+                  {/* Markdown formatting toolbar */}
+                  <div className="flex items-center gap-0.5 flex-wrap">
+                    {FORMAT_BUTTONS.map((btn) => {
+                      const Icon = btn.icon;
+                      return (
+                        <Button
+                          key={btn.title}
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 w-7 p-0 text-muted-foreground hover:text-foreground"
+                          title={btn.title}
+                          onClick={() =>
+                            applyFormat(btn.before, btn.after, btn.placeholder)
+                          }
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
