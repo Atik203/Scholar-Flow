@@ -4678,6 +4678,8 @@ export const UserScalarFieldEnum = {
   emailVerificationToken: 'emailVerificationToken',
   onboardingCompleted: 'onboardingCompleted',
   onboardingStep: 'onboardingStep',
+  twoFactorSecret: 'twoFactorSecret',
+  twoFactorEnabled: 'twoFactorEnabled',
   stripeCustomerId: 'stripeCustomerId',
   stripeSubscriptionId: 'stripeSubscriptionId',
   stripePriceId: 'stripePriceId',
@@ -5507,6 +5509,7 @@ export const UserPreferenceScalarFieldEnum = {
   compactMode: 'compactMode',
   metadata: 'metadata',
   notificationPreferences: 'notificationPreferences',
+  privacySettings: 'privacySettings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
