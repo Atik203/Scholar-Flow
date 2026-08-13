@@ -9,31 +9,29 @@
 
 import {
   Bell,
-  BellOff,
   CheckCheck,
   RefreshCw,
   Settings,
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 import {
   useDeleteBulkNotificationsMutation,
   useDeleteNotificationMutation,
   useGetNotificationsQuery,
+  useGetNotificationSettingsQuery,
   useGetUnreadCountQuery,
   useMarkAllAsReadMutation,
   useMarkAsReadMutation,
   useToggleStarredMutation,
+  useUpdateNotificationSettingsMutation,
 } from "@/redux/api/notificationApi";
 import { NotificationList } from "@/components/notifications/NotificationList";
-import { useNotificationStream } from "@/hooks/useNotificationStream";
 
 export default function NotificationCenterPage() {
-  const [isMuted, setIsMuted] = useState(false);
-
   const { data, isLoading, refetch, isFetching } = useGetNotificationsQuery({
     limit: 50,
   });
@@ -42,14 +40,26 @@ export default function NotificationCenterPage() {
   const { data: unreadData } = useGetUnreadCountQuery();
   const unreadCount = unreadData?.data?.count ?? 0;
 
+  // Real mute state, persisted server-side via notification settings.
+  const { data: settingsData } = useGetNotificationSettingsQuery();
+  const [updateSettings, { isLoading: isUpdatingMute }] =
+    useUpdateNotificationSettingsMutation();
+  const isMuted = settingsData?.data?.muteAll ?? false;
+
+  const onToggleMute = async () => {
+    try {
+      await updateSettings({ muteAll: !isMuted }).unwrap();
+      showSuccessToast(isMuted ? "Notifications unmuted" : "Notifications muted");
+    } catch {
+      showErrorToast("Failed to update mute setting");
+    }
+  };
+
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead] = useMarkAllAsReadMutation();
   const [toggleStarred] = useToggleStarredMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
   const [deleteBulk] = useDeleteBulkNotificationsMutation();
-
-  // Real-time SSE: invalidates cache and shows toast on new event
-  useNotificationStream();
 
   return (
     <div className="space-y-6 pb-12 min-h-screen">
@@ -90,10 +100,11 @@ export default function NotificationCenterPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setIsMuted(!isMuted)}
+            onClick={onToggleMute}
+            disabled={isUpdatingMute}
             className={
               isMuted
-                ? "bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+                ? "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/60 hover:text-red-700 dark:hover:text-red-300"
                 : ""
             }
             title={isMuted ? "Unmute" : "Mute notifications"}
