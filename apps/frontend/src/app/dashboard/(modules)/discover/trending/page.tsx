@@ -9,7 +9,6 @@ import { useGetTrendingQuery } from "@/redux/api/searchApi";
 import { formatDistanceToNow } from "date-fns";
 import { BookOpen, FileText, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 
 const PAGE_SIZE = 12;
 
@@ -18,30 +17,7 @@ export default function TrendingPage() {
 
   const trendingPapers = data?.data ?? [];
   // Trending endpoint is non-paginated today; render what we have.
-  // Infinite scroll is wired but no-op until the backend supports a
-  // paginated variant. We use the same hook so the future migration
-  // is a backend-only change.
   const visible = trendingPapers.slice(0, PAGE_SIZE);
-  const hasMore = trendingPapers.length > PAGE_SIZE;
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!hasMore) return;
-    const node = sentinelRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry?.isIntersecting) {
-          // Placeholder for the future paginated endpoint. No-op for
-          // now — we already rendered all rows.
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [hasMore]);
 
   return (
     <div className="space-y-6">
@@ -121,10 +97,6 @@ export default function TrendingPage() {
               </Card>
             ))}
           </div>
-          {/* Infinite scroll sentinel — currently a no-op since the
-              trending endpoint isn't paginated. Kept so the future
-              migration is a backend-only change. */}
-          {hasMore && <div ref={sentinelRef} className="h-4" />}
         </>
       )}
     </div>
