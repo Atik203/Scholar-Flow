@@ -1,8 +1,15 @@
-import { randomBytes, randomUUID } from "crypto";
+import { randomUUID } from "crypto";
 import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../shared/prisma";
+import {
+  buildOtpAuthUrl,
+  decryptTotpSecret,
+  encryptTotpSecret,
+  generateTotpSecret,
+  verifyTotp,
+} from "../../shared/twoFactor";
 import { StorageService as storageService } from "../papers/storage.service";
 import {
   UpdateOnboardingInput,
@@ -78,7 +85,7 @@ const getMyProfile = async (user: IAuthUser) => {
   const users = await prisma.$queryRaw<any[]>`
     SELECT id, email, name, "firstName", "lastName", institution, "fieldOfStudy",
            image, role, "createdAt", "updatedAt", "emailVerified",
-           "onboardingCompleted", "onboardingStep"
+           "onboardingCompleted", "onboardingStep", "twoFactorEnabled"
     FROM "User"
     WHERE email = ${user?.email} AND "isDeleted" = false
     LIMIT 1
@@ -902,11 +909,12 @@ export const userService = {
   getTwoFactorStatus: async (userId: string) => {
     const user = await prisma.user.findFirst({
       where: { id: userId, isDeleted: false },
-      select: { emailVerified: true },
+      select: { twoFactorEnabled: true, emailVerified: true },
     });
+    if (!user) throw new ApiError(404, "User not found");
     return {
-      enabled: false,
-      emailVerified: Boolean(user?.emailVerified),
+      enabled: Boolean(user.twoFactorEnabled),
+      emailVerified: Boolean(user.emailVerified),
     };
   },
 
@@ -916,30 +924,76 @@ export const userService = {
       select: { email: true },
     });
     if (!user) throw new ApiError(404, "User not found");
-    const secret = randomBytes(20).toString("hex").slice(0, 32);
-    return { secret, qrCodeUrl: `otpauth://totp/ScholarFlow:${user.email}?secret=${secret}&issuer=ScholarFlow` };
+
+    // Rotates any previously pending secret; stays DISABLED until verify.
+    const secret = generateTotpSecret();
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorSecret: encryptTotpSecret(secret) },
+    });
+
+    return {
+      secret,
+      qrCodeUrl: buildOtpAuthUrl(user.email, secret),
+    };
   },
 
   verifyTwoFactor: async (userId: string, token: string) => {
     if (!token || token.length !== 6) {
-      throw new ApiError(400, "Invalid 2FA token");
+      throw new ApiError(400, "Enter the 6-digit code from your authenticator app");
     }
+    const user = await prisma.user.findFirst({
+      where: { id: userId, isDeleted: false },
+      select: { twoFactorSecret: true, twoFactorEnabled: true },
+    });
+    if (!user) throw new ApiError(404, "User not found");
+
+    const secret = user.twoFactorSecret
+      ? decryptTotpSecret(user.twoFactorSecret)
+      : null;
+    if (!secret) {
+      throw new ApiError(400, "No pending 2FA setup. Generate a code first.");
+    }
+
+    if (!verifyTotp(token, secret)) {
+      throw new ApiError(400, "Invalid code. Make sure your device time is correct.");
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: true },
+    });
+
     return { enabled: true };
   },
 
   disableTwoFactor: async (userId: string) => {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: false, twoFactorSecret: null },
+    });
     return { enabled: false };
   },
 
   getPrivacySettings: async (userId: string) => {
     const prefs = await prisma.userPreference.findFirst({
       where: { userId },
+      select: { privacySettings: true },
     });
+    const stored = (prefs?.privacySettings ?? {}) as Record<string, unknown>;
     return {
-      profileVisibility: "public" as const,
-      showActivity: prefs?.emailDigest ?? true,
-      allowDataSharing: false,
-      showInDiscover: true,
+      profileVisibility:
+        (stored.profileVisibility as "public" | "private" | "team") || "public",
+      showActivity:
+        typeof stored.showActivity === "boolean" ? stored.showActivity : true,
+      allowDataSharing:
+        typeof stored.allowDataSharing === "boolean"
+          ? stored.allowDataSharing
+          : false,
+      showInDiscover:
+        typeof stored.showInDiscover === "boolean"
+          ? stored.showInDiscover
+          : true,
     };
   },
 
@@ -949,6 +1003,14 @@ export const userService = {
     allowDataSharing?: boolean;
     showInDiscover?: boolean;
   }) => {
-    return { ...data, updated: true };
+    const current = await userService.getPrivacySettings(userId);
+    const merged = { ...current, ...data };
+    await prisma.userPreference.upsert({
+      where: { userId },
+      create: { userId, privacySettings: merged as unknown as object },
+      update: { privacySettings: merged as unknown as object },
+      select: { id: true },
+    });
+    return merged;
   },
 };

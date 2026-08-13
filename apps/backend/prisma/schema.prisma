@@ -161,6 +161,10 @@ model User {
   onboardingCompleted Boolean @default(false)
   onboardingStep      Int     @default(0)
 
+  // Two-factor authentication (TOTP) — encrypted at rest
+  twoFactorSecret  String? // AES-256-GCM ciphertext (iv:tag:cipher)
+  twoFactorEnabled Boolean @default(false)
+
   // Stripe subscription fields
   stripeCustomerId       String?   @unique
   stripeSubscriptionId   String?   @unique
@@ -1378,6 +1382,8 @@ model UserPreference {
   metadata             Json?    @db.JsonB
   // Phase 7 - Notification preferences (channels, categories, quiet hours)
   notificationPreferences Json? @db.JsonB
+  // Privacy settings (profileVisibility, showActivity, allowDataSharing, showInDiscover)
+  privacySettings Json? @db.JsonB
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
