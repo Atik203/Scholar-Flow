@@ -1,6 +1,6 @@
 import axios from "axios";
 import htmlDocx from "html-docx-js";
-import puppeteer from "puppeteer";
+import puppeteer, { type Browser } from "puppeteer";
 import sanitizeHtml from "sanitize-html";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
 import ApiError from "../../errors/ApiError";
@@ -1341,6 +1341,34 @@ export const editorPaperService = {
       ? sanitizeHtml(input.content, sanitizeOptions)
       : "";
 
+    // Workspace gate: only the owner or an active member may plant papers
+    // in a workspace. Without this, any authenticated user could inject
+    // papers into arbitrary workspaces (workspace-IDOR).
+    if (input.workspaceId) {
+      const allowed = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
+        SELECT EXISTS (
+          SELECT 1 FROM "Workspace" w
+          WHERE w.id = ${input.workspaceId}
+            AND w."isDeleted" = false
+            AND (
+              w."ownerId" = ${uploaderId}
+              OR EXISTS (
+                SELECT 1 FROM "WorkspaceMember" wm
+                WHERE wm."workspaceId" = w.id
+                  AND wm."userId" = ${uploaderId}
+                  AND wm."isDeleted" = false
+              )
+            )
+        ) AS "allowed"
+      `;
+      if (!allowed[0]?.allowed) {
+        throw new ApiError(
+          403,
+          "You are not a member of this workspace or the workspace does not exist"
+        );
+      }
+    }
+
     // Create metadata with authors
     const metadata = {
       source: "editor",
@@ -1457,18 +1485,56 @@ export const editorPaperService = {
     }
   },
 
+  /**
+   * Write gate for editor papers: uploader OR workspace member with an
+   * OWNER/EDITOR role. VIEWER members and non-members get 403. This is the
+   * single gate for content updates, autosaves and version restores so all
+   * three stay consistent (viewing is open to all members, writing is not).
+   */
+  async assertEditorCanEdit(
+    paperId: string,
+    userId: string
+  ): Promise<void> {
+    const rows = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id
+      FROM "Paper" p
+      LEFT JOIN "WorkspaceMember" wm
+        ON wm."workspaceId" = p."workspaceId"
+        AND wm."userId" = ${userId}
+        AND wm."isDeleted" = false
+      WHERE p.id = ${paperId}
+        AND p."isDeleted" = false
+        AND p.source = 'editor'
+        AND (
+          p."uploaderId" = ${userId}
+          OR (wm.id IS NOT NULL AND wm.role IN ('OWNER', 'EDITOR'))
+        )
+      LIMIT 1
+    `;
+
+    if (!rows[0]) {
+      throw new ApiError(
+        403,
+        "You do not have edit access to this editor paper"
+      );
+    }
+  },
+
   // Update editor paper content
   async updateEditorContent(
     paperId: string,
     input: UpdateEditorContentInput,
     userId: string
   ) {
+    await this.assertEditorCanEdit(paperId, userId);
+
     const sanitizedContent = sanitizeHtml(input.content, sanitizeOptions);
 
-    // Save a version snapshot before overwriting
+    // Save a version snapshot before overwriting (manual saves only — the
+    // autosave endpoint never snapshots, keeping versions meaningful).
     const current = await prisma.$queryRaw<Array<{ contentHtml: string; title: string | null }>>`
       SELECT "contentHtml", title FROM "Paper"
-      WHERE id = ${paperId} AND "uploaderId" = ${userId} AND "isDeleted" = false
+      WHERE id = ${paperId} AND "isDeleted" = false
       LIMIT 1
     `;
     if (current.length > 0 && current[0].contentHtml) {
@@ -1488,7 +1554,6 @@ export const editorPaperService = {
         "isDraft" = COALESCE(${input.isDraft}, "isDraft"),
         "updatedAt" = NOW()
       WHERE id = ${paperId} 
-        AND "uploaderId" = ${userId}
         AND "isDeleted" = false
         AND source = 'editor'
       RETURNING id, title, "isDraft", "updatedAt"
@@ -1530,7 +1595,44 @@ export const editorPaperService = {
     offset: number = 0
   ) {
     if (isDraft !== undefined) {
-      return await prisma.$queryRaw<
+      const [papers, countRows] = await Promise.all([
+        prisma.$queryRaw<
+          Array<{
+            id: string;
+            title: string;
+            abstract: string | null;
+            isDraft: boolean;
+            isPublished: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            workspaceId: string;
+          }>
+        >`
+          SELECT
+            p.id, p.title, p.abstract, p."isDraft", p."isPublished",
+            p."createdAt", p."updatedAt", p."workspaceId"
+          FROM "Paper" p
+          WHERE p."uploaderId" = ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND p."isDraft" = ${isDraft}
+          ORDER BY p."updatedAt" DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `,
+        prisma.$queryRaw<Array<{ total: number }>>`
+          SELECT COUNT(*)::int AS total
+          FROM "Paper" p
+          WHERE p."uploaderId" = ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND p."isDraft" = ${isDraft}
+        `,
+      ]);
+      return { papers, total: countRows[0]?.total ?? 0 };
+    }
+
+    const [papers, countRows] = await Promise.all([
+      prisma.$queryRaw<
         Array<{
           id: string;
           title: string;
@@ -1542,41 +1644,25 @@ export const editorPaperService = {
           workspaceId: string;
         }>
       >`
-        SELECT 
+        SELECT
           p.id, p.title, p.abstract, p."isDraft", p."isPublished",
           p."createdAt", p."updatedAt", p."workspaceId"
         FROM "Paper" p
         WHERE p."uploaderId" = ${userId}
           AND p."isDeleted" = false
           AND p.source = 'editor'
-          AND p."isDraft" = ${isDraft}
         ORDER BY p."updatedAt" DESC
         LIMIT ${limit} OFFSET ${offset}
-      `;
-    }
-
-    return await prisma.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        abstract: string | null;
-        isDraft: boolean;
-        isPublished: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        workspaceId: string;
-      }>
-    >`
-      SELECT 
-        p.id, p.title, p.abstract, p."isDraft", p."isPublished",
-        p."createdAt", p."updatedAt", p."workspaceId"
-      FROM "Paper" p
-      WHERE p."uploaderId" = ${userId}
-        AND p."isDeleted" = false
-        AND p.source = 'editor'
-      ORDER BY p."updatedAt" DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+      `,
+      prisma.$queryRaw<Array<{ total: number }>>`
+        SELECT COUNT(*)::int AS total
+        FROM "Paper" p
+        WHERE p."uploaderId" = ${userId}
+          AND p."isDeleted" = false
+          AND p.source = 'editor'
+      `,
+    ]);
+    return { papers, total: countRows[0]?.total ?? 0 };
   },
 
   // Delete editor paper (soft delete)
@@ -1615,8 +1701,11 @@ export const editorPaperService = {
     return result[0] || null;
   },
 
-  // Auto-save functionality (updates content without changing draft status)
+  // Auto-save functionality (updates content without changing draft status
+  // and without a version snapshot — versions are reserved for manual saves)
   async autoSaveContent(paperId: string, content: string, userId: string) {
+    await this.assertEditorCanEdit(paperId, userId);
+
     const sanitizedContent = sanitizeHtml(content, sanitizeOptions);
 
     return await prisma.$executeRaw`
@@ -1625,7 +1714,6 @@ export const editorPaperService = {
         "contentHtml" = ${sanitizedContent},
         "updatedAt" = NOW()
       WHERE id = ${paperId} 
-        AND "uploaderId" = ${userId}
         AND "isDeleted" = false
         AND source = 'editor'
     `;
@@ -1633,6 +1721,58 @@ export const editorPaperService = {
 };
 
 // Export service functions
+
+// One shared headless browser per process — launching a fresh Chrome per
+// export was a CPU/DoS vector (each spawn costs hundreds of ms + RAM).
+// Lazily launched, reused across requests, auto-reset if the process dies.
+let pdfBrowserPromise: Promise<Browser> | null = null;
+
+function getPdfBrowser(): Promise<Browser> {
+  if (!pdfBrowserPromise) {
+    pdfBrowserPromise = puppeteer
+      .launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+        ],
+      })
+      .catch((error) => {
+        pdfBrowserPromise = null;
+        throw error;
+      });
+  }
+  return pdfBrowserPromise;
+}
+
+function closePdfBrowser(): void {
+  pdfBrowserPromise = null;
+}
+
+// Cap concurrent PDF renders (bounded CPU/memory under burst traffic).
+const MAX_PDF_CONCURRENCY = 2;
+let activePdfExports = 0;
+const pdfExportWaiters: Array<() => void> = [];
+
+async function acquirePdfSlot(): Promise<void> {
+  if (activePdfExports < MAX_PDF_CONCURRENCY) {
+    activePdfExports += 1;
+    return;
+  }
+  await new Promise<void>((resolve) => {
+    pdfExportWaiters.push(resolve);
+  });
+  activePdfExports += 1;
+}
+
+function releasePdfSlot(): void {
+  activePdfExports = Math.max(0, activePdfExports - 1);
+  pdfExportWaiters.shift()?.();
+}
+
+const PDF_RENDER_TIMEOUT_MS = 60_000;
+
 export const exportService = {
   // Generate PDF from HTML content
   async generatePDF(paperId: string, userId: string): Promise<Buffer> {
@@ -1645,20 +1785,29 @@ export const exportService = {
       throw new Error("Paper not found or access denied");
     }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-      ],
-    });
-
+    await acquirePdfSlot();
     try {
-      const page = await browser.newPage();
+      // Crash recovery: if the shared browser died (OOM, container restart),
+      // drop the cached promise and relaunch once before giving up.
+      let browser: Browser;
+      try {
+        browser = await getPdfBrowser();
+      } catch (error) {
+        closePdfBrowser();
+        throw error;
+      }
 
-      // Create HTML document with styling
-      const htmlContent = `
+      let page: import("puppeteer").Page;
+      try {
+        page = await browser.newPage();
+      } catch (error) {
+        closePdfBrowser();
+        browser = await getPdfBrowser();
+        page = await browser.newPage();
+      }
+      try {
+        // Create HTML document with styling
+        const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -1745,22 +1894,38 @@ export const exportService = {
         </html>
       `;
 
-      await page.setContent(htmlContent, { waitUntil: "networkidle0" });
+        await page.setContent(htmlContent, {
+          waitUntil: "networkidle0",
+          timeout: 30_000,
+        });
 
-      const pdfBuffer = await page.pdf({
-        format: "A4",
-        printBackground: true,
-        margin: {
-          top: "20mm",
-          right: "15mm",
-          bottom: "20mm",
-          left: "15mm",
-        },
-      });
+        const pdfBuffer = await Promise.race([
+          page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: {
+              top: "20mm",
+              right: "15mm",
+              bottom: "20mm",
+              left: "15mm",
+            },
+          }),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("PDF rendering timed out")),
+              PDF_RENDER_TIMEOUT_MS
+            )
+          ),
+        ]);
 
-      return Buffer.from(pdfBuffer);
+        return Buffer.from(pdfBuffer);
+      } finally {
+        await page.close().catch(() => {
+          // Page already gone — nothing to clean up
+        });
+      }
     } finally {
-      await browser.close();
+      releasePdfSlot();
     }
   },
 
@@ -1796,10 +1961,11 @@ export const exportService = {
         }
 
         try {
-          console.log(`[DOCX Export] Converting image to base64: ${imgUrl}`);
           const response = await axios.get(imgUrl, {
             responseType: "arraybuffer",
             timeout: 10000, // 10 second timeout
+            maxContentLength: 10 * 1024 * 1024, // refuse >10MB images
+            maxBodyLength: 10 * 1024 * 1024,
           });
 
           const contentType = response.headers["content-type"] || "image/png";
@@ -1825,8 +1991,6 @@ export const exportService = {
           img.base64
         );
       }
-
-      console.log(`[DOCX Export] Converted ${images.length} images to base64`);
     } catch (error) {
       console.warn("[DOCX Export] Error processing images:", error);
       // Continue with original content if image processing fails
@@ -1961,9 +2125,5 @@ export const paperVersionService = {
         savedAt: true,
       },
     });
-  },
-
-  async deleteVersion(versionId: string) {
-    return prisma.paperVersion.delete({ where: { id: versionId } });
   },
 };

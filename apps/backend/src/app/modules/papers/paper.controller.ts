@@ -21,6 +21,7 @@ import {
 } from "./paper.service";
 import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
+  autosaveContentSchema,
   createEditorPaperSchema,
   deletePaperParamsSchema,
   generatePaperInsightSchema,
@@ -702,25 +703,44 @@ export const paperController = {
       throw new ApiError(404, "Paper not found");
     }
 
-    // Get all chunks
-    const chunks = await prisma.paperChunk.findMany({
-      where: { paperId: parsed.data.id, isDeleted: false },
-      orderBy: { idx: "asc" },
-      select: {
-        id: true,
-        idx: true,
-        page: true,
-        content: true,
-        tokenCount: true,
-        createdAt: true,
-      },
-    });
+    // Get chunks — bounded: default 50, hard cap 200. The full chunk set
+    // can be thousands of rows; consumers paginate with offset instead.
+    const limit = Math.min(
+      Math.max(parseInt(String(req.query.limit ?? "50"), 10) || 50, 1),
+      200
+    );
+    const offset = Math.max(
+      parseInt(String(req.query.offset ?? "0"), 10) || 0,
+      0
+    );
+
+    const [chunks, total] = await Promise.all([
+      prisma.paperChunk.findMany({
+        where: { paperId: parsed.data.id, isDeleted: false },
+        orderBy: { idx: "asc" },
+        select: {
+          id: true,
+          idx: true,
+          page: true,
+          content: true,
+          tokenCount: true,
+          createdAt: true,
+        },
+        skip: offset,
+        take: limit,
+      }),
+      prisma.paperChunk.count({
+        where: { paperId: parsed.data.id, isDeleted: false },
+      }),
+    ]);
 
     sendSuccessResponse(
       res,
       {
-        chunksCount: chunks.length,
+        chunksCount: total,
         chunks: chunks,
+        limit,
+        offset,
       },
       "All chunks retrieved"
     );
@@ -1351,6 +1371,9 @@ export const editorPaperController = {
         201
       );
     } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
       console.error("[EditorPaperController] Create failed:", error);
       throw new ApiError(500, "Failed to create editor paper");
     }
@@ -1420,17 +1443,18 @@ export const editorPaperController = {
   autoSaveContent: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     const paramsParsed = getPaperParamsSchema.safeParse(req.params);
+    const bodyParsed = autosaveContentSchema.safeParse(req.body);
 
     if (!paramsParsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
-    if (!req.body.content || typeof req.body.content !== "string") {
+    if (!bodyParsed.success) {
       throw new ApiError(400, "Content is required");
     }
 
     await editorPaperService.autoSaveContent(
       paramsParsed.data.id,
-      req.body.content,
+      bodyParsed.data.content,
       authReq.user.id
     );
 
@@ -1475,7 +1499,7 @@ export const editorPaperController = {
     const draftFilter =
       isDraft === "true" ? true : isDraft === "false" ? false : undefined;
 
-    const papers = await editorPaperService.getUserEditorPapers(
+    const result = await editorPaperService.getUserEditorPapers(
       authReq.user.id,
       draftFilter,
       limitNum,
@@ -1485,11 +1509,11 @@ export const editorPaperController = {
     const meta = {
       page: pageNum,
       limit: limitNum,
-      total: papers.length, // This would ideally be total count, but for now using current results
-      totalPage: Math.ceil(papers.length / limitNum),
+      total: result.total,
+      totalPage: Math.ceil(result.total / limitNum),
     };
 
-    return sendPaginatedResponse(res, papers, meta, "Editor papers retrieved");
+    return sendPaginatedResponse(res, result.papers, meta, "Editor papers retrieved");
   }),
 
   // Delete editor paper
@@ -1635,8 +1659,6 @@ export const editorPaperController = {
         authReq.file.mimetype
       );
 
-      console.log("[EditorPaperController] Upload result:", result);
-
       const responseData = {
         message: "Image uploaded successfully",
         data: {
@@ -1644,8 +1666,6 @@ export const editorPaperController = {
           fileName: result.filename,
         },
       };
-
-      console.log("[EditorPaperController] Sending response:", responseData);
 
       sendSuccessResponse(res, responseData.data, responseData.message);
     } catch (error) {
