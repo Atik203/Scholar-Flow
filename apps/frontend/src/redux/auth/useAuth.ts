@@ -11,17 +11,20 @@ import {
   selectAuthLoading,
   selectCurrentUser,
   selectIsAuthenticated,
+  selectSessionToken,
 } from "./authSlice";
 
 export function useAuth() {
   const user = useAppSelector(selectCurrentUser);
   const accessToken = useAppSelector(selectAccessToken);
+  const sessionToken = useAppSelector(selectSessionToken);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isLoading = useAppSelector(selectAuthLoading);
 
   return {
     user,
     accessToken,
+    sessionToken,
     status: isLoading
       ? ("loading" as const)
       : isAuthenticated
