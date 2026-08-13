@@ -16,6 +16,7 @@ interface AuthResponse {
   data?: {
     user: TUser;
     accessToken: string;
+    sessionToken?: string;
   };
 }
 
@@ -58,6 +59,7 @@ export async function signInWithCredentials(
       setCredentials({
         user: data.data.user,
         accessToken: data.data.accessToken,
+        sessionToken: data.data.sessionToken,
       })
     );
 
@@ -143,6 +145,7 @@ export async function completeOAuthSignIn(
       setCredentials({
         user: data.data.user,
         accessToken: data.data.accessToken,
+        sessionToken: data.data.sessionToken,
       })
     );
 

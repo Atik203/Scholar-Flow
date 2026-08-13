@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../../errors/ApiError";
@@ -9,6 +10,10 @@ import {
   AsyncRequestHandler,
 } from "../../types/express";
 import { AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from "./auth.constant";
+
+// Session rows are bookkeeping for the Active Sessions page; the expiry
+// mirrors the 7d access-token TTL (both are extended by a fresh sign-in).
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 import {
   IOAuthSignInRequest,
   IRoleUpdateData,
@@ -76,6 +81,17 @@ class AuthController {
         ...clientInfo,
       }).catch(() => {});
 
+      // Bookkeeping session row so the Active Sessions page can list this
+      // sign-in. Token is opaque (random UUID); the access JWT stays
+      // stateless. Non-fatal: login must succeed even if this row fails.
+      const sessionToken = randomUUID();
+      authService
+        .createSession(user.id, {
+          sessionToken,
+          expires: new Date(Date.now() + SESSION_TTL_MS),
+        })
+        .catch(() => {});
+
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -91,6 +107,7 @@ class AuthController {
             onboardingStep: user.onboardingStep,
           },
           accessToken,
+          sessionToken,
         },
       });
     }
