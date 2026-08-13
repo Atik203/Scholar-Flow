@@ -74,33 +74,33 @@ export default function ResearchAnnotationsPage() {
       PROCESSED: {
         variant: "outline" as const,
         label: "Ready",
-        color: "text-green-600",
+        color: "text-green-600 dark:text-green-400",
       },
       PROCESSING: {
         variant: "default" as const,
         label: "Processing",
-        color: "text-blue-600",
+        color: "text-blue-600 dark:text-blue-400",
       },
       UPLOADED: {
         variant: "secondary" as const,
         label: "Uploaded",
-        color: "text-yellow-600",
+        color: "text-yellow-600 dark:text-yellow-400",
       },
       FAILED: {
         variant: "destructive" as const,
         label: "Failed",
-        color: "text-red-600",
+        color: "text-red-600 dark:text-red-400",
       },
     };
     return statusMap[status as keyof typeof statusMap] || statusMap.UPLOADED;
   };
 
   return (
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="w-full max-w-[1600px] mx-auto space-y-6">
         {/* Enhanced Header */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
+        <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-4 rounded-lg border">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild className="hover:bg-white/80">
+            <Button variant="ghost" asChild className="hover:bg-muted">
               <Link href="/dashboard/research">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Research Tools
@@ -118,10 +118,10 @@ export default function ResearchAnnotationsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-6 items-start">
           {/* Paper Selection Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="shadow-sm border-border/50">
+          <div>
+            <Card className="shadow-sm border-border/50 lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <FileText className="h-5 w-5" />
@@ -195,7 +195,7 @@ export default function ResearchAnnotationsPage() {
                               )}
                               {year && <div>{year}</div>}
                               {paper.file && (
-                                <div className="text-xs text-blue-600 mt-1">
+                                <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                                   <FileText className="h-3 w-3 inline mr-1" />
                                   {paper.file.originalFilename}
                                 </div>
@@ -212,7 +212,7 @@ export default function ResearchAnnotationsPage() {
           </div>
 
           {/* Main Annotation Area */}
-          <div className="lg:col-span-3">
+          <div className="min-w-0">
             {!selectedPaperId ? (
               <Card className="shadow-sm border-border/50">
                 <CardContent className="flex flex-col items-center justify-center py-16">
@@ -249,7 +249,7 @@ export default function ResearchAnnotationsPage() {
 
                   {/* Tab Navigation */}
                   <div className="border-b mt-4">
-                    <nav className="flex space-x-8">
+                    <nav className="flex flex-wrap gap-1 pb-px">
                       {([
                         { id: "preview", label: "Preview", icon: Eye },
                         {
@@ -273,7 +273,7 @@ export default function ResearchAnnotationsPage() {
                           <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                            className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                               activeTab === tab.id
                                 ? "border-primary text-primary"
                                 : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground"
@@ -293,7 +293,7 @@ export default function ResearchAnnotationsPage() {
                   {activeTab === "preview" && (
                     <>
                       {isFetchingFileUrl ? (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                             <p className="text-sm text-muted-foreground">
@@ -302,7 +302,7 @@ export default function ResearchAnnotationsPage() {
                           </div>
                         </div>
                       ) : fileUrlError ? (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2 text-destructive">
@@ -322,7 +322,7 @@ export default function ResearchAnnotationsPage() {
                           </div>
                         </div>
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
-                        <div className="h-[600px] border rounded-lg">
+                        <div className="min-h-[70vh] border rounded-lg">
                           <DocumentPreview
                             fileUrl={fileUrlData.data.url}
                             fileName={
@@ -341,7 +341,7 @@ export default function ResearchAnnotationsPage() {
                           />
                         </div>
                       ) : (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2">
@@ -361,7 +361,7 @@ export default function ResearchAnnotationsPage() {
                   {activeTab === "annotations" && (
                     <>
                       {isFetchingFileUrl ? (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                             <p className="text-sm text-muted-foreground">
@@ -370,7 +370,7 @@ export default function ResearchAnnotationsPage() {
                           </div>
                         </div>
                       ) : fileUrlError ? (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2 text-destructive">
@@ -397,7 +397,7 @@ export default function ResearchAnnotationsPage() {
                           />
                         </div>
                       ) : (
-                        <div className="h-[600px] border rounded-lg flex items-center justify-center">
+                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <h3 className="text-lg font-semibold mb-2">
@@ -415,7 +415,7 @@ export default function ResearchAnnotationsPage() {
 
                   {/* Comments Tab */}
                   {activeTab === "comments" && (
-                    <div className="h-[600px] border rounded-lg">
+                    <div className="min-h-[70vh] border rounded-lg">
                       <CommentSection
                         paperId={selectedPaperId}
                         className="h-full"
@@ -425,7 +425,7 @@ export default function ResearchAnnotationsPage() {
 
                   {/* Notes Tab */}
                   {activeTab === "notes" && (
-                    <div className="h-[600px] border rounded-lg">
+                    <div className="min-h-[70vh] border rounded-lg">
                       <NotesPanel
                         paperId={selectedPaperId}
                         className="h-full"

@@ -83,16 +83,16 @@ export function AnnotationLayer({
           title={`${annotation.type}: ${annotation.text}`}
         >
           {/* Annotation icon overlay */}
-          <div className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute -top-2 -right-2 bg-white dark:bg-card rounded-full p-1 shadow-sm border text-xs opacity-0 group-hover:opacity-100 transition-opacity">
             {getAnnotationIcon(annotation.type)}
           </div>
           
           {/* Annotation text preview on hover */}
-          <div className="absolute top-full left-0 mt-1 bg-white border rounded shadow-lg p-2 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-            <div className="text-xs font-medium text-gray-700 mb-1">
+          <div className="absolute top-full left-0 mt-1 bg-white dark:bg-card border rounded shadow-lg p-2 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
+            <div className="text-xs font-medium text-gray-700 dark:text-foreground mb-1">
               {annotation.user.name}
             </div>
-            <div className="text-xs text-gray-600 line-clamp-3">
+            <div className="text-xs text-gray-600 dark:text-muted-foreground line-clamp-3">
               {annotation.text}
             </div>
           </div>

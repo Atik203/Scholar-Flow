@@ -176,7 +176,7 @@ export default function PdfExtractionPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-blue-500" />
+                <FileText className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                 <div>
                   <p className="text-sm font-medium">Total Papers</p>
                   <p className="text-2xl font-bold">{stats.total}</p>
@@ -187,7 +187,7 @@ export default function PdfExtractionPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />
                 <div>
                   <p className="text-sm font-medium">Processed</p>
                   <p className="text-2xl font-bold">{stats.processed}</p>
@@ -198,7 +198,7 @@ export default function PdfExtractionPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-500" />
+                <Clock className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                 <div>
                   <p className="text-sm font-medium">Processing</p>
                   <p className="text-2xl font-bold">{stats.processing}</p>
@@ -209,7 +209,7 @@ export default function PdfExtractionPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <XCircle className="h-4 w-4 text-red-500" />
+                <XCircle className="h-4 w-4 text-red-500 dark:text-red-400" />
                 <div>
                   <p className="text-sm font-medium">Failed</p>
                   <p className="text-2xl font-bold">{stats.failed}</p>
@@ -220,7 +220,7 @@ export default function PdfExtractionPage() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
-                <Upload className="h-4 w-4 text-gray-500" />
+                <Upload className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Uploaded</p>
                   <p className="text-2xl font-bold">{stats.uploaded}</p>
@@ -313,7 +313,7 @@ export default function PdfExtractionPage() {
                             ))}
                           </div>
                         ) : papersError ? (
-                          <div className="text-center py-4 text-red-500">
+                          <div className="text-center py-4 text-red-500 dark:text-red-400">
                             <AlertCircle className="h-8 w-8 mx-auto mb-2" />
                             <p>Error loading papers</p>
                             <Button
@@ -698,7 +698,7 @@ export default function PdfExtractionPage() {
                   {/* Failed Papers */}
                   {failedPapers.length > 0 && (
                     <div className="space-y-2">
-                      <Label className="text-red-600">
+                      <Label className="text-red-600 dark:text-red-400">
                         Failed Papers ({failedPapers.length})
                       </Label>
                       <div className="max-h-60 overflow-y-auto space-y-2">
@@ -709,7 +709,7 @@ export default function PdfExtractionPage() {
                                 <h4 className="font-medium text-sm truncate">
                                   {paper.title}
                                 </h4>
-                                <p className="text-xs text-red-600">
+                                <p className="text-xs text-red-600 dark:text-red-400">
                                   Processing failed
                                 </p>
                               </div>
