@@ -10,7 +10,11 @@ import prisma from "../../shared/prisma";
 
 const escapeCsv = (v: unknown): string => {
   if (v === null || v === undefined) return "";
-  const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  let s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  // Neutralize CSV formula injection (= + - @ execute in Excel).
+  if (/^[=+\-@]/.test(s)) {
+    s = `'${s}`;
+  }
   if (s.includes(",") || s.includes('"') || s.includes("\n")) {
     return `"${s.replace(/"/g, '""')}"`;
   }
