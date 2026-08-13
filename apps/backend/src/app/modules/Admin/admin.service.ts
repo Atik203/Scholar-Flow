@@ -5,6 +5,7 @@
 
 import os from "os";
 import ApiError from "../../errors/ApiError";
+import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import { ADMIN_ERROR_MESSAGES } from "./admin.constant";
 import {
@@ -165,7 +166,7 @@ class AdminService {
 
       // Get total count
       const totalCount = await prisma.$queryRaw<Array<{ count: number }>>`
-        SELECT COUNT(*)::int as count FROM "User" u WHERE ${whereSql}
+        SELECT COUNT(*)::int as count FROM "User" u WHERE ${Prisma.raw(whereSql)}
       `;
       const total = totalCount[0].count;
 
@@ -207,7 +208,7 @@ class AdminService {
             WHERE wm."userId" = u.id
           ) as "workspaceCount"
         FROM "User" u
-        WHERE ${whereSql}
+        WHERE ${Prisma.raw(whereSql)}
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
