@@ -208,6 +208,11 @@ export interface UpdateEditorContentRequest {
   isDraft?: boolean;
 }
 
+export interface AutoSaveEditorContentRequest {
+  id: string;
+  content: string;
+}
+
 export interface PublishDraftRequest {
   id: string;
   title?: string;
@@ -449,6 +454,20 @@ export const paperApi = apiSlice.injectEndpoints({
       query: ({ id, ...body }) => ({
         url: `/editor/${id}/content`,
         method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    // Debounced autosave — lighter endpoint, never creates a version snapshot
+    // (versions are reserved for manual saves via updateEditorContent).
+    autoSaveEditorContent: builder.mutation<
+      { data: { paper: EditorPaper } },
+      AutoSaveEditorContentRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/autosave`,
+        method: "PATCH",
         body,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
@@ -809,6 +828,7 @@ export const {
   // Editor endpoints
   useCreateEditorPaperMutation,
   useUpdateEditorContentMutation,
+  useAutoSaveEditorContentMutation,
   useGetEditorPaperQuery,
   useListEditorPapersQuery,
   usePublishDraftMutation,

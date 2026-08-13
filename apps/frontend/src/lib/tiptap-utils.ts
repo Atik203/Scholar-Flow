@@ -362,10 +362,8 @@ export const handleImageUpload = async (
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const response = JSON.parse(xhr.responseText);
-            console.log("Upload response received:", response);
 
             if (response.success && response.data?.url) {
-              console.log("Upload successful, URL:", response.data.url);
               resolve(response.data.url);
             } else {
               console.error("Upload failed - response:", response);
@@ -375,7 +373,6 @@ export const handleImageUpload = async (
             }
           } catch (error) {
             console.error("Response parsing error:", error);
-            console.error("Raw response text:", xhr.responseText);
             reject(new Error("Invalid response from server"));
           }
         } else {
