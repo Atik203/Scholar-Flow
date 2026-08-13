@@ -297,6 +297,23 @@ export class SearchService {
     if (results.notes) aggregateTotal += results.notes.total;
     if (results.people) aggregateTotal += results.people.total;
 
+    // Auto-record to search history so the history page is populated.
+    // Failure must never break the search response.
+    try {
+      await SearchService.saveSearchQuery(userId, q, { type }, {
+        total: aggregateTotal,
+        papers: results.papers?.total ?? 0,
+        collections: results.collections?.total ?? 0,
+        workspaces: results.workspaces?.total ?? 0,
+        notes: results.notes?.total ?? 0,
+        people: results.people?.total ?? 0,
+      });
+    } catch (historyError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[SearchService] history record failed:", historyError);
+      }
+    }
+
     return {
       results,
       meta: { limit, skip, total: aggregateTotal },
