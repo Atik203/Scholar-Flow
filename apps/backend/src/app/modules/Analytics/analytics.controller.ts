@@ -44,6 +44,7 @@ export const analyticsController = {
     const eventId = String(req.params.eventId);
     const units = Number(req.body?.units ?? 0);
     const session = await personalAnalyticsService.stopReadingSession(
+      authReq.user.id,
       eventId,
       units
     );

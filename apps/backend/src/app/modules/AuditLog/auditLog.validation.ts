@@ -1,4 +1,11 @@
 import { z } from "zod";
+import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
+
+const safeDate = (v: string | undefined): Date | undefined => {
+  if (!v) return undefined;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+};
 
 export const listAuditLogQuerySchema = z.object({
   userId: z.string().uuid().optional(),
@@ -7,22 +14,11 @@ export const listAuditLogQuerySchema = z.object({
   entityId: z.string().uuid().optional(),
   action: z.string().optional(),
   severity: z.enum(["INFO", "WARNING", "ERROR", "CRITICAL"]).optional(),
-  startDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
-  endDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
+  startDate: z.string().datetime().optional().transform(safeDate),
+  endDate: z.string().datetime().optional().transform(safeDate),
   search: z.string().optional(),
-  page: z.string().optional().transform((v) => (v ? parseInt(v, 10) : 1)),
-  limit: z
-    .string()
-    .optional()
-    .transform((v) => (v ? Math.min(parseInt(v, 10), 200) : 50)),
+  page: z.string().optional().transform((v) => toPositiveInt(v, 1)),
+  limit: z.string().optional().transform((v) => toBoundedInt(v, 50, 200)),
 });
 
 export const exportAuditLogQuerySchema = z.object({
@@ -32,21 +28,10 @@ export const exportAuditLogQuerySchema = z.object({
   entityId: z.string().uuid().optional(),
   action: z.string().optional(),
   severity: z.enum(["INFO", "WARNING", "ERROR", "CRITICAL"]).optional(),
-  startDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
-  endDate: z
-    .string()
-    .datetime()
-    .optional()
-    .transform((v) => (v ? new Date(v) : undefined)),
+  startDate: z.string().datetime().optional().transform(safeDate),
+  endDate: z.string().datetime().optional().transform(safeDate),
   format: z.enum(["json", "csv"]).default("json"),
-  limit: z
-    .string()
-    .optional()
-    .transform((v) => (v ? Math.min(parseInt(v, 10), 5000) : 1000)),
+  limit: z.string().optional().transform((v) => toBoundedInt(v, 1000, 5000)),
 });
 
 export const createAuditEntrySchema = z.object({

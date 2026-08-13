@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
+import { toBoundedInt } from "../../shared/parseIntSafe";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
 import { notificationService } from "./notification.service";
 import { listQuerySchema, notificationIdSchema } from "./notification.validation";
@@ -13,7 +14,7 @@ export const NotificationController = {
 
     const q = listQuerySchema.parse(req.query);
     const cursor = q.cursor;
-    const limit = Math.min(50, parseInt((q.limit as string) || "20", 10));
+    const limit = toBoundedInt(q.limit, 20, 50);
 
     const queryParams = {
       type: q.type as string | undefined,
