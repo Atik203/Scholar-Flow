@@ -104,6 +104,21 @@ const globalErrorHandler = (
       },
     ];
   }
+  // Handle multer upload errors (oversized files, too many files)
+  else if ((err as any)?.name === "MulterError") {
+    const multerCode = (err as any)?.code as string | undefined;
+    statusCode = multerCode === "LIMIT_FILE_SIZE" ? 413 : 400;
+    message =
+      multerCode === "LIMIT_FILE_SIZE"
+        ? "File too large"
+        : `Upload failed: ${multerCode ?? "unknown multer error"}`;
+    errorSources = [
+      {
+        path: "upload",
+        message,
+      },
+    ];
+  }
   // Handle generic Error instances
   else if (err instanceof Error) {
     message = err?.message;
