@@ -10,6 +10,7 @@ import {
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { editorPaperController, paperController } from "./paper.controller";
 import {
+  autosaveContentSchema,
   createEditorPaperSchema,
   generatePaperInsightSchema,
   generatePaperSummarySchema,
@@ -24,6 +25,13 @@ import {
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+});
+
+// Editor images are bounded at 5MB at the multer level — buffering 50MB
+// only to reject it later wasted memory under upload bursts.
+const editorImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 });
 
 export const paperRoutes: express.Router = express.Router();
@@ -221,11 +229,12 @@ editorPaperRoutes.put(
   editorPaperController.updateEditorContent as any
 );
 
-// Auto-save editor content (no validation middleware for performance)
+// Auto-save editor content (debounced saves; no version snapshot)
 editorPaperRoutes.patch(
   "/:id/autosave",
   paperOperationLimiter,
   authMiddleware as any,
+  validateRequestBody(autosaveContentSchema) as any,
   editorPaperController.autoSaveContent as any
 );
 
@@ -273,7 +282,7 @@ editorPaperRoutes.post(
   "/upload-image",
   paperUploadLimiter,
   authMiddleware as any,
-  upload.single("image") as any,
+  editorImageUpload.single("image") as any,
   editorPaperController.uploadImage as any
 );
 
