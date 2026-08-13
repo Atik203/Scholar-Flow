@@ -9,20 +9,19 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Download, FileJson, FileSpreadsheet, FileText, Check, ChevronRight, Download as DownloadIcon } from "lucide-react";
+import { Download, FileJson, FileSpreadsheet, FileText, Check, ChevronRight, Download as DownloadIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/customUI/PageHeader";
 import { USER_ROLES, hasRoleAccess } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
+import { downloadAuthenticatedFile } from "@/lib/downloadBlob";
+import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 
 type Step = 1 | 2 | 3;
-type DataChoice = "personal" | "usage";
 type Format = "csv" | "json";
 
-const DATA_OPTIONS: Array<{ id: DataChoice; label: string; description: string }> = [
-  { id: "personal", label: "Personal analytics", description: "Reading activity, papers, achievements" },
+const DATA_OPTIONS: Array<{ id: "usage"; label: string; description: string }> = [
   { id: "usage", label: "Usage metrics", description: "API calls, storage, AI credits, feature usage" },
 ];
 
@@ -42,8 +41,8 @@ export default function ExportAnalyticsPage() {
   const hasAccess = hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER);
 
   const [step, setStep] = useState<Step>(1);
-  const [dataChoice, setDataChoice] = useState<DataChoice>("usage");
   const [format, setFormat] = useState<Format>("csv");
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!hasAccess) {
     return (
@@ -65,12 +64,19 @@ export default function ExportAnalyticsPage() {
     );
   }
 
-  const handleDownload = () => {
-    if (dataChoice === "usage") {
-      const url = `/api/analytics/usage/export?format=${format}`;
-      window.open(url, "_blank");
-    } else {
-      showSuccessToast("Coming soon", "Personal export will be available in the next release.");
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      await downloadAuthenticatedFile(
+        `/analytics/usage/export?format=${format}`,
+        session?.accessToken ?? null,
+        `analytics-usage.${format}`
+      );
+      showSuccessToast("Download started", `Your ${format.toUpperCase()} export is downloading.`);
+    } catch {
+      showErrorToast("Export failed", "Could not download the export. Please try again.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -116,18 +122,13 @@ export default function ExportAnalyticsPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {DATA_OPTIONS.map((opt) => (
-                <button
+                <div
                   key={opt.id}
-                  onClick={() => setDataChoice(opt.id)}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition ${
-                    dataChoice === opt.id
-                      ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20"
-                      : "border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                  }`}
+                  className="w-full p-4 rounded-xl border-2 text-left transition border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20"
                 >
                   <p className="font-medium">{opt.label}</p>
                   <p className="text-sm text-muted-foreground">{opt.description}</p>
-                </button>
+                </div>
               ))}
             </CardContent>
             <div className="p-6 pt-0 flex justify-end">
@@ -196,7 +197,7 @@ export default function ExportAnalyticsPage() {
               <div className="flex justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                 <span className="text-sm text-muted-foreground">Data</span>
                 <span className="text-sm font-medium">
-                  {DATA_OPTIONS.find((o) => o.id === dataChoice)?.label}
+                  {DATA_OPTIONS[0].label}
                 </span>
               </div>
               <div className="flex justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
@@ -212,10 +213,15 @@ export default function ExportAnalyticsPage() {
               </Button>
               <Button
                 onClick={handleDownload}
+                disabled={isDownloading}
                 className="gap-2 bg-indigo-600 hover:bg-indigo-700"
               >
-                <DownloadIcon className="h-4 w-4" />
-                Download
+                {isDownloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <DownloadIcon className="h-4 w-4" />
+                )}
+                {isDownloading ? "Downloading..." : "Download"}
               </Button>
             </div>
           </Card>
