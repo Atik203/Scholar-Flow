@@ -149,9 +149,23 @@ class AdminService {
       const limit = filters.limit || 10;
       const offset = (page - 1) * limit;
 
+      // Role/status filters were silently ignored before. Role is
+      // whitelisted (enum-like shape) before being inlined so the raw
+      // SQL stays injection-safe.
+      const whereParts: string[] = ['u."isDeleted" = false'];
+      if (filters.role && /^[A-Z][A-Z_]{0,40}$/.test(filters.role)) {
+        whereParts.push(`u."role" = '${filters.role}'`);
+      }
+      if (filters.status === "active") {
+        whereParts.push('u."isActive" = true');
+      } else if (filters.status === "inactive") {
+        whereParts.push('(u."isActive" = false OR u."isActive" IS NULL)');
+      }
+      const whereSql = whereParts.join(" AND ");
+
       // Get total count
       const totalCount = await prisma.$queryRaw<Array<{ count: number }>>`
-        SELECT COUNT(*)::int as count FROM "User" WHERE "isDeleted" = false
+        SELECT COUNT(*)::int as count FROM "User" u WHERE ${whereSql}
       `;
       const total = totalCount[0].count;
 
@@ -193,7 +207,7 @@ class AdminService {
             WHERE wm."userId" = u.id
           ) as "workspaceCount"
         FROM "User" u
-        WHERE u."isDeleted" = false
+        WHERE ${whereSql}
         ORDER BY u."createdAt" DESC
         LIMIT ${limit}
         OFFSET ${offset}
@@ -346,6 +360,36 @@ class AdminService {
   }
 
   /**
+   * Sample CPU usage from an idle/total DELTA between two snapshots
+   * (AGENTS.md: delta, not lifetime average).
+   */
+  private async sampleCpuUsage(): Promise<number> {
+    const read = () => {
+      let idle = 0;
+      let total = 0;
+      for (const cpu of os.cpus()) {
+        idle += cpu.times.idle;
+        total +=
+          cpu.times.user +
+          cpu.times.nice +
+          cpu.times.sys +
+          cpu.times.idle +
+          cpu.times.irq;
+      }
+      return { idle, total };
+    };
+
+    const a = read();
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    const b = read();
+
+    const idleDelta = b.idle - a.idle;
+    const totalDelta = b.total - a.total;
+    if (totalDelta <= 0) return 0;
+    return 100 - (100 * idleDelta) / totalDelta;
+  }
+
+  /**
    * Perform system health check
    */
   async getSystemHealth(): Promise<ISystemHealth> {
@@ -372,6 +416,16 @@ class AdminService {
       const totalStorageBytes = Number(storageResult[0].totalStorageBytes);
       const storageUsed = this.formatBytes(totalStorageBytes);
 
+      // Same estimation rule as getSystemMetrics: 10x usage, 100 GB floor.
+      const minTotalStorage = 100 * 1024 * 1024 * 1024;
+      const estimatedTotalStorage = Math.max(
+        totalStorageBytes * 10,
+        minTotalStorage
+      );
+      const percentageUsed = Math.round(
+        (totalStorageBytes / estimatedTotalStorage) * 1000
+      ) / 10;
+
       // Calculate uptime (placeholder - would need actual implementation)
       const uptime = process.uptime();
 
@@ -387,14 +441,14 @@ class AdminService {
           activeConnections: connections[0].count,
         },
         storage: {
-          total: storageUsed,
+          total: this.formatBytes(estimatedTotalStorage),
           used: storageUsed,
-          available: "Available", // Placeholder
-          percentageUsed: 0, // Would need actual calculation
+          available: this.formatBytes(estimatedTotalStorage - totalStorageBytes),
+          percentageUsed,
         },
         cache: {
           status: "healthy",
-          hitRate: 0.85, // Placeholder
+          hitRate: 0.85, // Placeholder until a real cache layer exists
         },
         uptime,
         lastChecked: new Date(),
@@ -452,28 +506,12 @@ class AdminService {
       const maxConnections = dbConnections[0]?.max || 100;
       const connectionPoolUsage = (activeConnections / maxConnections) * 100;
 
-      // CPU metrics - Calculate actual CPU usage
+      // CPU metrics — idle/total DELTA between two samples (not lifetime
+      // average).
       const cpus = os.cpus();
       const cpuCount = cpus.length;
       const loadAverage = os.loadavg();
-
-      // Calculate CPU usage from idle/total times
-      let totalIdle = 0;
-      let totalTick = 0;
-      cpus.forEach((cpu: any) => {
-        for (const type in cpu.times) {
-          totalTick += cpu.times[type];
-        }
-        totalIdle += cpu.times.idle;
-      });
-      const idle = totalIdle / cpuCount;
-      const total = totalTick / cpuCount;
-      const cpuUsageRaw = 100 - ~~((100 * idle) / total);
-      // Use load average as fallback if raw calculation seems off
-      const cpuUsage =
-        cpuUsageRaw > 0 && cpuUsageRaw < 100
-          ? cpuUsageRaw
-          : Math.min((loadAverage[0] / cpuCount) * 100, 100);
+      const cpuUsage = await this.sampleCpuUsage();
 
       // Memory metrics
       const totalMemory = os.totalmem();
@@ -497,7 +535,8 @@ class AdminService {
       const estimatedTotalStorage = Math.max(usedStorage * 10, minTotalStorage);
       const diskUsagePercentage = (usedStorage / estimatedTotalStorage) * 100;
 
-      // Determine health statuses
+      // Determine health statuses — 4 tiers per AGENTS.md:
+      // green <50, blue(degraded) <70, yellow(warning) <85, red(critical) >=85
       const dbStatus: "healthy" | "degraded" | "unhealthy" =
         dbResponseTime < 100
           ? "healthy"
@@ -505,15 +544,15 @@ class AdminService {
             ? "degraded"
             : "unhealthy";
 
-      const cpuStatus: "healthy" | "warning" | "critical" =
-        cpuUsage < 70 ? "healthy" : cpuUsage < 85 ? "warning" : "critical";
+      const tier = (usage: number): "healthy" | "degraded" | "warning" | "critical" => {
+        if (usage < 50) return "healthy";
+        if (usage < 70) return "degraded";
+        if (usage < 85) return "warning";
+        return "critical";
+      };
 
-      const storageStatus: "healthy" | "warning" | "critical" =
-        diskUsagePercentage < 70
-          ? "healthy"
-          : diskUsagePercentage < 85
-            ? "warning"
-            : "critical";
+      const cpuStatus = tier(cpuUsage);
+      const storageStatus = tier(diskUsagePercentage);
 
       return {
         health: {
@@ -541,13 +580,11 @@ class AdminService {
             used: usedStorage,
             free: estimatedTotalStorage - usedStorage,
             usagePercentage: Math.round(diskUsagePercentage * 100) / 100,
-            ioPercentage: Math.round(Math.random() * 40 + 10), // Placeholder: 10-50%
           },
           network: {
             bytesReceived: 0, // Would need OS-level monitoring
             bytesSent: 0, // Would need OS-level monitoring
             activeConnections,
-            bandwidth: Math.round(Math.random() * 30 + 10), // Placeholder: 10-40%
           },
         },
         systemInfo: {
