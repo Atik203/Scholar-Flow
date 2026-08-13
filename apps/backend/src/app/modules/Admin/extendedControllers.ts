@@ -10,13 +10,14 @@ import { adminPlansService } from "./adminPlans.service";
 import { adminSubscribersService } from "./adminSubscribers.service";
 import { systemAlertsService } from "./systemAlerts.service";
 import { CACHE_DURATIONS } from "./admin.constant";
+import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 
 // Plans
 export const adminPlansController = {
   list: catchAsync(async (_req: Request, res: Response) => {
     const items = await adminPlansService.listPlansWithStats();
     res.set({
-      "Cache-Control": `public, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+      "Cache-Control": `private, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
     });
     sendSuccessResponse(res, items, "Plans retrieved");
   }),
@@ -51,10 +52,8 @@ export const adminPlansController = {
 // Subscribers (admin subscription management)
 export const adminSubscribersController = {
   list: catchAsync(async (req: Request, res: Response) => {
-    const page = req.query.page ? parseInt(String(req.query.page), 10) : 1;
-    const limit = req.query.limit
-      ? Math.min(parseInt(String(req.query.limit), 10), 100)
-      : 20;
+    const page = toPositiveInt(req.query.page, 1);
+    const limit = toBoundedInt(req.query.limit, 20, 100);
     const status = req.query.status ? String(req.query.status) : undefined;
     const planId = req.query.planId ? String(req.query.planId) : undefined;
 
@@ -120,10 +119,8 @@ export const adminSubscribersController = {
 // Payments
 export const adminPaymentsController = {
   list: catchAsync(async (req: Request, res: Response) => {
-    const page = req.query.page ? parseInt(String(req.query.page), 10) : 1;
-    const limit = req.query.limit
-      ? Math.min(parseInt(String(req.query.limit), 10), 100)
-      : 20;
+    const page = toPositiveInt(req.query.page, 1);
+    const limit = toBoundedInt(req.query.limit, 20, 100);
     const status = req.query.status ? String(req.query.status) : undefined;
     const provider = req.query.provider
       ? String(req.query.provider)
@@ -208,10 +205,8 @@ export const adminApiKeysController = {
 // Moderation
 export const adminModerationController = {
   list: catchAsync(async (req: Request, res: Response) => {
-    const page = req.query.page ? parseInt(String(req.query.page), 10) : 1;
-    const limit = req.query.limit
-      ? Math.min(parseInt(String(req.query.limit), 10), 100)
-      : 20;
+    const page = toPositiveInt(req.query.page, 1);
+    const limit = toBoundedInt(req.query.limit, 20, 100);
     const status = req.query.status
       ? (String(req.query.status) as
           | "PENDING"
@@ -305,10 +300,8 @@ export const adminModerationController = {
 // System Alerts
 export const systemAlertsController = {
   list: catchAsync(async (req: Request, res: Response) => {
-    const page = req.query.page ? parseInt(String(req.query.page), 10) : 1;
-    const limit = req.query.limit
-      ? Math.min(parseInt(String(req.query.limit), 10), 100)
-      : 20;
+    const page = toPositiveInt(req.query.page, 1);
+    const limit = toBoundedInt(req.query.limit, 20, 100);
     const category = req.query.category
       ? (String(req.query.category) as
           | "USER"
