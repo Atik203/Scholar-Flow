@@ -25,11 +25,9 @@ import { formatDistanceToNow } from "date-fns";
 import {
   Clock,
   Edit,
-  Eye,
   FileText,
   MoreVertical,
   Search,
-  Share,
   Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -207,14 +205,6 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                       <DropdownMenuItem onClick={() => onPaperSelect(paper.id)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Share className="h-4 w-4 mr-2" />
-                        Share
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
