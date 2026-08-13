@@ -37,11 +37,10 @@ export interface GetNotificationsResponse {
   message: string;
   data: AppNotification[];
   meta: {
-    page: number;
-    limit: number;
     total: number;
-    totalPage: number;
-    skip: number;
+    limit: number;
+    nextCursor: string | null;
+    hasMore: boolean;
   };
 }
 
@@ -92,7 +91,7 @@ export const notificationApi = apiSlice
     endpoints: (builder) => ({
       getNotifications: builder.query<
         GetNotificationsResponse,
-        { page?: number; limit?: number; type?: string; read?: string; starred?: string }
+        { cursor?: string; limit?: number; type?: string; read?: string; starred?: string }
       >({
         query: (params) => ({
           url: "/notifications",
