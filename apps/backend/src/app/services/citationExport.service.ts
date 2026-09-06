@@ -29,7 +29,7 @@ export class CitationExportService {
   /**
    * Export citations for papers or collections
    */
-  static async exportCitations(
+  async exportCitations(
     req: AuthRequest,
     data: CitationExportRequest
   ): Promise<{ content: string; format: string; count: number }> {
@@ -186,7 +186,7 @@ export class CitationExportService {
   /**
    * Get export history for user
    */
-  static async getExportHistory(
+  async getExportHistory(
     req: AuthRequest,
     limit: number = 20,
     offset: number = 0
@@ -240,7 +240,7 @@ export class CitationExportService {
   /**
    * Delete a citation export
    */
-  static async deleteExport(
+  async deleteExport(
     req: AuthRequest,
     exportId: string
   ): Promise<{ message: string }> {
@@ -281,7 +281,7 @@ export class CitationExportService {
   /**
    * Download/retrieve a citation export by ID
    */
-  static async downloadExport(
+  async downloadExport(
     req: AuthRequest,
     exportId: string
   ): Promise<{ content: string; format: string; filename: string }> {
@@ -359,7 +359,7 @@ export class CitationExportService {
   /**
    * Extract citation data from paper
    */
-  private static extractCitationData(
+  private extractCitationData(
     paper: any,
     options: CitationExportRequest
   ): CitationData {
@@ -389,7 +389,7 @@ export class CitationExportService {
   /**
    * Parse authors from various formats
    */
-  private static parseAuthors(authors: any): string[] {
+  private parseAuthors(authors: any): string[] {
     if (typeof authors === "string") {
       return authors
         .split(/[,;]/)
@@ -407,7 +407,7 @@ export class CitationExportService {
   /**
    * Format citations according to specified format
    */
-  private static formatCitations(
+  private formatCitations(
     citations: CitationData[],
     format: string
   ): string {
@@ -436,7 +436,7 @@ export class CitationExportService {
   }
 
   // Phase 6 - Vancouver (medical / scientific, numbered)
-  private static formatVancouver(citations: CitationData[]): string {
+  private formatVancouver(citations: CitationData[]): string {
     return citations
       .map((citation, idx) => {
         const authors = citation.authors.join(", ");
@@ -465,7 +465,7 @@ export class CitationExportService {
   }
 
   // Phase 6 - ACS (American Chemical Society)
-  private static formatACS(citations: CitationData[]): string {
+  private formatACS(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         const authors = citation.authors.join("; ");
@@ -489,7 +489,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatBibTeX(citations: CitationData[]): string {
+  private formatBibTeX(citations: CitationData[]): string {
     return citations
       .map((citation, index) => {
         const key = `paper${index + 1}`;
@@ -517,7 +517,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatEndNote(citations: CitationData[]): string {
+  private formatEndNote(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         let endnote = `%0 Journal Article\n`;
@@ -539,7 +539,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatAPA(citations: CitationData[]): string {
+  private formatAPA(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         const authors = this.formatAuthorsAPA(citation.authors);
@@ -573,7 +573,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatMLA(citations: CitationData[]): string {
+  private formatMLA(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         const authors = this.formatAuthorsMLA(citation.authors);
@@ -611,7 +611,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatIEEE(citations: CitationData[]): string {
+  private formatIEEE(citations: CitationData[]): string {
     return citations
       .map((citation, index) => {
         const authors = this.formatAuthorsIEEE(citation.authors);
@@ -644,7 +644,7 @@ export class CitationExportService {
       .join("\n");
   }
 
-  private static formatChicago(citations: CitationData[]): string {
+  private formatChicago(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         const authors = this.formatAuthorsChicago(citation.authors);
@@ -680,7 +680,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatHarvard(citations: CitationData[]): string {
+  private formatHarvard(citations: CitationData[]): string {
     return citations
       .map((citation) => {
         const authors = this.formatAuthorsHarvard(citation.authors);
@@ -713,7 +713,7 @@ export class CitationExportService {
       .join("\n\n");
   }
 
-  private static formatAuthorsAPA(authors: string[]): string {
+  private formatAuthorsAPA(authors: string[]): string {
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return `${authors[0]} & ${authors[1]}`;
     if (authors.length <= 7)
@@ -721,32 +721,32 @@ export class CitationExportService {
     return `${authors.slice(0, 6).join(", ")}, ... ${authors[authors.length - 1]}`;
   }
 
-  private static formatAuthorsMLA(authors: string[]): string {
+  private formatAuthorsMLA(authors: string[]): string {
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
     return `${authors.slice(0, -1).join(", ")}, and ${authors[authors.length - 1]}`;
   }
 
-  private static formatAuthorsIEEE(authors: string[]): string {
+  private formatAuthorsIEEE(authors: string[]): string {
     if (authors.length === 1) return authors[0];
     if (authors.length <= 6) return authors.join(", ");
     return `${authors.slice(0, 3).join(", ")}, et al.`;
   }
 
-  private static formatAuthorsChicago(authors: string[]): string {
+  private formatAuthorsChicago(authors: string[]): string {
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
     return `${authors.slice(0, -1).join(", ")}, and ${authors[authors.length - 1]}`;
   }
 
-  private static formatAuthorsHarvard(authors: string[]): string {
+  private formatAuthorsHarvard(authors: string[]): string {
     if (authors.length === 1) return authors[0];
     if (authors.length === 2) return `${authors[0]} and ${authors[1]}`;
     return `${authors.slice(0, -1).join(", ")}, and ${authors[authors.length - 1]}`;
   }
 
   // Phase 6 - List of supported citation formats
-  static getFormats(): Array<{
+  getFormats(): Array<{
     name: string;
     ext: string;
     description: string;
@@ -771,7 +771,7 @@ export class CitationExportService {
    * Used by /citations/manager to drive the selection list in the manager UI.
    * Authors/year/journal are extracted from Paper.metadata JSON.
    */
-  static async getManagerView(
+  async getManagerView(
     req: AuthRequest,
     options: { search?: string; limit?: number; offset?: number }
   ): Promise<{
@@ -836,3 +836,5 @@ export class CitationExportService {
     };
   }
 }
+
+export const citationExportService = new CitationExportService();

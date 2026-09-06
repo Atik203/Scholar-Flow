@@ -28,6 +28,9 @@ import {
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
   useGetAiProvidersQuery,
+  type AiProviderModel,
+  type AiProvidersResponse,
+  type PaperInsightsResponse,
 } from "@/redux/api/paperApi";
 import { Bot, MessageCircle, Send, User } from "lucide-react";
 import { Component, type KeyboardEvent, useEffect, useState } from "react";
@@ -44,23 +47,12 @@ interface ChatMessage {
   timestamp: string;
 }
 
-type InsightsData = ReturnType<typeof useGetPaperInsightsQuery>["data"];
+type InsightsData = PaperInsightsResponse | undefined;
 type InsightsError = ReturnType<typeof useGetPaperInsightsQuery>["error"];
-type ProvidersData = ReturnType<typeof useGetAiProvidersQuery>["data"];
 type GenerateInsight = ReturnType<typeof useGeneratePaperInsightMutation>[0];
 type RefetchInsights = ReturnType<
   typeof useGetPaperInsightsQuery
 >["refetch"];
-
-interface AiInsightsPanelViewProps extends AiInsightsPanelProps {
-  insightsData: InsightsData;
-  isLoadingInsights: boolean;
-  insightsError: InsightsError;
-  refetchInsights: RefetchInsights;
-  generateInsight: GenerateInsight;
-  isGenerating: boolean;
-  availableModels: NonNullable<ProvidersData>["providers"][number]["models"];
-}
 
 interface AiInsightsPanelState {
   prompt: string;
@@ -68,6 +60,8 @@ interface AiInsightsPanelState {
 }
 
 export function AiInsightsPanel(props: AiInsightsPanelProps) {
+  const { paperId } = props;
+  const [selectedModel, setSelectedModel] = useState("");
   const {
     data: insightsData,
     isLoading: isLoadingInsights,
@@ -115,7 +109,7 @@ interface AiInsightsPanelViewProps extends AiInsightsPanelProps {
   refetchInsights: RefetchInsights;
   generateInsight: GenerateInsight;
   isGenerating: boolean;
-  availableModels: NonNullable<ProvidersData>["providers"][number]["models"];
+  availableModels: AiProviderModel[];
   selectedModel: string;
   setSelectedModel: (model: string) => void;
 }
