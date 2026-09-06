@@ -1,0 +1,783 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
+import {
+  AlertCircle,
+  Bookmark,
+  Clock,
+  Download,
+  FileText,
+  Maximize,
+  Minimize,
+  Quote,
+  Save,
+  Send,
+  Share2,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+// TipTap Extensions
+import { Highlight } from "@tiptap/extension-highlight";
+import { TaskItem, TaskList } from "@tiptap/extension-list";
+import { CharacterCount } from "@tiptap/extension-character-count";
+import { Subscript } from "@tiptap/extension-subscript";
+import { Superscript } from "@tiptap/extension-superscript";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { Typography } from "@tiptap/extension-typography";
+import { StarterKit } from "@tiptap/starter-kit";
+
+// TipTap UI Components
+import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
+import {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSeparator,
+} from "@/components/tiptap-ui-primitive/toolbar";
+import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
+import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
+import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
+import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
+import { MarkButton } from "@/components/tiptap-ui/mark-button";
+import { ResizableImageUploadButton } from "@/components/tiptap-ui/resizable-image-upload-button";
+import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
+import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
+
+// TipTap Node Extensions
+import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
+import { ResizableImageWithPopover } from "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover";
+
+// Import ResizableImage styles
+import "@/components/tiptap-node/resizable-image-with-popover/resizable-image-with-popover.scss";
+import "tiptap-extension-resizable-image/styles.css";
+
+// LaTeX Extensions
+import { LatexInline } from "@/components/tiptap-node/latex-inline/latex-inline-extension";
+import { LatexBlock } from "@/components/tiptap-node/latex-block/latex-block-extension";
+import { LatexInlineButton } from "@/components/tiptap-ui/latex-inline-button/latex-inline-button";
+import { LatexBlockButton } from "@/components/tiptap-ui/latex-block-button/latex-block-button";
+
+// Citation Extension
+import { CitationNode } from "@/components/tiptap-node/citation-node/citation-node";
+
+// Hooks
+import { useIsMobile } from "@/hooks/use-mobile";
+
+// Lib
+import TurndownService from "turndown";
+
+// Redux API
+import {
+  useAutoSaveEditorContentMutation,
+  useExportPaperDocxMutation,
+  useExportPaperPdfMutation,
+  useGetEditorPaperQuery,
+  usePublishDraftMutation,
+  useUpdateEditorContentMutation,
+  useUploadImageForEditorMutation,
+  useGetPaperVersionsQuery,
+  useRestorePaperVersionMutation,
+} from "@/redux/api/paperApi";
+
+import { VersionHistoryDialog } from "./VersionHistoryDialog";
+
+// Citation
+import { CitationSearchDialog } from "./CitationSearchDialog";
+
+// Templates
+import { TemplateSelector } from "./TemplateSelector";
+
+// Components
+import { ShareModal } from "./ShareModal";
+
+// Utils
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+
+interface ScholarFlowEditorProps {
+  paperId: string;
+  onBack: () => void;
+}
+
+export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [title, setTitle] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isVersionDialogOpen, setIsVersionDialogOpen] = useState(false);
+  const [isCitationDialogOpen, setIsCitationDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Redux hooks
+  const {
+    data: paperResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetEditorPaperQuery(paperId);
+  const [updateContent, { isLoading: isSaving }] =
+    useUpdateEditorContentMutation();
+  const [autoSaveEditorContent] = useAutoSaveEditorContentMutation();
+  const [uploadImage] = useUploadImageForEditorMutation();
+  const [exportPaperPdf, { isLoading: isExportingPdf }] =
+    useExportPaperPdfMutation();
+  const [exportPaperDocx, { isLoading: isExportingDocx }] =
+    useExportPaperDocxMutation();
+  const [publishDraft, { isLoading: isPublishing }] = usePublishDraftMutation();
+
+  // RTK-based image uploader shared by the image node and the toolbar
+  // button (replaces the raw XHR path in tiptap-utils).
+  const uploadEditorImage = useCallback(
+    async (file: File): Promise<string> => {
+      const formData = new FormData();
+      formData.append("image", file);
+      const result = await uploadImage(formData).unwrap();
+      return result.url;
+    },
+    [uploadImage]
+  );
+
+  const paper = paperResponse?.data;
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
+    editorProps: {
+      attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        "aria-label": "Paper content editor",
+        class:
+          "scholar-flow-editor prose prose-sm sm:prose lg:prose-lg xl:prose-xl focus:outline-none max-w-none",
+      },
+    },
+    extensions: [
+      StarterKit.configure({
+        horizontalRule: false,
+        link: {
+          openOnClick: false,
+          enableClickSelection: true,
+        },
+      }),
+      HorizontalRule,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      Highlight.configure({ multicolor: true }),
+      ResizableImageWithPopover.configure({
+        defaultWidth: 400,
+        defaultHeight: 300,
+        async onUpload(file: File) {
+          // RTK-based upload (the raw XHR path bypassed the API layer)
+          try {
+            const url = await uploadEditorImage(file);
+            return {
+              src: url,
+              "data-keep-ratio": true,
+            };
+          } catch (error) {
+            console.error("Upload failed:", error);
+            showErrorToast(
+              "Image upload failed",
+              error instanceof Error ? error.message : "Unknown error"
+            );
+            throw error;
+          }
+        },
+      }),
+      Typography,
+      Superscript,
+      Subscript,
+      LatexInline,
+      LatexBlock,
+      CitationNode,
+      CharacterCount,
+      // Note: Removed ImageUploadNode since ResizableImage handles uploads
+    ],
+    content: "",
+    onUpdate: () => {
+      // Dirty tracking lives in refs so the 2s-debounced callback never
+      // reads a stale `hasUnsavedChanges` closure (the old code could
+      // skip the first autosave entirely).
+      dirtyRef.current = true;
+      setHasUnsavedChanges(true);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        void handleAutoSave();
+      }, 2000);
+    },
+  });
+
+  // --- Autosave plumbing (ref-based, no stale closures) ---
+  const dirtyRef = useRef(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const savingRef = useRef(false);
+  const mountedRef = useRef(true);
+  const editorRef = useRef(editor);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    editorRef.current = editor;
+    return () => {
+      mountedRef.current = false;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      // Flush any pending edits on unmount so navigation never loses up to
+      // 2s of typing (state updates are skipped — component is gone).
+      if (dirtyRef.current && editorRef.current) {
+        void autoSaveEditorContent({
+          id: paperId,
+          content: editorRef.current.getHTML(),
+        }).catch(() => {
+          // Best-effort flush; failure is silent on teardown.
+        });
+      }
+    };
+  }, [editor, paperId, autoSaveEditorContent]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!dirtyRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
+
+  // Auto-save: PATCH /autosave — persists content WITHOUT a version snapshot
+  const handleAutoSave = useCallback(async () => {
+    if (!editor || !dirtyRef.current || savingRef.current) return;
+    savingRef.current = true;
+    try {
+      const content = editor.getHTML();
+      await autoSaveEditorContent({ id: paperId, content }).unwrap();
+      // react-hooks/immutability: writing a ref that effects also read is a
+      // heuristic false positive here — this is exactly what refs are for.
+      // eslint-disable-next-line react-hooks/immutability
+      dirtyRef.current = false;
+      if (mountedRef.current) {
+        setHasUnsavedChanges(false);
+        setLastSaved(new Date());
+      }
+    } catch (error: any) {
+      // Keep the dirty flag so the next keystroke retries the save
+      if (mountedRef.current) {
+        showErrorToast(
+          "Auto-save failed",
+          error?.data?.message ?? "Please try again"
+        );
+      }
+    } finally {
+      savingRef.current = false;
+    }
+  }, [editor, paperId, autoSaveEditorContent]);
+
+  // Manual save: PUT /content — creates a version snapshot (Ctrl+S / button)
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const handleSave = useCallback(async () => {
+    if (!editor) return;
+    savingRef.current = true;
+    try {
+      const content = editor.getHTML();
+      await updateContent({
+        id: paperId,
+        content,
+        title,
+        isDraft: paper?.isDraft ?? true,
+      }).unwrap();
+
+      // eslint-disable-next-line react-hooks/immutability
+      dirtyRef.current = false;
+      setHasUnsavedChanges(false);
+      setLastSaved(new Date());
+      showSuccessToast("Paper saved successfully!");
+    } catch (error: any) {
+      console.error("Save failed:", error);
+      showErrorToast("Failed to save paper", error?.data?.message);
+    } finally {
+      savingRef.current = false;
+    }
+  }, [editor, paperId, title, updateContent, paper?.isDraft]);
+
+  // Track initialization to avoid repeated setContent that can reset alignment/selection
+  const hasInitializedRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+  // Bumped after a version restore so the content-sync effect re-runs
+  // with freshly refetched paper data (soft restore, no page reload).
+  const [restoreEpoch, setRestoreEpoch] = useState(0);
+
+  // Reset initialization flag when switching papers
+  useEffect(() => {
+    hasInitializedRef.current = false;
+  }, [paperId]);
+
+  // Initialize editor content when paper data is loaded (once per paper)
+  useEffect(() => {
+    if (!editor || !paper) return;
+
+    // Always sync title from server
+    setTitle(paper.title);
+
+    if (hasInitializedRef.current) return;
+
+    const html = paper.contentHtml || "";
+
+    // Defer setContent to the next animation frame to avoid flushSync warnings
+    rafIdRef.current = window.requestAnimationFrame(() => {
+      if (editor.isDestroyed) return;
+      // Avoid emitting update to prevent triggering onUpdate during initial load
+      editor.commands.setContent(html, { emitUpdate: false });
+      hasInitializedRef.current = true;
+      // Optional: move cursor to end to avoid unexpected selection jumps
+      try {
+        const endPos = editor.state.doc.content.size;
+        editor.commands.setTextSelection(endPos);
+      } catch {
+        // no-op
+      }
+      setHasUnsavedChanges(false);
+      dirtyRef.current = false;
+    });
+
+    // Cleanup any pending rAF on effect re-run or unmount
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [editor, paper, restoreEpoch]);
+
+  // Soft version restore: refetch the paper (restored content) and let the
+  // init effect above re-seed the editor — replaces the old
+  // window.location.reload() that discarded any in-progress work.
+  const handleVersionRestored = useCallback(async () => {
+    hasInitializedRef.current = false;
+    // eslint-disable-next-line react-hooks/immutability
+    dirtyRef.current = false;
+    await refetch();
+    setRestoreEpoch((e) => e + 1);
+    showSuccessToast("Version restored");
+  }, [refetch]);
+
+  // Add Ctrl+S keyboard shortcut for saving (like Microsoft Word)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Ctrl+S / Cmd+S → save
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault();
+        handleSave();
+      }
+      // Esc → exit fullscreen
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleSave, isFullscreen]);
+
+  // Publish draft
+  const handlePublish = async () => {
+    if (!paper) return;
+
+    try {
+      await publishDraft({
+        id: paperId,
+        title,
+      }).unwrap();
+
+      showSuccessToast("Paper published successfully!");
+    } catch (error: any) {
+      console.error("Publish failed:", error);
+      showErrorToast("Failed to publish paper", error?.data?.message);
+    }
+  };
+
+  // Export functions
+  const handleExportPdf = async () => {
+    try {
+      const response = await exportPaperPdf(paperId);
+      if ("data" in response && response.data) {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title || "paper"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showSuccessToast("PDF exported successfully!");
+      } else {
+        throw response.error;
+      }
+    } catch (error: any) {
+      console.error("PDF export failed:", error);
+      showErrorToast(
+        "Failed to export PDF",
+        error?.data?.message || "Unknown error"
+      );
+    }
+  };
+
+  const handleExportDocx = async () => {
+    try {
+      const response = await exportPaperDocx(paperId);
+      if ("data" in response && response.data) {
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${title || "paper"}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        showSuccessToast("DOCX exported successfully!");
+      } else {
+        throw response.error;
+      }
+    } catch (error: any) {
+      console.error("DOCX export failed:", error);
+      showErrorToast(
+        "Failed to export DOCX",
+        error?.data?.message || "Unknown error"
+      );
+    }
+  };
+
+  const handleExportMd = () => {
+    if (!editor) return;
+    try {
+      const html = editor.getHTML();
+      const turndown = new TurndownService({
+        headingStyle: "atx",
+        codeBlockStyle: "fenced",
+      });
+      const markdown = turndown.turndown(html);
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title || "paper"}.md`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showSuccessToast("Markdown exported successfully!");
+    } catch (error: any) {
+      showErrorToast(
+        "Failed to export Markdown",
+        error?.message || "Unknown error"
+      );
+    }
+  };
+
+  // Cleanup timeout on unmount — handled in the autosave plumbing effect
+  // above (debounceRef + flush of any dirty content).
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading paper...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!paper) {
+    return (
+      <div className="text-center py-8">
+        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+        <p>Paper not found or you don't have access.</p>
+        <Button onClick={onBack} className="mt-4">
+          Go Back
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setHasUnsavedChanges(true);
+            }}
+            className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-background focus:border focus:border-border focus:rounded px-2 py-1 w-full max-w-2xl"
+            placeholder="Untitled Paper"
+          />
+          <div className="flex items-center gap-4 mt-2">
+            <Badge variant={paper.isDraft ? "secondary" : "default"}>
+              {paper.isDraft ? "Draft" : "Published"}
+            </Badge>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              {lastSaved
+                ? `Saved ${lastSaved.toLocaleTimeString()}`
+                : "Not saved"}
+              {hasUnsavedChanges && (
+                <span className="text-orange-600">• Unsaved changes</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || !hasUnsavedChanges}
+            variant="outline"
+            size="sm"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+
+          {paper.isDraft && (
+            <Button onClick={handlePublish} size="sm">
+              <Send className="h-4 w-4 mr-2" />
+              Publish
+            </Button>
+          )}
+
+          <Button
+            onClick={handleExportPdf}
+            variant="outline"
+            size="sm"
+            disabled={isExportingPdf}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isExportingPdf ? "Exporting..." : "PDF"}
+          </Button>
+
+          <Button
+            onClick={handleExportDocx}
+            variant="outline"
+            size="sm"
+            disabled={isExportingDocx}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            {isExportingDocx ? "Exporting..." : "DOCX"}
+          </Button>
+
+          <Button
+            onClick={handleExportMd}
+            variant="outline"
+            size="sm"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            MD
+          </Button>
+
+          <Button
+            onClick={() => setIsShareModalOpen(true)}
+            variant="outline"
+            size="sm"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
+
+          <Button
+            onClick={() => setIsFullscreen((f) => !f)}
+            variant="ghost"
+            size="sm"
+            title={isFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize className="h-4 w-4" />
+            ) : (
+              <Maximize className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Editor */}
+      <div className={isFullscreen ? "fixed inset-0 z-50 bg-background overflow-auto p-4" : ""}>
+      <Card className={isFullscreen ? "max-w-5xl mx-auto" : ""}>
+        <CardContent className="p-0">
+          <EditorContext.Provider value={{ editor }}>
+            {/* Toolbar */}
+            <Toolbar className="border-b">
+              <Spacer />
+
+              <ToolbarGroup>
+                <UndoRedoButton action="undo" />
+                <UndoRedoButton action="redo" />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
+                <ListDropdownMenu
+                  types={["bulletList", "orderedList", "taskList"]}
+                  portal={isMobile}
+                />
+                <BlockquoteButton />
+                <CodeBlockButton />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <MarkButton type="bold" />
+                <MarkButton type="italic" />
+                <MarkButton type="strike" />
+                <MarkButton type="code" />
+                <MarkButton type="underline" />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <MarkButton type="superscript" />
+                <MarkButton type="subscript" />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <TextAlignButton align="left" />
+                <TextAlignButton align="center" />
+                <TextAlignButton align="right" />
+                <TextAlignButton align="justify" />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <LatexInlineButton />
+                <LatexBlockButton />
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCitationDialogOpen(true)}
+                  title="Insert Citation"
+                >
+                  <Bookmark className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Cite</span>
+                </Button>
+              </ToolbarGroup>
+
+              <ToolbarSeparator />
+
+              <ToolbarGroup>
+                      <ResizableImageUploadButton
+                        text="Image"
+                        onUpload={uploadEditorImage}
+                      />
+              </ToolbarGroup>
+
+              <ToolbarGroup>
+                <TemplateSelector editor={editor} />
+              </ToolbarGroup>
+
+              <Spacer />
+            </Toolbar>
+
+            {/* Editor Content */}
+            <div className="p-6">
+              <EditorContent
+                editor={editor}
+                role="presentation"
+                className="min-h-[500px] focus-within:outline-none"
+              />
+            </div>
+
+            {/* Status Bar: Word count + Version history */}
+            <div className="px-6 py-2 border-t text-xs text-muted-foreground flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span>
+                  {editor?.storage?.characterCount?.words?.() ?? 0} words
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  {editor?.storage?.characterCount?.characters?.() ?? 0} characters
+                </span>
+                <span className="text-muted-foreground/50">|</span>
+                <span>
+                  ~{Math.max(1, Math.ceil((editor?.storage?.characterCount?.words?.() ?? 0) / 200))} min read
+                </span>
+              </div>
+              <button
+                className="text-primary hover:underline"
+                onClick={() => setIsVersionDialogOpen(true)}
+              >
+                Version History
+              </button>
+            </div>
+          </EditorContext.Provider>
+        </CardContent>
+      </Card>
+      </div> {/* fullscreen wrapper */}
+
+      {/* Version History Dialog */}
+      {isVersionDialogOpen && (
+        <VersionHistoryDialog
+          paperId={paperId}
+          open={isVersionDialogOpen}
+          onClose={() => setIsVersionDialogOpen(false)}
+          onRestored={() => void handleVersionRestored()}
+        />
+      )}
+
+      {/* Citation Search Dialog */}
+      <CitationSearchDialog
+        open={isCitationDialogOpen}
+        onOpenChange={setIsCitationDialogOpen}
+        editor={editor}
+        existingPaperIds={
+          editor
+            ? (editor.getJSON().content as any[])
+                ?.flatMap((n) =>
+                  n.type === "citation" ? [n.attrs?.paperId as string] : []
+                )
+                .filter(Boolean) ?? []
+            : []
+        }
+      />
+
+      {/* Auto-save indicator */}
+      {isSaving && (
+        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-3 py-2 rounded-md text-sm">
+          Auto-saving...
+        </div>
+      )}
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        paperId={paperId}
+        paperTitle={title}
+        isPublished={paper?.isPublished || false}
+      />
+    </div>
+  );
+}

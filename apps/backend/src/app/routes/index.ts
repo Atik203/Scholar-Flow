@@ -3,12 +3,36 @@ import {
   getApiStatus,
   getAvailableRoutes,
 } from "../controllers/status.controller";
+import { adminRoutes } from "../modules/Admin/admin.routes";
+import { aiConversationRoutes } from "../modules/AIChat/aiConversation.routes";
+import { aiContextRoutes } from "../modules/AIContext/aiContext.routes";
+import { aiProviderRoutes } from "../modules/AIProvider/aiProvider.routes";
+import { aiToolsRoutes } from "../modules/AI/aiTools.routes";
+import { annotationRoutes } from "../modules/annotations/annotation.routes";
 import { authRoutes } from "../modules/Auth/auth.routes";
+import { billingRoutes } from "../modules/Billing/billing.routes";
+import { collectionRoutes } from "../modules/Collection/collection.routes";
+import { editorPaperRoutes, paperRoutes } from "../modules/papers/paper.routes";
+import { noteRoutes } from "../modules/notes/note.routes";
+import { notebookRoutes } from "../modules/Notebook/notebook.routes";
+import { reportRoutes } from "../modules/Reports/report.routes";
+import { auditLogRoutes } from "../modules/AuditLog/auditLog.routes";
+import { webhookRoutes } from "../modules/Webhooks/webhook.routes";
+import { analyticsRoutes } from "../modules/Analytics/analytics.routes";
 import { userRoutes } from "../modules/User/user.routes";
-
-// Legacy route handlers (to be migrated into feature modules under app/modules/*)
-// Placeholder imports for other route groups can be added as they are modularized
-// import papersRouter from "../../routes/papers"; // TODO: migrate into app/modules/Paper
+import { workspaceRoutes } from "../modules/Workspace/workspace.routes";
+import { notificationRoutes } from "../modules/Notification/notification.routes";
+import { publicRoutes } from "../modules/Public/public.routes";
+import { searchRoutes } from "../modules/Search/search.routes";
+import { recommendationRoutes } from "../modules/Recommendation/recommendation.routes";
+import { importRoutes } from "../modules/Import/import.routes";
+import { teamRoutes } from "../modules/Team/team.routes";
+import { citationRoutes } from "../modules/CitationExport/citationExport.routes";
+import { discussionRoutes } from "../modules/Discussion/discussion.routes";
+import { activityLogRoutes } from "../modules/ActivityLog/activityLog.routes";
+import { invitationRoutes } from "./invitation.routes";
+import healthRoutes from "./health.routes";
+import { editorPaperController } from "../modules/papers/paper.controller";
 
 const router: import("express").Router = express.Router();
 
@@ -17,10 +41,60 @@ router.get("/status", getApiStatus);
 router.get("/routes", getAvailableRoutes);
 
 // Feature module based routes
+router.use("/health", healthRoutes);
 router.use("/user", userRoutes);
 router.use("/auth", authRoutes);
+router.use("/admin", adminRoutes);
+router.use("/billing", billingRoutes);
+router.use("/papers", paperRoutes);
+router.use("/editor", editorPaperRoutes); // Editor-specific paper routes
+router.use("/collections", collectionRoutes);
+router.use("/workspaces", workspaceRoutes);
+router.use("/annotations", annotationRoutes);
+router.use("/notes", noteRoutes);
+router.use("/notebooks", notebookRoutes);
 
-// Legacy flat routes (will be refactored into modules)
-// router.use("/papers", papersRouter);
+// Phase 2 features
+router.use("/citations", citationRoutes);
+router.use("/discussions", discussionRoutes);
+router.use("/activity-log", activityLogRoutes);
+
+// Phase 3 features
+router.use("/notifications", notificationRoutes);
+
+// Phase 1.9 Public content
+router.use("/public", publicRoutes);
+
+// Public: published editor docs (no auth)
+router.get("/public/editor/:id", editorPaperController.getPublicEditorPaper as any);
+
+// Phase 4 features
+router.use("/search", searchRoutes);
+router.use("/recommendations", recommendationRoutes);
+router.use("/import", importRoutes);
+
+// Phase 5 features
+router.use("/team", teamRoutes);
+
+// Phase 7 features
+router.use("/admin/reports", reportRoutes);
+router.use("/admin/audit-log", auditLogRoutes);
+router.use("/admin/webhooks", webhookRoutes);
+router.use("/analytics", analyticsRoutes);
+
+// Phase 9 — Public invitation endpoints
+router.use("/invitations", invitationRoutes);
+
+// Phase 10 — Global AI chat assistant
+router.use("/ai-chat", aiConversationRoutes);
+
+// Phase 10 — AI Context resolution (paper/workspace/dashboard)
+router.use("/ai-context", aiContextRoutes);
+
+// Phase 10 — AI Tools (rewriter, comparator, translator)
+router.use("/ai", aiToolsRoutes);
+
+// Phase 10 — Admin AI provider catalog (CRUD + key status)
+router.use("/admin/ai-providers", aiProviderRoutes as any);
 
 export default router;

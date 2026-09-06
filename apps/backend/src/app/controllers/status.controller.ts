@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-
-const prisma = new PrismaClient();
+import config from "../config";
+import prisma from "../shared/prisma";
 
 /**
  * @swagger
@@ -97,11 +96,27 @@ export const getApiStatus = async (req: Request, res: Response) => {
     }
 
     // Check feature flags
+    const aiProvidersConfigured = config.ai.providerFallbackOrder.map(
+      (provider) => ({
+        provider,
+        configured:
+          (provider === "openai" && !!config.openai.apiKey) ||
+          (provider === "gemini" && !!config.gemini.apiKey) ||
+          (provider === "claude" && !!config.claude.apiKey) ||
+          (provider === "deepseek" && !!config.deepseek.apiKey),
+      })
+    );
+
     const features = {
       pgvectorEnabled: process.env.USE_PGVECTOR === "true",
-      aiSearchEnabled: !!process.env.OPENAI_API_KEY,
+      aiSearchEnabled:
+        config.ai.featuresEnabled &&
+        aiProvidersConfigured.some((item) => item.configured),
+      aiProviderFallbackOrder: config.ai.providerFallbackOrder,
+      aiProvidersConfigured,
       fileUploadEnabled:
-        !!process.env.AWS_ACCESS_KEY_ID || !!process.env.AWS_S3_BUCKET,
+        config.featureFlags.uploads &&
+        (!!config.aws.access_key_id || !!process.env.AWS_S3_BUCKET),
       oauthEnabled: !!process.env.GOOGLE_CLIENT_ID,
     };
 

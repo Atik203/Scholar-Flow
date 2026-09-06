@@ -1,14 +1,11 @@
 generator client {
-  provider        = "prisma-client-js"
-  engineType      = "binary"
-  previewFeatures = ["postgresqlExtensions", "typedSql"]
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["typedSql"]
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL") // for migrations requiring extension install (superuser)
-  // extensions = [pgvector] // Temporarily disabled for password migration
+  provider = "postgresql"
 }
 
 enum Role {
@@ -18,10 +15,66 @@ enum Role {
   ADMIN
 }
 
+// Workspace-level roles (separate from global application Role)
+// These describe what a user can do WITHIN a specific workspace.
+enum WorkspaceRole {
+  VIEWER // Read-only access to workspace content
+  EDITOR // Can create/edit papers and collections in workspace
+  MANAGER // Can invite/remove members, manage workspace settings
+  OWNER // Full control, can delete workspace and transfer ownership
+}
+
+// Workspace visibility for figma-make UI (Phase 5)
+enum WorkspaceVisibility {
+  PRIVATE // Only members can see this workspace
+  INVITE_ONLY // Join by invitation only
+  PUBLIC // Anyone with a link can see this workspace
+}
+
+enum CollectionPermission {
+  VIEW // Read-only access - can view collection and papers
+  EDIT // Full access - can edit, add/remove papers, delete collection
+}
+
+// Collection visibility for figma-make UI (replaces boolean isPublic in Phase 4 subtask B)
+enum CollectionVisibility {
+  PRIVATE // Only the owner can see this collection
+  TEAM // Anyone in the workspace can see this collection
+  PUBLIC // Anyone with a link can see this collection
+}
+
+// Reading status of a paper within a specific collection (figma-make design)
+enum CollectionPaperStatus {
+  TO_READ
+  READING
+  COMPLETED
+  ARCHIVED
+}
+
+// Phase 6 - Note type (matches figma ResearchNotesPage type filter)
+enum NoteType {
+  QUICK
+  LITERATURE
+  METHODOLOGY
+  FINDINGS
+  IDEA
+}
+
+// Phase 6 - Note visibility (matches figma visibility pills: Private / Workspace / Public)
+enum NoteVisibility {
+  PRIVATE
+  WORKSPACE
+  PUBLIC
+}
+
 enum AnnotationType {
-  HIGHLIGHT
-  COMMENT
-  NOTE
+  HIGHLIGHT // Yellow highlight over text
+  UNDERLINE // Underline text
+  STRIKETHROUGH // Strike through text
+  AREA // Rectangle/area selection
+  COMMENT // Blue comment bubble
+  NOTE // Green sticky note
+  INK // Freehand drawing/ink annotation
 }
 
 enum PaymentProvider {
@@ -49,34 +102,121 @@ enum PlanTier {
   INSTITUTIONAL
 }
 
+enum PaperProcessingStatus {
+  UPLOADED // File record created, extraction not started yet
+  PROCESSING // Extraction & chunking in progress
+  PROCESSED // All chunks stored successfully
+  FAILED // Processing failed; see processingError
+}
+
+enum NotificationType {
+  MENTION
+  COMMENT
+  SHARE
+  INVITE
+  PAPER
+  COLLECTION
+  SYSTEM
+  ACHIEVEMENT
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String // The user receiving the notification
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  starred   Boolean          @default(false)
+  actionUrl String?
+
+  // Optional relations for context (actor and resource)
+  actorId    String? // User who triggered it
+  resourceId String? // ID of related entity (paperId, workspaceId, etc)
+  createdAt  DateTime @default(now())
+
+  user  User  @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  actor User? @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read])
+  @@index([userId, starred])
+  @@index([createdAt])
+}
+
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  name         String?
-  firstName    String?
-  lastName     String?
-  institution  String?
-  fieldOfStudy String?
-  image        String?
-  password     String? // Optional password for demo/test users
-  role         Role    @default(RESEARCHER)
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  name                   String?
+  firstName              String?
+  lastName               String?
+  institution            String?
+  fieldOfStudy           String?
+  image                  String?
+  password               String? // Optional password for demo/test users
+  role                   Role      @default(RESEARCHER)
+  emailVerified          DateTime? // When email was verified
+  emailVerificationToken String? // For email verification
+
+  // Onboarding flow fields (Phase 2)
+  onboardingCompleted Boolean @default(false)
+  onboardingStep      Int     @default(0)
+
+  // Two-factor authentication (TOTP) — encrypted at rest
+  twoFactorSecret  String? // AES-256-GCM ciphertext (iv:tag:cipher)
+  twoFactorEnabled Boolean @default(false)
+
+  // Stripe subscription fields
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String? // The price ID of the current subscription
+  stripeCurrentPeriodEnd DateTime? // When the current subscription period ends
 
   // Auth.js relations
   accounts Account[]
   sessions Session[]
 
   // App relations
-  memberships     WorkspaceMember[]
-  workspacesOwned Workspace[]       @relation("WorkspaceOwner")
-  uploadedPapers  Paper[]           @relation("PaperUploader")
-  annotations     Annotation[]
-  collections     Collection[]      @relation("CollectionOwner")
-  subscriptions   Subscription[]
-  payments        Payment[]
-  searchHistory   SearchHistory[]
-  notifications   Notification[]
-  usageEvents     UsageEvent[]
-  activities      ActivityLog[]
+  memberships               WorkspaceMember[]
+  workspacesOwned           Workspace[]           @relation("WorkspaceOwner")
+  uploadedPapers            Paper[]               @relation("PaperUploader")
+  annotations               Annotation[]
+  collections               Collection[]          @relation("CollectionOwner")
+  subscriptions             Subscription[]
+  payments                  Payment[]
+  searchHistory             SearchHistory[]
+  notifications             Notification[]        @relation("UserNotifications")
+  triggeredNotifications    Notification[]        @relation("NotificationActor")
+  usageEvents               UsageEvent[]
+  activities                ActivityLog[]
+  aiInsightThreads          AIInsightThread[]
+  aiInsightMessagesAuthored AIInsightMessage[]    @relation("AIInsightMessageAuthor")
+  // Sharing relations
+  collectionInvitesSent     CollectionMember[]    @relation("CollectionMemberInvitedBy")
+  workspaceInvitesReceived  WorkspaceInvitation[] @relation("WorkspaceInvitationUser")
+  workspaceInvitesSent      WorkspaceInvitation[] @relation("WorkspaceInvitationInvitedBy")
+
+  // Token relations
+  tokens        UserToken[]
+  researchNotes ResearchNote[]
+
+  // Phase 6 - Notebook hierarchy
+  notebooks      Notebook[]
+  notebookSections NotebookSection[]
+
+  // New Phase 2 features
+  citationExports    CitationExport[]
+  discussionThreads  DiscussionThread[]
+  discussionMessages DiscussionMessage[]
+  activityLogEntries ActivityLogEntry[]
+
+  // Phase 10 — Paper version history
+  paperVersions PaperVersion[]
+
+  // Phase 10 — Global AI assistant conversations
+  aiConversations AIConversation[]
+
+  // Phase 3 - User preferences
+  preference UserPreference?
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
@@ -84,17 +224,46 @@ model User {
   AnnotationVersion AnnotationVersion[]
   CollectionPaper   CollectionPaper[]
   CollectionMember  CollectionMember[]
+
+  // Phase 7 - admin / moderation / alerts / api keys
+  adminReportsCreated    AdminReport[]    @relation("AdminReportCreator")
+  resolvedSystemAlerts   SystemAlert[]    @relation("SystemAlertResolver")
+  apiKeysCreated         ApiKey[]         @relation("ApiKeyCreator")
+  contentReportsFiled    ContentReport[]  @relation("ContentReporter")
+  contentReportsAssigned ContentReport[]  @relation("ContentReportAssignee")
+  contentReportsResolved ContentReport[]  @relation("ContentReportResolver")
+
+  // Optimized indexes for common query patterns
+  @@index([isDeleted, createdAt]) // For listing active users sorted by creation
+  @@index([role, isDeleted, createdAt]) // For role-filtered queries
+  @@index([email, isDeleted]) // For email lookups with deletion filter
+
+  // Login tracking
+  lastLoginProvider String? // "google" | "github" | "credentials" | "magic-link"
+  loginHistory      LoginHistory[]
 }
 
 model Workspace {
-  id          String            @id @default(uuid())
+  id          String                @id @default(uuid())
   name        String
+  description String?
   ownerId     String
-  owner       User              @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  owner       User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id])
   members     WorkspaceMember[]
+  invitations WorkspaceInvitation[]
   collections Collection[]
   papers      Paper[]
   activities  ActivityLog[]
+
+  // New Phase 2 features
+  discussionThreads  DiscussionThread[]
+  activityLogEntries ActivityLogEntry[]
+  aiContextCaches    AIContextCache[]
+
+  // Phase 5 - denormalized color and visibility for fast list/sort without settings join
+  color      String              @default("blue")
+  visibility WorkspaceVisibility @default(PRIVATE)
+  settings   WorkspaceSettings?
 
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
@@ -102,15 +271,16 @@ model Workspace {
   Subscription Subscription[]
   UsageEvent   UsageEvent[]
 
-  @@index([ownerId])
+  @@index([ownerId, isDeleted, createdAt]) // For user's active workspaces
+  @@index([isDeleted, visibility]) // For visibility-filtered listings
 }
 
 model WorkspaceMember {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   workspaceId String
   userId      String
-  role        Role     @default(RESEARCHER)
-  joinedAt    DateTime @default(now())
+  role        WorkspaceRole @default(EDITOR)
+  joinedAt    DateTime      @default(now())
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
@@ -120,7 +290,71 @@ model WorkspaceMember {
   isDeleted Boolean  @default(false)
 
   @@unique([workspaceId, userId])
-  @@index([userId])
+  @@index([userId, isDeleted]) // For user's workspace lookups
+  @@index([workspaceId, isDeleted, role]) // For workspace member filtering by role
+}
+
+model WorkspaceInvitation {
+  id          String           @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole    @default(EDITOR)
+  invitedAt   DateTime         @default(now())
+  // Invitation workflow fields
+  status      MembershipStatus @default(PENDING)
+  invitedById String?
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+  expiresAt   DateTime? // Invites expire (INVITE_EXPIRY_DAYS); swept hourly by invitationSweeper
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  user      User      @relation("WorkspaceInvitationUser", fields: [userId], references: [id])
+  invitedBy User?     @relation("WorkspaceInvitationInvitedBy", fields: [invitedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId, status, isDeleted]) // For pending invitation lookups
+  @@index([userId, status, isDeleted]) // For user's pending invitations
+}
+
+// Phase 5 - Workspace settings (1:1 with Workspace)
+// Source of truth for advanced workspace configuration.
+// Color and visibility are denormalized on Workspace for fast list rendering.
+model WorkspaceSettings {
+  id          String    @id @default(uuid())
+  workspaceId String    @unique
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Visual identity
+  color         String  @default("blue") // blue | purple | green | orange | pink
+  coverImageKey String? // S3 key for optional banner
+  iconKey       String? // S3 key for optional icon
+
+  // Privacy & sharing
+  allowExternalSharing Boolean @default(false)
+  allowDownload        Boolean @default(true)
+
+  // Member defaults
+  defaultMemberRole      WorkspaceRole @default(EDITOR)
+  requireApprovalForJoin Boolean       @default(false)
+
+  // Team feature toggles
+  allowMemberInvites     Boolean @default(true)
+  allowPublicCollections Boolean @default(true)
+  aiFeaturesEnabled      Boolean @default(true)
+
+  // Security
+  enforce2FAForMembers Boolean  @default(false)
+  allowedEmailDomains  String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([workspaceId, isDeleted])
 }
 
 model Paper {
@@ -130,37 +364,80 @@ model Paper {
   title       String
   abstract    String?
   metadata    Json    @db.JsonB
-  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar'
+  source      String? // 'upload' | 'arxiv' | 'openalex' | 'doi' | 'semantic-scholar' | 'editor'
   doi         String? @unique
 
-  uploader        User              @relation("PaperUploader", fields: [uploaderId], references: [id])
-  workspace       Workspace         @relation(fields: [workspaceId], references: [id])
-  file            PaperFile?
-  chunks          PaperChunk[]
-  citationsFrom   Citation[]        @relation("CitationsFrom")
-  citationsTo     Citation[]        @relation("CitationsTo")
-  annotations     Annotation[]
-  collectionJoins CollectionPaper[]
-  aiSummaries     AISummary[]
+  // Editor-specific fields
+  isDraft     Boolean @default(false) // True for draft papers created in editor
+  isPublished Boolean @default(false) // True when draft is published/finalized
+
+  // Processing lifecycle fields
+  processingStatus PaperProcessingStatus @default(UPLOADED)
+  processingError  String?
+  processedAt      DateTime?
+
+  // Document preview support - for enhanced text extraction view
+  previewFileKey    String? // S3 key for preview PDF (converted from DOCX)
+  previewMimeType   String? // MIME type of preview file (usually application/pdf)
+  originalMimeType  String? // Original uploaded MIME type (preserves DOCX, DOC, PDF)
+  originalFormat    String? // "pdf" | "docx" | "doc" — the format the user uploaded
+  processingStage   String? // Current stage: "extracting" | "ocr" | "converting" | "chunking" | "embedding"
+  processingStartedAt DateTime? // When processing began (for timeout detection)
+  contentHtml       String? // Sanitized HTML content for rich text editor
+  extractionVersion Int     @default(1) // Version for extraction algorithm
+
+  // Phase 4 - Enhanced metadata for figma-make UI
+  tags          String[] @default([]) // User-defined tags for filtering and grouping
+  language      String? // ISO language code (e.g., "en", "es", "fr")
+  citationCount Int      @default(0) // External citation count (populated on import/extraction)
+
+  uploader          User               @relation("PaperUploader", fields: [uploaderId], references: [id])
+  workspace         Workspace          @relation(fields: [workspaceId], references: [id])
+  file              PaperFile?
+  chunks            PaperChunk[]
+  citationsFrom     Citation[]         @relation("CitationsFrom")
+  citationsTo       Citation[]         @relation("CitationsTo")
+  annotations       Annotation[]
+  collectionJoins   CollectionPaper[]
+  aiSummaries       AISummary[]
+  aiInsightThreads  AIInsightThread[]
+  aiInsightMessages AIInsightMessage[]
+  researchNotes     ResearchNote[]
+  aiKeyPoints       AIKeyPoint[]
+  aiMetadata        AIMetadata?
+  aiContextCaches   AIContextCache[]
+
+  // New Phase 2 features
+  citationExports   CitationExport[]
+  discussionThreads DiscussionThread[]
 
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   isDeleted  Boolean      @default(false)
   UsageEvent UsageEvent[]
+  PaperVersion PaperVersion[]
 
-  @@index([workspaceId, createdAt])
-  @@index([uploaderId])
+  // Optimized indexes for common query patterns
+  @@index([processingStatus, createdAt]) // For processing status dashboards
+  @@index([uploaderId, workspaceId, isDeleted, createdAt]) // Hot path: user's papers in workspace
+  @@index([workspaceId, isDeleted, createdAt]) // Workspace paper listings
+  @@index([uploaderId, isDeleted]) // User's all papers (cross-workspace)
+  @@index([isDraft, isDeleted]) // Filter draft papers
+  @@index([doi, isDeleted]) // DOI lookups
+  @@index([tags]) // Tag-based filtering (figma-make UI)
 }
 
 model PaperFile {
-  id              String  @id @default(uuid())
-  paperId         String  @unique
-  storageProvider String // s3 | gcs | local
-  objectKey       String
-  contentType     String?
-  sizeBytes       Int?
-  pageCount       Int?
-  checksum        String?
+  id               String    @id @default(uuid())
+  paperId          String    @unique
+  storageProvider  String // s3 | gcs | local
+  objectKey        String
+  contentType      String?
+  sizeBytes        Int?
+  pageCount        Int?
+  checksum         String?
+  originalFilename String? // Original uploaded filename
+  extractedAt      DateTime? // When text extraction completed
 
   paper Paper @relation(fields: [paperId], references: [id])
 
@@ -170,12 +447,12 @@ model PaperFile {
 }
 
 model PaperChunk {
-  id         String @id @default(uuid())
+  id         String                 @id @default(uuid())
   paperId    String
   idx        Int
   page       Int?
   content    String
-  // embedding  Unsupported("vector")? // pgvector column - temporarily disabled
+  embedding  Unsupported("vector")?
   tokenCount Int?
 
   paper Paper @relation(fields: [paperId], references: [id])
@@ -186,6 +463,24 @@ model PaperChunk {
 
   @@unique([paperId, idx])
   @@index([paperId])
+}
+
+model PaperVersion {
+  id           String   @id @default(uuid())
+  paperId      String
+  contentHtml  String
+  title        String?
+  version      Int
+  savedAt      DateTime @default(now())
+  savedById    String?
+  sizeBytes    Int?
+
+  paper        Paper?   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  savedBy      User?    @relation(fields: [savedById], references: [id], onDelete: SetNull)
+
+  @@unique([paperId, version])
+  @@index([paperId, savedAt(sort: Desc)])
+  @@index([savedById])
 }
 
 model Citation {
@@ -203,7 +498,8 @@ model Citation {
   isDeleted Boolean  @default(false)
 
   @@unique([sourcePaperId, targetPaperId, context])
-  @@index([targetPaperId])
+  @@index([targetPaperId, isDeleted]) // For citation lookups
+  @@index([sourcePaperId, isDeleted]) // Implicit from unique, but explicit for clarity
 }
 
 model Annotation {
@@ -211,10 +507,13 @@ model Annotation {
   paperId  String
   userId   String
   type     AnnotationType @default(HIGHLIGHT)
-  anchor   Json           @db.JsonB // position anchors
+  anchor   Json           @db.JsonB
   text     String
   version  Int            @default(1)
   parentId String?
+  color    String         @default("#FFEB3B")
+  positionIndex Int      @default(0)
+  metadata Json?
 
   parent   Annotation?  @relation("AnnotationThread", fields: [parentId], references: [id])
   children Annotation[] @relation("AnnotationThread")
@@ -227,8 +526,10 @@ model Annotation {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([paperId])
-  @@index([userId])
+  @@index([paperId, isDeleted, createdAt]) // For paper annotations sorted by date
+  @@index([userId, isDeleted]) // For user's annotations
+  @@index([parentId, isDeleted]) // For annotation threads
+  @@index([userId, paperId]) // For user's annotations on a specific paper
 }
 
 model AnnotationVersion {
@@ -250,12 +551,19 @@ model AnnotationVersion {
 }
 
 model Collection {
-  id          String  @id @default(uuid())
+  id          String               @id @default(uuid())
   workspaceId String
   ownerId     String
   name        String
   description String?
-  isPublic    Boolean @default(false)
+  // @deprecated Phase 4: kept for backward compat, will be removed in Phase 9.
+  // Prefer `visibility` field (CollectionVisibility enum) instead.
+  isPublic    Boolean              @default(false)
+  // Phase 4 - figma-make UI: replaces isPublic with a 3-state enum
+  visibility  CollectionVisibility @default(PRIVATE)
+  tags        String[]             @default([]) // User-defined tags for filtering
+  coverImage  String? // S3 key or URL for the collection cover image
+  color       String? // UI accent color (e.g., "blue", "purple", "green", "orange", "pink")
 
   owner     User      @relation("CollectionOwner", fields: [ownerId], references: [id])
   workspace Workspace @relation(fields: [workspaceId], references: [id])
@@ -263,20 +571,29 @@ model Collection {
   papers  CollectionPaper[]
   members CollectionMember[]
 
+  // New Phase 2 features
+  citationExports   CitationExport[]
+  discussionThreads DiscussionThread[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([workspaceId])
-  @@index([ownerId])
+  @@index([workspaceId, isDeleted])
+  @@index([ownerId, isDeleted, createdAt]) // Optimized for getUserCollections query
+  @@index([tags]) // Tag-based filtering (figma-make UI)
+  @@index([visibility, isDeleted]) // Visibility-filtered collection listings
 }
 
 model CollectionPaper {
-  id           String   @id @default(uuid())
+  id           String                @id @default(uuid())
   collectionId String
   paperId      String
   addedById    String
-  addedAt      DateTime @default(now())
+  addedAt      DateTime              @default(now())
+  // Phase 4 - figma-make UI: per-user reading status and star toggle
+  status       CollectionPaperStatus @default(TO_READ)
+  isStarred    Boolean               @default(false)
 
   collection Collection @relation(fields: [collectionId], references: [id])
   paper      Paper      @relation(fields: [paperId], references: [id])
@@ -287,24 +604,37 @@ model CollectionPaper {
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, paperId])
-  @@index([paperId])
+  @@index([collectionId, isDeleted, addedAt]) // Collection's papers sorted by add date
+  @@index([paperId, isDeleted]) // Paper's collections lookup
+  @@index([addedById, isDeleted]) // Papers added by specific user
+  @@index([collectionId, status, isStarred, isDeleted]) // Filter by status/starred in figma-make collection detail
 }
 
 model CollectionMember {
-  id           String   @id @default(uuid())
+  id           String               @id @default(uuid())
   collectionId String
   userId       String
-  role         Role     @default(RESEARCHER)
-  invitedAt    DateTime @default(now())
+  role         Role                 @default(RESEARCHER) // mirrors User.role; added 2026-08-10 (raw SQL used it since Phase 4 but the column was never migrated)
+  permission   CollectionPermission @default(EDIT) // Collection-specific permission (VIEW or EDIT)
+  invitedAt    DateTime             @default(now())
+  // Invitation workflow fields
+  status       MembershipStatus     @default(PENDING)
+  invitedById  String?
+  acceptedAt   DateTime?
+  declinedAt   DateTime?
+  expiresAt    DateTime? // Invites expire (INVITE_EXPIRY_DAYS); swept hourly by invitationSweeper
 
   collection Collection @relation(fields: [collectionId], references: [id])
   user       User       @relation(fields: [userId], references: [id])
+  invitedBy  User?      @relation("CollectionMemberInvitedBy", fields: [invitedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
   @@unique([collectionId, userId])
+  @@index([collectionId, status, isDeleted]) // For active member lookups
+  @@index([userId, isDeleted]) // For user's collection memberships
 }
 
 model SearchHistory {
@@ -339,6 +669,187 @@ model AISummary {
   @@unique([paperId, model, promptHash])
 }
 
+model AIInsightThread {
+  id       String  @id @default(uuid())
+  paperId  String
+  userId   String
+  title    String?
+  metadata Json?   @db.JsonB
+
+  paper    Paper              @relation(fields: [paperId], references: [id])
+  user     User               @relation(fields: [userId], references: [id])
+  messages AIInsightMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([paperId, userId, isDeleted], map: "idx_ai_insight_thread_lookup")
+  @@index([userId, createdAt], map: "idx_ai_insight_thread_user")
+}
+
+model AIInsightMessage {
+  id          String  @id @default(uuid())
+  threadId    String
+  paperId     String
+  role        String
+  content     String
+  metadata    Json?   @db.JsonB
+  createdById String?
+
+  thread    AIInsightThread @relation(fields: [threadId], references: [id])
+  paper     Paper           @relation(fields: [paperId], references: [id])
+  createdBy User?           @relation("AIInsightMessageAuthor", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([threadId, createdAt], map: "idx_ai_insight_msg_thread")
+  @@index([paperId, createdAt], map: "idx_ai_insight_msg_paper")
+}
+
+// Phase 10 — Global AI Assistant (floating chat)
+model AIConversation {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String?
+  model       String?  // e.g. "gpt-4o-mini", "gemini-2.5-flash-lite"
+  workspaceId String?
+  context     Json?    @db.JsonB // { type: "paper"|"collection"|"workspace", id: "...", title: "..." }
+
+  user      User                 @relation(fields: [userId], references: [id])
+  messages  AIConversationMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model AIConversationMessage {
+  id             String  @id @default(uuid())
+  conversationId String
+  role           String  // "user" | "assistant"
+  content        String
+  model          String? // which model generated this response
+  tokensUsed     Int?
+  costCents      Float?
+  metadata       Json?   @db.JsonB
+
+  conversation AIConversation @relation(fields: [conversationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId, createdAt])
+}
+
+// Phase 10 — Admin-managed AI provider catalog.
+// Lets admins enable / disable individual models, set the default for
+// the floating AI assistant, and reorder display via displayOrder.
+// Add-only migration; no destructive changes to existing tables.
+model AIProvider {
+  id            String   @id @default(uuid())
+  // Logical provider key: openai | anthropic | google | deepseek | minimax
+  provider      String
+  // Model identifier passed to the SDK (e.g. "gpt-4o-mini", "claude-3-5-sonnet-latest")
+  model         String
+  // Human-readable label shown in UI dropdowns (e.g. "GPT-4o Mini (OpenAI - Fast)")
+  displayName   String
+  enabled       Boolean  @default(true)
+  isDefault     Boolean  @default(false)
+  description   String?
+  // Env-var name to look up the API key (e.g. "OPENAI_API_KEY").
+  // Optional so a provider can be configured without a key (e.g. for catalog-only display).
+  apiKeyEnvName String?
+  // Cost per 1K tokens (in USD cents) for cost tracking in analytics.
+  inputCostPer1k  Float?
+  outputCostPer1k Float?
+  // Lower values appear first in admin lists and user dropdowns.
+  displayOrder  Int      @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+
+  @@unique([provider, model])
+  @@index([enabled, displayOrder])
+  @@index([isDefault])
+}
+
+// Phase 10 — Persisted AI Key Points extracted from papers.
+// Caches key findings/claims so they're reused across page loads
+// instead of being regenerated on every click.
+model AIKeyPoint {
+  id        String   @id @default(uuid())
+  paperId   String
+  content   String
+  category  String?  // "claim" | "finding" | "methodology" | "limitation" | "contribution"
+  order     Int
+  model     String?
+  tokensUsed Int?
+  paper     Paper    @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@unique([paperId, order])
+  @@index([paperId, isDeleted])
+}
+
+// Phase 10 — AI-generated / improved paper metadata.
+// Separate from Paper.metadata JSONB for typed access, avoiding
+// the "WHERE metadata->>'aiTitle' IS NULL" anti-pattern.
+// User can accept, modify, or reject AI suggestions here.
+model AIMetadata {
+  id              String   @id @default(uuid())
+  paperId         String
+  title           String?  // AI-improved title
+  abstract        String?  // AI-generated abstract
+  keywords        String[]
+  tags            String[]
+  researchDomain  String?  // "computer-science" | "biology" etc.
+  publicationType String?  // "journal" | "conference" | "preprint" | "thesis"
+  readingLevel    String?  // "beginner" | "intermediate" | "advanced"
+  methodology     String?
+  researchQuestions String[]
+  contributions   String[] 
+  limitations     String[]
+  futureWork      String[]
+  model           String?
+  tokensUsed      Int?
+  paper           Paper    @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  isDeleted       Boolean  @default(false)
+
+  @@unique([paperId])
+}
+
+// Phase 10 — Generic AI context cache.
+// Stores parsed text, structured document representations, and other
+// pre-processed content so downstream AI features don't re-read / re-chunk
+// the same paper text. Keeps token usage predictable.
+model AIContextCache {
+  id          String   @id @default(uuid())
+  paperId     String?
+  workspaceId String?
+  contentType String   // "parsed_text" | "structured_doc" | "chunks_index" | "summary_snapshot"
+  content     String
+  tokenCount  Int?
+  model       String?
+  expiresAt   DateTime?
+  paper       Paper?   @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paperId, contentType])
+  @@index([workspaceId, contentType])
+  @@index([expiresAt])
+}
+
 model Plan {
   id            String  @id @default(uuid())
   code          String  @unique
@@ -364,9 +875,15 @@ model Subscription {
   planId                 String
   status                 SubscriptionStatus
   provider               PaymentProvider
-  providerCustomerId     String?
-  providerSubscriptionId String?
+  providerCustomerId     String? // Stripe customer ID
+  providerSubscriptionId String? // Stripe subscription ID
   cancelAtPeriodEnd      Boolean            @default(false)
+  currentPeriodStart     DateTime?
+  currentPeriodEnd       DateTime?
+  canceledAt             DateTime?
+  trialStart             DateTime?
+  trialEnd               DateTime?
+  seats                  Int                @default(1) // Number of seats/team members
   startedAt              DateTime           @default(now())
   expiresAt              DateTime
 
@@ -379,9 +896,11 @@ model Subscription {
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
-  @@index([userId])
-  @@index([workspaceId])
-  @@index([planId])
+  @@index([userId, status, isDeleted]) // For user's active subscriptions
+  @@index([workspaceId, status, isDeleted]) // For workspace subscriptions
+  @@index([status, expiresAt]) // For expiration checks
+  @@index([providerSubscriptionId]) // For Stripe subscription lookups
+  @@index([providerCustomerId, status]) // For customer subscription queries
 }
 
 model Payment {
@@ -408,35 +927,22 @@ model Payment {
 model WebhookEvent {
   id          String          @id @default(uuid())
   provider    PaymentProvider
-  eventId     String
-  type        String
+  eventId     String // Stripe event ID (e.g., evt_xxx)
+  type        String // Event type (e.g., checkout.session.completed)
   payload     Json            @db.JsonB
   receivedAt  DateTime        @default(now())
   processedAt DateTime?
-  status      String
+  status      String // pending, processed, failed
   error       String?
+  attempts    Int             @default(0) // Number of processing attempts
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 
   @@unique([provider, eventId])
-}
-
-model Notification {
-  id      String    @id @default(uuid())
-  userId  String
-  type    String
-  payload Json      @db.JsonB
-  readAt  DateTime?
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  isDeleted Boolean  @default(false)
-
-  @@index([userId, createdAt])
+  @@index([status, receivedAt]) // For retry queries
+  @@index([type, processedAt]) // For event type analytics
 }
 
 model UsageEvent {
@@ -514,6 +1020,25 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
+
+  // Optimized index - composite is sufficient for session lookups
+  @@index([userId, expires])
+  @@index([expires, isDeleted]) // For cleanup queries
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  provider  String   // "google" | "github" | "credentials" | "magic-link"
+  ip        String?
+  userAgent String?
+  device    String?  // derived from user-agent (e.g. "Chrome on MacOS")
+  location  String?  // geocoded from IP (e.g. "New York, USA")
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model VerificationToken {
@@ -527,4 +1052,575 @@ model VerificationToken {
   isDeleted Boolean  @default(false)
 
   @@unique([identifier, token])
+}
+
+model UserToken {
+  id        String    @id @default(uuid())
+  userId    String
+  token     String    @unique // Hashed token
+  type      TokenType
+  expiresAt DateTime
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token, used]) // For token validation
+  @@index([userId, type, used]) // For user's active tokens by type
+  @@index([expiresAt, used]) // For cleanup queries
+}
+
+enum TokenType {
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+  MAGIC_LINK
+}
+
+// Invitation/member status for collection sharing
+enum MembershipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model ResearchNote {
+  id        String   @id @default(uuid())
+  userId    String
+  paperId   String? // Optional - can be general notes
+  title     String
+  content   String
+  tags      String[] // Array of tags
+  isPrivate Boolean  @default(true)
+
+  // Phase 6 - Optional notebook/section organization (matches figma ResearchNotesPage)
+  notebookId String?
+  sectionId  String?
+  noteType   NoteType       @default(QUICK)
+  visibility NoteVisibility @default(PRIVATE)
+  isStarred  Boolean        @default(false)
+  wordCount  Int            @default(0)
+  excerpt    String?
+
+  user     User              @relation(fields: [userId], references: [id])
+  paper    Paper?            @relation(fields: [paperId], references: [id])
+  notebook Notebook?         @relation(fields: [notebookId], references: [id], onDelete: SetNull)
+  section  NotebookSection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, isDeleted, updatedAt]) // For user's notes sorted by update
+  @@index([paperId, isDeleted]) // For paper-specific notes
+  @@index([paperId, userId]) // For notes on a paper filtered by user
+  @@index([tags]) // For tag-based searches
+  @@index([notebookId, isDeleted, updatedAt]) // Phase 6: notebook-scoped note listing
+  @@index([sectionId, isDeleted]) // Phase 6: section-scoped note listing
+  @@index([noteType, isDeleted]) // Phase 6: type filter chip
+  @@index([userId, isStarred, isDeleted]) // Phase 6: starred notes
+}
+
+// Phase 6 - Notebook hierarchy (matches figma folders + IMPLEMENTATION.md)
+model Notebook {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  color       String   @default("blue") // blue|green|purple|orange|pink
+  isStarred   Boolean  @default(false)
+
+  user     User              @relation(fields: [userId], references: [id])
+  sections NotebookSection[]
+  notes    ResearchNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, isDeleted, updatedAt]) // For user's notebooks sorted by update
+}
+
+model NotebookSection {
+  id         String   @id @default(uuid())
+  notebookId String
+  userId     String
+  name       String
+  order      Int      @default(0)
+
+  notebook Notebook      @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id])
+  notes    ResearchNote[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([notebookId, isDeleted, order]) // Sections within a notebook, ordered
+}
+
+// Citation Export System
+model CitationExport {
+  id           String         @id @default(uuid())
+  userId       String
+  paperId      String?
+  collectionId String?
+  format       CitationFormat
+  content      String // The actual citation content
+  metadata     Json?          @db.JsonB // Additional format-specific metadata
+  exportedAt   DateTime       @default(now())
+
+  user       User        @relation(fields: [userId], references: [id])
+  paper      Paper?      @relation(fields: [paperId], references: [id])
+  collection Collection? @relation(fields: [collectionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, exportedAt]) // For user's export history
+  @@index([paperId, format]) // For paper-specific exports
+  @@index([collectionId, format]) // For collection exports
+  @@index([userId, isDeleted]) // For deletion-filtered user export queries
+}
+
+enum CitationFormat {
+  BIBTEX
+  ENDNOTE
+  APA
+  MLA
+  IEEE
+  CHICAGO
+  HARVARD
+  VANCOUVER
+  ACS
+}
+
+// Threaded Research Discussions
+model DiscussionThread {
+  id           String   @id @default(uuid())
+  paperId      String?
+  collectionId String?
+  workspaceId  String?
+  userId       String
+  title        String
+  content      String
+  isResolved   Boolean  @default(false)
+  isPinned     Boolean  @default(false)
+  tags         String[] // Discussion tags for categorization
+
+  paper      Paper?              @relation(fields: [paperId], references: [id])
+  collection Collection?         @relation(fields: [collectionId], references: [id])
+  workspace  Workspace?          @relation(fields: [workspaceId], references: [id])
+  user       User                @relation(fields: [userId], references: [id])
+  messages   DiscussionMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([paperId, isDeleted, createdAt]) // For paper discussions
+  @@index([collectionId, isDeleted, createdAt]) // For collection discussions
+  @@index([workspaceId, isDeleted, createdAt]) // For workspace discussions
+  @@index([userId, isDeleted]) // For user's discussions
+  @@index([isResolved, isDeleted]) // For resolved/unresolved filtering
+  @@index([isPinned, isDeleted]) // For pinned discussions
+  @@index([isPinned, createdAt(sort: Desc)]) // For pinned threads sorted by date
+}
+
+model DiscussionMessage {
+  id          String  @id @default(uuid())
+  threadId    String
+  userId      String
+  content     String
+  parentId    String? // For threaded replies
+  isEdited    Boolean @default(false)
+  editHistory Json?   @db.JsonB // Store edit history
+
+  thread  DiscussionThread    @relation(fields: [threadId], references: [id])
+  user    User                @relation(fields: [userId], references: [id])
+  parent  DiscussionMessage?  @relation("MessageThread", fields: [parentId], references: [id])
+  replies DiscussionMessage[] @relation("MessageThread")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([threadId, createdAt]) // For thread messages sorted by date
+  @@index([userId, isDeleted]) // For user's messages
+  @@index([parentId, isDeleted]) // For message replies
+}
+
+// Enhanced Activity Log
+model ActivityLogEntry {
+  id          String           @id @default(uuid())
+  userId      String?
+  workspaceId String?
+  entity      String // 'paper', 'collection', 'discussion', 'annotation', etc.
+  entityId    String
+  action      String // 'created', 'updated', 'deleted', 'shared', 'exported', etc.
+  details     Json?            @db.JsonB // Additional context about the action
+  metadata    Json?            @db.JsonB // Additional metadata like IP, user agent, etc.
+  severity    ActivitySeverity @default(INFO)
+
+  user      User?      @relation(fields: [userId], references: [id])
+  workspace Workspace? @relation(fields: [workspaceId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@index([userId, createdAt]) // For user activity timeline
+  @@index([workspaceId, createdAt]) // For workspace activity
+  @@index([entity, entityId, createdAt]) // For entity-specific activity
+  @@index([action, createdAt]) // For action-based filtering
+  @@index([severity, createdAt]) // For severity-based filtering
+  @@index([userId, severity]) // For dashboard filtering by user + severity
+}
+
+enum ActivitySeverity {
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+// -------- Public Content Models (Phase 1.9) --------
+
+enum ContactSubmissionStatus {
+  NEW
+  READ
+  REPLIED
+}
+
+model Faq {
+  id          String   @id @default(uuid())
+  question    String
+  answer      String
+  category    String
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([category, order])
+  @@index([isPublished, category, order])
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  name        String
+  title       String
+  company     String?
+  avatar      String?
+  content     String
+  rating      Int      @default(5)
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([isPublished, order])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  isDeleted    Boolean  @default(false)
+
+  @@index([isActive])
+  @@index([createdAt(sort: Desc)]) // For admin listing sorted by subscription date
+}
+
+model ContactSubmission {
+  id        String                  @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    ContactSubmissionStatus @default(NEW)
+  createdAt DateTime                @default(now())
+  updatedAt DateTime                @updatedAt
+  isDeleted Boolean                 @default(false)
+
+  @@index([status, createdAt])
+  @@index([createdAt(sort: Desc)]) // For admin listing sorted by submission date
+}
+
+model PageContent {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  content     String
+  metadata    Json?    @db.JsonB
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  @@index([slug, isPublished])
+}
+
+// -------- User Preferences (Phase 3) --------
+
+model UserPreference {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme                String   @default("system") // light | dark | system
+  language             String   @default("en")
+  timezone             String   @default("UTC")
+  emailDigest          Boolean  @default(true)
+  defaultCitationStyle String   @default("APA")
+  compactMode          Boolean  @default(false)
+  metadata             Json?    @db.JsonB
+  // Phase 7 - Notification preferences (channels, categories, quiet hours)
+  notificationPreferences Json? @db.JsonB
+  // Privacy settings (profileVisibility, showActivity, allowDataSharing, showInDiscover)
+  privacySettings Json? @db.JsonB
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// ============================================================================
+// Phase 7 - Analytics, Notifications & Admin
+// ============================================================================
+
+// -------- Admin Reports --------
+
+enum AdminReportType {
+  USAGE
+  FINANCIAL
+  USER
+  CONTENT
+  SYSTEM
+}
+
+enum AdminReportStatus {
+  READY
+  GENERATING
+  SCHEDULED
+  FAILED
+}
+
+enum AdminReportFormat {
+  CSV
+  JSON
+}
+
+model AdminReport {
+  id          String             @id @default(uuid())
+  name        String
+  description String?
+  type        AdminReportType
+  status      AdminReportStatus  @default(READY)
+  format      AdminReportFormat  @default(CSV)
+  fileSize    String?
+  generatedAt DateTime?
+  // Scheduling
+  schedule    String? // cron-like expression
+  nextRunAt   DateTime?
+  recipients  String[]           @default([])
+  enabled     Boolean            @default(true)
+  // Config (filters, columns, etc.)
+  config      Json?              @db.JsonB
+  // Last result cached on disk
+  resultKey   String? // S3 key for the generated report file
+  createdById String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  isDeleted   Boolean            @default(false)
+
+  createdBy User @relation("AdminReportCreator", fields: [createdById], references: [id])
+
+  @@index([type, status, generatedAt])
+  @@index([nextRunAt, enabled])
+  @@index([createdById, isDeleted])
+}
+
+// -------- System Alerts --------
+
+enum SystemAlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum SystemAlertCategory {
+  USER
+  BILLING
+  SECURITY
+  STORAGE
+  PROCESSING
+  SYSTEM
+}
+
+model SystemAlert {
+  id           String              @id @default(uuid())
+  category     SystemAlertCategory
+  severity     SystemAlertSeverity @default(INFO)
+  title        String
+  message      String
+  metadata     Json?               @db.JsonB
+  resolved     Boolean             @default(false)
+  resolvedAt   DateTime?
+  resolvedById String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  resolvedBy User? @relation("SystemAlertResolver", fields: [resolvedById], references: [id])
+
+  @@index([category, createdAt])
+  @@index([resolved, createdAt])
+  @@index([severity, resolved])
+}
+
+// -------- Outbound Webhook Endpoints --------
+
+enum WebhookEndpointStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum WebhookDeliveryStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+model WebhookEndpoint {
+  id               String                @id @default(uuid())
+  name             String
+  url              String
+  description      String?
+  // Stored as HMAC-SHA256(secret + WEBHOOK_PEPPER); raw secret only returned on create
+  secretHash       String
+  // First 8 chars of the raw secret for display (e.g., "whsec_xx")
+  secretPrefix     String
+  events           String[]              @default([])
+  status           WebhookEndpointStatus @default(ACTIVE)
+  lastTriggered    DateTime?
+  totalDeliveries  Int                   @default(0)
+  failedDeliveries Int                   @default(0)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  isDeleted        Boolean               @default(false)
+
+  deliveries WebhookDelivery[]
+
+  @@index([status, isDeleted])
+}
+
+model WebhookDelivery {
+  id           String                @id @default(uuid())
+  endpointId   String
+  event        String
+  payload      Json                  @db.JsonB
+  status       WebhookDeliveryStatus
+  statusCode   Int?
+  responseBody String?               @db.Text
+  durationMs   Int?
+  attempts     Int                   @default(1)
+  createdAt    DateTime              @default(now())
+  completedAt  DateTime?
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, createdAt])
+  @@index([status, createdAt])
+}
+
+// -------- API Keys --------
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model ApiKey {
+  id            String      @id @default(uuid())
+  name          String
+  // Hashed (HMAC-SHA256 with API_KEY_PEPPER); raw key only returned on create
+  keyHash       String      @unique
+  // First 12 chars of the raw key for display (e.g., "sf_live_abcd")
+  keyPrefix     String
+  description   String?
+  scopes        String[]    @default([])
+  status        ApiKeyStatus @default(ACTIVE)
+  rateLimit     Int         @default(1000) // requests per hour
+  createdById   String
+  createdAt     DateTime    @default(now())
+  expiresAt     DateTime?
+  lastUsedAt    DateTime?
+  totalRequests Int         @default(0)
+  isDeleted     Boolean     @default(false)
+
+  createdBy User @relation("ApiKeyCreator", fields: [createdById], references: [id])
+
+  @@index([status, isDeleted])
+  @@index([keyPrefix])
+  @@index([createdById, isDeleted])
+}
+
+// -------- Content Moderation --------
+
+enum ContentReportType {
+  PAPER
+  COMMENT
+  COLLECTION
+  PROFILE
+}
+
+enum ContentReportReason {
+  SPAM
+  HARASSMENT
+  COPYRIGHT
+  INAPPROPRIATE
+  MISINFORMATION
+  OTHER
+}
+
+enum ContentReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+model ContentReport {
+  id             String              @id @default(uuid())
+  contentType    ContentReportType
+  contentId      String
+  contentTitle   String?
+  contentPreview String?             @db.Text
+  reporterId     String
+  reason         ContentReportReason
+  description    String?             @db.Text
+  status         ContentReportStatus @default(PENDING)
+  assignedToId   String?
+  resolvedAt     DateTime?
+  resolvedById   String?
+  action         String? // approved | removed | warning | suspended
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  isDeleted      Boolean             @default(false)
+
+  reporter   User  @relation("ContentReporter", fields: [reporterId], references: [id])
+  assignedTo User? @relation("ContentReportAssignee", fields: [assignedToId], references: [id])
+  resolvedBy User? @relation("ContentReportResolver", fields: [resolvedById], references: [id])
+
+  @@index([status, createdAt])
+  @@index([contentType, contentId])
+  @@index([reporterId, createdAt])
+  @@index([assignedToId, status])
 }

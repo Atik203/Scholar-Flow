@@ -5,11 +5,27 @@ import {
   requireAdmin,
   requireTeamLead,
 } from "../../middleware/auth";
+import {
+  emailVerificationLimiter,
+  passwordResetLimiter,
+  sensitiveAuthLimiter,
+} from "../../middleware/rateLimiter";
 import { validateRequestBody } from "../../middleware/validateRequest";
 import { authController } from "./auth.controller";
 import { authValidation } from "./auth.validation";
+import * as oauthController from "./oauth.controller";
 
 const router: express.Router = express.Router();
+
+// OAuth routes
+router.get("/oauth/google", oauthController.initiateGoogleOAuth);
+router.get("/oauth/github", oauthController.initiateGitHubOAuth);
+
+// OAuth callbacks - support both GET (direct from provider) and POST (from frontend)
+router.post("/oauth/google/callback", oauthController.handleGoogleCallback);
+router.get("/oauth/google/callback", oauthController.handleGoogleCallback);
+router.post("/oauth/github/callback", oauthController.handleGitHubCallback);
+router.get("/oauth/github/callback", oauthController.handleGitHubCallback);
 
 // Public routes
 router.post(
@@ -54,6 +70,49 @@ router.post(
   authController.deleteSession
 );
 
+// Password reset and email verification routes
+router.post(
+  "/forgot-password",
+  passwordResetLimiter,
+  validateRequestBody(authValidation.forgotPassword),
+  authController.forgotPassword
+);
+
+router.post(
+  "/reset-password",
+  passwordResetLimiter,
+  validateRequestBody(authValidation.passwordReset),
+  authController.resetPassword
+);
+
+router.post(
+  "/verify-email",
+  emailVerificationLimiter,
+  validateRequestBody(authValidation.emailVerification),
+  authController.verifyEmail
+);
+
+router.post(
+  "/send-verification",
+  sensitiveAuthLimiter,
+  validateRequestBody(authValidation.sendEmailVerification),
+  authController.sendEmailVerification
+);
+
+// Magic link routes (passwordless login)
+router.post(
+  "/magic-link/send",
+  sensitiveAuthLimiter,
+  validateRequestBody(authValidation.magicLinkSend),
+  authController.sendMagicLink
+);
+
+router.post(
+  "/magic-link/verify",
+  validateRequestBody(authValidation.magicLinkVerify),
+  authController.verifyMagicLink
+);
+
 // Protected routes for user management
 router.get(
   "/users",
@@ -71,6 +130,19 @@ router.put(
 );
 
 router.get("/profile", optionalAuth, authController.getCurrentUser);
+
+// Login history (authenticated)
+router.get(
+  "/login-history",
+  authMiddleware,
+  authController.getLoginHistory
+);
+
+router.get(
+  "/login-summary",
+  authMiddleware,
+  authController.getLoginSummary
+);
 
 /**
  * @swagger

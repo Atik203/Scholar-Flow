@@ -1,0 +1,418 @@
+import { apiSlice } from "./apiSlice";
+
+export type CollectionPermission = "VIEW" | "EDIT";
+export type UserPermission = "OWNER" | "EDIT" | "VIEW";
+
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  isPublic: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string | null;
+  color?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  workspaceId: string;
+  ownerId: string;
+  _count?: {
+    papers: number;
+    members: number;
+  };
+  userPermission?: UserPermission; // User's permission level for this collection
+}
+
+export interface CollectionMember {
+  id: string;
+  collectionId: string;
+  userId: string;
+  role: string;
+  permission: CollectionPermission;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  invitedAt: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+  invitedById?: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+  };
+  invitedBy?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface CreateCollectionRequest {
+  name: string;
+  description?: string;
+  isPublic?: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string;
+  color?: string;
+  workspaceId: string;
+}
+
+export interface UpdateCollectionRequest {
+  name?: string;
+  description?: string;
+  isPublic?: boolean;
+  visibility?: "PRIVATE" | "TEAM" | "PUBLIC";
+  tags?: string[];
+  coverImage?: string;
+  color?: string;
+}
+
+export interface CollectionPaper {
+  id: string;
+  collectionId: string;
+  paperId: string;
+  addedById: string;
+  addedAt: string;
+  paper: {
+    id: string;
+    title: string;
+    abstract?: string;
+    metadata: any;
+    processingStatus: string;
+    file?: {
+      id: string;
+      originalFilename: string;
+      sizeBytes: number;
+    };
+    uploader: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
+}
+
+export interface AddPaperToCollectionRequest {
+  paperId: string;
+}
+
+export interface InviteMemberRequest {
+  id: string;
+  email: string;
+  role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+  permission?: CollectionPermission;
+}
+
+export interface CollectionStats {
+  total: number;
+  totalPapers: number;
+  publicCount: number;
+  privateCount: number;
+  teamCount: number;
+  recentCount: number;
+  byVisibility: {
+    PRIVATE: number;
+    TEAM: number;
+    PUBLIC: number;
+  };
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+}
+
+export const collectionApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    // Get user's collections
+    getMyCollections: builder.query<
+      { result: Collection[]; meta: PaginationMeta },
+      { page?: number; limit?: number; workspaceId?: string }
+    >({
+      query: ({ page = 1, limit = 10, workspaceId } = {}) => {
+        const params: any = { page, limit };
+        if (workspaceId) {
+          params.workspaceId = workspaceId;
+        }
+        return {
+          url: "/collections/my",
+          params,
+        };
+      },
+      transformResponse: (response: { data: Collection[]; meta: any }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Collection" as const,
+                id,
+              })),
+              { type: "Collection", id: "LIST" },
+            ]
+          : [{ type: "Collection", id: "LIST" }],
+    }),
+
+    // Get collections shared with the user
+    getSharedCollections: builder.query<
+      { result: Collection[]; meta: any },
+      { page?: number; limit?: number } | void
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/collections/shared",
+        params: { page, limit },
+      }),
+      transformResponse: (response: { data: Collection[]; meta: any }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.result.map(({ id }) => ({
+                type: "Collection" as const,
+                id,
+              })),
+              { type: "Collection", id: "SHARED" },
+            ]
+          : [{ type: "Collection", id: "SHARED" }],
+    }),
+
+    // Get specific collection
+    getCollection: builder.query<Collection, string>({
+      query: (id) => `/collections/${id}`,
+      transformResponse: (response: { data: Collection }) => response.data,
+      providesTags: (result, error, id) => [{ type: "Collection", id }],
+    }),
+
+    // Create collection
+    createCollection: builder.mutation<Collection, CreateCollectionRequest>({
+      query: (data) => ({
+        url: "/collections",
+        method: "POST",
+        body: data,
+      }),
+      transformResponse: (response: { data: Collection }) => response.data,
+      invalidatesTags: [
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "Collection",
+      ],
+    }),
+
+    // Delete collection
+    deleteCollection: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/collections/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "Collection",
+      ],
+    }),
+
+    // Invites sent by the authenticated user
+    getInvitesSent: builder.query<
+      { result: CollectionMember[]; meta: PaginationMeta },
+      { page?: number; limit?: number } | void
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/collections/invites/sent",
+        params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      }),
+      transformResponse: (response: { data: any[]; meta: any }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: ["CollectionInvite", "Collection"],
+      keepUnusedDataFor: 0,
+      forceRefetch({ currentArg, previousArg }) {
+        return true; // Always refetch
+      },
+    }),
+
+    // Invites received by the authenticated user
+    getInvitesReceived: builder.query<
+      { result: any[]; meta: any },
+      { page?: number; limit?: number } | void
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/collections/invites/received",
+        params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      }),
+      transformResponse: (response: { data: any[]; meta: any }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: ["CollectionInvite", "Collection"],
+      keepUnusedDataFor: 0,
+      forceRefetch({ currentArg, previousArg }) {
+        return true; // Always refetch
+      },
+    }),
+
+    // Get papers in collection
+    getCollectionPapers: builder.query<
+      { result: CollectionPaper[]; meta: any },
+      { collectionId: string; page?: number; limit?: number }
+    >({
+      query: ({ collectionId, page = 1, limit = 10 }) => ({
+        url: `/collections/${collectionId}/papers`,
+        params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      }),
+      transformResponse: (response: {
+        data: CollectionPaper[];
+        meta: any;
+      }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: (result, error, { collectionId }) => [
+        { type: "CollectionPaper", id: collectionId },
+        "CollectionPaper",
+      ],
+      keepUnusedDataFor: 0,
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg?.collectionId !== previousArg?.collectionId;
+      },
+    }),
+
+    // Add paper to collection
+    addPaperToCollection: builder.mutation<
+      CollectionPaper,
+      { collectionId: string; data: AddPaperToCollectionRequest }
+    >({
+      query: ({ collectionId, data }) => ({
+        url: `/collections/${collectionId}/papers`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { collectionId }) => [
+        { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
+        "CollectionPaper",
+      ],
+    }),
+
+    // Remove paper from collection
+    removePaperFromCollection: builder.mutation<
+      void,
+      { collectionId: string; paperId: string }
+    >({
+      query: ({ collectionId, paperId }) => ({
+        url: `/collections/${collectionId}/papers/${paperId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { collectionId }) => [
+        { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
+        "CollectionPaper",
+      ],
+    }),
+
+    // Invite a member by email
+    inviteMember: builder.mutation<{ memberId: string }, InviteMemberRequest>({
+      query: ({ id, email, role = "RESEARCHER", permission = "EDIT" }) => ({
+        url: `/collections/${id}/invite`,
+        method: "POST",
+        body: { email, role, permission },
+      }),
+      transformResponse: (response: { data: { memberId: string } }) =>
+        response.data,
+      invalidatesTags: (result, error, { id }) => [
+        { type: "CollectionMember", id },
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
+      ],
+    }),
+
+    // Accept an invite
+    acceptInvite: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/collections/${id}/accept`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "CollectionMember", id },
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
+      ],
+    }),
+
+    // Decline an invite
+    declineInvite: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/collections/${id}/decline`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "CollectionMember", id },
+        { type: "Collection", id },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
+        "CollectionInvite",
+      ],
+    }),
+    // Phase 4: Update reading status or star a paper within a collection
+    updateCollectionPaper: builder.mutation<
+      void,
+      { collectionId: string; paperId: string; status?: "TO_READ" | "READING" | "COMPLETED" | "ARCHIVED"; isStarred?: boolean }
+    >({
+      query: ({ collectionId, paperId, ...data }) => ({
+        url: `/collections/${collectionId}/papers/${paperId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { collectionId }) => [
+        { type: "CollectionPaper", id: collectionId },
+        { type: "Collection", id: collectionId },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useGetMyCollectionsQuery,
+  useGetSharedCollectionsQuery,
+  useGetCollectionQuery,
+  useCreateCollectionMutation,
+  useDeleteCollectionMutation,
+  useGetCollectionPapersQuery,
+  useAddPaperToCollectionMutation,
+  useRemovePaperFromCollectionMutation,
+  useInviteMemberMutation,
+  useAcceptInviteMutation,
+  useDeclineInviteMutation,
+  useGetInvitesSentQuery,
+  useGetInvitesReceivedQuery,
+  // Phase 4
+  useUpdateCollectionPaperMutation,
+} = collectionApi;

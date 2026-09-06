@@ -1,0 +1,795 @@
+/**
+ * Admin Routes
+ * Routes for admin dashboard and system management
+ */
+
+import express from "express";
+import { authMiddleware, requireAdmin } from "../../middleware/auth";
+import { performanceMonitor } from "../../middleware/performanceMonitor";
+import { rateLimiter } from "../../middleware/rateLimiter";
+import { validateRequestBody } from "../../middleware/validateRequest";
+import { adminController } from "./admin.controller";
+import {
+  adminApiKeysController,
+  adminModerationController,
+  adminPaymentsController,
+  adminPlansController,
+  adminSubscribersController,
+  systemAlertsController,
+} from "./extendedControllers";
+import * as adminValidation from "./admin.validation";
+
+const router = express.Router();
+
+// Apply performance monitoring to all admin routes
+router.use(performanceMonitor as any);
+
+/**
+ * @swagger
+ * /api/admin/stats:
+ *   get:
+ *     summary: Get System Statistics
+ *     description: Retrieve comprehensive system statistics including users, papers, sessions, and storage. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/SystemStats'
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/stats",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemStats
+);
+
+/**
+ * @swagger
+ * /api/admin/users/recent:
+ *   get:
+ *     summary: Get Recent Users
+ *     description: Retrieve recent users with their activity metrics. Supports pagination.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN]
+ *         description: Filter by role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, all]
+ *         description: Filter by status
+ *     responses:
+ *       200:
+ *         description: Recent users retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get(
+  "/users/recent",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getRecentUsers
+);
+
+/**
+ * @swagger
+ * /api/admin/growth:
+ *   get:
+ *     summary: Get User Growth Data
+ *     description: Retrieve user growth statistics for the last 30 days
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Growth data retrieved successfully
+ */
+router.get(
+  "/growth",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getUserGrowthData
+);
+
+/**
+ * @swagger
+ * /api/admin/roles/distribution:
+ *   get:
+ *     summary: Get Role Distribution
+ *     description: Retrieve statistics about user role distribution
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Role distribution retrieved successfully
+ */
+router.get(
+  "/roles/distribution",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getRoleDistribution
+);
+
+/**
+ * @swagger
+ * /api/admin/papers/stats:
+ *   get:
+ *     summary: Get Paper Statistics
+ *     description: Retrieve paper processing statistics
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Paper stats retrieved successfully
+ */
+router.get(
+  "/papers/stats",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getPaperStats
+);
+
+/**
+ * @swagger
+ * /api/admin/health:
+ *   get:
+ *     summary: System Health Check
+ *     description: Check system health including database, storage, and cache status
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Health check completed successfully
+ */
+router.get(
+  "/health",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemHealth
+);
+
+/**
+ * @swagger
+ * /api/admin/system/metrics:
+ *   get:
+ *     summary: Get System Metrics
+ *     description: Retrieve comprehensive system metrics including CPU, memory, disk, network, and database performance. Real-time monitoring endpoint.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: System metrics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/SystemMetrics'
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/system/metrics",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemMetrics
+);
+
+/**
+ * @swagger
+ * /api/admin/analytics/revenue:
+ *   get:
+ *     summary: Get Revenue Analytics
+ *     description: Retrieve comprehensive revenue analytics including MRR, ARR, subscription metrics, and trends
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: timeRange
+ *         schema:
+ *           type: string
+ *           enum: [7d, 30d, 90d, 1y]
+ *           default: 30d
+ *         description: Time range for analytics
+ *     responses:
+ *       200:
+ *         description: Revenue analytics retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/revenue",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getRevenueAnalytics
+);
+
+/**
+ * @swagger
+ * /api/admin/analytics/top-customers:
+ *   get:
+ *     summary: Get Top Paying Customers
+ *     description: Retrieve list of top paying customers with their subscription details
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of customers to return
+ *     responses:
+ *       200:
+ *         description: Top customers retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/top-customers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getTopCustomers
+);
+
+/**
+ * @swagger
+ * /api/admin/analytics/subscribers:
+ *   get:
+ *     summary: Get Subscriber Details
+ *     description: Retrieve detailed list of all subscribers with pagination and filtering
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [ACTIVE, CANCELED, EXPIRED, PAST_DUE, all]
+ *         description: Filter by subscription status
+ *       - in: query
+ *         name: planId
+ *         schema:
+ *           type: string
+ *         description: Filter by plan ID
+ *     responses:
+ *       200:
+ *         description: Subscriber details retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/analytics/subscribers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSubscriberDetails
+);
+
+/**
+ * @swagger
+ * /api/admin/users:
+ *   get:
+ *     summary: Get All Users
+ *     description: Retrieve all users with pagination, search, and filtering capabilities
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name or email
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN, all]
+ *         description: Filter by role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, all]
+ *         description: Filter by account status
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getAllUsers
+);
+
+/**
+ * @swagger
+ * /api/admin/users/stats:
+ *   get:
+ *     summary: Get User Statistics
+ *     description: Retrieve user statistics for dashboard cards
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User statistics retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users/stats",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getUserStats
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/role:
+ *   patch:
+ *     summary: Update User Role
+ *     description: Update a user's role. Cannot change own role.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN]
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       400:
+ *         description: Invalid role
+ *       403:
+ *         description: Cannot change own role
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/role",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.updateUserRoleSchema),
+  rateLimiter,
+  adminController.updateUserRole
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/deactivate:
+ *   patch:
+ *     summary: Deactivate User
+ *     description: Soft delete a user account. Cannot deactivate own account.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deactivated successfully
+ *       400:
+ *         description: User already deactivated
+ *       403:
+ *         description: Cannot deactivate own account
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/deactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.deactivateUser
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/reactivate:
+ *   patch:
+ *     summary: Reactivate User
+ *     description: Restore a soft-deleted user account
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User reactivated successfully
+ *       400:
+ *         description: User is already active
+ *       404:
+ *         description: User not found
+ */
+router.patch(
+  "/users/:id/reactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.reactivateUser
+);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}:
+ *   delete:
+ *     summary: Permanently Delete User
+ *     description: Hard delete a user account. This action cannot be undone. Cannot delete own account.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User permanently deleted
+ *       403:
+ *         description: Cannot delete own account
+ *       404:
+ *         description: User not found
+ */
+router.delete(
+  "/users/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.permanentlyDeleteUser
+);
+
+// ============================================================================
+// Phase 7 - extended admin endpoints
+// ============================================================================
+
+/**
+ * Plans (read + CRUD — display metadata only, Stripe catalog stays env-driven)
+ */
+router.get(
+  "/plans",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.list as any
+);
+
+router.post(
+  "/plans",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.createPlanSchema),
+  rateLimiter,
+  adminPlansController.create as any
+);
+
+router.patch(
+  "/plans/:id",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.updatePlanSchema),
+  rateLimiter,
+  adminPlansController.update as any
+);
+
+router.delete(
+  "/plans/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.remove as any
+);
+
+router.post(
+  "/plans/:id/toggle",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.toggle as any
+);
+
+/**
+ * Subscribers (admin subscription management)
+ */
+router.get(
+  "/subscribers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.list as any
+);
+
+router.post(
+  "/subscribers/:id/cancel-at-period-end",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.cancelAtPeriodEnd as any
+);
+
+router.post(
+  "/subscribers/:id/reactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.reactivate as any
+);
+
+router.post(
+  "/subscribers/:id/cancel-now",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.cancelNow as any
+);
+
+router.post(
+  "/subscribers/:id/change-plan",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.changePlanSchema),
+  rateLimiter,
+  adminSubscribersController.changePlan as any
+);
+
+/**
+ * Payments (read + refund)
+ */
+router.get(
+  "/payments",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPaymentsController.list as any
+);
+
+router.post(
+  "/payments/:id/refund",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPaymentsController.refund as any
+);
+
+/**
+ * API Keys (CRUD)
+ */
+router.get(
+  "/api-keys",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.list as any
+);
+router.get(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.get as any
+);
+router.post(
+  "/api-keys",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.create as any
+);
+router.patch(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.update as any
+);
+router.post(
+  "/api-keys/:id/revoke",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.revoke as any
+);
+router.delete(
+  "/api-keys/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminApiKeysController.remove as any
+);
+
+/**
+ * Content Moderation queue
+ */
+router.get(
+  "/moderation/reports",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.list as any
+);
+router.get(
+  "/moderation/reports/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.get as any
+);
+router.post(
+  "/moderation/reports",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.create as any
+);
+router.post(
+  "/moderation/reports/:id/assign",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.assign as any
+);
+router.post(
+  "/moderation/reports/:id/resolve",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.resolve as any
+);
+router.post(
+  "/moderation/reports/:id/dismiss",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminModerationController.dismiss as any
+);
+
+/**
+ * System alerts
+ */
+router.get(
+  "/alerts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.list as any
+);
+router.get(
+  "/alerts/counts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.counts as any
+);
+router.post(
+  "/alerts/:id/resolve",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.resolve as any
+);
+router.post(
+  "/alerts",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  systemAlertsController.create as any
+);
+
+const adminRoutes: import("express").Router = router;
+export { adminRoutes };

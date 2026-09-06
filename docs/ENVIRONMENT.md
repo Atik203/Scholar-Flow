@@ -1,206 +1,389 @@
-# Scholar-Flow Environment Setup Guide
+# Scholar-Flow Environment Variables
 
-This guide explains all environment variables for both backend (Express + Prisma) and frontend (Next.js + NextAuth), where to get them, and how to configure them for development and production.
+This guide explains every environment variable used by the three apps (frontend, backend, socket-server). Each section tells you what the variable does, where to get its value, and what to set in development.
 
-## Locations and Quick Start
+## Quick Start (Minimum Vars to Get Running)
 
-- Backend env file: `apps/backend/.env`
-- Frontend env file: `apps/frontend/.env.local`
+To start the dev servers with basic functionality, you only need to set these:
 
-Recommended bootstrap (from repo root):
-
-```bash
-# Copy example envs
-cp apps/backend/.env.example apps/backend/.env
-cp apps/frontend/.env.example apps/frontend/.env.local
+**Backend (`apps/backend/.env`):**
+```env
+DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
+DIRECT_DATABASE_URL=postgresql://postgres:admin@localhost:5432/scholarflow_dev
 ```
 
-Then fill in the variables below.
+**Frontend (`apps/frontend/.env.local`):**
+```env
+BETTER_AUTH_SECRET=your-secret-here
+NEXTAUTH_SECRET=your-secret-here
+```
 
-## Generate Strong Secrets
+**Socket-server (`apps/socket-server/.env`):**
+```env
+NEXTAUTH_SECRET=same-as-frontend-secret
+FRONTEND_URL=http://localhost:3000
+```
 
-- NEXTAUTH_SECRET: a 32+ byte random string
+> Copy the example files first: `cp apps/backend/.env.example apps/backend/.env`, and similarly for frontend and socket-server.
+
+## Generating Strong Secrets
+
+For any secret (*_SECRET, *_KEY), generate a random 32+ byte value:
+
+```bash
+openssl rand -base64 32
+# Example output: x7R3kP9mZ2qL8vN4wB6cF1gH5jK0lM2n
+```
+
+Or use Node.js:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-- JWT/other secrets: you can reuse the same method.
+## Backend Environment Variables
 
-## Backend (.env)
+File: `apps/backend/.env`
 
-Required unless marked optional.
+### Database (Required)
 
-- DATABASE_URL
-  - What: PostgreSQL connection string
-  - Dev example: `postgresql://username:password@localhost:5432/scholar_flow`
-  - How: Create a DB named `scholar_flow` locally. For pgvector, ensure extension is installed: `CREATE EXTENSION IF NOT EXISTS vector;`
+| Variable | Description | Dev Value |
+|----------|-------------|-----------|
+| `DATABASE_URL` | PostgreSQL connection string (used by Prisma Accelerate) | `postgresql://user:pass@localhost:5432/scholarflow_dev` |
+| `DIRECT_DATABASE_URL` | Direct connection string (used by migrations and adapter) | Same as above for local dev |
+| `USE_PGVECTOR` | Enable pgvector semantic search features | `true` |
 
-- NODE_ENV
-  - What: Node environment (development|production)
-  - Dev: `development`
+To create the database:
+```bash
+createdb scholarflow_dev
+# Then enable pgvector:
+psql -d scholarflow_dev -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
 
-- PORT
-  - What: Backend port
-  - Dev: `5000`
+### Server (Required)
 
-- FRONTEND_URL
-- USE_PGVECTOR
-  - What: Feature flag to enable vector operations (embeddings & similarity)
-  - Dev: `false` by default; set `true` after pgvector extension and embeddings are ready
+| Variable | Description | Dev Value |
+|----------|-------------|-----------|
+| `NODE_ENV` | Environment name | `development` |
+| `PORT` | Backend API port | `5000` |
+| `FRONTEND_URL` | CORS allowed origin (no trailing slash) | `http://localhost:3000` |
+| `WS_URL` | WebSocket server URL for backend | `http://localhost:5001` |
 
-  - What: CORS allowlist origin
-  - Dev: `http://localhost:3000`
+### Authentication (Required)
 
-- NEXTAUTH_SECRET
-  - What: Secret used by Auth.js JWT; also used by backend middleware for token verification
-  - How: Generate via Node crypto (see above) and keep in sync with frontend NEXTAUTH_SECRET
+| Variable | Description | How to Get |
+|----------|-------------|------------|
+| `NEXTAUTH_SECRET` | Used by better-auth and backend for JWT verification | Generate with `openssl rand -base64 32` — must match frontend |
+| `JWT_SECRET` | JWT signing secret for backend tokens | Generate with `openssl rand -base64 32` |
+| `EXPIRES_IN` | Access token lifetime | `3d` |
+| `REFRESH_TOKEN_SECRET` | Refresh token signing secret | Generate separate from JWT_SECRET |
+| `REFRESH_TOKEN_EXPIRES_IN` | Refresh token lifetime | `15d` |
+| `RESET_PASS_TOKEN` | Password reset token signing secret | Generate with `openssl rand -base64 32` |
+| `RESET_PASS_TOKEN_EXPIRES_IN` | Reset token lifetime | `10m` |
+| `RESET_PASS_LINK` | Frontend password reset page URL | `http://localhost:3000/reset-password` |
+| `VERIFY_EMAIL_LINK` | Frontend email verification URL | `http://localhost:3000/verify-email` |
 
-- JWT_SECRET
-  - What: JWT signing secret for backend-only tokens (if used)
-  - How: Generate via Node crypto (see above)
+### OAuth Providers (Optional)
 
-- EXPIRES_IN, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRES_IN
-  - What: Access/refresh token lifetimes and secret (if using refresh flow)
-  - Dev example: `EXPIRES_IN=1d`, `REFRESH_TOKEN_SECRET=<random>`, `REFRESH_TOKEN_EXPIRES_IN=7d`
+Register OAuth apps to enable Google/GitHub login.
 
-- RESET_PASS_TOKEN, RESET_PASS_TOKEN_EXPIRES_IN, RESET_PASS_LINK
-  - What: Password reset token secret, expiry, and frontend link to reset page
-  - Dev example: `RESET_PASS_TOKEN=<random>`, `RESET_PASS_TOKEN_EXPIRES_IN=5m`, `RESET_PASS_LINK=http://localhost:3000/reset-password`
+**Google OAuth:**
 
-- Email/SMTP (choose one approach)
-  - EMAIL, APP_PASS (Gmail App Password)
-    - What: Sender email and its app password
-    - How: Enable 2FA in Google Account > Security > App passwords > create one for “Mail”
-  - OR SMTP\_\* (hosted SMTP)
-    - SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD
-    - How: Use your provider’s credentials (e.g., SendGrid, Mailgun)
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services
+2. Create a project → OAuth consent screen (External, add test users)
+3. Credentials → Create Credentials → OAuth client ID (Web application)
+4. Add authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+5. Copy the Client ID and Client Secret to your `.env`
 
-- OpenAI
-  - OPENAI_API_KEY
-  - How: [OpenAI Platform](https://platform.openai.com) > API keys (optional if AI features disabled)
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
 
-- AWS S3 (for file uploads)
-  - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_BUCKET_NAME, AWS_REGION
-  - How:
-    1. AWS Console > IAM > Users > Create user with Programmatic access
-    2. Attach policy for S3 access (at minimum bucket-limited put/get)
-    3. Create an S3 bucket (e.g., `scholar-flow-uploads`) and note the region (e.g., `us-east-1`)
+**GitHub OAuth:**
 
-- Stripe (payments; optional in MVP)
-  - STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-  - How: [Stripe Dashboard (test API keys)](https://dashboard.stripe.com/test/apikeys); install Stripe CLI to obtain and forward webhooks
-  - Dev Webhook URL: `http://localhost:5000/webhooks/stripe`
+1. Go to [GitHub OAuth Apps](https://github.com/settings/developers) → New OAuth App
+2. Homepage URL: `http://localhost:3000`
+3. Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
+4. Copy the Client ID and Secret to your `.env`
 
-- SSLCommerz (BD local payments; optional)
-  - STORE_ID, STORE_PASS, SUCCESS_URL, CANCEL_URL, FAIL_URL, SSL_PAYMENT_API, SSL_VALIDATIOIN_API
-  - How: Sandbox credentials from [SSLCommerz Developer](https://developer.sslcommerz.com/)
-  - Dev URLs: `http://localhost:3000/payment/{success|cancel|fail}`
+```env
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
 
-- Redis (optional; background jobs/cache)
+### Email (Optional)
 
-## Frontend Flags (.env.local)
+Choose one method:
 
-- NEXT_PUBLIC_FEATURE_SEMANTIC_SEARCH: `true|false`
-- NEXT_PUBLIC_FEATURE_ANNOTATIONS: `true|false`
-- NEXT_PUBLIC_FEATURE_CITATION_GRAPH: `false` (Phase 2+)
-- NEXT_PUBLIC_ENABLE_AI_FEATURES: `true|false`
-- NEXT_PUBLIC_ENABLE_PAYMENTS: `true|false`
-- NEXT_PUBLIC_USE_PGVECTOR: `true|false` (mirrors backend USE_PGVECTOR for UI gating)
-  - REDIS_URL
-  - Dev: `redis://localhost:6379`
+**Option 1: Gmail App Password (simplest)**
 
-## Frontend (.env.local)
+```env
+EMAIL=your.email@gmail.com
+APP_PASS=your-16-char-app-password
+```
 
-Required unless marked optional. These run in Next.js (some are public via NEXT*PUBLIC*\*).
+How to get: Google Account → Security → 2-Step Verification → App passwords → Generate "Mail" app password.
 
-- NEXTAUTH_URL
-  - What: Site URL for NextAuth
-  - Dev: `http://localhost:3000`
+**Option 2: Resend (recommended for production)**
 
-- NEXTAUTH_SECRET
-  - What: Must match backend/auth validator secret usage (used by Auth.js JWT)
-  - How: Generate via Node crypto (same as above)
+```env
+RESEND_API_KEY=re_xxxx
+```
 
-- NEXT_PUBLIC_API_BASE_URL
-  - What: Base URL for calling backend API in the browser
-  - Dev: `http://localhost:5000/api`
+Get from: [resend.com](https://resend.com) → API Keys.
 
-- OAuth Providers (optional but recommended)
-  - GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
-    - How (Google Cloud Console):
-  1. [Google Cloud Console](https://console.cloud.google.com/) > APIs & Services 2) Create project > OAuth consent screen: External > add test users (your Gmail) 3) Credentials > Create Credentials > OAuth client ID (Web application) 4) Authorized redirect URIs: - `http://localhost:3000/api/auth/callback/google` 5) Copy Client ID/Secret to env
-  - GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
-    - How (GitHub):
-  1. [GitHub OAuth Apps](https://github.com/settings/developers) > OAuth Apps > New OAuth App
-  2. Homepage URL: `http://localhost:3000`
-  3. Authorization callback URL: `http://localhost:3000/api/auth/callback/github` 4) Copy Client ID/Secret to env
+**Option 3: Custom SMTP**
 
-- Database (optional here unless using an adapter in NextAuth)
-  - DATABASE_URL (only if Auth.js adapter is used)
+```env
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASSWORD=your-smtp-password
+```
 
-- Analytics/Flags (optional)
-  - NEXT_PUBLIC_GOOGLE_ANALYTICS
-  - NEXT_PUBLIC_ENABLE_AI_FEATURES ("true" | "false")
-  - NEXT_PUBLIC_ENABLE_PAYMENTS ("true" | "false")
+### AI Providers (Optional)
 
-## Redirect URIs Summary (Dev)
+Add API keys for the AI providers you want to use. Providers with empty keys are skipped.
 
+```env
+OPENAI_API_KEY=sk-...           # platform.openai.com
+GEMINI_API_KEY=AIza...          # aistudio.google.com
+ANTHROPIC_API_KEY=sk-ant-...    # console.anthropic.com
+DEEPSEEK_API_KEY=sk-...         # platform.deepseek.com
+AI_PROVIDER_FALLBACK_ORDER=openai,gemini,claude,deepseek
+AI_FEATURES_ENABLED=true
+AI_REQUEST_TIMEOUT_MS=15000     # 15 seconds per provider call
+```
+
+### AWS S3 (Required for file uploads)
+
+```env
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+AWS_BUCKET_NAME=scholar-flow-uploads
+AWS_REGION=us-east-1
+```
+
+How to get:
+1. AWS Console → IAM → Users → Create user with Programmatic access
+2. Attach an S3 policy (minimum: `s3:PutObject`, `s3:GetObject`, `s3:DeleteObject` on your bucket)
+3. Create an S3 bucket (e.g., `scholar-flow-uploads`) in your chosen region
+
+### Stripe (Optional — for billing features)
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+STRIPE_PRICE_PRO_MONTHLY=price_pro_monthly_id
+STRIPE_PRICE_PRO_ANNUAL=price_pro_annual_id
+STRIPE_PRICE_TEAM_MONTHLY=price_team_monthly_id
+STRIPE_PRICE_TEAM_ANNUAL=price_team_annual_id
+STRIPE_PRICE_ENTERPRISE_MONTHLY=price_enterprise_monthly_id
+STRIPE_PRICE_ENTERPRISE_ANNUAL=price_enterprise_annual_id
+STRIPE_BILLING_PORTAL_RETURN_URL=http://localhost:3000/dashboard/billing
+```
+
+Get test keys from: [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys)
+Create price IDs in: Stripe Dashboard → Products → Create product with recurring pricing.
+
+For local webhook testing:
+```bash
+# Install Stripe CLI, then forward events
+stripe listen --forward-to http://localhost:5000/webhooks/stripe
+# Copy the returned signing secret to STRIPE_WEBHOOK_SECRET
+```
+
+### SSLCommerz (Optional — Bangladesh payments)
+
+```env
+STORE_ID=your-store-id
+STORE_PASS=your-store-password
+SUCCESS_URL=http://localhost:3000/payment/success
+CANCEL_URL=http://localhost:3000/payment/cancel
+FAIL_URL=http://localhost:3000/payment/fail
+SSL_PAYMENT_API=https://sandbox.sslcommerz.com/gwprocess/v4/api.php
+SSL_VALIDATIOIN_API=https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php
+```
+
+Sandbox credentials: [SSLCommerz Developer](https://developer.sslcommerz.com/)
+
+### Redis (Optional — for background jobs and caching)
+
+```env
+REDIS_URL=redis://localhost:6379          # Preferred — single connection string
+# OR individual fields:
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+REDIS_USERNAME=
+```
+
+If Redis is unavailable, the app falls back gracefully:
+- PDF/document processing runs synchronously instead of queued
+- AI responses are fetched directly (no caching)
+- The server still starts normally
+
+See [Redis Setup Guide](./REDIS_SETUP.md) for installation options.
+
+### Document Conversion (Optional)
+
+```env
+DOCX_TO_PDF_ENGINE=soffice          # soffice (free) or gotenberg
+GOTENBERG_URL=                      # Only needed with gotenberg engine
+GOTENBERG_TIMEOUT_MS=10000
+DOCX_TO_PDF_QUALITY=print           # draft | screen | print | prepress
+```
+
+`soffice` (LibreOffice) is the default — it's free and requires no additional setup. `gotenberg` is a Docker-based alternative for higher volume.
+
+### File Upload Settings
+
+```env
+FEATURE_UPLOADS=true
+MAX_UPLOAD_MB=25
+ALLOWED_UPLOAD_MIME=application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document
+TEXT_EXTRACTION_TIMEOUT_MS=20000
+CHUNK_MAX_TOKENS=800
+VIRUS_SCAN_ENABLED=false
+```
+
+## Frontend Environment Variables
+
+File: `apps/frontend/.env.local`
+
+### Authentication (Required)
+
+| Variable | Description | Dev Value |
+|----------|-------------|-----------|
+| `BETTER_AUTH_SECRET` | Secret for better-auth session encryption | `openssl rand -base64 32` |
+| `NEXTAUTH_SECRET` | Alias for better-auth secret (keep in sync with backend) | Same as `BETTER_AUTH_SECRET` |
+| `NEXTAUTH_URL` | Site URL for auth callbacks | `http://localhost:3000` |
+
+> `NEXTAUTH_SECRET` and `BETTER_AUTH_SECRET` should have the same value. The project uses better-auth (not NextAuth.js), but `NEXTAUTH_SECRET` is kept as an alias for compatibility.
+
+### API & WebSocket URLs (Required)
+
+| Variable | Description | Dev Value |
+|----------|-------------|-----------|
+| `NEXT_PUBLIC_API_BASE_URL` | Backend API URL (used by browser) | `http://localhost:5000/api` |
+| `NEXT_PUBLIC_WS_URL` | WebSocket server URL | `http://localhost:5001` |
+| `NEXT_PUBLIC_SITE_URL` | Site URL for metadata/SEO | `http://localhost:3000` |
+
+### OAuth Providers (Optional)
+
+```env
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
+
+These must match the values in the backend `.env`. Each provider's callback URL is:
 - Google: `http://localhost:3000/api/auth/callback/google`
 - GitHub: `http://localhost:3000/api/auth/callback/github`
 
-Set NEXTAUTH_URL=`http://localhost:3000` in dev.
+### Feature Flags (Optional)
 
-## Webhooks (Dev)
-
-- Stripe: `POST http://localhost:5000/webhooks/stripe`
-- SSLCommerz: `POST http://localhost:5000/webhooks/sslcommerz`
-
-If using Stripe CLI, forward events locally:
-
-```bash
-# Example (once Stripe CLI is installed and logged in)
-# Replace <whsec_...> with the returned signing secret and set STRIPE_WEBHOOK_SECRET
-stripe listen --forward-to http://localhost:5000/webhooks/stripe
+```env
+NEXT_PUBLIC_FEATURE_SEMANTIC_SEARCH=false
+NEXT_PUBLIC_FEATURE_ANNOTATIONS=false
+NEXT_PUBLIC_FEATURE_CITATION_GRAPH=false
+NEXT_PUBLIC_FEATURE_BILLING=true
+NEXT_PUBLIC_ENABLE_AI_FEATURES=true
+NEXT_PUBLIC_AI_ASSISTANT_ENABLED=true
+NEXT_PUBLIC_ENABLE_PAYMENTS=true
+NEXT_PUBLIC_USE_PGVECTOR=false
 ```
 
-## End-to-End Dev Checklist
+These toggle UI visibility for features. Set to `"true"` or `"false"` (as strings).
 
-1. Copy example envs into place
-1. Fill secrets and URLs as above (ensure NEXTAUTH_SECRET matches both sides)
-1. Start Postgres; create DB `scholar_flow` (and optionally enable pgvector)
-1. Run migrations/seeds from repo root:
+### Stripe (Optional)
 
-```bash
-yarn db:generate
-yarn db:migrate
-yarn db:seed # optional
+```env
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+NEXT_PUBLIC_STRIPE_PRICING_TABLE_ID=prctbl_...
+NEXT_PUBLIC_STRIPE_PRICE_PRO_MONTHLY=price_pro_monthly
+NEXT_PUBLIC_STRIPE_PRICE_PRO_ANNUAL=price_pro_annual
+NEXT_PUBLIC_STRIPE_PRICE_TEAM_MONTHLY=price_team_monthly
+NEXT_PUBLIC_STRIPE_PRICE_TEAM_ANNUAL=price_team_annual
 ```
 
-1. Start dev servers:
+Get publishable key from: Stripe Dashboard → API keys.
 
-```bash
-yarn dev
+### Analytics (Optional)
+
+```env
+NEXT_PUBLIC_GOOGLE_ANALYTICS=G-XXXXXXXXXX
 ```
 
-- Frontend: <http://localhost:3000>
-- Backend: <http://localhost:5000>
+## Socket-Server Environment Variables
+
+File: `apps/socket-server/.env`
+
+| Variable | Description | Dev Value |
+|----------|-------------|-----------|
+| `PORT` | WebSocket server port | `5001` |
+| `NEXTAUTH_SECRET` | Must match the backend/frontend `NEXTAUTH_SECRET` | `openssl rand -base64 32` |
+| `FRONTEND_URL` | CORS allowed origin (no trailing slash) | `http://localhost:3000` |
+
+The socket server verifies JWT tokens on WebSocket handshake using `NEXTAUTH_SECRET`. It must match exactly what the backend and frontend use.
+
+## Dev Redirect URIs Summary
+
+| Service | Provider | Callback URL |
+|---------|----------|--------------|
+| better-auth | Google | `http://localhost:3000/api/auth/callback/google` |
+| better-auth | GitHub | `http://localhost:3000/api/auth/callback/github` |
+
+## Dev Webhook URLs
+
+| Service | Endpoint |
+|---------|----------|
+| Stripe | `POST http://localhost:5000/webhooks/stripe` |
+| SSLCommerz | `POST http://localhost:5000/webhooks/sslcommerz` |
 
 ## Production Notes
 
-- Set NEXTAUTH_URL to your production domain (e.g., `https://app.scholar-flow.com`)
-- Update OAuth redirect URIs in Google/GitHub to use production URLs
-- Use production DATABASE_URL, S3 bucket/region, and provider keys
-- Restrict CORS via FRONTEND_URL and server middleware
-- Rotate and store secrets securely (Vercel/hosted env manager)
+When deploying:
+
+- Set `NEXTAUTH_URL` to your production domain (e.g., `https://app.scholar-flow.com`)
+- Update OAuth redirect URIs in Google/GitHub consoles to use production URLs
+- Use production database, S3 bucket, and Stripe live keys
+- Restrict CORS by updating `FRONTEND_URL`
+- Generate new, strong secrets (never reuse dev secrets in production)
+- Store secrets in Vercel/Render dashboard, not in `.env` files
 
 ## Security
 
-- Never commit .env files
+- Never commit `.env` files (they're in `.gitignore`)
 - Use strong secrets (32+ bytes) and rotate periodically
-- Limit IAM/S3 permissions to least privilege
-- Restrict webhook endpoints by validating signatures
+- Limit AWS IAM/S3 permissions to least privilege
+- Validate Stripe webhook signatures (don't trust unverified payloads)
+- Keep `NEXTAUTH_SECRET` in sync across all three apps
 
----
+## Troubleshooting
 
-If anything is unclear or missing, open an issue or ping the team. This document tracks the authoritative list of env vars for Scholar-Flow.
+**Problem: Auth callback fails with "redirect_uri_mismatch"**
+Cause: The OAuth provider's configured redirect URI doesn't match what the app sends.
+Fix: Verify the callback URL in Google/GitHub console matches `http://localhost:3000/api/auth/callback/{provider}`.
+
+**Problem: Backend won't start — "Missing NEXTAUTH_SECRET"**
+Cause: The backend can't start without an auth secret.
+Fix: Set `NEXTAUTH_SECRET` in `apps/backend/.env`. Even a placeholder value works for dev.
+
+**Problem: CORS errors in browser console**
+Cause: `FRONTEND_URL` in the backend doesn't match your actual frontend URL.
+Fix: Ensure `FRONTEND_URL=http://localhost:3000` (no trailing slash).
+
+**Problem: Prisma client errors on `yarn dev:backend`**
+Cause: Prisma client needs to be generated.
+Fix: Run `yarn db:generate` from the repo root.
+
+## Related Docs
+
+- [Setup Guide](./SETUP.md) — initial environment setup
+- [Redis Setup](./REDIS_SETUP.md) — Redis configuration options
+- [Database Setup](./DATABASE.md) — PostgreSQL + pgvector
+- [Deployment Guide](./DEPLOY.md) — production env configuration

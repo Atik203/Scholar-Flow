@@ -1,15 +1,24 @@
 {
   "version": 2,
+  "build": {
+    "env": {
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
+  },
   "env": {
     "YARN_IGNORE_ENGINES": "true"
   },
-  "installCommand": "cd ../.. && corepack enable && corepack yarn install --immutable",
-  "buildCommand": "cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build",
-  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && corepack enable && corepack yarn --version && corepack yarn install --immutable",
+  "buildCommand": "cd ../.. && corepack enable && corepack yarn workspace @scholar-flow/backend db:generate && corepack yarn workspace @scholar-flow/backend build",
+  "functions": {
+    "api/server.js": {
+      "includeFiles": "dist/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index.js"
+      "destination": "/api/server"
     }
   ]
 }

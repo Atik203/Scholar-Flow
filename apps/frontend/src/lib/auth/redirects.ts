@@ -1,11 +1,39 @@
 "use client";
 
+import { getDashboardBasePath } from "./roles";
+
 /**
  * Utility functions for handling authentication redirects and navigation
  */
 
 /**
+ * Get the canonical dashboard URL for a user.
+ * Admin → /dashboard/admin, everyone else → /dashboard.
+ *
+ * Note: the legacy role-segmented URLs (/dashboard/researcher, etc.) are
+ * deprecated — the shared /dashboard layout serves all roles, and the
+ * legacy routes only exist as proxy redirects. Do not reintroduce the
+ * role slug here.
+ */
+export function getRoleDashboardUrl(role?: string): string {
+  return getDashboardBasePath(role);
+}
+
+/**
+ * Get the canonical dashboard URL for landing pages (no role segment).
+ *
+ * Landing CTAs (homepage Hero/CTA, marketing pages) should link to this
+ * rather than the role-scoped URL. The shared `/dashboard` layout serves
+ * all roles; routing through `/dashboard/researcher` first causes a
+ * redirect bounce and a 404 flash for nested resources.
+ */
+export function getLandingDashboardUrl(): string {
+  return "/dashboard";
+}
+
+/**
  * Get the callback URL from query parameters or use a default
+ * Note: defaultUrl will be overridden with role-specific path if user session is available
  */
 export function getCallbackUrl(
   searchParams?: URLSearchParams,
@@ -45,12 +73,13 @@ export function validateCallbackUrl(
       // Prevent open redirects - only allow our own paths
       const allowedPaths = [
         "/dashboard",
-        "/profile",
+        "/dashboard/researcher",
+        "/dashboard/pro-researcher",
+        "/dashboard/team-lead",
+        "/dashboard/admin",
         "/papers",
         "/collections",
         "/collaborate",
-        "/settings",
-        "/admin",
       ];
 
       const isAllowed = allowedPaths.some(
@@ -108,42 +137,61 @@ export function buildRegisterUrl(callbackUrl?: string): string {
 
 /**
  * Handle post-authentication redirect
+ * @param isSuccess - Whether authentication was successful
+ * @param searchParams - URL search parameters that may contain callbackUrl
+ * @param errorUrl - URL to redirect to on error
+ * @param userRole - Optional user role (kept for API compatibility; landing
+ *                   destination is always the canonical /dashboard)
  */
 export function handleAuthRedirect(
   isSuccess: boolean,
   searchParams?: URLSearchParams,
-  errorUrl: string = "/login"
+  errorUrl: string = "/login",
+  _userRole?: string
 ): string {
   if (isSuccess) {
-    return getCallbackUrl(searchParams);
+    const callbackUrl = getCallbackUrl(searchParams);
+
+    // If callback is the generic /dashboard, use the canonical landing URL.
+    // Avoids the /dashboard/researcher → /dashboard redirect bounce.
+    if (callbackUrl === "/dashboard") {
+      return getLandingDashboardUrl();
+    }
+
+    return callbackUrl;
   }
   return errorUrl;
 }
 
 /**
  * Smart navigation based on authentication status
+ * @param isAuthenticated - Whether the user is authenticated
+ * @param currentPath - Current pathname
+ * @param userRole - Optional user role (kept for API compatibility)
  */
 export function getSmartRedirectUrl(
   isAuthenticated: boolean,
-  currentPath: string
+  currentPath: string,
+  _userRole?: string
 ): string | null {
-  // If user is authenticated and on auth pages, redirect to dashboard
+  // If user is authenticated and on auth pages, redirect to canonical dashboard
   if (
     isAuthenticated &&
     ["/login", "/register", "/auth/signin"].includes(currentPath)
   ) {
-    return "/dashboard";
+    return getLandingDashboardUrl();
   }
 
   // If user is not authenticated and on protected routes, redirect to login
   const protectedRoutes = [
     "/dashboard",
-    "/profile",
+    "/dashboard/researcher",
+    "/dashboard/pro-researcher",
+    "/dashboard/team-lead",
+    "/dashboard/admin",
     "/papers",
     "/collections",
     "/collaborate",
-    "/settings",
-    "/admin",
   ];
   const isProtectedRoute = protectedRoutes.some(
     (route) => currentPath === route || currentPath.startsWith(route + "/")
@@ -158,13 +206,17 @@ export function getSmartRedirectUrl(
 
 /**
  * Enhanced "Get Started" navigation logic
+ * @param isAuthenticated - Whether the user is authenticated
+ * @param currentPath - Current pathname
+ * @param userRole - Optional user role (kept for API compatibility)
  */
 export function getGetStartedUrl(
   isAuthenticated: boolean,
-  currentPath: string = "/"
+  currentPath: string = "/",
+  _userRole?: string
 ): string {
   if (isAuthenticated) {
-    return "/dashboard";
+    return getLandingDashboardUrl();
   }
 
   // For unauthenticated users, go to login with callback if not on home page
