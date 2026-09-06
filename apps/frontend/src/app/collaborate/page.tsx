@@ -1,89 +1,48 @@
-"use client";
+import { Metadata } from 'next';
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ArrowLeft, UserPlus, Users } from "lucide-react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+export const metadata: Metadata = {
+  title: 'Collaborate - Scholar Flow',
+  description: 'Discover how Scholar Flow enables seamless collaboration between researchers worldwide.',
+};
 
 export default function CollaboratePage() {
-  const { data: session, status } = useSession();
-
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    redirect("/login");
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Button asChild variant="ghost" className="mb-4">
-            <Link href="/dashboard" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <Users className="h-8 w-8" />
-            Collaborate
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">
+            Collaborate with Researchers Worldwide
           </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Work together with colleagues on research projects
-          </p>
+          
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Real-time Collaboration
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Work together on research papers, share insights, and collaborate 
+              in real-time with researchers from around the world. Our platform 
+              makes it easy to connect and work together on groundbreaking research.
+            </p>
+            
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              Shared Collections
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Create and manage shared collections of research papers with your 
+              team. Organize papers by topic, project, or research area and 
+              collaborate on analysis and insights.
+            </p>
+            
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+              AI-Powered Insights
+            </h2>
+            <p className="text-gray-600 leading-relaxed">
+              Leverage AI to discover connections between papers, identify 
+              research gaps, and generate insights that enhance your collaborative 
+              research efforts.
+            </p>
+          </div>
         </div>
-
-        <Card className="dark:bg-gray-800 dark:border-gray-700">
-          <CardHeader>
-            <CardTitle className="dark:text-white">Collaboration</CardTitle>
-            <CardDescription className="dark:text-gray-400">
-              This feature is coming soon in Phase 1 of ScholarFlow
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-12">
-              <UserPlus className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Collaboration Features Coming Soon
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                We're developing powerful collaboration tools to help
-                researchers work together more effectively on their projects.
-              </p>
-              <div className="space-y-4">
-                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                  <h4 className="font-medium text-purple-900 dark:text-purple-100 mb-2">
-                    Planned Features:
-                  </h4>
-                  <ul className="text-sm text-purple-700 dark:text-purple-300 space-y-1">
-                    <li>• Invite collaborators to collections</li>
-                    <li>• Real-time annotation and comments</li>
-                    <li>• Shared workspaces and projects</li>
-                    <li>• Version control for research notes</li>
-                  </ul>
-                </div>
-                <Button asChild>
-                  <Link href="/dashboard">Return to Dashboard</Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

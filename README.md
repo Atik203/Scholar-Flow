@@ -1,227 +1,322 @@
-# Scholar-Flow
+# ScholarFlow
 
-[![Phase](https://img.shields.io/badge/Phase-1%20MVP%20Development-blue)](./Roadmap.md)
-[![Auth Status](https://img.shields.io/badge/Authentication-✅%20Complete-green)](./docs/AUTHENTICATION_ROUTING.md)
-[![UI Status](https://img.shields.io/badge/UI%20Design-📋%20Documented-orange)](./docs/UI_DESIGN.md)
+> **AI-Powered Research Paper Collaboration Hub**
 
-## AI-Powered Research Paper Collaboration Hub
+ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-Smart ingestion, semantic search, structured collaboration, and citation intelligence for researchers & academic teams.
+[![Version](https://img.shields.io/badge/version-1.3.1-blue)](./CHANGELOG.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
 
-[Roadmap](./Roadmap.md) · [Schema](./SCHEMA.md) · [UI Design Blueprint](./docs/UI_DESIGN.md) · [Environment](./docs/ENVIRONMENT.md)
+> **Note on licensing:** See [LICENSE.md](./LICENSE.md) for details.
 
----
+## 📦 Recent Releases
 
-## ✨ Key Capabilities (Phased Delivery)
+- **1.3.1 (2026-06-28)** — AI architecture overhaul: context persistence, metadata generation, context-aware chat, inline paper Q&A, token optimization, Vercel crash fix (uuid ESM + outputDirectory). See [CHANGELOG.md](./CHANGELOG.md).
+- **1.3.0-rc1 (2026-10-01)** — Phase 10: AI assistant, WebSocket collab, editor templates, paper upload/import overhaul, smart URL import (IEEE/ResearchGate/Google Scholar/Semantic Scholar). See [CHANGELOG.md](./CHANGELOG.md).
+- **1.2.9** — Phase 9: WCAG 2.1 AA, code splitting, 8 final pages, invitation backend.
+- **1.2.8** — Phase 8: Architecture stabilization, 14 new pages, removed dead code.
 
-| Area            | Phase 1 (MVP) ✅             | Phase 2                         | Phase 3                                    |
-| --------------- | ---------------------------- | ------------------------------- | ------------------------------------------ |
-| Auth & Profiles | ✅ Email/OAuth, JWT, Profile | Password reset, roles expansion | Org SSO (future)                           |
-| Papers          | Upload, metadata store       | OCR & full AI summaries         | Versioning & multi-format ingest           |
-| Collections     | Create & list                | Sharing, activity feed          | Advanced permissions & workspace analytics |
-| Semantic Search | Flagged (pgvector infra)     | Vector search & recommendations | Multi-doc chat assistant                   |
-| Annotations     | Placeholder                  | Full highlights + realtime      | History diff & export                      |
-| Citation Graph  | Deferred                     | Interactive graph               | Advanced metrics & clustering              |
-| Billing         | Deferred                     | Plans integration (Stripe/SSL)  | Usage-based quotas                         |
-| Admin           | Deferred                     | Basic user mgmt                 | Platform analytics & moderation            |
+## 🚀 Live Demo
 
-**✅ Recent Major Completion:** OAuth Authentication System with Google/GitHub, JWT management, and comprehensive testing.
+- **Frontend**: [ScholarFlow App](https://scholar-flow-ai.vercel.app)
+- **API**: [Backend API](https://scholar-flow-api.vercel.app/api/health)
 
-Detailed per‑page UX & component plan lives in: **`docs/UI_DESIGN.md`** (kept out of this README to stay concise).
+## ✨ Features
+
+### 📝 Rich Text Editing & Paper Management
+
+- **Rich Text Editor**: Full-featured TipTap-based editor for research papers with advanced formatting, tables, lists, and more
+- **Auto-save & Drafts**: Debounced auto-save, manual save, and draft/publish workflow with real-time status
+- **Export to PDF/DOCX**: One-click export with embedded images and professional styling
+- **Image Upload**: Drag-and-drop or paste images directly into the editor, with S3 storage and resizing
+- **Smart Upload**: Drag-and-drop PDF upload with automatic metadata extraction
+- **AI Metadata**: Automatic title, author, and abstract extraction from PDFs
+- **Advanced Search**: Full-text search with filters (author, date, type, keywords)
+- **PDF Preview**: Secure in-app PDF viewer with responsive design
+
+### 🤝 Sharing & Collaboration
+
+- **Email Sharing**: Share papers via email with permission management (view/edit)
+- **Workspace Collaboration**: Invite users to collections and workspaces with role-based access
+- **Real-Time Collaboration**: WebSocket-powered co-editing with Y.js, cursor presence, live discussion chat with typing indicators
+
+### 🤖 AI-Powered Features (Phase 10)
+
+- **Global AI Assistant**: Floating chat widget (Cmd+J) with markdown rendering, code highlighting, 4 providers (OpenAI/Gemini/Claude/DeepSeek)
+- **AI Paper Tools**: Key Points extraction, Rewriter, Comparator, Literature Review, Translator
+- **AI Summarizer**: One-click paper summaries with configurable tone, audience, and word limits
+- **Semantic Search**: pgvector-powered meaning search across all papers
+- **AI Metadata**: Automatic title, author, abstract extraction from PDFs
+
+### 📝 Rich Text Editing
+
+- **TipTap Editor**: Full-featured with LaTeX math (KaTeX), citations, 7 paper templates (IEEE/ACM/Springer/arXiv)
+- **Version History**: Auto-snapshot before save, keep 50 versions, restore any version
+- **Word Count + Reading Time**: Live stats in editor status bar
+- **Full-Screen Mode**: Distraction-free writing with Esc to exit
+- **Image Upload**: Drag-and-drop with alignment, captions, text wrap
+- **Export**: PDF, DOCX, Markdown with one click
+
+- **Multiple Auth Options**: Google OAuth, GitHub OAuth, and email/password
+- **Secure Sessions**: JWT-based authentication with refresh tokens
+- **Password Recovery**: Secure password reset with email verification
+- **Production Security**: Rate limiting, input sanitization, CORS protection
+
+### 🎯 Modern UI/UX
+
+- **Responsive Design**: Mobile-first design with Tailwind CSS
+- **Interactive Dashboard**: Quick access to papers, search, and collections
+- **Real-time Feedback**: Loading states, error handling, and success notifications
+- **Accessibility**: WCAG compliant with keyboard navigation support
+
+### 💳 Billing & Subscription
+
+- **Stripe Checkout**: Upgrade workspaces through secure hosted checkout with plan-aware metadata
+- **Customer Portal Access**: Manage billing details, cancel, or reactivate subscriptions from Stripe without support tickets
+- **Real-Time Sync**: Webhook-driven role updates keep dashboard permissions aligned with subscription status
+- **Billing Dashboard Entry**: Dedicated navigation item and refreshed auth session to surface plan changes instantly
+
+### 🛠️ Admin Dashboard & System Monitoring
+
+- **Real-Time System Metrics**: Live monitoring with 10-second auto-refresh for CPU, memory, storage, and database
+- **Accurate CPU Tracking**: Intelligent CPU usage calculation using idle/total times from Node.js os module
+- **Smart Storage Analytics**: Dynamic storage estimation based on actual database usage with realistic percentages
+- **Health Status Dashboard**: Comprehensive health cards (Database/Server/Storage/CPU) with automatic status classification
+- **Performance Visualization**: Auto-colored progress bars that adapt based on metric values (green→blue→yellow→red)
+- **System Information Panel**: Real-time platform, Node.js version, database version, memory, and uptime display
+- **Production-Grade Architecture**: HTTP caching, rate limiting, admin-only access, lazy loading with code splitting
+
+### 🏗️ Production-Ready Infrastructure
+
+- **Performance Monitoring**: Response time tracking and health checks
+- **Error Handling**: Comprehensive error boundaries and retry logic
+- **Database Optimization**: Composite indexes and query optimization
+- **Scalable Architecture**: Microservices-ready with clean separation
+
+## 🛠️ Technology Stack
+
+### Frontend
+
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + ShadCN UI
+- **State Management**: Redux Toolkit Query
+- **Forms**: React Hook Form + Zod validation
+- **Authentication**: better-auth (Google OAuth, GitHub OAuth, email/password)
+
+### Backend
+
+- **Runtime**: Node.js with Express.js
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Storage**: AWS S3 for file management
+- **Authentication**: JWT + bcrypt
+- **Validation**: Zod schemas
+
+### DevOps & Tools
+
+- **Package Manager**: Yarn Berry (v4.9.2)
+- **Monorepo**: Turborepo for build optimization
+- **Database**: PostgreSQL with pgvector (AI-ready)
+- **Deployment**: Vercel (Frontend + REST API) + Render (WebSocket)
+- **Monitoring**: Health checks and performance tracking
+
+## 📁 Project Structure
+
+```text
+Scholar-Flow/
+├── apps/
+│   ├── frontend/          # Next.js 16 application (port 3000)
+│   │   ├── src/app/       # App Router pages
+│   │   ├── components/    # Reusable UI components
+│   │   ├── lib/          # Utilities and configurations
+│   │   └── redux/        # RTK Query state management
+│   ├── backend/          # Express.js REST API (port 5000)
+│   │   ├── src/app/      # Application logic
+│   │   ├── prisma/       # Database schema and migrations
+│   │   └── scripts/      # Utility scripts
+│   └── socket-server/    # Socket.io real-time server (port 5001)
+├── docs/                 # Project documentation
+├── .github/             # GitHub workflows and templates
+└── .cursor/             # Development rules and guidelines
+```
 
 ## 🚀 Quick Start
 
-```bash
-git clone <repository-url>
-cd Scholar-Flow
-yarn install
-copy apps\backend\.env.example apps\backend\.env        # Windows
-copy apps\frontend\.env.local.example apps\frontend\.env.local
+### Prerequisites
 
-yarn db:migrate
-yarn dev
+- Node.js 24+ (check with `node --version`)
+- Yarn Berry v4.9.2+ (check with `yarn --version`)
+- PostgreSQL 15+ with pgvector extension
+- AWS S3 account (for file storage — optional for local dev without uploads)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/Atik203/Scholar-Flow.git
+   cd Scholar-Flow
+   ```
+
+2. **Set up environment variables**
+
+   ```bash
+   # Copy environment templates
+   cp apps/frontend/.env.example apps/frontend/.env.local
+   cp apps/backend/.env.example apps/backend/.env
+   cp apps/socket-server/.env.example apps/socket-server/.env
+
+   # Edit the .env files with your configurations
+   ```
+
+3. **Install dependencies, generate Prisma client, and build**
+
+   ```bash
+   yarn setup
+   ```
+
+   This runs `yarn install` followed by `prisma generate --sql` in one step.
+
+4. **Set up the database**
+
+   ```bash
+   yarn db:migrate
+   yarn db:seed
+   ```
+
+5. **Start development servers**
+
+   ```bash
+   yarn dev:turbo
+   ```
+
+   The application will be available at:
+   - Frontend: [http://localhost:3000](http://localhost:3000)
+   - Backend: [http://localhost:5000](http://localhost:5000)
+   - WebSocket: [http://localhost:5001](http://localhost:5001)
+
+## 🔧 Development Commands
+
+```bash
+# Development
+yarn dev:turbo          # Start both frontend and backend
+yarn dev:frontend       # Start only frontend
+yarn dev:backend        # Start only backend
+
+# Database
+yarn db:migrate         # Run database migrations
+yarn db:generate        # Generate Prisma client
+yarn db:studio          # Open Prisma Studio
+yarn db:seed            # Seed database with sample data
+
+# Quality Assurance
+yarn lint               # Run ESLint
+yarn type-check         # TypeScript compilation check
+yarn test               # Run test suite
+yarn build              # Production build
+
+# Utilities
+yarn clean              # Clean build artifacts
+yarn setup:clean        # Full clean reinstall (clean → install → generate)
 ```
 
-More: see `DEVELOPMENT.md`.
+### Content Management & Editing
+
+- ✅ **Rich Text Editor**: TipTap-based, with advanced formatting, tables, lists, and image upload
+- ✅ **Auto-save & Drafts**: Debounced auto-save, manual save, and draft/publish workflow
+- ✅ **Export to PDF/DOCX**: One-click export with embedded images and professional styling
+- ✅ **Image Upload**: Drag-and-drop or paste images, S3 storage, resizing
+- ✅ **Email Sharing**: Share papers via email with permission management
+
+### Authentication & Security
+
+- ✅ **Authentication System**: Google/GitHub OAuth + email/password
+- ✅ **Production Security**: Rate limiting, monitoring, error handling, admin-only access
+
+### Paper Management
+
+- ✅ **Paper Upload**: Multi-file drag-and-drop with S3 storage
+- ✅ **Metadata Extraction**: AI-powered title, author, abstract extraction
+- ✅ **Advanced Search**: Full-text search with comprehensive filters
+- ✅ **PDF Preview**: Secure iframe-based PDF viewer
+
+### Admin & System Monitoring
+
+- ✅ **Real-Time System Metrics**: Live CPU, memory, storage, database monitoring with 10s auto-refresh
+- ✅ **Accurate CPU Tracking**: Intelligent calculation using Node.js os module (idle/total times)
+- ✅ **Smart Storage Analytics**: Dynamic estimation (10x usage, min 100GB) for realistic percentages
+- ✅ **Health Dashboard**: Auto-classified status cards (healthy/degraded/unhealthy/warning/critical)
+- ✅ **Performance Visualization**: Auto-colored bars (green→blue→yellow→red based on values)
+- ✅ **System Information**: Real-time platform, versions, memory, uptime display
+
+### User Experience
+
+- ✅ **Dashboard**: Quick access and navigation with role-based routing
+- ✅ **Responsive UI**: Mobile-first design with modern components
+- ✅ **Lazy Loading**: Code splitting with React.lazy and Suspense boundaries
+
+## 📚 Documentation
+
+- [**Changelog**](./CHANGELOG.md) - Version history and release notes
+- [**Roadmap**](./IMPLEMENTATION.md) - Phase-by-phase implementation plan and current status
+- [**Quickstart**](./docs/QUICKSTART.md) - Get running in 5 minutes (start here if new)
+- [**Setup Guide**](./docs/SETUP.md) - Detailed environment setup and architecture
+- [**Environment Variables**](./docs/ENVIRONMENT.md) - All env vars explained
+- [**Development Guide**](./docs/DEVELOPMENT.md) - Day-to-day development workflow
+- [**Database Setup**](./docs/DATABASE.md) - PostgreSQL, pgvector, and Prisma guide
+- [**Redis Setup**](./docs/REDIS_SETUP.md) - Redis configuration for background jobs
+- [**Deployment Guide**](./docs/DEPLOY.md) - Deploy to Vercel + Render / Oracle Cloud
+- [**Branch Flow**](./docs/BRANCH_FLOW.md) - Git branching strategy (atik → dev → main)
+- [**Database Schema**](./docs/ERD.md) - ERD and relational schema reference
+- [**Testing Guide**](./docs/TESTING.md) - How to run and write tests
+- [**API Reference**](http://localhost:5000/api/docs) - Live Swagger UI when backend is running
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 🧪 Testing
+
+```bash
+# Run all tests (via Turborepo)
+yarn test
+
+# Run frontend tests only
+yarn workspace @scholar-flow/frontend test
+
+# Run backend tests only
+yarn workspace @scholar-flow/backend test
+
+# Watch mode (frontend)
+yarn workspace @scholar-flow/frontend test:watch
+```
+
+## 📄 License
+
+This project is UNLICENSED — see the [LICENSE.md](./LICENSE.md) file for details. All rights reserved by the project maintainer unless otherwise stated.
+
+## 🙏 Acknowledgments
+
+- [Next.js](https://nextjs.org/) for the amazing React framework
+- [Prisma](https://prisma.io/) for the excellent database toolkit
+- [ShadCN UI](https://ui.shadcn.com/) for beautiful component library
+- [Vercel](https://vercel.com/) for seamless deployment
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Atik203/Scholar-Flow/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Atik203/Scholar-Flow/discussions)
+- **Email**: [atikurrahaman0305@gmail.com](mailto:atikurrahaman0305@gmail.com)
 
 ---
 
-## 🧩 Architecture Snapshot
-
-Monorepo (Yarn Berry + Turbo) with:
-
-- `apps/frontend`: Next.js 15 (App Router, Tailwind, ShadCN, NextAuth, RTK Query)
-- `apps/backend`: Express + TypeScript + Prisma (Postgres + pgvector)
-- `packages/*`: Shared types / SEO utilities
-
-Workers will process ingestion (OCR, embeddings) via a queue
-
-## 🎯 Product Overview
-
-Scholar-Flow helps researchers and teams:
-
-- Ingest & organize academic papers
-- Generate AI summaries & semantic retrieval
-- Annotate & collaborate in collections
-- Explore citation relationships
-- Manage access, billing, and usage
-
-## 🏗️ System Architecture (High Level)
-
-Frontend (Next.js) ↔ Backend (Express/Prisma) ↔ Postgres (pgvector)  
-Optional Worker (embeddings/OCR) ← queue (Redis)  
-Object storage (S3/R2) for PDFs.  
-Feature flags gate unfinished surfaces (see example env files).
-
-## 📦 Core Feature Domains
-
-| Domain                | Highlights (Current / Planned)                                  |
-| --------------------- | --------------------------------------------------------------- |
-| Paper Ingestion       | Upload, metadata extraction, queued processing (OCR/embeddings) |
-| Collections           | Organize papers, future sharing & activity feed                 |
-| Semantic Intelligence | pgvector-backed search (flagged until data + embeddings)        |
-| Annotations           | Placeholder now → full highlight + realtime threads             |
-| Citation Intelligence | Graph + formatting (Phase 2+)                                   |
-| AI Assistance         | Summaries, suggestions (progressive rollout)                    |
-| Billing & Plans       | Stripe + SSLCommerz integration (Phase 3)                       |
-| Admin & Governance    | User management, metrics, moderation (Phase 3)                  |
-
-## 4) Detailed Tech Stack
-
-- Frontend: Next.js (App Router), React, TypeScript, Tailwind, ShadCN, Framer Motion; Forms with RHF + Zod; State with RTK Query + light UI slice.
-- Backend API: Node.js, Express.js, Prisma ORM; Zod for input validation; Helmet, CORS; RBAC middleware by role and workspace membership.
-- Workers: Node.js with BullMQ (Redis) for ingest/OCR/embeddings/AI tasks.
-- Database: Postgres + Prisma; pgvector for embeddings (stored as Unsupported("vector") in Prisma, queried via raw SQL).
-- AI: OpenAI, HuggingFace, LangChain, Tesseract.
-- Storage: S3-compatible (R2/S3/MinIO) with signed URLs.
-- Payments: Stripe SDK; SSLCommerz (sslcommerz-lts).
-- DevOps: Vercel (frontend); Railway/Render/Fly.io (backend + workers); Redis for queues/cache.
-
-## 5) Authentication & Authorization
-
-- Auth.js (NextAuth) on the frontend app; JWT session strategy.
-- Backend validates JWT (bearer) with shared secret; extracts userId and role.
-- Workspace-based access: WorkspaceMember role gates access to papers/collections inside a workspace.
-- Collection-level sharing for granular collaboration.
-- Admin users can manage users, payments, and system settings.
-
-## 6) API Surface (Backend Express)
-
-- Auth
-  - POST /auth/session/validate (optional ping) – verifies JWT valid/claims
-- Papers
-  - POST /papers/upload-url – get pre-signed upload URL
-  - POST /papers/import – import by DOI/API providers
-  - GET /papers – list/filter; supports semantic=true for vector search
-  - GET /papers/:id – detail with metadata
-  - DELETE /papers/:id – soft delete
-- Annotations
-  - GET /papers/:id/annotations
-  - POST /papers/:id/annotations
-  - GET /papers/:id/annotations/versions
-  - POST /papers/:id/annotations/versions/revert
-- Collections
-  - GET /collections
-  - POST /collections
-  - GET /collections/:id
-  - POST /collections/:id/papers
-  - POST /collections/:id/invite
-- Search & AI
-  - POST /search/semantic
-  - GET /papers/:id/similar
-  - POST /papers/:id/ai/summarize
-  - POST /papers/:id/ai/citation-suggestions
-- Graph
-  - GET /graph/paper/:id
-- Workspaces
-  - POST /workspaces
-  - POST /workspaces/:id/invite
-  - PUT /workspaces/:id/members/:userId
-  - GET /workspaces/:id/activities
-- Billing
-  - GET /subscriptions
-  - POST /subscriptions/checkout
-  - GET /payments
-  - POST /payments/ssl/init
-  - POST /webhooks/stripe
-  - POST /webhooks/sslcommerz
-- Admin
-  - GET /admin/users
-  - PUT /admin/users/:id
-  - GET /admin/metrics
-
-Security and cross-cutting
-
-- CORS: allow frontend domain; block others by default.
-- CSRF: not required for pure bearer APIs; ensure cookie usage is httpOnly/secure if used.
-- Rate limiting: per-IP and per-user; stricter on AI endpoints.
-- Input validation: Zod schemas on every route; sanitize filters for search.
-- Audit logs and notifications for sensitive actions.
-
-## 🖥️ UI / UX Documentation
-
-**Full UI Design Blueprint:** [`docs/UI_DESIGN.md`](./docs/UI_DESIGN.md)
-
-This document provides:
-
-- Complete screen-by-screen structure and component taxonomy
-- Phased UI delivery plan (Phase 1 → Phase 2 → Phase 3)
-- Feature flag strategy and accessibility checklist
-- Authentication UI patterns and state management
-- Component architecture mapping and routing plan
-
-**✅ Phase 1 Authentication UI:** Login, signup, and OAuth flows with comprehensive form validation, error handling, and responsive design.
-
-## 8) Non-Functional Requirements
-
-- Performance: paginate lists; stream large PDFs; index pgvector with ivfflat (cosine).
-- Reliability: idempotent payment webhooks; store raw webhook payloads; retries with backoff.
-- Background jobs: all heavy tasks (OCR/embeddings) offloaded; job results written back atomically.
-- Security: signed URLs for file access; strict RBAC; input validation; secrets management (runtime env).
-- Internationalization: i18n-ready; date-fns for formatting.
-- Accessibility: keyboard-friendly annotations; ARIA for viewer controls.
-
-## 9) Monetization
-
-- Free: up to 100 papers, basic AI features, no shared collections.
-- Pro ($10/mo): unlimited uploads, all AI tools, collaboration, priority queue.
-- Institutional: workspace/institution-wide seats and SSO (future).
-
-## 10) Database Schema Reference
-
-The full Prisma data model has been moved to `SCHEMA.md` for clarity.
-
-## 11) Deployment
-
-- Frontend: Vercel project with environment-bound NEXTAUTH_SECRET, NEXT_PUBLIC_API_BASE_URL.
-- Backend: Railway/Render/Fly.io container; set DATABASE_URL, JWT/Auth secrets, Stripe/SSL keys, S3 creds.
-- Workers: Same platform as backend, separate process using the same codebase (monorepo) or separate repo.
-- Migrations: Prisma migrate on backend deploy; maintain seed scripts for local/dev environments.
-
-## ⏭️ Immediate Next Steps (Phase 1)
-
-1. Finalize Auth + profile endpoints integration
-2. Implement upload → ingest pipeline (with placeholder worker path)
-3. Add pgvector migration & embeddings service stub (feature-flagged)
-4. Collections basic CRUD + association
-5. Prepare semantic search API skeleton (disabled until embeddings exist)
-
-> For extended roadmap see `Roadmap.md`.
-
----
-
-### 🤝 Contributing
-
-Follow conventional commits, keep PRs small, and align with current phase. See `.cursor/rules` and `docs/UI_DESIGN.md` before adding new UI routes.
-
-### 📄 Licensing
-
-Proprietary – see `LICENSE.md` and `TERMS.md`.
-
-### 📬 Contact
-
-Open an issue or start a discussion for feature proposals. Tag design-related issues with `ui-design`.
-
----
-
-_Generated & maintained with structured AI assistance. UI details intentionally extracted to keep this README high signal._
+⭐ **Star this repository** if you find it helpful!

@@ -1,0 +1,223 @@
+import express from "express";
+import { authMiddleware } from "../../middleware/auth";
+import { performanceMonitor } from "../../middleware/performanceMonitor";
+import {
+  rateLimiter,
+  workspaceMutationLimiter,
+} from "../../middleware/rateLimiter";
+import {
+  validateRequestBody,
+  validateRequestParams,
+} from "../../middleware/validateRequest";
+import { workspaceController } from "./workspace.controller";
+import {
+  createWorkspaceSchema,
+  inviteMemberSchema,
+  memberParamsSchema,
+  updateMemberRoleSchema,
+  updateWorkspaceSchema,
+  updateWorkspaceSettingsSchema,
+  workspaceParamsSchema,
+} from "./workspace.validation";
+
+export const workspaceRoutes: express.Router = express.Router();
+
+// Apply perf monitor to all routes
+workspaceRoutes.use(performanceMonitor as any);
+
+// List my workspaces
+workspaceRoutes.get(
+  "/",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.list as any
+);
+
+// Get invitations sent by user (MUST be registered before /:id routes)
+workspaceRoutes.get(
+  "/invites/sent",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsSent as any
+);
+
+// Get invitations received by user (MUST be registered before /:id routes)
+workspaceRoutes.get(
+  "/invites/received",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsReceived as any
+);
+
+// Revoke a pending invitation (MUST be registered before /:id routes)
+workspaceRoutes.delete(
+  "/invites/:invitationId",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  workspaceController.cancelInvitation as any
+);
+
+// Resend a pending invitation (MUST be registered before /:id routes)
+workspaceRoutes.post(
+  "/invites/:invitationId/resend",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  workspaceController.resendInvitation as any
+);
+
+// Create workspace
+workspaceRoutes.post(
+  "/",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestBody(createWorkspaceSchema) as any,
+  workspaceController.create as any
+);
+
+// Get one
+workspaceRoutes.get(
+  "/:id",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getOne as any
+);
+
+// Update
+workspaceRoutes.patch(
+  "/:id",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  validateRequestBody(updateWorkspaceSchema) as any,
+  workspaceController.update as any
+);
+
+// Delete
+workspaceRoutes.delete(
+  "/:id",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.remove as any
+);
+
+// Members: list
+workspaceRoutes.get(
+  "/:id/members",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.listMembers as any
+);
+
+// Members: add
+workspaceRoutes.post(
+  "/:id/members",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.addMember as any
+);
+
+// Members: update role
+workspaceRoutes.patch(
+  "/:id/members/:memberId",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(memberParamsSchema) as any,
+  validateRequestBody(updateMemberRoleSchema) as any,
+  workspaceController.updateMemberRole as any
+);
+
+// Members: remove
+workspaceRoutes.delete(
+  "/:id/members/:memberId",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(memberParamsSchema) as any,
+  workspaceController.removeMember as any
+);
+
+// Invitation routes
+workspaceRoutes.post(
+  "/:id/invite",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  validateRequestBody(inviteMemberSchema) as any,
+  workspaceController.inviteMember as any
+);
+
+// Accept invitation
+workspaceRoutes.post(
+  "/:id/accept",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.acceptInvitation as any
+);
+
+// Decline invitation
+workspaceRoutes.post(
+  "/:id/decline",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.declineInvitation as any
+);
+
+// ----------------------------------------------------------------------------
+// Phase 5 — Settings, Activity, Stats, Papers, Collections
+// ----------------------------------------------------------------------------
+
+workspaceRoutes.get(
+  "/:id/settings",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getSettings as any
+);
+
+workspaceRoutes.patch(
+  "/:id/settings",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  validateRequestBody(updateWorkspaceSettingsSchema) as any,
+  workspaceController.updateSettings as any
+);
+
+workspaceRoutes.get(
+  "/:id/stats",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getStats as any
+);
+
+workspaceRoutes.get(
+  "/:id/activity",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getActivity as any
+);
+
+workspaceRoutes.get(
+  "/:id/papers",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getPapers as any
+);
+
+workspaceRoutes.get(
+  "/:id/collections",
+  rateLimiter,
+  authMiddleware as any,
+  validateRequestParams(workspaceParamsSchema) as any,
+  workspaceController.getCollections as any
+);
+
+export default workspaceRoutes;

@@ -1,0 +1,303 @@
+import express from "express";
+import multer from "multer";
+import { authMiddleware } from "../../middleware/auth";
+import {
+  aiGenerationLimiter,
+  paperListLimiter,
+  paperOperationLimiter,
+  paperUploadLimiter,
+} from "../../middleware/rateLimiter";
+import { validateRequestBody } from "../../middleware/validateRequest";
+import { editorPaperController, paperController } from "./paper.controller";
+import {
+  autosaveContentSchema,
+  createEditorPaperSchema,
+  generatePaperInsightSchema,
+  generatePaperSummarySchema,
+  publishDraftSchema,
+  shareViaEmailSchema,
+  updateEditorContentSchema,
+  updatePaperMetadataSchema,
+} from "./paper.validation";
+
+// Memory storage is fine for MVP; switch to streaming for large PDFs later.
+// 50MB cap prevents OOM abuse — papers are bounded at upload time.
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+});
+
+// Editor images are bounded at 5MB at the multer level — buffering 50MB
+// only to reject it later wasted memory under upload bursts.
+const editorImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+});
+
+export const paperRoutes: express.Router = express.Router();
+
+// Upload PDF (protected - requires auth for production, fallback for dev)
+paperRoutes.post(
+  "/",
+  paperUploadLimiter,
+  authMiddleware as any,
+  upload.single("file") as any,
+  paperController.upload as any
+);
+
+// List papers by user (protected, but allow dev fallback with workspaceId)
+paperRoutes.get(
+  "/",
+  paperListLimiter,
+  authMiddleware as any,
+  paperController.list as any
+);
+
+// Get available AI providers and their models (before /:id to avoid route conflict)
+paperRoutes.get(
+  "/ai/providers",
+  paperListLimiter,
+  authMiddleware as any,
+  paperController.getAiProviders as any
+);
+
+// Get single paper (protected + access checked in controller)
+paperRoutes.get(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getOne as any
+);
+
+// Get signed file URL
+paperRoutes.get(
+  "/:id/file-url",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getFileUrl as any
+);
+
+// Get signed preview URL (prefers preview PDF for DOCX, falls back to original)
+paperRoutes.get(
+  "/:id/preview-url",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getPreviewUrl as any
+);
+
+// Generate AI summary for a paper (LLM cost — AI rate limiter)
+paperRoutes.post(
+  "/:id/summary",
+  aiGenerationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperSummarySchema) as any,
+  paperController.generateSummary as any
+);
+
+// Update metadata (protected + access checked in controller)
+paperRoutes.patch(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(updatePaperMetadataSchema) as any,
+  paperController.updateMetadata as any
+);
+
+// Delete paper (protected + access checked in controller)
+paperRoutes.delete(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.delete as any
+);
+
+// Authenticated helper to verify uploadedPapers relation
+paperRoutes.get(
+  "/me/summary",
+  authMiddleware as any,
+  paperController.myUploadsSummary as any
+);
+
+// Trigger PDF processing for a specific paper
+paperRoutes.post(
+  "/:id/process",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.processPDF as any
+);
+
+// Get processing status and chunks for a paper
+paperRoutes.get(
+  "/:id/processing-status",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getProcessingStatus as any
+);
+
+// Get all chunks for a paper
+paperRoutes.get(
+  "/:id/chunks",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getAllChunks as any
+);
+
+// Force direct PDF processing (bypasses Redis queue)
+paperRoutes.post(
+  "/:id/process-direct",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.processPDFDirect as any
+);
+
+// Share paper via email
+paperRoutes.post(
+  "/share-email",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(shareViaEmailSchema),
+  paperController.shareViaEmail as any
+);
+
+// Generate AI insights for a paper (chat-like conversation — LLM cost)
+paperRoutes.post(
+  "/:id/insights",
+  aiGenerationLimiter,
+  authMiddleware as any,
+  validateRequestBody(generatePaperInsightSchema),
+  paperController.generateInsight as any
+);
+
+// Get insight conversation history for a paper
+paperRoutes.get(
+  "/:id/insights",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.getInsightHistory as any
+);
+
+// Phase 10 — AI Key Points extraction (LLM cost)
+paperRoutes.post(
+  "/:id/key-points",
+  aiGenerationLimiter,
+  authMiddleware as any,
+  paperController.generateKeyPoints as any
+);
+
+// Phase 10 — AI Metadata Generation (LLM cost)
+paperRoutes.post(
+  "/:id/generate-metadata",
+  aiGenerationLimiter,
+  authMiddleware as any,
+  paperController.generateMetadata as any
+);
+
+// Editor-specific routes
+export const editorPaperRoutes: express.Router = express.Router();
+
+// Create new editor paper
+editorPaperRoutes.post(
+  "/",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(createEditorPaperSchema) as any,
+  editorPaperController.createEditorPaper as any
+);
+
+// Get user's editor papers (drafts and published)
+editorPaperRoutes.get(
+  "/",
+  paperListLimiter,
+  authMiddleware as any,
+  editorPaperController.getUserEditorPapers as any
+);
+
+// Get specific editor paper
+editorPaperRoutes.get(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getEditorPaper as any
+);
+
+// Update editor paper content
+editorPaperRoutes.put(
+  "/:id/content",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(updateEditorContentSchema) as any,
+  editorPaperController.updateEditorContent as any
+);
+
+// Auto-save editor content (debounced saves; no version snapshot)
+editorPaperRoutes.patch(
+  "/:id/autosave",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(autosaveContentSchema) as any,
+  editorPaperController.autoSaveContent as any
+);
+
+// Publish draft paper
+editorPaperRoutes.post(
+  "/:id/publish",
+  paperOperationLimiter,
+  authMiddleware as any,
+  validateRequestBody(publishDraftSchema) as any,
+  editorPaperController.publishDraft as any
+);
+
+// Delete editor paper
+editorPaperRoutes.delete(
+  "/:id",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.deleteEditorPaper as any
+);
+
+// Version history
+editorPaperRoutes.get(
+  "/:id/versions",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersions as any
+);
+
+editorPaperRoutes.get(
+  "/:id/versions/:versionId",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.getVersion as any
+);
+
+editorPaperRoutes.post(
+  "/:id/versions/:versionId/restore",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.restoreVersion as any
+);
+
+// Upload image for editor
+editorPaperRoutes.post(
+  "/upload-image",
+  paperUploadLimiter,
+  authMiddleware as any,
+  editorImageUpload.single("image") as any,
+  editorPaperController.uploadImage as any
+);
+
+// Export paper as PDF
+editorPaperRoutes.get(
+  "/:id/export/pdf",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.exportPDF as any
+);
+
+// Export paper as DOCX
+editorPaperRoutes.get(
+  "/:id/export/docx",
+  paperOperationLimiter,
+  authMiddleware as any,
+  editorPaperController.exportDOCX as any
+);
