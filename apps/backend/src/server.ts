@@ -1,6 +1,12 @@
 import compression from "compression";
 import cors from "cors";
-import express, { RequestHandler } from "express";
+import express, {
+  NextFunction,
+  Request,
+  RequestHandler,
+  Response,
+} from "express";
+import http from "http";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -9,18 +15,95 @@ import { setupSwagger } from "./app/config/swagger";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
+import {
+  captureStripeRawBody,
+  isStripeWebhookPath,
+} from "./app/utils/stripeWebhook";
+
+// Initialize queue processing (lazy on Vercel to avoid cold start issues)
+if (process.env.VERCEL !== "1") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require("./app/services/pdfProcessingQueue");
+} else {
+  console.log("[Boot] Vercel environment - deferring queue init");
+}
 
 const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
-// Security middleware
-app.use(helmet() as unknown as RequestHandler);
+// Trust proxy when behind Vercel/reverse proxy (required for rate limiting and IP detection)
+if (process.env.VERCEL === "1" || config.env === "production") {
+  app.set("trust proxy", true);
+  console.log("[Config] Trust proxy enabled for production/Vercel environment");
+}
+
+// Security middleware with enhanced CSP and security headers
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        connectSrc: [
+          "'self'",
+          process.env.WS_URL || "ws://localhost:5001",
+          (process.env.WS_URL || "ws://localhost:5001").replace("http", "ws"),
+          "https://api.openai.com",
+          "https://generativelanguage.googleapis.com",
+          "https://api.anthropic.com",
+          "https://api.deepseek.com",
+        ],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+        reportUri: "/api/csp-report",
+      },
+    },
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    frameguard: {
+      action: "deny", // Prevent clickjacking
+    },
+    noSniff: true, // Prevent MIME type sniffing
+    xssFilter: true, // Enable XSS filter
+    referrerPolicy: {
+      policy: "strict-origin-when-cross-origin",
+    },
+  }) as unknown as RequestHandler
+);
 app.use(compression() as unknown as RequestHandler);
 
 // CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:3000",
+  "https://scholar-flow-ai.vercel.app",
+  process.env.WS_URL || "http://localhost:5001",
+].filter(Boolean);
+
+// Add Vercel deployment URL if available
+if (process.env.VERCEL_URL) {
+  allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
+}
+
+console.log("[Boot] CORS allowed origins:", allowedOrigins);
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    exposedHeaders: ["X-Response-Time"],
     credentials: true,
   }) as unknown as RequestHandler
 );
@@ -28,32 +111,68 @@ app.use(
 // Rate limiting (typing relaxed for dev boot)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 300,
   message: "Too many requests from this IP, please try again later.",
 });
 // Cast to any to avoid TS overload mismatch while bootstrapping
 app.use("/api/", limiter as unknown as import("express").RequestHandler);
 
-// Request parsing
-app.use(express.json({ limit: "50mb" }) as unknown as RequestHandler);
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "50mb",
-  }) as unknown as RequestHandler
+// Stripe webhook - MUST be before express.json() to preserve raw body
+import { webhookController } from "./app/modules/Billing/webhook.controller";
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  captureStripeRawBody,
+  webhookController.handleStripeWebhook as unknown as RequestHandler
 );
+// Request parsing
+const jsonParser = express.json({ limit: "50mb" });
+const urlencodedParser = express.urlencoded({
+  extended: true,
+  limit: "50mb",
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return jsonParser(req, res, next);
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (isStripeWebhookPath(req)) {
+    return next();
+  }
+
+  return urlencodedParser(req, res, next);
+});
 
 // Logging
 if (config.env !== "production") {
   app.use(morgan("dev") as unknown as RequestHandler);
 }
 
+// Performance monitoring
+import { performanceMonitor } from "./app/middleware/performanceMonitor";
+app.use(performanceMonitor as unknown as RequestHandler);
+
+// Cache control for GET API responses (Phase 9 Lighthouse optimization)
+const cacheControlMiddleware: import("express").RequestHandler = (req, res, next) => {
+  if (req.method === "GET" && req.path.startsWith("/api/")) {
+    res.set("Cache-Control", "private, max-age=30");
+    res.set("Vary", "Authorization");
+  }
+  next();
+};
+app.use(cacheControlMiddleware);
+
 // Root endpoint
 const rootHandler: import("express").RequestHandler = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Welcome to Scholar-Flow API",
-    version: "1.0.0",
+    version: "1.3.1",
     documentation: "/docs",
     api: "/api",
     health: "/health",
@@ -69,6 +188,10 @@ app.get("/health", healthCheck as unknown as RequestHandler);
 // Support health check under /api as well (useful when deployed behind a rewrite to /api/$1)
 app.get("/api/health", healthCheck as unknown as RequestHandler);
 
+// CSP violation report endpoint (needs JSON parser before it)
+import { cspReportHandler } from "./app/modules/Security/cspReport.route";
+app.post("/api/csp-report", cspReportHandler as unknown as RequestHandler);
+
 // API routes
 app.use("/api", router);
 
@@ -80,10 +203,42 @@ app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
+  // Phase 10 - WebSocket server
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
+
+  // Billing - subscription expiry/grace sweeper (hourly cron)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startSubscriptionSweeper } = require(
+    "./app/modules/Billing/subscriptionSweeper"
+  );
+  startSubscriptionSweeper();
+
+  // Invitations - expiry sweeper (hourly cron, stale PENDING -> EXPIRED)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startInvitationSweeper } = require(
+    "./app/modules/Invitation/invitationSweeper"
+  );
+  startInvitationSweeper();
+
+  // Papers - embedding backfill sweep (hourly cron, unembedded chunks)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startEmbeddingBackfill } = require(
+    "./app/services/embeddingBackfill"
+  );
+  startEmbeddingBackfill();
+
+  const httpServer = http.createServer(app);
+  setupWebSocket(httpServer);
+
   // Start server with graceful fallback & diagnostics
   const startServer = (desiredPort: number, attempt = 0) => {
-    const server = app.listen(desiredPort, () => {
+    const server = httpServer.listen(desiredPort, () => {
       console.log(`🚀 Scholar-Flow API running on port ${desiredPort}`);
+      console.log(
+        "[Boot] DATABASE_URL present:",
+        Boolean(process.env.DATABASE_URL)
+      );
       console.log(`📖 Environment: ${config.env}`);
     });
 
@@ -124,5 +279,4 @@ export default app;
 
 // Also expose CommonJS export for Vercel @vercel/node when using dist/server.js directly
 // Note: TypeScript will emit both default and CJS exports under commonjs module target
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (module as any).exports = app;

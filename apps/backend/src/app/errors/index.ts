@@ -1,6 +1,5 @@
 // Error classes
 export { default as ApiError } from "./ApiError";
-export { default as AppError } from "./AppError";
 
 // Error handlers
 export { default as handleDuplicateError } from "./handleDuplicateError";

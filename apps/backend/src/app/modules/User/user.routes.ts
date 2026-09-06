@@ -1,7 +1,36 @@
 import express from "express";
+import multer from "multer";
+import { authMiddleware } from "../../middleware/auth";
+import {
+  paperOperationLimiter,
+  paperUploadLimiter,
+} from "../../middleware/rateLimiter";
+import { validateRequestBody } from "../../middleware/validateRequest";
 import { userController } from "./user.controller";
+import { changePasswordSchema, exportDataSchema, privacySettingsSchema, twoFactorSetupSchema, updateOnboardingSchema, updatePreferencesSchema, updateProfileSchema } from "./user.validation";
 
 const router: import("express").Router = express.Router();
+
+// Configure multer for profile picture uploads (memory storage, max 5MB)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only JPEG, PNG, and WebP are allowed"));
+    }
+  },
+});
 
 /**
  * @swagger
@@ -104,7 +133,7 @@ const router: import("express").Router = express.Router();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/", userController.getAllFromDB);
+router.get("/", authMiddleware, userController.getAllFromDB);
 
 /**
  * @swagger
@@ -170,7 +199,81 @@ router.get("/", userController.getAllFromDB);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/me", userController.getMyProfile);
+router.get("/me", authMiddleware, userController.getMyProfile);
+
+/**
+ * @swagger
+ * /api/user/update-profile:
+ *   put:
+ *     summary: Update User Profile
+ *     description: Update the current user's profile information including name, institution, field of study, and image.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Full name of the user
+ *                 example: "Dr. John Smith"
+ *               firstName:
+ *                 type: string
+ *                 description: First name of the user
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 description: Last name of the user
+ *                 example: "Smith"
+ *               institution:
+ *                 type: string
+ *                 description: User's institution or organization
+ *                 example: "Stanford University"
+ *               fieldOfStudy:
+ *                 type: string
+ *                 description: User's field of study or research area
+ *                 example: "Computer Science"
+ *               image:
+ *                 type: string
+ *                 description: URL to user's profile image
+ *                 example: "https://example.com/avatar.jpg"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.put(
+  "/update-profile",
+  authMiddleware,
+  validateRequestBody(updateProfileSchema),
+  userController.updateProfile
+);
 
 /**
  * @swagger
@@ -223,6 +326,303 @@ router.get("/me", userController.getMyProfile);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/change-password", userController.changePassword);
+router.post(
+  "/change-password",
+  authMiddleware,
+  validateRequestBody(changePasswordSchema),
+  userController.changePassword
+);
+
+/**
+ * @swagger
+ * /api/user/delete-account:
+ *   delete:
+ *     summary: Delete User Account
+ *     description: Permanently delete the current user's account. This action is irreversible and will log out the user immediately.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Account deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Account deleted successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     success:
+ *                       type: boolean
+ *                       example: true
+ *                     message:
+ *                       type: string
+ *                       example: "Account deleted successfully"
+ *                     deletedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-01-15T10:30:00.000Z"
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       404:
+ *         description: User not found or already deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.delete("/delete-account", authMiddleware, userController.deleteAccount);
+
+/**
+ * @swagger
+ * /api/user/upload-profile-picture:
+ *   post:
+ *     summary: Upload Profile Picture
+ *     description: Upload a new profile picture to S3. Accepts JPEG, PNG, or WebP images up to 5MB. Returns permanent URL with no expiration.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: Profile picture image file (JPEG, PNG, or WebP, max 5MB)
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Profile picture uploaded successfully!"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     imageUrl:
+ *                       type: string
+ *                       example: "https://bucket.s3.region.amazonaws.com/profile-pictures/user-id/uuid.jpg"
+ *       400:
+ *         description: Invalid file type or size
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.post(
+  "/upload-profile-picture",
+  authMiddleware,
+  paperUploadLimiter,
+  upload.single("file") as any,
+  userController.uploadProfilePicture
+);
+
+/**
+ * @swagger
+ * /api/user/analytics:
+ *   get:
+ *     summary: Get User Analytics
+ *     description: Retrieve comprehensive analytics including papers count, collections count, storage usage, AI tokens usage, and charts data.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Analytics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User analytics retrieved successfully!"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     plan:
+ *                       type: string
+ *                       enum: [FREE, PRO]
+ *                       example: "FREE"
+ *                     limits:
+ *                       type: object
+ *                       properties:
+ *                         maxPapers:
+ *                           type: number
+ *                           example: 50
+ *                         maxStorage:
+ *                           type: number
+ *                           example: 1024
+ *                         maxTokens:
+ *                           type: number
+ *                           example: 10000
+ *                         maxCollections:
+ *                           type: number
+ *                           example: 10
+ *                     usage:
+ *                       type: object
+ *                       properties:
+ *                         papers:
+ *                           type: object
+ *                         collections:
+ *                           type: object
+ *                         storage:
+ *                           type: object
+ *                         tokens:
+ *                           type: object
+ *                     charts:
+ *                       type: object
+ *                       properties:
+ *                         papersOverTime:
+ *                           type: array
+ *                         collectionsOverTime:
+ *                           type: array
+ *                         storageOverTime:
+ *                           type: array
+ *                         papersByStatus:
+ *                           type: array
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
+ */
+router.get(
+  "/analytics",
+  authMiddleware,
+  paperOperationLimiter,
+  userController.getUserAnalytics
+);
+
+router.put(
+  "/onboarding",
+  authMiddleware,
+  validateRequestBody(updateOnboardingSchema),
+  userController.updateOnboarding
+);
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   get:
+ *     summary: Get User Preferences
+ *     description: Retrieve the current user's preferences. Creates a default record on first access.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Preferences retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get("/preferences", authMiddleware, userController.getPreferences);
+
+/**
+ * @swagger
+ * /api/user/preferences:
+ *   put:
+ *     summary: Update User Preferences
+ *     description: Update the current user's preferences. All fields are optional.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               theme:
+ *                 type: string
+ *                 enum: [light, dark, system]
+ *               language:
+ *                 type: string
+ *               timezone:
+ *                 type: string
+ *               emailDigest:
+ *                 type: boolean
+ *               defaultCitationStyle:
+ *                 type: string
+ *                 enum: [APA, MLA, CHICAGO, HARVARD, IEEE, BIBTEX, ENDNOTE]
+ *               compactMode:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Preferences updated successfully
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.put(
+  "/preferences",
+  authMiddleware,
+  validateRequestBody(updatePreferencesSchema),
+  userController.updatePreferences
+);
+
+/**
+ * @swagger
+ * /api/user/activity:
+ *   get:
+ *     summary: Get User Activity Feed
+ *     description: Retrieve paginated activity entries for the current user.
+ *     tags: [Users]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Activity retrieved successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ */
+router.get("/activity", authMiddleware, userController.getActivity);
+
+// Phase 8 — Export, Security, 2FA, Privacy
+router.post("/export", authMiddleware, validateRequestBody(exportDataSchema), userController.exportData);
+
+router.get("/sessions", authMiddleware, userController.getSessions);
+router.delete("/sessions/:id", authMiddleware, userController.terminateSession);
+
+router.get("/2fa/status", authMiddleware, userController.getTwoFactorStatus);
+router.post("/2fa/generate", authMiddleware, userController.generateTwoFactorSecret);
+router.post("/2fa/verify", authMiddleware, validateRequestBody(twoFactorSetupSchema), userController.verifyTwoFactor);
+router.post("/2fa/disable", authMiddleware, userController.disableTwoFactor);
+
+router.get("/privacy", authMiddleware, userController.getPrivacySettings);
+router.put("/privacy", authMiddleware, validateRequestBody(privacySettingsSchema), userController.updatePrivacySettings);
 
 export const userRoutes = router;

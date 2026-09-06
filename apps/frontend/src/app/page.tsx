@@ -1,22 +1,25 @@
-"use client";
-import { CTA } from "@/components/customUI/CTA";
-import { Features } from "@/components/customUI/Features";
-import { Hero } from "@/components/customUI/Hero";
-import { HowItWorks } from "@/components/customUI/HowItWorks";
-import { LogosMarquee } from "@/components/customUI/LogosMarquee";
-import { Reviews } from "@/components/customUI/Reviews";
-import { Testimonials } from "@/components/customUI/Testimonials";
+import { Hero } from "@/components/sections/Hero";
+import { Features } from "@/components/sections/Features";
+import { HowItWorks } from "@/components/sections/HowItWorks";
+import { Integrations } from "@/components/sections/Integrations";
+import { Comparison } from "@/components/sections/Comparison";
+import { Testimonials } from "@/components/sections/Testimonials";
+import { FAQ } from "@/components/sections/FAQ";
+import { Newsletter } from "@/components/sections/Newsletter";
+import { CTA } from "@/components/sections/CTA";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
       <Features />
-      <LogosMarquee />
       <HowItWorks />
+      <Integrations />
+      <Comparison />
       <Testimonials />
-      <Reviews />
+      <FAQ />
       <CTA />
+      <Newsletter />
     </>
   );
 }

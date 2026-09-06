@@ -1,0 +1,375 @@
+import { apiSlice } from "./apiSlice";
+
+export type WorkspaceColor = "blue" | "purple" | "green" | "orange" | "pink";
+export type WorkspaceVisibility = "PRIVATE" | "INVITE_ONLY" | "PUBLIC";
+
+export interface WorkspaceSettings {
+  color: WorkspaceColor;
+  coverImageKey?: string | null;
+  iconKey?: string | null;
+  allowExternalSharing: boolean;
+  allowDownload: boolean;
+  defaultMemberRole: "VIEWER" | "EDITOR" | "MANAGER" | "OWNER";
+  requireApprovalForJoin: boolean;
+  allowMemberInvites: boolean;
+  allowPublicCollections: boolean;
+  aiFeaturesEnabled: boolean;
+  enforce2FAForMembers: boolean;
+  allowedEmailDomains: string[];
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  description?: string;
+  ownerId: string;
+  isPublic?: boolean;
+  color?: WorkspaceColor;
+  visibility?: WorkspaceVisibility;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  memberCount?: number;
+  collectionCount?: number;
+  paperCount?: number;
+  isOwner?: boolean;
+  userRole?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+}
+
+export interface WorkspaceInvitation {
+  id: string;
+  workspaceId: string;
+  userId: string;
+  role: string;
+  status: "PENDING" | "ACCEPTED" | "DECLINED";
+  invitedAt: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+  workspaceName?: string;
+  inviteeEmail?: string;
+  inviteeName?: string;
+  inviterEmail?: string;
+  inviterName?: string;
+}
+
+export interface InviteWorkspaceMemberRequest {
+  id: string;
+  email: string;
+  role?: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+}
+
+export const workspaceApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    listWorkspaces: builder.query<
+      {
+        data: Workspace[];
+        meta: { limit: number; nextCursor?: string | null; hasMore?: boolean };
+      },
+      { cursor?: string; limit?: number; scope?: "all" | "owned" | "shared" }
+    >({
+      query: ({ cursor, limit = 10, scope = "all" } = {}) => ({
+        url: `/workspaces`,
+        params: { ...(cursor && { cursor }), limit, scope },
+      }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((w) => ({
+                type: "Workspace" as const,
+                id: w.id,
+              })),
+              { type: "Workspace" as const, id: "LIST" },
+            ]
+          : [{ type: "Workspace" as const, id: "LIST" }],
+    }),
+
+    createWorkspace: builder.mutation<
+      Workspace,
+      { name: string; color?: WorkspaceColor; visibility?: WorkspaceVisibility }
+    >({
+      query: (body) => ({ url: `/workspaces`, method: "POST", body }),
+      transformResponse: (response: { data: Workspace }) => response.data,
+      invalidatesTags: [{ type: "Workspace", id: "LIST" }],
+    }),
+
+    getWorkspace: builder.query<Workspace, string>({
+      query: (id) => `/workspaces/${id}`,
+      transformResponse: (response: { data: Workspace }) => response.data,
+      providesTags: (result, _err, id) => [{ type: "Workspace", id }],
+    }),
+
+    updateWorkspace: builder.mutation<
+      Workspace,
+      { id: string; name?: string; description?: string }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/workspaces/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      transformResponse: (response: { data: Workspace }) => response.data,
+      invalidatesTags: (result, _err, { id }) => [
+        { type: "Workspace", id },
+        { type: "Workspace", id: "LIST" },
+      ],
+    }),
+
+    deleteWorkspace: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({ url: `/workspaces/${id}`, method: "DELETE" }),
+      invalidatesTags: [{ type: "Workspace", id: "LIST" }],
+    }),
+
+    listMembers: builder.query<
+      {
+        data: any[];
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { id: string; page?: number; limit?: number }
+    >({
+      query: ({ id, page = 1, limit = 10 }) => ({
+        url: `/workspaces/${id}/members`,
+        params: { page, limit },
+      }),
+      providesTags: (_result, _err, { id }) => [
+        { type: "Workspace", id: `${id}-members` },
+      ],
+    }),
+
+    updateMemberRole: builder.mutation<
+      { success: boolean },
+      { id: string; memberId: string; role: string }
+    >({
+      query: ({ id, memberId, role }) => ({
+        url: `/workspaces/${id}/members/${memberId}`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-members` },
+        { type: "Workspace", id: "LIST" },
+      ],
+    }),
+
+    removeMember: builder.mutation<
+      { success: boolean },
+      { id: string; memberId: string }
+    >({
+      query: ({ id, memberId }) => ({
+        url: `/workspaces/${id}/members/${memberId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-members` },
+        { type: "Workspace", id: "LIST" },
+      ],
+    }),
+
+    // Workspace Invitations
+    inviteWorkspaceMember: builder.mutation<
+      { invitationId: string },
+      InviteWorkspaceMemberRequest
+    >({
+      query: ({ id, email, role = "RESEARCHER" }) => ({
+        url: `/workspaces/${id}/invite`,
+        method: "POST",
+        body: { email, role },
+      }),
+      transformResponse: (response: { data: { invitationId: string } }) =>
+        response.data,
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Workspace", id: `${id}-members` },
+        { type: "Workspace", id: "SHARED" },
+        { type: "Workspace", id: "INVITES" },
+      ],
+    }),
+
+    acceptWorkspaceInvitation: builder.mutation<{ success: boolean }, string>({
+      query: (workspaceId) => ({
+        url: `/workspaces/${workspaceId}/accept`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, workspaceId) => [
+        { type: "Workspace", id: workspaceId },
+        { type: "Workspace", id: "LIST" },
+        { type: "Workspace", id: "SHARED" },
+        { type: "Workspace", id: "INVITES" },
+      ],
+    }),
+
+    declineWorkspaceInvitation: builder.mutation<{ success: boolean }, string>({
+      query: (workspaceId) => ({
+        url: `/workspaces/${workspaceId}/decline`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, workspaceId) => [
+        { type: "Workspace", id: workspaceId },
+        { type: "Workspace", id: "SHARED" },
+        { type: "Workspace", id: "INVITES" },
+      ],
+    }),
+
+    getWorkspaceInvitationsSent: builder.query<
+      {
+        result: WorkspaceInvitation[];
+        meta: { total: number; totalPage: number };
+      },
+      { page?: number; limit?: number } | void
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/workspaces/invites/sent",
+        params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      }),
+      transformResponse: (response: {
+        data: WorkspaceInvitation[];
+        meta: { total: number; totalPage: number };
+      }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: [{ type: "Workspace", id: "INVITES" }],
+      keepUnusedDataFor: 0,
+    }),
+
+    getWorkspaceInvitationsReceived: builder.query<
+      {
+        result: WorkspaceInvitation[];
+        meta: { total: number; totalPage: number };
+      },
+      { page?: number; limit?: number } | void
+    >({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: "/workspaces/invites/received",
+        params: { page, limit },
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      }),
+      transformResponse: (response: {
+        data: WorkspaceInvitation[];
+        meta: { total: number; totalPage: number };
+      }) => ({
+        result: response.data,
+        meta: response.meta,
+      }),
+      providesTags: [{ type: "Workspace", id: "INVITES" }],
+      keepUnusedDataFor: 0,
+    }),
+
+    // Phase 5 — Workspace settings, activity, stats, papers, collections
+    getWorkspaceSettings: builder.query<WorkspaceSettings, string>({
+      query: (id) => `/workspaces/${id}/settings`,
+      transformResponse: (response: { data: WorkspaceSettings }) => response.data,
+      providesTags: (_res, _err, id) => [{ type: "Workspace", id: `${id}-settings` }],
+    }),
+
+    updateWorkspaceSettings: builder.mutation<
+      WorkspaceSettings,
+      {
+        id: string;
+        color?: WorkspaceColor;
+        allowExternalSharing?: boolean;
+        allowDownload?: boolean;
+        defaultMemberRole?: "VIEWER" | "EDITOR" | "MANAGER" | "OWNER";
+        requireApprovalForJoin?: boolean;
+        allowMemberInvites?: boolean;
+        allowPublicCollections?: boolean;
+        aiFeaturesEnabled?: boolean;
+        enforce2FAForMembers?: boolean;
+        allowedEmailDomains?: string[];
+      }
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/workspaces/${id}/settings`,
+        method: "PATCH",
+        body,
+      }),
+      transformResponse: (response: { data: WorkspaceSettings }) => response.data,
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-settings` },
+        { type: "Workspace", id },
+      ],
+    }),
+
+    getWorkspaceStats: builder.query<
+      { papers: number; collections: number; members: number; storage: string },
+      string
+    >({
+      query: (id) => `/workspaces/${id}/stats`,
+      transformResponse: (response: { data: any }) => response.data,
+      providesTags: (_res, _err, id) => [{ type: "Workspace", id: `${id}-stats` }],
+    }),
+
+    getWorkspaceActivity: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 30 }) => ({
+        url: `/workspaces/${id}/activity`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-activity` },
+      ],
+    }),
+
+    getWorkspacePapers: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 20 }) => ({
+        url: `/workspaces/${id}/papers`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-papers` },
+      ],
+    }),
+
+    getWorkspaceCollections: builder.query<
+      {
+        result: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      },
+      { id: string; cursor?: string; limit?: number }
+    >({
+      query: ({ id, cursor, limit = 20 }) => ({
+        url: `/workspaces/${id}/collections`,
+        params: { ...(cursor && { cursor }), limit },
+      }),
+      providesTags: (_res, _err, { id }) => [
+        { type: "Workspace", id: `${id}-collections` },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useListWorkspacesQuery,
+  useCreateWorkspaceMutation,
+  useGetWorkspaceQuery,
+  useUpdateWorkspaceMutation,
+  useDeleteWorkspaceMutation,
+  useListMembersQuery,
+  useUpdateMemberRoleMutation,
+  useRemoveMemberMutation,
+  useInviteWorkspaceMemberMutation,
+  useAcceptWorkspaceInvitationMutation,
+  useDeclineWorkspaceInvitationMutation,
+  useGetWorkspaceInvitationsSentQuery,
+  useGetWorkspaceInvitationsReceivedQuery,
+  useGetWorkspaceSettingsQuery,
+  useUpdateWorkspaceSettingsMutation,
+  useGetWorkspaceStatsQuery,
+  useGetWorkspaceActivityQuery,
+  useGetWorkspacePapersQuery,
+  useGetWorkspaceCollectionsQuery,
+} = workspaceApi;

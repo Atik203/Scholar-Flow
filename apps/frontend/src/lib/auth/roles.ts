@@ -6,6 +6,18 @@ export const USER_ROLES = {
   ADMIN: "ADMIN",
 } as const;
 
+/**
+ * Canonical dashboard base path (Phase 3+).
+ * - Admin → /dashboard/admin (admin console)
+ * - Everyone else → /dashboard (shared app home)
+ */
+export const getDashboardBasePath = (role?: string): string => {
+  if (role === USER_ROLES.ADMIN) {
+    return "/dashboard/admin";
+  }
+  return "/dashboard";
+};
+
 export const ROLE_HIERARCHY = {
   RESEARCHER: 1,
   PRO_RESEARCHER: 2,
@@ -39,6 +51,21 @@ export const ROLE_PERMISSIONS = {
     "collection:delete_own",
     "profile:read_own",
     "profile:update_own",
+    "notification:read",
+    "notification:update",
+    "note:read",
+    "note:create",
+    "note:update_own",
+    "note:delete_own",
+    "citation:read",
+    "citation:export",
+    "discussion:read",
+    "discussion:create",
+    "search:read",
+    "search:history",
+    "analytics:read_own",
+    "billing:read_own",
+    "billing:manage_own",
   ],
   PRO_RESEARCHER: [
     "paper:read",
@@ -56,6 +83,24 @@ export const ROLE_PERMISSIONS = {
     "profile:update_own",
     "workspace:create",
     "workspace:join",
+    "notification:read",
+    "notification:update",
+    "note:read",
+    "note:create",
+    "note:update_own",
+    "note:delete_own",
+    "citation:read",
+    "citation:export",
+    "discussion:read",
+    "discussion:create",
+    "search:read",
+    "search:history",
+    "ai:summarize",
+    "ai:chat",
+    "analytics:read_own",
+    "analytics:export",
+    "billing:read_own",
+    "billing:manage_own",
   ],
   TEAM_LEAD: [
     "paper:read",
@@ -81,6 +126,27 @@ export const ROLE_PERMISSIONS = {
     "workspace:join",
     "workspace:manage",
     "user:invite",
+    "notification:read",
+    "notification:update",
+    "note:read",
+    "note:create",
+    "note:update_own",
+    "note:delete_own",
+    "note:read_team",
+    "citation:read",
+    "citation:export",
+    "discussion:read",
+    "discussion:create",
+    "discussion:moderate",
+    "search:read",
+    "search:history",
+    "ai:summarize",
+    "ai:chat",
+    "analytics:read_own",
+    "analytics:read_workspace",
+    "analytics:export",
+    "billing:read_own",
+    "billing:manage_own",
   ],
   ADMIN: [
     "paper:read",
@@ -111,63 +177,37 @@ export const ROLE_PERMISSIONS = {
     "admin:analytics",
     "admin:settings",
     "system:manage",
+    "notification:read",
+    "notification:update",
+    "notification:manage",
+    "note:read",
+    "note:create",
+    "note:update",
+    "note:delete",
+    "citation:read",
+    "citation:export",
+    "citation:manage",
+    "discussion:read",
+    "discussion:create",
+    "discussion:moderate",
+    "discussion:delete",
+    "search:read",
+    "search:history",
+    "search:manage",
+    "ai:summarize",
+    "ai:chat",
+    "ai:manage",
+    "analytics:read_own",
+    "analytics:read_workspace",
+    "analytics:read_all",
+    "analytics:export",
+    "billing:read_own",
+    "billing:manage_own",
+    "billing:manage_all",
   ],
 } as const;
 
 export type UserRole = keyof typeof USER_ROLES;
-
-// Role-based navigation items
-export const getNavigationItems = (userRole?: string) => {
-  const baseItems = [
-    { label: "Dashboard", href: "/dashboard", permission: "dashboard:read" },
-    { label: "Papers", href: "/papers", permission: "paper:read" },
-    {
-      label: "Collections",
-      href: "/collections",
-      permission: "collection:read",
-    },
-  ];
-
-  const proItems = [
-    { label: "Workspaces", href: "/workspaces", permission: "workspace:read" },
-    {
-      label: "Collaboration",
-      href: "/collaborate",
-      permission: "collaboration:join",
-    },
-  ];
-
-  const teamLeadItems = [
-    { label: "Team", href: "/team", permission: "user:read_team" },
-    { label: "Analytics", href: "/analytics", permission: "analytics:read" },
-  ];
-
-  const adminItems = [
-    { label: "Admin", href: "/admin", permission: "admin:dashboard" },
-    { label: "Users", href: "/admin/users", permission: "user:read" },
-    {
-      label: "Settings",
-      href: "/admin/settings",
-      permission: "admin:settings",
-    },
-  ];
-
-  let items = [...baseItems];
-
-  if (hasRoleAccess(userRole, USER_ROLES.PRO_RESEARCHER)) {
-    items = [...items, ...proItems];
-  }
-
-  if (hasRoleAccess(userRole, USER_ROLES.TEAM_LEAD)) {
-    items = [...items, ...teamLeadItems];
-  }
-
-  if (hasRoleAccess(userRole, USER_ROLES.ADMIN)) {
-    items = [...items, ...adminItems];
-  }
-
-  return items;
-};
 
 // Utility functions
 export const hasPermission = (

@@ -5,6 +5,10 @@ import { OAUTH_PROVIDERS, USER_ROLES } from "./auth.constant";
 export const signInSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  twoFactorCode: z
+    .string()
+    .regex(/^\d{6}$/, "twoFactorCode must be a 6-digit code")
+    .optional(),
 });
 
 // OAuth Profile validation
@@ -68,6 +72,10 @@ export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   rememberMe: z.boolean().optional(),
+  twoFactorCode: z
+    .string()
+    .regex(/^\d{6}$/, "twoFactorCode must be a 6-digit code")
+    .optional(),
 });
 
 // Registration validation
@@ -118,6 +126,11 @@ export const passwordResetRequestSchema = z.object({
   email: z.string().email("Invalid email format"),
 });
 
+// Forgot password validation (initiate password reset)
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
 // Password reset validation
 export const passwordResetSchema = z.object({
   token: z.string().min(1, "Reset token is required"),
@@ -128,6 +141,16 @@ export const passwordResetSchema = z.object({
       /^(?=.*[a-z])(?=.*\d)/,
       "Password must contain at least one lowercase letter and one number"
     ),
+});
+
+// Email verification validation
+export const emailVerificationSchema = z.object({
+  token: z.string().min(1, "Verification token is required"),
+});
+
+// Send email verification validation
+export const sendEmailVerificationSchema = z.object({
+  userId: z.string().uuid("Invalid user ID"),
 });
 
 // User creation validation
@@ -191,6 +214,15 @@ export const userFiltersSchema = z.object({
   isDeleted: z.boolean().optional().default(false),
 });
 
+// Magic link validation
+export const magicLinkSendSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+export const magicLinkVerifySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+});
+
 // Export all validation schemas
 export const authValidation = {
   signInRequest: signInSchema,
@@ -204,10 +236,14 @@ export const authValidation = {
   login: loginSchema,
   register: registerSchema,
   passwordChange: passwordChangeSchema,
-  passwordResetRequest: passwordResetRequestSchema,
+  forgotPassword: forgotPasswordSchema,
   passwordReset: passwordResetSchema,
+  emailVerification: emailVerificationSchema,
+  sendEmailVerification: sendEmailVerificationSchema,
   createUser: createUserSchema,
   updateUser: updateUserSchema,
+  magicLinkSend: magicLinkSendSchema,
+  magicLinkVerify: magicLinkVerifySchema,
   jwtPayload: jwtPayloadSchema,
   pagination: paginationSchema,
   userFilters: userFiltersSchema,

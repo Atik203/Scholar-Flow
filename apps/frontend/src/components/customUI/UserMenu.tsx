@@ -9,24 +9,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getDashboardBasePath } from "@/lib/auth/roles";
+import { handleSignOutWithLoading } from "@/lib/auth/signout";
+import { useAuth } from "@/redux/auth/useAuth";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface UserMenuProps {
   className?: string;
 }
 
 export function UserMenu({ className }: UserMenuProps) {
-  const { data: session } = useSession();
-  const router = useRouter();
+  const { session } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (!session?.user) {
     return null;
   }
 
   const { user } = session;
+  const dashboardHref = getDashboardBasePath(user.role);
   const initials = user.name
     ? user.name
         .split(" ")
@@ -36,8 +39,8 @@ export function UserMenu({ className }: UserMenuProps) {
         .slice(0, 2)
     : user.email?.[0]?.toUpperCase() || "U";
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleSignOut = () => {
+    void handleSignOutWithLoading(setIsSigningOut);
   };
 
   return (
@@ -60,7 +63,7 @@ export function UserMenu({ className }: UserMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 mt-2 dark:bg-gray-800 dark:border-gray-700"
+        className="w-72 min-w-[18rem] mt-2 dark:bg-gray-800 dark:border-gray-700"
         align="end"
         forceMount
       >
@@ -93,21 +96,21 @@ export function UserMenu({ className }: UserMenuProps) {
 
         {/* Menu Items */}
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/dashboard" className="flex items-center">
+          <Link href={dashboardHref} className="flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/profile" className="flex items-center">
+          <Link href="/dashboard/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild className="cursor-pointer">
-          <Link href="/settings" className="flex items-center">
+          <Link href="/dashboard/settings" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>
@@ -118,9 +121,10 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuItem
           className="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
           onClick={handleSignOut}
+          disabled={isSigningOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{isSigningOut ? "Signing out..." : "Log out"}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

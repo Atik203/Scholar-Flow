@@ -1,0 +1,637 @@
+/**
+ * Admin Plans / Payments / API Keys / Moderation / Alerts RTK Query slices
+ */
+
+import { apiSlice } from "./apiSlice";
+
+// ============================================================================
+// Plans
+// ============================================================================
+
+export interface AdminPlan {
+  id: string;
+  code: string;
+  name: string;
+  priceCents: number;
+  currency: string;
+  interval: string;
+  stripePriceId: string | null;
+  features: unknown;
+  active: boolean;
+  activeSubscribers: number;
+  canceledSubscribers: number;
+  totalSubscribers: number;
+  monthlyRevenueCents: number;
+}
+
+export const adminPlansApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    listPlans: builder.query<
+      { success: boolean; data: AdminPlan[] },
+      void
+    >({
+      query: () => "/admin/plans",
+      providesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    createPlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      {
+        code: string;
+        name: string;
+        priceCents: number;
+        currency: string;
+        interval: "month" | "year";
+        active?: boolean;
+      }
+    >({
+      query: (body) => ({ url: "/admin/plans", method: "POST", body }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    updatePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      { id: string; patch: Partial<{ code: string; name: string; priceCents: number; currency: string; interval: string; active: boolean }> }
+    >({
+      query: ({ id, patch }) => ({
+        url: `/admin/plans/${id}`,
+        method: "PATCH",
+        body: patch,
+      }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    deletePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      string
+    >({
+      query: (id) => ({ url: `/admin/plans/${id}`, method: "DELETE" }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    togglePlan: builder.mutation<
+      { success: boolean; data: AdminPlan },
+      string
+    >({
+      query: (id) => ({ url: `/admin/plans/${id}/toggle`, method: "POST" }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+  }),
+});
+
+export const {
+  useListPlansQuery,
+  useCreatePlanMutation,
+  useUpdatePlanMutation,
+  useDeletePlanMutation,
+  useTogglePlanMutation,
+} = adminPlansApi;
+
+// ============================================================================
+// Payments
+// ============================================================================
+
+export interface AdminPayment {
+  id: string;
+  userId: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  createdAt: string;
+  provider: string;
+  transactionId: string;
+  user: { id: string; name: string | null; email: string };
+  subscription?: {
+    id: string;
+    plan: { name: string; code: string };
+  };
+}
+
+export const adminPaymentsApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    listPayments: builder.query<
+      {
+        success: boolean;
+        data: AdminPayment[];
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { page?: number; limit?: number; status?: string; provider?: string; search?: string }
+    >({
+      query: (params) => ({ url: "/admin/payments", params }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((p) => ({ type: "Admin" as const, id: `PAYMENT-${p.id}` })),
+              { type: "Admin", id: "PAYMENTS" },
+            ]
+          : [{ type: "Admin", id: "PAYMENTS" }],
+    }),
+
+    refundPayment: builder.mutation<
+      { success: boolean; data: AdminPayment },
+      string
+    >({
+      query: (id) => ({
+        url: `/admin/payments/${id}/refund`,
+        method: "POST",
+      }),
+      // Payment list + revenue analytics both refresh (refunds change both)
+      invalidatesTags: [
+        { type: "Admin", id: "PAYMENTS" },
+        { type: "Admin" },
+      ],
+    }),
+  }),
+});
+
+export const { useListPaymentsQuery, useRefundPaymentMutation } = adminPaymentsApi;
+
+// ============================================================================
+// Subscribers (admin subscription management)
+// ============================================================================
+
+export interface AdminSubscriber {
+  subscriptionId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  planName: string;
+  status: string;
+  seats: number;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  totalSpent: number;
+  lastPaymentDate: string | null;
+}
+
+export const adminSubscribersApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    listSubscribers: builder.query<
+      {
+        success: boolean;
+        data: AdminSubscriber[];
+        meta: { page: number; limit: number; total: number; totalPage: number };
+      },
+      { page?: number; limit?: number; status?: string; planId?: string }
+    >({
+      query: (params) => ({ url: "/admin/subscribers", params }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((s) => ({
+                type: "Admin" as const,
+                id: `SUBSCRIBER-${s.subscriptionId}`,
+              })),
+              { type: "Admin", id: "SUBSCRIBERS" },
+            ]
+          : [{ type: "Admin", id: "SUBSCRIBERS" }],
+    }),
+
+    cancelSubscriberAtPeriodEnd: builder.mutation<
+      { success: boolean },
+      string
+    >({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/cancel-at-period-end`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    reactivateSubscriber: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/reactivate`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    cancelSubscriberNow: builder.mutation<{ success: boolean }, string>({
+      query: (id) => ({
+        url: `/admin/subscribers/${id}/cancel-now`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Admin", id: `SUBSCRIBER-${id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+
+    changeSubscriberPlan: builder.mutation<
+      { success: boolean },
+      { id: string; priceId: string }
+    >({
+      query: ({ id, priceId }) => ({
+        url: `/admin/subscribers/${id}/change-plan`,
+        method: "POST",
+        body: { priceId },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Admin", id: `SUBSCRIBER-${arg.id}` },
+        { type: "Admin", id: "SUBSCRIBERS" },
+        { type: "Admin" },
+      ],
+    }),
+  }),
+});
+
+export const {
+  useListSubscribersQuery,
+  useCancelSubscriberAtPeriodEndMutation,
+  useReactivateSubscriberMutation,
+  useCancelSubscriberNowMutation,
+  useChangeSubscriberPlanMutation,
+} = adminSubscribersApi;
+
+// ============================================================================
+// API Keys
+// ============================================================================
+
+export type ApiKeyStatus = "ACTIVE" | "REVOKED" | "EXPIRED";
+
+export interface AdminApiKey {
+  id: string;
+  name: string;
+  description: string | null;
+  scopes: string[];
+  status: ApiKeyStatus;
+  rateLimit: number;
+  createdById: string;
+  createdAt: string;
+  expiresAt: string | null;
+  lastUsedAt: string | null;
+  totalRequests: number;
+  keyPrefix: string;
+  createdBy?: { id: string; name: string | null; email: string };
+}
+
+export const adminApiKeysApi = apiSlice
+  .injectEndpoints({
+    endpoints: (builder) => ({
+      listApiKeys: builder.query<
+        { success: boolean; data: AdminApiKey[] },
+        void
+      >({
+        query: () => "/admin/api-keys",
+        providesTags: [{ type: "AdminApiKey", id: "LIST" }],
+      }),
+
+      getApiKey: builder.query<
+        { success: boolean; data: AdminApiKey },
+        string
+      >({
+        query: (id) => `/admin/api-keys/${id}`,
+        providesTags: (result, error, id) => [
+          { type: "AdminApiKey", id },
+        ],
+      }),
+
+      createApiKey: builder.mutation<
+        { success: boolean; data: AdminApiKey & { _secret: string } },
+        {
+          name: string;
+          description?: string;
+          scopes?: string[];
+          rateLimit?: number;
+          expiresAt?: string;
+        }
+      >({
+        query: (body) => ({
+          url: "/admin/api-keys",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: [{ type: "AdminApiKey", id: "LIST" }],
+      }),
+
+      updateApiKey: builder.mutation<
+        { success: boolean; data: AdminApiKey },
+        {
+          id: string;
+          patch: {
+            name?: string;
+            description?: string;
+            scopes?: string[];
+            rateLimit?: number;
+            status?: ApiKeyStatus;
+          };
+        }
+      >({
+        query: ({ id, patch }) => ({
+          url: `/admin/api-keys/${id}`,
+          method: "PATCH",
+          body: patch,
+        }),
+        invalidatesTags: (result, error, arg) => [
+          { type: "AdminApiKey", id: arg.id },
+          { type: "AdminApiKey", id: "LIST" },
+        ],
+      }),
+
+      revokeApiKey: builder.mutation<
+        { success: boolean; data: AdminApiKey },
+        string
+      >({
+        query: (id) => ({
+          url: `/admin/api-keys/${id}/revoke`,
+          method: "POST",
+        }),
+        invalidatesTags: [{ type: "AdminApiKey", id: "LIST" }],
+      }),
+
+      deleteApiKey: builder.mutation<
+        { success: boolean; data: { id: string } },
+        string
+      >({
+        query: (id) => ({
+          url: `/admin/api-keys/${id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: [{ type: "AdminApiKey", id: "LIST" }],
+      }),
+    }),
+  });
+
+export const {
+  useListApiKeysQuery,
+  useGetApiKeyQuery,
+  useCreateApiKeyMutation,
+  useUpdateApiKeyMutation,
+  useRevokeApiKeyMutation,
+  useDeleteApiKeyMutation,
+} = adminApiKeysApi;
+
+// ============================================================================
+// Moderation
+// ============================================================================
+
+export type ContentReportType = "PAPER" | "COMMENT" | "COLLECTION" | "PROFILE";
+export type ContentReportReason =
+  | "SPAM"
+  | "HARASSMENT"
+  | "COPYRIGHT"
+  | "INAPPROPRIATE"
+  | "MISINFORMATION"
+  | "OTHER";
+export type ContentReportStatus =
+  | "PENDING"
+  | "UNDER_REVIEW"
+  | "RESOLVED"
+  | "DISMISSED";
+
+export interface ContentReport {
+  id: string;
+  contentType: ContentReportType;
+  contentId: string;
+  contentTitle: string | null;
+  contentPreview: string | null;
+  reporterId: string;
+  reason: ContentReportReason;
+  description: string | null;
+  status: ContentReportStatus;
+  assignedToId: string | null;
+  resolvedAt: string | null;
+  resolvedById: string | null;
+  action: string | null;
+  createdAt: string;
+  updatedAt: string;
+  reporter?: { id: string; name: string | null; email: string };
+  assignedTo?: { id: string; name: string | null; email: string } | null;
+  resolvedBy?: { id: string; name: string | null; email: string } | null;
+}
+
+export const adminModerationApi = apiSlice
+  .injectEndpoints({
+    endpoints: (builder) => ({
+      listContentReports: builder.query<
+        {
+          success: boolean;
+          data: ContentReport[];
+          meta: { page: number; limit: number; total: number; totalPage: number };
+        },
+        {
+          status?: ContentReportStatus;
+          contentType?: ContentReportType;
+          assignedToId?: string;
+          page?: number;
+          limit?: number;
+        }
+      >({
+        query: (params) => ({ url: "/admin/moderation/reports", params }),
+        providesTags: (result) =>
+          result?.data
+            ? [
+                ...result.data.map((r) => ({
+                  type: "AdminModeration" as const,
+                  id: r.id,
+                })),
+                { type: "AdminModeration", id: "LIST" },
+              ]
+            : [{ type: "AdminModeration", id: "LIST" }],
+      }),
+
+      getContentReport: builder.query<
+        { success: boolean; data: ContentReport },
+        string
+      >({
+        query: (id) => `/admin/moderation/reports/${id}`,
+        providesTags: (result, error, id) => [
+          { type: "AdminModeration", id },
+        ],
+      }),
+
+      assignReport: builder.mutation<
+        { success: boolean; data: ContentReport },
+        { id: string; assignedToId: string }
+      >({
+        query: ({ id, assignedToId }) => ({
+          url: `/admin/moderation/reports/${id}/assign`,
+          method: "POST",
+          body: { assignedToId },
+        }),
+        invalidatesTags: (result, error, arg) => [
+          { type: "AdminModeration", id: arg.id },
+          { type: "AdminModeration", id: "LIST" },
+        ],
+      }),
+
+      resolveReport: builder.mutation<
+        { success: boolean; data: ContentReport },
+        { id: string; action: "approved" | "removed" | "warning" | "suspended" }
+      >({
+        query: ({ id, action }) => ({
+          url: `/admin/moderation/reports/${id}/resolve`,
+          method: "POST",
+          body: { action },
+        }),
+        invalidatesTags: (result, error, arg) => [
+          { type: "AdminModeration", id: arg.id },
+          { type: "AdminModeration", id: "LIST" },
+        ],
+      }),
+
+      dismissReport: builder.mutation<
+        { success: boolean; data: ContentReport },
+        string
+      >({
+        query: (id) => ({
+          url: `/admin/moderation/reports/${id}/dismiss`,
+          method: "POST",
+        }),
+        invalidatesTags: (result, error, id) => [
+          { type: "AdminModeration", id },
+          { type: "AdminModeration", id: "LIST" },
+        ],
+      }),
+
+      fileReport: builder.mutation<
+        { success: boolean; data: ContentReport },
+        {
+          contentType: ContentReportType;
+          contentId: string;
+          contentTitle?: string;
+          contentPreview?: string;
+          reason: ContentReportReason;
+          description?: string;
+        }
+      >({
+        query: (body) => ({
+          url: "/admin/moderation/reports",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: [{ type: "AdminModeration", id: "LIST" }],
+      }),
+    }),
+  });
+
+export const {
+  useListContentReportsQuery,
+  useGetContentReportQuery,
+  useAssignReportMutation,
+  useResolveReportMutation,
+  useDismissReportMutation,
+  useFileReportMutation,
+} = adminModerationApi;
+
+// ============================================================================
+// System Alerts
+// ============================================================================
+
+export type SystemAlertSeverity = "INFO" | "WARNING" | "CRITICAL";
+export type SystemAlertCategory =
+  | "USER"
+  | "BILLING"
+  | "SECURITY"
+  | "STORAGE"
+  | "PROCESSING"
+  | "SYSTEM";
+
+export interface SystemAlert {
+  id: string;
+  category: SystemAlertCategory;
+  severity: SystemAlertSeverity;
+  title: string;
+  message: string;
+  metadata: Record<string, unknown> | null;
+  resolved: boolean;
+  resolvedAt: string | null;
+  resolvedById: string | null;
+  createdAt: string;
+  resolvedBy?: { id: string; name: string | null; email: string } | null;
+}
+
+export const systemAlertsApi = apiSlice
+  .injectEndpoints({
+    endpoints: (builder) => ({
+      listAlerts: builder.query<
+        {
+          success: boolean;
+          data: SystemAlert[];
+          meta: { page: number; limit: number; total: number; totalPage: number };
+          summary: { unresolved: number; critical: number };
+        },
+        {
+          category?: SystemAlertCategory;
+          severity?: SystemAlertSeverity;
+          resolved?: boolean;
+          page?: number;
+          limit?: number;
+        }
+      >({
+        query: (params) => ({ url: "/admin/alerts", params }),
+        providesTags: (result) =>
+          result?.data
+            ? [
+                ...result.data.map((a) => ({
+                  type: "SystemAlert" as const,
+                  id: a.id,
+                })),
+                { type: "SystemAlert", id: "LIST" },
+              ]
+            : [{ type: "SystemAlert", id: "LIST" }],
+      }),
+
+      getAlertCounts: builder.query<
+        {
+          success: boolean;
+          data: { unresolved: number; critical: number; info: number; warning: number };
+        },
+        void
+      >({
+        query: () => "/admin/alerts/counts",
+        providesTags: [{ type: "SystemAlert", id: "COUNTS" }],
+      }),
+
+      resolveAlert: builder.mutation<
+        { success: boolean; data: SystemAlert },
+        string
+      >({
+        query: (id) => ({
+          url: `/admin/alerts/${id}/resolve`,
+          method: "POST",
+        }),
+        invalidatesTags: (result, error, id) => [
+          { type: "SystemAlert", id },
+          { type: "SystemAlert", id: "LIST" },
+          { type: "SystemAlert", id: "COUNTS" },
+        ],
+      }),
+
+      createAlert: builder.mutation<
+        { success: boolean; data: SystemAlert },
+        {
+          category: SystemAlertCategory;
+          severity: SystemAlertSeverity;
+          title: string;
+          message: string;
+          metadata?: Record<string, unknown>;
+        }
+      >({
+        query: (body) => ({
+          url: "/admin/alerts",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: [{ type: "SystemAlert", id: "LIST" }],
+      }),
+    }),
+  });
+
+export const {
+  useListAlertsQuery,
+  useGetAlertCountsQuery,
+  useResolveAlertMutation,
+  useCreateAlertMutation,
+} = systemAlertsApi;

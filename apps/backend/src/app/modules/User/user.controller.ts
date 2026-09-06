@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import ApiError from "../../errors/ApiError";
 import { IAuthUser } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
+import { AsyncRequestHandler } from "../../types/express";
 import { userService } from "./user.service";
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
@@ -36,6 +38,25 @@ const getMyProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new Error(
+      "User authentication failed: user object is missing or invalid"
+    );
+  }
+
+  const result = await userService.updateProfile(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile updated successfully!",
+    data: result,
+  });
+});
+
 const changePassword = catchAsync(async (req: Request, res: Response) => {
   const user = (req as any).user as IAuthUser;
   await userService.changePassword(user, req.body);
@@ -48,8 +69,277 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const userController = {
+const deleteAccount = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new Error(
+      "User authentication failed: user object is missing or invalid"
+    );
+  }
+
+  const result = await userService.deleteAccount(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Account deleted successfully!",
+    data: result,
+  });
+});
+
+const uploadProfilePicture = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  if (!req.file) {
+    throw new ApiError(400, "Profile picture file is required");
+  }
+
+  // Validate file type
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+  ];
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    throw new ApiError(
+      400,
+      "Invalid file type. Only JPEG, PNG, and WebP images are allowed"
+    );
+  }
+
+  // Validate file size (max 5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (req.file.size > maxSize) {
+    throw new ApiError(400, "File size too large. Maximum size is 5MB");
+  }
+
+  const result = await userService.uploadProfilePicture(user, req.file);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile picture uploaded successfully!",
+    data: result,
+  });
+});
+
+const getUserAnalytics = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+
+  if (!user || !user.id) {
+    throw new ApiError(401, "User authentication failed");
+  }
+
+  const result = await userService.getUserAnalytics(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User analytics retrieved successfully!",
+    data: result,
+  });
+});
+
+const updateOnboarding = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updateOnboarding(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Onboarding status updated successfully!",
+    data: result,
+  });
+});
+
+const getPreferences = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getPreferences(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Preferences retrieved successfully!",
+    data: result,
+  });
+});
+
+const updatePreferences = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updatePreferences(user, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Preferences updated successfully!",
+    data: result,
+  });
+});
+
+const getActivity = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const options = {
+    page: Number(req.query.page) || 1,
+    limit: Number(req.query.limit) || 10,
+  };
+  const result = await userService.getActivity(user, options);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Activity retrieved successfully!",
+    data: result.result,
+    meta: result.meta,
+  });
+});
+
+const exportData = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const { format } = req.body as { format: "csv" | "json" };
+  const result = await userService.exportData(user.id, format || "csv");
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Data exported successfully",
+    data: result,
+  });
+});
+
+const getSessions = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getSessions(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Sessions retrieved successfully",
+    data: result,
+  });
+});
+
+const terminateSession = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.terminateSession(user.id, req.params.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Session terminated successfully",
+    data: result,
+  });
+});
+
+const getTwoFactorStatus = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getTwoFactorStatus(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA status retrieved",
+    data: result,
+  });
+});
+
+const generateTwoFactorSecret = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.generateTwoFactor(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA secret generated",
+    data: result,
+  });
+});
+
+const verifyTwoFactor = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const { code } = req.body as { code: string };
+  const result = await userService.verifyTwoFactor(user.id, code);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA verified successfully",
+    data: result,
+  });
+});
+
+const disableTwoFactor = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.disableTwoFactor(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "2FA disabled successfully",
+    data: result,
+  });
+});
+
+const getPrivacySettings = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.getPrivacySettings(user.id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Privacy settings retrieved",
+    data: result,
+  });
+});
+
+const updatePrivacySettings = catchAsync(async (req: Request, res: Response) => {
+  const user = (req as any).user as IAuthUser;
+  const result = await userService.updatePrivacySettings(user.id, req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Privacy settings updated",
+    data: result,
+  });
+});
+
+export const userController: {
+  getAllFromDB: AsyncRequestHandler;
+  getMyProfile: AsyncRequestHandler;
+  updateProfile: AsyncRequestHandler;
+  changePassword: AsyncRequestHandler;
+  deleteAccount: AsyncRequestHandler;
+  uploadProfilePicture: AsyncRequestHandler;
+  getUserAnalytics: AsyncRequestHandler;
+  updateOnboarding: AsyncRequestHandler;
+  getPreferences: AsyncRequestHandler;
+  updatePreferences: AsyncRequestHandler;
+  getActivity: AsyncRequestHandler;
+  exportData: AsyncRequestHandler;
+  getSessions: AsyncRequestHandler;
+  terminateSession: AsyncRequestHandler;
+  getTwoFactorStatus: AsyncRequestHandler;
+  generateTwoFactorSecret: AsyncRequestHandler;
+  verifyTwoFactor: AsyncRequestHandler;
+  disableTwoFactor: AsyncRequestHandler;
+  getPrivacySettings: AsyncRequestHandler;
+  updatePrivacySettings: AsyncRequestHandler;
+} = {
   getAllFromDB,
   getMyProfile,
+  updateProfile,
   changePassword,
+  deleteAccount,
+  uploadProfilePicture,
+  getUserAnalytics,
+  updateOnboarding,
+  getPreferences,
+  updatePreferences,
+  getActivity,
+  exportData,
+  getSessions,
+  terminateSession,
+  getTwoFactorStatus,
+  generateTwoFactorSecret,
+  verifyTwoFactor,
+  disableTwoFactor,
+  getPrivacySettings,
+  updatePrivacySettings,
 };

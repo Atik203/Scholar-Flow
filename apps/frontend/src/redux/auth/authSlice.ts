@@ -1,33 +1,84 @@
+/**
+ * Simple, production-grade auth slice with Redux Persist
+ * Replaces NextAuth for reliable client-side session management
+ */
+
+import type { TUser } from "@/types/user";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { TUser } from "../../types/user";
+import { clearAuthCookie, setAuthCookie } from "@/lib/auth/authCookies";
 
 export interface AuthState {
   user: TUser | null;
   accessToken: string | null;
+  // Opaque backend session token returned at sign-in; used to identify the
+  // current device row on the Active Sessions page.
+  sessionToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
   accessToken: null,
+  sessionToken: null,
+  isAuthenticated: false,
+  isLoading: true, // Start true for hydration check
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setCredentials(
+    setCredentials: (
       state,
-      action: PayloadAction<{ user: TUser; accessToken: string }>
-    ) {
+      action: PayloadAction<{
+        user: TUser;
+        accessToken: string;
+        sessionToken?: string | null;
+      }>
+    ) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
+      state.sessionToken = action.payload.sessionToken ?? null;
+      state.isAuthenticated = true;
+      state.isLoading = false;
+      // Set lightweight cookie so Next.js proxy can detect auth
+      setAuthCookie();
     },
-    clearCredentials(state) {
+    clearCredentials: (state) => {
       state.user = null;
       state.accessToken = null;
+      state.sessionToken = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+      // Clear the proxy auth cookie
+      clearAuthCookie();
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    // Update user profile without changing token
+    updateUser: (state, action: PayloadAction<Partial<TUser>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     },
   },
 });
 
-export const { setCredentials, clearCredentials } = authSlice.actions;
+export const { setCredentials, clearCredentials, setLoading, updateUser } =
+  authSlice.actions;
+
 export default authSlice.reducer;
+
+// Selectors
+export const selectCurrentUser = (state: { auth: AuthState }) =>
+  state.auth.user;
+export const selectAccessToken = (state: { auth: AuthState }) =>
+  state.auth.accessToken;
+export const selectSessionToken = (state: { auth: AuthState }) =>
+  state.auth.sessionToken;
+export const selectIsAuthenticated = (state: { auth: AuthState }) =>
+  state.auth.isAuthenticated;
+export const selectAuthLoading = (state: { auth: AuthState }) =>
+  state.auth.isLoading;
