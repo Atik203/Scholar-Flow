@@ -452,6 +452,9 @@ export function isAllowedUri(
   uri: string | undefined,
   protocols?: ProtocolConfig
 ) {
+  const escapeRegExp = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
   const allowedProtocols: string[] = [
     "http",
     "https",
@@ -482,7 +485,7 @@ export function isAllowedUri(
       .replace(ATTR_WHITESPACE, "")
       .match(
         new RegExp(
-          `^(?:(?:${allowedProtocols.join("|")}):|[^a-z]|[a-z0-9+.-]+(?:[^a-z+.:-]|$))`,
+          `^(?:(?:${allowedProtocols.map(escapeRegExp).join("|")}):|[^a-z]|[a-z0-9+.-]+(?:[^a-z+.:-]|$))`,
           "i"
         )
       )
