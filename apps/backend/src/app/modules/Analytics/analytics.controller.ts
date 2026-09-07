@@ -57,6 +57,19 @@ export const analyticsController = {
     sendSuccessResponse(res, session, "Reading session stopped");
   }),
 
+  recordPaperView: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const paperId = req.body?.paperId ? String(req.body.paperId) : undefined;
+    if (!paperId) throw new ApiError(400, "paperId is required");
+
+    const event = await personalAnalyticsService.recordPaperView(
+      authReq.user.id,
+      paperId
+    );
+    sendSuccessResponse(res, event, "Paper view recorded");
+  }),
+
   workspace: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
