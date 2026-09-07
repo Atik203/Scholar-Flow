@@ -5,12 +5,14 @@ export interface ImportResult {
   source: string;
   externalId?: string;
   hasPdf?: boolean;
+  alreadyImported?: boolean;
 }
 
 export interface SmartImportResult {
   id: string;
   title: string;
-  hasPdf: boolean;
+  hasPdf?: boolean;
+  alreadyImported?: boolean;
 }
 
 export interface ImportHistoryItem {
