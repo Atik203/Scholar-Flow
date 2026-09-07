@@ -135,6 +135,18 @@ export const analyticsApi = apiSlice
         invalidatesTags: ["Analytics"],
       }),
 
+      recordPaperView: builder.mutation<
+        { success: boolean; data: unknown },
+        { paperId: string }
+      >({
+        query: (body) => ({
+          url: "/analytics/personal/view",
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: ["Analytics"],
+      }),
+
       getWorkspaceAnalytics: builder.query<
         { success: boolean; message: string; data: WorkspaceAnalyticsSummary },
         { workspaceId: string; timeRange?: AnalyticsTimeRange }
@@ -194,6 +206,7 @@ export const {
   useGetPersonalAnalyticsQuery,
   useStartReadingSessionMutation,
   useStopReadingSessionMutation,
+  useRecordPaperViewMutation,
   useGetWorkspaceAnalyticsQuery,
   useGetUsageReportQuery,
   useGetAiUsageQuery,
