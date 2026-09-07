@@ -1585,6 +1585,12 @@ export const collectionController = {
           NOW(),
           false
         )
+        ON CONFLICT ("collectionId", "paperId")
+        DO UPDATE SET
+          "isDeleted" = false,
+          "addedById" = ${userId},
+          "addedAt" = NOW(),
+          "updatedAt" = NOW()
         RETURNING id, "collectionId", "paperId", "addedById", "addedAt", "createdAt", "updatedAt"
       )
       SELECT
