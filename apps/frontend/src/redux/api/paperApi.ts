@@ -219,6 +219,13 @@ export interface PublishDraftRequest {
   abstract?: string;
 }
 
+export interface PaperShareItem {
+  id: string;
+  email: string;
+  permission: string;
+  createdAt: string;
+}
+
 export interface ShareViaEmailRequest {
   paperId: string;
   recipientEmail: string;
@@ -606,6 +613,24 @@ export const paperApi = apiSlice.injectEndpoints({
           permission: string;
         };
       },
+      invalidatesTags: [{ type: "PaperShare", id: "LIST" }],
+    }),
+
+    getPaperShares: builder.query<PaperShareItem[], string>({
+      query: (paperId) => `/papers/${paperId}/shares`,
+      transformResponse: (res: { data: PaperShareItem[] }) => res.data,
+      providesTags: [{ type: "PaperShare", id: "LIST" }],
+    }),
+
+    revokePaperShare: builder.mutation<
+      { id: string; revoked: boolean },
+      string
+    >({
+      query: (shareId) => ({
+        url: `/papers/shares/${shareId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "PaperShare", id: "LIST" }],
     }),
 
     generatePaperSummary: builder.mutation<
@@ -853,6 +878,8 @@ export const {
   useExportPaperDocxMutation,
   useUploadImageForEditorMutation,
   useShareViaEmailMutation,
+  useGetPaperSharesQuery,
+  useRevokePaperShareMutation,
   useGeneratePaperSummaryMutation,
   // AI Insights endpoints
   useGeneratePaperInsightMutation,
