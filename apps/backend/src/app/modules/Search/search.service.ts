@@ -264,6 +264,58 @@ async function fetchArxivFeed(
     .slice(0, limit);
 }
 
+/**
+ * arXiv keyword search (relevance-sorted) — powers personalized
+ * recommendations when the user has interest keywords.
+ */
+async function fetchArxivSearch(
+  keyword: string,
+  limit: number,
+  reason?: string
+): Promise<DiscoveryItem[]> {
+  const url =
+    `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(keyword)}` +
+    `&start=0&max_results=${limit}&sortBy=relevance`;
+  const cacheKey = `arxiv-search:${keyword.toLowerCase()}:${limit}`;
+  const xml = await cachedExternalJson<string>(cacheKey, url);
+  if (!xml) return [];
+
+  return parseArxivEntries(xml)
+    .map((entry: ArxivEntry): DiscoveryItem => ({
+      kind: "external",
+      id: entry.id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf)\//i, ""),
+      externalUrl: entry.id,
+      title: entry.title,
+      abstract: entry.summary || null,
+      source: "arxiv",
+      citationCount: null,
+      publishedAt: entry.published || null,
+      authors: entry.authors,
+      reason: reason ?? undefined,
+    }))
+    .slice(0, limit);
+}
+
+/**
+ * OpenAlex keyword search (relevance-sorted) — secondary personalized
+ * signal when arXiv returns nothing for a keyword.
+ */
+async function fetchOpenAlexSearch(
+  keyword: string,
+  limit: number,
+  reason?: string
+): Promise<DiscoveryItem[]> {
+  const url =
+    `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}` +
+    `&per-page=${Math.min(limit, 25)}&sort=relevance_score:desc`;
+  const cacheKey = `openalex-search:${keyword.toLowerCase()}:${limit}`;
+  const data = await cachedExternalJson<{ results?: OpenAlexWork[] }>(cacheKey, url);
+  return (data?.results ?? [])
+    .filter((w) => w?.title)
+    .map((w) => mapOpenAlexWork(w, reason))
+    .slice(0, limit);
+}
+
 function daysAgo(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() - days);
@@ -899,36 +951,110 @@ export class SearchService {
   }
 
   /**
-   * Get personalized recommendations — papers the user can access,
-   * newest first. Same access scope as getTrendingPapers.
+   * Get personalized recommendations for a user.
+   *
+   * Personalization signal: the user's top interest keywords, derived from
+   * tags + metadata.keywords across their accessible (non-deleted) papers.
+   * External arXiv/OpenAlex searches are performed per keyword with a
+   * "Because you work on X" reason; if the user has no interests yet, or
+   * every upstream call fails (cached/fallback safe), return accessible
+   * platform papers newest-first so the page is never empty.
    */
   static async getRecommendations(userId: string, limit: number) {
-    return prisma.paper.findMany({
-      where: {
-        isDeleted: false,
-        OR: [
-          { uploaderId: userId },
-          {
-            workspace: {
-              isDeleted: false,
-              OR: [
-                { ownerId: userId },
-                { members: { some: { userId, isDeleted: false } } },
-              ],
-            },
+    const cap = Math.min(20, Math.max(1, limit));
+
+    const accessibleWhere = {
+      isDeleted: false,
+      OR: [
+        { uploaderId: userId },
+        {
+          workspace: {
+            isDeleted: false,
+            OR: [
+              { ownerId: userId },
+              { members: { some: { userId, isDeleted: false } } },
+            ],
           },
-        ],
-      },
-      take: limit,
+        },
+      ],
+    };
+
+    const recent = await prisma.paper.findMany({
+      where: accessibleWhere,
+      take: 50,
       orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        abstract: true,
-        source: true,
-        createdAt: true,
-      },
+      select: { tags: true, metadata: true },
     });
+
+    const freq = new Map<string, number>();
+    for (const paper of recent) {
+      for (const tag of paper.tags ?? []) {
+        const key = tag.toLowerCase().trim();
+        if (key.length >= 3) freq.set(key, (freq.get(key) ?? 0) + 1);
+      }
+      const keywords = (paper.metadata as { keywords?: unknown } | null)?.keywords;
+      if (Array.isArray(keywords)) {
+        for (const k of keywords.slice(0, 10)) {
+          if (typeof k !== "string") continue;
+          const key = k.toLowerCase().trim();
+          if (key.length >= 3) freq.set(key, (freq.get(key) ?? 0) + 1);
+        }
+      }
+    }
+
+    const interests = [...freq.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([keyword]) => keyword);
+
+    if (interests.length > 0) {
+      const perKeyword = Math.max(1, Math.ceil((cap * 0.6) / interests.length));
+      const out: DiscoveryItem[] = [];
+      const seen = new Set<string>();
+
+      for (const keyword of interests) {
+        const reason = `Because you work on "${keyword}"`;
+        let items: DiscoveryItem[] = [];
+        try {
+          items = await fetchArxivSearch(keyword, perKeyword, reason);
+        } catch {
+          items = [];
+        }
+        if (items.length === 0) {
+          try {
+            items = await fetchOpenAlexSearch(keyword, perKeyword, reason);
+          } catch {
+            items = [];
+          }
+        }
+        for (const item of items) {
+          if (seen.has(item.id)) continue;
+          seen.add(item.id);
+          out.push(item);
+        }
+      }
+
+      if (out.length > 0) return out.slice(0, cap);
+    }
+
+    // No interests or all upstream calls failed → platform fallback
+    // (previous behavior: newest accessible papers).
+    const platform = (
+      await prisma.paper.findMany({
+        where: accessibleWhere,
+        take: cap,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          source: true,
+          createdAt: true,
+        },
+      })
+    ).map(toPlatformDiscoveryItem);
+
+    return platform;
   }
 
   /**
