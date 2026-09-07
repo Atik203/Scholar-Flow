@@ -10,6 +10,394 @@ export type GlobalSearchType =
   | "notes"
   | "people";
 
+/**
+ * Discovery feed item — either a platform paper (kind "platform", points at
+ * /dashboard/papers/[paperId]) or a live external record from arXiv/OpenAlex
+ * (kind "external", opens externalUrl).
+ */
+export interface DiscoveryItem {
+  kind: "platform" | "external";
+  /** Platform paper id (platform items) or a stable external id (DOI/arXiv). */
+  id: string;
+  paperId?: string;
+  externalUrl?: string;
+  title: string;
+  abstract?: string | null;
+  source?: string | null;
+  citationCount?: number | null;
+  publishedAt?: string | null;
+  authors?: string[];
+  reason?: string;
+}
+
+/**
+ * Live external APIs (arXiv export API + OpenAlex) are free, keyless, and
+ * rate-friendly — but must NEVER be hammered per request. Module-level TTL
+ * cache keeps each feed at most one upstream call per 10 minutes.
+ */
+const EXTERNAL_CACHE_TTL_MS = 10 * 60 * 1000;
+const EXTERNAL_FETCH_TIMEOUT_MS = 10000;
+const externalCache = new Map<string, { at: number; data: unknown }>();
+
+function decodeXmlEntities(input: string): string {
+  return input
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#(\d+);/g, (_, code: string) =>
+      String.fromCharCode(parseInt(code, 10))
+    );
+}
+
+async function fetchWithTimeout(
+  url: string,
+  timeoutMs = EXTERNAL_FETCH_TIMEOUT_MS,
+  headers?: Record<string, string>
+): Promise<Response | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal, headers });
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Cached JSON GET against a free external API. Returns null on any failure
+ * (timeout, non-2xx, invalid JSON) — callers must degrade gracefully.
+ */
+async function cachedExternalJson<T>(
+  cacheKey: string,
+  url: string,
+  ttlMs = EXTERNAL_CACHE_TTL_MS
+): Promise<T | null> {
+  const hit = externalCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < ttlMs) return hit.data as T;
+
+  const res = await fetchWithTimeout(url);
+  if (!res || !res.ok) return null;
+
+  let data: T;
+  try {
+    data = (await res.json()) as T;
+  } catch {
+    return null;
+  }
+  externalCache.set(cacheKey, { at: Date.now(), data });
+  return data;
+}
+
+/**
+ * Cached plain-text GET (arXiv returns Atom XML, not JSON — the json
+ * variant throws on it). Returns null on any failure; callers degrade.
+ */
+async function cachedExternalText(
+  cacheKey: string,
+  url: string,
+  ttlMs = EXTERNAL_CACHE_TTL_MS
+): Promise<string | null> {
+  const hit = externalCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < ttlMs) return hit.data as string;
+
+  const res = await fetchWithTimeout(url);
+  if (!res || !res.ok) return null;
+
+  let text: string;
+  try {
+    text = await res.text();
+  } catch {
+    return null;
+  }
+  externalCache.set(cacheKey, { at: Date.now(), data: text });
+  return text;
+}
+
+/**
+ * arXiv export API returns Atom XML with a feed-level <title> ("arXiv Query:
+ * ...") before the entries — every field is parsed from <entry> blocks only,
+ * mirroring the single-entry parser in the Import module.
+ */
+function parseArxivEntries(
+  xml: string
+): Array<{
+  id: string;
+  title: string;
+  summary: string;
+  published: string;
+  authors: string[];
+}> {
+  const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) ?? [];
+  const results: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    published: string;
+    authors: string[];
+  }> = [];
+
+  for (const entry of entries) {
+    const content = (tag: string): string => {
+      const m = entry.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
+      if (!m) return "";
+      return decodeXmlEntities(m[1].replace(/<[^>]*>/g, " "))
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+    const id = content("id");
+    const title = content("title");
+    if (!id || !title) continue;
+
+    const authorMatches = entry.matchAll(
+      /<author>[\s\S]*?<name[^>]*>(.*?)<\/name>[\s\S]*?<\/author>/g
+    );
+    const authors = [...authorMatches]
+      .map((m) => decodeXmlEntities(m[1].replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim())
+      .filter(Boolean);
+
+    results.push({
+      id,
+      title,
+      summary: content("summary"),
+      published: content("published"),
+      authors,
+    });
+  }
+  return results;
+}
+
+/**
+ * OpenAlex stores abstracts as an inverted index — reconstruct the plain
+ * text by unshuffling word positions (cheap, no dependency).
+ */
+function reconstructOpenAlexAbstract(
+  inverted: Record<string, number[]> | undefined
+): string | null {
+  if (!inverted) return null;
+  const words: string[] = [];
+  for (const [word, positions] of Object.entries(inverted)) {
+    for (const pos of positions) words[pos] = word;
+  }
+  return words.join(" ").trim() || null;
+}
+
+interface OpenAlexWork {
+  id?: string;
+  doi?: string | null;
+  title?: string | null;
+  abstract_inverted_index?: Record<string, number[]> | null;
+  publication_date?: string | null;
+  cited_by_count?: number | null;
+  primary_location?: { landing_page_url?: string | null } | null;
+  landing_page_url?: string | null;
+  authorships?: Array<{ author?: { display_name?: string | null } | null } | null>;
+}
+
+function mapOpenAlexWork(work: OpenAlexWork, reason?: string): DiscoveryItem {
+  const doi = work.doi?.replace(/^https?:\/\/doi\.org\//i, "") ?? null;
+  const authors = (work.authorships ?? [])
+    .map((a) => a?.author?.display_name)
+    .filter((n): n is string => Boolean(n));
+  return {
+    kind: "external",
+    id: doi ?? work.id ?? work.title ?? "openalex",
+    externalUrl:
+      work.primary_location?.landing_page_url ??
+      work.landing_page_url ??
+      (doi ? `https://doi.org/${doi}` : undefined),
+    title: work.title ?? "Untitled work",
+    abstract: reconstructOpenAlexAbstract(work.abstract_inverted_index ?? undefined),
+    source: "openalex",
+    citationCount: work.cited_by_count ?? null,
+    publishedAt: work.publication_date ?? null,
+    authors,
+    reason,
+  };
+}
+
+/**
+ * Latest live papers from OpenAlex: recent journal articles sorted by
+ * citation count. Free, keyless, cached — the primary trending signal.
+ */
+async function fetchOpenAlexRecent(limit: number): Promise<DiscoveryItem[]> {
+  const perPage = Math.min(limit, 25);
+  const url =
+    `https://api.openalex.org/works?filter=from_publication_date:${daysAgo(30)},type:article` +
+    `&sort=cited_by_count:desc&per-page=${perPage}`;
+  const data = await cachedExternalJson<{ results?: OpenAlexWork[] }>("openalex-recent", url);
+  if (!data?.results?.length) return [];
+  const seen = new Set<string>();
+  const items: DiscoveryItem[] = [];
+  for (const work of data.results) {
+    if (!work?.title) continue;
+    const key = work.doi ?? work.title;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    items.push(mapOpenAlexWork(work));
+  }
+  return items.slice(0, limit);
+}
+
+interface ArxivEntry {
+  id: string;
+  title: string;
+  summary: string;
+  published: string;
+  authors: string[];
+}
+
+/**
+ * Live arXiv feed. category is an uppercase arXiv category (e.g. "cs.AI",
+ * "stat.ML") or null for a general recent-submissions feed. start/maxResults
+ * power pagination on the Explore page.
+ */
+async function fetchArxivFeed(
+  category: string | null,
+  start: number,
+  limit: number
+): Promise<DiscoveryItem[]> {
+  const query = category
+    ? `search_query=cat:${encodeURIComponent(category)}`
+    : "search_query=all:electron&sortBy=submittedDate&sortOrder=descending";
+  const url =
+    category
+      ? `https://export.arxiv.org/api/query?${query}&start=${start}&max_results=${limit}&sortBy=submittedDate&sortOrder=descending`
+      : `https://export.arxiv.org/api/query?${query}`;
+  const cacheKey = `arxiv:${category ?? "recent"}:${start}:${limit}`;
+  const xml = await cachedExternalText(cacheKey, url);
+  if (!xml) return [];
+
+  return parseArxivEntries(xml)
+    .map((entry: ArxivEntry): DiscoveryItem => ({
+      kind: "external",
+      id: entry.id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf)\//i, ""),
+      externalUrl: entry.id,
+      title: entry.title,
+      abstract: entry.summary || null,
+      source: "arxiv",
+      citationCount: null,
+      publishedAt: entry.published || null,
+      authors: entry.authors,
+    }))
+    .slice(0, limit);
+}
+
+/**
+ * arXiv keyword search (relevance-sorted) — powers personalized
+ * recommendations when the user has interest keywords.
+ */
+async function fetchArxivSearch(
+  keyword: string,
+  limit: number,
+  reason?: string
+): Promise<DiscoveryItem[]> {
+  const url =
+    `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(keyword)}` +
+    `&start=0&max_results=${limit}&sortBy=relevance`;
+  const cacheKey = `arxiv-search:${keyword.toLowerCase()}:${limit}`;
+  const xml = await cachedExternalText(cacheKey, url);
+  if (!xml) return [];
+
+  return parseArxivEntries(xml)
+    .map((entry: ArxivEntry): DiscoveryItem => ({
+      kind: "external",
+      id: entry.id.replace(/^https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf)\//i, ""),
+      externalUrl: entry.id,
+      title: entry.title,
+      abstract: entry.summary || null,
+      source: "arxiv",
+      citationCount: null,
+      publishedAt: entry.published || null,
+      authors: entry.authors,
+      reason: reason ?? undefined,
+    }))
+    .slice(0, limit);
+}
+
+/**
+ * OpenAlex keyword search (relevance-sorted) — secondary personalized
+ * signal when arXiv returns nothing for a keyword.
+ */
+async function fetchOpenAlexSearch(
+  keyword: string,
+  limit: number,
+  reason?: string
+): Promise<DiscoveryItem[]> {
+  const url =
+    `https://api.openalex.org/works?search=${encodeURIComponent(keyword)}` +
+    `&per-page=${Math.min(limit, 25)}&sort=relevance_score:desc`;
+  const cacheKey = `openalex-search:${keyword.toLowerCase()}:${limit}`;
+  const data = await cachedExternalJson<{ results?: OpenAlexWork[] }>(cacheKey, url);
+  return (data?.results ?? [])
+    .filter((w) => w?.title)
+    .map((w) => mapOpenAlexWork(w, reason))
+    .slice(0, limit);
+}
+
+function daysAgo(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Union item shape helper — pinned platform fields (no full Paper rows leak).
+ */
+function toPlatformDiscoveryItem(paper: {
+  id: string;
+  title: string;
+  abstract?: string | null;
+  source?: string | null;
+  createdAt: Date;
+}): DiscoveryItem {
+  return {
+    kind: "platform",
+    id: paper.id,
+    paperId: paper.id,
+    title: paper.title,
+    abstract: paper.abstract,
+    source: paper.source,
+    publishedAt: paper.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Whitelisted arXiv categories for the Explore page — exact arXiv primary
+ * categories only (the export API matches `cat:` literally). Unknown values
+ * are rejected with 400, never forwarded upstream.
+ */
+export const EXPLORE_CATEGORIES: Record<string, string> = {
+  "cs.AI": "Artificial Intelligence",
+  "cs.LG": "Machine Learning",
+  "cs.CL": "NLP & Language",
+  "cs.CV": "Computer Vision",
+  "cs.SE": "Software Engineering",
+  "cs.CR": "Security & Privacy",
+  "cs.NE": "Neural Computing",
+  "stat.ML": "Statistics & ML",
+  "q-bio.NC": "Neurons & Cognition",
+  "q-fin.TR": "Trading & Market Microstructure",
+  "eess.AS": "Audio & Speech",
+  "econ.GN": "General Economics",
+};
+
+export interface ExploreResult {
+  items: DiscoveryItem[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+}
+
 export class SearchService {
   /**
    * Global multi-entity search
@@ -559,71 +947,194 @@ export class SearchService {
   }
   
   /**
-   * Get trending papers for a user (papers they can access, newest first).
-   * Access scope: own uploads, or papers in a non-deleted workspace where
-   * the user is owner or an active member. Never leaks rows from
-   * workspaces the user cannot see.
+   * Browse live research by category (arXiv feed, submittedDate desc,
+   * paginated via start index). No platform data — this is the external
+   * world's latest output for a field.
    */
-  static async getTrendingPapers(userId: string, limit: number) {
-    return prisma.paper.findMany({
-      where: {
-        isDeleted: false,
-        OR: [
-          { uploaderId: userId },
-          {
-            workspace: {
-              isDeleted: false,
-              OR: [
-                { ownerId: userId },
-                { members: { some: { userId, isDeleted: false } } },
-              ],
-            },
-          },
-        ],
+  static async getExplore(
+    category: string,
+    page: number,
+    limit: number
+  ): Promise<ExploreResult> {
+    const cap = Math.min(20, Math.max(1, limit));
+    const start = (page - 1) * cap;
+    const items = await fetchArxivFeed(category, start, cap);
+
+    return {
+      items,
+      meta: {
+        page,
+        limit: cap,
+        total: items.length,
+        totalPage: Math.max(1, Math.ceil(items.length / cap)),
       },
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        abstract: true,
-        source: true,
-        createdAt: true,
-      },
-    });
+    };
   }
 
   /**
-   * Get personalized recommendations — papers the user can access,
-   * newest first. Same access scope as getTrendingPapers.
+   * Get trending papers for a user — a live mix, not just platform data:
+   *   1. OpenAlex recent articles by citation count (primary, keyless)
+   *   2. arXiv recent submissions (freshness fallback)
+   *   3. Platform papers the user can access (own uploads or non-deleted
+   *      workspace with owner/active-member rights)
+   * External calls are cached/TTL'd and degrade gracefully — the endpoint
+   * never fails because an upstream API is down.
+   */
+  static async getTrendingPapers(userId: string, limit: number) {
+    const cap = Math.min(20, Math.max(1, limit));
+    const externalCount = Math.ceil(cap / 2);
+
+    let external: DiscoveryItem[] = [];
+    try {
+      external = await fetchOpenAlexRecent(externalCount);
+    } catch {
+      external = [];
+    }
+    if (external.length === 0) {
+      try {
+        external = await fetchArxivFeed(null, 0, externalCount);
+      } catch {
+        external = [];
+      }
+    }
+
+    const platform = (
+      await prisma.paper.findMany({
+        where: {
+          isDeleted: false,
+          OR: [
+            { uploaderId: userId },
+            {
+              workspace: {
+                isDeleted: false,
+                OR: [
+                  { ownerId: userId },
+                  { members: { some: { userId, isDeleted: false } } },
+                ],
+              },
+            },
+          ],
+        },
+        take: cap - external.length,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          source: true,
+          createdAt: true,
+        },
+      })
+    ).map(toPlatformDiscoveryItem);
+
+    return [...external, ...platform].slice(0, cap);
+  }
+
+  /**
+   * Get personalized recommendations for a user.
+   *
+   * Personalization signal: the user's top interest keywords, derived from
+   * tags + metadata.keywords across their accessible (non-deleted) papers.
+   * External arXiv/OpenAlex searches are performed per keyword with a
+   * "Because you work on X" reason; if the user has no interests yet, or
+   * every upstream call fails (cached/fallback safe), return accessible
+   * platform papers newest-first so the page is never empty.
    */
   static async getRecommendations(userId: string, limit: number) {
-    return prisma.paper.findMany({
-      where: {
-        isDeleted: false,
-        OR: [
-          { uploaderId: userId },
-          {
-            workspace: {
-              isDeleted: false,
-              OR: [
-                { ownerId: userId },
-                { members: { some: { userId, isDeleted: false } } },
-              ],
-            },
+    const cap = Math.min(20, Math.max(1, limit));
+
+    const accessibleWhere = {
+      isDeleted: false,
+      OR: [
+        { uploaderId: userId },
+        {
+          workspace: {
+            isDeleted: false,
+            OR: [
+              { ownerId: userId },
+              { members: { some: { userId, isDeleted: false } } },
+            ],
           },
-        ],
-      },
-      take: limit,
+        },
+      ],
+    };
+
+    const recent = await prisma.paper.findMany({
+      where: accessibleWhere,
+      take: 50,
       orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        abstract: true,
-        source: true,
-        createdAt: true,
-      },
+      select: { tags: true, metadata: true },
     });
+
+    const freq = new Map<string, number>();
+    for (const paper of recent) {
+      for (const tag of paper.tags ?? []) {
+        const key = tag.toLowerCase().trim();
+        if (key.length >= 3) freq.set(key, (freq.get(key) ?? 0) + 1);
+      }
+      const keywords = (paper.metadata as { keywords?: unknown } | null)?.keywords;
+      if (Array.isArray(keywords)) {
+        for (const k of keywords.slice(0, 10)) {
+          if (typeof k !== "string") continue;
+          const key = k.toLowerCase().trim();
+          if (key.length >= 3) freq.set(key, (freq.get(key) ?? 0) + 1);
+        }
+      }
+    }
+
+    const interests = [...freq.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([keyword]) => keyword);
+
+    if (interests.length > 0) {
+      const perKeyword = Math.max(1, Math.ceil((cap * 0.6) / interests.length));
+      const out: DiscoveryItem[] = [];
+      const seen = new Set<string>();
+
+      for (const keyword of interests) {
+        const reason = `Because you work on "${keyword}"`;
+        let items: DiscoveryItem[] = [];
+        try {
+          items = await fetchArxivSearch(keyword, perKeyword, reason);
+        } catch {
+          items = [];
+        }
+        if (items.length === 0) {
+          try {
+            items = await fetchOpenAlexSearch(keyword, perKeyword, reason);
+          } catch {
+            items = [];
+          }
+        }
+        for (const item of items) {
+          if (seen.has(item.id)) continue;
+          seen.add(item.id);
+          out.push(item);
+        }
+      }
+
+      if (out.length > 0) return out.slice(0, cap);
+    }
+
+    // No interests or all upstream calls failed → platform fallback
+    // (previous behavior: newest accessible papers).
+    const platform = (
+      await prisma.paper.findMany({
+        where: accessibleWhere,
+        take: cap,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          source: true,
+          createdAt: true,
+        },
+      })
+    ).map(toPlatformDiscoveryItem);
+
+    return platform;
   }
 
   /**

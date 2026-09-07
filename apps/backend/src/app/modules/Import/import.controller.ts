@@ -70,7 +70,17 @@ export const importController = {
     }
     await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importByURL(url, workspaceId, authReq.user.id);
-    sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title }, "Paper imported via URL", 201);
+    sendSuccessResponse(
+      res,
+      {
+        id: result.paper.id,
+        title: result.paper.title,
+        hasPdf: Boolean(result.hasPdf),
+        alreadyImported: Boolean(result.alreadyImported),
+      },
+      "Paper imported via URL",
+      201,
+    );
   }),
 
   importBySmartURL: catchAsync(async (req: Request, res: Response) => {
@@ -81,7 +91,17 @@ export const importController = {
     }
     await assertWorkspaceAccess(workspaceId, authReq.user.id);
     const result = await ImportService.importBySmartURL(url, workspaceId, authReq.user.id);
-    sendSuccessResponse(res, { id: result.paper.id, title: result.paper.title, hasPdf: result.hasPdf }, "Paper imported via Smart URL", 201);
+    sendSuccessResponse(
+      res,
+      {
+        id: result.paper.id,
+        title: result.paper.title,
+        hasPdf: Boolean(result.hasPdf),
+        alreadyImported: Boolean(result.alreadyImported),
+      },
+      "Paper imported via Smart URL",
+      201,
+    );
   }),
 
   importByFile: catchAsync(async (req: Request, res: Response) => {
