@@ -314,6 +314,8 @@ export const collectionApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { collectionId }) => [
         { type: "CollectionPaper", id: collectionId },
         { type: "Collection", id: collectionId },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
         "CollectionPaper",
       ],
     }),
@@ -330,6 +332,8 @@ export const collectionApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { collectionId }) => [
         { type: "CollectionPaper", id: collectionId },
         { type: "Collection", id: collectionId },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
         "CollectionPaper",
       ],
     }),
@@ -394,6 +398,8 @@ export const collectionApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, { collectionId }) => [
         { type: "CollectionPaper", id: collectionId },
         { type: "Collection", id: collectionId },
+        { type: "Collection", id: "LIST" },
+        { type: "Collection", id: "SHARED" },
       ],
     }),
   }),
