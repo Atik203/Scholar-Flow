@@ -45,8 +45,13 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { data: countData } = useGetUnreadCountQuery();
-  const { data: listData, refetch } = useGetNotificationsQuery({ limit: 8 });
+  const { data: countData } = useGetUnreadCountQuery(undefined, {
+    pollingInterval: 15000,
+  });
+  const { data: listData, refetch } = useGetNotificationsQuery(
+    { limit: 8 },
+    { pollingInterval: 15000 }
+  );
   const [markAsRead] = useMarkAsReadMutation();
   const [markAllAsRead] = useMarkAllAsReadMutation();
 
