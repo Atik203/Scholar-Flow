@@ -391,6 +391,7 @@ export const ModelName = {
   WorkspaceInvitation: 'WorkspaceInvitation',
   WorkspaceSettings: 'WorkspaceSettings',
   Paper: 'Paper',
+  PaperShare: 'PaperShare',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
   PaperVersion: 'PaperVersion',
@@ -455,7 +456,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "aIKeyPoint" | "aIMetadata" | "aIContextCache" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "loginHistory" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
+    modelProps: "notification" | "user" | "workspace" | "workspaceMember" | "workspaceInvitation" | "workspaceSettings" | "paper" | "paperShare" | "paperFile" | "paperChunk" | "paperVersion" | "citation" | "annotation" | "annotationVersion" | "collection" | "collectionPaper" | "collectionMember" | "searchHistory" | "aISummary" | "aIInsightThread" | "aIInsightMessage" | "aIConversation" | "aIConversationMessage" | "aIProvider" | "aIKeyPoint" | "aIMetadata" | "aIContextCache" | "plan" | "subscription" | "payment" | "webhookEvent" | "usageEvent" | "activityLog" | "account" | "session" | "loginHistory" | "verificationToken" | "userToken" | "researchNote" | "notebook" | "notebookSection" | "citationExport" | "discussionThread" | "discussionMessage" | "activityLogEntry" | "faq" | "testimonial" | "newsletterSubscriber" | "contactSubmission" | "pageContent" | "userPreference" | "adminReport" | "systemAlert" | "webhookEndpoint" | "webhookDelivery" | "apiKey" | "contentReport"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -974,6 +975,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PaperCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PaperCountAggregateOutputType> | number
+        }
+      }
+    }
+    PaperShare: {
+      payload: Prisma.$PaperSharePayload<ExtArgs>
+      fields: Prisma.PaperShareFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaperShareFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaperShareFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        findFirst: {
+          args: Prisma.PaperShareFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaperShareFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        findMany: {
+          args: Prisma.PaperShareFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>[]
+        }
+        create: {
+          args: Prisma.PaperShareCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        createMany: {
+          args: Prisma.PaperShareCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaperShareCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>[]
+        }
+        delete: {
+          args: Prisma.PaperShareDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        update: {
+          args: Prisma.PaperShareUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        deleteMany: {
+          args: Prisma.PaperShareDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaperShareUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaperShareUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>[]
+        }
+        upsert: {
+          args: Prisma.PaperShareUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaperSharePayload>
+        }
+        aggregate: {
+          args: Prisma.PaperShareAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePaperShare>
+        }
+        groupBy: {
+          args: Prisma.PaperShareGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperShareGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaperShareCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaperShareCountAggregateOutputType> | number
         }
       }
     }
@@ -4797,6 +4872,20 @@ export const PaperScalarFieldEnum = {
 export type PaperScalarFieldEnum = (typeof PaperScalarFieldEnum)[keyof typeof PaperScalarFieldEnum]
 
 
+export const PaperShareScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  email: 'email',
+  permission: 'permission',
+  sharedById: 'sharedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type PaperShareScalarFieldEnum = (typeof PaperShareScalarFieldEnum)[keyof typeof PaperShareScalarFieldEnum]
+
+
 export const PaperFileScalarFieldEnum = {
   id: 'id',
   paperId: 'paperId',
@@ -6304,6 +6393,7 @@ export type GlobalOmitConfig = {
   workspaceInvitation?: Prisma.WorkspaceInvitationOmit
   workspaceSettings?: Prisma.WorkspaceSettingsOmit
   paper?: Prisma.PaperOmit
+  paperShare?: Prisma.PaperShareOmit
   paperFile?: Prisma.PaperFileOmit
   paperChunk?: Prisma.PaperChunkOmit
   paperVersion?: Prisma.PaperVersionOmit

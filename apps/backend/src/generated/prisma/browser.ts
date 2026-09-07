@@ -53,6 +53,13 @@ export type WorkspaceSettings = Prisma.WorkspaceSettingsModel
  */
 export type Paper = Prisma.PaperModel
 /**
+ * Model PaperShare
+ * *
+ *  * Email sharing — grants view/edit access to a paper for a specific email.
+ *  * One row per paper+email (upserted); soft-delete revokes access.
+ */
+export type PaperShare = Prisma.PaperShareModel
+/**
  * Model PaperFile
  * 
  */
