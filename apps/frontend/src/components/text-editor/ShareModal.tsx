@@ -22,8 +22,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { showApiErrorToast } from "@/lib/errorHandling";
-import { useShareViaEmailMutation } from "@/redux/api/paperApi";
-import { Copy, Link, Loader2, Mail, Share2, Users } from "lucide-react";
+import {
+  useGetPaperSharesQuery,
+  useRevokePaperShareMutation,
+  useShareViaEmailMutation,
+} from "@/redux/api/paperApi";
+import { Copy, Link, Loader2, Mail, ShieldCheck, Share2, Trash2, Users } from "lucide-react";
 import React, { useState } from "react";
 
 interface ShareModalProps {
@@ -50,6 +54,11 @@ export function ShareModal({
   const [message, setMessage] = useState("");
   const [shareViaEmail, { isLoading: isEmailSharing }] =
     useShareViaEmailMutation();
+  const { data: sharesResponse } = useGetPaperSharesQuery(paperId, {
+    skip: !isOpen,
+  });
+  const [revokeShare] = useRevokePaperShareMutation();
+  const shares = sharesResponse ?? [];
 
   React.useEffect(() => {
     if (isOpen && isPublished) {
@@ -249,6 +258,49 @@ export function ShareModal({
               </Button>
             </div>
           </div>
+
+          {/* Shared with (active email shares — revocable) */}
+          {shares.length > 0 && (
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" />
+                Shared with
+              </Label>
+              <ul className="space-y-2">
+                {shares.map((share) => (
+                  <li
+                    key={share.id}
+                    className="flex items-center justify-between gap-2 rounded-md border border-muted/60 px-3 py-2 text-sm"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="truncate font-medium">{share.email}</span>
+                      <Badge
+                        variant={share.permission === "edit" ? "default" : "secondary"}
+                      >
+                        {share.permission === "edit" ? "Can Edit" : "View Only"}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      title="Revoke access"
+                      onClick={async () => {
+                        try {
+                          await revokeShare(share.id).unwrap();
+                          showSuccessToast(`Access revoked for ${share.email}`);
+                        } catch (error: any) {
+                          showApiErrorToast(error);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Quick Share Actions */}
           <div className="space-y-3">
