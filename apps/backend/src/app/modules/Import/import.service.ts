@@ -1,4 +1,9 @@
 import axios from "axios";
+import { execFile } from "child_process";
+import { mkdtemp, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import { promisify } from "util";
 import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
 import { StorageService as storage } from "../papers/storage.service";
@@ -46,6 +51,86 @@ function decodeEntities(input: string): string {
 
 function looksLikePdf(buffer: Buffer): boolean {
   return buffer.length > 4 && buffer.subarray(0, 5).toString("latin1") === "%PDF-";
+}
+
+/**
+ * Use poppler pdftotext to extract just the first page of a PDF buffer.
+ * Returns the raw text or null if poppler is unavailable / extraction fails.
+ */
+async function extractPdfFirstPageText(buffer: Buffer): Promise<string | null> {
+  const execFileAsync = promisify(execFile);
+  let tmpDir: string | null = null;
+  try {
+    tmpDir = await mkdtemp(join(tmpdir(), "sf-import-"));
+    const inputPath = join(tmpDir, "input.pdf");
+    await writeFile(inputPath, buffer);
+    const { stdout } = await execFileAsync(
+      "pdftotext",
+      ["-f", "1", "-l", "1", "-layout", "-nopgbrk", inputPath, "-"],
+      { timeout: 15000, maxBuffer: 5 * 1024 * 1024 },
+    );
+    return stdout.trim();
+  } catch {
+    return null;
+  } finally {
+    if (tmpDir) await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+/**
+ * Best-effort metadata extraction from the first page of a PDF.
+ * Parses common patterns: title block, author lines, Abstract section.
+ */
+function parseMetadataFromText(text: string): {
+  title: string;
+  authors: string[];
+  abstract: string;
+} {
+  const lines = text.split(/\n/).map((l) => l.trim()).filter(Boolean);
+
+  // Title: first substantial line that isn't a header/footer
+  let title = "";
+  for (const line of lines) {
+    if (line.length < 5 || line.length > 200) continue;
+    if (/^(arxiv|vol\.|issue|page|journal|doi:|https?:)/i.test(line)) continue;
+    if (/^\d+$/.test(line)) continue; // page number
+    title = line.replace(/\s+/g, " ");
+    break;
+  }
+
+  // Authors: lines immediately after the title that look like names
+  const authors: string[] = [];
+  const titleIdx = lines.findIndex((l) => l.trim() === title);
+  if (titleIdx >= 0) {
+    for (let i = titleIdx + 1; i < Math.min(titleIdx + 5, lines.length); i++) {
+      const line = lines[i];
+      // Stop at abstract/institution/affiliation markers
+      if (/^(abstract|introduction|keywords|www\.|http|email|@|department|university|institute)/i.test(line)) break;
+      // Looks like author names: 2-50 chars, may contain initials, commas, ampersands
+      if (line.length >= 2 && line.length <= 80 && /^[A-Z\u00C0-\u024F]/.test(line)) {
+        // Split on common separators
+        const names = line.split(/[,;&]|\band\b/).map((n) => n.trim()).filter(Boolean);
+        for (const name of names) {
+          if (name.length >= 2 && name.length <= 50) authors.push(name);
+        }
+        break;
+      }
+    }
+  }
+
+  // Abstract: look for "Abstract" section
+  let abstract = "";
+  const absMatch = text.match(/abstract[\s:\-.]*\n?([\s\S]*?)(?:(?:keywords|introduction|1\.|i\.|introduction)\s*[\n:]|$)/i);
+  if (absMatch) {
+    abstract = absMatch[1].replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+    if (abstract.length > 10 && abstract.length < 2000) {
+      // Good
+    } else {
+      abstract = "";
+    }
+  }
+
+  return { title, authors, abstract };
 }
 
 /**
@@ -749,6 +834,35 @@ export class ImportService {
         await tryQueueExtraction(paperId);
         hasPdf = true;
         console.log(`[Import] URL ${url}: PDF saved, extraction queued`);
+
+        // Best-effort metadata extraction from PDF first page when title
+        // was just a URL slug and we have no real metadata yet.
+        if (title === "Untitled" || !abstract) {
+          try {
+            const firstPageText = await extractPdfFirstPageText(pdfBuffer);
+            if (firstPageText) {
+              const pdfMeta = parseMetadataFromText(firstPageText);
+              const updates: string[] = [];
+              if (pdfMeta.title && pdfMeta.title.length > 5 && title === "Untitled") {
+                updates.push(`title = ${JSON.stringify(pdfMeta.title)}`);
+              }
+              if (pdfMeta.abstract && pdfMeta.abstract.length > 10 && !abstract) {
+                updates.push(`abstract = ${JSON.stringify(pdfMeta.abstract)}`);
+              }
+              if (updates.length > 0) {
+                await prisma.$executeRawUnsafe(
+                  `UPDATE "Paper" SET ${updates.join(", ")}, "updatedAt" = NOW() WHERE id = $1`,
+                  paperId,
+                );
+                console.log(`[Import] URL ${url}: updated paper from PDF content`);
+                if (pdfMeta.title && pdfMeta.title.length > 5) title = pdfMeta.title;
+                if (pdfMeta.abstract && pdfMeta.abstract.length > 10) abstract = pdfMeta.abstract;
+              }
+            }
+          } catch (pdfMetaErr) {
+            console.warn(`[Import] URL ${url}: PDF metadata extraction failed`, (pdfMetaErr as Error).message);
+          }
+        }
       } catch (err) {
         console.warn(`[Import] URL ${url}: PDF save failed — metadata only`, (err as Error).message);
       }
