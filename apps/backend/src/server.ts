@@ -22,9 +22,10 @@ import {
 
 // Initialize queue processing (lazy on Vercel to avoid cold start issues)
 if (process.env.VERCEL !== "1") {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   require("./app/services/pdfProcessingQueue");
 } else {
-  console.log("[Boot] Vercel environment — deferring queue init");
+  console.log("[Boot] Vercel environment - deferring queue init");
 }
 
 const app: import("express").Express = express();
@@ -124,7 +125,6 @@ app.post(
   captureStripeRawBody,
   webhookController.handleStripeWebhook as unknown as RequestHandler
 );
-
 // Request parsing
 const jsonParser = express.json({ limit: "50mb" });
 const urlencodedParser = express.urlencoded({
@@ -203,8 +203,30 @@ app.use("*", routeNotFound as unknown as RequestHandler);
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
-  // Phase 10 — WebSocket server
+  // Phase 10 - WebSocket server
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupWebSocket } = require("./app/modules/WebSocket/socketServer");
+
+  // Billing - subscription expiry/grace sweeper (hourly cron)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startSubscriptionSweeper } = require(
+    "./app/modules/Billing/subscriptionSweeper"
+  );
+  startSubscriptionSweeper();
+
+  // Invitations - expiry sweeper (hourly cron, stale PENDING -> EXPIRED)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startInvitationSweeper } = require(
+    "./app/modules/Invitation/invitationSweeper"
+  );
+  startInvitationSweeper();
+
+  // Papers - embedding backfill sweep (hourly cron, unembedded chunks)
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { startEmbeddingBackfill } = require(
+    "./app/services/embeddingBackfill"
+  );
+  startEmbeddingBackfill();
 
   const httpServer = http.createServer(app);
   setupWebSocket(httpServer);
@@ -257,5 +279,4 @@ export default app;
 
 // Also expose CommonJS export for Vercel @vercel/node when using dist/server.js directly
 // Note: TypeScript will emit both default and CJS exports under commonjs module target
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (module as any).exports = app;

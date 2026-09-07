@@ -4,8 +4,6 @@ import { CitationExportDialog } from "@/components/citations/CitationExportDialo
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetHistoryQuery as useGetCitationExportHistoryQuery } from "@/redux/api/citationApi";
@@ -16,15 +14,12 @@ import {
   Calendar,
   Download,
   FileText,
-  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function CitationExportPage() {
-  const { user } = useProtectedRoute();
-  const scopedPath = (segment: string) =>
-    buildRoleScopedPath(user?.role, segment);
+  const scopedPath = (segment: string) => `/dashboard${segment}`;
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
   const { data: exportHistory, isLoading: isExportHistoryLoading } =
     useGetCitationExportHistoryQuery({
@@ -82,7 +77,7 @@ export default function CitationExportPage() {
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild className="hover:bg-white/80">
+            <Button variant="ghost" asChild className="hover:bg-muted">
               <Link href={scopedPath("/research/citations")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Citations
@@ -98,12 +93,6 @@ export default function CitationExportPage() {
                 Export citations in various academic formats
               </p>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Export Settings
-            </Button>
           </div>
         </div>
 

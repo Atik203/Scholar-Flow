@@ -15,13 +15,13 @@ import { StorageService as storage } from "./storage.service";
 import { createPaperError } from "./paper.errors";
 import {
   editorPaperService,
-  ensureDevUserAndWorkspace,
   exportService,
   paperService,
   paperVersionService,
 } from "./paper.service";
 import type { GeneratePaperSummaryInput } from "./paper.validation";
 import {
+  autosaveContentSchema,
   createEditorPaperSchema,
   deletePaperParamsSchema,
   generatePaperInsightSchema,
@@ -39,7 +39,6 @@ function featureEnabled() {
 
 export const paperController = {
   upload: catchAsync(async (req: Request, res: Response) => {
-    const startTime = Date.now();
     const authReq = req as AuthenticatedRequest;
 
     if (!featureEnabled()) {
@@ -58,7 +57,6 @@ export const paperController = {
       throw createPaperError.invalidFileType(["PDF", "DOCX", "DOC"]);
     }
 
-    const validationStart = Date.now();
     const parsed = uploadPaperSchema.safeParse(authReq.body);
     if (!parsed.success) {
       const errorDetails = parsed.error.issues
@@ -66,53 +64,61 @@ export const paperController = {
         .join(", ");
       throw createPaperError.validationFailed(errorDetails);
     }
-    console.log(`[PaperUpload] Validation: ${Date.now() - validationStart}ms`);
 
-    // Resolve uploader & workspace fallback for dev/testing
-    const resolveStart = Date.now();
-    let userId = authReq.user?.id as string | undefined;
-    let workspaceId = parsed.data.workspaceId as string | undefined;
-    if (!userId || !workspaceId) {
-      const { user, workspace } = await ensureDevUserAndWorkspace();
-      if (!userId) userId = user.id;
-      if (!workspaceId) workspaceId = workspace.id;
+    // Authenticated user + real workspace are mandatory (no dev fallback)
+    const userId = authReq.user?.id;
+    if (!userId) {
+      throw createPaperError.authenticationRequired();
     }
-    console.log(
-      `[PaperUpload] User/workspace resolve: ${Date.now() - resolveStart}ms`
-    );
 
-    const objectKey = `papers/${workspaceId}/${Date.now()}-${authReq.file.originalname}`;
-    const s3Start = Date.now();
-    console.log("[PaperUpload] Starting S3 upload", {
-      objectKey,
-      fileSize: `${(authReq.file.size / 1024 / 1024).toFixed(2)}MB`,
-      contentType: authReq.file.mimetype,
-    });
+    const workspaceId = parsed.data.workspaceId;
+    if (!workspaceId) {
+      throw new ApiError(400, "workspaceId is required to upload a paper");
+    }
+
+    // Uploader must own or be an active member of the workspace
+    const access = await prisma.$queryRaw<Array<{ isMember: boolean }>>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM "Workspace" w
+        WHERE w.id = ${workspaceId}
+          AND w."isDeleted" = false
+          AND (
+            w."ownerId" = ${userId}
+            OR EXISTS (
+              SELECT 1
+              FROM "WorkspaceMember" m
+              WHERE m."workspaceId" = w.id
+                AND m."userId" = ${userId}
+                AND m."isDeleted" = false
+            )
+          )
+      ) AS "isMember"
+    `;
+
+    if (!access[0]?.isMember) {
+      throw new ApiError(403, "You do not have access to this workspace");
+    }
+
+    // Sanitize the user-controlled filename before embedding it in the S3 key
+    const safeName = (authReq.file.originalname || "document")
+      .replace(/[^\w.\-]+/g, "_")
+      .slice(0, 80);
+    const objectKey = `papers/${workspaceId}/${Date.now()}-${safeName}`;
 
     await storage.putObject({
       key: objectKey,
       body: authReq.file.buffer,
       contentType: authReq.file.mimetype,
     });
-    const s3Time = Date.now() - s3Start;
-    console.log(`[PaperUpload] S3 upload completed: ${s3Time}ms`);
 
-    const dbStart = Date.now();
-    console.log("[PaperUpload] Starting database operations");
     const paper = await paperService.createUploadedPaper({
       input: parsed.data,
       file: authReq.file,
-      uploaderId: userId!,
-      workspaceId: workspaceId!,
+      uploaderId: userId,
+      workspaceId,
       objectKey,
     });
-    const dbTime = Date.now() - dbStart;
-    console.log(`[PaperUpload] Database operations completed: ${dbTime}ms`);
-
-    const totalTime = Date.now() - startTime;
-    console.log(
-      `[PaperUpload] TOTAL TIME: ${totalTime}ms (S3: ${s3Time}ms, DB: ${dbTime}ms, Other: ${totalTime - s3Time - dbTime}ms)`
-    );
 
     sendSuccessResponse(res, { paper }, "Paper uploaded successfully", 201);
   }),
@@ -128,8 +134,38 @@ export const paperController = {
 
     const { workspaceId, cursor, limit } = parsed.data;
 
-    // If workspaceId is explicitly provided and not empty, use workspace-scoped listing (for future workspace features)
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+    const userId = authReq.user.id;
+
+    // If workspaceId is explicitly provided and not empty, use workspace-scoped listing
+    // (only for users who own or are active members of that workspace)
     if (workspaceId && workspaceId.trim() !== "") {
+      const access = await prisma.$queryRaw<Array<{ isMember: boolean }>>`
+        SELECT EXISTS (
+          SELECT 1
+          FROM "Workspace" w
+          WHERE w.id = ${workspaceId}
+            AND w."isDeleted" = false
+            AND (
+              w."ownerId" = ${userId}
+              OR EXISTS (
+                SELECT 1
+                FROM "WorkspaceMember" m
+                WHERE m."workspaceId" = w.id
+                  AND m."userId" = ${userId}
+                  AND m."isDeleted" = false
+              )
+            )
+        ) AS "isMember"
+      `;
+
+      if (!access[0]?.isMember) {
+        throw new ApiError(403, "You do not have access to this workspace");
+      }
+
       const results = await paperService.listByWorkspace(
         workspaceId,
         limit || 10,
@@ -148,13 +184,8 @@ export const paperController = {
     }
 
     // Default: list papers by authenticated user
-    const authReq = req as AuthenticatedRequest;
-    if (!authReq.user?.id) {
-      throw createPaperError.authenticationRequired();
-    }
-
     const results = await paperService.listByUser(
-      authReq.user.id,
+      userId,
       limit || 10,
       cursor
     );
@@ -177,6 +208,13 @@ export const paperController = {
       throw createPaperError.validationFailed("Invalid paper ID format");
     }
 
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
       throw createPaperError.paperNotFound(parsed.data.id);
@@ -191,6 +229,13 @@ export const paperController = {
       throw createPaperError.validationFailed("Invalid paper ID format");
     }
 
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+
     await paperService.softDelete(parsed.data.id);
     sendSuccessResponse(res, null, "Paper deleted successfully");
   }),
@@ -201,6 +246,13 @@ export const paperController = {
     if (!parsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
+
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -230,6 +282,13 @@ export const paperController = {
     if (!parsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
+
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -327,6 +386,7 @@ export const paperController = {
       wordLimit: options.wordLimit,
       workspaceId: paperRecord.workspaceId,
       uploaderId: paperRecord.uploaderId,
+      model: options.model,
     };
 
     const textHash = createHash("sha1")
@@ -438,6 +498,13 @@ export const paperController = {
       throw new ApiError(400, "Invalid metadata");
     }
 
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(params.data.id, authReq.user.id);
+
     const updated = await paperService.updateMetadata(
       params.data.id,
       body.data
@@ -447,16 +514,6 @@ export const paperController = {
     }
 
     sendSuccessResponse(res, updated, "Paper metadata updated successfully");
-  }),
-
-  // Debug endpoint to get dev workspace info
-  getDevWorkspace: catchAsync(async (req: Request, res: Response) => {
-    const { user, workspace } = await ensureDevUserAndWorkspace();
-    sendSuccessResponse(
-      res,
-      { workspace, user: { id: user.id, email: user.email } },
-      "Dev workspace retrieved"
-    );
   }),
 
   // Authenticated helper endpoint: returns count of papers uploaded by current user
@@ -477,6 +534,13 @@ export const paperController = {
     if (!parsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
+
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -581,6 +645,13 @@ export const paperController = {
       throw new ApiError(400, "Invalid paper ID");
     }
 
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
       throw new ApiError(404, "Paper not found");
@@ -620,30 +691,56 @@ export const paperController = {
       throw new ApiError(400, "Invalid paper ID");
     }
 
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
       throw new ApiError(404, "Paper not found");
     }
 
-    // Get all chunks
-    const chunks = await prisma.paperChunk.findMany({
-      where: { paperId: parsed.data.id, isDeleted: false },
-      orderBy: { idx: "asc" },
-      select: {
-        id: true,
-        idx: true,
-        page: true,
-        content: true,
-        tokenCount: true,
-        createdAt: true,
-      },
-    });
+    // Get chunks — bounded: default 50, hard cap 200. The full chunk set
+    // can be thousands of rows; consumers paginate with offset instead.
+    const limit = Math.min(
+      Math.max(parseInt(String(req.query.limit ?? "50"), 10) || 50, 1),
+      200
+    );
+    const offset = Math.max(
+      parseInt(String(req.query.offset ?? "0"), 10) || 0,
+      0
+    );
+
+    const [chunks, total] = await Promise.all([
+      prisma.paperChunk.findMany({
+        where: { paperId: parsed.data.id, isDeleted: false },
+        orderBy: { idx: "asc" },
+        select: {
+          id: true,
+          idx: true,
+          page: true,
+          content: true,
+          tokenCount: true,
+          createdAt: true,
+        },
+        skip: offset,
+        take: limit,
+      }),
+      prisma.paperChunk.count({
+        where: { paperId: parsed.data.id, isDeleted: false },
+      }),
+    ]);
 
     sendSuccessResponse(
       res,
       {
-        chunksCount: chunks.length,
+        chunksCount: total,
         chunks: chunks,
+        limit,
+        offset,
       },
       "All chunks retrieved"
     );
@@ -655,6 +752,13 @@ export const paperController = {
     if (!parsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
+
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -755,11 +859,20 @@ export const paperController = {
       const paperData = paper[0];
 
       // Check if user has permission to share this paper
+      // (uploader, workspace owner/member, or collection member with EDIT)
       const hasPermission = (await prisma.$queryRaw`
         SELECT 1 FROM "Paper" p
+        LEFT JOIN "Workspace" w
+          ON w.id = p."workspaceId" AND w."isDeleted" = false
+        LEFT JOIN "WorkspaceMember" wm
+          ON wm."workspaceId" = p."workspaceId"
+          AND wm."userId" = ${authReq.user.id}
+          AND wm."isDeleted" = false
         WHERE p.id = ${paperId}
         AND (
           p."uploaderId" = ${authReq.user.id}
+          OR w."ownerId" = ${authReq.user.id}
+          OR wm.id IS NOT NULL
           OR EXISTS (
             SELECT 1 FROM "CollectionPaper" cp
             JOIN "CollectionMember" cm ON cp."collectionId" = cm."collectionId"
@@ -1090,6 +1203,18 @@ export const paperController = {
         update: { ...aiMetadata },
       });
 
+      // Persist the extracted title/abstract back to the Paper row so the
+      // detail page reflects them immediately (user can fine-tune after).
+      if (md.title || md.abstract) {
+        await prisma.paper.update({
+          where: { id: paperId },
+          data: {
+            ...(md.title ? { title: String(md.title).slice(0, 500) } : {}),
+            ...(md.abstract ? { abstract: String(md.abstract) } : {}),
+          },
+        });
+      }
+
       // Also return authors for the edit form
       const authors = Array.isArray(md.authors)
         ? md.authors
@@ -1139,12 +1264,27 @@ export const paperController = {
 
     try {
       if (threadId) {
+        // The thread must belong to this paper (cross-paper read prevention)
+        const thread = await prisma.aIInsightThread.findFirst({
+          where: { id: threadId as string, paperId },
+          select: { id: true },
+        });
+        if (!thread) {
+          throw createPaperError.validationFailed(
+            "Thread not found for this paper"
+          );
+        }
+
         // Get specific thread messages
         const messages = await paperService.listInsightMessages(
           threadId as string,
           parseInt(page as string, 10) || 1,
           Math.min(parseInt(limit as string, 10) || 20, 50)
         );
+
+        const totalMessages = await prisma.aIInsightMessage.count({
+          where: { threadId: threadId as string, isDeleted: false },
+        });
 
         sendSuccessResponse(
           res,
@@ -1154,7 +1294,7 @@ export const paperController = {
             pagination: {
               page: parseInt(page as string, 10) || 1,
               limit: Math.min(parseInt(limit as string, 10) || 20, 50),
-              total: messages.length, // This would ideally be total count
+              total: totalMessages,
             },
           },
           "Insight history retrieved"
@@ -1231,6 +1371,9 @@ export const editorPaperController = {
         201
       );
     } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
       console.error("[EditorPaperController] Create failed:", error);
       throw new ApiError(500, "Failed to create editor paper");
     }
@@ -1300,17 +1443,18 @@ export const editorPaperController = {
   autoSaveContent: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     const paramsParsed = getPaperParamsSchema.safeParse(req.params);
+    const bodyParsed = autosaveContentSchema.safeParse(req.body);
 
     if (!paramsParsed.success) {
       throw new ApiError(400, "Invalid paper ID");
     }
-    if (!req.body.content || typeof req.body.content !== "string") {
+    if (!bodyParsed.success) {
       throw new ApiError(400, "Content is required");
     }
 
     await editorPaperService.autoSaveContent(
       paramsParsed.data.id,
-      req.body.content,
+      bodyParsed.data.content,
       authReq.user.id
     );
 
@@ -1355,7 +1499,7 @@ export const editorPaperController = {
     const draftFilter =
       isDraft === "true" ? true : isDraft === "false" ? false : undefined;
 
-    const papers = await editorPaperService.getUserEditorPapers(
+    const result = await editorPaperService.getUserEditorPapers(
       authReq.user.id,
       draftFilter,
       limitNum,
@@ -1365,11 +1509,11 @@ export const editorPaperController = {
     const meta = {
       page: pageNum,
       limit: limitNum,
-      total: papers.length, // This would ideally be total count, but for now using current results
-      totalPage: Math.ceil(papers.length / limitNum),
+      total: result.total,
+      totalPage: Math.ceil(result.total / limitNum),
     };
 
-    return sendPaginatedResponse(res, papers, meta, "Editor papers retrieved");
+    return sendPaginatedResponse(res, result.papers, meta, "Editor papers retrieved");
   }),
 
   // Delete editor paper
@@ -1515,8 +1659,6 @@ export const editorPaperController = {
         authReq.file.mimetype
       );
 
-      console.log("[EditorPaperController] Upload result:", result);
-
       const responseData = {
         message: "Image uploaded successfully",
         data: {
@@ -1524,8 +1666,6 @@ export const editorPaperController = {
           fileName: result.filename,
         },
       };
-
-      console.log("[EditorPaperController] Sending response:", responseData);
 
       sendSuccessResponse(res, responseData.data, responseData.message);
     } catch (error) {
@@ -1537,23 +1677,36 @@ export const editorPaperController = {
   // List versions for an editor paper
   getVersions: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
     const { id } = req.params;
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
     const versions = await paperVersionService.listVersions(id);
     sendSuccessResponse(res, { versions }, "Versions retrieved");
   }),
 
   // Get a specific version's content
   getVersion: catchAsync(async (req: Request, res: Response) => {
-    const { versionId } = req.params;
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
+    const { id, versionId } = req.params;
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
     const version = await paperVersionService.getVersion(versionId);
-    if (!version) throw new ApiError(404, "Version not found");
+    if (!version || version.paperId !== id) throw new ApiError(404, "Version not found");
     sendSuccessResponse(res, version, "Version retrieved");
   }),
 
   // Restore to a specific version
   restoreVersion: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw createPaperError.authenticationRequired();
+    }
     const { id, versionId } = req.params;
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
     const version = await paperVersionService.getVersion(versionId);
     if (!version || version.paperId !== id) {
       throw new ApiError(404, "Version not found");
@@ -1561,7 +1714,7 @@ export const editorPaperController = {
     const result = await editorPaperService.updateEditorContent(
       id,
       { content: version.contentHtml, title: version.title ?? undefined },
-      authReq.user?.id ?? ""
+      authReq.user.id
     );
     sendSuccessResponse(res, result, "Version restored");
   }),

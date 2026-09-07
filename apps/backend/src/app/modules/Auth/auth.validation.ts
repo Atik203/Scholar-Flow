@@ -5,6 +5,10 @@ import { OAUTH_PROVIDERS, USER_ROLES } from "./auth.constant";
 export const signInSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  twoFactorCode: z
+    .string()
+    .regex(/^\d{6}$/, "twoFactorCode must be a 6-digit code")
+    .optional(),
 });
 
 // OAuth Profile validation
@@ -68,6 +72,10 @@ export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   rememberMe: z.boolean().optional(),
+  twoFactorCode: z
+    .string()
+    .regex(/^\d{6}$/, "twoFactorCode must be a 6-digit code")
+    .optional(),
 });
 
 // Registration validation

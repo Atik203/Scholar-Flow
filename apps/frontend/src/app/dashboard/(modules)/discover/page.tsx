@@ -8,8 +8,56 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Compass, Search, Sparkles, TrendingUp } from "lucide-react";
+import { useGetSuggestedCollectionsQuery } from "@/redux/api/recommendationApi";
+import { Compass, Search, Sparkles, TrendingUp, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
+
+function SuggestedCollectionsCard() {
+  const { data: suggestions, isLoading } = useGetSuggestedCollectionsQuery({ limit: 3 });
+
+  return (
+    <Card className="group hover:-translate-y-1 transition-all hover:shadow-md border-muted/60 flex flex-col">
+      <CardHeader>
+        <div className="w-12 h-12 bg-teal-100 dark:bg-teal-950/40 rounded-xl flex items-center justify-center mb-4">
+          <Compass className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+        </div>
+        <CardTitle>Browse Collections</CardTitle>
+        <CardDescription className="line-clamp-2">
+          Explore collections curated by community experts in various fields
+          of study.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col justify-between gap-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : suggestions && suggestions.length > 0 ? (
+          <ul className="space-y-2">
+            {suggestions.map((s) => (
+              <li key={s.name} className="flex items-center justify-between gap-2 text-sm">
+                <span className="truncate font-medium">{s.name}</span>
+                <span className="text-xs text-muted-foreground flex-shrink-0">
+                  {s.paperCount} papers
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground py-2">
+            Suggested collections appear once you add papers.
+          </p>
+        )}
+        <Button variant="secondary" className="w-full" asChild>
+          <Link href="/dashboard/collections/shared">
+            Explore Collections
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function DiscoverPage() {
   return (
@@ -93,28 +141,8 @@ export default function DiscoverPage() {
           </CardContent>
         </Card>
 
-        {/* Browse Collections (placeholder) */}
-        <Card className="group hover:-translate-y-1 transition-all hover:shadow-md border-muted/60">
-          <CardHeader>
-            <div className="w-12 h-12 bg-teal-100 dark:bg-teal-950/40 rounded-xl flex items-center justify-center mb-4">
-              <Compass className="w-6 h-6 text-teal-600 dark:text-teal-400" />
-            </div>
-            <CardTitle>Browse Collections</CardTitle>
-            <CardDescription className="line-clamp-2">
-              Explore public collections curated by community experts in
-              various fields of study.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button
-              variant="secondary"
-              className="w-full"
-              disabled
-            >
-              Coming Soon
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Browse Collections (real: suggested collections + shared link) */}
+        <SuggestedCollectionsCard />
       </div>
     </div>
   );

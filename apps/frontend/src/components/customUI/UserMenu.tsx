@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getRoleDashboardBasePath } from "@/lib/auth/roles";
+import { getDashboardBasePath } from "@/lib/auth/roles";
 import { handleSignOutWithLoading } from "@/lib/auth/signout";
 import { useAuth } from "@/redux/auth/useAuth";
 import { LayoutDashboard, LogOut, Settings, User } from "lucide-react";
@@ -29,7 +29,7 @@ export function UserMenu({ className }: UserMenuProps) {
   }
 
   const { user } = session;
-  const dashboardHref = getRoleDashboardBasePath(user.role);
+  const dashboardHref = getDashboardBasePath(user.role);
   const initials = user.name
     ? user.name
         .split(" ")

@@ -3,6 +3,7 @@
  * Handles Google and GitHub OAuth flows
  */
 
+import { randomUUID } from "crypto";
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../../errors/ApiError";
@@ -10,6 +11,10 @@ import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { AsyncRequestHandler } from "../../types/express";
 import { authService } from "./auth.service";
+
+// Session rows are bookkeeping for the Active Sessions page; the expiry
+// mirrors the 7d access-token TTL (both are extended by a fresh sign-in).
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function detectDevice(ua: string): string {
   if (!ua) return "Unknown";
@@ -282,6 +287,15 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
       ...clientInfo,
     }).catch(() => {});
 
+    // Bookkeeping session row for the Active Sessions page (non-fatal)
+    const sessionToken = randomUUID();
+    authService
+      .createSession(user.id, {
+        sessionToken,
+        expires: new Date(Date.now() + SESSION_TTL_MS),
+      })
+      .catch(() => {});
+
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -297,6 +311,7 @@ export const handleGoogleCallback: AsyncRequestHandler = catchAsync(
           onboardingStep: user.onboardingStep,
         },
         accessToken,
+        sessionToken,
       },
     });
   }
@@ -430,6 +445,15 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
       ...clientInfo,
     }).catch(() => {});
 
+    // Bookkeeping session row for the Active Sessions page (non-fatal)
+    const sessionToken = randomUUID();
+    authService
+      .createSession(user.id, {
+        sessionToken,
+        expires: new Date(Date.now() + SESSION_TTL_MS),
+      })
+      .catch(() => {});
+
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -445,6 +469,7 @@ export const handleGitHubCallback: AsyncRequestHandler = catchAsync(
           onboardingStep: user.onboardingStep,
         },
         accessToken,
+        sessionToken,
       },
     });
   }

@@ -24,6 +24,7 @@ annotationRoutes.post(
 annotationRoutes.get(
   "/paper/:paperId",
   paperOperationLimiter,
+  authMiddleware as any,
   annotationController.getPaperAnnotations as any
 );
 
@@ -65,5 +66,6 @@ annotationRoutes.post(
 annotationRoutes.get(
   "/:id/versions",
   paperOperationLimiter,
+  authMiddleware as any,
   annotationController.getVersions as any
 );

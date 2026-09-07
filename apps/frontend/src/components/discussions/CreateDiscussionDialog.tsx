@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { useCreateDiscussionMutation } from "@/redux/api/discussionApi";
 import { MessageSquare, Plus, Pin, CheckCircle, XCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,7 +58,8 @@ export function CreateDiscussionDialog({
   onDiscussionCreated
 }: CreateDiscussionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [createDiscussion, { isLoading: isCreating }] =
+    useCreateDiscussionMutation();
 
   const form = useForm<DiscussionFormData>({
     resolver: zodResolver(discussionFormSchema),
@@ -76,38 +78,24 @@ export function CreateDiscussionDialog({
   };
 
   const handleCreateDiscussion = async (data: DiscussionFormData) => {
-    setIsCreating(true);
     try {
       const tags = data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
 
-      const response = await fetch('/api/discussions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          tags,
-          ...(paperId && { paperId }),
-          ...(collectionId && { collectionId }),
-          ...(workspaceId && { workspaceId }),
-        }),
-      });
+      await createDiscussion({
+        title: data.title,
+        content: data.content,
+        tags,
+        ...(paperId && { paperId }),
+        ...(collectionId && { collectionId }),
+        ...(workspaceId && { workspaceId }),
+      }).unwrap();
 
-      if (!response.ok) {
-        throw new Error('Failed to create discussion');
-      }
-
-      const result = await response.json();
       showSuccessToast('Discussion created successfully');
       setIsOpen(false);
       form.reset();
       onDiscussionCreated?.();
-    } catch (error) {
-      console.error('Create discussion error:', error);
+    } catch (error: unknown) {
       showErrorToast('Failed to create discussion. Please try again.');
-    } finally {
-      setIsCreating(false);
     }
   };
 
