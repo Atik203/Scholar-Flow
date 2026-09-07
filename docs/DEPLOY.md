@@ -189,7 +189,10 @@ PDF uploads, no long-lived sockets/cron). Use a Render Web Service instead:
 ```bash
 # Render dashboard → New → Web Service → Connect GitHub repo → Scholar-Flow
 #   Root Directory: apps/backend
-#   Build Command:  cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build
+#   Build Command:  cd ../.. && yarn install && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build
+#                   (yarn install MUST run at repo root — Render's default install
+#                    runs inside apps/backend and fails with "Couldn't find the
+#                    node_modules state file")
 #   Start Command:  node dist/server.js
 #   Instance: Free
 #   Health Check Path: /api/health
