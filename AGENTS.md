@@ -767,67 +767,51 @@ yarn repomix
 
 ---
 
-## Local Development Database
+## Database — ONE shared cloud DB (local dev + production)
 
 ### Database Setup
-
-**Primary: Prisma Postgres (Cloud)** — used for both local dev and production
+- **Single Prisma Postgres (Prisma Cloud) database is used for BOTH local
+  development and production.** There is NO local database. No WSL
+  PostgreSQL. `docker` is not used.
 - `DATABASE_URL` = Accelerate endpoint in `.env` (runtime queries via proxy)
 - `DIRECT_DATABASE_URL` = Direct PostgreSQL URL for migrations and adapter
-- No local database needed — Prisma Cloud manages it
-
-**Fallback: PostgreSQL 18 in WSL** (for offline dev or cloud issues)
-- Install: `sudo apt install -y postgresql-18 postgresql-18-pgvector`
-- Start:   `sudo pg_ctlcluster 18 main start`
-- Stop:    `sudo pg_ctlcluster 18 main stop`
-- Status:  `sudo pg_lsclusters`
-- Default port: 5432
-
-### Database Initialization (after fresh install)
-```bash
-# Create the database
-sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'admin';"
-sudo -u postgres psql -c "CREATE DATABASE scholarflow_dev;"
-
-# Enable required extensions
-sudo -u postgres psql -d scholarflow_dev -c "CREATE EXTENSION IF NOT EXISTS vector;"
-sudo -u postgres psql -d scholarflow_dev -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
-
-# Run migrations (overriding DATABASE_URL for local introspection)
-DATABASE_URL="postgres://postgres:admin@localhost:5432/scholarflow_dev" yarn db:migrate
-
-# Generate client and seed
-yarn db:generate --sql
-DATABASE_URL="postgres://postgres:admin@localhost:5432/scholarflow_dev" yarn db:seed
-```
+- Both `.env` (local) and `.env.production` (deployed) point at the SAME
+  cloud database — any local `yarn dev:backend` reads/writes production data.
 
 ### Environment Strategy
-- `.env` → Local development (`DIRECT_DATABASE_URL = postgres://postgres:admin@localhost:5432/scholarflow_dev`)
-- `.env.production` → Cloud/Production (`DIRECT_DATABASE_URL` points to Prisma Cloud or deployed DB)
+- `.env` → same cloud DB (Accelerate URL + direct URL)
+- `.env.production` → same cloud DB (deployed backend)
 - The PG adapter picks up `DIRECT_DATABASE_URL` from whichever `.env` is loaded
 - Never commit `.env` or `.env.production` (already in `.gitignore`)
 
 ### Migration Discipline
-- ALWAYS use `yarn db:migrate` — never `prisma db push`
-- Fresh local DB = all migrations apply cleanly → no drift
-- If drift appears locally: create reconciliation migration via `prisma migrate dev --create-only --name <name>`
-- If drift appears on cloud: create a reconciliation migration, do NOT reset
+- ALWAYS use migrations — never `prisma db push`
 - `prisma.config.ts` uses `DATABASE_URL` for migration, `DIRECT_DATABASE_URL` for directUrl
 - Run `yarn db:generate --sql` after every migration
-- When `prisma migrate dev` prompts for a new migration name (no pending migrations), press Ctrl+C and use `prisma migrate dev --create-only --name <name>` instead, then `prisma migrate deploy` to apply
+- `prisma migrate dev` needs a shadow database; if shadow replay fails due to
+  history drift (see below), fall back to writing the migration SQL by hand
+  into `prisma/migrations/<timestamp>_<name>/migration.sql`, then
+  `yarn prisma migrate deploy` (deploy does NOT use a shadow DB and only runs
+  pending migrations).
 
 ### Migration Drift (learned the hard way)
-The schema in `schema.prisma` has accumulated columns and tables that were added to the production database via `prisma db push` (bypassing migration history). This causes `ColumnNotFound` errors when migrating a new database. Detection:
-```bash
-# Compare current DB columns with schema
-psql "postgres://postgres:admin@localhost:5432/scholarflow_dev" -At -c "SELECT column_name FROM information_schema.columns WHERE table_name = '<ModelName>' AND table_schema = 'public' ORDER BY ordinal_position;"
-```
-Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `DATABASE_URL` pointing to the drift-free database. Review the generated SQL carefully — it may contain destructive operations (column drops, type changes) if the schema diverged. Apply with `prisma migrate deploy`.
+The schema in `schema.prisma` has accumulated columns and tables that were
+added to the shared database via `prisma db push` (bypassing migration
+history). This makes `prisma migrate dev` fail ("relation ... does not
+exist" while replaying history in the shadow DB). Detection: run `migrate
+dev --create-only` and read the error; or compare live columns against the
+schema with psql against the DIRECT_DATABASE_URL. Fix options:
+1. **Best for additive changes (tables/columns that don't exist yet):**
+   write the migration SQL by hand and `prisma migrate deploy`.
+2. For reconciliations: `prisma migrate dev --create-only --name
+   reconcile_schema_drift` against a drift-free scratch DB, review the
+   generated SQL carefully (may contain destructive ops), then `migrate
+   deploy`.
 
 ### Adapter Configuration
 - Adapter: `@prisma/adapter-pg` with `pg` driver (TCP connection pooling)
 - Connection: passes `DIRECT_DATABASE_URL` to adapter
-- Works with any standard `postgres://` URL (local, cloud, any provider)
+- Works with any standard `postgres://` URL (cloud or any provider)
 - Pooling: `pg` driver pools TCP connections natively (no extra config needed)
 - DO NOT use `@prisma/adapter-ppg` — no HTTP keep-alive, 1500ms+ per query with cloud DB latency from Bangladesh
 
@@ -837,7 +821,9 @@ Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `
 - Uses `@prisma/adapter-pg` with `PrismaPg` adapter (imported from generated client)
 - Default password for all demo users: `password123`
 - Demo users: admin@scholarflow.com, researcher@scholarflow.com, pro.researcher@scholarflow.com, teamlead@scholarflow.com
-- Must override `DATABASE_URL` + `DIRECT_DATABASE_URL` to local URL when seeding local DB (WSL fallback) or Prisma Cloud URLs when seeding cloud DB
+- Seeds the SHARED cloud DB — `.env` must have cloud `DATABASE_URL` +
+  `DIRECT_DATABASE_URL` (it does by default). Never seed against a scratch
+  DB and expect data to appear locally.
 - **Plan catalog (learned the hard way):** the checkout webhook resolves plans by
   `stripePriceId` then code `{tier}_{interval}`. `seed.js` creates only
   free/pro/institutional (no price IDs) — running it leaves the DB without
@@ -848,10 +834,10 @@ Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `
   The 2026-08-09 incident: user's Pro trial was never granted for exactly this.
 
 ### Performance Verification Workflow
-1. Ensure local PG18 is running: `sudo pg_ctlcluster 18 main start`
-2. Start backend: `yarn dev:backend`
-3. Hit any DB endpoint from dashboard or curl
-4. Terminal shows `[SLOW QUERY] {duration}ms` for any query >50ms
-5. On localhost: expect <10ms (vs 240ms to US East)
-6. On deployed US East backend: expect <50ms
-7. If >50ms with local DB, check for missing indexes or N+1 queries
+1. Start backend: `yarn dev:backend` (connects to the shared cloud DB)
+2. Hit any DB endpoint from dashboard or curl
+3. Terminal shows `[SLOW QUERY] {duration}ms` for any query >50ms
+4. From Bangladesh against US-East cloud DB: expect 100-250ms per query
+   (network-bound); on the deployed US-East backend: expect <50ms
+5. If a query is slow even on the deployed backend, check for missing
+   indexes or N+1 queries
