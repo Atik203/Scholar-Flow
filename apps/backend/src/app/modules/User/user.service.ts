@@ -927,14 +927,16 @@ export const userService = {
   generateTwoFactor: async (userId: string) => {
     const user = await prisma.user.findFirst({
       where: { id: userId, isDeleted: false },
-      select: { email: true },
+select: { email: true },
     });
     if (!user) throw new ApiError(404, "User not found");
 
+    const secret = generateTotpSecret();
+
     await prisma.user.update({
       where: { id: userId },
-      data: {
-        twoFactorSecret: encryptTotpSecret(secret),
+      data: {
+        twoFactorSecret: encryptTotpSecret(secret),
         twoFactorEnabled: false,
       },
     });
