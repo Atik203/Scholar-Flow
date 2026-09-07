@@ -28,9 +28,12 @@ import {
   useGeneratePaperInsightMutation,
   useGetPaperInsightsQuery,
   useGetAiProvidersQuery,
+  type AiProviderModel,
+  type AiProvidersResponse,
+  type PaperInsightsResponse,
 } from "@/redux/api/paperApi";
 import { Bot, MessageCircle, Send, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Component, type KeyboardEvent, useEffect, useState } from "react";
 
 interface AiInsightsPanelProps {
   paperId: string;
@@ -44,12 +47,21 @@ interface ChatMessage {
   timestamp: string;
 }
 
-export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
-  const [prompt, setPrompt] = useState("");
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  // Empty until the provider catalog loads — no hardcoded model default
-  const [selectedModel, setSelectedModel] = useState("");
+type InsightsData = PaperInsightsResponse | undefined;
+type InsightsError = ReturnType<typeof useGetPaperInsightsQuery>["error"];
+type GenerateInsight = ReturnType<typeof useGeneratePaperInsightMutation>[0];
+type RefetchInsights = ReturnType<
+  typeof useGetPaperInsightsQuery
+>["refetch"];
 
+interface AiInsightsPanelState {
+  prompt: string;
+  selectedThreadId: string | null;
+}
+
+export function AiInsightsPanel(props: AiInsightsPanelProps) {
+  const { paperId } = props;
+  const [selectedModel, setSelectedModel] = useState("");
   const {
     data: insightsData,
     isLoading: isLoadingInsights,
@@ -65,7 +77,6 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
   const availableModels =
     aiProvidersData?.providers?.flatMap((p) => p.models) ?? [];
 
-  // Default to the first catalog model once providers load
   useEffect(() => {
     if (
       availableModels.length > 0 &&
@@ -75,7 +86,107 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
     }
   }, [availableModels, selectedModel]);
 
-  // Get current thread messages
+  return (
+    <AiInsightsPanelView
+      {...props}
+      insightsData={insightsData}
+      isLoadingInsights={isLoadingInsights}
+      insightsError={insightsError}
+      refetchInsights={refetchInsights}
+      generateInsight={generateInsight}
+      isGenerating={isGenerating}
+      availableModels={availableModels}
+      selectedModel={selectedModel}
+      setSelectedModel={setSelectedModel}
+    />
+  );
+}
+
+interface AiInsightsPanelViewProps extends AiInsightsPanelProps {
+  insightsData: InsightsData;
+  isLoadingInsights: boolean;
+  insightsError: InsightsError;
+  refetchInsights: RefetchInsights;
+  generateInsight: GenerateInsight;
+  isGenerating: boolean;
+  availableModels: AiProviderModel[];
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+}
+
+class AiInsightsPanelView extends Component<
+  AiInsightsPanelViewProps,
+  AiInsightsPanelState
+> {
+  public state: AiInsightsPanelState = {
+    prompt: "",
+    selectedThreadId: null,
+  };
+
+  private handleSendMessage = async () => {
+    const { paperId, generateInsight, refetchInsights, selectedModel } =
+      this.props;
+    const { prompt, selectedThreadId } = this.state;
+    if (!prompt.trim()) return;
+
+    const userPrompt = prompt.trim();
+    this.setState({ prompt: "" });
+
+    try {
+      const result = await generateInsight({
+        paperId,
+        input: {
+          message: userPrompt,
+          threadId: selectedThreadId || undefined,
+          model: selectedModel || undefined,
+        },
+      }).unwrap();
+
+      if (!selectedThreadId) {
+        this.setState({ selectedThreadId: result.threadId });
+      }
+
+      refetchInsights();
+      showSuccessToast("Insight generated successfully");
+    } catch (error: any) {
+      showErrorToast(
+        error?.data?.message || "Failed to generate insight. Please try again."
+      );
+    }
+  };
+
+  private handleKeyPress = (event: KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      this.handleSendMessage();
+    }
+  };
+
+  private startNewConversation = () => {
+    this.setState({ selectedThreadId: null });
+  };
+
+  private formatMessageTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  public render() {
+    const {
+      paperId,
+      paperTitle,
+      insightsData,
+      isLoadingInsights,
+      insightsError,
+      isGenerating,
+      availableModels,
+      selectedModel,
+      setSelectedModel,
+    } = this.props;
+    const { prompt, selectedThreadId } = this.state;
+
   const currentThread = insightsData?.threads?.find(
     (thread) => thread.id === selectedThreadId
   );
@@ -90,55 +201,6 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
           timestamp: msg.createdAt,
         }))
       : [];
-
-  const handleSendMessage = async () => {
-    if (!prompt.trim()) return;
-
-    const userPrompt = prompt.trim();
-    setPrompt("");
-
-    try {
-      const result = await generateInsight({
-        paperId,
-        input: {
-          message: userPrompt,
-          threadId: selectedThreadId || undefined,
-          model: selectedModel || undefined,
-        },
-      }).unwrap();
-
-      // If no thread was selected, set the new thread as selected
-      if (!selectedThreadId) {
-        setSelectedThreadId(result.threadId);
-      }
-
-      // Refetch insights to get updated data
-      refetchInsights();
-      showSuccessToast("Insight generated successfully");
-    } catch (error: any) {
-      showErrorToast(
-        error?.data?.message || "Failed to generate insight. Please try again."
-      );
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  const startNewConversation = () => {
-    setSelectedThreadId(null);
-  };
-
-  const formatMessageTime = (timestamp: string) => {
-    return new Date(timestamp).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   if (isLoadingInsights) {
     return (
@@ -194,7 +256,7 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
             <Button
               variant="outline"
               size="sm"
-              onClick={startNewConversation}
+              onClick={this.startNewConversation}
               className="text-xs"
             >
               <MessageCircle className="h-3 w-3 mr-1" />
@@ -216,7 +278,7 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
                   {insightsData.threads.map((thread) => (
                     <button
                       key={thread.id}
-                      onClick={() => setSelectedThreadId(thread.id)}
+                      onClick={() => this.setState({ selectedThreadId: thread.id })}
                       className={cn(
                         "w-full text-left p-2 rounded text-xs hover:bg-accent transition-colors",
                         selectedThreadId === thread.id
@@ -270,7 +332,7 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
                             {message.role === "user" ? "You" : "AI Assistant"}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {formatMessageTime(message.timestamp)}
+                            {this.formatMessageTime(message.timestamp)}
                           </span>
                         </div>
                         <div
@@ -300,13 +362,13 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
                 <Input
                   placeholder="Ask a question about this paper..."
                   value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  onKeyPress={handleKeyPress}
+                  onChange={(e) => this.setState({ prompt: e.target.value })}
+                  onKeyPress={this.handleKeyPress}
                   disabled={isGenerating}
                   className="flex-1"
                 />
                 <Button
-                  onClick={handleSendMessage}
+                  onClick={this.handleSendMessage}
                   disabled={!prompt.trim() || isGenerating}
                   size="sm"
                 >
@@ -328,4 +390,5 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
       </CardContent>
     </Card>
   );
+  }
 }
