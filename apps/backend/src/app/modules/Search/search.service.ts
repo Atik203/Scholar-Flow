@@ -96,6 +96,31 @@ async function cachedExternalJson<T>(
 }
 
 /**
+ * Cached plain-text GET (arXiv returns Atom XML, not JSON — the json
+ * variant throws on it). Returns null on any failure; callers degrade.
+ */
+async function cachedExternalText(
+  cacheKey: string,
+  url: string,
+  ttlMs = EXTERNAL_CACHE_TTL_MS
+): Promise<string | null> {
+  const hit = externalCache.get(cacheKey);
+  if (hit && Date.now() - hit.at < ttlMs) return hit.data as string;
+
+  const res = await fetchWithTimeout(url);
+  if (!res || !res.ok) return null;
+
+  let text: string;
+  try {
+    text = await res.text();
+  } catch {
+    return null;
+  }
+  externalCache.set(cacheKey, { at: Date.now(), data: text });
+  return text;
+}
+
+/**
  * arXiv export API returns Atom XML with a feed-level <title> ("arXiv Query:
  * ...") before the entries — every field is parsed from <entry> blocks only,
  * mirroring the single-entry parser in the Import module.
@@ -246,7 +271,7 @@ async function fetchArxivFeed(
       ? `https://export.arxiv.org/api/query?${query}&start=${start}&max_results=${limit}&sortBy=submittedDate&sortOrder=descending`
       : `https://export.arxiv.org/api/query?${query}`;
   const cacheKey = `arxiv:${category ?? "recent"}:${start}:${limit}`;
-  const xml = await cachedExternalJson<string>(cacheKey, url);
+  const xml = await cachedExternalText(cacheKey, url);
   if (!xml) return [];
 
   return parseArxivEntries(xml)
@@ -277,7 +302,7 @@ async function fetchArxivSearch(
     `https://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(keyword)}` +
     `&start=0&max_results=${limit}&sortBy=relevance`;
   const cacheKey = `arxiv-search:${keyword.toLowerCase()}:${limit}`;
-  const xml = await cachedExternalJson<string>(cacheKey, url);
+  const xml = await cachedExternalText(cacheKey, url);
   if (!xml) return [];
 
   return parseArxivEntries(xml)
