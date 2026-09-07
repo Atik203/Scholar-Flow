@@ -97,6 +97,18 @@ export const personalAnalyticsService = {
   },
 
   async startReadingSession(userId: string, paperId?: string) {
+    // Resolve the paper's workspace so workspace analytics can see the
+    // event (paper_view/reading sessions were previously invisible there
+    // because workspaceId was never populated).
+    const workspaceId = paperId
+      ? (
+          await prisma.paper.findFirst({
+            where: { id: paperId, isDeleted: false },
+            select: { workspaceId: true },
+          })
+        )?.workspaceId ?? undefined
+      : undefined;
+
     // Create a "reading_session" event with units=0; client will PATCH on stop.
     return prisma.usageEvent.create({
       data: {
@@ -104,6 +116,61 @@ export const personalAnalyticsService = {
         kind: "reading_session",
         units: 0,
         paperId,
+        ...(workspaceId ? { workspaceId } : {}),
+      },
+    });
+  },
+
+  /**
+   * Record a paper view (kind "paper_view", units=1, workspaceId populated).
+   *
+   * Access-scoped: only counts papers the user owns or shares an active
+   * workspace with — mirrors the trending/recommendations scope. Deduped
+   * to one event per user+paper per rolling 24h so refreshes don't inflate
+   * the "papers read" stat.
+   */
+  async recordPaperView(userId: string, paperId: string) {
+    const paper = await prisma.paper.findFirst({
+      where: {
+        id: paperId,
+        isDeleted: false,
+        OR: [
+          { uploaderId: userId },
+          {
+            workspace: {
+              isDeleted: false,
+              OR: [
+                { ownerId: userId },
+                { members: { some: { userId, isDeleted: false } } },
+              ],
+            },
+          },
+        ],
+      },
+      select: { id: true, workspaceId: true },
+    });
+    if (!paper) return null;
+
+    const windowStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const existing = await prisma.usageEvent.findFirst({
+      where: {
+        userId,
+        paperId: paper.id,
+        kind: "paper_view",
+        createdAt: { gte: windowStart },
+        isDeleted: false,
+      },
+      select: { id: true },
+    });
+    if (existing) return existing;
+
+    return prisma.usageEvent.create({
+      data: {
+        userId,
+        paperId: paper.id,
+        workspaceId: paper.workspaceId,
+        kind: "paper_view",
+        units: 1,
       },
     });
   },
