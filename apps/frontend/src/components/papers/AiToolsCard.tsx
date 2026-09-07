@@ -102,6 +102,12 @@ function renderToolOutput(tool: Tool, data: unknown): React.ReactNode {
       return <span className="whitespace-pre-wrap">{raw}</span>;
     }
   }
+  if (tool === "review") {
+    const review = obj?.review;
+    if (typeof review === "string" && review.trim()) {
+      return <span className="whitespace-pre-wrap">{review}</span>;
+    }
+  }
   return typeof data === "string"
     ? data
     : JSON.stringify(data, null, 2);
