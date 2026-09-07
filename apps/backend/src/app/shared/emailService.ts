@@ -64,15 +64,24 @@ class EmailService {
 
   /**
    * Send a generic email.
-   * Dispatches via Resend when RESEND_API_KEY is set; falls back to SMTP/Gmail.
+   * Dispatches via Resend when RESEND_API_KEY is set; falls back to SMTP/Gmail
+   * when Resend rejects the send (e.g. unverified recipient domain 403) —
+   * per the dispatcher contract, delivery must not silently die on Resend.
    */
   async sendEmail(options: EmailOptions): Promise<void> {
-    try {
-      if (this.useResend && this.resendApiKey) {
+    if (this.useResend && this.resendApiKey) {
+      try {
         await this._sendViaResend(options);
         return;
+      } catch (resendError) {
+        console.error(
+          "Resend delivery failed, falling back to SMTP:",
+          (resendError as Error)?.message || resendError
+        );
       }
+    }
 
+    try {
       const mailOptions = {
         from: `"ScholarFlow" <${config.emailSender.email}>`,
         to: options.to,
