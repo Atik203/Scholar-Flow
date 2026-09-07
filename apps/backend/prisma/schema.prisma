@@ -215,6 +215,9 @@ model User {
   // Phase 10 — Global AI assistant conversations
   aiConversations AIConversation[]
 
+  // Email sharing — papers shared to an email with view/edit permission
+  paperSharesShared PaperShare[] @relation("PaperShareSharedBy")
+
   // Phase 3 - User preferences
   preference UserPreference?
 
@@ -406,6 +409,7 @@ model Paper {
   aiKeyPoints       AIKeyPoint[]
   aiMetadata        AIMetadata?
   aiContextCaches   AIContextCache[]
+  paperShares       PaperShare[]
 
   // New Phase 2 features
   citationExports   CitationExport[]
@@ -425,6 +429,27 @@ model Paper {
   @@index([isDraft, isDeleted]) // Filter draft papers
   @@index([doi, isDeleted]) // DOI lookups
   @@index([tags]) // Tag-based filtering (figma-make UI)
+}
+
+/**
+ * Email sharing — grants view/edit access to a paper for a specific email.
+ * One row per paper+email (upserted); soft-delete revokes access.
+ */
+model PaperShare {
+  id         String   @id @default(uuid())
+  paperId    String
+  email      String
+  permission String // "view" | "edit"
+  sharedById String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  isDeleted  Boolean  @default(false)
+
+  paper    Paper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  sharedBy User  @relation("PaperShareSharedBy", fields: [sharedById], references: [id])
+
+  @@unique([paperId, email])
+  @@index([email, isDeleted])
 }
 
 model PaperFile {
