@@ -46,6 +46,73 @@ const TOOLS: Array<{ key: Tool; label: string; icon: typeof PenLine }> = [
   { key: "review", label: "Literature Review", icon: BookOpenCheck },
 ];
 
+/**
+ * Per-tool output renderer. Server text is displayed as plain text (React
+ * escapes everything) — never inject raw model output as HTML.
+ */
+function renderToolOutput(tool: Tool, data: unknown): React.ReactNode {
+  const obj = data as Record<string, unknown> | null;
+  if (tool === "rewrite") {
+    const rewritten = obj?.rewritten;
+    if (typeof rewritten === "string" && rewritten.trim()) {
+      return <span className="whitespace-pre-wrap">{rewritten}</span>;
+    }
+  }
+  if (tool === "compare") {
+    const raw = obj?.comparison;
+    if (typeof raw === "string" && raw.trim()) {
+      try {
+        const parsed: any = JSON.parse(raw);
+        const cmp = parsed?.comparison ?? parsed;
+        const sections: Array<[string, unknown]> = [
+          ["Agreements", cmp?.agreements],
+          ["Disagreements", cmp?.disagreements],
+          ["Complementary findings", cmp?.complementary_findings],
+          ["Conflicting conclusions", cmp?.conflicting_conclusions],
+        ];
+        const hasAny = sections.some(
+          ([, value]) => Array.isArray(value) && value.length > 0,
+        );
+        if (hasAny) {
+          return (
+            <div className="space-y-3">
+              {sections.map(
+                ([label, value]) =>
+                  Array.isArray(value) && value.length > 0 ? (
+                    <div key={label}>
+                      <p className="font-medium text-foreground">{label}</p>
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        {value.map((item, i) => (
+                          <li key={i}>
+                            {typeof item === "string"
+                              ? item
+                              : JSON.stringify(item)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null,
+              )}
+            </div>
+          );
+        }
+      } catch {
+        // not JSON — fall through to plain text
+      }
+      return <span className="whitespace-pre-wrap">{raw}</span>;
+    }
+  }
+  if (tool === "review") {
+    const review = obj?.review;
+    if (typeof review === "string" && review.trim()) {
+      return <span className="whitespace-pre-wrap">{review}</span>;
+    }
+  }
+  return typeof data === "string"
+    ? data
+    : JSON.stringify(data, null, 2);
+}
+
 interface AiToolsCardProps {
   paperId: string;
   paperTitle: string;
@@ -57,7 +124,7 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   const [tone, setTone] = useState("");
   const [otherPaperId, setOtherPaperId] = useState("");
   const [topic, setTopic] = useState("");
-  const [output, setOutput] = useState<string | null>(null);
+  const [output, setOutput] = useState<unknown>(null);
 
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     limit: 100,
@@ -74,12 +141,8 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   const run = async (fn: () => Promise<unknown>) => {
     setOutput(null);
     try {
-      const result = await fn();
-      setOutput(
-        typeof result === "string"
-          ? result
-          : JSON.stringify(result, null, 2)
-      );
+      const result = (await fn()) as any;
+      setOutput(result?.data ?? result);
     } catch {
       showErrorToast("AI tool failed", "Please try again");
     }
@@ -210,10 +273,10 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
           </Button>
         </div>
 
-        {output && (
-          <pre className="whitespace-pre-wrap rounded-lg border bg-muted/40 p-4 text-sm max-h-80 overflow-y-auto">
-            {output}
-          </pre>
+        {output !== null && (
+          <div className="rounded-lg border bg-muted/40 p-4 text-sm max-h-80 overflow-y-auto">
+            {renderToolOutput(tool, output)}
+          </div>
         )}
       </CardContent>
     </Card>
