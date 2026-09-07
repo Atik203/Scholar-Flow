@@ -40,7 +40,7 @@ This project supports multiple AI models with prefix caching:
 ## Product
 Scholar-Flow is an AI-powered research paper SaaS collaboration platform.
 Target users: researchers, students, professors, academic teams.
-Version: 1.3.1 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
+Version: 1.3.4 — Next.js 16, React 19.2, better-auth, Prisma 7.8.0
 
 Core features:
 - Research paper upload with AI metadata extraction (title/author/abstract)
@@ -667,7 +667,7 @@ yarn lint  → runs eslint . (not next lint — removed in v16)
 - Next.js 16 migration ✅ (Async APIs, proxy.ts, React Compiler, Turbopack default)
 - better-auth migration ✅ (replaced NextAuth.js v4)
 - Prisma v7 migration ✅ (driver adapter required)
-- Current focus: Release 1.3.1 — AI architecture overhaul, Vercel crash fix, build fixes
+- Current focus: Release 1.3.4 — Discover live research feeds, editor alignment, permission-backed email sharing
 - Framework: Next.js 16, React 19.2, Turbopack default, Prisma 7.8.0
 - React Compiler: enabled (do not add manual memoization)
 
