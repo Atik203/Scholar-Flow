@@ -13,13 +13,14 @@ import { showSuccessToast, showErrorToast } from "@/components/providers/ToastPr
 import { motion } from "motion/react";
 import { ArrowLeft, BookOpen, Calendar, Check, Eye, FileText, Globe, Grid3X3, LayoutList, Loader2, Lock, MoreHorizontal, Plus, Search, Star, Trash2, UserPlus, Users, X } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { use, useState } from "react";
 
 function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
 
 export default function CollectionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
+  const router = useRouter();
   if (!resolvedParams?.id) notFound();
 
   const { data: collection, isLoading } = useGetCollectionQuery(resolvedParams.id);
@@ -38,6 +39,20 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ id:
   const [addSearch, setAddSearch] = useState("");
   const [bulkMode, setBulkMode] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteCollection = async () => {
+    setDeleting(true);
+    try {
+      await deleteCollection(resolvedParams.id).unwrap();
+      showSuccessToast("Collection deleted");
+      router.push("/dashboard/collections");
+    } catch (e: any) {
+      showErrorToast(e?.data?.message || "Failed to delete collection");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   if (!collection) return <div className="text-center py-20"><p className="text-destructive">Collection not found</p><Button asChild variant="outline"><Link href="/dashboard/collections"><ArrowLeft className="mr-2 h-4 w-4" />Back</Link></Button></div>;
@@ -88,7 +103,7 @@ export default function CollectionDetailPage({ params }: { params: Promise<{ id:
           <AlertDialog>
             <AlertDialogTrigger asChild><Button variant="outline" size="sm"><Trash2 className="h-4 w-4 text-destructive" /></Button></AlertDialogTrigger>
             <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Collection?</AlertDialogTitle><AlertDialogDescription>This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
-              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteCollection(resolvedParams.id)}>Delete</AlertDialogAction></AlertDialogFooter>
+              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction disabled={deleting} onClick={handleDeleteCollection}>{deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}</AlertDialogAction></AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>

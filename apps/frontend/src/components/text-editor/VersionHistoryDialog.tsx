@@ -2,6 +2,16 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -13,13 +23,17 @@ import {
   useGetPaperVersionsQuery,
   useRestorePaperVersionMutation,
 } from "@/redux/api/paperApi";
-import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { showErrorToast } from "@/components/providers/ToastProvider";
 import { History, RotateCcw, Clock, FileText } from "lucide-react";
+import { useState } from "react";
 
 interface VersionHistoryDialogProps {
   paperId: string;
   open: boolean;
   onClose: () => void;
+  // Called after the restore succeeds; the parent refetches the paper and
+  // re-seeds the editor instead of doing a hard page reload.
+  onRestored: () => void;
 }
 
 function formatBytes(bytes: number | null): string {
@@ -41,21 +55,27 @@ export function VersionHistoryDialog({
   paperId,
   open,
   onClose,
+  onRestored,
 }: VersionHistoryDialogProps) {
   const { data: versions, isLoading } = useGetPaperVersionsQuery(paperId);
   const [restoreVersion, { isLoading: isRestoring }] =
     useRestorePaperVersionMutation();
+  // Version waiting for explicit confirmation — restoring overwrites the
+  // current editor content, so never do it on a single click.
+  const [pendingRestore, setPendingRestore] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
 
-  const handleRestore = async (versionId: string) => {
+  const handleRestore = async () => {
+    if (!pendingRestore) return;
     try {
-      await restoreVersion({ paperId, versionId }).unwrap();
-      showSuccessToast("Version restored successfully");
+      await restoreVersion({ paperId, versionId: pendingRestore.id }).unwrap();
+      setPendingRestore(null);
       onClose();
-      window.location.reload();
+      onRestored();
     } catch (error: any) {
-      showErrorToast(
-        error?.data?.message || "Failed to restore version"
-      );
+      showErrorToast(error?.data?.message || "Failed to restore version");
     }
   };
 
@@ -115,7 +135,12 @@ export function VersionHistoryDialog({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => handleRestore(v.id)}
+                  onClick={() =>
+                    setPendingRestore({
+                      id: v.id,
+                      label: v.title || `Version ${v.version}`,
+                    })
+                  }
                   disabled={isRestoring}
                   className="flex-shrink-0"
                 >
@@ -127,6 +152,33 @@ export function VersionHistoryDialog({
           )}
         </div>
       </DialogContent>
+
+      <AlertDialog
+        open={pendingRestore !== null}
+        onOpenChange={(v) => !v && setPendingRestore(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore this version?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Restoring <strong>{pendingRestore?.label}</strong> replaces the
+              current editor content. Any unsaved changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRestoring}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void handleRestore();
+              }}
+              disabled={isRestoring}
+            >
+              {isRestoring ? "Restoring…" : "Restore"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

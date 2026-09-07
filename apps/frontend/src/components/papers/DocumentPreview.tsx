@@ -164,16 +164,6 @@ export function DocumentPreview({
 
   const effectiveType = getEffectiveType();
 
-  // Debug logging to understand MIME type detection
-  console.log("[DocumentPreview] Debug info:", {
-    mimeType,
-    fileExtension,
-    effectiveType,
-    fileUrl: fileUrl?.substring(0, 100) + "...",
-    fileName,
-    originalFilename,
-  });
-
   const handleDownload = () => {
     const link = document.createElement("a");
     link.href = fileUrl;
@@ -221,14 +211,35 @@ export function DocumentPreview({
 
       const arrayBuffer = await response.arrayBuffer();
 
-      // Convert DOCX to HTML
+      // Convert DOCX to HTML — the result is user-uploaded content rendered
+      // via dangerouslySetInnerHTML, so strip anything dangerous first.
       const result = await mammoth.convertToHtml({ arrayBuffer });
+      const sanitizedHtml = await import("sanitize-html");
 
       if (result.messages && result.messages.length > 0) {
         console.warn("DOCX conversion warnings:", result.messages);
       }
 
-      setDocxHtml(result.value);
+      setDocxHtml(
+        sanitizedHtml.default(result.value, {
+          allowedTags: [
+            "p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li",
+            "strong", "em", "u", "s", "a", "blockquote", "pre", "code",
+            "table", "thead", "tbody", "tr", "th", "td", "br", "img",
+            "span", "div", "hr", "sub", "sup", "figure", "figcaption",
+          ],
+          allowedAttributes: {
+            a: ["href", "title", "target", "rel"],
+            img: ["src", "alt", "title", "width", "height"],
+            th: ["colspan", "rowspan", "align"],
+            td: ["colspan", "rowspan", "align"],
+            span: ["style"],
+            p: ["style"],
+            div: ["style"],
+          },
+          allowedSchemes: ["http", "https", "mailto"],
+        })
+      );
     } catch (err) {
       console.error("DOCX conversion error:", err);
       console.error("File URL:", fileUrl);

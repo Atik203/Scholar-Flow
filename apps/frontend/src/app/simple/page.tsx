@@ -1,22 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { EditorSkeleton } from "@/components/text-editor/EditorSkeleton";
-import dynamic from "next/dynamic";
-
-// Lazy load the heavy TipTap SimpleEditor (reduces initial bundle by ~3.5MB)
-const SimpleEditor = dynamic(
-  () =>
-    import("@/components/tiptap-templates/simple/simple-editor").then(
-      (mod) => ({
-        default: mod.SimpleEditor,
-      })
-    ),
-  {
-    loading: () => <EditorSkeleton />,
-    ssr: false,
-  }
-);
-
+// Public TipTap template demo was a leftover scaffold — point at the
+// real editor entry instead.
 export default function Page() {
-  return <SimpleEditor />;
+  redirect("/dashboard/research/editor");
 }

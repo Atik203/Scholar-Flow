@@ -206,7 +206,7 @@ If a field cannot be determined, omit it. Use the original title if no better ti
 
     const data = (await callClaudeApi(
       this.apiKey,
-      DEFAULT_MODEL,
+      input.model || DEFAULT_MODEL,
       systemPrompt,
       userMessage,
       this.requestTimeoutMs,

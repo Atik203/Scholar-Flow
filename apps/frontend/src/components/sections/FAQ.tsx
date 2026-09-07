@@ -23,7 +23,7 @@ const faqs = [
   },
   {
     question: "What is the difference between plans?",
-    answer: "The Free plan includes 5 papers, basic search, and personal collections. Pro adds unlimited papers, AI summaries, semantic search, and 3 team members. Institutional includes unlimited everything, SSO, admin dashboard, priority support, and custom integrations. All plans include a 14-day free trial.",
+    answer: "The Free plan includes up to 10 papers, basic search, and personal collections. Pro adds unlimited papers, AI summaries, semantic search, and 5 team members. Team adds unlimited team members, SSO, admin dashboard, priority support, and custom integrations. All plans include a 14-day free trial.",
   },
   {
     question: "How accurate is the semantic search?",

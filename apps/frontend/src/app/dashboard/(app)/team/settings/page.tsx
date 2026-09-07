@@ -31,6 +31,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_SETTINGS: TeamSettings = {
@@ -85,7 +86,6 @@ export default function TeamSettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [saved, setSaved] = useState(false);
   const [newDomain, setNewDomain] = useState("");
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const [settings, setSettings] = useState<TeamSettings>(DEFAULT_SETTINGS);
   const [hydrated, setHydrated] = useState(false);
@@ -574,25 +574,15 @@ export default function TeamSettingsPage() {
                   Danger Zone
                 </h2>
                 <div className="space-y-4">
-                  <div className="p-4 bg-card rounded-lg border">
-                    <h3 className="font-medium mb-2">Archive Team</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      Archive this team to hide it from all members. You can restore it later.
-                    </p>
-                    <Button variant="outline" className="bg-yellow-500/10 text-yellow-700">
-                      Archive Team
-                    </Button>
-                  </div>
                   <div className="p-4 bg-card rounded-lg border border-red-500/30">
-                    <h3 className="font-medium mb-2">Delete Team</h3>
+                    <h3 className="font-medium mb-2">Account Deletion</h3>
                     <p className="text-muted-foreground text-sm mb-4">
-                      Permanently delete this team and all its data. This action cannot be undone.
+                      There is no standalone &quot;team&quot; to archive or delete
+                      — your team is the set of users sharing your workspaces.
+                      To delete your account, use the account settings page.
                     </p>
-                    <Button
-                      variant="destructive"
-                      onClick={() => setShowDeleteConfirm(true)}
-                    >
-                      Delete Team
+                    <Button asChild variant="destructive">
+                      <Link href="/dashboard/settings">Go to Account Settings</Link>
                     </Button>
                   </div>
                 </div>
@@ -601,68 +591,6 @@ export default function TeamSettingsPage() {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setShowDeleteConfirm(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-background rounded-xl border border-red-500/30 p-6 max-w-md w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-3 bg-red-500/20 rounded-full">
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                </div>
-                <h3 className="text-xl font-semibold">Delete Team?</h3>
-              </div>
-              <p className="text-muted-foreground mb-6">
-                This will permanently delete the team &ldquo;{settings.general?.name}
-                &rdquo; and all associated data including:
-              </p>
-              <ul className="text-muted-foreground text-sm mb-6 space-y-2">
-                <li className="flex items-center gap-2">
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                  All papers and collections
-                </li>
-                <li className="flex items-center gap-2">
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                  Member data and permissions
-                </li>
-                <li className="flex items-center gap-2">
-                  <Trash2 className="h-4 w-4 text-red-600" />
-                  Activity history and analytics
-                </li>
-              </ul>
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Delete Permanently
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

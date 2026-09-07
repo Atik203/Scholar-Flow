@@ -1,19 +1,22 @@
 "use client";
 
-import { getRoleSlug } from "./roles";
+import { getDashboardBasePath } from "./roles";
 
 /**
  * Utility functions for handling authentication redirects and navigation
  */
 
 /**
- * Get the role-based dashboard URL for a user
- * @param role - User's role
- * @returns Role-scoped dashboard path (e.g., /dashboard/researcher)
+ * Get the canonical dashboard URL for a user.
+ * Admin → /dashboard/admin, everyone else → /dashboard.
+ *
+ * Note: the legacy role-segmented URLs (/dashboard/researcher, etc.) are
+ * deprecated — the shared /dashboard layout serves all roles, and the
+ * legacy routes only exist as proxy redirects. Do not reintroduce the
+ * role slug here.
  */
 export function getRoleDashboardUrl(role?: string): string {
-  const roleSlug = getRoleSlug(role);
-  return `/dashboard/${roleSlug}`;
+  return getDashboardBasePath(role);
 }
 
 /**

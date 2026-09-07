@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
-let nextConfig: NextConfig = {
+const nextConfig = {
   // Compiler optimizations for production performance
   reactCompiler: true,
   compiler: {
@@ -43,8 +43,8 @@ let nextConfig: NextConfig = {
 
   // Image optimization configuration
   images: {
-    // Use modern image formats for better compression
-    formats: ["image/avif", "image/webp"],
+  // Use modern image formats for better compression
+  formats: ["image/avif", "image/webp"],
     // Cache optimized images for 60 seconds minimum (overrides v16 default of 4hrs)
     minimumCacheTTL: 60,
     remotePatterns: [
@@ -117,8 +117,15 @@ let nextConfig: NextConfig = {
   },
 };
 
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
-export default withBundleAnalyzer(nextConfig);
+// `next` is declared at both the repo root and this workspace, so the
+// types resolved here and inside @next/bundle-analyzer come from two
+// physically distinct (but byte-identical) copies of next@16.3.0 —
+// TS treats them as separate module identities. The cast targets the
+// wrapper's own parameter type so no phantom mismatch can surface.
+export default bundleAnalyzer(
+  nextConfig as Parameters<ReturnType<typeof withBundleAnalyzer>>[0]
+);

@@ -75,7 +75,7 @@ export default function PaymentCancelPage() {
                     <li>• Team collaboration features</li>
                     <li>• Priority customer support</li>
                     <li>• Export to all formats</li>
-                    <li>• 14-day free trial on annual plans</li>
+                    <li>• 14-day free trial on all paid plans</li>
                   </ul>
                 </div>
               </div>

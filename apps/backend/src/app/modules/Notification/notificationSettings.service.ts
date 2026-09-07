@@ -73,22 +73,17 @@ export const notificationSettingsService = {
    * UserPreference row if one does not exist.
    */
   async getPreferences(userId: string): Promise<NotificationPreferences> {
-    const pref = await prisma.userPreference.findUnique({
+    // Upsert avoids the read-then-create race: two concurrent first GETs
+    // used to hit a P2002 unique-constraint error on UserPreference.
+    const pref = await prisma.userPreference.upsert({
       where: { userId },
+      create: {
+        userId,
+        notificationPreferences: DEFAULT_PREFERENCES as unknown as object,
+      },
+      update: {},
       select: { notificationPreferences: true },
     });
-
-    if (!pref) {
-      // Create a fresh row with defaults; do not block the response.
-      await prisma.userPreference.create({
-        data: {
-          userId,
-          notificationPreferences: DEFAULT_PREFERENCES as unknown as object,
-        },
-        select: { id: true },
-      });
-      return DEFAULT_PREFERENCES;
-    }
 
     if (!pref.notificationPreferences) {
       return DEFAULT_PREFERENCES;

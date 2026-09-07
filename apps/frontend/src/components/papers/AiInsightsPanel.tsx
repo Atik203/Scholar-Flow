@@ -47,7 +47,8 @@ interface ChatMessage {
 export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
   const [prompt, setPrompt] = useState("");
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash-lite");
+  // Empty until the provider catalog loads — no hardcoded model default
+  const [selectedModel, setSelectedModel] = useState("");
 
   const {
     data: insightsData,
@@ -64,10 +65,11 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
   const availableModels =
     aiProvidersData?.providers?.flatMap((p) => p.models) ?? [];
 
+  // Default to the first catalog model once providers load
   useEffect(() => {
     if (
       availableModels.length > 0 &&
-      !availableModels.find((m) => m.value === selectedModel)
+      (!selectedModel || !availableModels.find((m) => m.value === selectedModel))
     ) {
       setSelectedModel(availableModels[0].value);
     }
@@ -101,7 +103,7 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
         input: {
           message: userPrompt,
           threadId: selectedThreadId || undefined,
-          model: selectedModel,
+          model: selectedModel || undefined,
         },
       }).unwrap();
 
@@ -114,7 +116,6 @@ export function AiInsightsPanel({ paperId, paperTitle }: AiInsightsPanelProps) {
       refetchInsights();
       showSuccessToast("Insight generated successfully");
     } catch (error: any) {
-      console.error("Failed to generate insight:", error);
       showErrorToast(
         error?.data?.message || "Failed to generate insight. Please try again."
       );

@@ -27,7 +27,7 @@ export default function WorkspaceAnalyticsPage() {
   const { data: profile } = useGetProfileQuery();
   const { data: workspacesData } = useListWorkspacesQuery({ limit: 1 });
   const firstWorkspaceId = workspacesData?.data?.[0]?.id;
-  const { data, isLoading } = useGetWorkspaceAnalyticsQuery(
+  const { data, isLoading, error } = useGetWorkspaceAnalyticsQuery(
     { workspaceId: firstWorkspaceId ?? "", timeRange },
     { skip: !firstWorkspaceId }
   );
@@ -58,6 +58,33 @@ export default function WorkspaceAnalyticsPage() {
             </p>
             <Button asChild>
               <Link href="/dashboard/workspaces">Go to workspaces</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    const status = (error as { status?: number })?.status;
+    const message =
+      status === 403
+        ? "Workspace analytics require the Team Lead role or above."
+        : "Failed to load workspace analytics.";
+    return (
+      <div className="p-6 lg:p-8">
+        <PageHeader
+          icon={<TrendingUp className="h-7 w-7 text-white" />}
+          title="Workspace Analytics"
+          description={summary?.workspace.name ?? "Team metrics"}
+        />
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-lg font-semibold mb-2">Not available</h3>
+            <p className="text-muted-foreground mb-4">{message}</p>
+            <Button asChild>
+              <Link href="/dashboard/analytics/personal">Back to personal analytics</Link>
             </Button>
           </CardContent>
         </Card>
@@ -99,7 +126,7 @@ export default function WorkspaceAnalyticsPage() {
               label="Members"
               value={summary.stats.totalMembers}
               change={`${summary.stats.activeMembers} active`}
-              trend="up"
+              trend="neutral"
               icon={<Users className="h-5 w-5" />}
               color="from-emerald-500 to-teal-600"
             />
@@ -120,8 +147,8 @@ export default function WorkspaceAnalyticsPage() {
             <StatCard
               label="Total Views"
               value={summary.stats.totalViews}
-              change={`${summary.stats.totalAnnotations} ann.`}
-              trend="up"
+              change={`${summary.stats.totalAnnotations} annotations`}
+              trend="neutral"
               icon={<Activity className="h-5 w-5" />}
               color="from-orange-500 to-red-600"
             />

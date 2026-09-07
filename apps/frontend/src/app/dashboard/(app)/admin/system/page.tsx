@@ -142,15 +142,15 @@ export default function AdminSystemPage() {
               </Suspense>
               <Suspense fallback={<Skeleton className="h-12 w-full" />}>
                 <PerformanceBar
-                  label="Disk I/O"
-                  value={metrics?.performance.disk.ioPercentage || 0}
+                  label="Storage Usage"
+                  value={metrics?.performance.disk.usagePercentage || 0}
                   isLoading={isLoading}
                 />
               </Suspense>
               <Suspense fallback={<Skeleton className="h-12 w-full" />}>
                 <PerformanceBar
-                  label="Network"
-                  value={metrics?.performance.network.bandwidth || 0}
+                  label="DB Pool Usage"
+                  value={metrics?.database.connectionPoolUsage || 0}
                   isLoading={isLoading}
                 />
               </Suspense>

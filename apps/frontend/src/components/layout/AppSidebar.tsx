@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { WorkspaceSwitcher } from "@/components/workspace/WorkspaceSwitcher";
 import {
   USER_ROLES,
-  buildRoleScopedPath,
   hasRoleAccess,
 } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
@@ -183,6 +182,7 @@ const navigationItems: SidebarItem[] = [
     icon: Microscope,
     minRole: USER_ROLES.RESEARCHER,
     items: [
+      { title: "Research Hub", path: "/dashboard/research", icon: Microscope, minRole: USER_ROLES.RESEARCHER },
       { title: "PDF Text Extraction", path: "/dashboard/research/pdf-extraction", icon: TextCursor, minRole: USER_ROLES.RESEARCHER },
       { title: "Text Editor", path: "/dashboard/research/editor", icon: FileText, minRole: USER_ROLES.RESEARCHER },
       { title: "Citations", path: "/dashboard/citations", icon: Quote, minRole: USER_ROLES.RESEARCHER },
@@ -269,6 +269,12 @@ const adminFeatures: SidebarItem[] = [
     title: "Subscriptions",
     path: "/dashboard/admin/subscriptions",
     icon: CreditCard,
+    minRole: USER_ROLES.ADMIN,
+  },
+  {
+    title: "Subscribers",
+    path: "/dashboard/admin/subscribers",
+    icon: Users,
     minRole: USER_ROLES.ADMIN,
   },
   {

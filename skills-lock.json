@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "connect-recommend": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "ddf136d2fdc3fb24d5b4b932ec60cb714e941ca8b624b5f3fe8888728e5b5563",
+      "wellKnownDigest": "sha256:02aaebe4ca5578ab043ae666d5589a819281cef2f687926266e5ee05e7b3ab84"
+    },
+    "stripe-best-practices": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "4a5d49489d8ca7b65d96731dd3662cbc838d5aa78b27028e3adf8abd6916cc23",
+      "wellKnownDigest": "sha256:d1db9c26a3103e8173eeaf4c31873b867132dbac124447da53af78c1d5112d5f"
+    },
+    "stripe-directory": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "58d8c458beaa92877ed2f0a622af65a0a91e2804efcc4188ac87a35780015361",
+      "wellKnownDigest": "sha256:57b0fec4d8df8ce60de8e323acfd92f91b79171169b5b9a1c1dd04dd9759544c"
+    },
+    "stripe-docs": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "7f8b47057d65cdc55c60ed870bf6ad508907e5d981fca77781b4964de54d985f",
+      "wellKnownDigest": "sha256:a2d407ba808bce05731557fa7b92022376545e363a8958012253a3b82def71a6"
+    },
+    "stripe-projects": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "d75347f4e465c0e78032f7cb28b7bcd406cde9a34826b780958b059423fba778",
+      "wellKnownDigest": "sha256:1d0e134fc0b0e97e63b6f6078edeb6a6f802744a62485a05bef264fd89df1269"
+    },
+    "upgrade-stripe": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "f4aa17ac21714309e3cafa4eb15b032b3d8ff8623c8731944ccbcaf6766fdb49",
+      "wellKnownDigest": "sha256:e90e738392f12ffefce8c18a57af6f4c3337a398baf1cc73900bdcc41a596308"
+    }
+  }
+}

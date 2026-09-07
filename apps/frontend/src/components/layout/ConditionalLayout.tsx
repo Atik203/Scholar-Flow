@@ -24,10 +24,6 @@ export function isDashboardRoute(pathname: string): boolean {
     "/analytics",
     "/search",
     "/trends",
-    "/dashboard/researcher",
-    "/dashboard/pro-researcher",
-    "/dashboard/team-lead",
-    "/dashboard/admin",
   ];
   return dashboardPages.some(
     (page) => pathname === page || pathname.startsWith(page + "/")

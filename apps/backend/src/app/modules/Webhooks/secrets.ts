@@ -7,9 +7,18 @@
  * UI can show the signature header for the most recent test delivery.
  */
 
-import { createHash, createHmac } from "crypto";
+import { createHmac, randomBytes } from "crypto";
 
-const PEPPER = () => process.env.WEBHOOK_PEPPER || "scholarflow-dev-pepper";
+// Fail fast in production when the pepper is missing: without it, every
+// stored secret hash is salted with a publicly-known fallback key.
+const PEPPER = (): string => {
+  const env = process.env.WEBHOOK_PEPPER;
+  if (env) return env;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("WEBHOOK_PEPPER is not configured");
+  }
+  return "scholarflow-dev-pepper";
+};
 
 export const hashWebhookSecret = (raw: string): string => {
   return createHmac("sha256", PEPPER()).update(raw).digest("hex");
@@ -27,11 +36,9 @@ export const generateWebhookSecret = (): {
   prefix: string;
   hash: string;
 } => {
-  // whsec_ + 40 hex chars (20 bytes) — looks like Stripe's prefix convention
-  const random = createHash("sha256")
-    .update(`${Date.now()}-${Math.random()}-${PEPPER()}`)
-    .digest("hex")
-    .slice(0, 40);
+  // whsec_ + 40 hex chars (20 bytes) — looks like Stripe's prefix convention.
+  // crypto.randomBytes — was Date.now()+Math.random() (predictable).
+  const random = randomBytes(20).toString("hex");
   const raw = `whsec_${random}`;
   return {
     raw,
@@ -48,10 +55,7 @@ export const generateApiKey = (): {
   prefix: string;
   hash: string;
 } => {
-  const random = createHash("sha256")
-    .update(`${Date.now()}-${Math.random()}-${PEPPER()}`)
-    .digest("hex")
-    .slice(0, 40);
+  const random = randomBytes(20).toString("hex");
   const raw = `sf_live_${random}`;
   return {
     raw,

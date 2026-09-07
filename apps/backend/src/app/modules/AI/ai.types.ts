@@ -41,6 +41,8 @@ export interface AiSummaryRequest {
   workspaceId?: string;
   uploaderId?: string;
   timeoutMs?: number;
+  /** Requested model — providers fall back to their default when omitted */
+  model?: string;
 }
 
 export interface AiSummaryResult {

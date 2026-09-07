@@ -5,6 +5,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -370,8 +371,22 @@ export default function AdminUsersPage() {
                         <TableCell>{user.paperCount}</TableCell>
                         <TableCell>
                           {user.subscriptionStatus ? (
-                            <span className="text-xs">
-                              {user.planName || "N/A"}
+                            <span className="flex flex-col items-start gap-1">
+                              <span className="text-xs">
+                                {user.planName || "N/A"}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] px-1.5 py-0 ${
+                                  user.subscriptionStatus === "ACTIVE"
+                                    ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                                    : user.subscriptionStatus === "PAST_DUE"
+                                      ? "border-amber-500/40 text-amber-600 dark:text-amber-400"
+                                      : "text-muted-foreground"
+                                }`}
+                              >
+                                {user.subscriptionStatus}
+                              </Badge>
                             </span>
                           ) : (
                             <span className="text-xs text-muted-foreground">

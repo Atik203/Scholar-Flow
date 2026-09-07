@@ -104,9 +104,8 @@ yarn dev:turbo           → start both apps via Turborepo
 yarn dev:frontend        → frontend only
 yarn dev:backend         → backend only
 yarn build               → production build (both)
-yarn lint                → ESLint (both)
+yarn lint                → ESLint (both, flat configs)
 yarn type-check          → TypeScript check (both, needs build first)
-yarn test                → test suite
 yarn format              → Prettier
 yarn clean               → clean all build artifacts
 yarn db:migrate          → prisma migrate dev
@@ -115,6 +114,9 @@ yarn db:studio           → Prisma Studio
 yarn db:seed             → seed database
 yarn db:reset            → prisma migrate reset --force
 yarn setup               → install + generate (use for fresh setup)
+
+Note: `yarn test` was removed (test suites deleted by decision — tests are
+not used; CI runs lint + type-check + build only).
 
 ---
 
@@ -168,6 +170,80 @@ Customer portal accessed via backend endpoint only.
 Webhook handlers MUST be idempotent (safe to replay).
 Test mode and live mode keys are different — never mix them.
 Before touching billing code: read the webhook handler first.
+Subscription expiry/grace downgrades run in subscriptionSweeper.ts (hourly
+node-cron, SUB_GRACE_DAYS default 7) — never rely on webhooks alone for
+downgrades: Stripe keeps failed payments in PAST_DUE dunning for days/weeks.
+
+## Architecture Learnings (Release 1.3.2 hardening)
+
+### Canonical dashboard URLs (no role segments)
+- All dashboard links/redirects MUST be canonical `/dashboard/*` (admin:
+  `/dashboard/admin`). The legacy `/dashboard/{roleSlug}` routes are REMOVED;
+  `proxy.ts` keeps only pure back-compat redirects for old bookmarks.
+- `getDashboardBasePath(role)` in `lib/auth/roles.ts` is the single source of
+  truth. Do NOT reintroduce `buildRoleScopedPath`/`getRoleSlug`-style helpers.
+
+### Global search access control
+- Papers search (raw SQL + count) MUST filter: `uploaderId = user` OR
+  workspace where user is owner/active member (non-deleted).
+- People search is ADMIN-ONLY and scoped to the requester's team members
+  (users sharing a workspace); non-admins silently get empty results —
+  never 403 (the "all" search runs all branches in one request).
+- `GET /search/trending` + `/recommendations` require auth and are scoped
+  to accessible papers; `select` display fields only (no metadata rows).
+
+### AI feature rules
+- `/api/ai/compare` + `/api/ai/literature-review` MUST verify access to each
+  paper (owner or workspace member) before processing — 403 otherwise.
+- AI-generated text rendered via `dangerouslySetInnerHTML` MUST be
+  HTML-escaped first (KeyPointsCard pattern) — never inject raw model output.
+- Paper detail page wires `AiSummaryPanel` (tone/audience/focus) +
+  `AiInsightsPanel` (threads + model selector) + `KeyPointsCard`.
+- RTK hooks exist for `/papers/me/summary` and `/api/ai/*` tools
+  (rewrite/compare/translate/literature-review) — build UI on them.
+
+### Tooling state (fixed in 1.3.2)
+- Lint is GREEN for both apps (flat configs). Frontend: eslint-config-next
+  16 flat configs with jsx-a11y rules merged into the vitals config object.
+  `react-hooks/set-state-in-effect` + `react-hooks/refs` are scoped OFF
+  pending the derived-state refactor (React Compiler handles these).
+- `next` is declared at BOTH root and frontend (needed for
+  eslint-config-next resolution); next.config.ts carries an explicit
+  `Parameters<ReturnType<typeof withBundleAnalyzer>>[0]` cast for the
+  dual-copy type identity issue — do not "clean up" that cast.
+- `patch-next-themes.cjs` patches BOTH `dist/index.js` and `dist/index.mjs`
+  (the bundler uses the .mjs via exports map).
+- Backend lint uses `eslint src` (Windows command-line length limit);
+  `.eslintrc.json` was replaced by `eslint.config.mjs` (eslint 9).
+
+### Dependencies
+- Audit is clean (0 advisories). Removed unused: langchain, crypto-js,
+  jspdf, axios (frontend), @types stubs. Backend OWNS axios (used by
+  import/paper services) — do not move it back to frontend.
+- `.yarnrc.yml` packageExtensions for backend pins multer ^2.2.0 and
+  sharp ^0.35.3 — keep in sync with package.json (crypto-js pin removed).
+
+### Local Stripe CLI
+- Binary: `O:\stripe.exe`. Config: `%USERPROFILE%\.config\stripe\config.toml`
+  (test_mode_api_key). Global npm was reinstalled (2026-08, was corrupted by
+  malware) — npm/npx now work (11.11.0), but the project still uses Yarn.
+
+## Stripe Skills & MCP (installed)
+- Official Stripe skills live in `.agents/skills/`: `stripe-best-practices`,
+  `stripe-docs`, `stripe-directory`, `stripe-projects`, `upgrade-stripe`,
+  `connect-recommend`. Load the matching skill BEFORE writing Stripe code.
+- Stripe MCP server is configured in `opencode.json` (`https://mcp.stripe.com`,
+  OAuth). Tools: `stripe_api_search`, `stripe_api_details`, `stripe_api_read`,
+  `stripe_api_write`, `search_stripe_documentation`,
+  `stripe_implementation_planner`. Prefer MCP/skills over guessing API shapes.
+- Local webhook testing: `stripe listen --forward-to http://localhost:5000/webhooks/stripe`
+  prints a `whsec_...` secret that MUST be copied into `STRIPE_WEBHOOK_SECRET`
+  in `apps/backend/.env` (secret changes on every `stripe listen` restart).
+  Then `stripe trigger checkout.session.completed` etc. The CLI binary is at
+  `O:\stripe.exe` on this machine; test key is in `%USERPROFILE%\.config\stripe\config.toml`.
+- Checkout wiring: pricing page CTAs call `POST /billing/checkout-session`
+  with a `priceId` from the public `GET /billing/prices` catalog (price IDs
+  are public — never hardcode them in the frontend).
 
 ---
 
@@ -309,7 +385,7 @@ Do not generate any code before completing steps 1-5.
 - Never add console.log for debugging
 - Never install packages without user confirmation
 - Never touch .env.production files
-- Never commit .env or .env.production
+- Never commit .env or .env.production (root .gitignore ignores all .env*)
 - Never call save on every TipTap keystroke
 - Never make raw fetch calls inside React components
 - Never skip Stripe webhook signature verification
@@ -321,6 +397,13 @@ Do not generate any code before completing steps 1-5.
 - Never use images.domains — use images.remotePatterns only
 - Never use unstable_cacheLife or unstable_cacheTag prefix
 - Never call revalidateTag with one argument — requires 'max' second arg
+- Never reintroduce role-scoped dashboard URLs (/dashboard/{roleSlug}) —
+  canonical /dashboard/* only
+- Never use npx — the global npm install on this machine was corrupted by
+  malware (fixed 2026-08, npm 11.11.0 works) but the project still uses Yarn;
+  use yarn dlx for one-off tools
+- Never edit the dual-copy cast in next.config.ts or the
+  patch-next-themes.cjs dual-file patch — both are load-bearing
 
 ## Always Do
 - Run yarn type-check after TypeScript changes
@@ -755,6 +838,14 @@ Fix: Run `prisma migrate dev --create-only --name reconcile_schema_drift` with `
 - Default password for all demo users: `password123`
 - Demo users: admin@scholarflow.com, researcher@scholarflow.com, pro.researcher@scholarflow.com, teamlead@scholarflow.com
 - Must override `DATABASE_URL` + `DIRECT_DATABASE_URL` to local URL when seeding local DB (WSL fallback) or Prisma Cloud URLs when seeding cloud DB
+- **Plan catalog (learned the hard way):** the checkout webhook resolves plans by
+  `stripePriceId` then code `{tier}_{interval}`. `seed.js` creates only
+  free/pro/institutional (no price IDs) — running it leaves the DB without
+  pro_monthly/team_* rows and EVERY checkout webhook fails with
+  "Plan not found" (user charged, no role granted). Run
+  `seedPlans.js` too: `yarn ts-node prisma/seedPlans.js` with
+  STRIPE_PRICE_* env vars set — it now uses the PrismaPg adapter like seed.js.
+  The 2026-08-09 incident: user's Pro trial was never granted for exactly this.
 
 ### Performance Verification Workflow
 1. Ensure local PG18 is running: `sudo pg_ctlcluster 18 main start`

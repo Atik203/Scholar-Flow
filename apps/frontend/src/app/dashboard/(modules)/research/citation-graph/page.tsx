@@ -4,29 +4,92 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useProtectedRoute } from "@/hooks/useAuthGuard";
+import { hasRoleAccess, USER_ROLES } from "@/lib/auth/roles";
+import { useGetPaperCitationsQuery } from "@/redux/api/citationApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { motion } from "motion/react";
 import {
   GitGraph,
   Plus,
   Search,
-  Trash2,
   X,
+  Lock,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 interface GraphNode {
   id: string;
   title: string;
   x: number;
   y: number;
-  connections: string[];
+}
+
+function PaperCitationLines({
+  paperId,
+  nodesById,
+  onEdges,
+}: {
+  paperId: string;
+  nodesById: Record<string, GraphNode>;
+  onEdges: (count: number) => void;
+}) {
+  const { data: citations } = useGetPaperCitationsQuery(paperId, {
+    skip: !paperId,
+  });
+
+  useEffect(() => {
+    if (citations && citations.length > 0) {
+      onEdges(citations.length);
+    }
+  }, [citations, onEdges]);
+
+  const source = nodesById[paperId];
+  if (!source) return null;
+
+  return (
+    <>
+      {(citations || []).map((citation) => {
+        const target = nodesById[citation.targetPaper.id];
+        if (!target) return null;
+        return (
+          <g key={citation.id}>
+            <line
+              x1={source.x}
+              y1={source.y}
+              x2={target.x}
+              y2={target.y}
+              stroke="hsl(var(--primary) / 0.35)"
+              strokeWidth={2}
+              markerEnd="url(#arrow)"
+            />
+            <title>
+              {source.title} cites {citation.targetPaper.title}
+            </title>
+          </g>
+        );
+      })}
+    </>
+  );
 }
 
 export default function CitationGraphPage() {
+  const { user, isLoading: isAuthLoading } = useProtectedRoute();
+  const isProOrAbove = hasRoleAccess(user?.role, USER_ROLES.PRO_RESEARCHER);
   const { data: papersData, isLoading } = useListPapersQuery({ limit: 100 });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const [edgeCount, setEdgeCount] = useState(0);
+
+  useEffect(() => {
+    setEdgeCount(0);
+  }, [selectedIds]);
+
+  const onEdges = useMemo(
+    () => (count: number) => setEdgeCount((prev) => prev + count),
+    []
+  );
 
   const papers = useMemo(() => {
     if (!papersData?.items) return [];
@@ -61,11 +124,17 @@ export default function CitationGraphPage() {
         title: p.title,
         x: centerX + radius * Math.cos(angle),
         y: centerY + radius * Math.sin(angle),
-        connections:
-          i > 0 ? [selected[i - 1].id] : selected.length > 1 ? [selected[selected.length - 1].id] : [],
       };
     });
   }, [papers, selectedIds]);
+
+  const nodesById = useMemo(() => {
+    const map: Record<string, GraphNode> = {};
+    nodes.forEach((n) => {
+      map[n.id] = n;
+    });
+    return map;
+  }, [nodes]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -74,6 +143,38 @@ export default function CitationGraphPage() {
       return next;
     });
   };
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isProOrAbove) {
+    return (
+      <div className="max-w-md mx-auto py-20">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-muted-foreground" />
+              Citation Graph
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Visualizing real citation relationships between your papers is
+              available to Pro Researchers and above.
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/dashboard/billing">Upgrade to Pro</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] gap-0">
@@ -149,29 +250,42 @@ export default function CitationGraphPage() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center space-y-3">
               <GitGraph className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-              <p className="text-muted-foreground">Select papers to build a citation graph</p>
+              <p className="text-muted-foreground">
+                Select papers to build a citation graph
+              </p>
+              <p className="text-xs text-muted-foreground/70 max-w-sm mx-auto">
+                Arrows show real citation relationships between your selected
+                papers.
+              </p>
             </div>
           </div>
         ) : (
           <>
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
-              {nodes.map((node) =>
-                node.connections.map((targetId) => {
-                  const target = nodes.find((n) => n.id === targetId);
-                  if (!target) return null;
-                  return (
-                    <line
-                      key={`${node.id}-${targetId}`}
-                      x1={node.x}
-                      y1={node.y}
-                      x2={target.x}
-                      y2={target.y}
-                      stroke="hsl(var(--primary) / 0.3)"
-                      strokeWidth={2}
-                    />
-                  );
-                })
-              )}
+              <defs>
+                <marker
+                  id="arrow"
+                  viewBox="0 0 10 10"
+                  refX="9"
+                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path
+                    d="M0,0 L0,10 L10,5 z"
+                    fill="hsl(var(--primary) / 0.5)"
+                  />
+                </marker>
+              </defs>
+              {nodes.map((node) => (
+                <PaperCitationLines
+                  key={node.id}
+                  paperId={node.id}
+                  nodesById={nodesById}
+                  onEdges={onEdges}
+                />
+              ))}
             </svg>
             {nodes.map((node) => (
               <motion.div
@@ -201,7 +315,10 @@ export default function CitationGraphPage() {
 
         {nodes.length > 0 && (
           <div className="absolute bottom-4 left-4">
-            <Badge variant="secondary">{nodes.length} papers in graph</Badge>
+            <Badge variant="secondary">
+              {nodes.length} papers in graph
+              {edgeCount > 0 && ` · ${edgeCount} citation links`}
+            </Badge>
           </div>
         )}
       </div>

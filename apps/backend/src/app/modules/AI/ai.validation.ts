@@ -52,13 +52,10 @@ export const generateSummarySchema = z.object({
 
 export type GenerateSummaryInput = z.infer<typeof generateSummarySchema>;
 
-const insightModelSchema = z.enum([
-  "gpt-4o-mini",
-  "gpt-3.5-turbo",
-  "gpt-4o",
-  "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-]);
+// Model names come from the admin-managed AI provider catalog — validate
+// shape/length here and resolve against the catalog in the service, so
+// catalog additions (claude/deepseek/etc.) never 400 at the boundary.
+const aiModelSchema = z.string().trim().min(1).max(128);
 
 export const generateInsightSchema = z.object({
   message: z
@@ -68,7 +65,7 @@ export const generateInsightSchema = z.object({
     .max(1200, "Insight prompts should be shorter than 1200 characters"),
   threadId: z.string().uuid().optional(),
   refreshContext: z.boolean().optional(),
-  model: insightModelSchema.optional(),
+  model: aiModelSchema.optional(),
 });
 
 export type GenerateInsightInput = z.infer<typeof generateInsightSchema>;

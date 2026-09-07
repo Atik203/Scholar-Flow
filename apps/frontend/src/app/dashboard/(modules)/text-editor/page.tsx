@@ -1,23 +1,6 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { TextEditorDashboard } from "@/components/text-editor/TextEditorDashboard";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Suspense } from "react";
-
+// Legacy duplicate of /dashboard/research/editor — keep the canonical path.
 export default function TextEditorPage() {
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center min-h-[400px]">
-              <LoadingSpinner size="lg" />
-            </div>
-          }
-        >
-          <TextEditorDashboard />
-        </Suspense>
-      </div>
-    </div>
-  );
+  redirect("/dashboard/research/editor");
 }

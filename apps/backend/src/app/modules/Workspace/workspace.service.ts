@@ -1,5 +1,7 @@
 import ApiError from "../../errors/ApiError";
 import prisma, { Prisma } from "../../shared/prisma";
+import { INVITE_EXPIRY_MS } from "../Invitation/invitationSweeper";
+import { notificationService } from "../Notification/notification.service";
 
 export class WorkspaceService {
   static async listUserWorkspaces(
@@ -75,32 +77,42 @@ export class WorkspaceService {
     name: string,
     options?: { color?: string; visibility?: string }
   ) {
-    // Create workspace and membership in a transaction
+    // Create workspace, membership, settings and activity in a single transaction
     try {
       const color = options?.color && ["blue", "purple", "green", "orange", "pink"].includes(options.color) ? options.color : "blue";
       const visibility = options?.visibility === "INVITE_ONLY" || options?.visibility === "PUBLIC" ? options.visibility : "PRIVATE";
 
-      const workspace = await prisma.$queryRaw<any[]>`
-        INSERT INTO "Workspace" (id, name, "ownerId", color, visibility, "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${name}, ${ownerId}, ${color}, ${visibility}::"WorkspaceVisibility", now(), now(), false)
-        RETURNING *
-      `;
-      const w = workspace[0];
-      await prisma.$executeRaw`
-        INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'OWNER', now(), now(), now(), false)
-      `;
-      // Create default WorkspaceSettings row
-      await prisma.$executeRaw`
-        INSERT INTO "WorkspaceSettings" (id, "workspaceId", color, "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${w.id}, ${color}, now(), now(), false)
-        ON CONFLICT ("workspaceId") DO NOTHING
-      `;
-      await prisma.$executeRaw`
-        INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${ownerId}, ${w.id}, 'Workspace', ${w.id}, 'CREATE', now(), now(), false)
-      `;
-      return w;
+      let workspaceId = "";
+      await prisma.$transaction(async (tx) => {
+        const workspace = await tx.$queryRaw<any[]>`
+          INSERT INTO "Workspace" (id, name, "ownerId", color, visibility, "createdAt", "updatedAt", "isDeleted")
+          VALUES (gen_random_uuid(), ${name}, ${ownerId}, ${color}, ${visibility}::"WorkspaceVisibility", now(), now(), false)
+          RETURNING *
+        `;
+        const w = workspace[0];
+        workspaceId = w.id;
+        await tx.$executeRaw`
+          INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
+          VALUES (gen_random_uuid(), ${w.id}, ${ownerId}, 'OWNER', now(), now(), now(), false)
+        `;
+        // Create default WorkspaceSettings row
+        await tx.$executeRaw`
+          INSERT INTO "WorkspaceSettings" (id, "workspaceId", color, "createdAt", "updatedAt", "isDeleted")
+          VALUES (gen_random_uuid(), ${w.id}, ${color}, now(), now(), false)
+          ON CONFLICT ("workspaceId") DO NOTHING
+        `;
+        await tx.activityLogEntry.create({
+          data: {
+            userId: ownerId,
+            workspaceId: w.id,
+            entity: "Workspace",
+            entityId: w.id,
+            action: "CREATE",
+            severity: "INFO",
+          },
+        });
+      });
+      return prisma.workspace.findUnique({ where: { id: workspaceId } });
     } catch (e) {
       throw new ApiError(500, "Failed to create workspace");
     }
@@ -183,10 +195,16 @@ export class WorkspaceService {
           RETURNING *
         `;
       }
-      await prisma.$executeRaw`
-        INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, details, "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${userId}, ${id}, 'Workspace', ${id}, 'UPDATE', '{}'::jsonb, now(), now(), false)
-      `;
+      await prisma.activityLogEntry.create({
+        data: {
+          userId,
+          workspaceId: id,
+          entity: "Workspace",
+          entityId: id,
+          action: "UPDATE",
+          severity: "INFO",
+        },
+      });
       return rows[0];
     }
     return this.getWorkspace(userId, id);
@@ -205,28 +223,63 @@ export class WorkspaceService {
     if (!isOwner)
       throw new ApiError(403, "Only Owner can delete workspace");
 
-    // Soft delete workspace and cascade to related entities
-    await prisma.$executeRaw`
-      UPDATE "Workspace" SET "isDeleted" = true, "updatedAt" = now() WHERE id = ${id}
-    `;
+    // Soft delete workspace and cascade to related entities — all in one
+    // transaction so a partial failure can't leave the workspace half-deleted.
+    // Papers + collections (and their members/joins) are soft-deleted too so
+    // nothing keeps pointing at a deleted workspace.
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`
+        UPDATE "Workspace" SET "isDeleted" = true, "updatedAt" = now() WHERE id = ${id}
+      `;
 
-    // Soft delete related invitations
-    await prisma.$executeRaw`
-      UPDATE "WorkspaceInvitation" SET "isDeleted" = true, "updatedAt" = now() 
-      WHERE "workspaceId" = ${id} AND "isDeleted" = false
-    `;
+      // Soft delete related invitations
+      await tx.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET "isDeleted" = true, "updatedAt" = now() 
+        WHERE "workspaceId" = ${id} AND "isDeleted" = false
+      `;
 
-    // Soft delete workspace members
-    await prisma.$executeRaw`
-      UPDATE "WorkspaceMember" SET "isDeleted" = true, "updatedAt" = now() 
-      WHERE "workspaceId" = ${id} AND "isDeleted" = false
-    `;
+      // Soft delete workspace members
+      await tx.$executeRaw`
+        UPDATE "WorkspaceMember" SET "isDeleted" = true, "updatedAt" = now() 
+        WHERE "workspaceId" = ${id} AND "isDeleted" = false
+      `;
 
-    // Log the deletion activity
-    await prisma.$executeRaw`
-      INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${userId}, ${id}, 'Workspace', ${id}, 'DELETE', now(), now(), false)
-    `;
+      // Soft delete papers under the workspace
+      await tx.$executeRaw`
+        UPDATE "Paper" SET "isDeleted" = true, "updatedAt" = now()
+        WHERE "workspaceId" = ${id} AND "isDeleted" = false
+      `;
+
+      // Soft delete collections under the workspace
+      await tx.$executeRaw`
+        UPDATE "Collection" SET "isDeleted" = true, "updatedAt" = now()
+        WHERE "workspaceId" = ${id} AND "isDeleted" = false
+      `;
+
+      // Soft delete collection papers + members under the workspace's collections
+      await tx.$executeRaw`
+        UPDATE "CollectionPaper" cp SET "isDeleted" = true, "updatedAt" = now()
+        FROM "Collection" c
+        WHERE c.id = cp."collectionId" AND c."workspaceId" = ${id} AND cp."isDeleted" = false
+      `;
+      await tx.$executeRaw`
+        UPDATE "CollectionMember" cm SET "isDeleted" = true, "updatedAt" = now()
+        FROM "Collection" c
+        WHERE c.id = cm."collectionId" AND c."workspaceId" = ${id} AND cm."isDeleted" = false
+      `;
+
+      // Log the deletion activity
+      await tx.activityLogEntry.create({
+        data: {
+          userId,
+          workspaceId: id,
+          entity: "Workspace",
+          entityId: id,
+          action: "DELETE",
+          severity: "INFO",
+        },
+      });
+    });
     return { success: true };
   }
 
@@ -285,6 +338,13 @@ export class WorkspaceService {
       member.ownerId === requestorId;
     if (!isManager) throw new ApiError(403, "Insufficient permissions");
 
+    // Only the actual owner may mint OWNER roles
+    const isOwner = member.role === "OWNER" || member.ownerId === requestorId;
+    const requestedRole = payload.role || "EDITOR";
+    if (requestedRole === "OWNER" && !isOwner) {
+      throw new ApiError(403, "Only the workspace owner can add members as OWNER");
+    }
+
     let targetUserId = payload.userId as string | undefined;
     if (!targetUserId && payload.email) {
       const u = await prisma.$queryRaw<any[]>`
@@ -298,13 +358,33 @@ export class WorkspaceService {
     // Upsert membership; if exists and soft-deleted, reactivate
     await prisma.$executeRaw`
       INSERT INTO "WorkspaceMember" (id, "workspaceId", "userId", role, "joinedAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${payload.role || "EDITOR"}, now(), now(), now(), false)
+      VALUES (gen_random_uuid(), ${id}, ${targetUserId}, ${requestedRole}, now(), now(), now(), false)
       ON CONFLICT ("workspaceId", "userId") DO UPDATE SET role = EXCLUDED.role, "isDeleted" = false, "updatedAt" = now()
     `;
-    await prisma.$executeRaw`
-      INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, details, "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${requestorId}, ${id}, 'WorkspaceMember', ${id}, 'ADD_MEMBER', '{}'::jsonb, now(), now(), false)
-    `;
+    await prisma.activityLogEntry.create({
+      data: {
+        userId: requestorId,
+        workspaceId: id,
+        entity: "WorkspaceMember",
+        entityId: targetUserId,
+        action: "ADD_MEMBER",
+        severity: "INFO",
+      },
+    });
+    // Notify the added user (best-effort)
+    try {
+      await notificationService.createNotification({
+        userId: targetUserId,
+        type: "INVITE",
+        title: "Added to workspace",
+        message: "You were added to a workspace on ScholarFlow.",
+        actionUrl: `/dashboard/workspaces/${id}`,
+        actorId: requestorId,
+        resourceId: id,
+      });
+    } catch {
+      // notification failures never break the main flow
+    }
     return { success: true };
   }
 
@@ -330,10 +410,16 @@ export class WorkspaceService {
       UPDATE "WorkspaceMember" SET role = ${role}, "updatedAt" = now()
       WHERE id = ${memberId} AND "workspaceId" = ${id}
     `;
-    await prisma.$executeRaw`
-      INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, details, "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${requestorId}, ${id}, 'WorkspaceMember', ${memberId}, 'UPDATE_MEMBER_ROLE', '{}'::jsonb, now(), now(), false)
-    `;
+    await prisma.activityLogEntry.create({
+      data: {
+        userId: requestorId,
+        workspaceId: id,
+        entity: "WorkspaceMember",
+        entityId: memberId,
+        action: "UPDATE_MEMBER_ROLE",
+        severity: "INFO",
+      },
+    });
     return { success: true };
   }
 
@@ -364,10 +450,16 @@ export class WorkspaceService {
       UPDATE "WorkspaceMember" SET "isDeleted" = true, "updatedAt" = now()
       WHERE id = ${memberId} AND "workspaceId" = ${id}
     `;
-    await prisma.$executeRaw`
-      INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, details, "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${requestorId}, ${id}, 'WorkspaceMember', ${memberId}, 'REMOVE_MEMBER', '{}'::jsonb, now(), now(), false)
-    `;
+    await prisma.activityLogEntry.create({
+      data: {
+        userId: requestorId,
+        workspaceId: id,
+        entity: "WorkspaceMember",
+        entityId: memberId,
+        action: "REMOVE_MEMBER",
+        severity: "INFO",
+      },
+    });
     return { success: true };
   }
 
@@ -394,6 +486,12 @@ export class WorkspaceService {
         403,
         "Only workspace owners and managers can invite members"
       );
+    }
+
+    // Only the actual owner may invite OWNER roles
+    const requestedRole = payload.role || "EDITOR";
+    if (requestedRole === "OWNER" && !isOwner) {
+      throw new ApiError(403, "Only the workspace owner can invite members as OWNER");
     }
 
     // Find user by email
@@ -430,20 +528,37 @@ export class WorkspaceService {
 
     // Create or update invitation
     const roleValue = payload.role || "EDITOR";
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
     const invitationResult = await prisma.$queryRaw<any[]>`
-      INSERT INTO "WorkspaceInvitation" (id, "workspaceId", "userId", role, "invitedById", status, "invitedAt", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${workspaceId}, ${targetUser.id}, ${roleValue}::"WorkspaceRole", ${inviterId}, 'PENDING'::"MembershipStatus", now(), now(), now(), false)
+      INSERT INTO "WorkspaceInvitation" (id, "workspaceId", "userId", role, "invitedById", status, "invitedAt", "expiresAt", "createdAt", "updatedAt", "isDeleted")
+      VALUES (gen_random_uuid(), ${workspaceId}, ${targetUser.id}, ${roleValue}::"WorkspaceRole", ${inviterId}, 'PENDING'::"MembershipStatus", now(), ${expiresAt}, now(), now(), false)
       ON CONFLICT ("workspaceId", "userId") DO UPDATE SET 
         role = ${roleValue}::"WorkspaceRole", 
         "invitedById" = EXCLUDED."invitedById",
         status = 'PENDING'::"MembershipStatus",
         "invitedAt" = now(),
+        "expiresAt" = ${expiresAt},
         "acceptedAt" = null,
         "declinedAt" = null,
         "isDeleted" = false,
         "updatedAt" = now()
       RETURNING id
     `;
+
+    // Notify the invitee (best-effort)
+    try {
+      await notificationService.createNotification({
+        userId: targetUser.id,
+        type: "INVITE",
+        title: "Workspace invitation",
+        message: `${ws.name || "A workspace"} invitation — accept or decline from your dashboard.`,
+        actionUrl: "/dashboard/workspaces/shared",
+        actorId: inviterId,
+        resourceId: workspaceId,
+      });
+    } catch {
+      // notification failures never break the main flow
+    }
 
     // Send invitation email (similar to collection pattern)
     try {
@@ -470,7 +585,7 @@ export class WorkspaceService {
   // Accept workspace invitation
   static async acceptInvitation(userId: string, workspaceId: string) {
     const invitation = await prisma.$queryRaw<any[]>`
-      SELECT wi.id, wi.role, wi.status
+      SELECT wi.id, wi.role, wi.status, wi."expiresAt", wi."invitedById"
       FROM "WorkspaceInvitation" wi
       WHERE wi."workspaceId" = ${workspaceId} AND wi."userId" = ${userId} AND wi."isDeleted" = false
     `;
@@ -480,6 +595,16 @@ export class WorkspaceService {
     }
     if (invitation[0].status !== "PENDING") {
       throw new ApiError(400, "Invitation is not pending");
+    }
+    if (
+      invitation[0].expiresAt &&
+      new Date(invitation[0].expiresAt).getTime() < Date.now()
+    ) {
+      await prisma.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET status = 'EXPIRED', "updatedAt" = now()
+        WHERE id = ${invitation[0].id}
+      `;
+      throw new ApiError(400, "Invitation has expired");
     }
 
     try {
@@ -502,11 +627,34 @@ export class WorkspaceService {
         `;
 
         // Add activity log
-        await tx.$executeRaw`
-          INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
-          VALUES (gen_random_uuid(), ${userId}, ${workspaceId}, 'Workspace', ${workspaceId}, 'JOIN', now(), now(), false)
-        `;
+        await tx.activityLogEntry.create({
+          data: {
+            userId,
+            workspaceId,
+            entity: "Workspace",
+            entityId: workspaceId,
+            action: "JOIN",
+            severity: "INFO",
+          },
+        });
       });
+
+      // Notify the inviter (best-effort)
+      if (invitation[0].invitedById) {
+        try {
+          await notificationService.createNotification({
+            userId: invitation[0].invitedById,
+            type: "INVITE",
+            title: "Invitation accepted",
+            message: "A user accepted your workspace invitation.",
+            actionUrl: `/dashboard/workspaces/${workspaceId}`,
+            actorId: userId,
+            resourceId: workspaceId,
+          });
+        } catch {
+          // notification failures never break the main flow
+        }
+      }
 
       return { success: true };
     } catch (error) {
@@ -517,7 +665,7 @@ export class WorkspaceService {
   // Decline workspace invitation
   static async declineInvitation(userId: string, workspaceId: string) {
     const invitation = await prisma.$queryRaw<any[]>`
-      SELECT wi.id, wi.status
+      SELECT wi.id, wi.status, wi."expiresAt"
       FROM "WorkspaceInvitation" wi
       WHERE wi."workspaceId" = ${workspaceId} AND wi."userId" = ${userId} AND wi."isDeleted" = false
     `;
@@ -527,12 +675,112 @@ export class WorkspaceService {
     if (invitation[0].status !== "PENDING") {
       throw new ApiError(400, "Invitation is not pending");
     }
+    if (
+      invitation[0].expiresAt &&
+      new Date(invitation[0].expiresAt).getTime() < Date.now()
+    ) {
+      await prisma.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET status = 'EXPIRED', "updatedAt" = now()
+        WHERE id = ${invitation[0].id}
+      `;
+      throw new ApiError(400, "Invitation has expired");
+    }
 
     await prisma.$executeRaw`
       UPDATE "WorkspaceInvitation" 
       SET status = 'DECLINED'::"MembershipStatus", "declinedAt" = now(), "updatedAt" = now()
       WHERE id = ${invitation[0].id}
     `;
+
+    return { success: true };
+  }
+
+  /**
+   * Cancel (revoke) a pending workspace invitation. Only the inviter or the
+   * workspace owner may revoke.
+   */
+  static async cancelInvitation(requestorId: string, invitationId: string) {
+    const inv = await prisma.workspaceInvitation.findUnique({
+      where: { id: invitationId },
+      select: { id: true, invitedById: true, status: true, workspaceId: true },
+    });
+    if (!inv || inv.status !== "PENDING") {
+      throw new ApiError(404, "Pending invitation not found");
+    }
+    const ws = await prisma.workspace.findFirst({
+      where: { id: inv.workspaceId, isDeleted: false },
+      select: { ownerId: true },
+    });
+    if (inv.invitedById !== requestorId && ws?.ownerId !== requestorId) {
+      throw new ApiError(403, "You can only revoke invitations you sent");
+    }
+    await prisma.workspaceInvitation.update({
+      where: { id: invitationId },
+      data: { isDeleted: true, status: "DECLINED" },
+    });
+    return { success: true };
+  }
+
+  /**
+   * Resend a pending workspace invitation: bumps invitedAt + expiresAt and
+   * re-sends the email. Only the inviter or the workspace owner may resend.
+   */
+  static async resendInvitation(requestorId: string, invitationId: string) {
+    const inv = await prisma.workspaceInvitation.findUnique({
+      where: { id: invitationId },
+      select: {
+        id: true,
+        invitedById: true,
+        status: true,
+        workspaceId: true,
+        userId: true,
+        role: true,
+      },
+    });
+    if (!inv || inv.status !== "PENDING") {
+      throw new ApiError(404, "Pending invitation not found");
+    }
+    const ws = await prisma.workspace.findFirst({
+      where: { id: inv.workspaceId, isDeleted: false },
+      select: { ownerId: true, name: true },
+    });
+    if (inv.invitedById !== requestorId && ws?.ownerId !== requestorId) {
+      throw new ApiError(403, "You can only resend invitations you sent");
+    }
+
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+    await prisma.workspaceInvitation.update({
+      where: { id: invitationId },
+      data: { invitedAt: new Date(), expiresAt },
+    });
+
+    // Re-send email (best-effort)
+    try {
+      const emailService = (await import("../../shared/emailService")).default;
+      const [invitee, inviter] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: inv.userId },
+          select: { email: true, name: true, firstName: true, lastName: true },
+        }),
+        prisma.user.findUnique({
+          where: { id: requestorId },
+          select: { name: true, email: true },
+        }),
+      ]);
+      if (invitee && inviter) {
+        await emailService.sendWorkspaceInvitationEmail({
+          email: invitee.email,
+          name: invitee.name || invitee.email,
+          workspaceName: ws?.name || "Workspace",
+          inviterName: inviter.name || inviter.email || "A ScholarFlow user",
+          workspaceId: inv.workspaceId,
+        });
+      }
+    } catch (emailError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to resend workspace invitation email:", emailError);
+      }
+    }
 
     return { success: true };
   }
@@ -908,13 +1156,23 @@ export class WorkspaceService {
 
   static async acceptInvitationByToken(userId: string, invitationId: string) {
     const inv = await prisma.$queryRaw<any[]>`
-      SELECT id, role, "workspaceId", "userId", status
+      SELECT id, role, "workspaceId", "userId", status, "expiresAt", "invitedById"
       FROM "WorkspaceInvitation"
       WHERE id = ${invitationId} AND "isDeleted" = false
     `;
     if (!inv[0]) throw new ApiError(404, "Invitation not found");
     if (inv[0].userId !== userId) throw new ApiError(403, "This invitation is not for your account");
     if (inv[0].status !== "PENDING") throw new ApiError(400, "Invitation already processed");
+    if (
+      inv[0].expiresAt &&
+      new Date(inv[0].expiresAt).getTime() < Date.now()
+    ) {
+      await prisma.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET status = 'EXPIRED', "updatedAt" = now()
+        WHERE id = ${invitationId}
+      `;
+      throw new ApiError(400, "Invitation has expired");
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`
@@ -926,22 +1184,55 @@ export class WorkspaceService {
         VALUES (gen_random_uuid(), ${inv[0].workspaceId}, ${userId}, ${inv[0].role}, now(), now(), now(), false)
         ON CONFLICT ("workspaceId", "userId") DO UPDATE SET role = ${inv[0].role}, "isDeleted" = false, "joinedAt" = now()
       `;
-      await tx.$executeRaw`
-        INSERT INTO "ActivityLog" (id, "userId", "workspaceId", entity, "entityId", action, "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${userId}, ${inv[0].workspaceId}, 'Workspace', ${inv[0].workspaceId}, 'JOIN', now(), now(), false)
-      `;
+      await tx.activityLogEntry.create({
+        data: {
+          userId,
+          workspaceId: inv[0].workspaceId,
+          entity: "Workspace",
+          entityId: inv[0].workspaceId,
+          action: "JOIN",
+          severity: "INFO",
+        },
+      });
     });
+
+    // Notify the inviter (best-effort)
+    if (inv[0].invitedById) {
+      try {
+        await notificationService.createNotification({
+          userId: inv[0].invitedById,
+          type: "INVITE",
+          title: "Invitation accepted",
+          message: "A user accepted your workspace invitation.",
+          actionUrl: `/dashboard/workspaces/${inv[0].workspaceId}`,
+          actorId: userId,
+          resourceId: inv[0].workspaceId,
+        });
+      } catch {
+        // notification failures never break the main flow
+      }
+    }
     return { success: true };
   }
 
   static async declineInvitationByToken(userId: string, invitationId: string) {
     const inv = await prisma.$queryRaw<any[]>`
-      SELECT id, "userId", status FROM "WorkspaceInvitation"
+      SELECT id, "userId", status, "expiresAt" FROM "WorkspaceInvitation"
       WHERE id = ${invitationId} AND "isDeleted" = false
     `;
     if (!inv[0]) throw new ApiError(404, "Invitation not found");
     if (inv[0].userId !== userId) throw new ApiError(403, "This invitation is not for your account");
     if (inv[0].status !== "PENDING") throw new ApiError(400, "Invitation already processed");
+    if (
+      inv[0].expiresAt &&
+      new Date(inv[0].expiresAt).getTime() < Date.now()
+    ) {
+      await prisma.$executeRaw`
+        UPDATE "WorkspaceInvitation" SET status = 'EXPIRED', "updatedAt" = now()
+        WHERE id = ${invitationId}
+      `;
+      throw new ApiError(400, "Invitation has expired");
+    }
 
     await prisma.$queryRaw`
       UPDATE "WorkspaceInvitation" SET status = 'DECLINED', "declinedAt" = now()

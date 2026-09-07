@@ -28,7 +28,7 @@ export default function GlobalError({
   const showDetails = process.env.NODE_ENV !== "production";
 
   return (
-    <html>
+    <html lang="en">
       <body>
         <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
           <div className="text-center space-y-6 max-w-md p-6">

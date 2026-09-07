@@ -185,6 +185,32 @@ export default function NotificationSettingsPage() {
               </div>
             ))}
           </div>
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div>
+              <Label className="text-sm">Email digest frequency</Label>
+              <p className="text-xs text-muted-foreground">
+                How often email summaries are sent
+              </p>
+            </div>
+            <select
+              value={local.digestFrequency}
+              onChange={(e) =>
+                setLocal((p) =>
+                  p
+                    ? {
+                        ...p,
+                        digestFrequency: e.target.value as NotificationPreferences["digestFrequency"],
+                      }
+                    : p
+                )
+              }
+              className="h-9 px-2 rounded-md border bg-background text-sm"
+            >
+              <option value="instant">Instant</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
         </CardContent>
       </Card>
 

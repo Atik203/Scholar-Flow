@@ -3,15 +3,14 @@
 /**
  * NotificationHistoryPage
  *
- * Paginated history of all notifications, including read + deleted items.
- * Uses cursor-style pagination with a date range filter (date inputs in
- * the toolbar drive a server-side startDate/endDate filter).
+ * Cursor-paginated history of all notifications. The backend list is
+ * cursor-based (nextCursor/hasMore); we keep a stack of cursors to
+ * support Previous/Next navigation.
  */
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Bell, Calendar, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Bell, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import {
   useDeleteNotificationMutation,
   useGetNotificationsQuery,
@@ -20,21 +19,33 @@ import {
 import { NotificationList } from "@/components/notifications/NotificationList";
 
 export default function NotificationHistoryPage() {
-  const [page, setPage] = useState(1);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  // Stack of cursors: [page1Cursor, page2Cursor, ...]; cursor of the
+  // current page is the last item. Empty string = first page.
+  const [cursorStack, setCursorStack] = useState<string[]>([]);
   const limit = 25;
+  const currentCursor = cursorStack[cursorStack.length - 1] ?? "";
 
   const { data, isLoading, refetch, isFetching } = useGetNotificationsQuery({
-    page,
+    cursor: currentCursor || undefined,
     limit,
   });
   const notifications = data?.data ?? [];
   const meta = data?.meta;
-  const totalPages = meta?.totalPage ?? 1;
+  const hasMore = Boolean(meta?.hasMore);
+  const nextCursor = meta?.nextCursor;
 
   const [toggleStarred] = useToggleStarredMutation();
   const [deleteNotification] = useDeleteNotificationMutation();
+
+  const goNext = () => {
+    if (nextCursor) {
+      setCursorStack((prev) => [...prev, nextCursor]);
+    }
+  };
+
+  const goPrev = () => {
+    setCursorStack((prev) => prev.slice(0, -1));
+  };
 
   return (
     <div className="space-y-6 pb-12 min-h-screen">
@@ -63,31 +74,9 @@ export default function NotificationHistoryPage() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-muted-foreground" />
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="max-w-[200px]"
-          />
-          <span className="text-muted-foreground">→</span>
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="max-w-[200px]"
-          />
-        </div>
-      </div>
-
       <NotificationList
         notifications={notifications}
         isLoading={isLoading}
-        onMarkAsRead={() => {
-          // history page: read state is immutable from this view
-        }}
         onToggleStarred={(id) => toggleStarred(id)}
         onDelete={(id) => deleteNotification(id)}
         showFilters={false}
@@ -95,25 +84,25 @@ export default function NotificationHistoryPage() {
         emptyStateMessage="Notifications you receive will be archived here."
       />
 
-      {meta && totalPages > 1 && (
+      {(cursorStack.length > 0 || hasMore) && (
         <div className="flex items-center justify-between pt-4">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
+            onClick={goPrev}
+            disabled={cursorStack.length === 0}
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
           </Button>
           <span className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
+            Page {cursorStack.length + 1}
           </span>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            onClick={goNext}
+            disabled={!hasMore}
           >
             Next
             <ChevronRight className="w-4 h-4 ml-2" />

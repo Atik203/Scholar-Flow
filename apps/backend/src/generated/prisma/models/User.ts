@@ -49,6 +49,8 @@ export type UserMinAggregateOutputType = {
   emailVerificationToken: string | null
   onboardingCompleted: boolean | null
   onboardingStep: number | null
+  twoFactorSecret: string | null
+  twoFactorEnabled: boolean | null
   stripeCustomerId: string | null
   stripeSubscriptionId: string | null
   stripePriceId: string | null
@@ -74,6 +76,8 @@ export type UserMaxAggregateOutputType = {
   emailVerificationToken: string | null
   onboardingCompleted: boolean | null
   onboardingStep: number | null
+  twoFactorSecret: string | null
+  twoFactorEnabled: boolean | null
   stripeCustomerId: string | null
   stripeSubscriptionId: string | null
   stripePriceId: string | null
@@ -99,6 +103,8 @@ export type UserCountAggregateOutputType = {
   emailVerificationToken: number
   onboardingCompleted: number
   onboardingStep: number
+  twoFactorSecret: number
+  twoFactorEnabled: number
   stripeCustomerId: number
   stripeSubscriptionId: number
   stripePriceId: number
@@ -134,6 +140,8 @@ export type UserMinAggregateInputType = {
   emailVerificationToken?: true
   onboardingCompleted?: true
   onboardingStep?: true
+  twoFactorSecret?: true
+  twoFactorEnabled?: true
   stripeCustomerId?: true
   stripeSubscriptionId?: true
   stripePriceId?: true
@@ -159,6 +167,8 @@ export type UserMaxAggregateInputType = {
   emailVerificationToken?: true
   onboardingCompleted?: true
   onboardingStep?: true
+  twoFactorSecret?: true
+  twoFactorEnabled?: true
   stripeCustomerId?: true
   stripeSubscriptionId?: true
   stripePriceId?: true
@@ -184,6 +194,8 @@ export type UserCountAggregateInputType = {
   emailVerificationToken?: true
   onboardingCompleted?: true
   onboardingStep?: true
+  twoFactorSecret?: true
+  twoFactorEnabled?: true
   stripeCustomerId?: true
   stripeSubscriptionId?: true
   stripePriceId?: true
@@ -296,6 +308,8 @@ export type UserGroupByOutputType = {
   emailVerificationToken: string | null
   onboardingCompleted: boolean
   onboardingStep: number
+  twoFactorSecret: string | null
+  twoFactorEnabled: boolean
   stripeCustomerId: string | null
   stripeSubscriptionId: string | null
   stripePriceId: string | null
@@ -344,6 +358,8 @@ export type UserWhereInput = {
   emailVerificationToken?: Prisma.StringNullableFilter<"User"> | string | null
   onboardingCompleted?: Prisma.BoolFilter<"User"> | boolean
   onboardingStep?: Prisma.IntFilter<"User"> | number
+  twoFactorSecret?: Prisma.StringNullableFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   stripeCustomerId?: Prisma.StringNullableFilter<"User"> | string | null
   stripeSubscriptionId?: Prisma.StringNullableFilter<"User"> | string | null
   stripePriceId?: Prisma.StringNullableFilter<"User"> | string | null
@@ -409,6 +425,8 @@ export type UserOrderByWithRelationInput = {
   emailVerificationToken?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingCompleted?: Prisma.SortOrder
   onboardingStep?: Prisma.SortOrder
+  twoFactorSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -479,6 +497,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   emailVerificationToken?: Prisma.StringNullableFilter<"User"> | string | null
   onboardingCompleted?: Prisma.BoolFilter<"User"> | boolean
   onboardingStep?: Prisma.IntFilter<"User"> | number
+  twoFactorSecret?: Prisma.StringNullableFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BoolFilter<"User"> | boolean
   stripePriceId?: Prisma.StringNullableFilter<"User"> | string | null
   stripeCurrentPeriodEnd?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
@@ -542,6 +562,8 @@ export type UserOrderByWithAggregationInput = {
   emailVerificationToken?: Prisma.SortOrderInput | Prisma.SortOrder
   onboardingCompleted?: Prisma.SortOrder
   onboardingStep?: Prisma.SortOrder
+  twoFactorSecret?: Prisma.SortOrderInput | Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripeSubscriptionId?: Prisma.SortOrderInput | Prisma.SortOrder
   stripePriceId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -575,6 +597,8 @@ export type UserScalarWhereWithAggregatesInput = {
   emailVerificationToken?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   onboardingCompleted?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   onboardingStep?: Prisma.IntWithAggregatesFilter<"User"> | number
+  twoFactorSecret?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  twoFactorEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   stripeCustomerId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   stripeSubscriptionId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   stripePriceId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -600,6 +624,8 @@ export type UserCreateInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -665,6 +691,8 @@ export type UserUncheckedCreateInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -730,6 +758,8 @@ export type UserUpdateInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -795,6 +825,8 @@ export type UserUncheckedUpdateInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -860,6 +892,8 @@ export type UserCreateManyInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -885,6 +919,8 @@ export type UserUpdateManyMutationInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -910,6 +946,8 @@ export type UserUncheckedUpdateManyInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -945,6 +983,8 @@ export type UserCountOrderByAggregateInput = {
   emailVerificationToken?: Prisma.SortOrder
   onboardingCompleted?: Prisma.SortOrder
   onboardingStep?: Prisma.SortOrder
+  twoFactorSecret?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
   stripeSubscriptionId?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
@@ -974,6 +1014,8 @@ export type UserMaxOrderByAggregateInput = {
   emailVerificationToken?: Prisma.SortOrder
   onboardingCompleted?: Prisma.SortOrder
   onboardingStep?: Prisma.SortOrder
+  twoFactorSecret?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
   stripeSubscriptionId?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
@@ -999,6 +1041,8 @@ export type UserMinOrderByAggregateInput = {
   emailVerificationToken?: Prisma.SortOrder
   onboardingCompleted?: Prisma.SortOrder
   onboardingStep?: Prisma.SortOrder
+  twoFactorSecret?: Prisma.SortOrder
+  twoFactorEnabled?: Prisma.SortOrder
   stripeCustomerId?: Prisma.SortOrder
   stripeSubscriptionId?: Prisma.SortOrder
   stripePriceId?: Prisma.SortOrder
@@ -1624,6 +1668,8 @@ export type UserCreateWithoutNotificationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -1688,6 +1734,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -1757,6 +1805,8 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -1821,6 +1871,8 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -1901,6 +1953,8 @@ export type UserUpdateWithoutNotificationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1965,6 +2019,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2040,6 +2096,8 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2104,6 +2162,8 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2168,6 +2228,8 @@ export type UserCreateWithoutWorkspacesOwnedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2232,6 +2294,8 @@ export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2312,6 +2376,8 @@ export type UserUpdateWithoutWorkspacesOwnedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2376,6 +2442,8 @@ export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2440,6 +2508,8 @@ export type UserCreateWithoutMembershipsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2504,6 +2574,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2584,6 +2656,8 @@ export type UserUpdateWithoutMembershipsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2648,6 +2722,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2712,6 +2788,8 @@ export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2776,6 +2854,8 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2845,6 +2925,8 @@ export type UserCreateWithoutWorkspaceInvitesSentInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2909,6 +2991,8 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -2989,6 +3073,8 @@ export type UserUpdateWithoutWorkspaceInvitesReceivedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3053,6 +3139,8 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3128,6 +3216,8 @@ export type UserUpdateWithoutWorkspaceInvitesSentInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3192,6 +3282,8 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3256,6 +3348,8 @@ export type UserCreateWithoutUploadedPapersInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3320,6 +3414,8 @@ export type UserUncheckedCreateWithoutUploadedPapersInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3400,6 +3496,8 @@ export type UserUpdateWithoutUploadedPapersInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3464,6 +3562,8 @@ export type UserUncheckedUpdateWithoutUploadedPapersInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3528,6 +3628,8 @@ export type UserCreateWithoutPaperVersionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3592,6 +3694,8 @@ export type UserUncheckedCreateWithoutPaperVersionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3672,6 +3776,8 @@ export type UserUpdateWithoutPaperVersionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3736,6 +3842,8 @@ export type UserUncheckedUpdateWithoutPaperVersionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3800,6 +3908,8 @@ export type UserCreateWithoutAnnotationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3864,6 +3974,8 @@ export type UserUncheckedCreateWithoutAnnotationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -3944,6 +4056,8 @@ export type UserUpdateWithoutAnnotationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4008,6 +4122,8 @@ export type UserUncheckedUpdateWithoutAnnotationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4072,6 +4188,8 @@ export type UserCreateWithoutAnnotationVersionInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4136,6 +4254,8 @@ export type UserUncheckedCreateWithoutAnnotationVersionInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4216,6 +4336,8 @@ export type UserUpdateWithoutAnnotationVersionInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4280,6 +4402,8 @@ export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4344,6 +4468,8 @@ export type UserCreateWithoutCollectionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4408,6 +4534,8 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4488,6 +4616,8 @@ export type UserUpdateWithoutCollectionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4552,6 +4682,8 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4616,6 +4748,8 @@ export type UserCreateWithoutCollectionPaperInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4680,6 +4814,8 @@ export type UserUncheckedCreateWithoutCollectionPaperInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4760,6 +4896,8 @@ export type UserUpdateWithoutCollectionPaperInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4824,6 +4962,8 @@ export type UserUncheckedUpdateWithoutCollectionPaperInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4888,6 +5028,8 @@ export type UserCreateWithoutCollectionMemberInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -4952,6 +5094,8 @@ export type UserUncheckedCreateWithoutCollectionMemberInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5021,6 +5165,8 @@ export type UserCreateWithoutCollectionInvitesSentInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5085,6 +5231,8 @@ export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5165,6 +5313,8 @@ export type UserUpdateWithoutCollectionMemberInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5229,6 +5379,8 @@ export type UserUncheckedUpdateWithoutCollectionMemberInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5304,6 +5456,8 @@ export type UserUpdateWithoutCollectionInvitesSentInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5368,6 +5522,8 @@ export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5432,6 +5588,8 @@ export type UserCreateWithoutSearchHistoryInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5496,6 +5654,8 @@ export type UserUncheckedCreateWithoutSearchHistoryInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5576,6 +5736,8 @@ export type UserUpdateWithoutSearchHistoryInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5640,6 +5802,8 @@ export type UserUncheckedUpdateWithoutSearchHistoryInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5704,6 +5868,8 @@ export type UserCreateWithoutAiInsightThreadsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5768,6 +5934,8 @@ export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -5848,6 +6016,8 @@ export type UserUpdateWithoutAiInsightThreadsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5912,6 +6082,8 @@ export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5976,6 +6148,8 @@ export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6040,6 +6214,8 @@ export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6120,6 +6296,8 @@ export type UserUpdateWithoutAiInsightMessagesAuthoredInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6184,6 +6362,8 @@ export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6248,6 +6428,8 @@ export type UserCreateWithoutAiConversationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6312,6 +6494,8 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6392,6 +6576,8 @@ export type UserUpdateWithoutAiConversationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6456,6 +6642,8 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6520,6 +6708,8 @@ export type UserCreateWithoutSubscriptionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6584,6 +6774,8 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6664,6 +6856,8 @@ export type UserUpdateWithoutSubscriptionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6728,6 +6922,8 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -6792,6 +6988,8 @@ export type UserCreateWithoutPaymentsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6856,6 +7054,8 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -6936,6 +7136,8 @@ export type UserUpdateWithoutPaymentsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7000,6 +7202,8 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7064,6 +7268,8 @@ export type UserCreateWithoutUsageEventsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7128,6 +7334,8 @@ export type UserUncheckedCreateWithoutUsageEventsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7208,6 +7416,8 @@ export type UserUpdateWithoutUsageEventsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7272,6 +7482,8 @@ export type UserUncheckedUpdateWithoutUsageEventsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7336,6 +7548,8 @@ export type UserCreateWithoutActivitiesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7400,6 +7614,8 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7480,6 +7696,8 @@ export type UserUpdateWithoutActivitiesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7544,6 +7762,8 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7608,6 +7828,8 @@ export type UserCreateWithoutAccountsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7672,6 +7894,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7752,6 +7976,8 @@ export type UserUpdateWithoutAccountsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7816,6 +8042,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -7880,6 +8108,8 @@ export type UserCreateWithoutSessionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -7944,6 +8174,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8024,6 +8256,8 @@ export type UserUpdateWithoutSessionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8088,6 +8322,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8152,6 +8388,8 @@ export type UserCreateWithoutLoginHistoryInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8216,6 +8454,8 @@ export type UserUncheckedCreateWithoutLoginHistoryInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8296,6 +8536,8 @@ export type UserUpdateWithoutLoginHistoryInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8360,6 +8602,8 @@ export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8424,6 +8668,8 @@ export type UserCreateWithoutTokensInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8488,6 +8734,8 @@ export type UserUncheckedCreateWithoutTokensInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8568,6 +8816,8 @@ export type UserUpdateWithoutTokensInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8632,6 +8882,8 @@ export type UserUncheckedUpdateWithoutTokensInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8696,6 +8948,8 @@ export type UserCreateWithoutResearchNotesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8760,6 +9014,8 @@ export type UserUncheckedCreateWithoutResearchNotesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -8840,6 +9096,8 @@ export type UserUpdateWithoutResearchNotesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8904,6 +9162,8 @@ export type UserUncheckedUpdateWithoutResearchNotesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -8968,6 +9228,8 @@ export type UserCreateWithoutNotebooksInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9032,6 +9294,8 @@ export type UserUncheckedCreateWithoutNotebooksInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9112,6 +9376,8 @@ export type UserUpdateWithoutNotebooksInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9176,6 +9442,8 @@ export type UserUncheckedUpdateWithoutNotebooksInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9240,6 +9508,8 @@ export type UserCreateWithoutNotebookSectionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9304,6 +9574,8 @@ export type UserUncheckedCreateWithoutNotebookSectionsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9384,6 +9656,8 @@ export type UserUpdateWithoutNotebookSectionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9448,6 +9722,8 @@ export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9512,6 +9788,8 @@ export type UserCreateWithoutCitationExportsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9576,6 +9854,8 @@ export type UserUncheckedCreateWithoutCitationExportsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9656,6 +9936,8 @@ export type UserUpdateWithoutCitationExportsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9720,6 +10002,8 @@ export type UserUncheckedUpdateWithoutCitationExportsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9784,6 +10068,8 @@ export type UserCreateWithoutDiscussionThreadsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9848,6 +10134,8 @@ export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -9928,6 +10216,8 @@ export type UserUpdateWithoutDiscussionThreadsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -9992,6 +10282,8 @@ export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10056,6 +10348,8 @@ export type UserCreateWithoutDiscussionMessagesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10120,6 +10414,8 @@ export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10200,6 +10496,8 @@ export type UserUpdateWithoutDiscussionMessagesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10264,6 +10562,8 @@ export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10328,6 +10628,8 @@ export type UserCreateWithoutActivityLogEntriesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10392,6 +10694,8 @@ export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10472,6 +10776,8 @@ export type UserUpdateWithoutActivityLogEntriesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10536,6 +10842,8 @@ export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10600,6 +10908,8 @@ export type UserCreateWithoutPreferenceInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10664,6 +10974,8 @@ export type UserUncheckedCreateWithoutPreferenceInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10744,6 +11056,8 @@ export type UserUpdateWithoutPreferenceInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10808,6 +11122,8 @@ export type UserUncheckedUpdateWithoutPreferenceInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -10872,6 +11188,8 @@ export type UserCreateWithoutAdminReportsCreatedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -10936,6 +11254,8 @@ export type UserUncheckedCreateWithoutAdminReportsCreatedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11016,6 +11336,8 @@ export type UserUpdateWithoutAdminReportsCreatedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11080,6 +11402,8 @@ export type UserUncheckedUpdateWithoutAdminReportsCreatedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11144,6 +11468,8 @@ export type UserCreateWithoutResolvedSystemAlertsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11208,6 +11534,8 @@ export type UserUncheckedCreateWithoutResolvedSystemAlertsInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11288,6 +11616,8 @@ export type UserUpdateWithoutResolvedSystemAlertsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11352,6 +11682,8 @@ export type UserUncheckedUpdateWithoutResolvedSystemAlertsInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11416,6 +11748,8 @@ export type UserCreateWithoutApiKeysCreatedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11480,6 +11814,8 @@ export type UserUncheckedCreateWithoutApiKeysCreatedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11560,6 +11896,8 @@ export type UserUpdateWithoutApiKeysCreatedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11624,6 +11962,8 @@ export type UserUncheckedUpdateWithoutApiKeysCreatedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -11688,6 +12028,8 @@ export type UserCreateWithoutContentReportsFiledInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11752,6 +12094,8 @@ export type UserUncheckedCreateWithoutContentReportsFiledInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11821,6 +12165,8 @@ export type UserCreateWithoutContentReportsAssignedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11885,6 +12231,8 @@ export type UserUncheckedCreateWithoutContentReportsAssignedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -11954,6 +12302,8 @@ export type UserCreateWithoutContentReportsResolvedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -12018,6 +12368,8 @@ export type UserUncheckedCreateWithoutContentReportsResolvedInput = {
   emailVerificationToken?: string | null
   onboardingCompleted?: boolean
   onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
   stripeCustomerId?: string | null
   stripeSubscriptionId?: string | null
   stripePriceId?: string | null
@@ -12098,6 +12450,8 @@ export type UserUpdateWithoutContentReportsFiledInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12162,6 +12516,8 @@ export type UserUncheckedUpdateWithoutContentReportsFiledInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12237,6 +12593,8 @@ export type UserUpdateWithoutContentReportsAssignedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12301,6 +12659,8 @@ export type UserUncheckedUpdateWithoutContentReportsAssignedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12376,6 +12736,8 @@ export type UserUpdateWithoutContentReportsResolvedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12440,6 +12802,8 @@ export type UserUncheckedUpdateWithoutContentReportsResolvedInput = {
   emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -12877,6 +13241,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   emailVerificationToken?: boolean
   onboardingCompleted?: boolean
   onboardingStep?: boolean
+  twoFactorSecret?: boolean
+  twoFactorEnabled?: boolean
   stripeCustomerId?: boolean
   stripeSubscriptionId?: boolean
   stripePriceId?: boolean
@@ -12943,6 +13309,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   emailVerificationToken?: boolean
   onboardingCompleted?: boolean
   onboardingStep?: boolean
+  twoFactorSecret?: boolean
+  twoFactorEnabled?: boolean
   stripeCustomerId?: boolean
   stripeSubscriptionId?: boolean
   stripePriceId?: boolean
@@ -12968,6 +13336,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   emailVerificationToken?: boolean
   onboardingCompleted?: boolean
   onboardingStep?: boolean
+  twoFactorSecret?: boolean
+  twoFactorEnabled?: boolean
   stripeCustomerId?: boolean
   stripeSubscriptionId?: boolean
   stripePriceId?: boolean
@@ -12993,6 +13363,8 @@ export type UserSelectScalar = {
   emailVerificationToken?: boolean
   onboardingCompleted?: boolean
   onboardingStep?: boolean
+  twoFactorSecret?: boolean
+  twoFactorEnabled?: boolean
   stripeCustomerId?: boolean
   stripeSubscriptionId?: boolean
   stripePriceId?: boolean
@@ -13003,7 +13375,7 @@ export type UserSelectScalar = {
   lastLoginProvider?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "firstName" | "lastName" | "institution" | "fieldOfStudy" | "image" | "password" | "role" | "emailVerified" | "emailVerificationToken" | "onboardingCompleted" | "onboardingStep" | "stripeCustomerId" | "stripeSubscriptionId" | "stripePriceId" | "stripeCurrentPeriodEnd" | "createdAt" | "updatedAt" | "isDeleted" | "lastLoginProvider", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "firstName" | "lastName" | "institution" | "fieldOfStudy" | "image" | "password" | "role" | "emailVerified" | "emailVerificationToken" | "onboardingCompleted" | "onboardingStep" | "twoFactorSecret" | "twoFactorEnabled" | "stripeCustomerId" | "stripeSubscriptionId" | "stripePriceId" | "stripeCurrentPeriodEnd" | "createdAt" | "updatedAt" | "isDeleted" | "lastLoginProvider", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
@@ -13109,6 +13481,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     emailVerificationToken: string | null
     onboardingCompleted: boolean
     onboardingStep: number
+    twoFactorSecret: string | null
+    twoFactorEnabled: boolean
     stripeCustomerId: string | null
     stripeSubscriptionId: string | null
     stripePriceId: string | null
@@ -13594,6 +13968,8 @@ export interface UserFieldRefs {
   readonly emailVerificationToken: Prisma.FieldRef<"User", 'String'>
   readonly onboardingCompleted: Prisma.FieldRef<"User", 'Boolean'>
   readonly onboardingStep: Prisma.FieldRef<"User", 'Int'>
+  readonly twoFactorSecret: Prisma.FieldRef<"User", 'String'>
+  readonly twoFactorEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly stripeCustomerId: Prisma.FieldRef<"User", 'String'>
   readonly stripeSubscriptionId: Prisma.FieldRef<"User", 'String'>
   readonly stripePriceId: Prisma.FieldRef<"User", 'String'>

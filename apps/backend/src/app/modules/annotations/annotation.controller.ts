@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../../middleware/auth";
 import catchAsync from "../../shared/catchAsync";
+import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
   sendSuccessResponse,
@@ -12,6 +13,34 @@ import {
   getAnnotationsQuerySchema,
   updateAnnotationSchema,
 } from "./annotation.types";
+
+/** Shared access gate: uploader OR workspace owner/member of the paper. */
+async function assertPaperAccess(
+  paperId: string,
+  userId: string
+): Promise<boolean> {
+  const access = await prisma.$queryRaw<Array<{ allowed: boolean }>>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM "Paper" p
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      LEFT JOIN "WorkspaceMember" m
+        ON m."workspaceId" = p."workspaceId"
+        AND m."userId" = ${userId}
+        AND m."isDeleted" = false
+      WHERE p.id = ${paperId}
+        AND p."isDeleted" = false
+        AND (
+          p."uploaderId" = ${userId}
+          OR w."ownerId" = ${userId}
+          OR m.id IS NOT NULL
+        )
+    ) AS "allowed"
+  `;
+
+  return access[0]?.allowed === true;
+}
 
 export const annotationController = {
   /**
@@ -39,6 +68,15 @@ export const annotationController = {
       return;
     }
 
+    const canAccess = await assertPaperAccess(parsed.data.paperId, userId);
+    if (!canAccess) {
+      res.status(403).json({
+        success: false,
+        message: "You do not have access to this paper",
+      });
+      return;
+    }
+
     const annotation = await AnnotationService.createAnnotation(
       userId,
       parsed.data
@@ -61,6 +99,26 @@ export const annotationController = {
         success: false,
         message: "Invalid query parameters",
         errors: parsed.error.issues,
+      });
+      return;
+    }
+
+    // Access gate: uploader OR workspace owner/member of the paper
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.id;
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    const canAccess = await assertPaperAccess(parsed.data.paperId, userId);
+    if (!canAccess) {
+      res.status(403).json({
+        success: false,
+        message: "You do not have access to this paper",
       });
       return;
     }

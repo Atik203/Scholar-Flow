@@ -28,7 +28,8 @@ export const SearchController = {
       q.type as any,
       limit,
       skip,
-      q.workspaceId
+      q.workspaceId,
+      authReq.user.role
     );
     
     // Optionally log this user search to history 
@@ -86,8 +87,10 @@ export const SearchController = {
   }),
 
   getTrending: catchAsync(async (req: Request, res: Response) => {
-    // Open route, auth not strict
-    const result = await SearchService.getTrendingPapers(10);
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const result = await SearchService.getTrendingPapers(authReq.user.id, 10);
     sendSuccessResponse(res, result, "Trending retrieved successfully");
   }),
 
@@ -132,7 +135,8 @@ export const SearchController = {
       authReq.user.id,
       body.q,
       body.workspaceId,
-      body.model
+      body.model,
+      authReq.user.role
     );
     sendSuccessResponse(res, result, "AI summary generated");
   }),
@@ -149,7 +153,8 @@ export const SearchController = {
       authReq.user.id,
       q.q,
       limit,
-      q.workspaceId
+      q.workspaceId,
+      authReq.user.role
     );
     sendSuccessResponse(res, { sources }, "Sources retrieved");
   }),

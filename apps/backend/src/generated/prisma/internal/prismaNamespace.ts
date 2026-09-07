@@ -4678,6 +4678,8 @@ export const UserScalarFieldEnum = {
   emailVerificationToken: 'emailVerificationToken',
   onboardingCompleted: 'onboardingCompleted',
   onboardingStep: 'onboardingStep',
+  twoFactorSecret: 'twoFactorSecret',
+  twoFactorEnabled: 'twoFactorEnabled',
   stripeCustomerId: 'stripeCustomerId',
   stripeSubscriptionId: 'stripeSubscriptionId',
   stripePriceId: 'stripePriceId',
@@ -4730,6 +4732,7 @@ export const WorkspaceInvitationScalarFieldEnum = {
   invitedById: 'invitedById',
   acceptedAt: 'acceptedAt',
   declinedAt: 'declinedAt',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -4930,12 +4933,14 @@ export const CollectionMemberScalarFieldEnum = {
   id: 'id',
   collectionId: 'collectionId',
   userId: 'userId',
+  role: 'role',
   permission: 'permission',
   invitedAt: 'invitedAt',
   status: 'status',
   invitedById: 'invitedById',
   acceptedAt: 'acceptedAt',
   declinedAt: 'declinedAt',
+  expiresAt: 'expiresAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   isDeleted: 'isDeleted'
@@ -5504,6 +5509,7 @@ export const UserPreferenceScalarFieldEnum = {
   compactMode: 'compactMode',
   metadata: 'metadata',
   notificationPreferences: 'notificationPreferences',
+  privacySettings: 'privacySettings',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

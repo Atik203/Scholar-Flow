@@ -1,7 +1,10 @@
 import express from "express";
 import { authMiddleware } from "../../middleware/auth";
 import { performanceMonitor } from "../../middleware/performanceMonitor";
-import { rateLimiter } from "../../middleware/rateLimiter";
+import {
+  rateLimiter,
+  workspaceMutationLimiter,
+} from "../../middleware/rateLimiter";
 import {
   validateRequestBody,
   validateRequestParams,
@@ -30,10 +33,42 @@ workspaceRoutes.get(
   workspaceController.list as any
 );
 
+// Get invitations sent by user (MUST be registered before /:id routes)
+workspaceRoutes.get(
+  "/invites/sent",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsSent as any
+);
+
+// Get invitations received by user (MUST be registered before /:id routes)
+workspaceRoutes.get(
+  "/invites/received",
+  rateLimiter,
+  authMiddleware as any,
+  workspaceController.getInvitationsReceived as any
+);
+
+// Revoke a pending invitation (MUST be registered before /:id routes)
+workspaceRoutes.delete(
+  "/invites/:invitationId",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  workspaceController.cancelInvitation as any
+);
+
+// Resend a pending invitation (MUST be registered before /:id routes)
+workspaceRoutes.post(
+  "/invites/:invitationId/resend",
+  workspaceMutationLimiter,
+  authMiddleware as any,
+  workspaceController.resendInvitation as any
+);
+
 // Create workspace
 workspaceRoutes.post(
   "/",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestBody(createWorkspaceSchema) as any,
   workspaceController.create as any
@@ -51,7 +86,7 @@ workspaceRoutes.get(
 // Update
 workspaceRoutes.patch(
   "/:id",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   validateRequestBody(updateWorkspaceSchema) as any,
@@ -61,7 +96,7 @@ workspaceRoutes.patch(
 // Delete
 workspaceRoutes.delete(
   "/:id",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   workspaceController.remove as any
@@ -79,7 +114,7 @@ workspaceRoutes.get(
 // Members: add
 workspaceRoutes.post(
   "/:id/members",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   workspaceController.addMember as any
@@ -88,6 +123,7 @@ workspaceRoutes.post(
 // Members: update role
 workspaceRoutes.patch(
   "/:id/members/:memberId",
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(memberParamsSchema) as any,
   validateRequestBody(updateMemberRoleSchema) as any,
@@ -97,6 +133,7 @@ workspaceRoutes.patch(
 // Members: remove
 workspaceRoutes.delete(
   "/:id/members/:memberId",
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(memberParamsSchema) as any,
   workspaceController.removeMember as any
@@ -105,7 +142,7 @@ workspaceRoutes.delete(
 // Invitation routes
 workspaceRoutes.post(
   "/:id/invite",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   validateRequestBody(inviteMemberSchema) as any,
@@ -115,7 +152,7 @@ workspaceRoutes.post(
 // Accept invitation
 workspaceRoutes.post(
   "/:id/accept",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   workspaceController.acceptInvitation as any
@@ -124,26 +161,10 @@ workspaceRoutes.post(
 // Decline invitation
 workspaceRoutes.post(
   "/:id/decline",
-  rateLimiter,
+  workspaceMutationLimiter,
   authMiddleware as any,
   validateRequestParams(workspaceParamsSchema) as any,
   workspaceController.declineInvitation as any
-);
-
-// Get invitations sent by user
-workspaceRoutes.get(
-  "/invites/sent",
-  rateLimiter,
-  authMiddleware as any,
-  workspaceController.getInvitationsSent as any
-);
-
-// Get invitations received by user
-workspaceRoutes.get(
-  "/invites/received",
-  rateLimiter,
-  authMiddleware as any,
-  workspaceController.getInvitationsReceived as any
 );
 
 // ----------------------------------------------------------------------------

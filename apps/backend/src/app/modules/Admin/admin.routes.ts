@@ -7,14 +7,17 @@ import express from "express";
 import { authMiddleware, requireAdmin } from "../../middleware/auth";
 import { performanceMonitor } from "../../middleware/performanceMonitor";
 import { rateLimiter } from "../../middleware/rateLimiter";
+import { validateRequestBody } from "../../middleware/validateRequest";
 import { adminController } from "./admin.controller";
 import {
   adminApiKeysController,
   adminModerationController,
   adminPaymentsController,
   adminPlansController,
+  adminSubscribersController,
   systemAlertsController,
 } from "./extendedControllers";
+import * as adminValidation from "./admin.validation";
 
 const router = express.Router();
 
@@ -312,7 +315,7 @@ router.get(
  *         name: status
  *         schema:
  *           type: string
- *           enum: [ACTIVE, TRIALING, CANCELED, EXPIRED, PAST_DUE, all]
+ *           enum: [ACTIVE, CANCELED, EXPIRED, PAST_DUE, all]
  *         description: Filter by subscription status
  *       - in: query
  *         name: planId
@@ -449,6 +452,7 @@ router.patch(
   "/users/:id/role",
   authMiddleware,
   requireAdmin,
+  validateRequestBody(adminValidation.updateUserRoleSchema),
   rateLimiter,
   adminController.updateUserRole
 );
@@ -556,7 +560,7 @@ router.delete(
 // ============================================================================
 
 /**
- * Plans (read)
+ * Plans (read + CRUD — display metadata only, Stripe catalog stays env-driven)
  */
 router.get(
   "/plans",
@@ -564,6 +568,84 @@ router.get(
   requireAdmin,
   rateLimiter,
   adminPlansController.list as any
+);
+
+router.post(
+  "/plans",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.createPlanSchema),
+  rateLimiter,
+  adminPlansController.create as any
+);
+
+router.patch(
+  "/plans/:id",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.updatePlanSchema),
+  rateLimiter,
+  adminPlansController.update as any
+);
+
+router.delete(
+  "/plans/:id",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.remove as any
+);
+
+router.post(
+  "/plans/:id/toggle",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.toggle as any
+);
+
+/**
+ * Subscribers (admin subscription management)
+ */
+router.get(
+  "/subscribers",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.list as any
+);
+
+router.post(
+  "/subscribers/:id/cancel-at-period-end",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.cancelAtPeriodEnd as any
+);
+
+router.post(
+  "/subscribers/:id/reactivate",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.reactivate as any
+);
+
+router.post(
+  "/subscribers/:id/cancel-now",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSubscribersController.cancelNow as any
+);
+
+router.post(
+  "/subscribers/:id/change-plan",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.changePlanSchema),
+  rateLimiter,
+  adminSubscribersController.changePlan as any
 );
 
 /**

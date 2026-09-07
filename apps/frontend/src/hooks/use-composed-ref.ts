@@ -2,6 +2,11 @@
 
 import * as React from "react"
 
+// Generic ref-composition utility — mutates ref objects and callbacks,
+// which the React Compiler purity rules cannot compile. Disabled at file
+// level because this is a deliberate imperative ref utility (mirrors the
+// well-known useComposedRef pattern used by many component libraries).
+
 // basically Exclude<React.ClassAttributes<T>["ref"], string>
 type UserRef<T> =
   | ((instance: T | null) => void)
@@ -22,6 +27,7 @@ export const useComposedRef = <T extends HTMLElement>(
   libRef: React.RefObject<T | null>,
   userRef: UserRef<T>
 ) => {
+  /* eslint-disable react-hooks/immutability */
   const prevUserRef = React.useRef<UserRef<T>>(null)
 
   return React.useCallback(

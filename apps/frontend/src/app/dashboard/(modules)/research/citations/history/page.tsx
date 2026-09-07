@@ -8,8 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   useDeleteExportMutation as useDeleteCitationExportMutation,
   useGetHistoryQuery as useGetCitationExportHistoryQuery,
@@ -30,9 +35,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function CitationHistoryPage() {
-  const { user } = useProtectedRoute();
-  const scopedPath = (segment: string) =>
-    buildRoleScopedPath(user?.role, segment);
+  const scopedPath = (segment: string) => `/dashboard${segment}`;
   const [searchTerm, setSearchTerm] = useState("");
   const [formatFilter, setFormatFilter] = useState("");
 
@@ -71,10 +74,10 @@ export default function CitationHistoryPage() {
       await deleteExport(exportId).unwrap();
       showSuccessToast("Export deleted successfully");
       refetch();
-    } catch (error: any) {
-      console.error("Delete export error:", error);
+    } catch (error: unknown) {
       const errorMessage =
-        error?.data?.message || "Failed to delete export. Please try again.";
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to delete export. Please try again.";
       showErrorToast(errorMessage);
     }
   };
@@ -99,10 +102,10 @@ export default function CitationHistoryPage() {
       window.URL.revokeObjectURL(url);
 
       showSuccessToast(`Downloaded ${result.filename}`);
-    } catch (error: any) {
-      console.error("Download export error:", error);
+    } catch (error: unknown) {
       const errorMessage =
-        error?.data?.message || "Failed to download export. Please try again.";
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to download export. Please try again.";
       showErrorToast(errorMessage);
     }
   };
@@ -123,7 +126,7 @@ export default function CitationHistoryPage() {
         {/* Enhanced Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-background to-muted/30 p-6 rounded-lg border">
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" asChild className="hover:bg-white/80">
+            <Button variant="ghost" asChild className="hover:bg-muted">
               <Link href={scopedPath("/research/citations")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Citations
@@ -168,17 +171,21 @@ export default function CitationHistoryPage() {
                 />
               </div>
 
-              <select
+              <Select
                 value={formatFilter}
-                onChange={(e) => setFormatFilter(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                onValueChange={setFormatFilter}
               >
-                {formatOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="All Formats" />
+                </SelectTrigger>
+                <SelectContent>
+                  {formatOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <div className="text-sm text-muted-foreground flex items-center">
                 {filteredExports.length} export
@@ -210,7 +217,7 @@ export default function CitationHistoryPage() {
                     : "You haven't exported any citations yet"}
                 </p>
                 <Button asChild>
-                  <Link href="/research/citations/export">
+                  <Link href={scopedPath("/research/citations/export")}>
                     <Download className="h-4 w-4 mr-2" />
                     Create First Export
                   </Link>

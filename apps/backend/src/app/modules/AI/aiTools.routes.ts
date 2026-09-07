@@ -7,6 +7,26 @@ import { AuthenticatedRequest } from "../../interfaces/common";
 
 const router: express.Router = express.Router();
 
+// Access filter: papers the user uploaded, or that live in a non-deleted
+// workspace where they are owner or an active member. Mirrors the access
+// checks used across papers/search endpoints.
+const buildAccessiblePaperWhere = (userId: string, id: string) => ({
+  id,
+  isDeleted: false,
+  OR: [
+    { uploaderId: userId },
+    {
+      workspace: {
+        isDeleted: false,
+        OR: [
+          { ownerId: userId },
+          { members: { some: { userId, isDeleted: false } } },
+        ],
+      },
+    },
+  ],
+});
+
 // Rewrite text with AI
 router.post(
   "/rewrite",
@@ -54,14 +74,25 @@ router.post(
 
     const { aiService } = await import("../AI/ai.service");
     const { default: prisma } = await import("../../shared/prisma");
+    const userId = (req as AuthenticatedRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, message: "Authentication required" });
+      return;
+    }
 
     const [p1, p2] = await Promise.all([
-      prisma.paper.findUnique({ where: { id: paper1Id }, select: { title: true, abstract: true } }),
-      prisma.paper.findUnique({ where: { id: paper2Id }, select: { title: true, abstract: true } }),
+      prisma.paper.findFirst({
+        where: buildAccessiblePaperWhere(userId, paper1Id),
+        select: { id: true, title: true, abstract: true },
+      }),
+      prisma.paper.findFirst({
+        where: buildAccessiblePaperWhere(userId, paper2Id),
+        select: { id: true, title: true, abstract: true },
+      }),
     ]);
 
     if (!p1 || !p2) {
-      res.status(404).json({ success: false, message: "One or both papers not found" });
+      res.status(403).json({ success: false, message: "You don't have access to one or both papers" });
       return;
     }
 
@@ -134,13 +165,34 @@ router.post(
     }
 
     const { default: prisma } = await import("../../shared/prisma");
+    const userId = (req as AuthenticatedRequest).user?.id;
+    if (!userId) {
+      res.status(401).json({ success: false, message: "Authentication required" });
+      return;
+    }
+
     const papers = await prisma.paper.findMany({
-      where: { id: { in: paperIds.slice(0, 20) } },
+      where: {
+        id: { in: paperIds.slice(0, 20) },
+        isDeleted: false,
+        OR: [
+          { uploaderId: userId },
+          {
+            workspace: {
+              isDeleted: false,
+              OR: [
+                { ownerId: userId },
+                { members: { some: { userId, isDeleted: false } } },
+              ],
+            },
+          },
+        ],
+      },
       select: { id: true, title: true, abstract: true },
     });
 
     if (papers.length === 0) {
-      res.status(404).json({ success: false, message: "No papers found" });
+      res.status(403).json({ success: false, message: "You don't have access to any of the selected papers" });
       return;
     }
 

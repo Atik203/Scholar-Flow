@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Patch next-themes@0.4.6 to fix React 19/Next.js 16 script-in-component error.
  *
@@ -11,47 +12,74 @@
  *
  * Source: https://github.com/shadcn-ui/ui/pull/10238
  *
+ * IMPORTANT: The package's exports map resolves bundler imports to
+ * ./dist/index.mjs and require() to ./dist/index.js. Both must be patched —
+ * Turbopack/webpack bundle the .mjs file.
+ *
  * Idempotent: safe to re-run; will skip if already patched.
  */
 const fs = require("fs");
 const path = require("path");
 
-const TARGET = path.join(
-  __dirname,
-  "..",
-  "node_modules",
-  "next-themes",
-  "dist",
-  "index.js"
-);
+const DIST_DIR = path.join(__dirname, "..", "node_modules", "next-themes", "dist");
 
 const MARKER = "if(typeof window!==\"undefined\")return null;";
-const SEARCH =
-  'Y=t.memo(({forcedTheme:e,storageKey:s,attribute:n,enableSystem:l,enableColorScheme:o,defaultTheme:d,value:u,themes:h,nonce:m,scriptProps:w})=>{let p=';
 
-if (!fs.existsSync(TARGET)) {
+const TARGETS = [
+  {
+    file: "index.js",
+    search:
+      'Y=t.memo(({forcedTheme:e,storageKey:s,attribute:n,enableSystem:l,enableColorScheme:o,defaultTheme:d,value:u,themes:h,nonce:m,scriptProps:w})=>{let p=',
+    replacement:
+      'Y=t.memo(({forcedTheme:e,storageKey:s,attribute:n,enableSystem:l,enableColorScheme:o,defaultTheme:d,value:u,themes:h,nonce:m,scriptProps:w})=>{if(typeof window!=="undefined")return null;let p=',
+  },
+  {
+    file: "index.mjs",
+    search:
+      '_=t.memo(({forcedTheme:e,storageKey:i,attribute:s,enableSystem:u,enableColorScheme:m,defaultTheme:a,value:l,themes:h,nonce:d,scriptProps:w})=>{let p=',
+    replacement:
+      '_=t.memo(({forcedTheme:e,storageKey:i,attribute:s,enableSystem:u,enableColorScheme:m,defaultTheme:a,value:l,themes:h,nonce:d,scriptProps:w})=>{if(typeof window!=="undefined")return null;let p=',
+  },
+];
+
+if (!fs.existsSync(DIST_DIR)) {
   console.log("[patch-next-themes] next-themes not installed yet; skipping");
   process.exit(0);
 }
 
-const original = fs.readFileSync(TARGET, "utf8");
+let patchedAny = false;
+let skippedAny = false;
 
-if (original.includes(MARKER)) {
-  console.log("[patch-next-themes] already patched; skipping");
-  process.exit(0);
+for (const target of TARGETS) {
+  const filePath = path.join(DIST_DIR, target.file);
+
+  if (!fs.existsSync(filePath)) {
+    console.log(`[patch-next-themes] ${target.file} not found; skipping`);
+    continue;
+  }
+
+  const original = fs.readFileSync(filePath, "utf8");
+
+  if (original.includes(MARKER)) {
+    console.log(`[patch-next-themes] ${target.file} already patched; skipping`);
+    skippedAny = true;
+    continue;
+  }
+
+  if (!original.includes(target.search)) {
+    console.log(
+      `[patch-next-themes] WARN: pattern not found in ${target.file}; next-themes version may have changed`
+    );
+    skippedAny = true;
+    continue;
+  }
+
+  const patched = original.replace(target.search, target.replacement);
+  fs.writeFileSync(filePath, patched, "utf8");
+  console.log(`[patch-next-themes] patched next-themes/dist/${target.file} (client-side script render suppressed)`);
+  patchedAny = true;
 }
 
-if (!original.includes(SEARCH)) {
-  console.log(
-    "[patch-next-themes] WARN: target pattern not found; next-themes version may have changed"
-  );
-  process.exit(0);
+if (!patchedAny && !skippedAny) {
+  console.log("[patch-next-themes] nothing to do");
 }
-
-const patched = original.replace(
-  SEARCH,
-  'Y=t.memo(({forcedTheme:e,storageKey:s,attribute:n,enableSystem:l,enableColorScheme:o,defaultTheme:d,value:u,themes:h,nonce:m,scriptProps:w})=>{if(typeof window!=="undefined")return null;let p='
-);
-
-fs.writeFileSync(TARGET, patched, "utf8");
-console.log("[patch-next-themes] patched next-themes/dist/index.js (client-side script render suppressed)");

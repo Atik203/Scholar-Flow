@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/customUI/PageHeader";
-import { useDismissReportMutation, useListReportsQuery, useResolveReportMutation, type ContentReportStatus } from "@/redux/api/adminExtendedApi";
+import { useDismissReportMutation, useListContentReportsQuery, useResolveReportMutation, type ContentReportStatus } from "@/redux/api/adminExtendedApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 
 const STATUS_COLOR: Record<ContentReportStatus, string> = {
@@ -25,7 +25,7 @@ export default function AdminModerationPage() {
   const [statusFilter, setStatusFilter] = useState<ContentReportStatus | "all">(
     "PENDING"
   );
-  const { data, isLoading, refetch } = useListReportsQuery({
+  const { data, isLoading, refetch } = useListContentReportsQuery({
     status: statusFilter === "all" ? undefined : statusFilter,
     limit: 50,
   });

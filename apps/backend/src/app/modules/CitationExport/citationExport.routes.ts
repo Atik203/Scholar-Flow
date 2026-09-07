@@ -240,8 +240,8 @@ router.get(
     try {
       const result = await CitationExportService.getExportHistory(
         req,
-        Number(req.query.limit),
-        Number(req.query.offset)
+        Number(req.query.limit ?? 20),
+        Number(req.query.offset ?? 0)
       );
 
       res.json({

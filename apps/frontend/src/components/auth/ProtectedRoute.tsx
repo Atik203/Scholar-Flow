@@ -3,7 +3,8 @@
 import { showAccessDeniedToast } from "@/components/providers/ToastProvider";
 import { hasPermission, hasRoleAccess } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
-import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { ReactNode, useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -21,8 +22,34 @@ export function ProtectedRoute({
   showToast = true,
 }: ProtectedRouteProps) {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
 
-  // If not authenticated, show fallback or null
+  // Never leave a blank page: when no fallback content is provided, send the
+  // user somewhere sensible (login for unauthenticated, dashboard otherwise).
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      if (!fallback) router.replace("/login");
+      return;
+    }
+
+    if (requiredRole && !hasRoleAccess(user.role, requiredRole)) {
+      if (!fallback) router.replace("/dashboard");
+      return;
+    }
+
+    if (requiredPermission && !hasPermission(user.role, requiredPermission)) {
+      if (!fallback) router.replace("/dashboard");
+    }
+  }, [
+    isAuthenticated,
+    user,
+    requiredRole,
+    requiredPermission,
+    fallback,
+    router,
+  ]);
+
+  // If not authenticated, show fallback or null (redirect effect handles it)
   if (!isAuthenticated || !user) {
     return fallback || null;
   }

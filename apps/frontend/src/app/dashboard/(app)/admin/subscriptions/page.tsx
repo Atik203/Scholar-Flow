@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -31,11 +32,22 @@ import {
   CheckCircle2,
   CreditCard,
   DollarSign,
+  RefreshCw,
   TrendingUp,
   Users,
   XCircle,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 export default function AdminSubscriptionsPage() {
   const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "1y">(
@@ -46,6 +58,7 @@ export default function AdminSubscriptionsPage() {
     data: revenueData,
     isLoading: revenueLoading,
     error: revenueError,
+    refetch: refetchRevenue,
   } = useGetRevenueAnalyticsQuery({ timeRange });
 
   const {
@@ -57,20 +70,10 @@ export default function AdminSubscriptionsPage() {
   const isLoading = revenueLoading || customersLoading;
   const hasError = revenueError || customersError;
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(2)}M`;
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(2)}K`;
-    }
-    return num.toFixed(2);
-  };
-
   const getStatusBadge = (status: string) => {
     const statusMap: Record<
       string,
-      { variant: "default" | "secondary" | "destructive"; icon: any }
+      { variant: "default" | "secondary" | "destructive"; icon: LucideIcon }
     > = {
       ACTIVE: { variant: "default", icon: CheckCircle2 },
       CANCELED: { variant: "destructive", icon: XCircle },
@@ -131,23 +134,33 @@ export default function AdminSubscriptionsPage() {
             </p>
           </div>
 
-          <Select
-            value={timeRange}
-            onValueChange={(value) =>
-              setTimeRange(value as "7d" | "30d" | "90d" | "1y")
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <Calendar className="mr-2 h-4 w-4" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="1y">Last year</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-3">
+            <Select
+              value={timeRange}
+              onValueChange={(value) =>
+                setTimeRange(value as "7d" | "30d" | "90d" | "1y")
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <Calendar className="mr-2 h-4 w-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="90d">Last 90 days</SelectItem>
+                <SelectItem value="1y">Last year</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={() => refetchRevenue()}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Key Metrics Cards */}
@@ -259,6 +272,75 @@ export default function AdminSubscriptionsPage() {
           </Card>
         </div>
 
+        {/* Revenue Trend Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              Revenue Trend
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Daily successful payment volume in {timeRange}
+            </p>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : revenueData?.revenueTrend &&
+              revenueData.revenueTrend.length > 0 ? (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={revenueData.revenueTrend.map((r) => ({
+                      ...r,
+                      label: r.date.slice(5),
+                    }))}
+                    margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.15)" />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={56}
+                      tickFormatter={(value: number) =>
+                        `$${value.toLocaleString()}`
+                      }
+                    />
+                    <Tooltip
+                      cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
+                      formatter={(value, name) => [
+                        `$${Number(value).toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}`,
+                        name === "revenue" ? "Revenue" : String(name),
+                      ]}
+                      labelFormatter={(label) => `Date: ${String(label)}`}
+                    />
+                    <Bar
+                      dataKey="revenue"
+                      fill="hsl(var(--chart-1))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-12">
+                No payment activity in this period
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Subscription Metrics Row */}
         <div className="grid gap-4 md:grid-cols-3">
           {/* ARPU Card */}
@@ -325,7 +407,7 @@ export default function AdminSubscriptionsPage() {
               ) : (
                 <>
                   <div className="text-3xl font-bold text-destructive">
-                    {revenueData?.metrics.churnRate.toFixed(2) || 0}%
+                    {(revenueData?.metrics?.churnRate ?? 0).toFixed(2)}%
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
                     {revenueData?.subscriptions.canceled || 0} canceled in{" "}
@@ -356,17 +438,23 @@ export default function AdminSubscriptionsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {revenueData?.subscriptions.byStatus.map((status) => (
-                    <div
-                      key={status.status}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        {getStatusBadge(status.status)}
+                  {revenueData?.subscriptions.byStatus.length ? (
+                    revenueData.subscriptions.byStatus.map((status) => (
+                      <div
+                        key={status.status}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(status.status)}
+                        </div>
+                        <span className="text-2xl font-bold">{status.count}</span>
                       </div>
-                      <span className="text-2xl font-bold">{status.count}</span>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No subscriptions
+                    </p>
+                  )}
                 </div>
               )}
             </CardContent>

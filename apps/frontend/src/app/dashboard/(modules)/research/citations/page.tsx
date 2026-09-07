@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
-import { buildRoleScopedPath } from "@/lib/auth/roles";
 import { useGetMyCollectionsQuery } from "@/redux/api/collectionApi";
 import { useListPapersQuery } from "@/redux/api/paperApi";
 import { useGetHistoryQuery as useGetCitationExportHistoryQuery } from "@/redux/api/citationApi";
@@ -19,10 +18,10 @@ import {
   Quote,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function CitationsPage() {
-  const { user, isAuthenticated } = useProtectedRoute();
+  const { isAuthenticated } = useProtectedRoute();
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
 
   // Fetch real data from backend
@@ -48,10 +47,7 @@ export default function CitationsPage() {
     limit: 10,
   });
 
-  const scopedPath = useCallback(
-    (segment: string) => buildRoleScopedPath(user?.role, segment),
-    [user?.role]
-  );
+  const scopedPath = (segment: string) => `/dashboard${segment}`;
 
   // Transform papers data for UI
   const papers = useMemo(() => {

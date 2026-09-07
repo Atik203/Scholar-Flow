@@ -3,12 +3,15 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { emailService } from "../../shared/emailService";
+import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import {
   sendPaginatedResponse,
   sendSuccessResponse,
 } from "../../shared/sendResponse";
 import { CollectionService } from "./collection.service";
+import { INVITE_EXPIRY_MS } from "../Invitation/invitationSweeper";
+import { notificationService } from "../Notification/notification.service";
 import {
   addPaperToCollectionSchema,
   createCollectionSchema,
@@ -47,35 +50,42 @@ export const collectionController = {
     `;
 
     if (!workspaceRows.length) {
-      try {
-        const workspaceName = `${
-          (authReq.user as any)?.name || authReq.user.email
-        }'s Workspace`;
+      throw new ApiError(
+        403,
+        "Workspace not found or you don't own it — collections must be created in a workspace you own"
+      );
+    }
 
-        await prisma.$executeRaw`
-          INSERT INTO "Workspace" (
-            id,
-            name,
-            "ownerId",
-            "createdAt",
-            "updatedAt",
-            "isDeleted"
-          ) VALUES (
-            ${workspaceId},
-            ${workspaceName},
-            ${userId},
-            NOW(),
-            NOW(),
-            false
-          )
-        `;
-
-        await prisma.$executeRaw`
-          INSERT INTO "WorkspaceMember" (
+    try {
+      // Collection + owner membership + activity log in a single transaction
+      const result = await prisma.$transaction(async (tx) => {
+        const collectionRows = await tx.$queryRaw<
+          Array<{
+            id: string;
+            workspaceId: string;
+            ownerId: string;
+            name: string;
+            description: string | null;
+            isPublic: boolean;
+            visibility: string;
+            tags: string[];
+            coverImage: string | null;
+            color: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+          }>
+        >`
+          INSERT INTO "Collection" (
             id,
             "workspaceId",
-            "userId",
-            role,
+            "ownerId",
+            name,
+            description,
+            "isPublic",
+            visibility,
+            tags,
+            "coverImage",
+            color,
             "createdAt",
             "updatedAt",
             "isDeleted"
@@ -83,109 +93,75 @@ export const collectionController = {
             gen_random_uuid(),
             ${workspaceId},
             ${userId},
-            'RESEARCHER'::"Role",
+            ${name},
+            ${description ?? null},
+            ${isPublic ?? false},
+            ${visibility ?? "PRIVATE"}::"CollectionVisibility",
+            ${tags ?? []}::text[],
+            ${coverImage ?? null},
+            ${color ?? null},
             NOW(),
             NOW(),
             false
           )
-          ON CONFLICT ("workspaceId", "userId") DO NOTHING
+          RETURNING id, "workspaceId", "ownerId", name, description, "isPublic", visibility, tags, "coverImage", color, "createdAt", "updatedAt"
         `;
-      } catch (workspaceError) {
-        console.error("Error creating workspace:", workspaceError);
-        throw new ApiError(500, "Failed to create workspace for collection");
-      }
-    }
 
-    try {
-      const collectionRows = await prisma.$queryRaw<
-        Array<{
-          id: string;
-          workspaceId: string;
-          ownerId: string;
-          name: string;
-          description: string | null;
-          isPublic: boolean;
-          visibility: string;
-          tags: string[];
-          coverImage: string | null;
-          color: string | null;
-          createdAt: Date;
-          updatedAt: Date;
-        }>
-      >`
-        INSERT INTO "Collection" (
-          id,
-          "workspaceId",
-          "ownerId",
-          name,
-          description,
-          "isPublic",
-          visibility,
-          tags,
-          "coverImage",
-          color,
-          "createdAt",
-          "updatedAt",
-          "isDeleted"
-        ) VALUES (
-          gen_random_uuid(),
-          ${workspaceId},
-          ${userId},
-          ${name},
-          ${description ?? null},
-          ${isPublic ?? false},
-          ${visibility ?? "PRIVATE"}::"CollectionVisibility",
-          ${tags ?? []}::text[],
-          ${coverImage ?? null},
-          ${color ?? null},
-          NOW(),
-          NOW(),
-          false
-        )
-        RETURNING id, "workspaceId", "ownerId", name, description, "isPublic", visibility, tags, "coverImage", color, "createdAt", "updatedAt"
-      `;
+        const collectionRow = collectionRows[0];
+        if (!collectionRow) {
+          throw new Error("Failed to insert collection record");
+        }
 
-      const collectionRow = collectionRows[0];
-      if (!collectionRow) {
-        throw new Error("Failed to insert collection record");
-      }
+        await tx.$executeRaw`
+          INSERT INTO "CollectionMember" (
+            id,
+            "collectionId",
+            "userId",
+            role,
+            permission,
+            status,
+            "invitedById",
+            "invitedAt",
+            "acceptedAt",
+            "createdAt",
+            "updatedAt",
+            "isDeleted"
+          ) VALUES (
+            gen_random_uuid(),
+            ${collectionRow.id},
+            ${userId},
+            'RESEARCHER'::"Role",
+            'EDIT'::"CollectionPermission",
+            'ACCEPTED'::"MembershipStatus",
+            ${userId},
+            NOW(),
+            NOW(),
+            NOW(),
+            NOW(),
+            false
+          )
+          ON CONFLICT ("collectionId", "userId") DO UPDATE SET
+            status = 'ACCEPTED',
+            permission = EXCLUDED.permission,
+            role = EXCLUDED.role,
+            "acceptedAt" = NOW(),
+            "declinedAt" = NULL,
+            "updatedAt" = NOW()
+        `;
 
-      await prisma.$executeRaw`
-        INSERT INTO "CollectionMember" (
-          id,
-          "collectionId",
-          "userId",
-          role,
-          permission,
-          status,
-          "invitedById",
-          "invitedAt",
-          "acceptedAt",
-          "createdAt",
-          "updatedAt",
-          "isDeleted"
-        ) VALUES (
-          gen_random_uuid(),
-          ${collectionRow.id},
-          ${userId},
-          'RESEARCHER'::"Role",
-          'EDIT'::"CollectionPermission",
-          'ACCEPTED'::"MembershipStatus",
-          ${userId},
-          NOW(),
-          NOW(),
-          NOW(),
-          NOW(),
-          false
-        )
-        ON CONFLICT ("collectionId", "userId") DO UPDATE SET
-          status = 'ACCEPTED',
-          permission = EXCLUDED.permission,
-          role = EXCLUDED.role,
-          "acceptedAt" = NOW(),
-          "declinedAt" = NULL,
-          "updatedAt" = NOW()
-      `;
+        await tx.activityLogEntry.create({
+          data: {
+            userId,
+            workspaceId,
+            entity: "Collection",
+            entityId: collectionRow.id,
+            action: "CREATE",
+            severity: "INFO",
+          },
+        });
+
+        return collectionRow;
+      });
 
       const ownerRows = await prisma.$queryRaw<
         Array<{ id: string; name: string | null; email: string | null }>
@@ -198,18 +174,18 @@ export const collectionController = {
 
       const owner = ownerRows[0];
       const responsePayload = {
-        id: collectionRow.id,
-        workspaceId: collectionRow.workspaceId,
-        ownerId: collectionRow.ownerId,
-        name: collectionRow.name,
-        description: collectionRow.description,
-        isPublic: collectionRow.isPublic,
-        visibility: collectionRow.visibility,
-        tags: collectionRow.tags || [],
-        coverImage: collectionRow.coverImage,
-        color: collectionRow.color,
-        createdAt: collectionRow.createdAt,
-        updatedAt: collectionRow.updatedAt,
+        id: result.id,
+        workspaceId: result.workspaceId,
+        ownerId: result.ownerId,
+        name: result.name,
+        description: result.description,
+        isPublic: result.isPublic,
+        visibility: result.visibility,
+        tags: result.tags || [],
+        coverImage: result.coverImage,
+        color: result.color,
+        createdAt: result.createdAt,
+        updatedAt: result.updatedAt,
         owner: owner
           ? {
               id: owner.id,
@@ -437,9 +413,9 @@ export const collectionController = {
     const inviterId = authReq.user.id;
 
     const collectionRows = await prisma.$queryRaw<
-      Array<{ id: string; name: string }>
+      Array<{ id: string; name: string; workspaceId: string | null }>
     >`
-      SELECT id, name
+      SELECT id, name, "workspaceId"
       FROM "Collection"
       WHERE id = ${id}
         AND "ownerId" = ${inviterId}
@@ -471,8 +447,8 @@ export const collectionController = {
       throw new ApiError(400, "You cannot invite yourself");
     }
 
-    const existingRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const existingRows = await prisma.$queryRaw<Array<{ id: string; status: string }>>`
+      SELECT id, status
       FROM "CollectionMember"
       WHERE "collectionId" = ${id}
         AND "userId" = ${user.id}
@@ -480,6 +456,11 @@ export const collectionController = {
       LIMIT 1
     `;
 
+    if (existingRows[0]?.status === "ACCEPTED") {
+      throw new ApiError(400, "User is already a member of this collection");
+    }
+
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
     let memberId: string | undefined;
 
     if (existingRows.length) {
@@ -491,6 +472,7 @@ export const collectionController = {
           status = 'PENDING'::"MembershipStatus",
           "invitedById" = ${inviterId},
           "invitedAt" = NOW(),
+          "expiresAt" = ${expiresAt},
           "declinedAt" = NULL,
           "acceptedAt" = NULL,
           "updatedAt" = NOW()
@@ -510,6 +492,7 @@ export const collectionController = {
           status,
           "invitedById",
           "invitedAt",
+          "expiresAt",
           "createdAt",
           "updatedAt",
           "isDeleted"
@@ -522,6 +505,7 @@ export const collectionController = {
           'PENDING'::"MembershipStatus",
           ${inviterId},
           NOW(),
+          ${expiresAt},
           NOW(),
           NOW(),
           false
@@ -556,11 +540,149 @@ export const collectionController = {
       console.error("Failed to send invitation email:", emailError);
     }
 
+    // Notify the invitee (best-effort)
+    try {
+      await notificationService.createNotification({
+        userId: user.id,
+        type: "INVITE",
+        title: "Collection invitation",
+        message: `${collection.name} — accept or decline from your dashboard.`,
+        actionUrl: "/dashboard/collections/shared",
+        actorId: inviterId,
+        resourceId: id,
+      });
+    } catch {
+      // notification failures never break the main flow
+    }
+
+    // Log the invite activity (best-effort)
+    try {
+      await prisma.activityLogEntry.create({
+        data: {
+          userId: inviterId,
+          workspaceId: collection.workspaceId ?? undefined,
+          entity: "Collection",
+          entityId: id,
+          action: "INVITE",
+          severity: "INFO",
+        },
+      });
+    } catch {
+      // activity failures never break the main flow
+    }
+
     if (!memberId) {
       throw new ApiError(500, "Failed to persist collection invitation");
     }
 
     sendSuccessResponse(res, { memberId }, "Invitation sent successfully", 201);
+  }),
+
+  // Revoke a pending invite / remove a member (owner only)
+  revokeMember: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const { collectionId, memberId } = req.params;
+
+    const collectionRows = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "Collection"
+      WHERE id = ${collectionId}
+        AND "ownerId" = ${authReq.user.id}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+    if (!collectionRows.length) {
+      throw new ApiError(403, "Only the owner can manage members");
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "CollectionMember"
+      SET "isDeleted" = true, "updatedAt" = NOW()
+      WHERE id = ${memberId} AND "collectionId" = ${collectionId}
+    `;
+
+    sendSuccessResponse(res, null, "Invitation revoked");
+  }),
+
+  // Resend a pending invite (owner only)
+  resendInvite: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const { collectionId, memberId } = req.params;
+
+    const collectionRows = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT id
+      FROM "Collection"
+      WHERE id = ${collectionId}
+        AND "ownerId" = ${authReq.user.id}
+        AND "isDeleted" = false
+      LIMIT 1
+    `;
+    if (!collectionRows.length) {
+      throw new ApiError(403, "Only the owner can manage members");
+    }
+
+    const memberRows = await prisma.$queryRaw<
+      Array<{ id: string; status: string; "userId": string }>
+    >`
+      SELECT id, status, "userId"
+      FROM "CollectionMember"
+      WHERE id = ${memberId} AND "collectionId" = ${collectionId} AND "isDeleted" = false
+      LIMIT 1
+    `;
+    const member = memberRows[0];
+    if (!member) throw new ApiError(404, "Invitation not found");
+    if (member.status !== "PENDING") {
+      throw new ApiError(400, "Only pending invitations can be resent");
+    }
+
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+    await prisma.$executeRaw`
+      UPDATE "CollectionMember"
+      SET "invitedAt" = NOW(), "expiresAt" = ${expiresAt}, "updatedAt" = NOW()
+      WHERE id = ${memberId}
+    `;
+
+    // Re-send email (best-effort)
+    try {
+      const userRows = await prisma.$queryRaw<
+        Array<{ email: string; name: string | null }>
+      >`
+        SELECT email, name FROM "User" WHERE id = ${member.userId} LIMIT 1
+      `;
+      const invitee = userRows[0];
+      if (invitee) {
+        const [inviterRows, collectionNameRows] = await Promise.all([
+          prisma.$queryRaw<Array<{ name: string | null; email: string | null }>>`
+            SELECT name, email FROM "User" WHERE id = ${authReq.user.id} LIMIT 1
+          `,
+          prisma.$queryRaw<Array<{ name: string }>>`
+            SELECT name FROM "Collection" WHERE id = ${collectionId} LIMIT 1
+          `,
+        ]);
+        await emailService.sendCollectionInvitationEmail({
+          email: invitee.email,
+          name: invitee.name || invitee.email,
+          collectionName: collectionNameRows[0]?.name || "a collection",
+          inviterName:
+            inviterRows[0]?.name ||
+            inviterRows[0]?.email ||
+            "A ScholarFlow user",
+          collectionId,
+        });
+      }
+    } catch (emailError) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Failed to resend collection invitation email:", emailError);
+      }
+    }
+
+    sendSuccessResponse(res, null, "Invitation resent");
   }),
 
   // Accept an invite
@@ -571,8 +693,10 @@ export const collectionController = {
     }
     const { id } = req.params;
 
-    const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const memberRows = await prisma.$queryRaw<
+      Array<{ id: string; status: string; expiresAt: Date | null; invitedById: string | null }>
+    >`
+      SELECT id, status, "expiresAt", "invitedById"
       FROM "CollectionMember"
       WHERE "collectionId" = ${id}
         AND "userId" = ${authReq.user.id}
@@ -583,6 +707,16 @@ export const collectionController = {
     const member = memberRows[0];
     if (!member) {
       throw new ApiError(404, "Invitation not found");
+    }
+    if (member.status !== "PENDING") {
+      throw new ApiError(400, "Only pending invitations can be accepted");
+    }
+    if (member.expiresAt && new Date(member.expiresAt).getTime() < Date.now()) {
+      await prisma.$executeRaw`
+        UPDATE "CollectionMember" SET status = 'EXPIRED', "updatedAt" = NOW()
+        WHERE id = ${member.id}
+      `;
+      throw new ApiError(400, "Invitation has expired");
     }
 
     const updatedRows = await prisma.$queryRaw<
@@ -614,6 +748,23 @@ export const collectionController = {
 
     const updated = updatedRows[0];
 
+    // Notify the inviter (best-effort)
+    if (member.invitedById) {
+      try {
+        await notificationService.createNotification({
+          userId: member.invitedById,
+          type: "INVITE",
+          title: "Collection invitation accepted",
+          message: "A user accepted your collection invitation.",
+          actionUrl: `/dashboard/collections/${id}`,
+          actorId: authReq.user.id,
+          resourceId: id,
+        });
+      } catch {
+        // notification failures never break the main flow
+      }
+    }
+
     sendSuccessResponse(res, updated, "Invitation accepted");
   }),
 
@@ -625,8 +776,10 @@ export const collectionController = {
     }
     const { id } = req.params;
 
-    const memberRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const memberRows = await prisma.$queryRaw<
+      Array<{ id: string; status: string; expiresAt: Date | null }>
+    >`
+      SELECT id, status, "expiresAt"
       FROM "CollectionMember"
       WHERE "collectionId" = ${id}
         AND "userId" = ${authReq.user.id}
@@ -637,6 +790,16 @@ export const collectionController = {
     const member = memberRows[0];
     if (!member) {
       throw new ApiError(404, "Invitation not found");
+    }
+    if (member.status !== "PENDING") {
+      throw new ApiError(400, "Only pending invitations can be declined");
+    }
+    if (member.expiresAt && new Date(member.expiresAt).getTime() < Date.now()) {
+      await prisma.$executeRaw`
+        UPDATE "CollectionMember" SET status = 'EXPIRED', "updatedAt" = NOW()
+        WHERE id = ${member.id}
+      `;
+      throw new ApiError(400, "Invitation has expired");
     }
 
     const updatedRows = await prisma.$queryRaw<
@@ -970,8 +1133,10 @@ export const collectionController = {
     }
 
     // Check if collection exists
-    const collectionRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const collectionRows = await prisma.$queryRaw<
+      Array<{ id: string; workspaceId: string | null }>
+    >`
+      SELECT id, "workspaceId"
       FROM "Collection"
       WHERE id = ${id}
         AND "isDeleted" = false
@@ -1024,9 +1189,9 @@ export const collectionController = {
       throw new ApiError(400, "No fields to update");
     }
 
-    // Use separate queries for simplicity and type safety
-    const updatePromises = [];
-
+    // Atomic update — all field updates in a single transaction (was: parallel
+    // statements with no transaction, partial-write risk)
+    const updatePromises: Prisma.PrismaPromise<number>[] = [];
     if (name !== undefined) {
       updatePromises.push(
         prisma.$executeRaw`
@@ -1091,7 +1256,23 @@ export const collectionController = {
       );
     }
 
-    await Promise.all(updatePromises);
+    await prisma.$transaction(updatePromises);
+
+    // Log the update activity (best-effort)
+    try {
+      await prisma.activityLogEntry.create({
+        data: {
+          userId: authReq.user.id,
+          workspaceId: collectionRows[0].workspaceId ?? undefined,
+          entity: "Collection",
+          entityId: id,
+          action: "UPDATE",
+          severity: "INFO",
+        },
+      });
+    } catch {
+      // activity failures never break the main flow
+    }
 
     // Fetch updated collection with owner and counts
     const updatedRows = await prisma.$queryRaw<
@@ -1171,8 +1352,10 @@ export const collectionController = {
     const { id } = req.params;
 
     // Check if collection exists
-    const collectionRows = await prisma.$queryRaw<Array<{ id: string }>>`
-      SELECT id
+    const collectionRows = await prisma.$queryRaw<
+      Array<{ id: string; ownerId: string; workspaceId: string | null }>
+    >`
+      SELECT id, "ownerId", "workspaceId"
       FROM "Collection"
       WHERE id = ${id}
         AND "isDeleted" = false
@@ -1183,16 +1366,9 @@ export const collectionController = {
       throw new ApiError(404, "Collection not found");
     }
 
-    // Check edit permission
-    const hasEditPermission = await CollectionService.hasEditPermission(
-      id,
-      authReq.user.id
-    );
-    if (!hasEditPermission) {
-      throw new ApiError(
-        403,
-        "Access denied: You don't have edit permission for this collection"
-      );
+    // Only the owner may delete a collection (consistent with invite/getMembers)
+    if (collectionRows[0].ownerId !== authReq.user.id) {
+      throw new ApiError(403, "Only the owner can delete this collection");
     }
 
     // Soft delete the collection
@@ -1202,11 +1378,32 @@ export const collectionController = {
       WHERE id = ${id}
     `;
 
+    // Log the deletion activity (best-effort)
+    try {
+      await prisma.activityLogEntry.create({
+        data: {
+          userId: authReq.user.id,
+          workspaceId: collectionRows[0].workspaceId ?? undefined,
+          entity: "Collection",
+          entityId: id,
+          action: "DELETE",
+          severity: "INFO",
+        },
+      });
+    } catch {
+      // activity failures never break the main flow
+    }
+
     sendSuccessResponse(res, null, "Collection deleted successfully");
   }),
 
-  // Search collections
+  // Search collections (auth required — scoped to accessible collections)
   search: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+
     const { q } = req.query;
     if (!q || typeof q !== "string") {
       throw new ApiError(400, "Search query is required");
@@ -1216,7 +1413,12 @@ export const collectionController = {
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const result = await CollectionService.searchCollections(q, limit, skip);
+    const result = await CollectionService.searchCollections(
+      q,
+      authReq.user.id,
+      limit,
+      skip
+    );
 
     sendPaginatedResponse(
       res,
@@ -1232,9 +1434,13 @@ export const collectionController = {
     );
   }),
 
-  // Get collection statistics
+  // Get collection statistics (auth required — scoped to the user's collections)
   getStats: catchAsync(async (req: Request, res: Response) => {
-    const stats = await CollectionService.getCollectionStats();
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) {
+      throw new ApiError(401, "Authentication required");
+    }
+    const stats = await CollectionService.getCollectionStats(authReq.user.id);
     sendSuccessResponse(
       res,
       stats,
@@ -1743,28 +1949,24 @@ export const collectionController = {
       );
     }
 
-    // Build update dynamically based on provided fields
-    const setClauses: string[] = [];
-    setClauses.push(`"updatedAt" = NOW()`);
-
+    // Build update dynamically based on provided fields (typed ORM update —
+    // avoids $executeRawUnsafe and keeps the query parameterized)
+    const updateData: Prisma.CollectionPaperUpdateInput = {};
     if (status !== undefined) {
-      setClauses.push(`status = ${status}::"CollectionPaperStatus"`);
+      updateData.status = status;
     }
     if (isStarred !== undefined) {
-      setClauses.push(`"isStarred" = ${isStarred}`);
+      updateData.isStarred = isStarred;
     }
 
-    if (setClauses.length <= 1) {
+    if (Object.keys(updateData).length === 0) {
       throw new ApiError(400, "No fields to update");
     }
 
-    const setSql = setClauses.join(", ");
-
-    await prisma.$executeRawUnsafe(`
-      UPDATE "CollectionPaper"
-      SET ${setSql}
-      WHERE id = ${cpRows[0].id}
-    `);
+    await prisma.collectionPaper.update({
+      where: { id: cpRows[0].id },
+      data: updateData,
+    });
 
     sendSuccessResponse(res, null, "Collection paper updated successfully");
   }),

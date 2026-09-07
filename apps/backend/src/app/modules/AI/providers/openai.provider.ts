@@ -308,7 +308,7 @@ export class OpenAiProvider extends BaseAiProvider {
     try {
       const { payload, raw, tokens } = await this.callStructuredJson(
         {
-          model: DEFAULT_MODEL,
+          model: input.model || DEFAULT_MODEL,
           messages: [
             {
               role: "system",

@@ -34,7 +34,6 @@ import {
   BookOpen,
   Building2,
   Calendar,
-  Copy,
   Edit,
   FileText,
   Folder,
@@ -92,10 +91,19 @@ export default function WorkspaceDetailsPage() {
   });
   const { data: stats } = useGetWorkspaceStatsQuery(id, { skip: !shouldFetch });
   const { data: settings } = useGetWorkspaceSettingsQuery(id, { skip: !shouldFetch });
-  const { data: membersData } = useListMembersQuery({ id, limit: 50 });
+  const { data: membersData } = useListMembersQuery(
+    { id, limit: 50 },
+    { skip: !shouldFetch }
+  );
   const members = membersData?.data || [];
-  const { data: collectionsData } = useGetWorkspaceCollectionsQuery({ id, limit: 20 });
-  const { data: papersData } = useGetWorkspacePapersQuery({ id, limit: 20 });
+  const { data: collectionsData } = useGetWorkspaceCollectionsQuery(
+    { id, limit: 20 },
+    { skip: !shouldFetch }
+  );
+  const { data: papersData } = useGetWorkspacePapersQuery(
+    { id, limit: 20 },
+    { skip: !shouldFetch }
+  );
   const { data: activityData, isLoading: activityLoading } = useGetWorkspaceActivityQuery(
     { id, limit: 30 },
     { skip: !shouldFetch }
@@ -974,13 +982,6 @@ function InviteDialog({
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"VIEWER" | "EDITOR" | "MANAGER" | "OWNER">("EDITOR");
-  const inviteLink = typeof window !== "undefined" ? `${window.location.origin}/workspaces/invite` : "";
-
-  const copyInviteLink = () => {
-    if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(inviteLink);
-    showSuccessToast("Invite link copied");
-  };
 
   return (
     <AnimatePresence>
@@ -1025,13 +1026,13 @@ function InviteDialog({
                 </select>
               </div>
               <div className="bg-muted/50 p-3 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">Or share invite link:</p>
-                <div className="flex gap-2">
-                  <Input type="text" readOnly value={inviteLink} className="text-xs" />
-                  <Button size="icon" variant="outline" onClick={copyInviteLink}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Invited users accept from{" "}
+                  <Link href="/dashboard/workspaces/shared" className="underline">
+                    Shared Workspaces
+                  </Link>
+                  .
+                </p>
               </div>
             </div>
             <div className="flex gap-2 justify-end mt-6">

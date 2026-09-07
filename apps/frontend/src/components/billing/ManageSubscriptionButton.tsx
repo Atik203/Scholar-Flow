@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/components/providers/ToastProvider";
 import { apiSlice } from "@/redux/api/apiSlice";
 import { useCreatePortalSessionMutation } from "@/redux/api/billingApi";
 import { useAppDispatch } from "@/redux/hooks";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { toast } from "sonner";
 
 interface ManageSubscriptionButtonProps {
   className?: string;
@@ -35,7 +35,7 @@ export function ManageSubscriptionButton({
 
   const handleManageSubscription = async () => {
     try {
-      const response = (await createPortal({}).unwrap()) as any;
+      const response = await createPortal({}).unwrap();
 
       if (response?.data?.url) {
         // Mark that portal was opened
@@ -48,12 +48,11 @@ export function ManageSubscriptionButton({
       } else {
         throw new Error("No portal URL received");
       }
-    } catch (error: any) {
-      console.error("Error creating portal session:", error);
-      toast.error(
-        error?.data?.message ||
-          "Failed to open subscription portal. Please try again."
-      );
+    } catch (error) {
+      const message =
+        (error as { data?: { message?: string } })?.data?.message ||
+        "Failed to open subscription portal. Please try again.";
+      showErrorToast(message);
     }
   };
 

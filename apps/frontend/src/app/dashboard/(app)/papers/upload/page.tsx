@@ -8,7 +8,7 @@ import { useUploadPaperMutation } from "@/redux/api/paperApi";
 import { useImportByDOIMutation, useImportByArxivMutation, useImportByURLMutation, useImportBySmartURLMutation } from "@/redux/api/importApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowLeft, BookOpen, Check, CheckCircle, FileText, Globe, Link2, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, CheckCircle, Eye, FileText, Globe, Link2, Loader2, Search, Sparkles, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useRef } from "react";
@@ -38,17 +38,12 @@ function formatLabel(format: string): string {
 
 function StageLabel({ upload }: { upload: FileUpload }) {
   if (upload.stage === "error") return <span className="text-xs text-destructive">{upload.error}</span>;
-  if (upload.stage === "complete") return <span className="text-xs text-green-600">Processed</span>;
-  if (upload.stage === "extracting") return <span className="text-xs text-muted-foreground">
-    {upload.format === "docx" ? "Converting & extracting..." : "Extracting text..."}
-  </span>;
-  return <span className="text-xs text-muted-foreground">{upload.stage}</span>;
+  if (upload.stage === "complete") return <span className="text-xs text-green-600">Uploaded — processing queued</span>;
+  return <span className="text-xs text-muted-foreground">{upload.stage === "uploading" ? "Uploading..." : upload.stage}</span>;
 }
 
 const stages = [
   { key: "uploading", label: "Uploading", icon: Upload },
-  { key: "extracting", label: "Extracting", icon: FileText },
-  { key: "analyzing", label: "AI Analysis", icon: Sparkles },
   { key: "complete", label: "Complete", icon: CheckCircle },
 ];
 
@@ -96,21 +91,30 @@ export default function UploadPaperPage() {
     const newUploads: FileUpload[] = files.map((file) => ({ id: Math.random().toString(36).slice(2), file, progress: 0, stage: "uploading", format: detectFormat(file) }));
     setUploads((prev) => [...prev, ...newUploads]);
 
+    // Honest flow: upload is the only real step here — extraction is queued
+    // server-side and tracked on the paper detail/list pages. No fake timers.
+    let succeeded = 0;
     for (const upload of newUploads) {
       try {
-        updateUpload(upload.id, { stage: "uploading", progress: 30 });
+        updateUpload(upload.id, { stage: "uploading", progress: 45 });
         const tagList = tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
         const result = await uploadPaper({ file: upload.file, workspaceId: selectedWorkspace, tags: tagList, language: language || undefined }).unwrap();
-        updateUpload(upload.id, { stage: "extracting", progress: 60, paperId: result.data.paper.id });
-        await new Promise((r) => setTimeout(r, 800));
-        updateUpload(upload.id, { stage: "analyzing", progress: 85 });
-        await new Promise((r) => setTimeout(r, 1200));
-        updateUpload(upload.id, { stage: "complete", progress: 100 });
+        updateUpload(upload.id, { stage: "complete", progress: 100, paperId: result.data.paper.id });
+        succeeded++;
       } catch (e: any) {
-        updateUpload(upload.id, { stage: "error", error: e?.message || "Upload failed" });
+        updateUpload(upload.id, { stage: "error", error: e?.data?.message || e?.message || "Upload failed" });
       }
     }
-    showSuccessToast(`Uploaded ${newUploads.length} paper(s)`);
+    if (succeeded > 0) {
+      showSuccessToast(
+        `Uploaded ${succeeded} paper(s) — processing starts automatically`
+      );
+    }
+    if (succeeded < newUploads.length) {
+      showErrorToast(
+        `${newUploads.length - succeeded} upload(s) failed — check the queue for details`
+      );
+    }
   };
 
   const updateUpload = (id: string, data: Partial<FileUpload>) => {
@@ -338,6 +342,17 @@ export default function UploadPaperPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      {upload.stage === "complete" && upload.paperId && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1"
+                          onClick={() => goToPaper(upload.paperId!)}
+                        >
+                          <Eye className="h-3 w-3" />
+                          View
+                        </Button>
+                      )}
                       {upload.stage === "complete" && <Check className="h-5 w-5 text-green-500" />}
                       {upload.stage === "error" && <X className="h-5 w-5 text-destructive" />}
                       {(upload.stage === "uploading" || upload.stage === "extracting" || upload.stage === "analyzing") && <Loader2 className="h-5 w-5 animate-spin text-primary" />}

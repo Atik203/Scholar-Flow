@@ -50,7 +50,7 @@ const storage =
 const authPersistConfig = {
   key: "scholarflow-auth",
   storage,
-  whitelist: ["user", "accessToken", "isAuthenticated"], // Only persist these fields
+  whitelist: ["user", "accessToken", "sessionToken", "isAuthenticated"], // Only persist these fields
 };
 
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);

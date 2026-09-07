@@ -22,11 +22,12 @@ import {
 } from "@/redux/api/notebookApi";
 import { useAppSelector } from "@/redux/hooks";
 import { selectAccessToken } from "@/redux/auth/authSlice";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
-  BookOpen, Brain, Edit3, Eye, FileText, Hash, Loader2, Lock, MoreHorizontal, Plus, Search, Sparkles, Star, Trash2, Users, Globe, X
+  BookOpen, Brain, Edit3, Eye, FileText, Hash, Loader2, Lock, MoreHorizontal, Plus, Search, Sparkles, Star, Trash2, Users, Globe
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
 
 function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
@@ -71,11 +72,20 @@ export default function NotesPage() {
   const [editContent, setEditContent] = useState("");
   const [showNewNotebook, setShowNewNotebook] = useState(false);
   const [newNotebookName, setNewNotebookName] = useState("");
-  const [showAISummary, setShowAISummary] = useState(false);
   const [createNoteInNotebook] = useCreateNoteInNotebookMutation();
   const [updateNoteMetadata] = useUpdateNoteMetadataMutation();
   const [showNewSection, setShowNewSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
+
+  // Auto-select the note from ?selected= (set by /dashboard/notes/new).
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const selected = searchParams.get("selected");
+    if (selected) {
+      setSelectedNoteId(selected);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Default to first notebook once loaded
   useEffect(() => {
@@ -250,7 +260,7 @@ export default function NotesPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className={cn("h-3 w-3 rounded-sm flex-shrink-0", `bg-${nb.color}-500`)} style={{ background: nb.color === "blue" ? "#3b82f6" : nb.color === "purple" ? "#a855f7" : nb.color === "green" ? "#22c55e" : nb.color === "orange" ? "#f97316" : "#ec4899" }} />
+                    <div className="h-3 w-3 rounded-sm flex-shrink-0" style={{ background: nb.color === "blue" ? "#3b82f6" : nb.color === "purple" ? "#a855f7" : nb.color === "green" ? "#22c55e" : nb.color === "orange" ? "#f97316" : "#ec4899" }} />
                     <span className="text-sm font-medium truncate">{nb.name}</span>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
@@ -390,32 +400,8 @@ export default function NotesPage() {
                   {viewMode === "edit" && (
                     <Button size="sm" onClick={onSave}>Save</Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => setShowAISummary((v) => !v)}>
-                    <Sparkles className="h-4 w-4 mr-1" />AI
-                  </Button>
                 </div>
               </div>
-
-              <AnimatePresence>
-                {showAISummary && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-b">
-                    <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex-shrink-0">
-                          <Brain className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-1 text-sm">AI Summary (Phase 8)</h4>
-                          <p className="text-xs text-purple-700 dark:text-purple-300">AI summarization will be enabled in Phase 8 (Global AI Assistant).</p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowAISummary(false)}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               <div className="flex-1 overflow-y-auto">
                 <div className="p-6 max-w-4xl mx-auto">

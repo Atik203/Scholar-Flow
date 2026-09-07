@@ -135,21 +135,6 @@ export const workspaceApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    addMember: builder.mutation<
-      { success: boolean },
-      { id: string; userId?: string; email?: string; role?: string }
-    >({
-      query: ({ id, ...body }) => ({
-        url: `/workspaces/${id}/members`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: (_res, _err, { id }) => [
-        { type: "Workspace", id: `${id}-members` },
-        { type: "Workspace", id: "LIST" },
-      ],
-    }),
-
     updateMemberRole: builder.mutation<
       { success: boolean },
       { id: string; memberId: string; role: string }
@@ -374,7 +359,6 @@ export const {
   useUpdateWorkspaceMutation,
   useDeleteWorkspaceMutation,
   useListMembersQuery,
-  useAddMemberMutation,
   useUpdateMemberRoleMutation,
   useRemoveMemberMutation,
   useInviteWorkspaceMemberMutation,
