@@ -69,6 +69,22 @@ paperRoutes.get(
   paperController.getOne as any
 );
 
+// List active email shares for a paper (author/owner only)
+paperRoutes.get(
+  "/:id/shares",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.listShares as any
+);
+
+// Revoke an email share (author or original sharer only)
+paperRoutes.delete(
+  "/shares/:shareId",
+  paperOperationLimiter,
+  authMiddleware as any,
+  paperController.revokeShare as any
+);
+
 // Get signed file URL
 paperRoutes.get(
   "/:id/file-url",

@@ -695,13 +695,15 @@ export const paperService = {
 
   /**
    * Access gate for paper resources: uploader OR workspace owner OR active
-   * workspace member. Papers without a workspace are uploader-only.
+   * workspace member OR an active PaperShare row for the user's email.
+   * Papers without a workspace are uploader-only.
    * Throws 404 (missing) / 403 (no access) — mirrors the summary-access rule
    * but tolerates null/deleted workspaces (LEFT JOIN).
    */
   async assertPaperAccess(
     paperId: string,
-    userId: string
+    userId: string,
+    email?: string
   ): Promise<void> {
     const rows = await prisma.$queryRaw<
       Array<{
@@ -747,7 +749,83 @@ export const paperService = {
       }
     }
 
+    if (email) {
+      const share = await prisma.$queryRaw<Array<{ exists: number }>>`
+        SELECT 1 as exists
+        FROM "PaperShare"
+        WHERE "paperId" = ${paperId}
+          AND email = ${email}
+          AND "isDeleted" = false
+        LIMIT 1
+      `;
+      if (share.length > 0) {
+        return;
+      }
+    }
+
     throw new ApiError(403, "You do not have access to this paper");
+  },
+
+  /**
+   * List active email shares for a paper. Only the uploader or the workspace
+   * owner may manage shares — everyone else gets 403, never a leak.
+   */
+  async listPaperShares(paperId: string, requesterId: string) {
+    const manager = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id
+      FROM "Paper" p
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+        AND (p."uploaderId" = ${requesterId} OR w."ownerId" = ${requesterId})
+      LIMIT 1
+    `;
+    if (!manager[0]) {
+      throw new ApiError(403, "Only the author can manage shares");
+    }
+
+    return prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string;
+        permission: string;
+        createdAt: Date;
+      }>
+    >`
+      SELECT id, email, permission, "createdAt"
+      FROM "PaperShare"
+      WHERE "paperId" = ${paperId} AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+    `;
+  },
+
+  /**
+   * Revoke an email share (soft delete — immediately drops recipient access
+   * because every gate checks isDeleted=false). Author or original sharer.
+   */
+  async revokePaperShare(shareId: string, requesterId: string) {
+    const rows = await prisma.$queryRaw<
+      Array<{ id: string; sharedById: string; uploaderId: string }>
+    >`
+      SELECT ps.id, ps."sharedById", p."uploaderId"
+      FROM "PaperShare" ps
+      JOIN "Paper" p ON p.id = ps."paperId"
+      WHERE ps.id = ${shareId} AND ps."isDeleted" = false AND p."isDeleted" = false
+      LIMIT 1
+    `;
+    const row = rows[0];
+    if (!row) throw new ApiError(404, "Share not found");
+
+    if (row.sharedById !== requesterId && row.uploaderId !== requesterId) {
+      throw new ApiError(403, "Only the sharer or the author can revoke");
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "PaperShare"
+      SET "isDeleted" = true, "updatedAt" = NOW()
+      WHERE id = ${shareId}
+    `;
+    return { id: shareId, revoked: true };
   },
 
   async getSummarySourceText(
@@ -1459,12 +1537,14 @@ export const editorPaperService = {
 
   /**
    * Access gate for editor papers: uploader OR active workspace member
-   * (membership isDeleted=false — deleted memberships grant nothing).
+   * (membership isDeleted=false — deleted memberships grant nothing) OR an
+   * active PaperShare row for the user's email (view is open to any share).
    * Throws 403 when the user has no access.
    */
   async assertEditorPaperAccess(
     paperId: string,
-    userId: string
+    userId: string,
+    email?: string
   ): Promise<void> {
     const rows = await prisma.$queryRaw<Array<{ id: string }>>`
       SELECT p.id
@@ -1473,10 +1553,15 @@ export const editorPaperService = {
         ON wm."workspaceId" = p."workspaceId"
         AND wm."userId" = ${userId}
         AND wm."isDeleted" = false
+      LEFT JOIN "PaperShare" ps
+        ON ps."paperId" = p.id
+        AND ${email}::text IS NOT NULL
+        AND ps.email = ${email}
+        AND ps."isDeleted" = false
       WHERE p.id = ${paperId}
         AND p."isDeleted" = false
         AND p.source = 'editor'
-        AND (p."uploaderId" = ${userId} OR wm.id IS NOT NULL)
+        AND (p."uploaderId" = ${userId} OR wm.id IS NOT NULL OR ps.id IS NOT NULL)
       LIMIT 1
     `;
 
@@ -1487,13 +1572,15 @@ export const editorPaperService = {
 
   /**
    * Write gate for editor papers: uploader OR workspace member with an
-   * OWNER/EDITOR role. VIEWER members and non-members get 403. This is the
-   * single gate for content updates, autosaves and version restores so all
-   * three stay consistent (viewing is open to all members, writing is not).
+   * OWNER/EDITOR role, OR a PaperShare row with permission 'edit'. VIEWER
+   * members and non-members get 403. This is the single gate for content
+   * updates, autosaves and version restores so all three stay consistent
+   * (viewing is open to all members, writing is not).
    */
   async assertEditorCanEdit(
     paperId: string,
-    userId: string
+    userId: string,
+    email?: string
   ): Promise<void> {
     const rows = await prisma.$queryRaw<Array<{ id: string }>>`
       SELECT p.id
@@ -1502,12 +1589,19 @@ export const editorPaperService = {
         ON wm."workspaceId" = p."workspaceId"
         AND wm."userId" = ${userId}
         AND wm."isDeleted" = false
+      LEFT JOIN "PaperShare" ps
+        ON ps."paperId" = p.id
+        AND ps.permission = 'edit'
+        AND ${email}::text IS NOT NULL
+        AND ps.email = ${email}
+        AND ps."isDeleted" = false
       WHERE p.id = ${paperId}
         AND p."isDeleted" = false
         AND p.source = 'editor'
         AND (
           p."uploaderId" = ${userId}
           OR (wm.id IS NOT NULL AND wm.role IN ('OWNER', 'EDITOR'))
+          OR ps.id IS NOT NULL
         )
       LIMIT 1
     `;
@@ -1524,9 +1618,10 @@ export const editorPaperService = {
   async updateEditorContent(
     paperId: string,
     input: UpdateEditorContentInput,
-    userId: string
+    userId: string,
+    email?: string
   ) {
-    await this.assertEditorCanEdit(paperId, userId);
+    await this.assertEditorCanEdit(paperId, userId, email);
 
     const sanitizedContent = sanitizeHtml(input.content, sanitizeOptions);
 
@@ -1703,8 +1798,8 @@ export const editorPaperService = {
 
   // Auto-save functionality (updates content without changing draft status
   // and without a version snapshot — versions are reserved for manual saves)
-  async autoSaveContent(paperId: string, content: string, userId: string) {
-    await this.assertEditorCanEdit(paperId, userId);
+  async autoSaveContent(paperId: string, content: string, userId: string, email?: string) {
+    await this.assertEditorCanEdit(paperId, userId, email);
 
     const sanitizedContent = sanitizeHtml(content, sanitizeOptions);
 
