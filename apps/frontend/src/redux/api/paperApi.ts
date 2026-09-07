@@ -308,7 +308,13 @@ export const paperApi = apiSlice.injectEndpoints({
         items: response.data,
         meta: response.meta,
       }),
-      providesTags: ["Paper"],
+      providesTags: (result) => [
+        { type: "Paper", id: "LIST" },
+        ...(result?.items ?? []).map((paper) => ({
+          type: "Paper" as const,
+          id: paper.id,
+        })),
+      ],
     }),
 
     getPaper: builder.query<Paper, string>({
@@ -354,7 +360,10 @@ export const paperApi = apiSlice.injectEndpoints({
         body: data,
       }),
       transformResponse: (response: { data: Paper }): Paper => response.data,
-      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Paper", id },
+        "Paper",
+      ],
     }),
 
     deletePaper: builder.mutation<void, string>({
@@ -431,6 +440,7 @@ export const paperApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, paperId) => [
         { type: "Paper", id: paperId },
         { type: "ProcessingStatus", id: paperId },
+        "Paper",
       ],
     }),
 
@@ -456,7 +466,10 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Paper", id },
+        "Paper",
+      ],
     }),
 
     // Debounced autosave — lighter endpoint, never creates a version snapshot
@@ -508,7 +521,10 @@ export const paperApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Paper", id },
+        "Paper",
+      ],
     }),
 
     exportPaperPdf: builder.mutation<Blob, string>({
@@ -807,6 +823,7 @@ export const paperApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { paperId }) => [
         { type: "Paper", id: paperId },
+        "Paper",
       ],
     }),
   }),
