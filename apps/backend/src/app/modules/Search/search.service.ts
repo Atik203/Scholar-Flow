@@ -840,38 +840,62 @@ export class SearchService {
   }
   
   /**
-   * Get trending papers for a user (papers they can access, newest first).
-   * Access scope: own uploads, or papers in a non-deleted workspace where
-   * the user is owner or an active member. Never leaks rows from
-   * workspaces the user cannot see.
+   * Get trending papers for a user — a live mix, not just platform data:
+   *   1. OpenAlex recent articles by citation count (primary, keyless)
+   *   2. arXiv recent submissions (freshness fallback)
+   *   3. Platform papers the user can access (own uploads or non-deleted
+   *      workspace with owner/active-member rights)
+   * External calls are cached/TTL'd and degrade gracefully — the endpoint
+   * never fails because an upstream API is down.
    */
   static async getTrendingPapers(userId: string, limit: number) {
-    return prisma.paper.findMany({
-      where: {
-        isDeleted: false,
-        OR: [
-          { uploaderId: userId },
-          {
-            workspace: {
-              isDeleted: false,
-              OR: [
-                { ownerId: userId },
-                { members: { some: { userId, isDeleted: false } } },
-              ],
+    const cap = Math.min(20, Math.max(1, limit));
+    const externalCount = Math.ceil(cap / 2);
+
+    let external: DiscoveryItem[] = [];
+    try {
+      external = await fetchOpenAlexRecent(externalCount);
+    } catch {
+      external = [];
+    }
+    if (external.length === 0) {
+      try {
+        external = await fetchArxivFeed(null, 0, externalCount);
+      } catch {
+        external = [];
+      }
+    }
+
+    const platform = (
+      await prisma.paper.findMany({
+        where: {
+          isDeleted: false,
+          OR: [
+            { uploaderId: userId },
+            {
+              workspace: {
+                isDeleted: false,
+                OR: [
+                  { ownerId: userId },
+                  { members: { some: { userId, isDeleted: false } } },
+                ],
+              },
             },
-          },
-        ],
-      },
-      take: limit,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        abstract: true,
-        source: true,
-        createdAt: true,
-      },
-    });
+          ],
+        },
+        take: cap - external.length,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          title: true,
+          abstract: true,
+          source: true,
+          createdAt: true,
+        },
+      })
+    ).map(toPlatformDiscoveryItem);
+
+    return [...external, ...platform].slice(0, cap);
   }
 
   /**
