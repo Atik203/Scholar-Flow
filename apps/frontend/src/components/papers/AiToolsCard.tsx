@@ -58,6 +58,50 @@ function renderToolOutput(tool: Tool, data: unknown): React.ReactNode {
       return <span className="whitespace-pre-wrap">{rewritten}</span>;
     }
   }
+  if (tool === "compare") {
+    const raw = obj?.comparison;
+    if (typeof raw === "string" && raw.trim()) {
+      try {
+        const parsed: any = JSON.parse(raw);
+        const cmp = parsed?.comparison ?? parsed;
+        const sections: Array<[string, unknown]> = [
+          ["Agreements", cmp?.agreements],
+          ["Disagreements", cmp?.disagreements],
+          ["Complementary findings", cmp?.complementary_findings],
+          ["Conflicting conclusions", cmp?.conflicting_conclusions],
+        ];
+        const hasAny = sections.some(
+          ([, value]) => Array.isArray(value) && value.length > 0,
+        );
+        if (hasAny) {
+          return (
+            <div className="space-y-3">
+              {sections.map(
+                ([label, value]) =>
+                  Array.isArray(value) && value.length > 0 ? (
+                    <div key={label}>
+                      <p className="font-medium text-foreground">{label}</p>
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        {value.map((item, i) => (
+                          <li key={i}>
+                            {typeof item === "string"
+                              ? item
+                              : JSON.stringify(item)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null,
+              )}
+            </div>
+          );
+        }
+      } catch {
+        // not JSON — fall through to plain text
+      }
+      return <span className="whitespace-pre-wrap">{raw}</span>;
+    }
+  }
   return typeof data === "string"
     ? data
     : JSON.stringify(data, null, 2);
