@@ -102,7 +102,7 @@ app.use(
       }
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cache-Control"],
     exposedHeaders: ["X-Response-Time"],
     credentials: true,
   }) as unknown as RequestHandler

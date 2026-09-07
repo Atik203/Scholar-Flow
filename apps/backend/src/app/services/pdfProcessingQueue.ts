@@ -1,9 +1,9 @@
 import Bull from "bull";
 
 // Check if Redis is configured
-const isRedisConfigured = Boolean(
-  process.env.REDIS_HOST && process.env.REDIS_PORT
-);
+const isRedisConfigured =
+  process.env.REDIS_ENABLED === "true" &&
+  Boolean(process.env.REDIS_HOST && process.env.REDIS_PORT);
 
 let pdfProcessingQueue: Bull.Queue | null = null;
 let queueReady = false;

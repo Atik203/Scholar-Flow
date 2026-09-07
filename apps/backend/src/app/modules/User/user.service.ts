@@ -931,11 +931,12 @@ export const userService = {
     });
     if (!user) throw new ApiError(404, "User not found");
 
-    // Rotates any previously pending secret; stays DISABLED until verify.
-    const secret = generateTotpSecret();
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorSecret: encryptTotpSecret(secret) },
+      data: {
+        twoFactorSecret: encryptTotpSecret(secret),
+        twoFactorEnabled: false,
+      },
     });
 
     return {

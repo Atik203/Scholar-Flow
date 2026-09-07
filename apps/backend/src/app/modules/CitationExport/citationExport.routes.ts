@@ -3,7 +3,7 @@ import { z } from "zod";
 import { authMiddleware } from "../../middleware/auth";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import { validateRequest } from "../../middleware/validateRequest";
-import { CitationExportService } from "../../services/citationExport.service";
+import { citationExportService } from "../../services/citationExport.service";
 import { citationInsertService } from "../../services/citationInsert.service";
 
 const router: Router = Router();
@@ -118,7 +118,7 @@ router.get(
   authMiddleware,
   async (_req, res, next) => {
     try {
-      const data = CitationExportService.getFormats();
+      const data = citationExportService.getFormats();
       res.json({ success: true, data });
     } catch (error) {
       next(error);
@@ -132,7 +132,7 @@ router.get(
   authMiddleware,
   async (req, res, next) => {
     try {
-      const data = await CitationExportService.getManagerView(req, {
+      const data = await citationExportService.getManagerView(req, {
         search:
           typeof req.query.search === "string" ? req.query.search : undefined,
         limit: req.query.limit ? Number(req.query.limit) : undefined,
@@ -151,7 +151,7 @@ router.post(
   validateRequest(exportCitationsSchema),
   async (req, res, next) => {
     try {
-      const result = await CitationExportService.exportCitations(req, req.body);
+      const result = await citationExportService.exportCitations(req, req.body);
 
       res.json({
         success: true,
@@ -238,7 +238,7 @@ router.get(
   validateRequest(getExportHistorySchema),
   async (req, res, next) => {
     try {
-      const result = await CitationExportService.getExportHistory(
+      const result = await citationExportService.getExportHistory(
         req,
         Number(req.query.limit ?? 20),
         Number(req.query.offset ?? 0)
@@ -283,7 +283,7 @@ router.get(
  */
 router.delete("/:exportId", authMiddleware, async (req, res, next) => {
   try {
-    const result = await CitationExportService.deleteExport(
+    const result = await citationExportService.deleteExport(
       req,
       req.params.exportId
     );
@@ -342,7 +342,7 @@ router.delete("/:exportId", authMiddleware, async (req, res, next) => {
  */
 router.get("/:exportId/download", authMiddleware, async (req, res, next) => {
   try {
-    const result = await CitationExportService.downloadExport(
+    const result = await citationExportService.downloadExport(
       req,
       req.params.exportId
     );
