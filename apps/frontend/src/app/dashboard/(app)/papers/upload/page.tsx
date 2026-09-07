@@ -132,7 +132,13 @@ export default function UploadPaperPage() {
     setIsImporting(true);
     try {
       const result = await importDoi({ doi: doiInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast(result.hasPdf ? "Paper imported via DOI with PDF" : "Paper metadata imported (no OA PDF available)");
+      if (result.alreadyImported) {
+        showSuccessToast("Paper already in this workspace — opening it");
+      } else if (result.hasPdf) {
+        showSuccessToast("Paper imported via DOI with PDF");
+      } else {
+        showSuccessToast("Paper metadata imported (no open-access PDF available — you can attach a file later)");
+      }
       setDoiInput("");
       goToPaper(result.paper.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "DOI import failed"); }
@@ -144,7 +150,13 @@ export default function UploadPaperPage() {
     setIsImporting(true);
     try {
       const result = await importArxiv({ arxivId: arxivInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast(result.hasPdf ? "Paper imported via arXiv with PDF" : "Paper metadata imported (PDF download failed)");
+      if (result.alreadyImported) {
+        showSuccessToast("Paper already in this workspace — opening it");
+      } else if (result.hasPdf) {
+        showSuccessToast("Paper imported via arXiv with PDF");
+      } else {
+        showSuccessToast("Paper metadata imported (PDF download failed)");
+      }
       setArxivInput("");
       goToPaper(result.paper.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "arXiv import failed"); }
@@ -156,7 +168,13 @@ export default function UploadPaperPage() {
     setIsImporting(true);
     try {
       const result = await importUrl({ url: urlInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast("Paper imported via URL");
+      if (result.alreadyImported) {
+        showSuccessToast("Paper already in this workspace — opening it");
+      } else if (result.hasPdf) {
+        showSuccessToast("Paper imported via URL with PDF");
+      } else {
+        showSuccessToast("Paper metadata imported (no PDF found at URL)");
+      }
       setUrlInput("");
       goToPaper(result.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "URL import failed"); }
@@ -168,7 +186,13 @@ export default function UploadPaperPage() {
     setIsImporting(true);
     try {
       const result = await importSmartUrl({ url: smartUrlInput.trim(), workspaceId: selectedWorkspace }).unwrap();
-      showSuccessToast(result.hasPdf ? "Paper imported with PDF from " + new URL(smartUrlInput).hostname : "Paper metadata imported (PDF not available)");
+      if (result.alreadyImported) {
+        showSuccessToast("Paper already in this workspace — opening it");
+      } else if (result.hasPdf) {
+        showSuccessToast("Paper imported with PDF from " + new URL(smartUrlInput).hostname);
+      } else {
+        showSuccessToast("Paper metadata imported (PDF not available)");
+      }
       setSmartUrlInput("");
       goToPaper(result.id);
     } catch (e: any) { showErrorToast(e?.data?.message || "Import failed"); }
@@ -279,10 +303,10 @@ export default function UploadPaperPage() {
           <CardHeader><CardTitle className="text-lg">Import by DOI</CardTitle></CardHeader>
           <CardContent>
             <div className="flex gap-2">
-              <Input placeholder="10.48550/arXiv.1706.03762" value={doiInput} onChange={(e) => setDoiInput(e.target.value)} className="flex-1" />
+              <Input placeholder="https://doi.org/10.48550/arXiv.1706.03762 or any DOI" value={doiInput} onChange={(e) => setDoiInput(e.target.value)} className="flex-1" />
               <Button onClick={handleDoiImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Link2 className="mr-2 h-4 w-4" />}Import</Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Automatically searches Unpaywall and Semantic Scholar for the full PDF</p>
+            <p className="text-xs text-muted-foreground mt-2">Paste a DOI (with or without doi.org prefix). Searches Unpaywall and Semantic Scholar for the full PDF; arXiv DOIs are routed automatically</p>
           </CardContent>
         </Card>
       )}
@@ -292,10 +316,10 @@ export default function UploadPaperPage() {
           <CardHeader><CardTitle className="text-lg">Import by arXiv ID</CardTitle></CardHeader>
           <CardContent>
             <div className="flex gap-2">
-              <Input placeholder="1706.03762" value={arxivInput} onChange={(e) => setArxivInput(e.target.value)} className="flex-1" />
+              <Input placeholder="2511.11306, arxiv.org/abs/2511.11306, or 10.48550/arXiv.2511.11306" value={arxivInput} onChange={(e) => setArxivInput(e.target.value)} className="flex-1" />
               <Button onClick={handleArxivImport} disabled={isImporting}>{isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookOpen className="mr-2 h-4 w-4" />}Import</Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">Automatically downloads the PDF from arXiv.org</p>
+            <p className="text-xs text-muted-foreground mt-2">Accepts an ID, a full arxiv.org URL, or an arXiv DOI. Automatically downloads the PDF from arXiv.org</p>
           </CardContent>
         </Card>
       )}
