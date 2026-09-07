@@ -890,8 +890,22 @@ export const paperController = {
         );
       }
 
-      // Generate paper link (assuming frontend URL structure)
-      const paperLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/papers/${paperId}`;
+      // Persist the share: one row per paper+email (upsert refreshes the
+      // permission and re-activates soft-deleted rows — an idempotent
+      // re-share). This row is what actually grants the recipient access.
+      await prisma.$executeRaw`
+        INSERT INTO "PaperShare" (id, "paperId", email, permission, "sharedById", "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${paperId}, ${recipientEmail}, ${permission}, ${authReq.user.id}, NOW(), NOW(), false)
+        ON CONFLICT ("paperId", "email")
+        DO UPDATE SET permission = EXCLUDED.permission, "updatedAt" = NOW(), "isDeleted" = false
+      `;
+
+      // Generate paper link (permission-aware frontend route).
+      const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      const paperLink =
+        permission === "edit"
+          ? `${baseUrl}/dashboard/research/editor?paper=${paperId}`
+          : `${baseUrl}/dashboard/papers/${paperId}`;
 
       // Import and use email service
       const { emailService } = await import("../../shared/emailService");
