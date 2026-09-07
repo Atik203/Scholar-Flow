@@ -1,4 +1,5 @@
 import axios from "axios";
+import ApiError from "../../errors/ApiError";
 import prisma from "../../shared/prisma";
 import { StorageService as storage } from "../papers/storage.service";
 import { queueDocumentExtraction } from "../../services/pdfProcessingQueue";
@@ -19,6 +20,7 @@ export interface ImportResult {
   source: string;
   externalId?: string;
   hasPdf?: boolean;
+  alreadyImported?: boolean;
 }
 
 async function tryQueueExtraction(paperId: string): Promise<void> {
@@ -27,6 +29,134 @@ async function tryQueueExtraction(paperId: string): Promise<void> {
   } catch {
     console.warn(`[Import] Could not queue extraction for ${paperId} — Redis unavailable`);
   }
+}
+
+function decodeEntities(input: string): string {
+  return input
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+}
+
+function looksLikePdf(buffer: Buffer): boolean {
+  return buffer.length > 4 && buffer.subarray(0, 5).toString("latin1") === "%PDF-";
+}
+
+/**
+ * Accept a bare arXiv ID (new 2511.11306 or old hep-th/9901001 style), a
+ * full arxiv.org/abs|pdf URL, or the DataCite arXiv DOI
+ * (10.48550/arXiv.2511.11306). Strips trailing version suffixes. Returns the
+ * canonical unversioned ID, or null when the input is not an arXiv ID.
+ */
+function normalizeArxivId(input: string): string | null {
+  let id = input.trim();
+  if (!id) return null;
+
+  const urlMatch = id.match(/arxiv\.org\/(?:abs|pdf)\/([^?#\s]+)/i);
+  if (urlMatch) id = urlMatch[1];
+
+  id = id
+    .replace(/^10\.48550\/arxiv\./i, "")
+    .replace(/^arxiv:\s*/i, "")
+    .replace(/^doi:\s*/i, "")
+    .replace(/^https?:\/\/(dx\.)?doi\.org\//i, "")
+    .split(/[?#\s]/)[0]
+    .trim()
+    .replace(/v\d+$/i, "");
+
+  if (!id || id.length > 64 || !/^[\w.-]+$/.test(id)) return null;
+  const looksArxiv =
+    /^\d{4}\.\d{4,5}$/.test(id) || /^[a-z-]+(?:\.[a-z-]+)*\/\d{7}$/i.test(id);
+  return looksArxiv ? id : null;
+}
+
+/**
+ * arXiv export API returns an Atom feed whose FIRST <title> is the feed-level
+ * "arXiv Query: ..." string. Every field must be parsed from the <entry>
+ * block, otherwise the paper title becomes the query string (observed bug).
+ */
+function parseArxivFeed(xml: string): {
+  title: string;
+  authors: string[];
+  abstract: string;
+  year: number;
+} | null {
+  const entry = xml.match(/<entry>[\s\S]*?<\/entry>/)?.[0];
+  if (!entry) return null;
+
+  const content = (tag: string): string => {
+    const m = entry.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`));
+    if (!m) return "";
+    const text = m[1].replace(/<[^>]*>/g, " ");
+    return decodeEntities(text).replace(/\s+/g, " ").trim();
+  };
+
+  const title = content("title");
+  if (!title) return null;
+
+  const authorMatches = entry.matchAll(
+    /<author>[\s\S]*?<name[^>]*>(.*?)<\/name>[\s\S]*?<\/author>/g,
+  );
+  const authors = [...authorMatches]
+    .map((m) =>
+      decodeEntities(m[1].replace(/<[^>]*>/g, " ")).replace(/\s+/g, " ").trim(),
+    )
+    .filter(Boolean);
+
+  const yearMatch = entry.match(/<published>\s*(\d{4})/);
+  const year = yearMatch
+    ? parseInt(yearMatch[1], 10)
+    : new Date().getFullYear();
+
+  return { title, authors, abstract: content("summary"), year };
+}
+
+/**
+ * Idempotency pre-check: if the same paper (DOI, arXiv ID, source ID, or
+ * originating URL) is already imported into this workspace, return it instead
+ * of creating a duplicate row. metadata->>'sourceId' / 'sourceUrl' are written
+ * by the URL/smart-URL importers for exactly this lookup.
+ */
+async function findExistingPaper(
+  workspaceId: string,
+  match: {
+    doi?: string | null;
+    arxivId?: string | null;
+    sourceId?: string | null;
+    url?: string | null;
+  },
+): Promise<{ id: string; title: string; source: string; doi: string | null } | null> {
+  const { doi = null, arxivId = null, sourceId = null, url = null } = match;
+  const rows = await prisma.$queryRaw<
+    Array<{ id: string; title: string; source: string; doi: string | null }>
+  >`
+    SELECT id, title, source, doi
+    FROM "Paper"
+    WHERE "workspaceId" = ${workspaceId}
+      AND "isDeleted" = false
+      AND (
+        (${doi}::text IS NOT NULL AND doi = ${doi})
+        OR (${arxivId}::text IS NOT NULL AND "metadata"->>'arxivId' = ${arxivId})
+        OR (${sourceId}::text IS NOT NULL AND "metadata"->>'sourceId' = ${sourceId})
+        OR (${url}::text IS NOT NULL AND "metadata"->>'sourceUrl' = ${url})
+      )
+    LIMIT 1
+  `;
+  return rows[0] ?? null;
+}
+
+async function paperHasPdf(paperId: string): Promise<boolean> {
+  const rows = await prisma.$queryRaw<Array<{ n: number }>>`
+    SELECT COUNT(*)::int AS n FROM "PaperFile"
+    WHERE "paperId" = ${paperId} AND "isDeleted" = false
+  `;
+  return (rows[0]?.n ?? 0) > 0;
 }
 
 async function savePdfToS3(
@@ -208,46 +338,68 @@ export class ImportService {
     return { paper: paper[0], source: "doi", externalId: cleanDoi, hasPdf };
   }
 
-  static async importByArxiv(arxivId: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
-    const cleanId = arxivId
-      .replace(/^https?:\/\/arxiv\.org\/(abs|pdf)\//, "")
-      .replace(/v\d+$/, "")
-      .trim();
-    const res = await axios.get(`http://export.arxiv.org/api/query?id_list=${encodeURIComponent(cleanId)}`, {
-      timeout: 15000,
-    });
-
-    const text = res.data as string;
-    const titleMatch = text.match(/<title>(.*?)<\/title>/);
-    const title = titleMatch?.[1]?.replace(/\s+/g, " ").trim() || "Untitled";
-    const summaryMatch = text.match(/<summary>(.*?)<\/summary>/);
-    const abstract = summaryMatch?.[1]?.replace(/\s+/g, " ").trim() || "";
-    const authorMatches = text.matchAll(/<author>[\s\S]*?<name>(.*?)<\/name>[\s\S]*?<\/author>/g);
-    const authors = [...authorMatches].map((m) => m[1].trim());
-    const yearMatch = text.match(/<published>(\d{4})/);
-    const year = yearMatch ? parseInt(yearMatch[1], 10) : 2024;
-    const metadata = { authors, year, source: "arxiv", arxivId: cleanId };
+  static async importByArxiv(input: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+    const cleanId = normalizeArxivId(input);
+    if (!cleanId) {
+      throw new ApiError(
+        400,
+        "Invalid arXiv ID. Expected e.g. 2511.11306, arxiv.org/abs/2511.11306 or 10.48550/arXiv.2511.11306",
+      );
+    }
     const paperDoi = `10.48550/arXiv.${cleanId}`;
+
+    const existing = await findExistingPaper(workspaceId, {
+      doi: paperDoi,
+      arxivId: cleanId,
+    });
+    if (existing) {
+      console.log(`[Import] arXiv ${cleanId}: already imported — returning existing paper`);
+      return {
+        paper: existing,
+        source: "arxiv",
+        externalId: cleanId,
+        hasPdf: await paperHasPdf(existing.id),
+        alreadyImported: true,
+      };
+    }
+
+    const res = await axios.get(
+      `https://export.arxiv.org/api/query?id_list=${encodeURIComponent(cleanId)}&max_results=1`,
+      { timeout: 15000 },
+    );
+
+    const parsed = parseArxivFeed(res.data as string);
+    if (!parsed) {
+      throw new ApiError(404, `arXiv paper "${cleanId}" not found`);
+    }
+
+    const metadata = { authors: parsed.authors, year: parsed.year, source: "arxiv", arxivId: cleanId };
+    const abstract = parsed.abstract || null;
 
     const paper = await prisma.$queryRaw<any[]>`
       INSERT INTO "Paper" (id, "workspaceId", "uploaderId", title, abstract, metadata, source, doi, tags, language, "citationCount", "processingStatus", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${title}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'arxiv', ${paperDoi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
+      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${parsed.title}, ${abstract}, ${JSON.stringify(metadata)}::jsonb, 'arxiv', ${paperDoi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
       RETURNING id, title, source, doi
     `;
     const paperId = paper[0].id;
 
+    let hasPdf = false;
     try {
-      console.log(`[Import] arXiv ${cleanId}: downloading PDF from https://arxiv.org/pdf/${cleanId}.pdf`);
-      const pdfBuffer = await downloadPdf(`https://arxiv.org/pdf/${cleanId}.pdf`);
+      console.log(`[Import] arXiv ${cleanId}: downloading PDF from https://arxiv.org/pdf/${cleanId}`);
+      const pdfBuffer = await downloadPdf(`https://arxiv.org/pdf/${cleanId}`);
       const filename = sanitizeFilename(`${cleanId}.pdf`);
       await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
       await tryQueueExtraction(paperId);
+      hasPdf = true;
       console.log(`[Import] arXiv ${cleanId}: PDF saved, extraction queued`);
-      return { paper: paper[0], source: "arxiv", externalId: cleanId, hasPdf: true };
     } catch (err) {
-      console.warn(`[Import] arXiv ${cleanId}: PDF download failed`, (err as Error).message);
-      return { paper: paper[0], source: "arxiv", externalId: cleanId, hasPdf: false };
+      console.warn(
+        `[Import] arXiv ${cleanId}: PDF download failed — metadata only`,
+        (err as Error).message,
+      );
     }
+
+    return { paper: paper[0], source: "arxiv", externalId: cleanId, hasPdf, alreadyImported: false };
   }
 
   static async importByURL(url: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
