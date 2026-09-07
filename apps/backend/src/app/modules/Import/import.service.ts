@@ -138,13 +138,18 @@ async function findExistingPaper(
   >`
     SELECT id, title, source, doi
     FROM "Paper"
-    WHERE "workspaceId" = ${workspaceId}
-      AND "isDeleted" = false
+    WHERE "isDeleted" = false
       AND (
         (${doi}::text IS NOT NULL AND doi = ${doi})
         OR (${arxivId}::text IS NOT NULL AND "metadata"->>'arxivId' = ${arxivId})
-        OR (${sourceId}::text IS NOT NULL AND "metadata"->>'sourceId' = ${sourceId})
-        OR (${url}::text IS NOT NULL AND "metadata"->>'sourceUrl' = ${url})
+        OR (
+          (${sourceId}::text IS NOT NULL OR ${url}::text IS NOT NULL)
+          AND "workspaceId" = ${workspaceId}
+          AND (
+            (${sourceId}::text IS NOT NULL AND "metadata"->>'sourceId' = ${sourceId})
+            OR (${url}::text IS NOT NULL AND "metadata"->>'sourceUrl' = ${url})
+          )
+        )
       )
     LIMIT 1
   `;
