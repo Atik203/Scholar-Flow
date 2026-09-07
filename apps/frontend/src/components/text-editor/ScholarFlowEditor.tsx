@@ -166,7 +166,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         },
       }),
       HorizontalRule,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      TextAlign.configure({
+        types: ["heading", "paragraph", "listItem", "blockquote"],
+      }),
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
