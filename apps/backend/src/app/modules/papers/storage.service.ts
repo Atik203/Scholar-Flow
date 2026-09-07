@@ -189,13 +189,25 @@ class StorageServiceClass {
   }
 }
 
-// Singleton via globalThis (same pattern as prisma.ts)
+// Singleton via globalThis (same pattern as prisma.ts).
+// Lazy: the S3 client is only constructed on first use so the API can boot
+// without AWS env vars (e.g. local dev / non-S3 features). Endpoints that
+// actually touch S3 fail fast with the bucket error when it is not configured.
 const globalForStorage = globalThis as unknown as {
   __storageService?: StorageServiceClass;
 };
 
-export const StorageService = globalForStorage.__storageService
-  ? globalForStorage.__storageService
-  : (globalForStorage.__storageService = new StorageServiceClass());
+const getStorageService = (): StorageServiceClass => {
+  if (!globalForStorage.__storageService) {
+    globalForStorage.__storageService = new StorageServiceClass();
+  }
+  return globalForStorage.__storageService;
+};
+
+export const StorageService = new Proxy({} as StorageServiceClass, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getStorageService(), prop, receiver);
+  },
+});
 
 export { StorageServiceClass };

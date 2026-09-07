@@ -105,11 +105,15 @@ function CopyButton({ content }: { content: string }) {
 
 export function FloatingAiAssistant() {
   const pathname = usePathname();
+
+  // Route gate lives here (only hook: usePathname), so the inner component
+  // can call all of its hooks unconditionally without a Rules-of-Hooks error.
   if (!isDashboardRoute(pathname)) return null;
-  return <FloatingAiAssistantContent />;
+
+  return <FloatingAiAssistantInner />;
 }
 
-function FloatingAiAssistantContent() {
+function FloatingAiAssistantInner() {
   const [open, setOpen] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
