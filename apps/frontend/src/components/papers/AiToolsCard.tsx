@@ -46,6 +46,23 @@ const TOOLS: Array<{ key: Tool; label: string; icon: typeof PenLine }> = [
   { key: "review", label: "Literature Review", icon: BookOpenCheck },
 ];
 
+/**
+ * Per-tool output renderer. Server text is displayed as plain text (React
+ * escapes everything) — never inject raw model output as HTML.
+ */
+function renderToolOutput(tool: Tool, data: unknown): React.ReactNode {
+  const obj = data as Record<string, unknown> | null;
+  if (tool === "rewrite") {
+    const rewritten = obj?.rewritten;
+    if (typeof rewritten === "string" && rewritten.trim()) {
+      return <span className="whitespace-pre-wrap">{rewritten}</span>;
+    }
+  }
+  return typeof data === "string"
+    ? data
+    : JSON.stringify(data, null, 2);
+}
+
 interface AiToolsCardProps {
   paperId: string;
   paperTitle: string;
@@ -57,7 +74,7 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   const [tone, setTone] = useState("");
   const [otherPaperId, setOtherPaperId] = useState("");
   const [topic, setTopic] = useState("");
-  const [output, setOutput] = useState<string | null>(null);
+  const [output, setOutput] = useState<unknown>(null);
 
   const { data: papersData, isLoading: papersLoading } = useListPapersQuery({
     limit: 100,
@@ -74,12 +91,8 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   const run = async (fn: () => Promise<unknown>) => {
     setOutput(null);
     try {
-      const result = await fn();
-      setOutput(
-        typeof result === "string"
-          ? result
-          : JSON.stringify(result, null, 2)
-      );
+      const result = (await fn()) as any;
+      setOutput(result?.data ?? result);
     } catch {
       showErrorToast("AI tool failed", "Please try again");
     }
@@ -210,10 +223,10 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
           </Button>
         </div>
 
-        {output && (
-          <pre className="whitespace-pre-wrap rounded-lg border bg-muted/40 p-4 text-sm max-h-80 overflow-y-auto">
-            {output}
-          </pre>
+        {output !== null && (
+          <div className="rounded-lg border bg-muted/40 p-4 text-sm max-h-80 overflow-y-auto">
+            {renderToolOutput(tool, output)}
+          </div>
         )}
       </CardContent>
     </Card>
