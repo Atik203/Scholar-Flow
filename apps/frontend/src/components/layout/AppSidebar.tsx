@@ -174,7 +174,7 @@ const navigationItems: SidebarItem[] = [
     items: [
       { title: "Trending Papers", path: "/dashboard/discover/trending", icon: TrendingUp, minRole: USER_ROLES.RESEARCHER },
       { title: "Recommendations", path: "/dashboard/discover/recommendations", icon: Sparkles, minRole: USER_ROLES.RESEARCHER },
-      { title: "Explore", path: "/dashboard/discover", icon: Compass, minRole: USER_ROLES.RESEARCHER },
+      { title: "Explore", path: "/dashboard/discover/explore", icon: Compass, minRole: USER_ROLES.RESEARCHER },
     ],
   },
   {
