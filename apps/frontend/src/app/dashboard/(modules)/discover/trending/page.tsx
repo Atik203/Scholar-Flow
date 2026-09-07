@@ -71,10 +71,10 @@ export default function TrendingPage() {
                       {paper.abstract || "No abstract available for this trending paper."}
                     </p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground pt-1">
-                      {paper.createdAt && (
+                      {paper.publishedAt && (
                         <div className="flex items-center gap-1">
                           <BookOpen className="w-3.5 h-3.5" />
-                          Added {formatDistanceToNow(new Date(paper.createdAt), { addSuffix: true })}
+                          Added {formatDistanceToNow(new Date(paper.publishedAt), { addSuffix: true })}
                         </div>
                       )}
                       {paper.source && (
