@@ -84,10 +84,62 @@ export interface SaveSearchQueryResponse {
   data: SearchHistory;
 }
 
+// Discovery — live external + platform mix. Items are either a platform
+// paper (kind "platform", paperId -> /dashboard/papers/[id]) or a live
+// record from arXiv/OpenAlex (kind "external", externalUrl to open).
+export interface DiscoveryItem {
+  kind: "platform" | "external";
+  id: string;
+  paperId?: string;
+  externalUrl?: string;
+  title: string;
+  abstract?: string | null;
+  source?: string | null;
+  citationCount?: number | null;
+  publishedAt?: string | null;
+  authors?: string[];
+  reason?: string;
+}
+
 export interface DiscoveryResponse {
   success: boolean;
-  data: SearchResultItem[];
+  data: DiscoveryItem[];
 }
+
+export interface ExploreParams {
+  category: string;
+  page: number;
+  limit?: number;
+}
+
+export interface ExploreMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+export interface ExploreResponse {
+  success: boolean;
+  meta: ExploreMeta;
+  data: DiscoveryItem[];
+}
+
+// Mirror of the backend whitelist (search.service.ts EXPLORE_CATEGORIES).
+export const EXPLORE_CATEGORIES: Record<string, string> = {
+  "cs.AI": "Artificial Intelligence",
+  "cs.LG": "Machine Learning",
+  "cs.CL": "NLP & Language",
+  "cs.CV": "Computer Vision",
+  "cs.SE": "Software Engineering",
+  "cs.CR": "Security & Privacy",
+  "cs.NE": "Neural Computing",
+  "stat.ML": "Statistics & ML",
+  "q-bio.NC": "Neurons & Cognition",
+  "q-fin.TR": "Trading & Market Microstructure",
+  "eess.AS": "Audio & Speech",
+  "econ.GN": "General Economics",
+};
 
 // Phase D.2 — Perplexity-style AI summary + citations.
 export interface AISearchSource {
@@ -158,6 +210,18 @@ export const searchApi = apiSlice.injectEndpoints({
       keepUnusedDataFor: 300,
     }),
 
+    getExplore: builder.query<ExploreResponse, ExploreParams>({
+      query: (params) => {
+        const queryParams = new URLSearchParams({
+          category: params.category,
+          page: params.page.toString(),
+        });
+        if (params.limit) queryParams.append('limit', params.limit.toString());
+        return `/search/explore?${queryParams.toString()}`;
+      },
+      keepUnusedDataFor: 300,
+    }),
+
     semanticSearch: builder.query<
       { results: Array<{ id: string; paperId: string; content: string; title: string | null; distance: number }>; fallback: string | null },
       { q: string; limit?: number; workspaceId?: string }
@@ -202,6 +266,7 @@ export const {
   useSaveSearchQueryMutation,
   useGetTrendingQuery,
   useGetRecommendationsQuery,
+  useGetExploreQuery,
   useSemanticSearchQuery,
   useAiSearchMutation,
   useGetSearchSourcesQuery,
