@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import type { ChainedCommands } from "@tiptap/react"
 import { type Editor } from "@tiptap/react"
 
 // --- Hooks ---
@@ -66,28 +65,60 @@ export const textAlignLabels: Record<TextAlign, string> = {
 }
 
 /**
+ * The node types the TextAlign extension is configured for (read live from
+ * the extension instance so config changes never desync these checks).
+ */
+function getTextAlignConfigTypes(
+  editor: Editor | null
+): string[] | null {
+  if (!editor) return null;
+  const ext = editor.extensionManager.extensions.find(
+    (e) => e.name === "textAlign"
+  );
+  if (!ext) return null;
+  const types = (ext as { options?: { types?: string[] } }).options?.types;
+  return Array.isArray(types) && types.length > 0 ? types : null;
+}
+
+/**
+ * Node types present under the current selection, restricted to the types
+ * the TextAlign extension supports. Cursor-in-block and multi-block
+ * selections both resolve correctly via doc.nodesBetween.
+ */
+function getSelectedAlignableTypes(editor: Editor): string[] {
+  const supported = getTextAlignConfigTypes(editor);
+  if (!supported) return [];
+
+  const { $from, $to } = editor.state.selection;
+  const found = new Set<string>();
+  editor.state.doc.nodesBetween($from.pos, $to.pos, (node) => {
+    if (node.isBlock && supported.includes(node.type.name)) {
+      found.add(node.type.name);
+    }
+  });
+  return [...found];
+}
+
+/**
  * Checks if text alignment can be performed in the current editor state
  */
 export function canSetTextAlign(
   editor: Editor | null,
   align: TextAlign
 ): boolean {
-  if (!editor || !editor.isEditable) return false
+  if (!editor || !editor.isEditable) return false;
   if (
     !isExtensionAvailable(editor, "textAlign") ||
     isNodeTypeSelected(editor, ["image"])
   )
-    return false
+    return false;
 
-  return editor.can().setTextAlign(align)
-}
-
-export function hasSetTextAlign(
-  commands: ChainedCommands
-): commands is ChainedCommands & {
-  setTextAlign: (align: TextAlign) => ChainedCommands
-} {
-  return "setTextAlign" in commands
+  // NOT editor.can().setTextAlign(align): TipTap v3's stock command requires
+  // EVERY configured type (heading + paragraph) to be present in the
+  // selection — updateAttributes returns false per absent type — so it is
+  // false for any plain-paragraph selection and the buttons stay disabled.
+  // Enable whenever at least one supported type is under the selection.
+  return getSelectedAlignableTypes(editor).length > 0;
 }
 
 /**
@@ -105,15 +136,25 @@ export function isTextAlignActive(
  * Sets text alignment in the editor
  */
 export function setTextAlign(editor: Editor | null, align: TextAlign): boolean {
-  if (!editor || !editor.isEditable) return false
-  if (!canSetTextAlign(editor, align)) return false
+  if (!editor || !editor.isEditable) return false;
+  if (!canSetTextAlign(editor, align)) return false;
 
-  const chain = editor.chain().focus()
-  if (hasSetTextAlign(chain)) {
-    return chain.setTextAlign(align).run()
-  }
+  // Same trap as can(): the stock chain.setTextAlign(align) applies
+  // updateAttributes to EVERY configured type and aborts when any of them is
+  // absent from the selection — a plain paragraph selection would never
+  // align. Apply alignment only to the node types actually in the selection.
+  const presentTypes = getSelectedAlignableTypes(editor);
+  if (presentTypes.length === 0) return false;
 
-  return false
+  return editor
+    .chain()
+    .focus()
+    .command(({ commands }) =>
+      presentTypes.every((type) =>
+        commands.updateAttributes(type, { textAlign: align })
+      )
+    )
+    .run();
 }
 
 /**
