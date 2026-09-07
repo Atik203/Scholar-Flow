@@ -3,9 +3,10 @@ import ApiError from "../../errors/ApiError";
 import { AuthenticatedRequest } from "../../interfaces/common";
 import catchAsync from "../../shared/catchAsync";
 import { sendPaginatedResponse, sendSuccessResponse } from "../../shared/sendResponse";
-import { SearchService } from "./search.service";
+import { SearchService, EXPLORE_CATEGORIES } from "./search.service";
 import {
   aiSearchBodySchema,
+  exploreQuerySchema,
   globalSearchQuerySchema,
   saveSearchHistorySchema,
   searchHistoryQuerySchema,
@@ -124,6 +125,23 @@ export const SearchController = {
     );
 
     sendSuccessResponse(res, result, "Semantic search completed");
+  }),
+
+  // Explore — browse live research by category.
+  // GET /api/search/explore?category=cs.AI&page=1&limit=12
+  getExplore: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const q = exploreQuerySchema.parse(req.query);
+    if (!EXPLORE_CATEGORIES[q.category]) {
+      throw new ApiError(400, `Unknown category "${q.category}"`);
+    }
+    const page = Math.max(1, parseInt(q.page, 10));
+    const limit = Math.min(20, parseInt(q.limit, 10));
+
+    const result = await SearchService.getExplore(q.category, page, limit);
+    sendPaginatedResponse(res, result.items, result.meta, "Explore results retrieved successfully");
   }),
 
   // Phase D.2 — AI search (Perplexity-style summary).

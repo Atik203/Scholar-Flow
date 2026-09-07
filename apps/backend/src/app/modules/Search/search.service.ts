@@ -343,6 +343,36 @@ function toPlatformDiscoveryItem(paper: {
   };
 }
 
+/**
+ * Whitelisted arXiv categories for the Explore page — exact arXiv primary
+ * categories only (the export API matches `cat:` literally). Unknown values
+ * are rejected with 400, never forwarded upstream.
+ */
+export const EXPLORE_CATEGORIES: Record<string, string> = {
+  "cs.AI": "Artificial Intelligence",
+  "cs.LG": "Machine Learning",
+  "cs.CL": "NLP & Language",
+  "cs.CV": "Computer Vision",
+  "cs.SE": "Software Engineering",
+  "cs.CR": "Security & Privacy",
+  "cs.NE": "Neural Computing",
+  "stat.ML": "Statistics & ML",
+  "q-bio.NC": "Neurons & Cognition",
+  "q-fin.TR": "Trading & Market Microstructure",
+  "eess.AS": "Audio & Speech",
+  "econ.GN": "General Economics",
+};
+
+export interface ExploreResult {
+  items: DiscoveryItem[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+}
+
 export class SearchService {
   /**
    * Global multi-entity search
@@ -891,6 +921,31 @@ export class SearchService {
     }
   }
   
+  /**
+   * Browse live research by category (arXiv feed, submittedDate desc,
+   * paginated via start index). No platform data — this is the external
+   * world's latest output for a field.
+   */
+  static async getExplore(
+    category: string,
+    page: number,
+    limit: number
+  ): Promise<ExploreResult> {
+    const cap = Math.min(20, Math.max(1, limit));
+    const start = (page - 1) * cap;
+    const items = await fetchArxivFeed(category, start, cap);
+
+    return {
+      items,
+      meta: {
+        page,
+        limit: cap,
+        total: items.length,
+        totalPage: Math.max(1, Math.ceil(items.length / cap)),
+      },
+    };
+  }
+
   /**
    * Get trending papers for a user — a live mix, not just platform data:
    *   1. OpenAlex recent articles by citation count (primary, keyless)
