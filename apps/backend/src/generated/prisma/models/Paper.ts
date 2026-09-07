@@ -403,6 +403,7 @@ export type PaperWhereInput = {
   aiKeyPoints?: Prisma.AIKeyPointListRelationFilter
   aiMetadata?: Prisma.XOR<Prisma.AIMetadataNullableScalarRelationFilter, Prisma.AIMetadataWhereInput> | null
   aiContextCaches?: Prisma.AIContextCacheListRelationFilter
+  paperShares?: Prisma.PaperShareListRelationFilter
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
@@ -452,6 +453,7 @@ export type PaperOrderByWithRelationInput = {
   aiKeyPoints?: Prisma.AIKeyPointOrderByRelationAggregateInput
   aiMetadata?: Prisma.AIMetadataOrderByWithRelationInput
   aiContextCaches?: Prisma.AIContextCacheOrderByRelationAggregateInput
+  paperShares?: Prisma.PaperShareOrderByRelationAggregateInput
   citationExports?: Prisma.CitationExportOrderByRelationAggregateInput
   discussionThreads?: Prisma.DiscussionThreadOrderByRelationAggregateInput
   UsageEvent?: Prisma.UsageEventOrderByRelationAggregateInput
@@ -504,6 +506,7 @@ export type PaperWhereUniqueInput = Prisma.AtLeast<{
   aiKeyPoints?: Prisma.AIKeyPointListRelationFilter
   aiMetadata?: Prisma.XOR<Prisma.AIMetadataNullableScalarRelationFilter, Prisma.AIMetadataWhereInput> | null
   aiContextCaches?: Prisma.AIContextCacheListRelationFilter
+  paperShares?: Prisma.PaperShareListRelationFilter
   citationExports?: Prisma.CitationExportListRelationFilter
   discussionThreads?: Prisma.DiscussionThreadListRelationFilter
   UsageEvent?: Prisma.UsageEventListRelationFilter
@@ -619,6 +622,7 @@ export type PaperCreateInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -666,6 +670,7 @@ export type PaperUncheckedCreateInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -713,6 +718,7 @@ export type PaperUpdateInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -760,6 +766,7 @@ export type PaperUncheckedUpdateInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -1067,6 +1074,20 @@ export type PaperUpdatetagsInput = {
   push?: string | string[]
 }
 
+export type PaperCreateNestedOneWithoutPaperSharesInput = {
+  create?: Prisma.XOR<Prisma.PaperCreateWithoutPaperSharesInput, Prisma.PaperUncheckedCreateWithoutPaperSharesInput>
+  connectOrCreate?: Prisma.PaperCreateOrConnectWithoutPaperSharesInput
+  connect?: Prisma.PaperWhereUniqueInput
+}
+
+export type PaperUpdateOneRequiredWithoutPaperSharesNestedInput = {
+  create?: Prisma.XOR<Prisma.PaperCreateWithoutPaperSharesInput, Prisma.PaperUncheckedCreateWithoutPaperSharesInput>
+  connectOrCreate?: Prisma.PaperCreateOrConnectWithoutPaperSharesInput
+  upsert?: Prisma.PaperUpsertWithoutPaperSharesInput
+  connect?: Prisma.PaperWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PaperUpdateToOneWithWhereWithoutPaperSharesInput, Prisma.PaperUpdateWithoutPaperSharesInput>, Prisma.PaperUncheckedUpdateWithoutPaperSharesInput>
+}
+
 export type PaperCreateNestedOneWithoutFileInput = {
   create?: Prisma.XOR<Prisma.PaperCreateWithoutFileInput, Prisma.PaperUncheckedCreateWithoutFileInput>
   connectOrCreate?: Prisma.PaperCreateOrConnectWithoutFileInput
@@ -1357,6 +1378,7 @@ export type PaperCreateWithoutUploaderInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -1403,6 +1425,7 @@ export type PaperUncheckedCreateWithoutUploaderInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -1508,6 +1531,7 @@ export type PaperCreateWithoutWorkspaceInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -1554,6 +1578,7 @@ export type PaperUncheckedCreateWithoutWorkspaceInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -1584,6 +1609,210 @@ export type PaperUpdateWithWhereUniqueWithoutWorkspaceInput = {
 export type PaperUpdateManyWithWhereWithoutWorkspaceInput = {
   where: Prisma.PaperScalarWhereInput
   data: Prisma.XOR<Prisma.PaperUpdateManyMutationInput, Prisma.PaperUncheckedUpdateManyWithoutWorkspaceInput>
+}
+
+export type PaperCreateWithoutPaperSharesInput = {
+  id?: string
+  title: string
+  abstract?: string | null
+  metadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string | null
+  doi?: string | null
+  isDraft?: boolean
+  isPublished?: boolean
+  processingStatus?: $Enums.PaperProcessingStatus
+  processingError?: string | null
+  processedAt?: Date | string | null
+  previewFileKey?: string | null
+  previewMimeType?: string | null
+  originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
+  contentHtml?: string | null
+  extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  uploader: Prisma.UserCreateNestedOneWithoutUploadedPapersInput
+  workspace: Prisma.WorkspaceCreateNestedOneWithoutPapersInput
+  file?: Prisma.PaperFileCreateNestedOneWithoutPaperInput
+  chunks?: Prisma.PaperChunkCreateNestedManyWithoutPaperInput
+  citationsFrom?: Prisma.CitationCreateNestedManyWithoutSourcePaperInput
+  citationsTo?: Prisma.CitationCreateNestedManyWithoutTargetPaperInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutPaperInput
+  collectionJoins?: Prisma.CollectionPaperCreateNestedManyWithoutPaperInput
+  aiSummaries?: Prisma.AISummaryCreateNestedManyWithoutPaperInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutPaperInput
+  aiInsightMessages?: Prisma.AIInsightMessageCreateNestedManyWithoutPaperInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
+  aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
+  aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
+  aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
+  UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
+}
+
+export type PaperUncheckedCreateWithoutPaperSharesInput = {
+  id?: string
+  workspaceId: string
+  uploaderId: string
+  title: string
+  abstract?: string | null
+  metadata: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: string | null
+  doi?: string | null
+  isDraft?: boolean
+  isPublished?: boolean
+  processingStatus?: $Enums.PaperProcessingStatus
+  processingError?: string | null
+  processedAt?: Date | string | null
+  previewFileKey?: string | null
+  previewMimeType?: string | null
+  originalMimeType?: string | null
+  originalFormat?: string | null
+  processingStage?: string | null
+  processingStartedAt?: Date | string | null
+  contentHtml?: string | null
+  extractionVersion?: number
+  tags?: Prisma.PaperCreatetagsInput | string[]
+  language?: string | null
+  citationCount?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  file?: Prisma.PaperFileUncheckedCreateNestedOneWithoutPaperInput
+  chunks?: Prisma.PaperChunkUncheckedCreateNestedManyWithoutPaperInput
+  citationsFrom?: Prisma.CitationUncheckedCreateNestedManyWithoutSourcePaperInput
+  citationsTo?: Prisma.CitationUncheckedCreateNestedManyWithoutTargetPaperInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutPaperInput
+  collectionJoins?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutPaperInput
+  aiSummaries?: Prisma.AISummaryUncheckedCreateNestedManyWithoutPaperInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutPaperInput
+  aiInsightMessages?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutPaperInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
+  aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
+  aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
+  UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
+  PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
+}
+
+export type PaperCreateOrConnectWithoutPaperSharesInput = {
+  where: Prisma.PaperWhereUniqueInput
+  create: Prisma.XOR<Prisma.PaperCreateWithoutPaperSharesInput, Prisma.PaperUncheckedCreateWithoutPaperSharesInput>
+}
+
+export type PaperUpsertWithoutPaperSharesInput = {
+  update: Prisma.XOR<Prisma.PaperUpdateWithoutPaperSharesInput, Prisma.PaperUncheckedUpdateWithoutPaperSharesInput>
+  create: Prisma.XOR<Prisma.PaperCreateWithoutPaperSharesInput, Prisma.PaperUncheckedCreateWithoutPaperSharesInput>
+  where?: Prisma.PaperWhereInput
+}
+
+export type PaperUpdateToOneWithWhereWithoutPaperSharesInput = {
+  where?: Prisma.PaperWhereInput
+  data: Prisma.XOR<Prisma.PaperUpdateWithoutPaperSharesInput, Prisma.PaperUncheckedUpdateWithoutPaperSharesInput>
+}
+
+export type PaperUpdateWithoutPaperSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  doi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  processingStatus?: Prisma.EnumPaperProcessingStatusFieldUpdateOperationsInput | $Enums.PaperProcessingStatus
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  uploader?: Prisma.UserUpdateOneRequiredWithoutUploadedPapersNestedInput
+  workspace?: Prisma.WorkspaceUpdateOneRequiredWithoutPapersNestedInput
+  file?: Prisma.PaperFileUpdateOneWithoutPaperNestedInput
+  chunks?: Prisma.PaperChunkUpdateManyWithoutPaperNestedInput
+  citationsFrom?: Prisma.CitationUpdateManyWithoutSourcePaperNestedInput
+  citationsTo?: Prisma.CitationUpdateManyWithoutTargetPaperNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutPaperNestedInput
+  collectionJoins?: Prisma.CollectionPaperUpdateManyWithoutPaperNestedInput
+  aiSummaries?: Prisma.AISummaryUpdateManyWithoutPaperNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutPaperNestedInput
+  aiInsightMessages?: Prisma.AIInsightMessageUpdateManyWithoutPaperNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
+  aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
+  aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
+  UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
+}
+
+export type PaperUncheckedUpdateWithoutPaperSharesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  workspaceId?: Prisma.StringFieldUpdateOperationsInput | string
+  uploaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  abstract?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  doi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isDraft?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  processingStatus?: Prisma.EnumPaperProcessingStatusFieldUpdateOperationsInput | $Enums.PaperProcessingStatus
+  processingError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  previewFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previewMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalMimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalFormat?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingStartedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  extractionVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  tags?: Prisma.PaperUpdatetagsInput | string[]
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  citationCount?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  file?: Prisma.PaperFileUncheckedUpdateOneWithoutPaperNestedInput
+  chunks?: Prisma.PaperChunkUncheckedUpdateManyWithoutPaperNestedInput
+  citationsFrom?: Prisma.CitationUncheckedUpdateManyWithoutSourcePaperNestedInput
+  citationsTo?: Prisma.CitationUncheckedUpdateManyWithoutTargetPaperNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutPaperNestedInput
+  collectionJoins?: Prisma.CollectionPaperUncheckedUpdateManyWithoutPaperNestedInput
+  aiSummaries?: Prisma.AISummaryUncheckedUpdateManyWithoutPaperNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutPaperNestedInput
+  aiInsightMessages?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutPaperNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
+  aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
+  aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
+  aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
+  UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
+  PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
 }
 
 export type PaperCreateWithoutFileInput = {
@@ -1626,6 +1855,7 @@ export type PaperCreateWithoutFileInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -1672,6 +1902,7 @@ export type PaperUncheckedCreateWithoutFileInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -1734,6 +1965,7 @@ export type PaperUpdateWithoutFileInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -1780,6 +2012,7 @@ export type PaperUncheckedUpdateWithoutFileInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -1826,6 +2059,7 @@ export type PaperCreateWithoutChunksInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -1872,6 +2106,7 @@ export type PaperUncheckedCreateWithoutChunksInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -1934,6 +2169,7 @@ export type PaperUpdateWithoutChunksInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -1980,6 +2216,7 @@ export type PaperUncheckedUpdateWithoutChunksInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -2027,6 +2264,7 @@ export type PaperCreateWithoutPaperVersionInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -2073,6 +2311,7 @@ export type PaperUncheckedCreateWithoutPaperVersionInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -2135,6 +2374,7 @@ export type PaperUpdateWithoutPaperVersionInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -2181,6 +2421,7 @@ export type PaperUncheckedUpdateWithoutPaperVersionInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -2226,6 +2467,7 @@ export type PaperCreateWithoutCitationsFromInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -2272,6 +2514,7 @@ export type PaperUncheckedCreateWithoutCitationsFromInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -2323,6 +2566,7 @@ export type PaperCreateWithoutCitationsToInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -2369,6 +2613,7 @@ export type PaperUncheckedCreateWithoutCitationsToInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -2431,6 +2676,7 @@ export type PaperUpdateWithoutCitationsFromInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -2477,6 +2723,7 @@ export type PaperUncheckedUpdateWithoutCitationsFromInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -2534,6 +2781,7 @@ export type PaperUpdateWithoutCitationsToInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -2580,6 +2828,7 @@ export type PaperUncheckedUpdateWithoutCitationsToInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -2626,6 +2875,7 @@ export type PaperCreateWithoutAnnotationsInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -2672,6 +2922,7 @@ export type PaperUncheckedCreateWithoutAnnotationsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -2734,6 +2985,7 @@ export type PaperUpdateWithoutAnnotationsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -2780,6 +3032,7 @@ export type PaperUncheckedUpdateWithoutAnnotationsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -2826,6 +3079,7 @@ export type PaperCreateWithoutCollectionJoinsInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -2872,6 +3126,7 @@ export type PaperUncheckedCreateWithoutCollectionJoinsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -2934,6 +3189,7 @@ export type PaperUpdateWithoutCollectionJoinsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -2980,6 +3236,7 @@ export type PaperUncheckedUpdateWithoutCollectionJoinsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -3026,6 +3283,7 @@ export type PaperCreateWithoutAiSummariesInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -3072,6 +3330,7 @@ export type PaperUncheckedCreateWithoutAiSummariesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -3134,6 +3393,7 @@ export type PaperUpdateWithoutAiSummariesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -3180,6 +3440,7 @@ export type PaperUncheckedUpdateWithoutAiSummariesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -3226,6 +3487,7 @@ export type PaperCreateWithoutAiInsightThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -3272,6 +3534,7 @@ export type PaperUncheckedCreateWithoutAiInsightThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -3334,6 +3597,7 @@ export type PaperUpdateWithoutAiInsightThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -3380,6 +3644,7 @@ export type PaperUncheckedUpdateWithoutAiInsightThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -3426,6 +3691,7 @@ export type PaperCreateWithoutAiInsightMessagesInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -3472,6 +3738,7 @@ export type PaperUncheckedCreateWithoutAiInsightMessagesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -3534,6 +3801,7 @@ export type PaperUpdateWithoutAiInsightMessagesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -3580,6 +3848,7 @@ export type PaperUncheckedUpdateWithoutAiInsightMessagesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -3626,6 +3895,7 @@ export type PaperCreateWithoutAiKeyPointsInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -3672,6 +3942,7 @@ export type PaperUncheckedCreateWithoutAiKeyPointsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -3734,6 +4005,7 @@ export type PaperUpdateWithoutAiKeyPointsInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -3780,6 +4052,7 @@ export type PaperUncheckedUpdateWithoutAiKeyPointsInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -3826,6 +4099,7 @@ export type PaperCreateWithoutAiMetadataInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -3872,6 +4146,7 @@ export type PaperUncheckedCreateWithoutAiMetadataInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -3934,6 +4209,7 @@ export type PaperUpdateWithoutAiMetadataInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -3980,6 +4256,7 @@ export type PaperUncheckedUpdateWithoutAiMetadataInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -4026,6 +4303,7 @@ export type PaperCreateWithoutAiContextCachesInput = {
   researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutPaperInput
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -4072,6 +4350,7 @@ export type PaperUncheckedCreateWithoutAiContextCachesInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutPaperInput
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -4134,6 +4413,7 @@ export type PaperUpdateWithoutAiContextCachesInput = {
   researchNotes?: Prisma.ResearchNoteUpdateManyWithoutPaperNestedInput
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -4180,6 +4460,7 @@ export type PaperUncheckedUpdateWithoutAiContextCachesInput = {
   researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutPaperNestedInput
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -4227,6 +4508,7 @@ export type PaperCreateWithoutUsageEventInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
@@ -4273,6 +4555,7 @@ export type PaperUncheckedCreateWithoutUsageEventInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
@@ -4335,6 +4618,7 @@ export type PaperUpdateWithoutUsageEventInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
@@ -4381,6 +4665,7 @@ export type PaperUncheckedUpdateWithoutUsageEventInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
@@ -4426,6 +4711,7 @@ export type PaperCreateWithoutResearchNotesInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
@@ -4472,6 +4758,7 @@ export type PaperUncheckedCreateWithoutResearchNotesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
@@ -4534,6 +4821,7 @@ export type PaperUpdateWithoutResearchNotesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -4580,6 +4868,7 @@ export type PaperUncheckedUpdateWithoutResearchNotesInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -4627,6 +4916,7 @@ export type PaperCreateWithoutCitationExportsInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
@@ -4673,6 +4963,7 @@ export type PaperUncheckedCreateWithoutCitationExportsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
@@ -4735,6 +5026,7 @@ export type PaperUpdateWithoutCitationExportsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
@@ -4781,6 +5073,7 @@ export type PaperUncheckedUpdateWithoutCitationExportsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
@@ -4827,6 +5120,7 @@ export type PaperCreateWithoutDiscussionThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionCreateNestedManyWithoutPaperInput
@@ -4873,6 +5167,7 @@ export type PaperUncheckedCreateWithoutDiscussionThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedCreateNestedManyWithoutPaperInput
   aiMetadata?: Prisma.AIMetadataUncheckedCreateNestedOneWithoutPaperInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedCreateNestedManyWithoutPaperInput
+  paperShares?: Prisma.PaperShareUncheckedCreateNestedManyWithoutPaperInput
   citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutPaperInput
   UsageEvent?: Prisma.UsageEventUncheckedCreateNestedManyWithoutPaperInput
   PaperVersion?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutPaperInput
@@ -4935,6 +5230,7 @@ export type PaperUpdateWithoutDiscussionThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUpdateManyWithoutPaperNestedInput
@@ -4981,6 +5277,7 @@ export type PaperUncheckedUpdateWithoutDiscussionThreadsInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
   PaperVersion?: Prisma.PaperVersionUncheckedUpdateManyWithoutPaperNestedInput
@@ -5055,6 +5352,7 @@ export type PaperUpdateWithoutUploaderInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -5101,6 +5399,7 @@ export type PaperUncheckedUpdateWithoutUploaderInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -5205,6 +5504,7 @@ export type PaperUpdateWithoutWorkspaceInput = {
   aiKeyPoints?: Prisma.AIKeyPointUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUpdateManyWithoutPaperNestedInput
@@ -5251,6 +5551,7 @@ export type PaperUncheckedUpdateWithoutWorkspaceInput = {
   aiKeyPoints?: Prisma.AIKeyPointUncheckedUpdateManyWithoutPaperNestedInput
   aiMetadata?: Prisma.AIMetadataUncheckedUpdateOneWithoutPaperNestedInput
   aiContextCaches?: Prisma.AIContextCacheUncheckedUpdateManyWithoutPaperNestedInput
+  paperShares?: Prisma.PaperShareUncheckedUpdateManyWithoutPaperNestedInput
   citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutPaperNestedInput
   discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutPaperNestedInput
   UsageEvent?: Prisma.UsageEventUncheckedUpdateManyWithoutPaperNestedInput
@@ -5303,6 +5604,7 @@ export type PaperCountOutputType = {
   researchNotes: number
   aiKeyPoints: number
   aiContextCaches: number
+  paperShares: number
   citationExports: number
   discussionThreads: number
   UsageEvent: number
@@ -5321,6 +5623,7 @@ export type PaperCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   researchNotes?: boolean | PaperCountOutputTypeCountResearchNotesArgs
   aiKeyPoints?: boolean | PaperCountOutputTypeCountAiKeyPointsArgs
   aiContextCaches?: boolean | PaperCountOutputTypeCountAiContextCachesArgs
+  paperShares?: boolean | PaperCountOutputTypeCountPaperSharesArgs
   citationExports?: boolean | PaperCountOutputTypeCountCitationExportsArgs
   discussionThreads?: boolean | PaperCountOutputTypeCountDiscussionThreadsArgs
   UsageEvent?: boolean | PaperCountOutputTypeCountUsageEventArgs
@@ -5417,6 +5720,13 @@ export type PaperCountOutputTypeCountAiContextCachesArgs<ExtArgs extends runtime
 /**
  * PaperCountOutputType without action
  */
+export type PaperCountOutputTypeCountPaperSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PaperShareWhereInput
+}
+
+/**
+ * PaperCountOutputType without action
+ */
 export type PaperCountOutputTypeCountCitationExportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.CitationExportWhereInput
 }
@@ -5486,6 +5796,7 @@ export type PaperSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   aiKeyPoints?: boolean | Prisma.Paper$aiKeyPointsArgs<ExtArgs>
   aiMetadata?: boolean | Prisma.Paper$aiMetadataArgs<ExtArgs>
   aiContextCaches?: boolean | Prisma.Paper$aiContextCachesArgs<ExtArgs>
+  paperShares?: boolean | Prisma.Paper$paperSharesArgs<ExtArgs>
   citationExports?: boolean | Prisma.Paper$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Paper$discussionThreadsArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Paper$UsageEventArgs<ExtArgs>
@@ -5604,6 +5915,7 @@ export type PaperInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   aiKeyPoints?: boolean | Prisma.Paper$aiKeyPointsArgs<ExtArgs>
   aiMetadata?: boolean | Prisma.Paper$aiMetadataArgs<ExtArgs>
   aiContextCaches?: boolean | Prisma.Paper$aiContextCachesArgs<ExtArgs>
+  paperShares?: boolean | Prisma.Paper$paperSharesArgs<ExtArgs>
   citationExports?: boolean | Prisma.Paper$citationExportsArgs<ExtArgs>
   discussionThreads?: boolean | Prisma.Paper$discussionThreadsArgs<ExtArgs>
   UsageEvent?: boolean | Prisma.Paper$UsageEventArgs<ExtArgs>
@@ -5637,6 +5949,7 @@ export type $PaperPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     aiKeyPoints: Prisma.$AIKeyPointPayload<ExtArgs>[]
     aiMetadata: Prisma.$AIMetadataPayload<ExtArgs> | null
     aiContextCaches: Prisma.$AIContextCachePayload<ExtArgs>[]
+    paperShares: Prisma.$PaperSharePayload<ExtArgs>[]
     citationExports: Prisma.$CitationExportPayload<ExtArgs>[]
     discussionThreads: Prisma.$DiscussionThreadPayload<ExtArgs>[]
     UsageEvent: Prisma.$UsageEventPayload<ExtArgs>[]
@@ -6079,6 +6392,7 @@ export interface Prisma__PaperClient<T, Null = never, ExtArgs extends runtime.Ty
   aiKeyPoints<T extends Prisma.Paper$aiKeyPointsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$aiKeyPointsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIKeyPointPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiMetadata<T extends Prisma.Paper$aiMetadataArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$aiMetadataArgs<ExtArgs>>): Prisma.Prisma__AIMetadataClient<runtime.Types.Result.GetResult<Prisma.$AIMetadataPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   aiContextCaches<T extends Prisma.Paper$aiContextCachesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$aiContextCachesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AIContextCachePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  paperShares<T extends Prisma.Paper$paperSharesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$paperSharesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PaperSharePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   citationExports<T extends Prisma.Paper$citationExportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$citationExportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CitationExportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   discussionThreads<T extends Prisma.Paper$discussionThreadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$discussionThreadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DiscussionThreadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   UsageEvent<T extends Prisma.Paper$UsageEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Paper$UsageEventArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UsageEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -6839,6 +7153,30 @@ export type Paper$aiContextCachesArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.AIContextCacheScalarFieldEnum | Prisma.AIContextCacheScalarFieldEnum[]
+}
+
+/**
+ * Paper.paperShares
+ */
+export type Paper$paperSharesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PaperShare
+   */
+  select?: Prisma.PaperShareSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PaperShare
+   */
+  omit?: Prisma.PaperShareOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PaperShareInclude<ExtArgs> | null
+  where?: Prisma.PaperShareWhereInput
+  orderBy?: Prisma.PaperShareOrderByWithRelationInput | Prisma.PaperShareOrderByWithRelationInput[]
+  cursor?: Prisma.PaperShareWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PaperShareScalarFieldEnum | Prisma.PaperShareScalarFieldEnum[]
 }
 
 /**

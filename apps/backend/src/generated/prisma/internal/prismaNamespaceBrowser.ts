@@ -58,6 +58,7 @@ export const ModelName = {
   WorkspaceInvitation: 'WorkspaceInvitation',
   WorkspaceSettings: 'WorkspaceSettings',
   Paper: 'Paper',
+  PaperShare: 'PaperShare',
   PaperFile: 'PaperFile',
   PaperChunk: 'PaperChunk',
   PaperVersion: 'PaperVersion',
@@ -274,6 +275,20 @@ export const PaperScalarFieldEnum = {
 } as const
 
 export type PaperScalarFieldEnum = (typeof PaperScalarFieldEnum)[keyof typeof PaperScalarFieldEnum]
+
+
+export const PaperShareScalarFieldEnum = {
+  id: 'id',
+  paperId: 'paperId',
+  email: 'email',
+  permission: 'permission',
+  sharedById: 'sharedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  isDeleted: 'isDeleted'
+} as const
+
+export type PaperShareScalarFieldEnum = (typeof PaperShareScalarFieldEnum)[keyof typeof PaperShareScalarFieldEnum]
 
 
 export const PaperFileScalarFieldEnum = {

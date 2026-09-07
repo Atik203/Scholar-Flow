@@ -174,6 +174,7 @@ export const apiSlice = createApi({
     "Notebook",
     "NotebookSection",
     "Discussion",
+    "PaperShare",
     "DiscussionMessage",
     "Citation",
     "CitationExport",
