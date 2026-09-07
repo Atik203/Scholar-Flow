@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import type { ChainedCommands } from "@tiptap/react"
 import { type Editor } from "@tiptap/react"
 
 // --- Hooks ---
@@ -122,14 +121,6 @@ export function canSetTextAlign(
   return getSelectedAlignableTypes(editor).length > 0;
 }
 
-export function hasSetTextAlign(
-  commands: ChainedCommands
-): commands is ChainedCommands & {
-  setTextAlign: (align: TextAlign) => ChainedCommands
-} {
-  return "setTextAlign" in commands
-}
-
 /**
  * Checks if the text alignment is currently active
  */
@@ -145,15 +136,25 @@ export function isTextAlignActive(
  * Sets text alignment in the editor
  */
 export function setTextAlign(editor: Editor | null, align: TextAlign): boolean {
-  if (!editor || !editor.isEditable) return false
-  if (!canSetTextAlign(editor, align)) return false
+  if (!editor || !editor.isEditable) return false;
+  if (!canSetTextAlign(editor, align)) return false;
 
-  const chain = editor.chain().focus()
-  if (hasSetTextAlign(chain)) {
-    return chain.setTextAlign(align).run()
-  }
+  // Same trap as can(): the stock chain.setTextAlign(align) applies
+  // updateAttributes to EVERY configured type and aborts when any of them is
+  // absent from the selection — a plain paragraph selection would never
+  // align. Apply alignment only to the node types actually in the selection.
+  const presentTypes = getSelectedAlignableTypes(editor);
+  if (presentTypes.length === 0) return false;
 
-  return false
+  return editor
+    .chain()
+    .focus()
+    .command(({ commands }) =>
+      presentTypes.every((type) =>
+        commands.updateAttributes(type, { textAlign: align })
+      )
+    )
+    .run();
 }
 
 /**
