@@ -180,6 +180,40 @@ APP_PASS=<gmail app password>
 REDIS_URL=<redis url>
 ```
 
+### 2b. Deploy REST API to Render Free (recommended over Vercel serverless)
+
+The backend is a long-lived Express container (cron sweeper, SSE, uploads,
+in-app socket.io) — it does NOT fit Vercel serverless (4.5MB body limit kills
+PDF uploads, no long-lived sockets/cron). Use a Render Web Service instead:
+
+```bash
+# Render dashboard → New → Web Service → Connect GitHub repo → Scholar-Flow
+#   Root Directory: apps/backend
+#   Build Command:  cd ../.. && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build
+#   Start Command:  node dist/server.js
+#   Instance: Free
+#   Health Check Path: /api/health
+
+# Environment Variables (paste in Render — the app does NOT read .env.production;
+# config/index.ts only loads .env, and Render injects env at runtime):
+ENABLE_EXPERIMENTAL_COREPACK=1   # REQUIRED: lets Corepack install pinned yarn 4.9.2 (fixes "global version of Yarn is 1.22.22")
+NODE_VERSION=24                  # REQUIRED: engines.node >= 24.0.0
+NODE_ENV=production
+JWT_SECRET=<openssl rand -base64 32>
+REFRESH_TOKEN_SECRET=<openssl rand -base64 32>
+RESET_PASS_TOKEN=<openssl rand -base64 32>
+FRONTEND_URL=https://scholar-flow-ai.vercel.app   # exact, no trailing slash (CORS whitelist)
+DIRECT_DATABASE_URL=<direct postgres:// URL>      # adapter-pg needs TCP URL, NOT prisma+postgres:// Accelerate
+DATABASE_URL=<accelerate url, optional — migrations only>
+AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... AWS_BUCKET_NAME=... AWS_REGION=...
+# Optional: OPENAI_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, DEEPSEEK_API_KEY,
+# AI_FEATURES_ENABLED=true, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+# RESEND_API_KEY + EMAIL + APP_PASS (email dispatch), REDIS_URL (skip → sync fallback)
+
+# Keep-awake (free tier sleeps after 15 min idle): UptimeRobot monitor pinging
+# https://<service>.onrender.com/api/health every 5 min.
+```
+
 ### 3. Deploy WebSocket Server to Render Free
 
 ```bash
