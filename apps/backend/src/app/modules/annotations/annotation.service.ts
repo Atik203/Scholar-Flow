@@ -19,6 +19,11 @@ export class AnnotationService {
 
     try {
       // Insert annotation using $executeRaw
+      const positionIndex =
+        data.anchor.coordinates.y != null
+          ? Math.round(data.anchor.coordinates.y * 1000)
+          : 0;
+
       await prisma.$executeRaw`
         INSERT INTO "Annotation" (
           id, "paperId", "userId", type, anchor, text, "parentId", version, 
@@ -28,7 +33,7 @@ export class AnnotationService {
         VALUES (
           ${annotationId}, ${data.paperId}, ${userId}, ${data.type}::"AnnotationType",
           ${JSON.stringify(data.anchor)}::jsonb, ${data.text}, ${data.parentId || null},
-          1, ${data.color || "#FFEB3B"}, ${data.anchor.coordinates.y || 0},
+          1, ${data.color || "#FFEB3B"}, ${positionIndex},
           ${data.metadata ? JSON.stringify(data.metadata) : null}::jsonb,
           ${now}, ${now}, false
         )
