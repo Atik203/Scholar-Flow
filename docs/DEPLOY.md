@@ -196,7 +196,9 @@ REDIS_URL=<redis url>
 # Environment Variables (add in Render dashboard):
 NODE_ENV=production
 PORT=5001
-JWT_SECRET=<same JWT_SECRET as backend>
+# IMPORTANT: socket-server reads NEXTAUTH_SECRET (not JWT_SECRET) and
+# verifies the backend JWT against it — value MUST equal the backend's JWT_SECRET.
+NEXTAUTH_SECRET=<same JWT_SECRET as backend>
 FRONTEND_URL=https://scholar-flow-ai.vercel.app
 ```
 
