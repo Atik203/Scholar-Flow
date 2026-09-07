@@ -195,11 +195,22 @@ app.post("/api/csp-report", cspReportHandler as unknown as RequestHandler);
 // API routes
 app.use("/api", router);
 
-// Global error handler
+// 404 handler — BEFORE the global error handler: the error handler must be
+// the LAST registered middleware, otherwise 404 errors (next(error)) have no
+// error middleware after them and fall through to Express's default handler.
+app.use("*", routeNotFound as unknown as RequestHandler);
+
+// Global error handler (always last)
 app.use(globalErrorHandler as unknown as RequestHandler);
 
-// 404 handler
-app.use("*", routeNotFound as unknown as RequestHandler);
+// Process-level guards: never let a single bad request (async throw /
+// unhandled rejection) take the whole API down. Log loudly, keep serving.
+process.on("unhandledRejection", (reason) => {
+  console.error("[Process] Unhandled rejection (keeping server alive):", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[Process] Uncaught exception (keeping server alive):", err);
+});
 
 // Only start server if not in Vercel environment
 if (process.env.VERCEL !== "1") {
