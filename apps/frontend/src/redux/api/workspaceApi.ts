@@ -313,6 +313,10 @@ export const workspaceApi = apiSlice.injectEndpoints({
         url: `/workspaces/${id}/activity`,
         params: { ...(cursor && { cursor }), limit },
       }),
+      transformResponse: (response: {
+        data: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      }) => ({ result: response.data, meta: response.meta }),
       providesTags: (_res, _err, { id }) => [
         { type: "Workspace", id: `${id}-activity` },
       ],
@@ -329,6 +333,10 @@ export const workspaceApi = apiSlice.injectEndpoints({
         url: `/workspaces/${id}/papers`,
         params: { ...(cursor && { cursor }), limit },
       }),
+      transformResponse: (response: {
+        data: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      }) => ({ result: response.data, meta: response.meta }),
       providesTags: (_res, _err, { id }) => [
         { type: "Workspace", id: `${id}-papers` },
       ],
@@ -345,6 +353,10 @@ export const workspaceApi = apiSlice.injectEndpoints({
         url: `/workspaces/${id}/collections`,
         params: { ...(cursor && { cursor }), limit },
       }),
+      transformResponse: (response: {
+        data: any[];
+        meta: { limit: number; hasMore: boolean; nextCursor: string | null };
+      }) => ({ result: response.data, meta: response.meta }),
       providesTags: (_res, _err, { id }) => [
         { type: "Workspace", id: `${id}-collections` },
       ],
