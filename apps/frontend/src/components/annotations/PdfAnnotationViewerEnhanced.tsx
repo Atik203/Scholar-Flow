@@ -87,72 +87,6 @@ export function PdfAnnotationViewerEnhanced({
     []
   );
 
-  const viewportToPage = useCallback(
-    (x: number, y: number, pageWidth: number, pageHeight: number) => {
-      let pageX = x / scale;
-      let pageY = y / scale;
-
-      if (rotation === 90) {
-        const temp = pageX;
-        pageX = pageHeight - pageY;
-        pageY = temp;
-      } else if (rotation === 180) {
-        pageX = pageWidth - pageX;
-        pageY = pageHeight - pageY;
-      } else if (rotation === 270) {
-        const temp = pageX;
-        pageX = pageY;
-        pageY = pageWidth - temp;
-      }
-
-      return { x: pageX, y: pageY };
-    },
-    [scale, rotation]
-  );
-
-  const handleTextSelection = useCallback(() => {
-    const windowSelection = window.getSelection();
-    if (!windowSelection || !windowSelection.toString().trim()) return;
-
-    const text = windowSelection.toString().trim();
-    const range = windowSelection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    const pageRect = pageRef.current?.getBoundingClientRect();
-
-    if (!pageRect) return;
-
-    const relativeX = rect.left - pageRect.left;
-    const relativeY = rect.top - pageRect.top;
-    const pw = pageRect.width / scale;
-    const ph = pageRect.height / scale;
-
-    const topLeft = viewportToPage(relativeX, relativeY, pw, ph);
-    const bottomRight = viewportToPage(
-      relativeX + rect.width,
-      relativeY + rect.height,
-      pw,
-      ph
-    );
-
-    const anchor: AnnotationAnchor = {
-      page: currentPage,
-      coordinates: {
-        x: topLeft.x,
-        y: topLeft.y,
-        width: bottomRight.x - topLeft.x,
-        height: bottomRight.y - topLeft.y,
-      },
-      selectedText: text,
-      viewport: { scale, rotation },
-    };
-
-    setSelectedText(text);
-    setSelection(anchor);
-    setIsAnnotationPopupOpen(true);
-
-    windowSelection.removeAllRanges();
-  }, [currentPage, scale, rotation, viewportToPage]);
-
   const handleAnnotationCreate = useCallback(
     async ({ text, color, type }: { text: string; color: string; type: AnnotationType }) => {
       if (!selection) return;
@@ -163,7 +97,7 @@ export function PdfAnnotationViewerEnhanced({
           type,
           anchor: selection,
           text: text.trim(),
-          color: type === "HIGHLIGHT" || type === "UNDERLINE" || type === "COMMENT" ? color : undefined,
+          color,
         }).unwrap();
 
         showSuccessToast("Annotation created");
@@ -286,8 +220,12 @@ export function PdfAnnotationViewerEnhanced({
 
   const popupPosition = selection?.coordinates
     ? {
-        x: selection.coordinates.x * scale + (pageRef.current?.getBoundingClientRect().left ?? 0),
-        y: selection.coordinates.y * scale + (pageRef.current?.getBoundingClientRect().top ?? 0),
+        x:
+          selection.coordinates.x * pageWidth +
+          (pageRef.current?.getBoundingClientRect().left ?? 0),
+        y:
+          selection.coordinates.y * pageHeight +
+          (pageRef.current?.getBoundingClientRect().top ?? 0),
       }
     : null;
 
@@ -350,7 +288,7 @@ export function PdfAnnotationViewerEnhanced({
               </Document>
 
               <AnnotationLayerEnhanced
-                pageIndex={currentPage - 1}
+                page={currentPage}
                 annotations={currentPageAnnotations}
                 scale={scale}
                 rotation={rotation}
