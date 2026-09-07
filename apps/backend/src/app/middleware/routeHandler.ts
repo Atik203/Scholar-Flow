@@ -1,19 +1,25 @@
-import { NextFunction, Request, Response } from "express";
-import ApiError from "../errors/ApiError";
+import { Request, Response } from "express";
 
 /**
- * 404 Route Not Found middleware
+ * 404 Route Not Found middleware.
+ *
+ * Responds with a clean JSON 404 directly instead of next(error) — with the
+ * global error handler currently registered before this middleware in
+ * server.ts, next(error) here fell through to Express's DEFAULT error
+ * handler (HTML/500-style noise). Deterministic + never crashes the process.
  */
-export const routeNotFound = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const error = new ApiError(
-    404,
-    `Route not found: ${req.method} ${req.originalUrl}`
-  );
-  next(error);
+export const routeNotFound = (req: Request, res: Response) => {
+  return res.status(404).json({
+    success: false,
+    statusCode: 404,
+    message: `Route not found: ${req.method} ${req.originalUrl}`,
+    errorSources: [
+      {
+        path: req.originalUrl,
+        message: `Route not found: ${req.method} ${req.originalUrl}`,
+      },
+    ],
+  });
 };
 
 /**
