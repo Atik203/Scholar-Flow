@@ -32,9 +32,13 @@ const app: import("express").Express = express();
 const PORT = config.port || 5000;
 
 // Trust proxy when behind Vercel/reverse proxy (required for rate limiting and IP detection)
+// NOTE: `true` is invalid here — express-rate-limit v7 rejects a permissive
+// trust proxy (ERR_ERL_PERMISSIVE_TRUST_PROXY) because it allows clients to
+// spoof X-Forwarded-For and bypass IP-based rate limits. One hop = the
+// hosting platform's load balancer, which is exactly what Render/Vercel use.
 if (process.env.VERCEL === "1" || config.env === "production") {
-  app.set("trust proxy", true);
-  console.log("[Config] Trust proxy enabled for production/Vercel environment");
+  app.set("trust proxy", 1);
+  console.log("[Config] Trust proxy (1 hop) enabled for production/Vercel environment");
 }
 
 // Security middleware with enhanced CSP and security headers
