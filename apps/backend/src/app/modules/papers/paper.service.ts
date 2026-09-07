@@ -766,6 +766,68 @@ export const paperService = {
     throw new ApiError(403, "You do not have access to this paper");
   },
 
+  /**
+   * List active email shares for a paper. Only the uploader or the workspace
+   * owner may manage shares — everyone else gets 403, never a leak.
+   */
+  async listPaperShares(paperId: string, requesterId: string) {
+    const manager = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT p.id
+      FROM "Paper" p
+      LEFT JOIN "Workspace" w
+        ON w.id = p."workspaceId" AND w."isDeleted" = false
+      WHERE p.id = ${paperId} AND p."isDeleted" = false
+        AND (p."uploaderId" = ${requesterId} OR w."ownerId" = ${requesterId})
+      LIMIT 1
+    `;
+    if (!manager[0]) {
+      throw new ApiError(403, "Only the author can manage shares");
+    }
+
+    return prisma.$queryRaw<
+      Array<{
+        id: string;
+        email: string;
+        permission: string;
+        createdAt: Date;
+      }>
+    >`
+      SELECT id, email, permission, "createdAt"
+      FROM "PaperShare"
+      WHERE "paperId" = ${paperId} AND "isDeleted" = false
+      ORDER BY "createdAt" DESC
+    `;
+  },
+
+  /**
+   * Revoke an email share (soft delete — immediately drops recipient access
+   * because every gate checks isDeleted=false). Author or original sharer.
+   */
+  async revokePaperShare(shareId: string, requesterId: string) {
+    const rows = await prisma.$queryRaw<
+      Array<{ id: string; sharedById: string; uploaderId: string }>
+    >`
+      SELECT ps.id, ps."sharedById", p."uploaderId"
+      FROM "PaperShare" ps
+      JOIN "Paper" p ON p.id = ps."paperId"
+      WHERE ps.id = ${shareId} AND ps."isDeleted" = false AND p."isDeleted" = false
+      LIMIT 1
+    `;
+    const row = rows[0];
+    if (!row) throw new ApiError(404, "Share not found");
+
+    if (row.sharedById !== requesterId && row.uploaderId !== requesterId) {
+      throw new ApiError(403, "Only the sharer or the author can revoke");
+    }
+
+    await prisma.$executeRaw`
+      UPDATE "PaperShare"
+      SET "isDeleted" = true, "updatedAt" = NOW()
+      WHERE id = ${shareId}
+    `;
+    return { id: shareId, revoked: true };
+  },
+
   async getSummarySourceText(
     paperId: string,
     record: PaperSummaryRecord

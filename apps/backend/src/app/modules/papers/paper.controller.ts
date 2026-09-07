@@ -935,6 +935,28 @@ export const paperController = {
     }
   }),
 
+  // List active email shares for a paper (author/owner only)
+  listShares: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const shares = await paperService.listPaperShares(
+      String(req.params.id),
+      authReq.user.id
+    );
+    sendSuccessResponse(res, shares, "Shares retrieved");
+  }),
+
+  // Revoke an email share (author or original sharer only)
+  revokeShare: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const result = await paperService.revokePaperShare(
+      String(req.params.shareId),
+      authReq.user.id
+    );
+    sendSuccessResponse(res, result, "Share revoked — recipient access removed");
+  }),
+
   // Generate AI insights for a paper (chat-like conversation)
   generateInsight: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
