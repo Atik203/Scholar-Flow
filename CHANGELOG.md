@@ -1,5 +1,85 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.4 — Discover Live Research, Editor Alignment & Working Email Sharing (2026-09-08)
+
+**Release date:** 2026-09-08
+**Theme:** Live external research feeds in Discover, Google Docs-style text alignment,
+permission-backed email sharing, analytics wiring, deployment hardening.
+
+---
+
+### Discover — live research (free APIs, no keys)
+- **Trending Papers** (`/search/trending`): real live mix — OpenAlex recent works
+  sorted by citation count (arXiv fallback) merged with accessible platform
+  papers; `?limit=` supported.
+- **For You** (`/search/recommendations`): real personalization — top 3 interest
+  keywords from the user's paper tags + metadata drive per-keyword arXiv
+  searches (OpenAlex fallback), each item annotated "Because you work on X";
+  falls back to newest accessible papers when no interests exist.
+- **Explore** (`/search/explore`, new): browse live arXiv submissions by 12
+  whitelisted categories, paginated; unknown categories rejected with 400.
+- External API calls are TTL-cached (10 min) with 10s timeouts — upstream
+  failures degrade to platform data, never crash the endpoint (fixed XML-vs-JSON
+  parse bug for arXiv Atom feeds).
+- External cards everywhere: source badge, citation counts, "Open" to the
+  original page, and **Save to Library** (reuses the import flow; auto-picks the
+  user's first workspace; toast + navigate to the new paper).
+- Discover landing page gained a live "Latest Research" strip (top 3 cs.AI).
+
+### Analytics — papers read & reading time actually count
+- New `POST /analytics/personal/view` records a `paper_view` UsageEvent
+  (access-scoped, deduped to 1 per user+paper per 24h, workspaceId populated so
+  workspace analytics finally see activity).
+- Paper detail page fires the view once per paper; new `useReadingSessionTracker`
+  hook starts a `reading_session` on load and closes it on unmount/tab-switch
+  with minutes read; reading sessions now resolve the paper's workspaceId.
+- Audited: annotation counts were already correctly wired (create + soft-delete).
+
+### Text Editor — alignment works like Google Docs
+- Fixed the permanently disabled align buttons: TipTap v3's stock
+  `can().setTextAlign()` requires every configured type in the selection;
+  `canSetTextAlign`/`setTextAlign` are now selection-aware (derived from the
+  live extension config) — mouse-select any lines and align left/center/right/
+  justify instantly.
+- Alignable types extended to headings, paragraphs, **list items and
+  blockquotes** (both ScholarFlowEditor and the simple template).
+
+### Email Sharing — actually grants access (was email-only)
+- New `PaperShare` model (unique paperId+email, permission view/edit,
+  soft-delete) + migration applied to the shared cloud DB.
+- `shareViaEmail` now persists the share (idempotent upsert re-activates) and
+  sends permission-aware links — view → `/dashboard/papers/:id`, edit →
+  `/dashboard/research/editor?paper=:id` (old `/papers/:id` was page-not-found).
+- All paper access gates (`assertPaperAccess`, `assertEditorPaperAccess`,
+  `assertEditorCanEdit`) grant access by the user's email; editor writes only
+  for `edit` shares.
+- New `GET /papers/:id/shares` (author/owner only) and
+  `DELETE /papers/shares/:shareId`; ShareModal shows "Shared with" list with
+  revoke — revocation drops access immediately (403 verified end-to-end).
+- Verified live: share → recipient access → revoke → 403.
+
+### Deployment & Reliability
+- Render backend guide added to `docs/DEPLOY.md` (the app is a long-lived
+  Express container — Vercel serverless breaks uploads/sockets/cron):
+  `corepack enable` first (Yarn 4.9.2 pin), Node 24, root `yarn install`,
+  env vars pasted in dashboard (`.env.production` is never read by the app).
+- 404s now return clean JSON (`routeNotFound` responds directly), the global
+  error handler is registered last, and `unhandledRejection`/`uncaughtException`
+  guards keep the process alive — a bad request can no longer take the API down.
+- `trust proxy` set to 1 hop (fixes express-rate-limit
+  `ERR_ERL_PERMISSIVE_TRUST_PROXY` on Render/Vercel).
+- Email dispatcher now falls back to SMTP/Gmail when Resend rejects a send
+  (e.g. unverified gmail.com from-domain).
+- Oracle Always Free docs updated to current 2 OCPU / 12 GB A1 limits.
+
+### Docs & Repo
+- AGENTS.md database section rewritten: one shared Prisma Cloud DB for local
+  dev + production (no local/WSL database); hand-written migration +
+  `prisma migrate deploy` path for the drift-prone shared DB.
+- Production branch recreated from main (clean lineage, no conflicted merges).
+
+---
+
 ## Release 1.3.1 — AI Architecture Overhaul & Vercel Stability (2026-06-28)
 
 **Release date:** 2026-06-28
