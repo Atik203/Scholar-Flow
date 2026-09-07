@@ -33,26 +33,31 @@ export const importApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     importByDOI: builder.mutation<ImportResult, { doi: string; workspaceId: string }>({
       query: (body) => ({ url: "/import/doi", method: "POST", body }),
+      transformResponse: (res: any) => res.data ?? res,
       invalidatesTags: ["Paper", "Import"],
     }),
 
     importByArxiv: builder.mutation<ImportResult, { arxivId: string; workspaceId: string }>({
       query: (body) => ({ url: "/import/arxiv", method: "POST", body }),
+      transformResponse: (res: any) => res.data ?? res,
       invalidatesTags: ["Paper", "Import"],
     }),
 
     importByURL: builder.mutation<SmartImportResult, { url: string; workspaceId: string }>({
       query: (body) => ({ url: "/import/url", method: "POST", body }),
+      transformResponse: (res: any) => res.data ?? res,
       invalidatesTags: ["Paper", "Import"],
     }),
 
     importBySmartURL: builder.mutation<SmartImportResult, { url: string; workspaceId: string }>({
       query: (body) => ({ url: "/import/smart-url", method: "POST", body }),
+      transformResponse: (res: any) => res.data ?? res,
       invalidatesTags: ["Paper", "Import"],
     }),
 
     importByFile: builder.mutation<FileImportResult, { content: string; format: "bibtex" | "ris"; workspaceId: string }>({
       query: (body) => ({ url: "/import/file", method: "POST", body }),
+      transformResponse: (res: any) => res.data ?? res,
       invalidatesTags: ["Paper", "Import"],
     }),
 
