@@ -19,13 +19,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/lib/apiUrl";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { paperApi } from "@/redux/api/paperApi";
+import { useRecordPaperViewMutation } from "@/redux/api/analyticsApi";
+import { useReadingSessionTracker } from "@/hooks/useReadingSessionTracker";
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -60,6 +62,19 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   const [previewError, setPreviewError] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const accessToken = useAppSelector((s) => s.auth.accessToken);
+  const [recordPaperView] = useRecordPaperViewMutation();
+  const viewedPaperRef = useRef<string | null>(null);
+
+  // Record a paper_view once per paper (server dedupes within 24h anyway)
+  // so personal/workspace analytics "papers read" stats actually increase.
+  useEffect(() => {
+    if (!paper?.id || viewedPaperRef.current === paper.id) return;
+    viewedPaperRef.current = paper.id;
+    recordPaperView({ paperId: paper.id });
+  }, [paper?.id, recordPaperView]);
+
+  // Reading minutes: start a session when the page loads, close on leave.
+  useReadingSessionTracker(paper?.id);
 
   /**
    * DOCX original download: fetch the signed URL via the API and save the
