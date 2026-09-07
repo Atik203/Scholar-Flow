@@ -8,9 +8,80 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SaveExternalPaperButton } from "@/components/papers/SaveExternalPaperButton";
 import { useGetSuggestedCollectionsQuery } from "@/redux/api/recommendationApi";
-import { Compass, Search, Sparkles, TrendingUp, Loader2, ArrowRight } from "lucide-react";
+import { useGetExploreQuery } from "@/redux/api/searchApi";
+import type { DiscoveryItem } from "@/redux/api/searchApi";
+import { Compass, Search, Sparkles, TrendingUp, Loader2, ArrowRight, Newspaper } from "lucide-react";
 import Link from "next/link";
+
+function LatestResearchStrip() {
+  const { data, isLoading } = useGetExploreQuery({ category: "cs.AI", page: 1, limit: 3 });
+  const items = data?.data ?? [];
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+          <Newspaper className="h-5 w-5 text-primary" />
+          Latest Research
+        </h2>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/dashboard/discover/explore">
+            Browse all fields <ArrowRight className="h-4 w-4 ml-1" />
+          </Link>
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-muted/60 p-4 space-y-2">
+              <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-full bg-muted animate-pulse rounded" />
+              <div className="h-4 w-2/3 bg-muted animate-pulse rounded" />
+            </div>
+          ))}
+        </div>
+      ) : items.length > 0 ? (
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+          {items.map((item) => (
+            <CompactPaperCard key={item.id} item={item} />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Live research is warming up — check back shortly.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function CompactPaperCard({ item }: { item: DiscoveryItem }) {
+  return (
+    <Card className="group hover:-translate-y-1 hover:shadow-md transition-all border-muted/60 flex flex-col">
+      <CardContent className="p-4 flex flex-col gap-2 flex-1">
+        <span className="text-xs font-medium px-2 py-0.5 self-start rounded-full bg-primary/10 text-primary capitalize">
+          {item.source ?? "external"}
+        </span>
+        <h3 className="font-medium text-sm leading-snug line-clamp-2">
+          <Link
+            href={item.externalUrl ?? "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            {item.title}
+          </Link>
+        </h3>
+        <p className="text-xs text-muted-foreground line-clamp-2 flex-1">
+          {item.abstract || "No abstract available."}
+        </p>
+        <SaveExternalPaperButton item={item} size="sm" className="mt-1" />
+      </CardContent>
+    </Card>
+  );
+}
 
 function SuggestedCollectionsCard() {
   const { data: suggestions, isLoading } = useGetSuggestedCollectionsQuery({ limit: 3 });
@@ -144,6 +215,8 @@ export default function DiscoverPage() {
         {/* Browse Collections (real: suggested collections + shared link) */}
         <SuggestedCollectionsCard />
       </div>
+
+      <LatestResearchStrip />
     </div>
   );
 }

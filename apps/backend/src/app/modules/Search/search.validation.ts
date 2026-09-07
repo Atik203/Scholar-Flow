@@ -52,3 +52,9 @@ export const sourcesQuerySchema = z.object({
   workspaceId: z.string().optional(),
   limit: z.string().optional().default("5"),
 });
+
+export const exploreQuerySchema = z.object({
+  category: z.string().optional().default("cs.AI"),
+  page: z.string().optional().default("1"),
+  limit: z.string().optional().default("12"),
+});

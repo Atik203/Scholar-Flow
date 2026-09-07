@@ -3,7 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { AnnotationType } from "@/redux/api/annotationApi";
-import { Check, Highlighter, MessageSquareText, Underline, X } from "lucide-react";
+import {
+  Check,
+  Highlighter,
+  MessageSquareText,
+  Pencil,
+  Square,
+  Strikethrough,
+  Underline,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const COLORS = [
@@ -15,10 +24,23 @@ const COLORS = [
   { value: "#AB47BC", label: "Purple" },
 ];
 
+const TYPE_LABELS: Record<AnnotationType, string> = {
+  HIGHLIGHT: "Highlight",
+  UNDERLINE: "Underline",
+  STRIKETHROUGH: "Strikethrough",
+  AREA: "Area",
+  COMMENT: "Comment",
+  INK: "Draw",
+  NOTE: "Note",
+};
+
 const TYPES: { value: AnnotationType; icon: typeof Highlighter }[] = [
   { value: "HIGHLIGHT", icon: Highlighter },
   { value: "UNDERLINE", icon: Underline },
+  { value: "STRIKETHROUGH", icon: Strikethrough },
+  { value: "AREA", icon: Square },
   { value: "COMMENT", icon: MessageSquareText },
+  { value: "INK", icon: Pencil },
 ];
 
 interface AnnotationPopupProps {
@@ -126,11 +148,7 @@ export function AnnotationPopup({
                   onClick={() => setType(t.value)}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {t.value === "HIGHLIGHT"
-                    ? "Highlight"
-                    : t.value === "UNDERLINE"
-                      ? "Underline"
-                      : "Comment"}
+                  {TYPE_LABELS[t.value]}
                 </Button>
               );
             })}

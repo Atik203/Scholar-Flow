@@ -24,7 +24,8 @@ import { showApiErrorToast } from "@/lib/errorHandling";
 import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/lib/apiUrl";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { paperApi } from "@/redux/api/paperApi";
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -39,6 +40,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   });
   const [updateMetadata] = useUpdatePaperMetadataMutation();
   const [deletePaper] = useDeletePaperMutation();
+  const dispatch = useAppDispatch();
   const [processPaper, { isLoading: isProcessing }] = useProcessPDFMutation();
   const [generateMetadata, { isLoading: isGeneratingMetadata }] = useGenerateMetadataMutation();
   const { data: previewUrlData } = useGetPaperPreviewUrlQuery(resolvedParams.id, {
@@ -148,7 +150,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   };
 
   const handleDelete = async () => {
-    try { await deletePaper(paper.id).unwrap(); router.push("/dashboard/papers"); } catch (e: unknown) { showApiErrorToast(e as any); }
+    try { await deletePaper(paper.id).unwrap(); dispatch(paperApi.util.invalidateTags(["Paper"])); router.push("/dashboard/papers"); } catch (e: unknown) { showApiErrorToast(e as any); }
   };
 
   const handleProcess = async () => {

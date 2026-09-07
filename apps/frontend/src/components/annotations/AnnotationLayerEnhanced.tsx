@@ -4,7 +4,7 @@ import { useRef, useCallback, useEffect } from "react";
 import type { Annotation, AnnotationType, AnnotationAnchor } from "@/redux/api/annotationApi";
 
 interface AnnotationLayerEnhancedProps {
-  pageIndex: number;
+  page: number;
   annotations: Annotation[];
   scale: number;
   rotation: number;
@@ -156,7 +156,7 @@ function renderAnnotation(
 }
 
 export function AnnotationLayerEnhanced({
-  pageIndex,
+  page,
   annotations,
   scale,
   rotation,
@@ -265,11 +265,18 @@ export function AnnotationLayerEnhanced({
   }, [onDrawingPointsChange, onDrawingComplete]);
 
   useEffect(() => {
-    if (!activeTool || !["HIGHLIGHT", "UNDERLINE", "COMMENT"].includes(activeTool)) return;
+    const selectableTools: AnnotationType[] = [
+      "HIGHLIGHT",
+      "UNDERLINE",
+      "STRIKETHROUGH",
+      "COMMENT",
+      "AREA",
+    ];
+    if (!activeTool || !selectableTools.includes(activeTool)) return;
 
     const handleSelection = () => {
       const container = containerRef.current;
-      if (!container) return;
+      if (!container || pageWidth <= 0 || pageHeight <= 0) return;
 
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || !sel.toString().trim()) return;
@@ -286,7 +293,7 @@ export function AnnotationLayerEnhanced({
       ) return;
 
       const anchor: AnnotationAnchor = {
-        page: pageIndex,
+        page,
         coordinates: {
           x: (rect.left - containerRect.left) / pageWidth,
           y: (rect.top - containerRect.top) / pageHeight,
@@ -309,7 +316,7 @@ export function AnnotationLayerEnhanced({
       document.removeEventListener("mouseup", handleSelection);
       document.removeEventListener("touchend", handleSelection);
     };
-  }, [activeTool, pageIndex, pageWidth, pageHeight, scale, rotation, onCreateAnnotation]);
+  }, [activeTool, page, pageWidth, pageHeight, scale, rotation, onCreateAnnotation]);
 
   if (!showAnnotations && !isDrawingMode) return null;
 
