@@ -842,22 +842,21 @@ export class ImportService {
             const firstPageText = await extractPdfFirstPageText(pdfBuffer);
             if (firstPageText) {
               const pdfMeta = parseMetadataFromText(firstPageText);
-              const updates: string[] = [];
               if (pdfMeta.title && pdfMeta.title.length > 5 && title === "Untitled") {
-                updates.push(`title = ${JSON.stringify(pdfMeta.title)}`);
+                await prisma.$executeRaw`
+                  UPDATE "Paper" SET title = ${pdfMeta.title}, "updatedAt" = NOW()
+                  WHERE id = ${paperId}
+                `;
               }
               if (pdfMeta.abstract && pdfMeta.abstract.length > 10 && !abstract) {
-                updates.push(`abstract = ${JSON.stringify(pdfMeta.abstract)}`);
+                await prisma.$executeRaw`
+                  UPDATE "Paper" SET abstract = ${pdfMeta.abstract}, "updatedAt" = NOW()
+                  WHERE id = ${paperId}
+                `;
               }
-              if (updates.length > 0) {
-                await prisma.$executeRawUnsafe(
-                  `UPDATE "Paper" SET ${updates.join(", ")}, "updatedAt" = NOW() WHERE id = $1`,
-                  paperId,
-                );
-                console.log(`[Import] URL ${url}: updated paper from PDF content`);
-                if (pdfMeta.title && pdfMeta.title.length > 5) title = pdfMeta.title;
-                if (pdfMeta.abstract && pdfMeta.abstract.length > 10) abstract = pdfMeta.abstract;
-              }
+              if (pdfMeta.title && pdfMeta.title.length > 5) title = pdfMeta.title;
+              if (pdfMeta.abstract && pdfMeta.abstract.length > 10) abstract = pdfMeta.abstract;
+              console.log(`[Import] URL ${url}: updated paper from PDF content`);
             }
           } catch (pdfMetaErr) {
             console.warn(`[Import] URL ${url}: PDF metadata extraction failed`, (pdfMetaErr as Error).message);
