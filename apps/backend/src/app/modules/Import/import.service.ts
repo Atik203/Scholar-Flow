@@ -159,6 +159,92 @@ async function paperHasPdf(paperId: string): Promise<boolean> {
   return (rows[0]?.n ?? 0) > 0;
 }
 
+function stripHtmlTags(input: string): string {
+  return input.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * DataCite REST API — fallback for DOIs not registered with Crossref
+ * (e.g. 10.48550/arXiv.*, DataCite-only datasets). Returns full abstracts.
+ */
+async function fetchDataCiteByDoi(doi: string): Promise<{
+  title: string;
+  authors: string[];
+  year: number | null;
+  abstract: string;
+}> {
+  const res = await axios.get(
+    `https://api.datacite.org/dois/${encodeURIComponent(doi)}`,
+    { timeout: 8000 },
+  );
+  const attrs = res.data?.data?.attributes;
+  if (!attrs) throw new Error(`DataCite: no record for ${doi}`);
+
+  const creators = (attrs.creators || [])
+    .map(
+      (c: any) =>
+        c?.name || `${c?.givenName || ""} ${c?.familyName || ""}`.trim(),
+    )
+    .filter(Boolean);
+  const abstractEntry = (attrs.descriptions || []).find(
+    (d: any) => (d?.descriptionType || "").toLowerCase() === "abstract",
+  );
+
+  return {
+    title: attrs.titles?.[0]?.title || "",
+    authors: creators,
+    year: attrs.publicationYear
+      ? parseInt(attrs.publicationYear, 10)
+      : null,
+    abstract: abstractEntry?.description
+      ? stripHtmlTags(decodeEntities(abstractEntry.description))
+      : "",
+  };
+}
+
+/**
+ * OpenAlex — free gap-fill source when Crossref/DataCite lack an abstract
+ * or authors. Reconstructs the abstract from abstract_inverted_index.
+ */
+async function fetchOpenAlexByDoi(doi: string): Promise<{
+  title: string;
+  authors: string[];
+  year: number | null;
+  abstract: string;
+  citedBy: number;
+} | null> {
+  const res = await axios.get(
+    `https://api.openalex.org/works/doi:${encodeURIComponent(doi)}`,
+    { timeout: 8000 },
+  );
+  const work = res.data;
+  if (!work?.title) return null;
+
+  const inverted: Record<string, number[]> | null =
+    work.abstract_inverted_index || null;
+  let abstract = "";
+  if (inverted) {
+    const words: Array<{ pos: number; word: string }> = [];
+    for (const [word, positions] of Object.entries(inverted)) {
+      for (const pos of positions) words.push({ pos, word });
+    }
+    abstract = words
+      .sort((a, b) => a.pos - b.pos)
+      .map((w) => w.word)
+      .join(" ");
+  }
+
+  return {
+    title: work.title,
+    authors: (work.authorships || [])
+      .map((a: any) => a?.author?.display_name)
+      .filter(Boolean),
+    year: work.publication_year || null,
+    abstract,
+    citedBy: work.cited_by_count || 0,
+  };
+}
+
 async function savePdfToS3(
   buffer: Buffer,
   workspaceId: string,
@@ -235,10 +321,10 @@ async function findOAPdfByDoi(doi: string): Promise<Buffer | null> {
 
   try {
     const ssRes = await axios.get(
-      `https://api.semanticscholar.org/v1/paper/DOI:${encodeURIComponent(doi)}`,
+      `https://api.semanticscholar.org/graph/v1/paper/DOI:${encodeURIComponent(doi)}?fields=openAccessPdf`,
       { timeout: 8000 },
     );
-    const pdfUrl = ssRes.data.pdfUrl || ssRes.data.openAccessPdf?.url;
+    const pdfUrl = ssRes.data?.openAccessPdf?.url;
     if (pdfUrl) {
       console.log(`[Import] Semantic Scholar found PDF for DOI ${doi}: ${pdfUrl}`);
       return await downloadPdf(pdfUrl);
@@ -301,41 +387,122 @@ async function extractMetadataFromHtml(url: string): Promise<{
 }
 
 export class ImportService {
-  static async importByDOI(doi: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
-    const cleanDoi = doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, "").trim();
-    const res = await axios.get(
-      `https://api.crossref.org/works/${encodeURIComponent(cleanDoi)}`,
-      { headers: { "User-Agent": "ScholarFlow/1.0 (mailto:dev@scholarflow.com)" }, timeout: 10000 },
-    );
+  static async importByDOI(input: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+    const cleanDoi = input
+      .trim()
+      .replace(/^https?:\/\/(dx\.)?doi\.org\//i, "")
+      .replace(/^doi:\s*/i, "")
+      .replace(/\/+$/, "");
 
-    const msg = res.data.message;
-    const title = msg.title?.[0] || "Untitled";
-    const authors = (msg.author || []).map((a: any) => `${a.given || ""} ${a.family || ""}`.trim());
-    const year = msg.created?.["date-parts"]?.[0]?.[0] || msg.issued?.["date-parts"]?.[0]?.[0] || 2024;
-    const abstract = msg.abstract || "";
-    const keywords = msg.subject || [];
-    const metadata = { authors, year, source: "doi", doi: cleanDoi, keywords };
+    // arXiv DataCite DOIs (10.48550/arXiv.*) return 404 from Crossref —
+    // route them through the arXiv importer instead.
+    if (cleanDoi.toLowerCase().startsWith("10.48550/arxiv.")) {
+      return this.importByArxiv(cleanDoi, workspaceId, uploaderId);
+    }
+    if (!/^10\.\d{4,9}\/[\w.()/:;<>\[\]_-]+$/i.test(cleanDoi)) {
+      throw new ApiError(400, `Invalid DOI: "${input}"`);
+    }
+
+    const existing = await findExistingPaper(workspaceId, { doi: cleanDoi });
+    if (existing) {
+      console.log(`[Import] DOI ${cleanDoi}: already imported — returning existing paper`);
+      return {
+        paper: existing,
+        source: "doi",
+        externalId: cleanDoi,
+        hasPdf: await paperHasPdf(existing.id),
+        alreadyImported: true,
+      };
+    }
+
+    let title = "";
+    let authors: string[] = [];
+    let year: number | null = null;
+    let abstract = "";
+    let keywords: string[] = [];
+    let citedBy = 0;
+
+    try {
+      const res = await axios.get(
+        `https://api.crossref.org/works/${encodeURIComponent(cleanDoi)}`,
+        { headers: { "User-Agent": "ScholarFlow/1.0 (mailto:dev@scholarflow.com)" }, timeout: 10000 },
+      );
+      const msg = res.data.message;
+      title = msg.title?.[0] || "";
+      authors = (msg.author || [])
+        .map((a: any) => `${a.given || ""} ${a.family || ""}`.trim())
+        .filter(Boolean);
+      year = msg.created?.["date-parts"]?.[0]?.[0] || msg.issued?.["date-parts"]?.[0]?.[0] || null;
+      abstract = msg.abstract
+        ? stripHtmlTags(decodeEntities(msg.abstract))
+        : "";
+      keywords = msg.subject || [];
+      citedBy = msg["is-referenced-by-count"] || 0;
+    } catch (err) {
+      const status = (err as any)?.response?.status;
+      if (status !== 404) throw err;
+      try {
+        const dc = await fetchDataCiteByDoi(cleanDoi);
+        title = dc.title;
+        authors = dc.authors;
+        year = dc.year;
+        abstract = dc.abstract;
+      } catch (dcErr) {
+        console.warn(`[Import] DOI ${cleanDoi}: DataCite fallback failed`, (dcErr as Error).message);
+        throw new ApiError(404, `Paper not found for DOI ${cleanDoi} (Crossref and DataCite)`);
+      }
+    }
+
+    // Gap-fill from OpenAlex when the primary source lacked abstract/authors.
+    if (!abstract || !authors.length || !title) {
+      try {
+        const oa = await fetchOpenAlexByDoi(cleanDoi);
+        if (oa) {
+          if (!title) title = oa.title;
+          if (!authors.length) authors = oa.authors;
+          if (!year) year = oa.year;
+          if (!abstract) abstract = oa.abstract;
+          if (!citedBy) citedBy = oa.citedBy;
+        }
+      } catch {
+        // OpenAlex enrichment is optional
+      }
+    }
+
+    if (!title) {
+      throw new ApiError(404, `Could not fetch metadata for DOI ${cleanDoi}`);
+    }
+
+    const metadata = { authors, year: year || new Date().getFullYear(), source: "doi", doi: cleanDoi, keywords };
 
     const paper = await prisma.$queryRaw<any[]>`
       INSERT INTO "Paper" (id, "workspaceId", "uploaderId", title, abstract, metadata, source, doi, tags, language, "citationCount", "processingStatus", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${title}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'doi', ${cleanDoi}, ${keywords}::text[], null, ${msg["is-referenced-by-count"] || 0}, 'UPLOADED', NOW(), NOW(), false)
+      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${title}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'doi', ${cleanDoi}, ${keywords}::text[], null, ${citedBy}, 'UPLOADED', NOW(), NOW(), false)
       RETURNING id, title, source, doi
     `;
     const paperId = paper[0].id;
 
     let hasPdf = false;
-    const pdfBuffer = await findOAPdfByDoi(cleanDoi);
-    if (pdfBuffer) {
-      const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
-      await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
-      await tryQueueExtraction(paperId);
-      hasPdf = true;
-      console.log(`[Import] DOI ${cleanDoi}: PDF saved, extraction queued`);
-    } else {
-      console.log(`[Import] DOI ${cleanDoi}: no OA PDF found — metadata only`);
+    try {
+      const pdfBuffer = await findOAPdfByDoi(cleanDoi);
+      if (pdfBuffer) {
+        if (!looksLikePdf(pdfBuffer)) throw new Error("OA PDF response was not a PDF");
+        const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
+        await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
+        await tryQueueExtraction(paperId);
+        hasPdf = true;
+        console.log(`[Import] DOI ${cleanDoi}: PDF saved, extraction queued`);
+      } else {
+        console.log(`[Import] DOI ${cleanDoi}: no OA PDF found — metadata only`);
+      }
+    } catch (err) {
+      console.warn(
+        `[Import] DOI ${cleanDoi}: PDF save failed — metadata only`,
+        (err as Error).message,
+      );
     }
 
-    return { paper: paper[0], source: "doi", externalId: cleanDoi, hasPdf };
+    return { paper: paper[0], source: "doi", externalId: cleanDoi, hasPdf, alreadyImported: false };
   }
 
   static async importByArxiv(input: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
