@@ -99,7 +99,8 @@ export const SearchController = {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
 
-    const result = await SearchService.getRecommendations(authReq.user.id, 10);
+    const limit = Math.min(20, parseInt((req.query.limit as string) || "10", 10));
+    const result = await SearchService.getRecommendations(authReq.user.id, limit);
     sendSuccessResponse(res, result, "Recommendations retrieved successfully");
   }),
 
