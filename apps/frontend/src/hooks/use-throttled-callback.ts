@@ -33,7 +33,9 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
 } {
   const handler = React.useMemo(
     () => throttle<T>(fn, wait, options),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Callers pass an arbitrary dependency list (lodash-style signature);
+    // the compiler's use-memo rule requires a literal array here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
     dependencies
   )
 

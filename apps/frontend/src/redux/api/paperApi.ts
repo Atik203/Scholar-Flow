@@ -208,6 +208,11 @@ export interface UpdateEditorContentRequest {
   isDraft?: boolean;
 }
 
+export interface AutoSaveEditorContentRequest {
+  id: string;
+  content: string;
+}
+
 export interface PublishDraftRequest {
   id: string;
   title?: string;
@@ -360,13 +365,6 @@ export const paperApi = apiSlice.injectEndpoints({
       invalidatesTags: (result, error, id) => [{ type: "Paper", id }, "Paper"],
     }),
 
-    getDevWorkspace: builder.query<
-      { data: { workspace: { id: string; name: string } } },
-      void
-    >({
-      query: () => "/papers/dev/workspace",
-    }),
-
     // PDF Processing endpoints
     processPDF: builder.mutation<{ data: { message: string } }, string>({
       query: (paperId) => ({
@@ -456,6 +454,20 @@ export const paperApi = apiSlice.injectEndpoints({
       query: ({ id, ...body }) => ({
         url: `/editor/${id}/content`,
         method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
+    }),
+
+    // Debounced autosave — lighter endpoint, never creates a version snapshot
+    // (versions are reserved for manual saves via updateEditorContent).
+    autoSaveEditorContent: builder.mutation<
+      { data: { paper: EditorPaper } },
+      AutoSaveEditorContentRequest
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/editor/${id}/autosave`,
+        method: "PATCH",
         body,
       }),
       invalidatesTags: (result, error, { id }) => [{ type: "Paper", id }],
@@ -671,6 +683,100 @@ export const paperApi = apiSlice.injectEndpoints({
       providesTags: ["AIProvider"],
     }),
 
+    // AI Tools — rewriter
+    aiRewriteText: builder.mutation<
+      { original: string; rewritten: string; provider: string },
+      { text: string; tone?: string; instructions?: string }
+    >({
+      query: (body) => ({
+        url: "/ai/rewrite",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: {
+        data: { original: string; rewritten: string; provider: string };
+      }) => response.data,
+    }),
+
+    // AI Tools — paper comparator
+    aiComparePapers: builder.mutation<
+      {
+        paper1: { id: string; title: string };
+        paper2: { id: string; title: string };
+        comparison: string;
+        provider: string;
+      },
+      { paper1Id: string; paper2Id: string }
+    >({
+      query: (body) => ({
+        url: "/ai/compare",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: {
+        data: {
+          paper1: { id: string; title: string };
+          paper2: { id: string; title: string };
+          comparison: string;
+          provider: string;
+        };
+      }) => response.data,
+    }),
+
+    // AI Tools — translator
+    aiTranslateText: builder.mutation<
+      {
+        originalLanguage: string;
+        targetLanguage: string;
+        original: string;
+        translated: string;
+        provider: string;
+      },
+      { text: string; targetLanguage: string }
+    >({
+      query: (body) => ({
+        url: "/ai/translate",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: {
+        data: {
+          originalLanguage: string;
+          targetLanguage: string;
+          original: string;
+          translated: string;
+          provider: string;
+        };
+      }) => response.data,
+    }),
+
+    // AI Tools — literature review from a set of papers
+    aiLiteratureReview: builder.mutation<
+      {
+        topic: string;
+        paperCount: number;
+        papers: Array<{ id: string; title: string }>;
+        review: string;
+        provider: string;
+      },
+      { paperIds: string[]; topic?: string; instructions?: string }
+    >({
+      query: (body) => ({
+        url: "/ai/literature-review",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: {
+        data: {
+          topic: string;
+          paperCount: number;
+          papers: Array<{ id: string; title: string }>;
+          review: string;
+          provider: string;
+        };
+      }) => response.data,
+    }),
+
     // Paper version history
     getPaperVersions: builder.query<PaperVersionsResponse, string>({
       query: (paperId) => `/editor/${paperId}/versions`,
@@ -715,7 +821,6 @@ export const {
   useGetPaperPreviewUrlQuery,
   useUpdatePaperMetadataMutation,
   useDeletePaperMutation,
-  useGetDevWorkspaceQuery,
   useProcessPDFMutation,
   useGetProcessingStatusQuery,
   useGetAllChunksQuery,
@@ -723,6 +828,7 @@ export const {
   // Editor endpoints
   useCreateEditorPaperMutation,
   useUpdateEditorContentMutation,
+  useAutoSaveEditorContentMutation,
   useGetEditorPaperQuery,
   useListEditorPapersQuery,
   usePublishDraftMutation,
@@ -740,4 +846,8 @@ export const {
   useRestorePaperVersionMutation,
   useExtractKeyPointsMutation,
   useGenerateMetadataMutation,
+  useAiRewriteTextMutation,
+  useAiComparePapersMutation,
+  useAiTranslateTextMutation,
+  useAiLiteratureReviewMutation,
 } = paperApi;

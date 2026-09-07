@@ -70,20 +70,20 @@ const adminActions = [
     color: "bg-red-500 hover:bg-red-600",
   },
   {
-    title: "Analytics Dashboard",
-    description: "View detailed platform analytics and reports",
+    title: "Revenue & Subscriptions",
+    description: "Revenue analytics, MRR, and subscription management",
     icon: Activity,
-    href: "/dashboard/admin/analytics",
+    href: "/dashboard/admin/subscriptions",
     color: "bg-purple-500 hover:bg-purple-600",
   },
 ];
 
 export default function AdminOverviewPage() {
-  // Fetch data with polling (30 seconds interval)
+  // Fetch data with polling (10 seconds interval per AGENTS.md)
   const { data: systemStats, isLoading: statsLoading } = useGetSystemStatsQuery(
     undefined,
     {
-      pollingInterval: 30000, // 30 seconds
+      pollingInterval: 10000, // 10 seconds
     }
   );
 
@@ -95,7 +95,7 @@ export default function AdminOverviewPage() {
 
   const { data: systemHealth, isLoading: healthLoading } =
     useGetSystemHealthQuery(undefined, {
-      pollingInterval: 60000, // 1 minute
+      pollingInterval: 10000, // 10 seconds
     });
 
   const { data: paperStats } = useGetPaperStatsQuery();

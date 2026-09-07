@@ -249,6 +249,21 @@ export const sseAuthMiddleware = async (
       throw new ApiError(401, "Invalid token: missing user identifier");
     }
 
+    // Cheap DB gate: soft-deleted users must not keep receiving SSE
+    // broadcasts with a still-valid token.
+    try {
+      const existing = await prisma.user.findFirst({
+        where: { id: userId, isDeleted: false },
+        select: { id: true },
+      });
+      if (!existing) {
+        throw new ApiError(401, AUTH_ERROR_MESSAGES.UNAUTHORIZED);
+      }
+    } catch (dbError) {
+      if (dbError instanceof ApiError) throw dbError;
+      // Never hard-block SSE on transient DB failures — verify-only.
+    }
+
     req.user = {
       userId,
       id: userId,

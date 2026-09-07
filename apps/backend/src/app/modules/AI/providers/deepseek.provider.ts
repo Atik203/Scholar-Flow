@@ -228,7 +228,7 @@ If a field cannot be determined, omit it. Use the original title if no better ti
 
     const data = await callDeepSeekApi(
       this.apiKey,
-      DEFAULT_MODEL,
+      input.model || DEFAULT_MODEL,
       messages,
       this.requestTimeoutMs,
       1200
