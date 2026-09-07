@@ -28,23 +28,20 @@ import {
   useAiComparePapersMutation,
   useAiLiteratureReviewMutation,
   useAiRewriteTextMutation,
-  useAiTranslateTextMutation,
   useListPapersQuery,
 } from "@/redux/api/paperApi";
 import { showErrorToast } from "@/components/providers/ToastProvider";
 import {
   BookOpenCheck,
-  Languages,
   PenLine,
   Scale,
   Loader2,
 } from "lucide-react";
 
-type Tool = "rewrite" | "translate" | "compare" | "review";
+type Tool = "rewrite" | "compare" | "review";
 
 const TOOLS: Array<{ key: Tool; label: string; icon: typeof PenLine }> = [
   { key: "rewrite", label: "Rewrite", icon: PenLine },
-  { key: "translate", label: "Translate", icon: Languages },
   { key: "compare", label: "Compare", icon: Scale },
   { key: "review", label: "Literature Review", icon: BookOpenCheck },
 ];
@@ -58,7 +55,6 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   const [tool, setTool] = useState<Tool>("rewrite");
   const [text, setText] = useState("");
   const [tone, setTone] = useState("");
-  const [targetLanguage, setTargetLanguage] = useState("");
   const [otherPaperId, setOtherPaperId] = useState("");
   const [topic, setTopic] = useState("");
   const [output, setOutput] = useState<string | null>(null);
@@ -68,11 +64,10 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
   });
 
   const [rewrite, { isLoading: isRewriting }] = useAiRewriteTextMutation();
-  const [translate, { isLoading: isTranslating }] = useAiTranslateTextMutation();
   const [compare, { isLoading: isComparing }] = useAiComparePapersMutation();
   const [review, { isLoading: isReviewing }] = useAiLiteratureReviewMutation();
 
-  const isRunning = isRewriting || isTranslating || isComparing || isReviewing;
+  const isRunning = isRewriting || isComparing || isReviewing;
   const papers = (papersData?.items ?? []).filter((p) => p.id !== paperId);
   const otherPaper = papers.find((p) => p.id === otherPaperId);
 
@@ -98,14 +93,6 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
       }).unwrap()
     );
 
-  const handleTranslate = () =>
-    run(() =>
-      translate({
-        text: text || paperTitle,
-        targetLanguage: targetLanguage || "English",
-      }).unwrap()
-    );
-
   const handleCompare = () =>
     run(() => compare({ paper1Id: paperId, paper2Id: otherPaperId }).unwrap());
 
@@ -120,7 +107,7 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
           AI Tools
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Rewrite, translate, compare, or review papers with AI
+          Rewrite, compare, or review papers with AI
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -146,11 +133,9 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
         </div>
 
         <div className="space-y-3">
-          {(tool === "rewrite" || tool === "translate") && (
+          {tool === "rewrite" && (
             <div className="space-y-2">
-              <Label htmlFor="ai-tool-text">
-                Text {tool === "rewrite" ? "to rewrite" : "to translate"}
-              </Label>
+              <Label htmlFor="ai-tool-text">Text to rewrite</Label>
               <Textarea
                 id="ai-tool-text"
                 rows={4}
@@ -158,30 +143,15 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
                 onChange={(e) => setText(e.target.value)}
                 placeholder={`Defaults to the paper title: "${paperTitle}"`}
               />
-            </div>
-          )}
-
-          {tool === "rewrite" && (
-            <div className="space-y-2">
-              <Label htmlFor="ai-tool-tone">Tone (optional)</Label>
-              <Input
-                id="ai-tool-tone"
-                value={tone}
-                onChange={(e) => setTone(e.target.value)}
-                placeholder="e.g. academic, casual, concise"
-              />
-            </div>
-          )}
-
-          {tool === "translate" && (
-            <div className="space-y-2">
-              <Label htmlFor="ai-tool-lang">Target language</Label>
-              <Input
-                id="ai-tool-lang"
-                value={targetLanguage}
-                onChange={(e) => setTargetLanguage(e.target.value)}
-                placeholder="e.g. English, French, Bengali"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="ai-tool-tone">Tone (optional)</Label>
+                <Input
+                  id="ai-tool-tone"
+                  value={tone}
+                  onChange={(e) => setTone(e.target.value)}
+                  placeholder="e.g. academic, casual, concise"
+                />
+              </div>
             </div>
           )}
 
@@ -223,7 +193,6 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
             disabled={isRunning || (tool === "compare" && !otherPaperId)}
             onClick={() => {
               if (tool === "rewrite") handleRewrite();
-              else if (tool === "translate") handleTranslate();
               else if (tool === "compare") handleCompare();
               else handleReview();
             }}
@@ -235,11 +204,9 @@ export function AiToolsCard({ paperId, paperTitle }: AiToolsCardProps) {
               ? "Working..."
               : tool === "rewrite"
                 ? "Rewrite"
-                : tool === "translate"
-                  ? "Translate"
-                  : tool === "compare"
-                    ? "Compare papers"
-                    : "Generate review"}
+                : tool === "compare"
+                  ? "Compare papers"
+                  : "Generate review"}
           </Button>
         </div>
 
