@@ -189,9 +189,12 @@ PDF uploads, no long-lived sockets/cron). Use a Render Web Service instead:
 ```bash
 # Render dashboard → New → Web Service → Connect GitHub repo → Scholar-Flow
 #   Root Directory: apps/backend
-#   Build Command:  cd ../.. && yarn install && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build
-#                   (yarn install MUST run at repo root — Render's default install
-#                    runs inside apps/backend and fails with "Couldn't find the
+#   Build Command:  corepack enable && cd ../.. && yarn install && yarn workspace @scholar-flow/backend db:generate && yarn workspace @scholar-flow/backend build
+#                   (corepack enable FIRST — the ENABLE_EXPERIMENTAL_COREPACK env var
+#                    is not reliable on Render; without it Yarn 1.22.22 runs and the
+#                    yarn@4.9.2 packageManager pin aborts the build.
+#                    yarn install MUST run at repo root — Render's default install
+#                   runs inside apps/backend and fails with "Couldn't find the
 #                    node_modules state file")
 #   Start Command:  node dist/server.js
 #   Instance: Free
