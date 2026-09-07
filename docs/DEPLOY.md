@@ -53,12 +53,19 @@ For when you need the backend always-on with zero cold starts.
 | Backend (REST + WS) | Oracle Cloud ARM VM | Your IP or domain | $0 forever |
 | Database | Prisma Cloud | — | $0 (included) |
 
-**Oracle VM specs (Always Free):**
-- 4 ARM cores (Ampere)
-- 24 GB RAM
+**Oracle VM specs (Always Free — current A1 limits as of 2026):**
+- 2 ARM OCPUs (Ampere A1, `VM.Standard.A1.Flex`)
+- 12 GB RAM
 - 200 GB block storage
 - 10 TB outbound data transfer/month
 - Ubuntu 22.04 or 24.04
+
+> **Note:** Oracle reduced the Always Free A1 allotment from 4 OCPU / 24 GB to
+> **2 OCPU / 12 GB**. If you have an existing 4 OCPU instance, resize it
+> (Compute → Instance → Edit → Change Shape) to stay within the free limits —
+> the backend + socket-server demo needs only ~0.5–1 GB RAM total, so
+> 2 OCPU / 12 GB is far more than enough. The VM is stateless (DB on Prisma
+> Cloud, files on S3), so resizing is safe.
 
 **Limitations:**
 - Requires credit card for signup (never charged, $1 verification hold refunded)
@@ -238,7 +245,7 @@ curl https://scholar-flow-socket.onrender.com/health
 # 3. Configure:
 #    Name: scholar-flow-backend
 #    Image: Ubuntu 24.04 (LTS)
-#    Shape: VM.Standard.A1.Flex (4 OCPU, 24 GB RAM)
+#    Shape: VM.Standard.A1.Flex (2 OCPU, 12 GB RAM — current Always Free max)
 #    Boot Volume: 100 GB
 #    Add SSH key
 # 4. Create
