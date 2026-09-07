@@ -118,6 +118,7 @@ export const notificationApi = apiSlice
         }),
         invalidatesTags: (result, error, id) => [
           { type: "Notification", id },
+          { type: "Notification", id: "LIST" },
           { type: "Notification", id: "UNREAD_COUNT" },
         ],
       }),
@@ -137,6 +138,7 @@ export const notificationApi = apiSlice
         }),
         invalidatesTags: (result, error, id) => [
           { type: "Notification", id },
+          { type: "Notification", id: "LIST" },
         ],
       }),
 
