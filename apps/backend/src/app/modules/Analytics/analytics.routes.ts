@@ -24,6 +24,12 @@ router.patch(
   rateLimiter,
   analyticsController.stopReadingSession
 );
+router.post(
+  "/personal/view",
+  authMiddleware,
+  rateLimiter,
+  analyticsController.recordPaperView
+);
 
 // Workspace analytics: Team Lead+
 router.get(
