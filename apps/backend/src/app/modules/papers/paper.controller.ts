@@ -213,7 +213,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -234,7 +234,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     await paperService.softDelete(parsed.data.id);
     sendSuccessResponse(res, null, "Paper deleted successfully");
@@ -252,7 +252,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -288,7 +288,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -503,7 +503,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(params.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(params.data.id, authReq.user.id, authReq.user.email);
 
     const updated = await paperService.updateMetadata(
       params.data.id,
@@ -540,7 +540,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -650,7 +650,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -696,7 +696,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -758,7 +758,7 @@ export const paperController = {
       throw createPaperError.authenticationRequired();
     }
 
-    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id);
+    await paperService.assertPaperAccess(parsed.data.id, authReq.user.id, authReq.user.email);
 
     const paper = await paperService.getById(parsed.data.id);
     if (!paper) {
@@ -890,8 +890,22 @@ export const paperController = {
         );
       }
 
-      // Generate paper link (assuming frontend URL structure)
-      const paperLink = `${process.env.FRONTEND_URL || "http://localhost:3000"}/papers/${paperId}`;
+      // Persist the share: one row per paper+email (upsert refreshes the
+      // permission and re-activates soft-deleted rows — an idempotent
+      // re-share). This row is what actually grants the recipient access.
+      await prisma.$executeRaw`
+        INSERT INTO "PaperShare" (id, "paperId", email, permission, "sharedById", "createdAt", "updatedAt", "isDeleted")
+        VALUES (gen_random_uuid(), ${paperId}, ${recipientEmail}, ${permission}, ${authReq.user.id}, NOW(), NOW(), false)
+        ON CONFLICT ("paperId", "email")
+        DO UPDATE SET permission = EXCLUDED.permission, "updatedAt" = NOW(), "isDeleted" = false
+      `;
+
+      // Generate paper link (permission-aware frontend route).
+      const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      const paperLink =
+        permission === "edit"
+          ? `${baseUrl}/dashboard/research/editor?paper=${paperId}`
+          : `${baseUrl}/dashboard/papers/${paperId}`;
 
       // Import and use email service
       const { emailService } = await import("../../shared/emailService");
@@ -1429,7 +1443,8 @@ export const editorPaperController = {
     const result = await editorPaperService.updateEditorContent(
       paramsParsed.data.id,
       bodyParsed.data,
-      authReq.user.id
+      authReq.user.id,
+      authReq.user.email
     );
 
     if (!result || (Array.isArray(result) && result.length === 0)) {
@@ -1455,7 +1470,8 @@ export const editorPaperController = {
     await editorPaperService.autoSaveContent(
       paramsParsed.data.id,
       bodyParsed.data.content,
-      authReq.user.id
+      authReq.user.id,
+      authReq.user.email
     );
 
     return sendSuccessResponse(res, {}, "Content auto-saved");
@@ -1681,7 +1697,7 @@ export const editorPaperController = {
       throw createPaperError.authenticationRequired();
     }
     const { id } = req.params;
-    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id, authReq.user.email);
     const versions = await paperVersionService.listVersions(id);
     sendSuccessResponse(res, { versions }, "Versions retrieved");
   }),
@@ -1693,7 +1709,7 @@ export const editorPaperController = {
       throw createPaperError.authenticationRequired();
     }
     const { id, versionId } = req.params;
-    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id, authReq.user.email);
     const version = await paperVersionService.getVersion(versionId);
     if (!version || version.paperId !== id) throw new ApiError(404, "Version not found");
     sendSuccessResponse(res, version, "Version retrieved");
@@ -1706,7 +1722,7 @@ export const editorPaperController = {
       throw createPaperError.authenticationRequired();
     }
     const { id, versionId } = req.params;
-    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id);
+    await editorPaperService.assertEditorPaperAccess(id, authReq.user.id, authReq.user.email);
     const version = await paperVersionService.getVersion(versionId);
     if (!version || version.paperId !== id) {
       throw new ApiError(404, "Version not found");
@@ -1714,7 +1730,8 @@ export const editorPaperController = {
     const result = await editorPaperService.updateEditorContent(
       id,
       { content: version.contentHtml, title: version.title ?? undefined },
-      authReq.user.id
+      authReq.user.id,
+      authReq.user.email
     );
     sendSuccessResponse(res, result, "Version restored");
   }),
