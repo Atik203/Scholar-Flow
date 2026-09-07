@@ -267,37 +267,51 @@ async function downloadPdf(url: string): Promise<Buffer> {
   return Buffer.from(res.data);
 }
 
-function extractMetaTag(html: string, name: string): string | null {
-  const patterns = [
-    new RegExp(`<meta\\s+name=["']${name}["']\\s+content=["']([^"']+)["']`, "i"),
-    new RegExp(`<meta\\s+name=["']${name}["'][^>]*content=["']([^"']+)["']`, "i"),
-    new RegExp(`<meta\\s+property=["']og:${name}["']\\s+content=["']([^"']+)["']`, "i"),
-    new RegExp(`<meta\\s+name=["']citation_${name}["']\\s+content=["']([^"']+)["']`, "i"),
-  ];
-  for (const pattern of patterns) {
-    const m = html.match(pattern);
-    if (m) return m[1];
+/**
+ * Attribute-order-agnostic HTML <meta>/<link> parser. Collects every meta by
+ * its name/property/itemprop key (multi-values joined with \0) plus
+ * rel="citation_pdf_url" links. Enables og:title, DC.date, article:author,
+ * prism.doi etc. without brittle positional regexes.
+ */
+function parseMetaTags(html: string): Map<string, string> {
+  const map = new Map<string, string>();
+
+  const metaRe = /<meta\b[^>]*>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = metaRe.exec(html)) !== null) {
+    const tag = m[0];
+    const attr = (name: string): string => {
+      const a = tag.match(
+        new RegExp(`${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"),
+      );
+      return a ? decodeEntities(a[1] ?? a[2] ?? a[3] ?? "") : "";
+    };
+    const key = (attr("name") || attr("property") || attr("itemprop") || "").toLowerCase();
+    const content = attr("content");
+    if (!key || !content) continue;
+    const previous = map.get(key);
+    map.set(key, previous ? `${previous}\u0000${content}` : content);
   }
-  return null;
+
+  const linkRe = /<link\b[^>]*>/gi;
+  let lm: RegExpExecArray | null;
+  while ((lm = linkRe.exec(html)) !== null) {
+    const rel = lm[0].match(/rel\s*=\s*["']([^"']+)["']/i)?.[1]?.toLowerCase() || "";
+    const href = lm[0].match(/href\s*=\s*["']([^"']+)["']/i)?.[1] || "";
+    if (rel.includes("citation_pdf_url") && href && !map.has("citation_pdf_url")) {
+      map.set("citation_pdf_url", decodeEntities(href));
+    }
+  }
+
+  return map;
 }
 
-function extractAllMetaTags(html: string, name: string): string[] {
-  const results: string[] = [];
-  const pattern = new RegExp(
-    `<meta\\s+name=["']${name}["'][^>]*content=["']([^"']+)["']`,
-    "gi",
-  );
-  let m;
-  while ((m = pattern.exec(html)) !== null) results.push(m[1]);
-
-  const citationPattern = new RegExp(
-    `<meta\\s+name=["']citation_${name}["'][^>]*content=["']([^"']+)["']`,
-    "gi",
-  );
-  let cm;
-  while ((cm = citationPattern.exec(html)) !== null) results.push(cm[1]);
-
-  return results;
+function findMeta(map: Map<string, string>, candidates: string[]): string {
+  for (const key of candidates) {
+    const value = map.get(key);
+    if (value) return value;
+  }
+  return "";
 }
 
 function sanitizeFilename(name: string): string {
@@ -337,17 +351,25 @@ async function findOAPdfByDoi(doi: string): Promise<Buffer | null> {
 }
 
 function detectSourceFromUrl(url: string): string {
-  const hostname = new URL(url).hostname.replace("www.", "");
+  let hostname = "";
+  let pathname = "";
+  try {
+    const parsed = new URL(url);
+    hostname = parsed.hostname.replace("www.", "");
+    pathname = parsed.pathname;
+  } catch {
+    return "unknown";
+  }
   if (hostname.includes("arxiv.org")) return "arxiv";
   if (hostname.includes("ieeexplore.ieee.org")) return "ieee";
   if (hostname.includes("researchgate.net")) return "researchgate";
   if (hostname.includes("scholar.google.com")) return "google_scholar";
   if (hostname.includes("semanticscholar.org")) return "semantic_scholar";
-  if (url.endsWith(".pdf")) return "pdf";
+  if (pathname.toLowerCase().endsWith(".pdf")) return "pdf";
   return "unknown";
 }
 
-async function extractMetadataFromHtml(url: string): Promise<{
+async function extractMetadataFromHtml(url: string, html?: string): Promise<{
   title: string;
   authors: string[];
   year: number;
@@ -356,29 +378,50 @@ async function extractMetadataFromHtml(url: string): Promise<{
   pdfUrl: string | null;
 }> {
   try {
-    const res = await axios.get(url, { timeout: 15000, responseType: "text" });
-    const html = res.data as string;
+    const body =
+      html ??
+      ((await axios.get(url, { timeout: 15000, responseType: "text" })).data as string);
+    const meta = parseMetaTags(body);
 
+    const titleTag = stripHtmlTags(
+      decodeEntities(body.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? ""),
+    );
     const title =
-      extractMetaTag(html, "title") ||
-      extractMetaTag(html, "citation_title") ||
-      extractMetaTag(html, "description") ||
+      findMeta(meta, ["citation_title", "og:title", "twitter:title", "dc.title", "dcterms.title"]) ||
+      titleTag ||
       "Untitled";
 
-    const authorTags = extractAllMetaTags(html, "author");
-    const authors = [...new Set(authorTags.map((a) => a.trim()))];
+    const authors = [
+      ...new Set(
+        findMeta(meta, ["citation_author", "author", "article:author", "dc.creator"])
+          .split("\u0000")
+          .flatMap((a) => a.split(";"))
+          .map((a) => decodeEntities(a).trim())
+          .filter(Boolean),
+      ),
+    ];
 
-    const yearStr = extractMetaTag(html, "date") || extractMetaTag(html, "citation_date") || "";
-    const year = parseInt(yearStr.match(/\d{4}/)?.[0] || "", 10) || new Date().getFullYear();
+    const dateStr = findMeta(meta, [
+      "citation_publication_date",
+      "citation_date",
+      "article:published_time",
+      "dc.date",
+      "date",
+    ]);
+    const year = parseInt(dateStr.match(/\d{4}/)?.[0] || "", 10) || new Date().getFullYear();
 
-    const abstract =
-      extractMetaTag(html, "description") ||
-      extractMetaTag(html, "citation_abstract") ||
-      "";
-
-    const doi = extractMetaTag(html, "doi") || extractMetaTag(html, "citation_doi") || null;
-
-    const pdfUrl = extractMetaTag(html, "citation_pdf_url") || null;
+    const abstract = stripHtmlTags(
+      findMeta(meta, ["citation_abstract", "og:description", "twitter:description", "description"]),
+    );
+    const doi = findMeta(meta, ["citation_doi", "doi", "prism.doi"]) || null;
+    let pdfUrl = findMeta(meta, ["citation_pdf_url"]) || null;
+    if (pdfUrl && !pdfUrl.startsWith("http")) {
+      try {
+        pdfUrl = new URL(pdfUrl, url).toString();
+      } catch {
+        pdfUrl = null;
+      }
+    }
 
     return { title, authors, year, abstract, doi, pdfUrl };
   } catch {
@@ -569,77 +612,155 @@ export class ImportService {
     return { paper: paper[0], source: "arxiv", externalId: cleanId, hasPdf, alreadyImported: false };
   }
 
-  static async importByURL(url: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+  static async importByURL(inputUrl: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+    const url = inputUrl.trim();
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(url);
+    } catch {
+      throw new ApiError(400, `Invalid URL: "${url}"`);
+    }
     const sourceType = detectSourceFromUrl(url);
 
     if (sourceType === "arxiv") {
-      const arxivId = url.match(/\/(abs|pdf)\/(\d+\.\d+)/)?.[2] || url.match(/arxiv\.org\/pdf\/(\d+\.\d+)/)?.[1] || "";
+      const arxivId = normalizeArxivId(url);
       if (arxivId) return this.importByArxiv(arxivId, workspaceId, uploaderId);
     }
-
-    if (sourceType === "ieee") {
+    if (
+      sourceType === "ieee" ||
+      sourceType === "semantic_scholar" ||
+      sourceType === "researchgate" ||
+      sourceType === "google_scholar"
+    ) {
       return this.importBySmartURL(url, workspaceId, uploaderId);
     }
 
-    if (sourceType === "semantic_scholar") {
-      return this.importBySmartURL(url, workspaceId, uploaderId);
+    let buffer: Buffer;
+    try {
+      buffer = await downloadPdf(url);
+    } catch {
+      throw new ApiError(
+        400,
+        `Could not download content from ${parsedUrl.hostname}${parsedUrl.pathname}`,
+      );
     }
 
-    let title = "Untitled";
+    let title = "";
     let authors: string[] = [];
-    let year = new Date().getFullYear();
+    let year: number | null = null;
     let abstract = "";
     let doi: string | null = null;
+    let pdfBuffer: Buffer | null = null;
 
-    if (sourceType !== "pdf") {
-      const meta = await extractMetadataFromHtml(url);
-      title = meta.title;
+    if (looksLikePdf(buffer)) {
+      pdfBuffer = buffer;
+    } else {
+      // HTML landing page (or a bot-wall): pull metadata, try citation_pdf_url.
+      const meta = await extractMetadataFromHtml(url, buffer.toString("utf8"));
+      title = meta.title === "Untitled" ? "" : meta.title;
       authors = meta.authors;
       year = meta.year;
       abstract = meta.abstract;
       doi = meta.doi;
+      if (meta.pdfUrl) {
+        try {
+          const candidate = await downloadPdf(meta.pdfUrl);
+          if (looksLikePdf(candidate)) pdfBuffer = candidate;
+        } catch {
+          // metadata-only fallback
+        }
+      }
     }
 
-    if (doi && !title) {
+    if (!pdfBuffer && !title && sourceType === "pdf") {
+      throw new ApiError(400, "The linked content is not a valid PDF");
+    }
+    if (!pdfBuffer && !title) {
+      throw new ApiError(
+        400,
+        `No paper metadata or PDF found at ${parsedUrl.hostname}${parsedUrl.pathname}`,
+      );
+    }
+
+    if (!title) {
+      title =
+        decodeURIComponent(parsedUrl.pathname.split("/").pop() || "")
+          .replace(/\.pdf$/i, "")
+          .replace(/[_-]+/g, " ")
+          .trim() || "Untitled";
+    }
+
+    if (doi && (!authors.length || !abstract || !year)) {
       try {
         const crossRef = await axios.get(
           `https://api.crossref.org/works/${encodeURIComponent(doi)}`,
           { headers: { "User-Agent": "ScholarFlow/1.0" }, timeout: 8000 },
         );
         const msg = crossRef.data.message;
-        if (!title) title = msg.title?.[0] || title;
-        if (!authors.length) authors = (msg.author || []).map((a: any) => `${a.given || ""} ${a.family || ""}`.trim());
-        if (!year) year = msg.created?.["date-parts"]?.[0]?.[0] || year;
-        if (!abstract) abstract = msg.abstract || "";
+        if (!authors.length)
+          authors = (msg.author || [])
+            .map((a: any) => `${a.given || ""} ${a.family || ""}`.trim())
+            .filter(Boolean);
+        if (!year) year = msg.created?.["date-parts"]?.[0]?.[0] || null;
+        if (!abstract && msg.abstract) abstract = stripHtmlTags(decodeEntities(msg.abstract));
       } catch {
-        // CrossRef enrichment is optional, continue with what we have
+        // CrossRef enrichment is optional
       }
     }
 
-    const pdfBuffer = await downloadPdf(url);
-    const metadata = { authors, year, source: "url" };
-    const paperTitle = title || url.split("/").pop()?.replace(/\.pdf$/i, "") || "Untitled";
+    const existing = await findExistingPaper(workspaceId, { doi, url });
+    if (existing) {
+      console.log(`[Import] URL ${url}: already imported — returning existing paper`);
+      return {
+        paper: existing,
+        source: "url",
+        externalId: doi || undefined,
+        hasPdf: await paperHasPdf(existing.id),
+        alreadyImported: true,
+      };
+    }
+
+    const metadata = {
+      authors,
+      year: year || new Date().getFullYear(),
+      source: "url",
+      doi,
+      sourceUrl: url,
+      sourceType,
+    };
 
     const paper = await prisma.$queryRaw<any[]>`
       INSERT INTO "Paper" (id, "workspaceId", "uploaderId", title, abstract, metadata, source, doi, tags, language, "citationCount", "processingStatus", "createdAt", "updatedAt", "isDeleted")
-      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${paperTitle}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'url', ${doi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
+      VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${title}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'url', ${doi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
       RETURNING id, title, source, doi
     `;
     const paperId = paper[0].id;
 
-    const filename = sanitizeFilename(`${paperTitle.substring(0, 50)}.pdf`);
-    await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
-    await tryQueueExtraction(paperId);
+    let hasPdf = false;
+    if (pdfBuffer) {
+      try {
+        const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
+        await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
+        await tryQueueExtraction(paperId);
+        hasPdf = true;
+        console.log(`[Import] URL ${url}: PDF saved, extraction queued`);
+      } catch (err) {
+        console.warn(`[Import] URL ${url}: PDF save failed — metadata only`, (err as Error).message);
+      }
+    } else {
+      console.log(`[Import] URL ${url}: metadata-only import (no usable PDF at URL)`);
+    }
 
-    return { paper: paper[0], source: "url", externalId: doi || undefined, hasPdf: true };
+    return { paper: paper[0], source: "url", externalId: doi || undefined, hasPdf, alreadyImported: false };
   }
 
-  static async importBySmartURL(url: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+  static async importBySmartURL(inputUrl: string, workspaceId: string, uploaderId: string): Promise<ImportResult> {
+    const url = inputUrl.trim();
     const sourceType = detectSourceFromUrl(url);
     console.log(`[Import] Smart URL detected source: ${sourceType} — ${url}`);
 
     if (sourceType === "arxiv") {
-      const arxivId = url.match(/\/(?:abs|pdf)\/(\d+\.\d+)/)?.[1] || "";
+      const arxivId = normalizeArxivId(url);
       if (arxivId) return this.importByArxiv(arxivId, workspaceId, uploaderId);
     }
 
@@ -649,79 +770,123 @@ export class ImportService {
 
       if (meta.pdfUrl) {
         try {
-          pdfBuffer = await downloadPdf(meta.pdfUrl);
+          const candidate = await downloadPdf(meta.pdfUrl);
+          if (looksLikePdf(candidate)) pdfBuffer = candidate;
         } catch {
           console.warn(`[Import] IEEE PDF download failed from ${meta.pdfUrl}`);
         }
       }
 
       let doi = meta.doi;
-      let crossRefTitle = meta.title;
-      let crossRefAuthors = meta.authors;
-      let crossRefYear = meta.year;
-      let crossRefAbstract = meta.abstract;
+      let title = meta.title === "Untitled" ? "" : meta.title;
+      let authors = meta.authors;
+      let year = meta.year;
+      let abstract = meta.abstract;
 
-      if (doi) {
+      // CrossRef enrichment — only fill missing fields (avoids overwriting
+      // publisher-provided metadata with stale registry records).
+      if (doi && (!title || !authors.length || !abstract || !year)) {
         try {
           const crossRef = await axios.get(
             `https://api.crossref.org/works/${encodeURIComponent(doi)}`,
             { headers: { "User-Agent": "ScholarFlow/1.0" }, timeout: 8000 },
           );
           const msg = crossRef.data.message;
-          if (!crossRefTitle) crossRefTitle = msg.title?.[0] || "Untitled";
-          if (!crossRefAuthors.length) crossRefAuthors = (msg.author || []).map((a: any) => `${a.given || ""} ${a.family || ""}`.trim());
-          if (!crossRefYear) crossRefYear = msg.created?.["date-parts"]?.[0]?.[0] || new Date().getFullYear();
-          crossRefAbstract = msg.abstract || crossRefAbstract;
+          if (!title) title = msg.title?.[0] || "";
+          if (!authors.length)
+            authors = (msg.author || [])
+              .map((a: any) => `${a.given || ""} ${a.family || ""}`.trim())
+              .filter(Boolean);
+          if (!year) year = msg.created?.["date-parts"]?.[0]?.[0] || new Date().getFullYear();
+          if (!abstract && msg.abstract) abstract = stripHtmlTags(decodeEntities(msg.abstract));
         } catch {
           // CrossRef enrichment is optional
         }
       }
 
-      const metadata = { authors: crossRefAuthors, year: crossRefYear, source: "ieee", doi };
+      const existing = await findExistingPaper(workspaceId, { doi, url });
+      if (existing) {
+        console.log(`[Import] IEEE ${url}: already imported — returning existing paper`);
+        return {
+          paper: existing,
+          source: "ieee",
+          externalId: doi || undefined,
+          hasPdf: await paperHasPdf(existing.id),
+          alreadyImported: true,
+        };
+      }
+
+      const metadata = { authors, year: year || new Date().getFullYear(), source: "ieee", doi, sourceUrl: url };
       const paper = await prisma.$queryRaw<any[]>`
         INSERT INTO "Paper" (id, "workspaceId", "uploaderId", title, abstract, metadata, source, doi, tags, language, "citationCount", "processingStatus", "createdAt", "updatedAt", "isDeleted")
-        VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${crossRefTitle}, ${crossRefAbstract || null}, ${JSON.stringify(metadata)}::jsonb, 'ieee', ${doi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
+        VALUES (gen_random_uuid(), ${workspaceId}, ${uploaderId}, ${title}, ${abstract || null}, ${JSON.stringify(metadata)}::jsonb, 'ieee', ${doi}, ARRAY[]::text[], null, 0, 'UPLOADED', NOW(), NOW(), false)
         RETURNING id, title, source, doi
       `;
       const paperId = paper[0].id;
 
-      if (pdfBuffer) {
-        const filename = sanitizeFilename(`${crossRefTitle.substring(0, 50)}.pdf`);
-        await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
-        await tryQueueExtraction(paperId);
-        return { paper: paper[0], source: "ieee", hasPdf: true };
-      }
-
-      if (doi) {
-        const oaPdf = await findOAPdfByDoi(doi);
-        if (oaPdf) {
-          const filename = sanitizeFilename(`${crossRefTitle.substring(0, 50)}.pdf`);
-          await savePdfToS3(oaPdf, workspaceId, paperId, filename);
-          await tryQueueExtraction(paperId);
-          return { paper: paper[0], source: "ieee", hasPdf: true };
+      let hasPdf = false;
+      try {
+        if (!pdfBuffer && doi) {
+          const oaPdf = await findOAPdfByDoi(doi);
+          if (oaPdf && looksLikePdf(oaPdf)) pdfBuffer = oaPdf;
         }
+        if (pdfBuffer) {
+          const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
+          await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
+          await tryQueueExtraction(paperId);
+          hasPdf = true;
+        } else {
+          console.log(`[Import] IEEE ${doi || url}: no PDF available — metadata only`);
+        }
+      } catch (err) {
+        console.warn(`[Import] IEEE ${doi || url}: PDF save failed — metadata only`, (err as Error).message);
       }
 
-      console.log(`[Import] IEEE ${doi || url}: no PDF available — metadata only`);
-      return { paper: paper[0], source: "ieee", externalId: doi || undefined, hasPdf: false };
+      return {
+        paper: paper[0],
+        source: "ieee",
+        externalId: doi || undefined,
+        hasPdf,
+        alreadyImported: false,
+      };
     }
 
     if (sourceType === "semantic_scholar") {
       try {
-        const paperIdMatch = url.match(/paper\/([a-f0-9]+)/)?.[1];
+        const paperIdMatch = url.match(/paper\/([A-Za-z0-9]+)/)?.[1];
         if (paperIdMatch) {
           const ssRes = await axios.get(
-            `https://api.semanticscholar.org/v1/paper/${paperIdMatch}`,
+            `https://api.semanticscholar.org/graph/v1/paper/${paperIdMatch}?fields=title,authors,abstract,year,externalIds,openAccessPdf,citationCount`,
             { timeout: 10000 },
           );
           const data = ssRes.data;
-          const title = data.title || "Untitled";
-          const authors = (data.authors || []).map((a: any) => a.name).filter(Boolean);
+          const title = data.title || "";
+          const authors = (data.authors || []).map((a: any) => a?.name).filter(Boolean);
           const year = data.year || new Date().getFullYear();
           const abstract = data.abstract || "";
           const doi = data.externalIds?.DOI || null;
-          const pdfUrl = data.pdfUrl || data.openAccessPdf?.url || null;
-          const metadata = { authors, year, source: "semantic_scholar", doi };
+          const pdfUrl = data.openAccessPdf?.url || null;
+
+          const existing = await findExistingPaper(workspaceId, { doi, sourceId: paperIdMatch, url });
+          if (existing) {
+            console.log(`[Import] Semantic Scholar ${paperIdMatch}: already imported — returning existing paper`);
+            return {
+              paper: existing,
+              source: "semantic_scholar",
+              externalId: doi || paperIdMatch,
+              hasPdf: await paperHasPdf(existing.id),
+              alreadyImported: true,
+            };
+          }
+
+          const metadata = {
+            authors,
+            year,
+            source: "semantic_scholar",
+            doi,
+            sourceId: paperIdMatch,
+            sourceUrl: url,
+          };
 
           const paper = await prisma.$queryRaw<any[]>`
             INSERT INTO "Paper" (id, "workspaceId", "uploaderId", title, abstract, metadata, source, doi, tags, language, "citationCount", "processingStatus", "createdAt", "updatedAt", "isDeleted")
@@ -730,19 +895,28 @@ export class ImportService {
           `;
           const paperId = paper[0].id;
 
+          let hasPdf = false;
           if (pdfUrl) {
             try {
               const pdfBuffer = await downloadPdf(pdfUrl);
-              const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
-              await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
-              await tryQueueExtraction(paperId);
-              return { paper: paper[0], source: "semantic_scholar", hasPdf: true };
+              if (looksLikePdf(pdfBuffer)) {
+                const filename = sanitizeFilename(`${title.substring(0, 50)}.pdf`);
+                await savePdfToS3(pdfBuffer, workspaceId, paperId, filename);
+                await tryQueueExtraction(paperId);
+                hasPdf = true;
+              }
             } catch {
               console.warn(`[Import] Semantic Scholar PDF download failed for ${title}`);
             }
           }
 
-          return { paper: paper[0], source: "semantic_scholar", externalId: doi || paperIdMatch, hasPdf: false };
+          return {
+            paper: paper[0],
+            source: "semantic_scholar",
+            externalId: doi || paperIdMatch,
+            hasPdf,
+            alreadyImported: false,
+          };
         }
       } catch {
         console.warn(`[Import] Semantic Scholar API failed for ${url}`);
