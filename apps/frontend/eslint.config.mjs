@@ -1,5 +1,9 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
+import { createRequire } from 'module';
+
+var require = createRequire(import.meta.url);
+var module = { exports: {} };
 
 // The jsx-a11y plugin is registered in nextVitals' first config object
 // (scoped to **/*.{js,jsx,mjs,ts,tsx,mts,cts}). In flat config, plugins
