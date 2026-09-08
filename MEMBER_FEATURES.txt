@@ -1,0 +1,51 @@
+SCHOLAR-FLOW — MEMBER FEATURE CONTRIBUTIONS
+===========================================
+
+1. MD. ATIKUR RAHMAN (ATIK)
+---------------------------
+
+PAPER MODULES
+- Paper upload (PDF, DOI, arXiv ID, URL/Smart URL, BibTeX/RIS file import)
+- Paper details (metadata, tags, AI-generated metadata, versions)
+- AI Summary
+- AI Tools (rewrite, compare, literature review)
+- Key Points
+- Paper Search
+- Share (view/edit permission via email + share link)
+
+WORKSPACE MODULES
+- Paper add
+- Collection add
+- Share using view/edit permission
+- Create workspace
+- Shared with members and get notification
+
+COLLECTION MODULES (KEY FEATURES)
+- Create / edit / delete collections
+- Add papers to collections
+- Share collections with view/edit permission
+- Browse shared collections
+- Suggested collections
+- Reading status tracking (to-read / reading / completed / archived)
+
+ALSO
+- AI Assistant (floating chat assistant with context)
+- Authentication for all roles — email/password, Google/GitHub OAuth,
+  magic link, role-based access (researcher / pro / team lead / admin)
+- Discover (trending papers, personalized recommendations, explore live
+  research feeds from arXiv/OpenAlex, save to library)
+
+2. MD. SALMAN RAHMAN NAYEEM (SALMAN)
+------------------------------------
+
+- Workspace module (team members, invitations, roles, workspace activity)
+- Dashboard (frontend design fixes + testing)
+- Global Search
+- Profile
+- Settings
+
+3. SOUROV
+---------
+
+- Mainly UI testing
+- Works with Salman on AI Insight frontend design
