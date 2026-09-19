@@ -16,7 +16,9 @@ import {
   Save,
   Send,
   Share2,
+  Users,
 } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // TipTap Extensions
@@ -611,6 +613,20 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           >
             <FileText className="h-4 w-4 mr-2" />
             MD
+          </Button>
+
+          <Button variant="outline" size="sm" asChild>
+            <Link
+              href={`/dashboard/papers/${paperId}/collaborate`}
+              onClick={() => {
+                // Persist pending edits so the collaboration session seeds
+                // from the latest content.
+                if (dirtyRef.current) void handleSave();
+              }}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Collaborate
+            </Link>
           </Button>
 
           <Button
