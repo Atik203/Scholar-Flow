@@ -67,6 +67,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 // Lib
 import TurndownService from "turndown";
+import {
+  EDITOR_SETTINGS_EVENT,
+  readEditorSettings,
+  type EditorSettings,
+} from "@/lib/editorSettings";
 
 // Redux API
 import {
@@ -112,6 +117,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const [isCitationDialogOpen, setIsCitationDialogOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
+  const [editorSettings, setEditorSettings] = useState<EditorSettings>(() =>
+    readEditorSettings()
+  );
 
   // Redux hooks
   const {
@@ -204,7 +212,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     ],
     content: "",
     onUpdate: () => {
-      // Dirty tracking lives in refs so the 2s-debounced callback never
+      // Dirty tracking lives in refs so the debounced callback never
       // reads a stale `hasUnsavedChanges` closure (the old code could
       // skip the first autosave entirely).
       dirtyRef.current = true;
@@ -212,7 +220,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         void handleAutoSave();
-      }, 2000);
+      }, autosaveMsRef.current);
     },
   });
 
@@ -222,6 +230,21 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   const savingRef = useRef(false);
   const mountedRef = useRef(true);
   const editorRef = useRef(editor);
+  const autosaveMsRef = useRef(editorSettings.autosaveIntervalMs);
+
+  // Apply editor preferences (autosave interval, font size, spellcheck)
+  useEffect(() => {
+    autosaveMsRef.current = editorSettings.autosaveIntervalMs;
+  }, [editorSettings]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<EditorSettings>).detail;
+      if (detail) setEditorSettings(detail);
+    };
+    window.addEventListener(EDITOR_SETTINGS_EVENT, handler);
+    return () => window.removeEventListener(EDITOR_SETTINGS_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -703,8 +726,13 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
               <Spacer />
             </Toolbar>
 
-            {/* Editor Content */}
-            <div className="p-6">
+            {/* Editor Content — preferences applied on the wrapper so the
+                contenteditable inherits font size and spellcheck state */}
+            <div
+              className="p-6"
+              style={{ fontSize: `${editorSettings.fontSize}px` }}
+              spellCheck={editorSettings.spellCheck}
+            >
               <EditorContent
                 editor={editor}
                 role="presentation"
