@@ -6,69 +6,59 @@ Latest Update — Release 1.3.5
 ---------------------------
 
 RESEARCH MENUS (EXCEPT ANNOTATIONS)
-- Research Hub — single hub for every research tool with role-based access
-  (Researcher / Pro / Team Lead / Admin)
-- PDF Text Extraction — PDF preview, OCR/text extraction with live processing
-  status, extracted-text viewer and metadata processing
-- Text Editor — rich-text editor (TipTap): 7 starter templates, auto-save with
-  configurable delay, font size + spellcheck settings, version history,
-  PDF/DOCX export, S3 image upload, real-time collaboration (Collaborate +
-  team-member share picker)
-- Citations — 9 academic formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver,
-  ACS, BibTeX, EndNote), copy/download, export history with download + delete,
-  editor inserts persisted as real Citation records
+- Research Hub — all research tools in one hub with role-based access
+- PDF Text Extraction — OCR/text extraction, live processing status, text viewer
+- Text Editor — TipTap editor: 7 templates, auto-save, PDF/DOCX export,
+  S3 image upload, real-time collaboration
+- Citations — 9 formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver, ACS,
+  BibTeX, EndNote), export history, editor inserts saved as citations
 - Citation Graph — visual map of real citation links between papers (Pro)
-- Research Map — topic cloud built from library tags with tag filtering (Pro)
+- Research Map — topic cloud built from library tags, with filtering (Pro)
 
 TEAMS MENUS
-- Team Members — real status + last active (derived from the 30-day activity
-  window), role changes and safe member removal
-- Invitations — workspace-targeted invites with Viewer / Editor / Manager
-  permissions, resend/cancel, pagination and accept/decline flow
-- Team Activity — audit trail with member/date filters, cursor pagination,
-  accurate stats and live polling
+- Members — real status + last active, role changes, safe removal
+- Invitations — workspace invites (Viewer/Editor/Manager), resend/cancel,
+  accept/decline
+- Activity — audit trail with member/date filters + cursor pagination
 - Team Settings — lead-only team/workspace configuration
-- Derived Team Access — Team menu opens for invited collaborators and workspace
-  members without promoting their global role; menus and actions gated by the
-  same access rule
-- Real-time team notifications — invite, decline, role-change and removal events
-  pushed instantly (SSE) with user notification preferences respected
+- Derived Team Access — Team menu for invited collaborators/workspace members
+  without global role promotion
+- Real-time notifications — invite, decline, role-change and removal events
+  pushed via SSE with user preferences respected
 
 ADMIN (FULL)
-- Admin Overview — real-time CPU / memory / storage / database metrics with 10s
-  refresh and health thresholds
-- User Management — search, roles and account actions
-- Subscriptions / Subscribers / Plans / Payments — billing monitoring, plan
-  catalog, subscriber and payment records
+- Admin Overview — real-time CPU / memory / storage / database metrics (10s
+  refresh) with health thresholds
+- Users — user management, roles and account actions
+- Subscriptions — subscription monitoring and status
+- Subscribers — subscriber list and history
+- Plans — plan catalog management
+- Payments — payment records and status
 - Reports — platform reports with CSV / JSON generation
 - Audit Log — full audit trail with filters and export
-- AI Models / AI API Keys / API Keys — model and key management
-- Webhooks — outbound webhook endpoints with delivery logs
-- Moderation / Alerts / System Health / System Settings — flagged-content
-  review, system alerts, health checks and platform configuration
+- AI Models — AI model management
+- AI API Keys — AI provider key management
+- API Keys — platform API key management
+- Webhooks — outbound endpoints with delivery logs
+- Moderation — flagged content review
+- Alerts — system alerting
+- System Health — health monitoring
+- System Settings — platform configuration
 - Security — admin-role middleware on every route, code-split admin panel
 
 PAYMENT
-- Stripe Checkout — plan upgrade/downgrade via checkout sessions using the
-  public price catalog (no hardcoded price IDs)
-- Billing Page — current plan, subscription status, payment method, invoices and
-  grace-period notice
-- Customer Portal — Stripe-hosted management of subscriptions, invoices and
-  payment methods
-- Webhooks — signature-verified, idempotent handlers as the only source of
-  truth for subscription status
-- Cancel Flow — self-serve cancellation with confirmation
-- Grace-period Sweeper — hourly job downgrades expired / past-due subscriptions
-  after the grace window
+- Stripe Checkout — upgrade/downgrade via public price catalog
+- Billing Page — plan, subscription status, payment method, invoices
+- Customer Portal — Stripe-hosted subscription/invoice management
+- Webhooks — signature-verified, idempotent subscription source of truth
+- Cancel Flow — self-serve cancellation
+- Grace-period Sweeper — hourly downgrade after grace window
 
 2. MD. SALMAN RAHMAN NAYEEM (SALMAN)
 ------------------------------------
 
 ANNOTATIONS (RESEARCH MENU)
-- PDF annotation workspace with collapsible "Your Papers" panel (persisted
-  state, search, PDF-ready filter, mobile drawer)
-- Highlight / underline / strikethrough marks with optional notes on every mark
-- Compact icon-only type picker, viewport-clamped popup, edit dialog and
-  confirmed deletes
-- Annotation queries with retry + persistence, side panel that opens only on
-  xl screens
+- Collapsible "Your Papers" panel (persisted, search, PDF filter, mobile drawer)
+- Highlight / underline / strikethrough with optional notes
+- Icon-only type picker, clamped popup, edit dialog, confirmed deletes
+- Annotation query retry + persistence, side panel opens only on xl screens
