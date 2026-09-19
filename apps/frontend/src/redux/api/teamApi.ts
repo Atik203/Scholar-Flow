@@ -163,6 +163,17 @@ export const teamApi = apiSlice.injectEndpoints({
     }),
 
     // -------------------------------------------------------------------------
+    // Access (derived: lead+ OR active workspace collaboration)
+    // -------------------------------------------------------------------------
+    getTeamAccess: builder.query<
+      { hasAccess: boolean; isTeamLead: boolean },
+      void
+    >({
+      query: () => "/team/access",
+      providesTags: [{ type: "Team", id: "ACCESS" }],
+    }),
+
+    // -------------------------------------------------------------------------
     // Stats
     // -------------------------------------------------------------------------
     getTeamStats: builder.query<TeamStats, void>({
@@ -196,6 +207,12 @@ export const teamApi = apiSlice.injectEndpoints({
           ...(endDate && { endDate }),
         },
       }),
+      // Backend paginated envelope is { data, meta }; map to the slice's
+      // declared { result, meta } shape.
+      transformResponse: (r: { data: TeamActivityItem[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
+      }),
       providesTags: [{ type: "Team", id: "ACTIVITY" }],
     }),
 
@@ -223,6 +240,10 @@ export const teamApi = apiSlice.injectEndpoints({
         params: { page, limit, ...(status && { status }) },
         headers: { "Cache-Control": "no-cache" },
       }),
+      transformResponse: (r: { data: TeamInvitation[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
+      }),
       providesTags: [{ type: "Team", id: "INVITATIONS_SENT" }],
     }),
 
@@ -235,12 +256,16 @@ export const teamApi = apiSlice.injectEndpoints({
         params: { page, limit, ...(status && { status }) },
         headers: { "Cache-Control": "no-cache" },
       }),
+      transformResponse: (r: { data: TeamInvitation[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
+      }),
       providesTags: [{ type: "Team", id: "INVITATIONS_RECEIVED" }],
     }),
 
     sendTeamInvitation: builder.mutation<
       { invitationId: string },
-      { email: string; role?: string; message?: string }
+      { email: string; role?: string; message?: string; workspaceId?: string }
     >({
       query: (body) => ({
         url: "/team/invitations",
@@ -299,8 +324,10 @@ export const {
   useGetTeamMemberQuery,
   useUpdateTeamMemberMutation,
   useRemoveTeamMemberMutation,
+  useGetTeamAccessQuery,
   useGetTeamStatsQuery,
   useGetTeamActivityQuery,
+  useLazyGetTeamActivityQuery,
   useGetTeamActivitySummaryQuery,
   useGetTeamInvitationsSentQuery,
   useGetTeamInvitationsReceivedQuery,

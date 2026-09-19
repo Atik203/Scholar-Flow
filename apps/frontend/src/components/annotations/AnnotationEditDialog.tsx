@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -53,16 +63,20 @@ export function AnnotationEditDialog({
   const [color, setColor] = useState(annotation?.color ?? COLORS[0]);
   const [replyText, setReplyText] = useState("");
   const [showReply, setShowReply] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   if (!annotation) return null;
 
   const handleSave = () => {
-    onSave(annotation.id, { text: text.trim() || undefined, color });
+    // Send the trimmed value even when empty so a previously saved note can be
+    // cleared without deleting the mark itself.
+    onSave(annotation.id, { text: text.trim(), color });
     onOpenChange(false);
   };
 
   const handleDelete = () => {
     onDelete(annotation.id);
+    setConfirmDeleteOpen(false);
     onOpenChange(false);
   };
 
@@ -81,6 +95,7 @@ export function AnnotationEditDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto"
@@ -224,7 +239,7 @@ export function AnnotationEditDialog({
           <Button
             variant="destructive"
             size="sm"
-            onClick={handleDelete}
+            onClick={() => setConfirmDeleteOpen(true)}
             className="gap-1.5"
           >
             <Trash2 className="size-4" />
@@ -263,5 +278,27 @@ export function AnnotationEditDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete annotation?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This removes the annotation and its replies. This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={handleDelete}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

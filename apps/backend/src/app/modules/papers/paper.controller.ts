@@ -900,6 +900,39 @@ export const paperController = {
         DO UPDATE SET permission = EXCLUDED.permission, "updatedAt" = NOW(), "isDeleted" = false
       `;
 
+      // In-app notification for registered recipients (best-effort, instant
+      // over SSE). Emails may go to non-users, so this is a no-op then.
+      try {
+        const recipient = await prisma.user.findFirst({
+          where: { email: recipientEmail, isDeleted: false },
+          select: { id: true },
+        });
+        if (recipient && recipient.id !== authReq.user.id) {
+          const { notificationService } = await import(
+            "../Notification/notification.service"
+          );
+          await notificationService.createNotification({
+            userId: recipient.id,
+            type: "SHARE",
+            category: "PAPERS",
+            title: "Paper shared with you",
+            message: `${
+              authReq.user.name || authReq.user.email
+            } shared "${paperData.title}" with ${
+              permission === "edit" ? "edit" : "view"
+            } access.`,
+            actionUrl:
+              permission === "edit"
+                ? `/dashboard/research/editor?paper=${paperId}`
+                : `/dashboard/papers/${paperId}`,
+            actorId: authReq.user.id,
+            resourceId: paperId,
+          });
+        }
+      } catch {
+        // notification failures never break the share flow
+      }
+
       // Generate paper link (permission-aware frontend route).
       const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
       const paperLink =

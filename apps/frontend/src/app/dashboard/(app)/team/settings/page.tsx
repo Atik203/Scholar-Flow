@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import {
+  useGetTeamAccessQuery,
   useGetTeamSettingsQuery,
   useUpdateTeamSettingsMutation,
   type TeamSettings,
@@ -19,6 +20,7 @@ import {
   ChevronRight,
   Eye,
   Globe,
+  Info,
   Link as LinkIcon,
   Lock,
   Mail,
@@ -82,6 +84,10 @@ export default function TeamSettingsPage() {
 
   const { data: serverSettings } = useGetTeamSettingsQuery(undefined, { skip: !shouldFetch });
   const [updateSettings, { isLoading: saving }] = useUpdateTeamSettingsMutation();
+  const { data: accessInfo, isLoading: accessLoading } = useGetTeamAccessQuery(
+    undefined,
+    { skip: !shouldFetch }
+  );
 
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [saved, setSaved] = useState(false);
@@ -152,6 +158,36 @@ export default function TeamSettingsPage() {
     }
   };
 
+  if (accessLoading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Settings stay lead-only — invited members can read team pages but do not
+  // change team preferences.
+  if (accessInfo && !accessInfo.isTeamLead) {
+    return (
+      <div className="mx-auto max-w-md py-20">
+        <div className="rounded-xl border bg-card p-6 space-y-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <Shield className="h-5 w-5 text-muted-foreground" />
+            Team Settings
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Only team leads can change team settings. Ask your team lead if you
+            need a change.
+          </p>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/dashboard/team">Back to Team</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const tabs: { id: TabId; label: string; icon: any }[] = [
     { id: "general", label: "General", icon: SettingsIcon },
     { id: "permissions", label: "Permissions", icon: Shield },
@@ -173,7 +209,7 @@ export default function TeamSettingsPage() {
             Team Settings
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your team&apos;s configuration and permissions
+            Configure your team defaults and preferences
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -203,6 +239,18 @@ export default function TeamSettingsPage() {
             {saving ? "Saving…" : "Save Changes"}
           </Button>
         </div>
+      </div>
+
+      {/* Scope notice — these settings persist per account until a shared
+          team entity exists, so be explicit about what they affect. */}
+      <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-sm dark:border-blue-900 dark:bg-blue-950/30">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+        <p className="text-muted-foreground">
+          These preferences are stored on your account and apply to your own
+          experience — for example, the default role pre-selected when you
+          invite members. Workspace-level roles are set per invitation, and a
+          shared team-wide policy layer is on the roadmap.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

@@ -4,6 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
 import {
@@ -11,20 +18,36 @@ import {
   useExportCitationsMutation,
   useGetHistoryQuery,
   useGetManagerViewQuery,
+  useGetPaperCitationsQuery,
+  useLazyDownloadExportQuery,
   useListFormatsQuery,
   type CitationFormatName,
   type CitationPaper,
+  type CitationRecord,
+  type ExportCitationsResponse,
 } from "@/redux/api/citationApi";
 import { useAppSelector } from "@/redux/hooks";
 import { selectAccessToken } from "@/redux/auth/authSlice";
 import { useAuth } from "@/redux/auth/useAuth";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  BookOpen, Brain, Check, CheckCircle2, Copy, Download, FileText, GitBranch, History, Loader2, Network, Quote, Search, Sparkles, TrendingUp, X
+  BookOpen, Brain, Check, CheckCircle2, Copy, Download, FileText, GitBranch, History, Loader2, Lock, Network, Quote, Search, Sparkles, TrendingUp, X
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 function cn(...classes: (string | undefined | null | false)[]): string { return classes.filter(Boolean).join(" "); }
+
+function saveTextFile(content: string, filename: string) {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
 
 type Tab = "papers" | "preview" | "graph" | "history";
 
@@ -57,74 +80,123 @@ function generateCitation(paper: CitationPaper, format: CitationFormatName): str
   }
 }
 
-const CitationGraph: React.FC<{ isPremium: boolean }> = ({ isPremium }) => {
-  const nodes = [
-    { id: "central", x: 200, y: 150, type: "central", year: 2020 },
-    { id: "cited1", x: 80, y: 80, type: "cited", year: 2015 },
-    { id: "cited2", x: 80, y: 150, type: "cited", year: 2016 },
-    { id: "cited3", x: 80, y: 220, type: "cited", year: 2018 },
-    { id: "citing1", x: 320, y: 80, type: "citing", year: 2021 },
-    { id: "citing2", x: 320, y: 150, type: "citing", year: 2022 },
-    { id: "citing3", x: 320, y: 220, type: "citing", year: 2023 },
-  ];
-  const edges = [
-    { from: "cited1", to: "central" },
-    { from: "cited2", to: "central" },
-    { from: "cited3", to: "central" },
-    { from: "central", to: "citing1" },
-    { from: "central", to: "citing2" },
-    { from: "central", to: "citing3" },
-  ];
+const GRAPH_WIDTH = 400;
+const GRAPH_HEIGHT = 300;
+const MAX_GRAPH_REFS = 6;
+
+const LiveCitationGraph: React.FC<{
+  focusPaper: CitationPaper | null;
+  citations: CitationRecord[];
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
+}> = ({ focusPaper, citations, isLoading, isError, onRetry }) => {
+  if (!focusPaper) {
+    return (
+      <div className="flex h-[300px] items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
+        Select a paper to build its citation graph
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[300px] items-center justify-center rounded-xl bg-muted/40">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-xl bg-muted/40 text-sm text-muted-foreground">
+        <p>Failed to load citations for this paper.</p>
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (citations.length === 0) {
+    return (
+      <div className="flex h-[300px] flex-col items-center justify-center gap-2 rounded-xl bg-muted/40 px-6 text-center">
+        <Network className="h-10 w-10 text-muted-foreground/40" />
+        <p className="text-sm font-medium">No citations recorded yet</p>
+        <p className="max-w-sm text-xs text-muted-foreground">
+          Insert citations from the editor or the citation search dialog to see
+          this paper&apos;s references here.
+        </p>
+      </div>
+    );
+  }
+
+  const refs = citations.slice(0, MAX_GRAPH_REFS);
+  const centerX = 270;
+  const centerY = GRAPH_HEIGHT / 2;
+  const step = refs.length > 1 ? (GRAPH_HEIGHT - 90) / (refs.length - 1) : 0;
+  const refNodes = refs.map((citation, i) => ({
+    citation,
+    x: 70,
+    y: refs.length > 1 ? 45 + i * step : centerY,
+  }));
+
   return (
-    <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-xl p-4 h-[300px] overflow-hidden">
-      <svg className="w-full h-full" viewBox="0 0 400 300">
+    <div className="relative h-[300px] overflow-hidden rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-4 dark:from-slate-900 dark:to-slate-800">
+      <svg className="h-full w-full" viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}>
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="currentColor" className="text-muted-foreground" />
           </marker>
         </defs>
-        {edges.map((e, i) => {
-          const from = nodes.find((n) => n.id === e.from)!;
-          const to = nodes.find((n) => n.id === e.to)!;
+        {refNodes.map((n, i) => (
+          <motion.line
+            key={n.citation.id}
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 0.6 }}
+            transition={{ delay: i * 0.08, duration: 0.4 }}
+            x1={centerX - 32}
+            y1={centerY}
+            x2={n.x + 18}
+            y2={n.y}
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-muted-foreground"
+            markerEnd="url(#arrowhead)"
+          />
+        ))}
+        <motion.g initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+          <circle cx={centerX} cy={centerY} r={30} className="fill-primary" />
+          <text x={centerX} y={centerY} textAnchor="middle" dy="4" className="fill-primary-foreground text-[10px] font-bold">
+            {focusPaper.year || "n.d."}
+          </text>
+          <title>{focusPaper.title}</title>
+        </motion.g>
+        {refNodes.map((n, i) => {
+          const year = (n.citation.targetPaper.metadata as { year?: number })?.year;
           return (
-            <motion.line
-              key={i}
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.5 }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-              stroke="currentColor" strokeWidth="2" className="text-muted-foreground"
-              markerEnd="url(#arrowhead)"
-            />
+            <motion.g
+              key={n.citation.id}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.25 + i * 0.05 }}
+            >
+              <circle cx={n.x} cy={n.y} r={17} className="fill-blue-500" />
+              <text x={n.x} y={n.y} textAnchor="middle" dy="3.5" className="fill-white text-[9px] font-bold">
+                {year || "ref"}
+              </text>
+              <title>{n.citation.targetPaper.title}</title>
+            </motion.g>
           );
         })}
-        {nodes.map((n, i) => (
-          <motion.g
-            key={n.id}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3 + i * 0.05 }}
-          >
-            <circle
-              cx={n.x} cy={n.y} r={n.type === "central" ? 25 : 18}
-              className={cn(
-                n.type === "central" ? "fill-primary" : n.type === "cited" ? "fill-blue-500" : "fill-green-500"
-              )}
-            />
-            <text x={n.x} y={n.y} textAnchor="middle" dy="4" className="fill-white text-xs font-bold">
-              {n.year}
-            </text>
-          </motion.g>
-        ))}
       </svg>
-      <div className="absolute bottom-2 left-2 flex items-center gap-4 text-xs text-muted-foreground bg-background/80 px-2 py-1 rounded">
-        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500" />References</span>
-        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-primary" />Selected</span>
-        <span className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500" />Citations</span>
+      <div className="absolute bottom-2 left-2 flex items-center gap-4 rounded bg-background/80 px-2 py-1 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-full bg-blue-500" />References</span>
+        <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-full bg-primary" />Selected</span>
       </div>
-      {!isPremium && (
-        <div className="absolute top-2 right-2 px-2 py-1 text-xs rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-medium">
-          PRO
+      {citations.length > refs.length && (
+        <div className="absolute bottom-2 right-2 rounded bg-background/80 px-2 py-1 text-xs text-muted-foreground">
+          +{citations.length - refs.length} more references
         </div>
       )}
     </div>
@@ -139,9 +211,10 @@ export default function CitationsPage() {
 
   const { data: formatsData } = useListFormatsQuery(undefined, { skip: !token });
   const { data: managerData, isLoading: loadingManager, refetch: refetchManager } = useGetManagerViewQuery({ limit: 200 }, { skip: !token });
-  const { data: historyData, refetch: refetchHistory } = useGetHistoryQuery({ limit: 50 }, { skip: !token });
+  const { data: historyData, isLoading: historyLoading, refetch: refetchHistory } = useGetHistoryQuery({ limit: 50 }, { skip: !token });
   const [exportMutation, { isLoading: exporting }] = useExportCitationsMutation();
   const [deleteExport] = useDeleteExportMutation();
+  const [downloadExport] = useLazyDownloadExportQuery();
 
   const formats = formatsData?.data || [];
   const papers: CitationPaper[] = managerData?.data?.papers || [];
@@ -159,6 +232,8 @@ export default function CitationsPage() {
   const [tab, setTab] = useState<Tab>("papers");
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [exportResult, setExportResult] = useState<ExportCitationsResponse | null>(null);
+  const [graphFocusId, setGraphFocusId] = useState<string | null>(null);
 
   // When formats load, default to first popular one if current is unavailable
   useEffect(() => {
@@ -176,6 +251,20 @@ export default function CitationsPage() {
   }, [papers, debouncedSearch]);
 
   const selectedPapers = papers.filter((p) => selectedIds.has(p.id));
+
+  const graphCandidates = selectedPapers.length > 0 ? selectedPapers : papers;
+  const graphFocusPaper =
+    graphCandidates.find((p) => p.id === graphFocusId) ||
+    graphCandidates[0] ||
+    null;
+  const {
+    data: focusCitations,
+    isLoading: focusCitationsLoading,
+    isError: focusCitationsError,
+    refetch: refetchFocusCitations,
+  } = useGetPaperCitationsQuery(graphFocusPaper?.id ?? "", {
+    skip: !token || !graphFocusPaper,
+  });
   const generatedCitations = useMemo(
     () => selectedPapers.map((p) => generateCitation(p, selectedFormat)).join("\n\n"),
     [selectedPapers, selectedFormat]
@@ -197,9 +286,16 @@ export default function CitationsPage() {
     setTimeout(() => setCopied(null), 1500);
   };
 
+  const selectedIsPremiumFormat =
+    formats.find((f) => f.name === selectedFormat)?.premium === true;
+
   const handleExport = async () => {
     if (selectedPapers.length === 0) {
       showErrorToast("Select at least one paper");
+      return;
+    }
+    if (selectedIsPremiumFormat && !isPremium) {
+      showErrorToast(`${selectedFormat} export requires a Pro plan`);
       return;
     }
     try {
@@ -207,10 +303,45 @@ export default function CitationsPage() {
         paperIds: Array.from(selectedIds),
         format: selectedFormat,
       }).unwrap();
+      setExportResult(res);
       setShowExportDialog(true);
       refetchHistory();
     } catch (e: any) {
       showErrorToast(e?.data?.message || "Export failed");
+    }
+  };
+
+  const handleDownloadExport = () => {
+    if (!exportResult) return;
+    const ext =
+      formats.find((f) => f.name === exportResult.format)?.ext || ".txt";
+    saveTextFile(
+      exportResult.content,
+      `citations-${exportResult.format.toLowerCase()}-${new Date()
+        .toISOString()
+        .slice(0, 10)}${ext}`
+    );
+    showSuccessToast("Download started");
+    setShowExportDialog(false);
+  };
+
+  const handleHistoryDownload = async (id: string) => {
+    try {
+      const res = await downloadExport(id).unwrap();
+      saveTextFile(res.content, res.filename);
+      showSuccessToast("Download started");
+    } catch {
+      showErrorToast("Failed to download export");
+    }
+  };
+
+  const handleDeleteExport = async (id: string) => {
+    try {
+      await deleteExport(id).unwrap();
+      showSuccessToast("Export deleted");
+      refetchHistory();
+    } catch {
+      showErrorToast("Failed to delete export");
     }
   };
 
@@ -246,16 +377,58 @@ export default function CitationsPage() {
           >
             <Card>
               <CardContent className="pt-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <h3 className="font-semibold flex items-center gap-2">
-                    <GitBranch className="h-5 w-5 text-primary" />Citation Network Visualization
+                    <GitBranch className="h-5 w-5 text-primary" />Citation Network
                   </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {/* TODO: Phase 8 — wire to real Citation model */}
-                    Interactive graph (illustrative — Phase 8 wires to live data)
-                  </p>
+                  {isPremium && graphCandidates.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Focus paper</span>
+                      <Select
+                        value={graphFocusPaper?.id ?? ""}
+                        onValueChange={(value) => setGraphFocusId(value)}
+                      >
+                        <SelectTrigger className="h-8 w-[260px] text-xs">
+                          <SelectValue placeholder="Select a paper" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {graphCandidates.slice(0, 50).map((paper) => (
+                            <SelectItem key={paper.id} value={paper.id} className="text-xs">
+                              {paper.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
-                <CitationGraph isPremium={isPremium} />
+                {isPremium ? (
+                  <>
+                    <LiveCitationGraph
+                      focusPaper={graphFocusPaper}
+                      citations={focusCitations || []}
+                      isLoading={focusCitationsLoading}
+                      isError={focusCitationsError}
+                      onRetry={() => void refetchFocusCitations()}
+                    />
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Arrows point from the selected paper to the references it cites.
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 text-center">
+                    <Lock className="h-10 w-10 text-muted-foreground/50" />
+                    <div>
+                      <p className="font-medium">Citation graph is a Pro feature</p>
+                      <p className="text-sm text-muted-foreground">
+                        Upgrade to Pro to visualize citation relationships between your papers.
+                      </p>
+                    </div>
+                    <Button asChild size="sm">
+                      <a href="/dashboard/billing">Upgrade to Pro</a>
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -266,7 +439,13 @@ export default function CitationsPage() {
         <Card>
           <CardContent className="pt-6">
             <h3 className="font-semibold mb-4 flex items-center gap-2"><History className="h-5 w-5" />Export History</h3>
-            {exports.length === 0 ? (
+            {historyLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16" />
+                ))}
+              </div>
+            ) : exports.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <History className="h-12 w-12 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">No exports yet. Select papers and export to see them here.</p>
@@ -281,9 +460,14 @@ export default function CitationsPage() {
                         {exp.paper?.title || exp.collection?.name || "Multiple papers"} • {new Date(exp.exportedAt).toLocaleString()}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={async () => { try { await deleteExport(exp.id).unwrap(); refetchHistory(); } catch {} }} aria-label="Delete export">
-                      <X className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => void handleHistoryDownload(exp.id)} aria-label="Download export">
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => void handleDeleteExport(exp.id)} aria-label="Delete export">
+                        <X className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -300,20 +484,35 @@ export default function CitationsPage() {
                   {formats.length === 0 ? (
                     Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-16" />)
                   ) : (
-                    formats.map((format) => (
+                    formats.map((format) => {
+                      const locked = format.premium && !isPremium;
+                      return (
                       <motion.button
                         key={format.name}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setSelectedFormat(format.name as CitationFormatName)}
+                        whileHover={locked ? undefined : { scale: 1.02 }}
+                        whileTap={locked ? undefined : { scale: 0.98 }}
+                        onClick={() => {
+                          if (locked) {
+                            showErrorToast(`${format.name} requires a Pro plan`);
+                            return;
+                          }
+                          setSelectedFormat(format.name as CitationFormatName);
+                        }}
+                        aria-disabled={locked}
                         className={cn(
                           "relative p-3 rounded-xl border text-left transition-all",
-                          selectedFormat === format.name ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:bg-muted"
+                          locked && "opacity-60 cursor-not-allowed",
+                          selectedFormat === format.name ? "border-primary bg-primary/5 ring-1 ring-primary" : !locked && "hover:bg-muted"
                         )}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-sm">{format.name}</span>
-                          {format.popular && (
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-sm flex items-center gap-1.5">
+                            {locked && <Lock className="h-3.5 w-3.5" />}
+                            {format.name}
+                          </span>
+                          {format.premium ? (
+                            <span className="px-1.5 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded text-[10px] font-medium">PRO</span>
+                          ) : format.popular && (
                             <span className="px-1.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded text-xs">Popular</span>
                           )}
                         </div>
@@ -324,7 +523,8 @@ export default function CitationsPage() {
                           </motion.div>
                         )}
                       </motion.button>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </CardContent>
@@ -515,8 +715,9 @@ export default function CitationsPage() {
                 <Button variant="outline" className="flex-1" onClick={() => { handleCopy("export", generatedCitations); setShowExportDialog(false); }}>
                   <Copy className="h-4 w-4 mr-2" />Copy to Clipboard
                 </Button>
-                <Button className="flex-1" onClick={() => { showSuccessToast("Saved to your history"); setShowExportDialog(false); }}>
-                  <Download className="h-4 w-4 mr-2" />Done
+                <Button className="flex-1" onClick={handleDownloadExport}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download {exportResult ? formats.find((f) => f.name === exportResult.format)?.ext ?? "" : ""}
                 </Button>
               </div>
             </motion.div>

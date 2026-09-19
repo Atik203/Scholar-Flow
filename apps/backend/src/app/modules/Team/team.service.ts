@@ -1,6 +1,7 @@
 import ApiError from "../../errors/ApiError";
 import prisma, { Prisma } from "../../shared/prisma";
-import { USER_ROLES } from "../Auth/auth.constant";
+import { ROLE_HIERARCHY, USER_ROLES } from "../Auth/auth.constant";
+import { notificationService } from "../Notification/notification.service";
 
 // TeamSettings is a virtual aggregate stored as JSON in a single column on a sentinel User row
 // of the requesting team_lead. In Phase 5 we don't have a dedicated Team model — the team is the
@@ -163,6 +164,7 @@ export class TeamService {
           image: true,
           role: true,
           createdAt: true,
+          updatedAt: true,
           memberships: {
             where: { isDeleted: false },
             select: {
@@ -186,25 +188,56 @@ export class TeamService {
     const hasMore = users.length > limit;
     const sliced = hasMore ? users.slice(0, -1) : users;
 
-    const formatted = sliced.map((u) => ({
-      id: u.id,
-      name: u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email,
-      email: u.email,
-      image: u.image,
-      role: u.role,
-      joinedAt: u.createdAt,
-      lastActive: u.createdAt, // approximate; updatedAt is closer but we use createdAt for now
-      status: "active" as const, // status derivation is best-effort; we have no lastActiveAt field
-      workspaces: u.memberships.map((wm) => ({
-        id: wm.workspace.id,
-        name: wm.workspace.name,
-        role: wm.role,
-      })),
-      workspaceCount: u._count.memberships,
-    }));
+    // Real last-active: most recent ActivityLogEntry per member (the table the
+    // activity feed reads). Falls back to updatedAt/createdAt when no activity.
+    const memberIds = sliced.map((u) => u.id);
+    const activityRows = memberIds.length
+      ? await prisma.activityLogEntry.groupBy({
+          by: ["userId"],
+          where: { userId: { in: memberIds }, isDeleted: false },
+          _max: { createdAt: true },
+        })
+      : [];
+    const lastActivityByUser = new Map<string, Date>();
+    for (const row of activityRows) {
+      if (row.userId && row._max.createdAt) {
+        lastActivityByUser.set(row.userId, row._max.createdAt);
+      }
+    }
+
+    const INACTIVE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
+
+    const formatted = sliced.map((u) => {
+      const lastActive =
+        lastActivityByUser.get(u.id) || u.updatedAt || u.createdAt;
+      const status: "active" | "inactive" =
+        Date.now() - new Date(lastActive).getTime() > INACTIVE_AFTER_MS
+          ? "inactive"
+          : "active";
+      return {
+        id: u.id,
+        name: u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email,
+        email: u.email,
+        image: u.image,
+        role: u.role,
+        joinedAt: u.createdAt,
+        lastActive,
+        status,
+        workspaces: u.memberships.map((wm) => ({
+          id: wm.workspace.id,
+          name: wm.workspace.name,
+          role: wm.role,
+        })),
+        workspaceCount: u._count.memberships,
+      };
+    });
+
+    const result = filters.status
+      ? formatted.filter((member) => member.status === filters.status)
+      : formatted;
 
     return {
-      result: formatted,
+      result,
       meta: { total, limit, hasMore, nextCursor: hasMore ? sliced[sliced.length - 1].id : null },
     };
   }
@@ -315,22 +348,123 @@ export class TeamService {
       where: { id: targetUserId },
       data: { role: data.role as any },
     });
+
+    // Notify the member about the role change (best-effort, instant via SSE)
+    try {
+      const roleLabel = data.role.replace(/_/g, " ");
+      await notificationService.createNotification({
+        userId: targetUserId,
+        type: "SYSTEM",
+        category: "TEAM",
+        title: "Role updated",
+        message: `Your team role was changed to ${roleLabel}.`,
+        actionUrl: "/dashboard/team",
+        actorId: requestorId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
   /**
-   * Remove a team member (soft-delete). Only ADMIN can do this in Phase 5.
-   * The user's data is preserved (isDeleted=true); they can no longer sign in.
+   * Revoke a collaborator's access to the requestor's team: soft-deletes
+   * their memberships and pending invitations in the workspaces the requestor
+   * owns. The user account itself is untouched — account deletion lives in
+   * the admin panel. This powers the Team page "Remove from Team" action and
+   * the "access lasts until the Team Lead removes it" model.
    */
   static async removeMember(requestorId: string, targetUserId: string) {
     if (requestorId === targetUserId) {
       throw new ApiError(400, "You cannot remove yourself");
     }
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { isDeleted: true },
+
+    // Only workspaces owned by the requestor count. Admins use the admin
+    // panel for account-level actions.
+    const owned = await prisma.workspace.findMany({
+      where: { ownerId: requestorId, isDeleted: false },
+      select: { id: true },
     });
-    return { success: true };
+    const ownedIds = owned.map((w) => w.id);
+    if (ownedIds.length === 0) {
+      throw new ApiError(
+        400,
+        "You must own a workspace to remove team members"
+      );
+    }
+
+    const [membershipResult, invitationResult] = await prisma.$transaction([
+      prisma.workspaceMember.updateMany({
+        where: {
+          userId: targetUserId,
+          workspaceId: { in: ownedIds },
+          isDeleted: false,
+        },
+        data: { isDeleted: true },
+      }),
+      prisma.workspaceInvitation.updateMany({
+        where: {
+          userId: targetUserId,
+          workspaceId: { in: ownedIds },
+          status: "PENDING",
+          isDeleted: false,
+        },
+        data: { isDeleted: true, status: "DECLINED", declinedAt: new Date() },
+      }),
+    ]);
+
+    if (membershipResult.count === 0 && invitationResult.count === 0) {
+      throw new ApiError(404, "That user is not part of your team");
+    }
+
+    // Best-effort audit trail so the removal is visible in team activity.
+    try {
+      await prisma.activityLogEntry.create({
+        data: {
+          userId: requestorId,
+          entity: "team",
+          entityId: targetUserId,
+          action: "member_removed",
+          details: {
+            memberships: membershipResult.count,
+            invitations: invitationResult.count,
+          },
+        },
+      });
+    } catch {
+      // Logging must never break the primary flow.
+    }
+
+    // Tell the removed member (best-effort) so the bell reflects it instantly.
+    try {
+      const requestor = await prisma.user.findUnique({
+        where: { id: requestorId },
+        select: { name: true, firstName: true, lastName: true, email: true },
+      });
+      const requestorName =
+        requestor?.name ||
+        `${requestor?.firstName || ""} ${requestor?.lastName || ""}`.trim() ||
+        requestor?.email ||
+        "A team lead";
+      await notificationService.createNotification({
+        userId: targetUserId,
+        type: "SYSTEM",
+        category: "TEAM",
+        title: "Removed from team",
+        message: `${requestorName} removed you from their team. You no longer have access to its shared workspaces.`,
+        actionUrl: "/dashboard/workspaces",
+        actorId: requestorId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
+    return {
+      success: true,
+      removedMemberships: membershipResult.count,
+      cancelledInvitations: invitationResult.count,
+    };
   }
 
   // -------------------------------------------------------------------------
@@ -620,7 +754,7 @@ export class TeamService {
    */
   static async inviteMember(
     inviterId: string,
-    payload: { email: string; role?: string; message?: string }
+    payload: { email: string; role?: string; message?: string; workspaceId?: string }
   ) {
     // Find user by email
     const user = await prisma.user.findFirst({
@@ -665,20 +799,27 @@ export class TeamService {
       );
     }
 
-    // Find an existing shared membership
+    // Target the requested workspace (must be owned by the inviter) or fall
+    // back to the inviter's first owned workspace.
+    const targetWorkspaceId = payload.workspaceId || inviterWorkspaces[0].id;
+    if (
+      payload.workspaceId &&
+      !inviterWorkspaces.some((w) => w.id === payload.workspaceId)
+    ) {
+      throw new ApiError(403, "You do not own the selected workspace");
+    }
+
+    // Find an existing membership in the target workspace
     const existingMembership = await prisma.workspaceMember.findFirst({
       where: {
         userId: user.id,
-        workspaceId: { in: inviterWorkspaces.map((w) => w.id) },
+        workspaceId: targetWorkspaceId,
         isDeleted: false,
       },
     });
     if (existingMembership) {
-      throw new ApiError(400, "User is already a member of one of your workspaces");
+      throw new ApiError(400, "User is already a member of this workspace");
     }
-
-    // Reuse first owned workspace for the invitation record
-    const targetWorkspaceId = inviterWorkspaces[0].id;
 
     // Upsert invitation
     const invitation = await prisma.workspaceInvitation.upsert({
@@ -725,6 +866,27 @@ export class TeamService {
       }
     }
 
+    // In-app notification (best-effort) — delivered instantly over SSE
+    try {
+      const inviterName =
+        inviter?.name ||
+        `${inviter?.firstName || ""} ${inviter?.lastName || ""}`.trim() ||
+        inviter?.email ||
+        "A team lead";
+      await notificationService.createNotification({
+        userId: user.id,
+        type: "INVITE",
+        category: "TEAM",
+        title: "Team invitation",
+        message: `${inviterName} invited you to join their team. Review and accept it from your invitations.`,
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invitation.id,
+      });
+    } catch {
+      // Notification failures must never break the invite flow.
+    }
+
     return { invitationId: invitation.id };
   }
 
@@ -743,6 +905,23 @@ export class TeamService {
       where: { id: invitationId },
       data: { isDeleted: true, status: "DECLINED" },
     });
+
+    // Best-effort heads-up to the invitee so the bell reflects the cancellation
+    try {
+      await notificationService.createNotification({
+        userId: invite.userId,
+        type: "INVITE",
+        category: "TEAM",
+        title: "Invitation cancelled",
+        message: "A team invitation sent to you was cancelled.",
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invitationId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
@@ -787,6 +966,24 @@ export class TeamService {
         console.error("Resend team invitation email failed:", (err as any)?.message || err);
       }
     }
+
+    // In-app reminder (best-effort)
+    try {
+      await notificationService.createNotification({
+        userId: invite.userId,
+        type: "INVITE",
+        category: "TEAM",
+        title: "Invitation reminder",
+        message:
+          "Your team invitation is still pending. Accept or decline it from your invitations.",
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invite.id,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
@@ -900,6 +1097,70 @@ export class TeamService {
   // -------------------------------------------------------------------------
   // Internal helpers
   // -------------------------------------------------------------------------
+
+  /**
+   * Team access is derived, never stored on the user's global role:
+   *  - global role is TEAM_LEAD or above, OR
+   *  - the user actively collaborates in a workspace owned by someone else
+   *    (i.e. they accepted a team invitation), OR
+   *  - the user owns a workspace that has other active members.
+   *
+   * This is what gives invited RESEARCHER / PRO_RESEARCHER users access to the
+   * Team section until they are removed from the workspace — and it keeps the
+   * section hidden for solo users who only have a personal workspace.
+   */
+  static async getAccessInfo(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    const role = (user?.role ??
+      USER_ROLES.RESEARCHER) as keyof typeof ROLE_HIERARCHY;
+    const isTeamLead =
+      (ROLE_HIERARCHY[role] ?? 0) >= ROLE_HIERARCHY[USER_ROLES.TEAM_LEAD];
+
+    const [memberOfOthersWorkspace, ownerWithMembers, pendingInvitation] =
+      await Promise.all([
+        prisma.workspaceMember.findFirst({
+          where: {
+            userId,
+            isDeleted: false,
+            workspace: { isDeleted: false, ownerId: { not: userId } },
+          },
+          select: { id: true },
+        }),
+        prisma.workspace.findFirst({
+          where: {
+            ownerId: userId,
+            isDeleted: false,
+            members: { some: { isDeleted: false, userId: { not: userId } } },
+          },
+          select: { id: true },
+        }),
+        // A pending (non-expired) invitation also opens the Team section so
+        // the invitee can review and accept it there.
+        prisma.workspaceInvitation.findFirst({
+          where: {
+            userId,
+            status: "PENDING",
+            isDeleted: false,
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          },
+          select: { id: true },
+        }),
+      ]);
+
+    return {
+      hasAccess:
+        isTeamLead ||
+        Boolean(memberOfOthersWorkspace) ||
+        Boolean(ownerWithMembers) ||
+        Boolean(pendingInvitation),
+      isTeamLead,
+      hasPendingInvitation: Boolean(pendingInvitation),
+    };
+  }
 
   /** Workspace IDs the user owns or is an active member of (non-deleted). */
   private static async _requesterWorkspaceIds(userId: string): Promise<string[]> {

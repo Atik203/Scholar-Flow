@@ -1,15 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
+import { getAppStore } from "@/redux/storeAccess";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
 
 function getAuthToken(): string | null {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.accessToken || null;
   } catch {}
   return null;
@@ -17,7 +18,7 @@ function getAuthToken(): string | null {
 
 function getUserName(): string {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.user?.name || "Anonymous";
   } catch {}
   return "Anonymous";
@@ -25,7 +26,7 @@ function getUserName(): string {
 
 function getUserId(): string {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.user?.id || "unknown";
   } catch {}
   return "unknown";
@@ -41,6 +42,8 @@ interface UseCollabSyncResult {
   ydoc: Y.Doc;
   provider: Socket | null;
   awareness: AwarenessBridge | null;
+  /** True once any peer update or sync response has been received. */
+  hasRemoteState: boolean;
 }
 
 class AwarenessBridge {
@@ -96,11 +99,26 @@ class AwarenessBridge {
     this.emit("change", [{ added: [], updated: [], removed: [clientId] }]);
   }
 
+  removeByUserId(userId: string) {
+    for (const [clientId, state] of Array.from(this.states.entries())) {
+      if (state?.userId === userId) {
+        this.states.delete(clientId);
+        this.emit("change", [{ added: [], updated: [], removed: [clientId] }]);
+      }
+    }
+  }
+
   private broadcast() {
     if (!this.socket?.connected) return;
     this.socket.emit("editor:awareness", {
       room: this.room,
-      state: this.localState,
+      // clientId + userId let peers key cursors correctly and clean up
+      // disconnected users without relying on socket ids.
+      state: {
+        ...this.localState,
+        clientId: this.clientId,
+        userId: getUserId(),
+      },
     });
   }
 
@@ -138,9 +156,10 @@ export function useCollabSync({
 }: UseCollabSyncOptions): UseCollabSyncResult {
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
   const socketRef = useRef<Socket | null>(null);
-  const awarenessRef = useRef<AwarenessBridge | null>(null);
   const syncedRef = useRef(false);
   const pendingUpdatesRef = useRef<Uint8Array[]>([]);
+  const [awareness, setAwareness] = useState<AwarenessBridge | null>(null);
+  const [hasRemoteState, setHasRemoteState] = useState(false);
 
   const saveSnapshot = useCallback(() => {
     const ydoc = ydocRef.current;
@@ -179,8 +198,10 @@ export function useCollabSync({
     if (!token) return;
 
     const ydoc = ydocRef.current;
-    const awareness = new AwarenessBridge(ydoc);
-    awarenessRef.current = awareness;
+    const awarenessBridge = new AwarenessBridge(ydoc);
+    syncedRef.current = false;
+    setHasRemoteState(false);
+    setAwareness(awarenessBridge);
 
     const socket = io(SOCKET_URL, {
       auth: { token },
@@ -207,17 +228,17 @@ export function useCollabSync({
       Y.applyUpdate(ydoc, snapshot);
     }
 
-    awareness.setSocket(socket);
-    awareness.setRoom(room);
+    awarenessBridge.setSocket(socket);
+    awarenessBridge.setRoom(room);
 
     socket.on("connect", () => {
       socket.emit("room:join", room);
       // Flush any offline queue
       flushPending(ydoc);
 
-      // Request fresh state from peers after reconnect
+      // Request fresh state from peers after reconnect (room-scoped)
       if (syncedRef.current) {
-        socket.emit("editor:sync-request");
+        socket.emit("editor:sync-request", { room });
       }
     });
 
@@ -226,9 +247,25 @@ export function useCollabSync({
       saveSnapshot();
     });
 
-    // Handle Y.js document updates from peers
-    socket.on("editor:update", ({ userId, update }: { userId: string; update: number[] }) => {
-      if (userId === socket.id) return;
+    socket.on("connect_error", (error: Error) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[CollabSync] connect error:", error.message);
+      }
+    });
+
+    // If someone is already in the room, the local doc must not be seeded
+    socket.on(
+      "room:joined",
+      ({ memberCount }: { memberCount?: number } = {}) => {
+        if ((memberCount ?? 0) > 1) setHasRemoteState(true);
+      }
+    );
+
+    // Handle Y.js document updates from peers. Own echoes are idempotent in
+    // Yjs, so no self-filter is needed (socket.id never matched the relayed
+    // authenticated userId anyway).
+    socket.on("editor:update", ({ update }: { update: number[] }) => {
+      setHasRemoteState(true);
       try {
         const u8 = new Uint8Array(update);
         Y.applyUpdate(ydoc, u8);
@@ -237,6 +274,7 @@ export function useCollabSync({
 
     // Handle initial sync
     socket.on("editor:sync-response", ({ update }: { update: number[] }) => {
+      setHasRemoteState(true);
       if (syncedRef.current) return;
       syncedRef.current = true;
       try {
@@ -253,17 +291,17 @@ export function useCollabSync({
       });
     });
 
-    // Awareness relay
-    socket.on("editor:awareness", ({ userId, state }: { userId: string; state: any }) => {
-      if (userId === socket.id) return;
-      const clientId = parseInt(userId.replace(/\D/g, ""), 10) || Date.now();
-      awareness.applyRemoteState(clientId, state);
+    // Awareness relay — keyed by the sender's Yjs clientId
+    socket.on("editor:awareness", ({ state }: { state: any }) => {
+      const clientId =
+        typeof state?.clientId === "number" ? state.clientId : null;
+      if (clientId === null) return;
+      awarenessBridge.applyRemoteState(clientId, state);
     });
 
     // Presence tracking for awareness cleanup
     socket.on("presence:left", ({ userId }: { userId: string }) => {
-      const clientId = parseInt(userId.replace(/\D/g, ""), 10) || Date.now();
-      awareness.removeClient(clientId);
+      awarenessBridge.removeByUserId(userId);
     });
 
     // Broadcast local Y.js updates to peers with offline queue
@@ -286,18 +324,21 @@ export function useCollabSync({
     return () => {
       ydoc.off("update", updateHandler);
       socket.emit("room:leave", room);
-      awareness.destroy();
+      awarenessBridge.destroy();
       if (indexeddbProvider) {
         indexeddbProvider.destroy();
       }
       socket.disconnect();
       socketRef.current = null;
+      syncedRef.current = false;
+      setAwareness(null);
     };
   }, [paperId, initialContent, enabled, saveSnapshot, restoreSnapshot, flushPending]);
 
   return {
     ydoc: ydocRef.current,
     provider: socketRef.current,
-    awareness: awarenessRef.current,
+    awareness,
+    hasRemoteState,
   };
 }

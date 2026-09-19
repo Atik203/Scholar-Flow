@@ -11,7 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetManagerViewQuery } from "@/redux/api/citationApi";
+import { showErrorToast } from "@/components/providers/ToastProvider";
+import { useCreateCitationMutation, useGetManagerViewQuery } from "@/redux/api/citationApi";
 import type { CitationPaper } from "@/redux/api/citationApi";
 import type { Editor } from "@tiptap/core";
 import { Bookmark, Plus, Search } from "lucide-react";
@@ -22,6 +23,7 @@ interface CitationSearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editor: Editor | null;
+  sourcePaperId: string;
   existingPaperIds: string[];
 }
 
@@ -36,11 +38,13 @@ export function CitationSearchDialog({
   open,
   onOpenChange,
   editor,
+  sourcePaperId,
   existingPaperIds,
 }: CitationSearchDialogProps) {
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
   const [inserting, setInserting] = useState(false);
+  const [createCitation] = useCreateCitationMutation();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 300);
@@ -54,9 +58,23 @@ export function CitationSearchDialog({
 
   const papers = useMemo(() => data?.data?.papers ?? [], [data]);
 
-  const handleInsert = (paper: CitationPaper) => {
+  const handleInsert = async (paper: CitationPaper) => {
     if (!editor) return;
     setInserting(true);
+
+    // Persist the citation edge first so the citation graph and export stay in
+    // sync with what the editor renders.
+    try {
+      await createCitation({
+        sourcePaperId,
+        targetPaperId: paper.id,
+        location: "editor",
+      }).unwrap();
+    } catch (err: any) {
+      showErrorToast(err?.data?.message || "Failed to save citation");
+      setInserting(false);
+      return;
+    }
 
     const authorsStr = (paper.authors ?? []).join("; ");
     const yearStr = paper.year?.toString() ?? "";
@@ -120,7 +138,7 @@ export function CitationSearchDialog({
                 return (
                   <button
                     key={paper.id}
-                    onClick={() => !alreadyCited && handleInsert(paper)}
+                    onClick={() => void handleInsert(paper)}
                     disabled={alreadyCited || inserting}
                     className={cn(
                       "w-full text-left p-3 rounded-lg border hover:bg-accent transition-colors",

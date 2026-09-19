@@ -58,7 +58,9 @@ export const createAnnotationSchema = z.object({
       })
       .optional(),
   }),
-  text: z.string().min(1).max(5000),
+  // Notes are optional: highlights, underlines, areas, and ink annotations
+  // are valid without a text note. Replies still require text.
+  text: z.string().max(5000).optional().default(""),
   parentId: z.string().uuid().optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   metadata: z.record(z.unknown()).optional(),
@@ -66,7 +68,8 @@ export const createAnnotationSchema = z.object({
 
 // Annotation update schema
 export const updateAnnotationSchema = z.object({
-  text: z.string().min(1).max(5000).optional(),
+  // Empty string is allowed so a note can be cleared while keeping the mark.
+  text: z.string().max(5000).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   metadata: z.record(z.unknown()).optional(),
   anchor: z

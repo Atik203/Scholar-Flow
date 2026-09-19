@@ -369,7 +369,7 @@ router.post(
         res.status(400).json({ success: false, message: "sourcePaperId and targetPaperId required" });
         return;
       }
-      const citation = await citationInsertService.insertCitation({
+      const citation = await citationInsertService.insertCitation(user.id, {
         sourcePaperId,
         targetPaperId,
         context,
@@ -387,7 +387,11 @@ router.get(
   authMiddleware,
   async (req, res, next) => {
     try {
-      const citations = await citationInsertService.listCitationsForPaper(req.params.sourcePaperId);
+      const user = (req as AuthenticatedRequest).user!;
+      const citations = await citationInsertService.listCitationsForPaper(
+        user.id,
+        req.params.sourcePaperId
+      );
       res.json({ success: true, data: citations });
     } catch (error) {
       next(error);
@@ -400,7 +404,8 @@ router.delete(
   authMiddleware,
   async (req, res, next) => {
     try {
-      await citationInsertService.deleteCitation(req.params.id);
+      const user = (req as AuthenticatedRequest).user!;
+      await citationInsertService.deleteCitation(user.id, req.params.id);
       res.json({ success: true, data: null });
     } catch (error) {
       next(error);

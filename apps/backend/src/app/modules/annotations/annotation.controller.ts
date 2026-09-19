@@ -157,8 +157,8 @@ export const annotationController = {
       return;
     }
 
-    // Ensure either text or anchor is provided
-    if (!parsed.data.text && !parsed.data.anchor) {
+    // Ensure either text (including empty, to clear a note) or anchor is provided
+    if (parsed.data.text === undefined && !parsed.data.anchor) {
       res.status(400).json({
         success: false,
         message: "Either text or anchor must be provided for update",
