@@ -14,6 +14,7 @@ import {
   useCancelTeamInvitationMutation,
   useGetTeamInvitationsReceivedQuery,
   useGetTeamInvitationsSentQuery,
+  useGetTeamSettingsQuery,
   useResendTeamInvitationMutation,
   useSendTeamInvitationMutation,
   type TeamInvitation,
@@ -628,6 +629,17 @@ function InviteModal({
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaces[0]?.id || "");
   const [role, setRole] = useState<"viewer" | "editor" | "manager">("editor");
   const [message, setMessage] = useState("");
+  const { data: settingsData } = useGetTeamSettingsQuery(undefined, {
+    skip: !isOpen,
+  });
+
+  // Pre-select the role saved in team settings (per-account default)
+  useEffect(() => {
+    const defaultRole = settingsData?.general?.defaultRole;
+    if (defaultRole === "PRO_RESEARCHER") setRole("editor");
+    else if (defaultRole === "TEAM_LEAD") setRole("manager");
+    else if (defaultRole === "RESEARCHER") setRole("viewer");
+  }, [settingsData, isOpen]);
 
   useEffect(() => {
     if (!selectedWorkspace && workspaces[0]?.id) {
