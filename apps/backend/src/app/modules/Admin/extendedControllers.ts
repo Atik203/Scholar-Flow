@@ -141,7 +141,7 @@ export const adminPaymentsController = {
     sendPaginatedResponse(
       res,
       result.items,
-      result.meta,
+      { ...result.meta, summary: result.summary },
       "Payments retrieved"
     );
   }),

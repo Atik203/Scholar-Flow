@@ -9,6 +9,8 @@ export type TMeta = {
   hasPreviousPage?: boolean;
   nextCursor?: string | null;
   hasMore?: boolean;
+  /** Optional aggregate block attached by list endpoints that expose summaries. */
+  summary?: unknown;
 };
 
 interface IApiResponse<T> {
