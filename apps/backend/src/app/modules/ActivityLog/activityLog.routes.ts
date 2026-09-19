@@ -18,7 +18,8 @@ const getActivityLogSchema = z.object({
     startDate: z.string().datetime().optional().transform(val => val ? new Date(val) : undefined),
     endDate: z.string().datetime().optional().transform(val => val ? new Date(val) : undefined),
     limit: z.string().transform(Number).optional().default("50"),
-    offset: z.string().transform(Number).optional().default("0")
+    offset: z.string().transform(Number).optional().default("0"),
+    cursor: z.string().uuid().optional()
   })
 });
 

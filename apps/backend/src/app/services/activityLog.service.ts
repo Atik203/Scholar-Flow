@@ -12,6 +12,7 @@ export interface ActivityLogFilters {
   startDate?: Date;
   endDate?: Date;
   limit?: number;
+  offset?: number;
   cursor?: string;
 }
 
@@ -91,6 +92,17 @@ export class ActivityLogService {
 
       // Apply filters
       if (filters.userId) {
+        // Prevent horizontal reads: a caller may only filter by their own id
+        // unless they are an admin (team-wide audit visibility).
+        if (filters.userId !== currentUserId) {
+          const requester = await prisma.user.findUnique({
+            where: { id: currentUserId },
+            select: { role: true },
+          });
+          if (requester?.role !== "ADMIN") {
+            throw new ApiError(403, "You can only view your own activity");
+          }
+        }
         where.userId = filters.userId;
       }
 
@@ -202,7 +214,7 @@ export class ActivityLogService {
           ...(filters.cursor ? {
             cursor: { id: filters.cursor },
             skip: 1,
-          } : {}),
+          } : filters.offset ? { skip: filters.offset } : {}),
         }),
         prisma.activityLogEntry.count({ where })
       ]);
