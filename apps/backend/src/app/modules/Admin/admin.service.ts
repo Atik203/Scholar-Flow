@@ -4,6 +4,7 @@
  */
 
 import os from "os";
+import { cacheService } from "../../cache/cacheService";
 import ApiError from "../../errors/ApiError";
 import { Prisma } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
@@ -427,8 +428,15 @@ class AdminService {
         (totalStorageBytes / estimatedTotalStorage) * 1000
       ) / 10;
 
-      // Calculate uptime (placeholder - would need actual implementation)
       const uptime = process.uptime();
+
+      const cacheStats = cacheService.getStats();
+      const cacheStatus: ISystemHealth["cache"]["status"] =
+        cacheStats.redisEnabled
+          ? "healthy"
+          : cacheStats.configured
+            ? "degraded"
+            : "not_configured";
 
       return {
         database: {
@@ -448,8 +456,8 @@ class AdminService {
           percentageUsed,
         },
         cache: {
-          status: "healthy",
-          hitRate: 0.85, // Placeholder until a real cache layer exists
+          status: cacheStatus,
+          hitRate: cacheStats.hitRate,
         },
         uptime,
         lastChecked: new Date(),
@@ -507,6 +515,11 @@ class AdminService {
       const maxConnections = dbConnections[0]?.max || 100;
       const connectionPoolUsage = (activeConnections / maxConnections) * 100;
 
+      const dbVersionResult = await prisma.$queryRaw<Array<{ version: string }>>`
+        SELECT current_setting('server_version') AS version
+      `;
+      const databaseVersion = `PostgreSQL ${dbVersionResult[0]?.version ?? "unknown"}`;
+
       // CPU metrics — idle/total DELTA between two samples (not lifetime
       // average).
       const cpus = os.cpus();
@@ -555,10 +568,17 @@ class AdminService {
       const cpuStatus = tier(cpuUsage);
       const storageStatus = tier(diskUsagePercentage);
 
+      const serverStatus: "healthy" | "degraded" | "unhealthy" =
+        memoryUsagePercentage >= 97 || dbStatus === "unhealthy"
+          ? "unhealthy"
+          : memoryUsagePercentage >= 90 || dbStatus === "degraded"
+            ? "degraded"
+            : "healthy";
+
       return {
         health: {
           database: dbStatus,
-          server: "healthy", // Assume healthy if code is running
+          server: serverStatus,
           storage: storageStatus,
           cpu: cpuStatus,
         },
@@ -582,16 +602,11 @@ class AdminService {
             free: estimatedTotalStorage - usedStorage,
             usagePercentage: Math.round(diskUsagePercentage * 100) / 100,
           },
-          network: {
-            bytesReceived: 0, // Would need OS-level monitoring
-            bytesSent: 0, // Would need OS-level monitoring
-            activeConnections,
-          },
         },
         systemInfo: {
           platform: `${os.platform()} ${os.arch()}`,
           nodeVersion: process.version,
-          databaseVersion: "PostgreSQL 15.x", // Would need actual query
+          databaseVersion,
           totalMemory: this.formatBytes(totalMemory),
           storageCapacity: this.formatBytes(estimatedTotalStorage),
           uptime: Math.floor(process.uptime()),

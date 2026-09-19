@@ -27,6 +27,9 @@ class CacheService {
   // Track cache hits for smart eviction (LRU-like behavior)
   private cacheHits: Map<string, number> = new Map();
 
+  // Miss counter for real hit-rate reporting in admin health
+  private cacheMisses: number = 0;
+
   constructor() {
     this.initializeRedis();
   }
@@ -116,14 +119,17 @@ class CacheService {
         if (cached.expiry < Date.now()) {
           this.memoryCache.delete(key);
           this.cacheHits.delete(key);
+          this.cacheMisses += 1;
           return null;
         }
         this.cacheHits.set(key, (this.cacheHits.get(key) || 0) + 1);
         return JSON.parse(cached.value) as T;
       }
 
+      this.cacheMisses += 1;
       return null;
     } catch (error) {
+      this.cacheMisses += 1;
       console.error(`Cache get error for key ${key}:`, error);
       return null;
     }
@@ -251,6 +257,7 @@ class CacheService {
       }
       this.memoryCache.clear();
       this.cacheHits.clear();
+      this.cacheMisses = 0;
     } catch (error) {
       console.error("Cache clear error:", error);
     }
@@ -276,24 +283,34 @@ class CacheService {
    * Get cache statistics (useful for monitoring free Redis usage)
    */
   public getStats(): {
+    configured: boolean;
     redisEnabled: boolean;
     memoryCacheSize: number;
     isConnecting: boolean;
     totalHits: number;
+    totalMisses: number;
+    hitRate: number | null;
     avgHitsPerKey: number;
   } {
     const totalHits = Array.from(this.cacheHits.values()).reduce(
       (sum, hits) => sum + hits,
       0
     );
+    const totalLookups = totalHits + this.cacheMisses;
     const avgHits =
       this.cacheHits.size > 0 ? totalHits / this.cacheHits.size : 0;
 
     return {
+      configured: Boolean(process.env.REDIS_URL),
       redisEnabled: this.isRedisEnabled,
       memoryCacheSize: this.memoryCache.size,
       isConnecting: this.isConnecting,
       totalHits,
+      totalMisses: this.cacheMisses,
+      hitRate:
+        totalLookups > 0
+          ? Math.round((totalHits / totalLookups) * 10000) / 10000
+          : null,
       avgHitsPerKey: Math.round(avgHits * 100) / 100,
     };
   }
