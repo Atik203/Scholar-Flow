@@ -315,6 +315,7 @@ export const {
   useRemoveTeamMemberMutation,
   useGetTeamStatsQuery,
   useGetTeamActivityQuery,
+  useLazyGetTeamActivityQuery,
   useGetTeamActivitySummaryQuery,
   useGetTeamInvitationsSentQuery,
   useGetTeamInvitationsReceivedQuery,
