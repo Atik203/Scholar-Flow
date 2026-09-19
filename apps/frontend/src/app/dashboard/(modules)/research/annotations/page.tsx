@@ -72,8 +72,59 @@ function getStatusBadge(status: string) {
   );
 }
 
-interface PapersPanelContentProps {
-  papers: Paper[];
+function PdfPaneState({
+  variant,
+  description,
+  onRetry,
+}: {
+  variant: "loading" | "error" | "missing";
+  description?: string;
+  onRetry?: () => void;
+}) {
+  if (variant === "loading") {
+    return (
+      <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-sm text-muted-foreground">Loading PDF...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isError = variant === "error";
+  return (
+    <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
+      <div className="text-center">
+        <FileText
+          className={`h-12 w-12 mx-auto mb-4 ${
+            isError ? "text-destructive" : "text-muted-foreground"
+          }`}
+        />
+        <h3
+          className={`text-lg font-semibold mb-2 ${
+            isError ? "text-destructive" : ""
+          }`}
+        >
+          {isError ? "Failed to Load PDF" : "PDF Not Available"}
+        </h3>
+        <p className="text-muted-foreground mb-4">
+          {description ??
+            (isError
+              ? "There was an error loading the PDF file for this paper."
+              : "The PDF file for this paper is not available.")}
+        </p>
+        {isError && onRetry && (
+          <Button variant="outline" onClick={onRetry} className="mt-2">
+            Retry
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface PapersPanelContentProps {  papers: Paper[];
   papersLoading: boolean;
   papersError: boolean;
   selectedPaperId: string | null;
@@ -277,6 +328,7 @@ export default function ResearchAnnotationsPage() {
     data: fileUrlData,
     isFetching: isFetchingFileUrl,
     error: fileUrlError,
+    refetch: refetchFileUrl,
   } = useGetPaperFileUrlQuery(selectedPaperId!, { skip: !selectedPaperId });
 
   // Auto-select first paper with PDF file if none selected
@@ -540,34 +592,12 @@ export default function ResearchAnnotationsPage() {
                   {activeTab === "preview" && (
                     <>
                       {isFetchingFileUrl ? (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                            <p className="text-sm text-muted-foreground">
-                              Loading PDF...
-                            </p>
-                          </div>
-                        </div>
+                        <PdfPaneState variant="loading" />
                       ) : fileUrlError ? (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2 text-destructive">
-                              Failed to Load PDF
-                            </h3>
-                            <p className="text-muted-foreground mb-4">
-                              There was an error loading the PDF file for this
-                              paper.
-                            </p>
-                            <Button
-                              variant="outline"
-                              onClick={() => window.location.reload()}
-                              className="mt-2"
-                            >
-                              Retry
-                            </Button>
-                          </div>
-                        </div>
+                        <PdfPaneState
+                          variant="error"
+                          onRetry={() => void refetchFileUrl()}
+                        />
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
                         <div className="min-h-[70vh] border rounded-lg">
                           <DocumentPreview
@@ -588,18 +618,10 @@ export default function ResearchAnnotationsPage() {
                           />
                         </div>
                       ) : (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">
-                              PDF Not Available
-                            </h3>
-                            <p className="text-muted-foreground">
-                              The PDF file for this paper is not available for
-                              preview.
-                            </p>
-                          </div>
-                        </div>
+                        <PdfPaneState
+                          variant="missing"
+                          description="The PDF file for this paper is not available for preview."
+                        />
                       )}
                     </>
                   )}
@@ -608,34 +630,12 @@ export default function ResearchAnnotationsPage() {
                   {activeTab === "annotations" && (
                     <>
                       {isFetchingFileUrl ? (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                            <p className="text-sm text-muted-foreground">
-                              Loading PDF...
-                            </p>
-                          </div>
-                        </div>
+                        <PdfPaneState variant="loading" />
                       ) : fileUrlError ? (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <FileText className="h-12 w-12 text-destructive mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2 text-destructive">
-                              Failed to Load PDF
-                            </h3>
-                            <p className="text-muted-foreground mb-4">
-                              There was an error loading the PDF file for this
-                              paper.
-                            </p>
-                            <Button
-                              variant="outline"
-                              onClick={() => window.location.reload()}
-                              className="mt-2"
-                            >
-                              Retry
-                            </Button>
-                          </div>
-                        </div>
+                        <PdfPaneState
+                          variant="error"
+                          onRetry={() => void refetchFileUrl()}
+                        />
                       ) : fileUrlData?.data?.url && selectedPaperId ? (
                         <div className="min-h-[75vh] border rounded-lg overflow-hidden">
                           <PdfAnnotationViewerEnhanced
@@ -644,18 +644,10 @@ export default function ResearchAnnotationsPage() {
                           />
                         </div>
                       ) : (
-                        <div className="min-h-[70vh] border rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold mb-2">
-                              PDF Not Available
-                            </h3>
-                            <p className="text-muted-foreground">
-                              The PDF file for this paper is not available for
-                              annotation.
-                            </p>
-                          </div>
-                        </div>
+                        <PdfPaneState
+                          variant="missing"
+                          description="The PDF file for this paper is not available for annotation."
+                        />
                       )}
                     </>
                   )}
