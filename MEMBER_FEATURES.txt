@@ -35,6 +35,12 @@ ALSO
 - Discover (trending papers, personalized recommendations, explore live
   research feeds from arXiv/OpenAlex, save to library)
 
+LATEST UPDATE (RELEASE 1.3.5)
+- Research Menus (except Annotations)
+- Teams Menus
+- Admin (Full)
+- Payment
+
 2. MD. SALMAN RAHMAN NAYEEM (SALMAN)
 ------------------------------------
 
@@ -43,6 +49,9 @@ ALSO
 - Global Search
 - Profile
 - Settings
+
+LATEST UPDATE (RELEASE 1.3.5)
+- Annotations (Research Menus)
 
 3. SOUROV
 ---------
