@@ -46,6 +46,14 @@ export interface AdminReportCreate {
   config?: Record<string, unknown>;
 }
 
+export interface AdminReportStats {
+  total: number;
+  ready: number;
+  generating: number;
+  scheduled: number;
+  failed: number;
+}
+
 export const adminReportsApi = apiSlice
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -73,6 +81,14 @@ export const adminReportsApi = apiSlice
             : [{ type: "AdminReport", id: "LIST" }],
       }),
 
+      getReportStats: builder.query<
+        { success: boolean; data: AdminReportStats },
+        { type?: AdminReportType; search?: string }
+      >({
+        query: (params) => ({ url: "/admin/reports/stats", params }),
+        providesTags: [{ type: "AdminReport", id: "STATS" }],
+      }),
+
       getReport: builder.query<
         { success: boolean; data: AdminReport },
         string
@@ -92,7 +108,10 @@ export const adminReportsApi = apiSlice
           method: "POST",
           body,
         }),
-        invalidatesTags: [{ type: "AdminReport", id: "LIST" }],
+        invalidatesTags: [
+          { type: "AdminReport", id: "LIST" },
+          { type: "AdminReport", id: "STATS" },
+        ],
       }),
 
       updateReport: builder.mutation<
@@ -107,6 +126,7 @@ export const adminReportsApi = apiSlice
         invalidatesTags: (result, error, arg) => [
           { type: "AdminReport", id: arg.id },
           { type: "AdminReport", id: "LIST" },
+          { type: "AdminReport", id: "STATS" },
         ],
       }),
 
@@ -118,20 +138,26 @@ export const adminReportsApi = apiSlice
           url: `/admin/reports/${id}`,
           method: "DELETE",
         }),
-        invalidatesTags: [{ type: "AdminReport", id: "LIST" }],
+        invalidatesTags: [
+          { type: "AdminReport", id: "LIST" },
+          { type: "AdminReport", id: "STATS" },
+        ],
       }),
 
       generateReport: builder.mutation<
-        { success: boolean; data: { id: string; status: AdminReportStatus; fileSize: string | null; generatedAt: string } },
+        Blob,
         string
       >({
         query: (id) => ({
           url: `/admin/reports/${id}/generate`,
           method: "POST",
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
         }),
         invalidatesTags: (result, error, id) => [
           { type: "AdminReport", id },
           { type: "AdminReport", id: "LIST" },
+          { type: "AdminReport", id: "STATS" },
         ],
       }),
     }),
@@ -140,6 +166,7 @@ export const adminReportsApi = apiSlice
 export const {
   useListReportsQuery,
   useGetReportQuery,
+  useGetReportStatsQuery,
   useCreateReportMutation,
   useUpdateReportMutation,
   useDeleteReportMutation,
