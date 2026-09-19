@@ -1,6 +1,6 @@
 import ApiError from "../../errors/ApiError";
 import prisma, { Prisma } from "../../shared/prisma";
-import { USER_ROLES } from "../Auth/auth.constant";
+import { ROLE_HIERARCHY, USER_ROLES } from "../Auth/auth.constant";
 
 // TeamSettings is a virtual aggregate stored as JSON in a single column on a sentinel User row
 // of the requesting team_lead. In Phase 5 we don't have a dedicated Team model — the team is the
@@ -351,18 +351,78 @@ export class TeamService {
   }
 
   /**
-   * Remove a team member (soft-delete). Only ADMIN can do this in Phase 5.
-   * The user's data is preserved (isDeleted=true); they can no longer sign in.
+   * Revoke a collaborator's access to the requestor's team: soft-deletes
+   * their memberships and pending invitations in the workspaces the requestor
+   * owns. The user account itself is untouched — account deletion lives in
+   * the admin panel. This powers the Team page "Remove from Team" action and
+   * the "access lasts until the Team Lead removes it" model.
    */
   static async removeMember(requestorId: string, targetUserId: string) {
     if (requestorId === targetUserId) {
       throw new ApiError(400, "You cannot remove yourself");
     }
-    await prisma.user.update({
-      where: { id: targetUserId },
-      data: { isDeleted: true },
+
+    // Only workspaces owned by the requestor count. Admins use the admin
+    // panel for account-level actions.
+    const owned = await prisma.workspace.findMany({
+      where: { ownerId: requestorId, isDeleted: false },
+      select: { id: true },
     });
-    return { success: true };
+    const ownedIds = owned.map((w) => w.id);
+    if (ownedIds.length === 0) {
+      throw new ApiError(
+        400,
+        "You must own a workspace to remove team members"
+      );
+    }
+
+    const [membershipResult, invitationResult] = await prisma.$transaction([
+      prisma.workspaceMember.updateMany({
+        where: {
+          userId: targetUserId,
+          workspaceId: { in: ownedIds },
+          isDeleted: false,
+        },
+        data: { isDeleted: true },
+      }),
+      prisma.workspaceInvitation.updateMany({
+        where: {
+          userId: targetUserId,
+          workspaceId: { in: ownedIds },
+          status: "PENDING",
+          isDeleted: false,
+        },
+        data: { isDeleted: true, status: "DECLINED", declinedAt: new Date() },
+      }),
+    ]);
+
+    if (membershipResult.count === 0 && invitationResult.count === 0) {
+      throw new ApiError(404, "That user is not part of your team");
+    }
+
+    // Best-effort audit trail so the removal is visible in team activity.
+    try {
+      await prisma.activityLogEntry.create({
+        data: {
+          userId: requestorId,
+          entity: "team",
+          entityId: targetUserId,
+          action: "member_removed",
+          details: {
+            memberships: membershipResult.count,
+            invitations: invitationResult.count,
+          },
+        },
+      });
+    } catch {
+      // Logging must never break the primary flow.
+    }
+
+    return {
+      success: true,
+      removedMemberships: membershipResult.count,
+      cancelledInvitations: invitationResult.count,
+    };
   }
 
   // -------------------------------------------------------------------------
@@ -939,6 +999,56 @@ export class TeamService {
   // -------------------------------------------------------------------------
   // Internal helpers
   // -------------------------------------------------------------------------
+
+  /**
+   * Team access is derived, never stored on the user's global role:
+   *  - global role is TEAM_LEAD or above, OR
+   *  - the user actively collaborates in a workspace owned by someone else
+   *    (i.e. they accepted a team invitation), OR
+   *  - the user owns a workspace that has other active members.
+   *
+   * This is what gives invited RESEARCHER / PRO_RESEARCHER users access to the
+   * Team section until they are removed from the workspace — and it keeps the
+   * section hidden for solo users who only have a personal workspace.
+   */
+  static async getAccessInfo(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    const role = (user?.role ??
+      USER_ROLES.RESEARCHER) as keyof typeof ROLE_HIERARCHY;
+    const isTeamLead =
+      (ROLE_HIERARCHY[role] ?? 0) >= ROLE_HIERARCHY[USER_ROLES.TEAM_LEAD];
+
+    const [memberOfOthersWorkspace, ownerWithMembers] = await Promise.all([
+      prisma.workspaceMember.findFirst({
+        where: {
+          userId,
+          isDeleted: false,
+          workspace: { isDeleted: false, ownerId: { not: userId } },
+        },
+        select: { id: true },
+      }),
+      prisma.workspace.findFirst({
+        where: {
+          ownerId: userId,
+          isDeleted: false,
+          members: { some: { isDeleted: false, userId: { not: userId } } },
+        },
+        select: { id: true },
+      }),
+    ]);
+
+    return {
+      hasAccess:
+        isTeamLead ||
+        Boolean(memberOfOthersWorkspace) ||
+        Boolean(ownerWithMembers),
+      isTeamLead,
+    };
+  }
 
   /** Workspace IDs the user owns or is an active member of (non-deleted). */
   private static async _requesterWorkspaceIds(userId: string): Promise<string[]> {
