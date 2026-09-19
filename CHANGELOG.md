@@ -1,5 +1,68 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.6 — Admin Console Fully Dynamic: System Actions, Persisted Settings & Real Exports (2026-09-20)
+
+**Release date:** 2026-09-20
+**Theme:** Every admin menu backed by real data — real system metrics and
+actions (diagnostics, cache flush, log export), a persisted platform settings
+store, real CSV/JSON exports, server-side aggregates, and removal of all
+mock/dead UI.
+
+---
+
+### System monitoring — no more placeholder data
+- `GET /admin/health` cache block now reports the real cache layer state
+  (`cacheService` stats: configured / Redis connected / hit rate from actual
+  lookups) instead of a hardcoded 85%.
+- `GET /admin/system/metrics` returns the real PostgreSQL version
+  (`current_setting('server_version')`) and derives server health from memory
+  pressure + DB status; fake network byte counters were removed.
+- New `POST /admin/system/diagnostics`: database ping + pool, heap/RSS memory,
+  cache and runtime info aggregated into pass/warn/fail checks.
+- New `POST /admin/system/clear-cache`: flushes Redis + the in-memory fallback;
+  returns 409 when Redis is not connected. Cache keys are namespaced
+  (`sf:cache:`) and cleared via SCAN/DEL — never FLUSHDB, because Bull PDF-queue
+  keys share the same Redis database.
+- New in-memory log ring buffer (last 1000 console lines, resets on restart)
+  with `GET /admin/system/logs` and `GET /admin/system/logs/export`.
+
+### Settings — persisted platform configuration
+- New `SystemSetting` model + migration; `GET/PATCH /admin/settings` with Zod
+  validation and an ActivityLogEntry audit trail on every write.
+- Settings page fully wired: platform name, support email, session timeout,
+  2FA requirement flag, notification toggles and storage quota; 2FA/backup rows
+  now explain platform-managed behavior instead of dead Configure buttons.
+
+### Exports & aggregates
+- New `GET /admin/users/export` — filter-aware CSV (search/role/status, 10k cap)
+  used by the Overview's Export button.
+- `GET /admin/payments` now returns a full-filter `summary` (succeeded count,
+  total revenue) in `meta` — no more page-scoped totals.
+- New `GET /admin/reports/stats` — server-side status counts; reports page
+  generates downloads through an RTK blob mutation instead of a raw fetch and
+  gained pagination.
+- Audit log CSV/JSON export now streams through the RTK blob hook (the old
+  `window.open` pointed at a frontend route that never existed).
+
+### Dashboard & page fixes
+- Overview: real user export, user-growth chart + role-distribution widgets
+  (previously unused endpoints), working recent-user role/deactivate/delete
+  actions and pagination.
+- AI Models: edit dialog's "Set as default" now calls the dedicated
+  set-default endpoint (PATCH ignored it).
+- Moderation: Resolve/Dismiss render for reports without a content preview.
+- Webhooks: delete/event-type failures surface toasts; retry-delivery
+  invalidates the endpoint's delivery list cache.
+- Cleanup: dead PerformanceBar color prop, unused imports and refetch handles.
+
+### Verification
+- `yarn lint` 0 errors, `yarn type-check` green (3 packages), `yarn build` 3/3.
+- Live-tested against the shared cloud DB as an admin: settings round-trip with
+  audit, diagnostics, namespaced cache clear, log capture/export, users CSV,
+  payments summary and reports stats all verified; no runtime errors.
+
+---
+
 ## Release 1.3.5 — Team Collaboration Access, Real-Time Notification Delivery & Annotations UX (2026-09-19)
 
 **Release date:** 2026-09-19
