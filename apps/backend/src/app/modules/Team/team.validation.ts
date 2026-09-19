@@ -32,6 +32,9 @@ export const inviteTeamMemberSchema = z.object({
     .optional()
     .default("RESEARCHER"),
   message: z.string().max(500).optional(),
+  // When provided, the invitation targets this workspace (must be owned by
+  // the inviter). Otherwise the inviter's first owned workspace is used.
+  workspaceId: z.string().uuid("Invalid workspace ID").optional(),
 });
 
 export const teamInvitationParamsSchema = z.object({

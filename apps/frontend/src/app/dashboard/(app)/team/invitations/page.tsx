@@ -4,7 +4,6 @@ import { showSuccessToast } from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useQueryErrorHandler } from "@/hooks/useErrorHandler";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import {
@@ -38,7 +37,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type FilterKey = "all" | "received" | "sent";
@@ -126,11 +125,13 @@ export default function TeamInvitationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [sentPage, setSentPage] = useState(1);
+  const [receivedPage, setReceivedPage] = useState(1);
 
   const { data: sentData, isLoading: sentLoading, refetch: refetchSent } =
-    useGetTeamInvitationsSentQuery({ page: 1, limit: 50 }, { skip: !shouldFetch });
+    useGetTeamInvitationsSentQuery({ page: sentPage, limit: 25 }, { skip: !shouldFetch });
   const { data: receivedData, isLoading: receivedLoading, refetch: refetchReceived } =
-    useGetTeamInvitationsReceivedQuery({ page: 1, limit: 50 }, { skip: !shouldFetch });
+    useGetTeamInvitationsReceivedQuery({ page: receivedPage, limit: 25 }, { skip: !shouldFetch });
   const { data: workspacesData } = useListWorkspacesQuery(
     { limit: 50, scope: "owned" },
     { skip: !shouldFetch }
@@ -143,6 +144,8 @@ export default function TeamInvitationsPage() {
 
   const sent: TeamInvitation[] = sentData?.result || [];
   const received: TeamInvitation[] = receivedData?.result || [];
+  const sentTotalPages = sentData?.meta?.totalPage ?? 1;
+  const receivedTotalPages = receivedData?.meta?.totalPage ?? 1;
 
   const allInvitations: (TeamInvitation & { type: "received" | "sent" })[] = [
     ...received.map((i) => ({ ...i, type: "received" as const })),
@@ -350,6 +353,28 @@ export default function TeamInvitationsPage() {
         )}
       </div>
 
+      {/* Pagination */}
+      {(sentTotalPages > 1 || receivedTotalPages > 1) && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
+          {(filter === "all" || filter === "received") && receivedTotalPages > 1 && (
+            <Pagination
+              label="Received"
+              page={receivedPage}
+              totalPages={receivedTotalPages}
+              onChange={setReceivedPage}
+            />
+          )}
+          {(filter === "all" || filter === "sent") && sentTotalPages > 1 && (
+            <Pagination
+              label="Sent"
+              page={sentPage}
+              totalPages={sentTotalPages}
+              onChange={setSentPage}
+            />
+          )}
+        </div>
+      )}
+
       {/* Invite Modal */}
       <InviteModal
         isOpen={showInviteModal}
@@ -361,9 +386,9 @@ export default function TeamInvitationsPage() {
             color: w.color,
           })) || []
         }
-        onSend={async ({ email, role, message }) => {
+        onSend={async ({ email, role, message, workspaceId }) => {
           try {
-            await sendInvite({ email, role, message }).unwrap();
+            await sendInvite({ email, role, message, workspaceId }).unwrap();
             showSuccessToast("Invitation sent");
             setShowInviteModal(false);
           } catch (err) {
@@ -546,6 +571,43 @@ function InvitationCard({
   );
 }
 
+function Pagination({
+  label,
+  page,
+  totalPages,
+  onChange,
+}: {
+  label: string;
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span>{label}</span>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page <= 1}
+        onClick={() => onChange(page - 1)}
+      >
+        Previous
+      </Button>
+      <span>
+        Page {page} of {totalPages}
+      </span>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={page >= totalPages}
+        onClick={() => onChange(page + 1)}
+      >
+        Next
+      </Button>
+    </div>
+  );
+}
+
 function InviteModal({
   isOpen,
   onClose,
@@ -555,12 +617,23 @@ function InviteModal({
   isOpen: boolean;
   onClose: () => void;
   workspaces: { id: string; name: string; color?: string }[];
-  onSend: (data: { email: string; role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN"; message?: string }) => void;
+  onSend: (data: {
+    email: string;
+    role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD";
+    message?: string;
+    workspaceId?: string;
+  }) => void;
 }) {
   const [email, setEmail] = useState("");
   const [selectedWorkspace, setSelectedWorkspace] = useState(workspaces[0]?.id || "");
-  const [role, setRole] = useState<"viewer" | "editor" | "admin">("editor");
+  const [role, setRole] = useState<"viewer" | "editor" | "manager">("editor");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!selectedWorkspace && workspaces[0]?.id) {
+      setSelectedWorkspace(workspaces[0].id);
+    }
+  }, [workspaces, selectedWorkspace]);
 
   return (
     <AnimatePresence>
@@ -629,7 +702,7 @@ function InviteModal({
               <div>
                 <label className="block text-sm font-medium mb-1">Role</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {(["viewer", "editor", "admin"] as const).map((r) => (
+                  {(["viewer", "editor", "manager"] as const).map((r) => (
                     <button
                       key={r}
                       onClick={() => setRole(r)}
@@ -644,6 +717,14 @@ function InviteModal({
                     </button>
                   ))}
                 </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {role === "viewer" &&
+                    "Can read, annotate, and comment on shared papers."}
+                  {role === "editor" &&
+                    "Can upload papers, create collections, and use AI tools."}
+                  {role === "manager" &&
+                    "Can manage members, invitations, and workspace settings."}
+                </p>
               </div>
 
               <div>
@@ -666,12 +747,13 @@ function InviteModal({
                   onSend({
                     email,
                     role:
-                      role === "admin"
+                      role === "manager"
                         ? "TEAM_LEAD"
                         : role === "editor"
                           ? "PRO_RESEARCHER"
                           : "RESEARCHER",
                     message: message || undefined,
+                    workspaceId: selectedWorkspace || undefined,
                   })
                 }
                 disabled={!email.trim()}
