@@ -356,6 +356,7 @@ export function PdfAnnotationViewerEnhanced({
       />
 
       <AnnotationEditDialog
+        key={editingAnnotation?.id ?? "annotation-editor"}
         annotation={editingAnnotation}
         open={!!editingAnnotation}
         onOpenChange={(open) => {
