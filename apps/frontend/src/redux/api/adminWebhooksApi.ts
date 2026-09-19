@@ -168,13 +168,16 @@ export const adminWebhooksApi = apiSlice
 
       retryDelivery: builder.mutation<
         { success: boolean; data: WebhookDelivery },
-        { deliveryId: string }
+        { deliveryId: string; endpointId: string }
       >({
         query: ({ deliveryId }) => ({
           url: `/admin/webhooks/deliveries/${deliveryId}/retry`,
           method: "POST",
         }),
-        invalidatesTags: [{ type: "AdminWebhook", id: "LIST" }],
+        invalidatesTags: (result, error, arg) => [
+          { type: "AdminWebhook", id: `DELIVERIES-${arg.endpointId}` },
+          { type: "AdminWebhook", id: "LIST" },
+        ],
       }),
     }),
   });
