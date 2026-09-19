@@ -37,7 +37,9 @@ export function SystemHealthIndicator({
     );
   }
 
-  const getStatusIcon = (status: "healthy" | "degraded" | "unhealthy") => {
+  const getStatusIcon = (
+    status: "healthy" | "degraded" | "unhealthy" | "not_configured"
+  ) => {
     switch (status) {
       case "healthy":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
@@ -45,10 +47,14 @@ export function SystemHealthIndicator({
         return <AlertTriangle className="h-5 w-5 text-yellow-600" />;
       case "unhealthy":
         return <AlertTriangle className="h-5 w-5 text-red-600" />;
+      case "not_configured":
+        return <AlertTriangle className="h-5 w-5 text-gray-400" />;
     }
   };
 
-  const getStatusBadge = (status: "healthy" | "degraded" | "unhealthy") => {
+  const getStatusBadge = (
+    status: "healthy" | "degraded" | "unhealthy" | "not_configured"
+  ) => {
     switch (status) {
       case "healthy":
         return <Badge className="bg-green-600">Healthy</Badge>;
@@ -56,6 +62,8 @@ export function SystemHealthIndicator({
         return <Badge className="bg-yellow-600">Degraded</Badge>;
       case "unhealthy":
         return <Badge className="bg-red-600">Unhealthy</Badge>;
+      case "not_configured":
+        return <Badge variant="outline">Not Configured</Badge>;
     }
   };
 
@@ -94,7 +102,12 @@ export function SystemHealthIndicator({
               <div>
                 <p className="font-medium">Cache</p>
                 <p className="text-sm text-muted-foreground">
-                  Hit Rate: {(health.cache.hitRate * 100).toFixed(1)}%
+                  Hit Rate:{" "}
+                  {health.cache.hitRate != null
+                    ? `${(health.cache.hitRate * 100).toFixed(1)}%`
+                    : health.cache.status === "not_configured"
+                      ? "in-memory fallback"
+                      : "no lookups yet"}
                 </p>
               </div>
             </div>
