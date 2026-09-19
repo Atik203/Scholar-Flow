@@ -90,6 +90,22 @@ const ROOM_RE = new RegExp(
   "i"
 );
 
+/**
+ * Emit-side guard: a socket may only emit into rooms it has joined (and the
+ * room name must match the allowlist). Without this, any authenticated
+ * client could broadcast into arbitrary paper/discussion rooms.
+ */
+const guardRoom = (socket: Socket, room: unknown): room is string => {
+  if (typeof room === "string" && ROOM_RE.test(room) && socket.rooms.has(room)) {
+    return true;
+  }
+  socket.emit("room:error", {
+    room,
+    message: "Access denied: join the room first",
+  });
+  return false;
+};
+
 io.on("connection", (socket: AuthenticatedSocket) => {
   const { userId, userName } = socket;
   if (!userId) { socket.disconnect(true); return; }
@@ -120,35 +136,45 @@ io.on("connection", (socket: AuthenticatedSocket) => {
     socket.to(room).emit("presence:left", { userId, userName, room, memberCount: count });
   });
 
-  socket.on("typing:start", ({ room, context }: { room: string; context?: string }) => {
+  socket.on("typing:start", ({ room, context }: { room: string; context?: string } = {} as { room: string; context?: string }) => {
+    if (!guardRoom(socket, room)) return;
     socket.to(room).emit("typing:update", { userId, userName, room, isTyping: true, context });
   });
 
-  socket.on("typing:stop", ({ room }: { room: string }) => {
+  socket.on("typing:stop", ({ room }: { room: string } = {} as { room: string }) => {
+    if (!guardRoom(socket, room)) return;
     socket.to(room).emit("typing:update", { userId, userName, room, isTyping: false });
   });
 
-  socket.on("editor:update", ({ room, update }: { room: string; update: number[] }) => {
+  socket.on("editor:update", ({ room, update }: { room: string; update: number[] } = {} as { room: string; update: number[] }) => {
+    if (!guardRoom(socket, room)) return;
     socket.to(room).emit("editor:update", { userId, update });
   });
 
-  socket.on("editor:awareness", ({ room, state }: { room: string; state: any }) => {
+  socket.on("editor:awareness", ({ room, state }: { room: string; state: any } = {} as { room: string; state: any }) => {
+    if (!guardRoom(socket, room)) return;
     socket.to(room).emit("editor:awareness", { userId, userName, state });
   });
 
-  socket.on("editor:sync-request", () => {
-    // Relayed to other clients — they respond with full state
-    socket.broadcast.emit("editor:sync-request");
+  socket.on("editor:sync-request", ({ room }: { room?: string } = {}) => {
+    // Room-scoped relay — a global broadcast leaked full document state to
+    // every connected client in unrelated rooms.
+    if (!guardRoom(socket, room)) return;
+    socket.to(room).emit("editor:sync-request", { room });
   });
 
-  socket.on("editor:sync-response", ({ room, update }: { room: string; update: number[] }) => {
+  socket.on("editor:sync-response", ({ room, update }: { room: string; update: number[] } = {} as { room: string; update: number[] }) => {
+    if (!guardRoom(socket, room)) return;
     socket.to(room).emit("editor:sync-response", { update });
   });
 
-  socket.on("discussion:message", ({ room, content, threadId }: { room: string; content: string; threadId?: string }) => {
+  socket.on("discussion:message", ({ room, content, threadId }: { room: string; content: string; threadId?: string } = {} as { room: string; content: string; threadId?: string }) => {
+    if (!guardRoom(socket, room)) return;
+    if (typeof content !== "string" || !content.trim()) return;
+
     const message = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      userId, userName, content, threadId,
+      userId, userName, content: content.slice(0, 5000), threadId,
       timestamp: new Date().toISOString(),
     };
     io.to(room).emit("discussion:message", message);
