@@ -8,36 +8,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface PerformanceBarProps {
   label: string;
   value: number; // percentage 0-100
-  color?: "blue" | "green" | "purple" | "orange" | "red" | "yellow";
   isLoading?: boolean;
 }
 
 export function PerformanceBar({
   label,
   value,
-  color = "blue",
   isLoading = false,
 }: PerformanceBarProps) {
-  const getBarColor = () => {
-    switch (color) {
-      case "blue":
-        return "bg-blue-600";
-      case "green":
-        return "bg-green-600";
-      case "purple":
-        return "bg-purple-600";
-      case "orange":
-        return "bg-orange-600";
-      case "red":
-        return "bg-red-600";
-      case "yellow":
-        return "bg-yellow-600";
-      default:
-        return "bg-blue-600";
-    }
-  };
-
-  // Auto-select color based on value if not specified
+  // Auto-select color based on value
   const getAutoColor = () => {
     if (value < 50) return "bg-green-600";
     if (value < 70) return "bg-blue-600";

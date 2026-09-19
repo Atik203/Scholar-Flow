@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, Key, XCircle } from "lucide-react";
 
 export default function AdminAIKeysPage() {
-  const { data, isLoading, refetch } = useGetKeyStatusesQuery();
+  const { data, isLoading } = useGetKeyStatusesQuery();
 
   const statuses = data?.keyStatuses ?? [];
   const configured = statuses.filter((s) => s.configured).length;
