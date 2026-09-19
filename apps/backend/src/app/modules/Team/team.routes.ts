@@ -2,9 +2,9 @@ import express from "express";
 import { authMiddleware } from "../../middleware/auth";
 import { performanceMonitor } from "../../middleware/performanceMonitor";
 import { rateLimiter } from "../../middleware/rateLimiter";
-import { requireRole, requireTeamLead } from "../../middleware/requireRole";
+import { requireTeamLead } from "../../middleware/requireRole";
+import { requireTeamAccess } from "../../middleware/requireTeamAccess";
 import { validateRequestBody, validateRequestParams } from "../../middleware/validateRequest";
-import { USER_ROLES } from "../Auth/auth.constant";
 import { teamController } from "./team.controller";
 import {
   inviteTeamMemberSchema,
@@ -18,9 +18,19 @@ export const teamRoutes: express.Router = express.Router();
 
 teamRoutes.use(performanceMonitor as any);
 
-// All team routes require TEAM_LEAD+ (or ADMIN)
+// Access probe must stay reachable before the access gate itself — the
+// sidebar and the team layout use it to decide whether to render.
+teamRoutes.get(
+  "/access",
+  authMiddleware as any,
+  teamController.getAccess as any
+);
+
+// Read/participate endpoints: lead+ OR active workspace collaboration.
+// This lets invited RESEARCHER / PRO_RESEARCHER users see their team until the
+// lead removes them from the workspace.
 teamRoutes.use(authMiddleware as any);
-teamRoutes.use(requireTeamLead as any);
+teamRoutes.use(requireTeamAccess as any);
 
 // ----------------------------------------------------------------------------
 // Members
@@ -42,17 +52,19 @@ teamRoutes.get(
 teamRoutes.patch(
   "/members/:userId",
   rateLimiter as any,
+  requireTeamLead as any,
   validateRequestParams(teamMemberParamsSchema) as any,
   validateRequestBody(updateTeamMemberSchema) as any,
   teamController.updateMember as any
 );
 
-// Only ADMIN can remove a user from the team
+// TEAM_LEAD+ can revoke access to the workspaces they own; ADMIN account
+// deletion stays in the admin panel.
 teamRoutes.delete(
   "/members/:userId",
   rateLimiter as any,
+  requireTeamLead as any,
   validateRequestParams(teamMemberParamsSchema) as any,
-  requireRole(USER_ROLES.ADMIN) as any,
   teamController.removeMember as any
 );
 
@@ -120,18 +132,20 @@ teamRoutes.post(
 );
 
 // ----------------------------------------------------------------------------
-// Settings
+// Settings (per-account preferences — manage access only)
 // ----------------------------------------------------------------------------
 
 teamRoutes.get(
   "/settings",
   rateLimiter as any,
+  requireTeamLead as any,
   teamController.getSettings as any
 );
 
 teamRoutes.patch(
   "/settings",
   rateLimiter as any,
+  requireTeamLead as any,
   validateRequestBody(updateTeamSettingsSchema) as any,
   teamController.updateSettings as any
 );
