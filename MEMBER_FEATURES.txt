@@ -5,7 +5,7 @@ Latest Update — Release 1.3.5
 1. MD. ATIKUR RAHMAN (ATIK)
 ---------------------------
 
-RESEARCH MENUS (EXCEPT ANNOTATIONS)
+RESEARCH Modules
 - Research Hub — all research tools in one hub with role-based access
 - PDF Text Extraction — OCR/text extraction, live processing status, text viewer
 - Text Editor — TipTap editor: 7 templates, auto-save, PDF/DOCX export,
@@ -15,7 +15,7 @@ RESEARCH MENUS (EXCEPT ANNOTATIONS)
 - Citation Graph — visual map of real citation links between papers (Pro)
 - Research Map — topic cloud built from library tags, with filtering (Pro)
 
-TEAMS MENUS
+TEAMS Modules
 - Members — real status + last active, role changes, safe removal
 - Invitations — workspace invites (Viewer/Editor/Manager), resend/cancel,
   accept/decline
