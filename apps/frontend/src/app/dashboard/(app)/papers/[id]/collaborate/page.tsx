@@ -15,10 +15,13 @@ import { Typography } from "@tiptap/extension-typography";
 import { StarterKit } from "@tiptap/starter-kit";
 import { ArrowLeft, Clock, Users } from "lucide-react";
 import Link from "next/link";
-import { use, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
 import { useCollabSync } from "@/lib/yjs/useCollabSync";
-import { useGetEditorPaperQuery } from "@/redux/api/paperApi";
+import {
+  useAutoSaveEditorContentMutation,
+  useGetEditorPaperQuery,
+} from "@/redux/api/paperApi";
 
 const USER_COLORS = [
   "#958DF1", "#F98181", "#FBBC88", "#FAF594", "#70CFF8",
@@ -42,8 +45,11 @@ interface Props {
 function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id: string; title: string; contentHtml?: string | null } }) {
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
+  const [autoSaveEditorContent] = useAutoSaveEditorContentMutation();
+  const persistTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const seededRef = useRef(false);
 
-  const { ydoc, awareness } = useCollabSync({
+  const { ydoc, awareness, hasRemoteState } = useCollabSync({
     paperId,
     initialContent: paper.contentHtml ?? null,
     enabled: true,
@@ -86,6 +92,18 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
         if (editor) {
           setWordCount(editor.storage?.characterCount?.words?.() ?? 0);
           setCharCount(editor.storage?.characterCount?.characters?.() ?? 0);
+
+          // Persist merged content to the paper record (debounced). Yjs keeps
+          // peers in sync; this keeps the stored document durable.
+          if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+          persistTimerRef.current = setTimeout(() => {
+            void autoSaveEditorContent({
+              id: paperId,
+              content: editor.getHTML(),
+            }).catch(() => {
+              // Best-effort autosave; local Yjs state is still intact.
+            });
+          }, 3000);
         }
       },
       editorProps: {
@@ -98,12 +116,47 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
     [ydoc, awareness]
   );
 
+  // Seed the shared doc from the saved HTML exactly once, and only when no
+  // other peer is in the room (prevents duplicated sections when two peers
+  // seed an empty document simultaneously).
+  useEffect(() => {
+    if (!editor || !paper.contentHtml || seededRef.current || hasRemoteState) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      if (seededRef.current || hasRemoteState) return;
+      const fragment = ydoc.getXmlFragment("default");
+      if (fragment.length > 0) return;
+      seededRef.current = true;
+      editor.commands.setContent(paper.contentHtml ?? "");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [editor, paper.contentHtml, ydoc, hasRemoteState]);
+
+  // Clear any pending persistence timer on unmount
+  useEffect(() => {
+    return () => {
+      if (persistTimerRef.current) clearTimeout(persistTimerRef.current);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/dashboard/papers/${paperId}`}>
+            <Link
+              href={`/dashboard/papers/${paperId}`}
+              onClick={() => {
+                if (!editor) return;
+                void autoSaveEditorContent({
+                  id: paperId,
+                  content: editor.getHTML(),
+                }).catch(() => {
+                  // Best-effort flush when leaving the page.
+                });
+              }}
+            >
               <ArrowLeft className="h-4 w-4 mr-1" /> Back
             </Link>
           </Button>
