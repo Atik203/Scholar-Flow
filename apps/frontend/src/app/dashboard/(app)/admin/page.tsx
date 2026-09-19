@@ -1,7 +1,10 @@
 "use client";
 
 import { RoleBadge } from "@/components/auth/RoleBadge";
-import { showSuccessToast } from "@/components/providers/ToastProvider";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,10 +18,17 @@ import { USER_ROLES } from "@/lib/auth/roles";
 import {
   useGetPaperStatsQuery,
   useGetRecentUsersQuery,
+  useGetRoleDistributionQuery,
   useGetSystemHealthQuery,
   useGetSystemStatsQuery,
+  useGetUserGrowthDataQuery,
 } from "@/redux/api/adminApi";
-import { useGetAlertCountsQuery, useListAlertsQuery, useResolveAlertMutation } from "@/redux/api/adminExtendedApi";
+import {
+  useExportUsersMutation,
+  useGetAlertCountsQuery,
+  useListAlertsQuery,
+  useResolveAlertMutation,
+} from "@/redux/api/adminExtendedApi";
 import {
   Activity,
   AlertTriangle,
@@ -29,10 +39,20 @@ import {
   Plus,
   Settings,
   Shield,
+  TrendingUp,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 // Lazy load heavy components for code splitting and better performance
 const AdminStatsCard = lazy(() =>
@@ -79,6 +99,8 @@ const adminActions = [
 ];
 
 export default function AdminOverviewPage() {
+  const [usersPage, setUsersPage] = useState(1);
+
   // Fetch data with polling (10 seconds interval per AGENTS.md)
   const { data: systemStats, isLoading: statsLoading } = useGetSystemStatsQuery(
     undefined,
@@ -89,7 +111,7 @@ export default function AdminOverviewPage() {
 
   const { data: recentUsersData, isLoading: usersLoading } =
     useGetRecentUsersQuery({
-      page: 1,
+      page: usersPage,
       limit: 10,
     });
 
@@ -105,12 +127,32 @@ export default function AdminOverviewPage() {
   const { data: recentAlerts } = useListAlertsQuery({ resolved: false, limit: 5 });
   const [resolveAlert] = useResolveAlertMutation();
 
-  const handleExportUsers = () => {
-    showSuccessToast("Export Data", "User data export started");
-  };
+  // Growth + role distribution widgets
+  const { data: growthData, isLoading: growthLoading } =
+    useGetUserGrowthDataQuery();
+  const { data: roleDistribution, isLoading: rolesLoading } =
+    useGetRoleDistributionQuery();
 
-  const handleAddUser = () => {
-    showSuccessToast("Add User", "Opening user creation form");
+  // Real user export (filter-aware CSV)
+  const [exportUsers, { isLoading: isExporting }] = useExportUsersMutation();
+
+  const handleExportUsers = async () => {
+    try {
+      const blob = await exportUsers().unwrap();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `scholar-flow-users-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      showSuccessToast("Export complete", "User CSV downloaded");
+    } catch {
+      showErrorToast("Export failed", "Could not export users. Try again.");
+    }
   };
 
   return (
@@ -233,13 +275,16 @@ export default function AdminOverviewPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleExportUsers}
+                    disabled={isExporting}
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    Export
+                    {isExporting ? "Exporting..." : "Export"}
                   </Button>
-                  <Button size="sm" onClick={handleAddUser}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add User
+                  <Button size="sm" asChild>
+                    <Link href="/dashboard/admin/users">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Manage Users
+                    </Link>
                   </Button>
                 </div>
               </CardHeader>
@@ -256,6 +301,9 @@ export default function AdminOverviewPage() {
                   <RecentUsersTable
                     users={recentUsersData?.data ?? []}
                     isLoading={usersLoading}
+                    currentPage={usersPage}
+                    totalPages={recentUsersData?.meta?.totalPage ?? 1}
+                    onPageChange={setUsersPage}
                   />
                 </Suspense>
               </CardContent>
@@ -283,6 +331,113 @@ export default function AdminOverviewPage() {
               />
             </Suspense>
           </div>
+        </div>
+
+        {/* Growth + Role Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                User Growth (30 days)
+              </CardTitle>
+              <CardDescription>New registrations per day</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {growthLoading ? (
+                <Skeleton className="h-56 w-full" />
+              ) : !growthData || growthData.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-10 text-center">
+                  No growth data available.
+                </p>
+              ) : (
+                <div className="h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={growthData.map((g) => ({
+                        ...g,
+                        label: g.date.slice(5),
+                      }))}
+                      margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="hsl(var(--muted-foreground) / 0.15)"
+                      />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        tick={{ fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                        width={32}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          fontSize: 12,
+                          borderRadius: 8,
+                          border: "1px solid hsl(var(--border))",
+                          background: "hsl(var(--background))",
+                        }}
+                      />
+                      <Bar
+                        dataKey="newUsers"
+                        name="New users"
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Role Distribution
+              </CardTitle>
+              <CardDescription>Active accounts by role</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {rolesLoading ? (
+                <Skeleton className="h-56 w-full" />
+              ) : !roleDistribution || roleDistribution.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-10 text-center">
+                  No role data available.
+                </p>
+              ) : (
+                <div className="space-y-4 pt-2">
+                  {roleDistribution.map((r) => (
+                    <div key={r.role} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium capitalize">
+                          {r.role.replace(/_/g, " ").toLowerCase()}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {r.count} ({r.percentage}%)
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all"
+                          style={{ width: `${Math.min(100, r.percentage)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Paper Processing Stats (if available) */}
