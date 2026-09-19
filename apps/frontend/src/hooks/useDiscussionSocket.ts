@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { getAppStore } from "@/redux/storeAccess";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
 
 function getAuthToken(): string | null {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.accessToken || null;
   } catch {}
   return null;
@@ -56,6 +57,19 @@ export function useDiscussionSocket({
     socket.on("connect", () => {
       setConnected(true);
       socket.emit("room:join", room);
+    });
+
+    socket.on("connect_error", (error: Error) => {
+      setConnected(false);
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[DiscussionSocket] connect error:", error.message);
+      }
+    });
+
+    socket.on("room:error", (payload: unknown) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[DiscussionSocket] room error:", payload);
+      }
     });
 
     socket.on("room:joined", ({ memberCount: count }: { memberCount: number }) => {
