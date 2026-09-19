@@ -115,6 +115,22 @@ const nextConfig = {
     // Custom API routes will be handled by direct fetch calls to backend
     return [];
   },
+
+  // Legacy duplicate citations routes (removed subtree) → canonical page
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/research/citations",
+        destination: "/dashboard/citations",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/research/citations/:path*",
+        destination: "/dashboard/citations",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 const bundleAnalyzer = withBundleAnalyzer({
