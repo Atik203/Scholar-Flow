@@ -2,6 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -9,12 +13,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DEFAULT_EDITOR_SETTINGS,
+  readEditorSettings,
+  writeEditorSettings,
+  type EditorSettings,
+} from "@/lib/editorSettings";
 import { editorTemplates, type EditorTemplate } from "@/lib/editorTemplates";
 import { useListEditorPapersQuery } from "@/redux/api/paperApi";
-import { LayoutTemplate, Download, FileText, Plus, Save } from "lucide-react";
+import {
+  useGetPreferencesQuery,
+  useUpdatePreferencesMutation,
+} from "@/redux/api/userApi";
+import { LayoutTemplate, Download, FileText, Loader2, Plus, Save } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CreatePaperDialog } from "./CreatePaperDialog";
 import { EditorSkeleton } from "./EditorSkeleton";
 import { PapersList } from "./PapersList";
@@ -30,6 +44,160 @@ const ScholarFlowEditor = dynamic(
     ssr: false,
   }
 );
+
+function EditorSettingsPanel() {
+  const { data, isLoading } = useGetPreferencesQuery();
+  const [updatePreferences, { isLoading: isSaving }] =
+    useUpdatePreferencesMutation();
+  const [settings, setSettings] = useState<EditorSettings>(
+    DEFAULT_EDITOR_SETTINGS
+  );
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (hydrated || isLoading) return;
+    const stored = (data?.data?.metadata?.editorSettings ?? {}) as Partial<
+      EditorSettings
+    >;
+    const local = readEditorSettings();
+    setSettings({
+      autosaveIntervalMs:
+        stored.autosaveIntervalMs ?? local.autosaveIntervalMs,
+      fontSize: stored.fontSize ?? local.fontSize,
+      spellCheck: stored.spellCheck ?? local.spellCheck,
+    });
+    setHydrated(true);
+  }, [data, isLoading, hydrated]);
+
+  const handleSave = async () => {
+    try {
+      await updatePreferences({
+        metadata: {
+          ...(data?.data?.metadata ?? {}),
+          editorSettings: settings,
+        },
+      }).unwrap();
+      writeEditorSettings(settings);
+      showSuccessToast("Editor settings saved");
+    } catch (error: any) {
+      showErrorToast(
+        "Failed to save editor settings",
+        error?.data?.message || "Please try again"
+      );
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Editor Settings</CardTitle>
+        <CardDescription>
+          Customize your writing experience. Settings are saved to your account
+          and applied to the editor immediately.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-10 animate-pulse rounded bg-muted" />
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label
+                  htmlFor="autosave-interval"
+                  className="text-sm font-medium"
+                >
+                  Auto-save delay
+                </label>
+                <select
+                  id="autosave-interval"
+                  value={settings.autosaveIntervalMs}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      autosaveIntervalMs: Number(e.target.value),
+                    }))
+                  }
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  <option value={1000}>1 second</option>
+                  <option value={2000}>2 seconds (default)</option>
+                  <option value={3000}>3 seconds</option>
+                  <option value={5000}>5 seconds</option>
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  How long the editor waits after you stop typing before saving.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="editor-font-size" className="text-sm font-medium">
+                  Editor font size
+                </label>
+                <select
+                  id="editor-font-size"
+                  value={settings.fontSize}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      fontSize: Number(e.target.value),
+                    }))
+                  }
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  {[14, 16, 18, 20].map((size) => (
+                    <option key={size} value={size}>
+                      {size}px
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Base text size inside the editor.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                id="editor-spellcheck"
+                type="checkbox"
+                checked={settings.spellCheck}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    spellCheck: e.target.checked,
+                  }))
+                }
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label htmlFor="editor-spellcheck" className="text-sm">
+                Enable browser spellcheck in the editor
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between border-t pt-4">
+              <p className="text-xs text-muted-foreground">
+                Preferences are stored per account and apply on every device.
+              </p>
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isSaving ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export function TextEditorDashboard() {
   // Deep link support: /dashboard/research/editor?paper=<id> opens that
@@ -222,17 +390,7 @@ export function TextEditorDashboard() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Editor Settings</CardTitle>
-              <CardDescription>
-                Customize your writing experience.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Settings coming soon...</p>
-            </CardContent>
-          </Card>
+          <EditorSettingsPanel />
         </TabsContent>
       </Tabs>
 
