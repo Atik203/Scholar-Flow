@@ -24,12 +24,30 @@ const STATUS_COLOR: Record<string, string> = {
 export default function AdminWebhooksPage() {
   const [showCreate, setShowCreate] = useState(false);
   const { data, isLoading, refetch } = useListEndpointsQuery();
-  const { data: eventTypes } = useListEventTypesQuery();
+  const {
+    data: eventTypes,
+    isError: eventTypesError,
+    refetch: refetchEventTypes,
+  } = useListEventTypesQuery();
   const [create] = useCreateEndpointMutation();
   const [remove] = useDeleteEndpointMutation();
   const [rotate] = useRotateSecretMutation();
   const [test] = useTestEndpointMutation();
   const endpoints = data?.data ?? [];
+
+  const handleOpenCreate = () => {
+    if (!eventTypes) {
+      showErrorToast(
+        "Event types unavailable",
+        eventTypesError
+          ? "Could not load webhook event types. Retrying..."
+          : "Loading event types, try again in a moment."
+      );
+      void refetchEventTypes();
+      return;
+    }
+    setShowCreate(true);
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -44,7 +62,7 @@ export default function AdminWebhooksPage() {
               Refresh
             </Button>
             <Button
-              onClick={() => setShowCreate(true)}
+              onClick={handleOpenCreate}
               className="gap-2 bg-indigo-600 hover:bg-indigo-700"
             >
               <Plus className="h-4 w-4" />
@@ -66,7 +84,7 @@ export default function AdminWebhooksPage() {
             <Webhook className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>No webhook endpoints yet.</p>
             <Button
-              onClick={() => setShowCreate(true)}
+              onClick={handleOpenCreate}
               className="mt-4 bg-indigo-600 hover:bg-indigo-700"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -153,9 +171,13 @@ export default function AdminWebhooksPage() {
                     size="sm"
                     variant="ghost"
                     onClick={async () => {
-                      if (confirm("Delete this webhook?")) {
-                        await remove(ep.id);
+                      if (!confirm("Delete this webhook?")) return;
+                      try {
+                        await remove(ep.id).unwrap();
+                        showSuccessToast("Deleted", "Webhook endpoint removed");
                         refetch();
+                      } catch {
+                        showErrorToast("Failed", "Could not delete endpoint");
                       }
                     }}
                     className="text-red-600"
