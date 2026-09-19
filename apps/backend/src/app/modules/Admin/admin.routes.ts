@@ -255,6 +255,31 @@ router.post(
 
 /**
  * @swagger
+ * /api/admin/system/clear-cache:
+ *   post:
+ *     summary: Clear System Cache
+ *     description: Flush Redis cache and in-memory fallback. Returns 409 when Redis is not connected. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache cleared successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       409:
+ *         description: Redis is not connected
+ */
+router.post(
+  "/system/clear-cache",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.clearSystemCache
+);
+
+/**
+ * @swagger
  * /api/admin/analytics/revenue:
  *   get:
  *     summary: Get Revenue Analytics

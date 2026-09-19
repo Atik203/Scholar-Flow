@@ -167,3 +167,9 @@ export interface ISystemDiagnostics {
   };
   generatedAt: Date;
 }
+
+export interface ICacheClearResult {
+  redisFlushed: boolean;
+  memoryEntriesCleared: number;
+  clearedAt: Date;
+}
