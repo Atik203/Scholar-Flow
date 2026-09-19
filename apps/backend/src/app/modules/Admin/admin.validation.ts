@@ -53,5 +53,15 @@ export const changePlanSchema = z.object({
   priceId: z.string().min(1, "priceId is required"),
 });
 
+export const updateSystemSettingsSchema = z.object({
+  platformName: z.string().trim().min(1).max(100).optional(),
+  supportEmail: z.string().trim().email().max(200).optional(),
+  sessionTimeoutMinutes: z.number().int().min(15).max(10080).optional(),
+  emailNotificationsEnabled: z.boolean().optional(),
+  registrationAlertsEnabled: z.boolean().optional(),
+  storageQuotaGb: z.number().int().min(1).max(100000).optional(),
+  twoFactorRequired: z.boolean().optional(),
+});
+
 export type AdminFiltersInput = z.infer<typeof adminFiltersSchema>;
 export type DateRangeInput = z.infer<typeof dateRangeSchema>;
