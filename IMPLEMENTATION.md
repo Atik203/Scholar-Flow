@@ -39,7 +39,7 @@ Unified entry points (server.ts), removed dead code (errorHandler.ts/AppError.ts
 
 ## 🔥 Phase 10 — FINAL PHASE: AI, Editor, Collaboration & Enterprise (Complete ✅)
 
-Phase 10 is **complete**. Scholar-Flow v1.3.5 is a production-grade, AI-powered academic SaaS platform.
+Phase 10 is **complete**. Scholar-Flow v1.3.6 is a production-grade, AI-powered academic SaaS platform.
 
 ---
 
@@ -215,12 +215,12 @@ AI is woven throughout Scholar-Flow — not just a chatbot, but a research assis
 - `eslint-plugin-jsx-a11y` enforced (18 WCAG 2.1 AA rules)
 
 ## Current Status
-- **Release:** 1.3.5 (2026-09-19)
+- **Release:** 1.3.6 (2026-09-20)
 - **Completed:** Phase 1-10, Next.js 16 migration, better-auth migration, Prisma v7 migration
-- **Current:** Release 1.3.5 — Team collaboration access, real-time notification delivery, annotations UX, citation persistence, realtime hardening
+- **Current:** Release 1.3.6 — Admin console fully dynamic: real system actions, persisted settings, exports and aggregates
 - **Framework:** Next.js 16, React 19.2, Turbopack, Prisma 7.8.0
 - **Page Coverage:** 98/102 figma-make (96.1%)
-- **Branch:** `atik` (Release 1.3.5)
+- **Branch:** `atik` (Release 1.3.6)
 
 ## Phase 10 Sub-Phases
 

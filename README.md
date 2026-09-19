@@ -4,7 +4,7 @@
 
 ScholarFlow is a modern research paper management and collaboration platform designed to streamline academic workflows. Upload, organize, search, and collaborate on research papers with AI-powered insights and smart organization features.
 
-[![Version](https://img.shields.io/badge/version-1.3.5-blue)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.3.6-blue)](./CHANGELOG.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Express](https://img.shields.io/badge/Express-Node.js-green)](https://expressjs.com/)
@@ -13,6 +13,7 @@ ScholarFlow is a modern research paper management and collaboration platform des
 
 ## 📦 Recent Releases
 
+- **1.3.6 (2026-09-20)** — Admin console fully dynamic: real system diagnostics/cache-clear/log-export actions, persisted platform settings with audit, filter-aware CSV/JSON exports, server-side aggregates, and removal of mock/dead UI. See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.5 (2026-09-19)** — Team access for invited collaborators (derived from workspace membership, revocable per workspace), real-time push notifications for every invite/share/removal event with enforced delivery preferences, annotations UX overhaul (collapsible papers rail, optional notes), citation persistence, and realtime/socket hardening. See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.4 (2026-09-08)** — Discover live research feeds (trending/recommendations/explore), Google Docs-style text alignment, permission-backed email sharing with revoke. See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.1 (2026-06-28)** — AI architecture overhaul: context persistence, metadata generation, context-aware chat, inline paper Q&A, token optimization, Vercel crash fix (uuid ESM + outputDirectory). See [CHANGELOG.md](./CHANGELOG.md).
