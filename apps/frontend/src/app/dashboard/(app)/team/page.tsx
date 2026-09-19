@@ -17,7 +17,9 @@ import {
   type TeamMember,
 } from "@/redux/api/teamApi";
 import { selectAccessToken } from "@/redux/auth/authSlice";
+import { useAuth } from "@/redux/auth/useAuth";
 import { useAppSelector } from "@/redux/hooks";
+import { USER_ROLES } from "@/lib/auth/roles";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Activity,
@@ -37,6 +39,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+type TeamInviteRole = "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD";
+type TeamAssignableRole = TeamInviteRole | "ADMIN";
+
 const formatRelativeTime = (dateString?: string) => {
   if (!dateString) return "—";
   const date = new Date(dateString);
@@ -54,6 +59,8 @@ const formatRelativeTime = (dateString?: string) => {
 export default function TeamMembersPage() {
   const accessToken = useAppSelector(selectAccessToken);
   const shouldFetch = !!accessToken && accessToken.length > 0;
+  const { session } = useAuth();
+  const isAdmin = session?.user?.role === USER_ROLES.ADMIN;
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "pending" | "inactive">(
@@ -66,7 +73,7 @@ export default function TeamMembersPage() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
-  const { data, isLoading } = useGetTeamMembersQuery(
+  const { data, isLoading, isError, refetch } = useGetTeamMembersQuery(
     {
       limit: 50,
       search: searchQuery || undefined,
@@ -101,7 +108,7 @@ export default function TeamMembersPage() {
     role,
   }: {
     email: string;
-    role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+    role: TeamInviteRole;
   }) => {
     try {
       await sendInvite({ email, role }).unwrap();
@@ -124,7 +131,7 @@ export default function TeamMembersPage() {
 
   const handleChangeRole = async (
     member: TeamMember,
-    newRole: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN"
+    newRole: TeamAssignableRole
   ) => {
     try {
       await updateMember({ userId: member.id, role: newRole }).unwrap();
@@ -286,6 +293,16 @@ export default function TeamMembersPage() {
                 <Skeleton key={i} className="h-20" />
               ))}
             </div>
+          ) : isError ? (
+            <div className="rounded-xl border bg-card p-12 text-center">
+              <Users className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <p className="text-muted-foreground mb-4">
+                Failed to load team members
+              </p>
+              <Button variant="outline" onClick={() => void refetch()}>
+                Retry
+              </Button>
+            </div>
           ) : filteredMembers.length === 0 ? (
             <div className="rounded-xl border bg-card p-12 text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -400,6 +417,7 @@ export default function TeamMembersPage() {
       {/* Member Actions Modal */}
       <MemberActionsModal
         member={selectedMember}
+        isAdmin={isAdmin}
         onClose={() => setSelectedMember(null)}
         onChangeRole={handleChangeRole}
         onRemove={handleRemove}
@@ -421,13 +439,11 @@ function InviteModal({
   onClose: () => void;
   onSend: (data: {
     email: string;
-    role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN";
+    role: TeamInviteRole;
   }) => void;
 }) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN">(
-    "RESEARCHER"
-  );
+  const [role, setRole] = useState<TeamInviteRole>("RESEARCHER");
 
   return (
     <AnimatePresence>
@@ -466,28 +482,25 @@ function InviteModal({
                 <label className="block text-sm font-medium mb-2">Role</label>
                 <select
                   value={role}
-                  onChange={(e) => setRole(e.target.value as any)}
+                  onChange={(e) => setRole(e.target.value as TeamInviteRole)}
                   className="w-full h-10 px-3 rounded-md border bg-background text-sm"
                 >
-                  <option value="VIEWER" disabled>
-                    Viewer (use workspace invite)
-                  </option>
-                  <option value="RESEARCHER">Researcher — Can upload and annotate</option>
+                  <option value="RESEARCHER">Viewer — can read and annotate</option>
                   <option value="PRO_RESEARCHER">
-                    Pro Researcher — All member permissions
+                    Editor — can upload and edit papers
                   </option>
-                  <option value="TEAM_LEAD">Team Lead — Can manage team</option>
-                  <option value="ADMIN">Admin — Full access</option>
+                  <option value="TEAM_LEAD">
+                    Manager — can manage the team
+                  </option>
                 </select>
                 <p className="mt-2 text-xs text-muted-foreground">
                   {role === "RESEARCHER" &&
-                    "Can upload papers, create annotations, and participate in discussions."}
+                    "Workspace role: Viewer. Can read, annotate, and comment on shared papers."}
                   {role === "PRO_RESEARCHER" &&
-                    "All member permissions plus advanced research tools and AI features."}
+                    "Workspace role: Editor. Can upload papers, create collections, and use AI tools."}
                   {role === "TEAM_LEAD" &&
-                    "All member permissions plus team management and workspace settings."}
-                  {role === "ADMIN" &&
-                    "Full access including billing, integrations, and user management."}
+                    "Workspace role: Manager. Can manage members, invitations, and workspace settings."}
+                  {" Admin access is granted from the admin panel."}
                 </p>
               </div>
             </div>
@@ -516,16 +529,20 @@ function MemberActionsModal({
   onClose,
   onChangeRole,
   onRemove,
+  isAdmin,
 }: {
   member: TeamMember | null;
   onClose: () => void;
   onChangeRole: (
     member: TeamMember,
-    role: "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD" | "ADMIN"
+    role: TeamAssignableRole
   ) => void;
   onRemove: (member: TeamMember) => void;
+  isAdmin: boolean;
 }) {
   if (!member) return null;
+  // Mirrors the backend rule: only admins can manage other admins.
+  const canManageThisMember = isAdmin || member.role !== "ADMIN";
   return (
     <AnimatePresence>
       {member && (
@@ -566,21 +583,23 @@ function MemberActionsModal({
                 <UserCheck className="h-4 w-4 text-muted-foreground" />
                 View Profile
               </Link>
-              <div className="px-4 py-2">
-                <label className="text-sm font-medium">Change Role</label>
-                <select
-                  value={member.role}
-                  onChange={(e) =>
-                    onChangeRole(member, e.target.value as any)
-                  }
-                  className="w-full h-9 px-2 mt-1 rounded-md border bg-background text-sm"
-                >
-                  <option value="RESEARCHER">Researcher</option>
-                  <option value="PRO_RESEARCHER">Pro Researcher</option>
-                  <option value="TEAM_LEAD">Team Lead</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
+              {canManageThisMember && (
+                <div className="px-4 py-2">
+                  <label className="text-sm font-medium">Change Role</label>
+                  <select
+                    value={member.role}
+                    onChange={(e) =>
+                      onChangeRole(member, e.target.value as TeamAssignableRole)
+                    }
+                    className="w-full h-9 px-2 mt-1 rounded-md border bg-background text-sm"
+                  >
+                    <option value="RESEARCHER">Researcher</option>
+                    <option value="PRO_RESEARCHER">Pro Researcher</option>
+                    <option value="TEAM_LEAD">Team Lead</option>
+                    {isAdmin && <option value="ADMIN">Admin</option>}
+                  </select>
+                </div>
+              )}
               <Link
                 href="/dashboard/workspaces"
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left transition-colors"
@@ -589,13 +608,15 @@ function MemberActionsModal({
                 <Tag className="h-4 w-4 text-muted-foreground" />
                 Manage Workspaces
               </Link>
-              <button
-                onClick={() => onRemove(member)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left text-destructive transition-colors"
-              >
-                <UserMinus className="h-4 w-4" />
-                Remove from Team
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => onRemove(member)}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left text-destructive transition-colors"
+                >
+                  <UserMinus className="h-4 w-4" />
+                  Remove from Team
+                </button>
+              )}
             </div>
             <div className="p-4 border-t">
               <Button variant="ghost" className="w-full" onClick={onClose}>
