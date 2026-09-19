@@ -408,6 +408,7 @@ export type UserWhereInput = {
   contentReportsFiled?: Prisma.ContentReportListRelationFilter
   contentReportsAssigned?: Prisma.ContentReportListRelationFilter
   contentReportsResolved?: Prisma.ContentReportListRelationFilter
+  systemSettingsUpdated?: Prisma.SystemSettingListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
 }
 
@@ -476,6 +477,7 @@ export type UserOrderByWithRelationInput = {
   contentReportsFiled?: Prisma.ContentReportOrderByRelationAggregateInput
   contentReportsAssigned?: Prisma.ContentReportOrderByRelationAggregateInput
   contentReportsResolved?: Prisma.ContentReportOrderByRelationAggregateInput
+  systemSettingsUpdated?: Prisma.SystemSettingOrderByRelationAggregateInput
   loginHistory?: Prisma.LoginHistoryOrderByRelationAggregateInput
 }
 
@@ -547,6 +549,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   contentReportsFiled?: Prisma.ContentReportListRelationFilter
   contentReportsAssigned?: Prisma.ContentReportListRelationFilter
   contentReportsResolved?: Prisma.ContentReportListRelationFilter
+  systemSettingsUpdated?: Prisma.SystemSettingListRelationFilter
   loginHistory?: Prisma.LoginHistoryListRelationFilter
 }, "id" | "email" | "stripeCustomerId" | "stripeSubscriptionId">
 
@@ -677,6 +680,7 @@ export type UserCreateInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -745,6 +749,7 @@ export type UserUncheckedCreateInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -813,6 +818,7 @@ export type UserUpdateInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -881,6 +887,7 @@ export type UserUncheckedUpdateInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -1674,6 +1681,22 @@ export type UserUpdateOneWithoutContentReportsResolvedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutContentReportsResolvedInput, Prisma.UserUpdateWithoutContentReportsResolvedInput>, Prisma.UserUncheckedUpdateWithoutContentReportsResolvedInput>
 }
 
+export type UserCreateNestedOneWithoutSystemSettingsUpdatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedCreateWithoutSystemSettingsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSystemSettingsUpdatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutSystemSettingsUpdatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedCreateWithoutSystemSettingsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSystemSettingsUpdatedInput
+  upsert?: Prisma.UserUpsertWithoutSystemSettingsUpdatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSystemSettingsUpdatedInput, Prisma.UserUpdateWithoutSystemSettingsUpdatedInput>, Prisma.UserUncheckedUpdateWithoutSystemSettingsUpdatedInput>
+}
+
 export type UserCreateWithoutNotificationsInput = {
   id?: string
   email: string
@@ -1738,6 +1761,7 @@ export type UserCreateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -1805,6 +1829,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -1877,6 +1902,7 @@ export type UserCreateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -1944,6 +1970,7 @@ export type UserUncheckedCreateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -2027,6 +2054,7 @@ export type UserUpdateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -2094,6 +2122,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2172,6 +2201,7 @@ export type UserUpdateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -2239,6 +2269,7 @@ export type UserUncheckedUpdateWithoutTriggeredNotificationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2306,6 +2337,7 @@ export type UserCreateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -2373,6 +2405,7 @@ export type UserUncheckedCreateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -2456,6 +2489,7 @@ export type UserUpdateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -2523,6 +2557,7 @@ export type UserUncheckedUpdateWithoutWorkspacesOwnedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2590,6 +2625,7 @@ export type UserCreateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -2657,6 +2693,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -2740,6 +2777,7 @@ export type UserUpdateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -2807,6 +2845,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -2874,6 +2913,7 @@ export type UserCreateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -2941,6 +2981,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -3013,6 +3054,7 @@ export type UserCreateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -3080,6 +3122,7 @@ export type UserUncheckedCreateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -3163,6 +3206,7 @@ export type UserUpdateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -3230,6 +3274,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesReceivedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -3308,6 +3353,7 @@ export type UserUpdateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -3375,6 +3421,7 @@ export type UserUncheckedUpdateWithoutWorkspaceInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -3442,6 +3489,7 @@ export type UserCreateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -3509,6 +3557,7 @@ export type UserUncheckedCreateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -3592,6 +3641,7 @@ export type UserUpdateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -3659,6 +3709,7 @@ export type UserUncheckedUpdateWithoutUploadedPapersInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -3726,6 +3777,7 @@ export type UserCreateWithoutPaperSharesSharedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -3793,6 +3845,7 @@ export type UserUncheckedCreateWithoutPaperSharesSharedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -3876,6 +3929,7 @@ export type UserUpdateWithoutPaperSharesSharedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -3943,6 +3997,7 @@ export type UserUncheckedUpdateWithoutPaperSharesSharedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -4010,6 +4065,7 @@ export type UserCreateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -4077,6 +4133,7 @@ export type UserUncheckedCreateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -4160,6 +4217,7 @@ export type UserUpdateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -4227,6 +4285,7 @@ export type UserUncheckedUpdateWithoutPaperVersionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -4294,6 +4353,7 @@ export type UserCreateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -4361,6 +4421,7 @@ export type UserUncheckedCreateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -4444,6 +4505,7 @@ export type UserUpdateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -4511,6 +4573,7 @@ export type UserUncheckedUpdateWithoutAnnotationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -4578,6 +4641,7 @@ export type UserCreateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -4645,6 +4709,7 @@ export type UserUncheckedCreateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -4728,6 +4793,7 @@ export type UserUpdateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -4795,6 +4861,7 @@ export type UserUncheckedUpdateWithoutAnnotationVersionInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -4862,6 +4929,7 @@ export type UserCreateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -4929,6 +4997,7 @@ export type UserUncheckedCreateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -5012,6 +5081,7 @@ export type UserUpdateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -5079,6 +5149,7 @@ export type UserUncheckedUpdateWithoutCollectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -5146,6 +5217,7 @@ export type UserCreateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -5213,6 +5285,7 @@ export type UserUncheckedCreateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -5296,6 +5369,7 @@ export type UserUpdateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -5363,6 +5437,7 @@ export type UserUncheckedUpdateWithoutCollectionPaperInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -5430,6 +5505,7 @@ export type UserCreateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -5497,6 +5573,7 @@ export type UserUncheckedCreateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -5569,6 +5646,7 @@ export type UserCreateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -5636,6 +5714,7 @@ export type UserUncheckedCreateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -5719,6 +5798,7 @@ export type UserUpdateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -5786,6 +5866,7 @@ export type UserUncheckedUpdateWithoutCollectionMemberInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -5864,6 +5945,7 @@ export type UserUpdateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -5931,6 +6013,7 @@ export type UserUncheckedUpdateWithoutCollectionInvitesSentInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -5998,6 +6081,7 @@ export type UserCreateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -6065,6 +6149,7 @@ export type UserUncheckedCreateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -6148,6 +6233,7 @@ export type UserUpdateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -6215,6 +6301,7 @@ export type UserUncheckedUpdateWithoutSearchHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -6282,6 +6369,7 @@ export type UserCreateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -6349,6 +6437,7 @@ export type UserUncheckedCreateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -6432,6 +6521,7 @@ export type UserUpdateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -6499,6 +6589,7 @@ export type UserUncheckedUpdateWithoutAiInsightThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -6566,6 +6657,7 @@ export type UserCreateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -6633,6 +6725,7 @@ export type UserUncheckedCreateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -6716,6 +6809,7 @@ export type UserUpdateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -6783,6 +6877,7 @@ export type UserUncheckedUpdateWithoutAiInsightMessagesAuthoredInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -6850,6 +6945,7 @@ export type UserCreateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -6917,6 +7013,7 @@ export type UserUncheckedCreateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -7000,6 +7097,7 @@ export type UserUpdateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -7067,6 +7165,7 @@ export type UserUncheckedUpdateWithoutAiConversationsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -7134,6 +7233,7 @@ export type UserCreateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -7201,6 +7301,7 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -7284,6 +7385,7 @@ export type UserUpdateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -7351,6 +7453,7 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -7418,6 +7521,7 @@ export type UserCreateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -7485,6 +7589,7 @@ export type UserUncheckedCreateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -7568,6 +7673,7 @@ export type UserUpdateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -7635,6 +7741,7 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -7702,6 +7809,7 @@ export type UserCreateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -7769,6 +7877,7 @@ export type UserUncheckedCreateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -7852,6 +7961,7 @@ export type UserUpdateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -7919,6 +8029,7 @@ export type UserUncheckedUpdateWithoutUsageEventsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -7986,6 +8097,7 @@ export type UserCreateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -8053,6 +8165,7 @@ export type UserUncheckedCreateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -8136,6 +8249,7 @@ export type UserUpdateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -8203,6 +8317,7 @@ export type UserUncheckedUpdateWithoutActivitiesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -8270,6 +8385,7 @@ export type UserCreateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -8337,6 +8453,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -8420,6 +8537,7 @@ export type UserUpdateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -8487,6 +8605,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -8554,6 +8673,7 @@ export type UserCreateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -8621,6 +8741,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -8704,6 +8825,7 @@ export type UserUpdateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -8771,6 +8893,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -8839,6 +8962,7 @@ export type UserCreateWithoutLoginHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserUncheckedCreateWithoutLoginHistoryInput = {
@@ -8906,6 +9030,7 @@ export type UserUncheckedCreateWithoutLoginHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
 }
 
 export type UserCreateOrConnectWithoutLoginHistoryInput = {
@@ -8989,6 +9114,7 @@ export type UserUpdateWithoutLoginHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLoginHistoryInput = {
@@ -9056,6 +9182,7 @@ export type UserUncheckedUpdateWithoutLoginHistoryInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
 }
 
 export type UserCreateWithoutTokensInput = {
@@ -9122,6 +9249,7 @@ export type UserCreateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -9189,6 +9317,7 @@ export type UserUncheckedCreateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -9272,6 +9401,7 @@ export type UserUpdateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -9339,6 +9469,7 @@ export type UserUncheckedUpdateWithoutTokensInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -9406,6 +9537,7 @@ export type UserCreateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -9473,6 +9605,7 @@ export type UserUncheckedCreateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -9556,6 +9689,7 @@ export type UserUpdateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -9623,6 +9757,7 @@ export type UserUncheckedUpdateWithoutResearchNotesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -9690,6 +9825,7 @@ export type UserCreateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -9757,6 +9893,7 @@ export type UserUncheckedCreateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -9840,6 +9977,7 @@ export type UserUpdateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -9907,6 +10045,7 @@ export type UserUncheckedUpdateWithoutNotebooksInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -9974,6 +10113,7 @@ export type UserCreateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -10041,6 +10181,7 @@ export type UserUncheckedCreateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -10124,6 +10265,7 @@ export type UserUpdateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -10191,6 +10333,7 @@ export type UserUncheckedUpdateWithoutNotebookSectionsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -10258,6 +10401,7 @@ export type UserCreateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -10325,6 +10469,7 @@ export type UserUncheckedCreateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -10408,6 +10553,7 @@ export type UserUpdateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -10475,6 +10621,7 @@ export type UserUncheckedUpdateWithoutCitationExportsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -10542,6 +10689,7 @@ export type UserCreateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -10609,6 +10757,7 @@ export type UserUncheckedCreateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -10692,6 +10841,7 @@ export type UserUpdateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -10759,6 +10909,7 @@ export type UserUncheckedUpdateWithoutDiscussionThreadsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -10826,6 +10977,7 @@ export type UserCreateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -10893,6 +11045,7 @@ export type UserUncheckedCreateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -10976,6 +11129,7 @@ export type UserUpdateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -11043,6 +11197,7 @@ export type UserUncheckedUpdateWithoutDiscussionMessagesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -11110,6 +11265,7 @@ export type UserCreateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -11177,6 +11333,7 @@ export type UserUncheckedCreateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -11260,6 +11417,7 @@ export type UserUpdateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -11327,6 +11485,7 @@ export type UserUncheckedUpdateWithoutActivityLogEntriesInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -11394,6 +11553,7 @@ export type UserCreateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -11461,6 +11621,7 @@ export type UserUncheckedCreateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -11544,6 +11705,7 @@ export type UserUpdateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -11611,6 +11773,7 @@ export type UserUncheckedUpdateWithoutPreferenceInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -11678,6 +11841,7 @@ export type UserCreateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -11745,6 +11909,7 @@ export type UserUncheckedCreateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -11828,6 +11993,7 @@ export type UserUpdateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -11895,6 +12061,7 @@ export type UserUncheckedUpdateWithoutAdminReportsCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -11962,6 +12129,7 @@ export type UserCreateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -12029,6 +12197,7 @@ export type UserUncheckedCreateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -12112,6 +12281,7 @@ export type UserUpdateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -12179,6 +12349,7 @@ export type UserUncheckedUpdateWithoutResolvedSystemAlertsInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -12246,6 +12417,7 @@ export type UserCreateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -12313,6 +12485,7 @@ export type UserUncheckedCreateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -12396,6 +12569,7 @@ export type UserUpdateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -12463,6 +12637,7 @@ export type UserUncheckedUpdateWithoutApiKeysCreatedInput = {
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -12530,6 +12705,7 @@ export type UserCreateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -12597,6 +12773,7 @@ export type UserUncheckedCreateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -12669,6 +12846,7 @@ export type UserCreateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -12736,6 +12914,7 @@ export type UserUncheckedCreateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -12808,6 +12987,7 @@ export type UserCreateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
+  systemSettingsUpdated?: Prisma.SystemSettingCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
 }
 
@@ -12875,6 +13055,7 @@ export type UserUncheckedCreateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
   contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedCreateNestedManyWithoutUpdatedByInput
   loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -12958,6 +13139,7 @@ export type UserUpdateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -13025,6 +13207,7 @@ export type UserUncheckedUpdateWithoutContentReportsFiledInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -13103,6 +13286,7 @@ export type UserUpdateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -13170,6 +13354,7 @@ export type UserUncheckedUpdateWithoutContentReportsAssignedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -13248,6 +13433,7 @@ export type UserUpdateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUpdateManyWithoutUpdatedByNestedInput
   loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
 }
 
@@ -13315,6 +13501,295 @@ export type UserUncheckedUpdateWithoutContentReportsResolvedInput = {
   apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
   contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
   contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
+  systemSettingsUpdated?: Prisma.SystemSettingUncheckedUpdateManyWithoutUpdatedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutSystemSettingsUpdatedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  lastLoginProvider?: string | null
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryCreateNestedManyWithoutUserInput
+  paperVersions?: Prisma.PaperVersionCreateNestedManyWithoutSavedByInput
+  aiConversations?: Prisma.AIConversationCreateNestedManyWithoutUserInput
+  paperSharesShared?: Prisma.PaperShareCreateNestedManyWithoutSharedByInput
+  preference?: Prisma.UserPreferenceCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberCreateNestedManyWithoutUserInput
+  adminReportsCreated?: Prisma.AdminReportCreateNestedManyWithoutCreatedByInput
+  resolvedSystemAlerts?: Prisma.SystemAlertCreateNestedManyWithoutResolvedByInput
+  apiKeysCreated?: Prisma.ApiKeyCreateNestedManyWithoutCreatedByInput
+  contentReportsFiled?: Prisma.ContentReportCreateNestedManyWithoutReporterInput
+  contentReportsAssigned?: Prisma.ContentReportCreateNestedManyWithoutAssignedToInput
+  contentReportsResolved?: Prisma.ContentReportCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSystemSettingsUpdatedInput = {
+  id?: string
+  email: string
+  name?: string | null
+  firstName?: string | null
+  lastName?: string | null
+  institution?: string | null
+  fieldOfStudy?: string | null
+  image?: string | null
+  password?: string | null
+  role?: $Enums.Role
+  emailVerified?: Date | string | null
+  emailVerificationToken?: string | null
+  onboardingCompleted?: boolean
+  onboardingStep?: number
+  twoFactorSecret?: string | null
+  twoFactorEnabled?: boolean
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
+  stripePriceId?: string | null
+  stripeCurrentPeriodEnd?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isDeleted?: boolean
+  lastLoginProvider?: string | null
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.WorkspaceMemberUncheckedCreateNestedManyWithoutUserInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedCreateNestedManyWithoutOwnerInput
+  uploadedPapers?: Prisma.PaperUncheckedCreateNestedManyWithoutUploaderInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUserInput
+  collections?: Prisma.CollectionUncheckedCreateNestedManyWithoutOwnerInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  searchHistory?: Prisma.SearchHistoryUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  triggeredNotifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  usageEvents?: Prisma.UsageEventUncheckedCreateNestedManyWithoutUserInput
+  activities?: Prisma.ActivityLogUncheckedCreateNestedManyWithoutUserInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedCreateNestedManyWithoutUserInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedCreateNestedManyWithoutCreatedByInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutInvitedByInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutUserInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  tokens?: Prisma.UserTokenUncheckedCreateNestedManyWithoutUserInput
+  researchNotes?: Prisma.ResearchNoteUncheckedCreateNestedManyWithoutUserInput
+  notebooks?: Prisma.NotebookUncheckedCreateNestedManyWithoutUserInput
+  notebookSections?: Prisma.NotebookSectionUncheckedCreateNestedManyWithoutUserInput
+  citationExports?: Prisma.CitationExportUncheckedCreateNestedManyWithoutUserInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedCreateNestedManyWithoutUserInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedCreateNestedManyWithoutUserInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedCreateNestedManyWithoutUserInput
+  paperVersions?: Prisma.PaperVersionUncheckedCreateNestedManyWithoutSavedByInput
+  aiConversations?: Prisma.AIConversationUncheckedCreateNestedManyWithoutUserInput
+  paperSharesShared?: Prisma.PaperShareUncheckedCreateNestedManyWithoutSharedByInput
+  preference?: Prisma.UserPreferenceUncheckedCreateNestedOneWithoutUserInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedCreateNestedManyWithoutChangedByInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedCreateNestedManyWithoutAddedByInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedCreateNestedManyWithoutUserInput
+  adminReportsCreated?: Prisma.AdminReportUncheckedCreateNestedManyWithoutCreatedByInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUncheckedCreateNestedManyWithoutResolvedByInput
+  apiKeysCreated?: Prisma.ApiKeyUncheckedCreateNestedManyWithoutCreatedByInput
+  contentReportsFiled?: Prisma.ContentReportUncheckedCreateNestedManyWithoutReporterInput
+  contentReportsAssigned?: Prisma.ContentReportUncheckedCreateNestedManyWithoutAssignedToInput
+  contentReportsResolved?: Prisma.ContentReportUncheckedCreateNestedManyWithoutResolvedByInput
+  loginHistory?: Prisma.LoginHistoryUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSystemSettingsUpdatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedCreateWithoutSystemSettingsUpdatedInput>
+}
+
+export type UserUpsertWithoutSystemSettingsUpdatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedUpdateWithoutSystemSettingsUpdatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedCreateWithoutSystemSettingsUpdatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSystemSettingsUpdatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSystemSettingsUpdatedInput, Prisma.UserUncheckedUpdateWithoutSystemSettingsUpdatedInput>
+}
+
+export type UserUpdateWithoutSystemSettingsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUpdateManyWithoutUserNestedInput
+  paperVersions?: Prisma.PaperVersionUpdateManyWithoutSavedByNestedInput
+  aiConversations?: Prisma.AIConversationUpdateManyWithoutUserNestedInput
+  paperSharesShared?: Prisma.PaperShareUpdateManyWithoutSharedByNestedInput
+  preference?: Prisma.UserPreferenceUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUpdateManyWithoutUserNestedInput
+  adminReportsCreated?: Prisma.AdminReportUpdateManyWithoutCreatedByNestedInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUpdateManyWithoutResolvedByNestedInput
+  apiKeysCreated?: Prisma.ApiKeyUpdateManyWithoutCreatedByNestedInput
+  contentReportsFiled?: Prisma.ContentReportUpdateManyWithoutReporterNestedInput
+  contentReportsAssigned?: Prisma.ContentReportUpdateManyWithoutAssignedToNestedInput
+  contentReportsResolved?: Prisma.ContentReportUpdateManyWithoutResolvedByNestedInput
+  loginHistory?: Prisma.LoginHistoryUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSystemSettingsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  institution?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fieldOfStudy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailVerificationToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  onboardingStep?: Prisma.IntFieldUpdateOperationsInput | number
+  twoFactorSecret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  twoFactorEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  stripeCustomerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeSubscriptionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripePriceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stripeCurrentPeriodEnd?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lastLoginProvider?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.WorkspaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  workspacesOwned?: Prisma.WorkspaceUncheckedUpdateManyWithoutOwnerNestedInput
+  uploadedPapers?: Prisma.PaperUncheckedUpdateManyWithoutUploaderNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutUserNestedInput
+  collections?: Prisma.CollectionUncheckedUpdateManyWithoutOwnerNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  searchHistory?: Prisma.SearchHistoryUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  triggeredNotifications?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  usageEvents?: Prisma.UsageEventUncheckedUpdateManyWithoutUserNestedInput
+  activities?: Prisma.ActivityLogUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightThreads?: Prisma.AIInsightThreadUncheckedUpdateManyWithoutUserNestedInput
+  aiInsightMessagesAuthored?: Prisma.AIInsightMessageUncheckedUpdateManyWithoutCreatedByNestedInput
+  collectionInvitesSent?: Prisma.CollectionMemberUncheckedUpdateManyWithoutInvitedByNestedInput
+  workspaceInvitesReceived?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutUserNestedInput
+  workspaceInvitesSent?: Prisma.WorkspaceInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  tokens?: Prisma.UserTokenUncheckedUpdateManyWithoutUserNestedInput
+  researchNotes?: Prisma.ResearchNoteUncheckedUpdateManyWithoutUserNestedInput
+  notebooks?: Prisma.NotebookUncheckedUpdateManyWithoutUserNestedInput
+  notebookSections?: Prisma.NotebookSectionUncheckedUpdateManyWithoutUserNestedInput
+  citationExports?: Prisma.CitationExportUncheckedUpdateManyWithoutUserNestedInput
+  discussionThreads?: Prisma.DiscussionThreadUncheckedUpdateManyWithoutUserNestedInput
+  discussionMessages?: Prisma.DiscussionMessageUncheckedUpdateManyWithoutUserNestedInput
+  activityLogEntries?: Prisma.ActivityLogEntryUncheckedUpdateManyWithoutUserNestedInput
+  paperVersions?: Prisma.PaperVersionUncheckedUpdateManyWithoutSavedByNestedInput
+  aiConversations?: Prisma.AIConversationUncheckedUpdateManyWithoutUserNestedInput
+  paperSharesShared?: Prisma.PaperShareUncheckedUpdateManyWithoutSharedByNestedInput
+  preference?: Prisma.UserPreferenceUncheckedUpdateOneWithoutUserNestedInput
+  AnnotationVersion?: Prisma.AnnotationVersionUncheckedUpdateManyWithoutChangedByNestedInput
+  CollectionPaper?: Prisma.CollectionPaperUncheckedUpdateManyWithoutAddedByNestedInput
+  CollectionMember?: Prisma.CollectionMemberUncheckedUpdateManyWithoutUserNestedInput
+  adminReportsCreated?: Prisma.AdminReportUncheckedUpdateManyWithoutCreatedByNestedInput
+  resolvedSystemAlerts?: Prisma.SystemAlertUncheckedUpdateManyWithoutResolvedByNestedInput
+  apiKeysCreated?: Prisma.ApiKeyUncheckedUpdateManyWithoutCreatedByNestedInput
+  contentReportsFiled?: Prisma.ContentReportUncheckedUpdateManyWithoutReporterNestedInput
+  contentReportsAssigned?: Prisma.ContentReportUncheckedUpdateManyWithoutAssignedToNestedInput
+  contentReportsResolved?: Prisma.ContentReportUncheckedUpdateManyWithoutResolvedByNestedInput
   loginHistory?: Prisma.LoginHistoryUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -13363,6 +13838,7 @@ export type UserCountOutputType = {
   contentReportsFiled: number
   contentReportsAssigned: number
   contentReportsResolved: number
+  systemSettingsUpdated: number
   loginHistory: number
 }
 
@@ -13406,6 +13882,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   contentReportsFiled?: boolean | UserCountOutputTypeCountContentReportsFiledArgs
   contentReportsAssigned?: boolean | UserCountOutputTypeCountContentReportsAssignedArgs
   contentReportsResolved?: boolean | UserCountOutputTypeCountContentReportsResolvedArgs
+  systemSettingsUpdated?: boolean | UserCountOutputTypeCountSystemSettingsUpdatedArgs
   loginHistory?: boolean | UserCountOutputTypeCountLoginHistoryArgs
 }
 
@@ -13695,6 +14172,13 @@ export type UserCountOutputTypeCountContentReportsResolvedArgs<ExtArgs extends r
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountSystemSettingsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SystemSettingWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountLoginHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LoginHistoryWhereInput
 }
@@ -13765,6 +14249,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   contentReportsFiled?: boolean | Prisma.User$contentReportsFiledArgs<ExtArgs>
   contentReportsAssigned?: boolean | Prisma.User$contentReportsAssignedArgs<ExtArgs>
   contentReportsResolved?: boolean | Prisma.User$contentReportsResolvedArgs<ExtArgs>
+  systemSettingsUpdated?: boolean | Prisma.User$systemSettingsUpdatedArgs<ExtArgs>
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -13892,6 +14377,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   contentReportsFiled?: boolean | Prisma.User$contentReportsFiledArgs<ExtArgs>
   contentReportsAssigned?: boolean | Prisma.User$contentReportsAssignedArgs<ExtArgs>
   contentReportsResolved?: boolean | Prisma.User$contentReportsResolvedArgs<ExtArgs>
+  systemSettingsUpdated?: boolean | Prisma.User$systemSettingsUpdatedArgs<ExtArgs>
   loginHistory?: boolean | Prisma.User$loginHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -13941,6 +14427,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     contentReportsFiled: Prisma.$ContentReportPayload<ExtArgs>[]
     contentReportsAssigned: Prisma.$ContentReportPayload<ExtArgs>[]
     contentReportsResolved: Prisma.$ContentReportPayload<ExtArgs>[]
+    systemSettingsUpdated: Prisma.$SystemSettingPayload<ExtArgs>[]
     loginHistory: Prisma.$LoginHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -14402,6 +14889,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   contentReportsFiled<T extends Prisma.User$contentReportsFiledArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsFiledArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contentReportsAssigned<T extends Prisma.User$contentReportsAssignedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsAssignedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contentReportsResolved<T extends Prisma.User$contentReportsResolvedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$contentReportsResolvedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContentReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  systemSettingsUpdated<T extends Prisma.User$systemSettingsUpdatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$systemSettingsUpdatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SystemSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   loginHistory<T extends Prisma.User$loginHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$loginHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -15801,6 +16289,30 @@ export type User$contentReportsResolvedArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.ContentReportScalarFieldEnum | Prisma.ContentReportScalarFieldEnum[]
+}
+
+/**
+ * User.systemSettingsUpdated
+ */
+export type User$systemSettingsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SystemSetting
+   */
+  select?: Prisma.SystemSettingSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SystemSetting
+   */
+  omit?: Prisma.SystemSettingOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SystemSettingInclude<ExtArgs> | null
+  where?: Prisma.SystemSettingWhereInput
+  orderBy?: Prisma.SystemSettingOrderByWithRelationInput | Prisma.SystemSettingOrderByWithRelationInput[]
+  cursor?: Prisma.SystemSettingWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SystemSettingScalarFieldEnum | Prisma.SystemSettingScalarFieldEnum[]
 }
 
 /**
