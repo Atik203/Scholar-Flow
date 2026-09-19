@@ -395,6 +395,36 @@ class AdminController {
   );
 
   /**
+   * Export users as CSV (filter-aware)
+   * GET /api/admin/users/export
+   */
+  exportUsers: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const searchQuery = req.query.search as string | undefined;
+      const role = req.query.role as string | undefined;
+      const status = req.query.status as string | undefined;
+
+      const { csv, count } = await userManagementService.exportUsersCsv(
+        searchQuery,
+        role,
+        status
+      );
+
+      const filename = `scholar-flow-users-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.setHeader("X-Export-Count", String(count));
+      res.status(200).send(csv);
+    }
+  );
+
+  /**
    * Get user statistics
    * GET /api/admin/users/stats
    */
