@@ -914,6 +914,7 @@ export const paperController = {
           await notificationService.createNotification({
             userId: recipient.id,
             type: "SHARE",
+            category: "PAPERS",
             title: "Paper shared with you",
             message: `${
               authReq.user.name || authReq.user.email

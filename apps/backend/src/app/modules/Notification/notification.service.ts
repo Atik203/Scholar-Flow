@@ -2,6 +2,26 @@ import { Prisma, NotificationType } from "../../shared/prisma";
 import prisma from "../../shared/prisma";
 import ApiError from "../../errors/ApiError";
 import { notificationBroadcaster } from "./broadcast";
+import {
+  notificationSettingsService,
+  type NotificationCategory,
+} from "./notificationSettings.service";
+
+// Fallback type → category mapping used when a caller does not pass an
+// explicit category. Invite flows pass WORKSPACE/TEAM explicitly.
+const TYPE_TO_CATEGORY: Record<NotificationType, NotificationCategory> = {
+  MENTION: "DISCUSSIONS",
+  COMMENT: "DISCUSSIONS",
+  SHARE: "PAPERS",
+  INVITE: "TEAM",
+  PAPER: "PAPERS",
+  COLLECTION: "COLLECTIONS",
+  SYSTEM: "SYSTEM",
+  ACHIEVEMENT: "ACHIEVEMENT",
+};
+
+// Account-critical notices ignore category/channel preferences.
+const ALWAYS_DELIVER: NotificationCategory[] = ["BILLING", "SECURITY"];
 
 export const notificationService = {
   /**
@@ -169,8 +189,11 @@ export const notificationService = {
 
   /**
    * Internal helper to create a notification (called by other services).
-   * After persisting, broadcasts the new notification to the user's open SSE
-   * connections via the in-process broadcaster.
+   * Honors the recipient's notification preferences (mute all, in-app
+   * channel, per-category in-app toggle) and broadcasts new notifications to
+   * the user's open SSE connections via the in-process broadcaster.
+   *
+   * Returns null when the recipient's preferences suppress delivery.
    */
   async createNotification(data: {
     userId: string;
@@ -180,9 +203,34 @@ export const notificationService = {
     actionUrl?: string;
     actorId?: string;
     resourceId?: string;
+    /** Explicit category; defaults from the notification type. */
+    category?: NotificationCategory;
   }) {
+    const { category: explicitCategory, ...notificationData } = data;
+    const category =
+      explicitCategory ?? TYPE_TO_CATEGORY[data.type] ?? "SYSTEM";
+
+    // Preference gate (fail-open). Never throws into the caller's flow.
+    try {
+      if (!ALWAYS_DELIVER.includes(category)) {
+        const prefs = await notificationSettingsService.getPreferencesLite(
+          data.userId
+        );
+        const categoryInApp = prefs.categories?.[category]?.inApp;
+        if (
+          prefs.muteAll ||
+          prefs.channels?.inApp === false ||
+          categoryInApp === false
+        ) {
+          return null;
+        }
+      }
+    } catch {
+      // Fail-open: preference read failures must never mute notifications.
+    }
+
     const notification = await prisma.notification.create({
-      data,
+      data: notificationData,
       include: {
         actor: {
           select: { name: true, image: true, firstName: true, lastName: true },

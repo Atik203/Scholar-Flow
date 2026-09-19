@@ -781,6 +781,7 @@ async function handleInvoicePaymentFailed(
     await notificationService.createNotification({
       userId: subscription[0].userId,
       type: "SYSTEM",
+      category: "BILLING",
       title: "Payment failed",
       message:
         "We couldn't charge your card for your subscription. Your paid plan continues during the grace period — update your payment method to avoid losing access.",

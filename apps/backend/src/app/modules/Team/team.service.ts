@@ -355,6 +355,7 @@ export class TeamService {
       await notificationService.createNotification({
         userId: targetUserId,
         type: "SYSTEM",
+        category: "TEAM",
         title: "Role updated",
         message: `Your team role was changed to ${roleLabel}.`,
         actionUrl: "/dashboard/team",
@@ -449,6 +450,7 @@ export class TeamService {
       await notificationService.createNotification({
         userId: targetUserId,
         type: "SYSTEM",
+        category: "TEAM",
         title: "Removed from team",
         message: `${requestorName} removed you from their team. You no longer have access to its shared workspaces.`,
         actionUrl: "/dashboard/workspaces",
@@ -874,6 +876,7 @@ export class TeamService {
       await notificationService.createNotification({
         userId: user.id,
         type: "INVITE",
+        category: "TEAM",
         title: "Team invitation",
         message: `${inviterName} invited you to join their team. Review and accept it from your invitations.`,
         actionUrl: "/dashboard/team/invitations",
@@ -908,6 +911,7 @@ export class TeamService {
       await notificationService.createNotification({
         userId: invite.userId,
         type: "INVITE",
+        category: "TEAM",
         title: "Invitation cancelled",
         message: "A team invitation sent to you was cancelled.",
         actionUrl: "/dashboard/team/invitations",
@@ -968,6 +972,7 @@ export class TeamService {
       await notificationService.createNotification({
         userId: invite.userId,
         type: "INVITE",
+        category: "TEAM",
         title: "Invitation reminder",
         message:
           "Your team invitation is still pending. Accept or decline it from your invitations.",
