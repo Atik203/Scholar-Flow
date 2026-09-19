@@ -58,8 +58,8 @@ export interface ISystemHealth {
     percentageUsed: number;
   };
   cache: {
-    status: "healthy" | "degraded" | "unhealthy";
-    hitRate: number;
+    status: "healthy" | "degraded" | "unhealthy" | "not_configured";
+    hitRate: number | null;
   };
   uptime: number;
   lastChecked: Date;
@@ -112,11 +112,6 @@ export interface ISystemMetrics {
       used: number; // bytes
       free: number; // bytes
       usagePercentage: number;
-    };
-    network: {
-      bytesReceived: number;
-      bytesSent: number;
-      activeConnections: number;
     };
   };
   systemInfo: {
