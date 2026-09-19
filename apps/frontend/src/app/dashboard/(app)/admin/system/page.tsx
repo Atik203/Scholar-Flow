@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +10,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetSystemMetricsQuery } from "@/redux/api/adminApi";
-import { Activity, Cpu, Database, HardDrive, Server } from "lucide-react";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+import {
+  useGetSystemHealthQuery,
+  useGetSystemMetricsQuery,
+} from "@/redux/api/adminApi";
+import {
+  useClearSystemCacheMutation,
+  useExportSystemLogsMutation,
+  useRunSystemDiagnosticsMutation,
+  type SystemDiagnostics,
+} from "@/redux/api/adminExtendedApi";
+import {
+  Activity,
+  CheckCircle2,
+  Cpu,
+  Database,
+  Download,
+  HardDrive,
+  Loader2,
+  MemoryStick,
+  PlayCircle,
+  Server,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import { Suspense, lazy } from "react";
 
 // Lazy load components for better performance
@@ -24,6 +51,11 @@ const SystemInfoRow = lazy(() =>
   import("./components").then((mod) => ({ default: mod.SystemInfoRow }))
 );
 
+const apiErrorMessage = (err: unknown, fallback: string): string => {
+  const message = (err as { data?: { message?: string } })?.data?.message;
+  return message && typeof message === "string" ? message : fallback;
+};
+
 export default function AdminSystemPage() {
   // Fetch system metrics with 10s polling for real-time updates
   const {
@@ -33,6 +65,74 @@ export default function AdminSystemPage() {
   } = useGetSystemMetricsQuery(undefined, {
     pollingInterval: 10000, // 10 seconds
   });
+
+  // Cache health (drives the Clear Cache enablement)
+  const { data: systemHealth } = useGetSystemHealthQuery(undefined, {
+    pollingInterval: 10000,
+  });
+  const cacheNotConfigured = systemHealth?.cache.status === "not_configured";
+
+  // System actions
+  const [runDiagnostics, { isLoading: isDiagnosing }] =
+    useRunSystemDiagnosticsMutation();
+  const [clearCache, { isLoading: isClearingCache }] =
+    useClearSystemCacheMutation();
+  const [exportLogs, { isLoading: isExportingLogs }] =
+    useExportSystemLogsMutation();
+  const [diagnostics, setDiagnostics] = useState<SystemDiagnostics | null>(null);
+
+  const handleRunDiagnostics = async () => {
+    try {
+      const result = await runDiagnostics().unwrap();
+      setDiagnostics(result.data);
+      showSuccessToast(
+        "Diagnostics complete",
+        `Overall status: ${result.data.status}`
+      );
+    } catch (err) {
+      showErrorToast(
+        "Diagnostics failed",
+        apiErrorMessage(err, "Could not run system diagnostics")
+      );
+    }
+  };
+
+  const handleClearCache = async () => {
+    try {
+      const result = await clearCache().unwrap();
+      showSuccessToast(
+        "Cache cleared",
+        `Redis flushed, ${result.data.memoryEntriesCleared} in-memory entries cleared`
+      );
+    } catch (err) {
+      showErrorToast(
+        "Clear cache failed",
+        apiErrorMessage(err, "Could not clear the system cache")
+      );
+    }
+  };
+
+  const handleExportLogs = async () => {
+    try {
+      const blob = await exportLogs().unwrap();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `scholar-flow-logs-${new Date()
+        .toISOString()
+        .slice(0, 10)}.log`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      showSuccessToast("Logs exported", "Backend log file downloaded");
+    } catch (err) {
+      showErrorToast(
+        "Export failed",
+        apiErrorMessage(err, "Could not export system logs")
+      );
+    }
+  };
 
   // Helper: Format uptime
   const formatUptime = (seconds: number): string => {
@@ -111,6 +211,19 @@ export default function AdminSystemPage() {
               status={metrics?.health.cpu || "healthy"}
               detail={`Average: ${metrics?.performance.cpu.usage?.toFixed(1) || 0}%`}
               icon={Cpu}
+              isLoading={isLoading}
+            />
+            <HealthCard
+              title="Cache"
+              status={systemHealth?.cache.status ?? "healthy"}
+              detail={
+                systemHealth?.cache.hitRate != null
+                  ? `${(systemHealth.cache.hitRate * 100).toFixed(1)}% hit rate`
+                  : systemHealth?.cache.status === "not_configured"
+                    ? "Redis not configured (in-memory fallback)"
+                    : "No lookups yet"
+              }
+              icon={MemoryStick}
               isLoading={isLoading}
             />
           </div>
@@ -206,29 +319,125 @@ export default function AdminSystemPage() {
           <CardHeader>
             <CardTitle>System Actions</CardTitle>
             <CardDescription>
-              Perform maintenance and system operations
+              Run diagnostics, clear the cache, or export recent backend logs
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-3">
-              <Button disabled>Clear Cache</Button>
-              <Button variant="outline" disabled>
-                Restart Server
+              <Button
+                onClick={handleRunDiagnostics}
+                disabled={isDiagnosing}
+                className="gap-2"
+              >
+                {isDiagnosing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <PlayCircle className="h-4 w-4" />
+                )}
+                {isDiagnosing ? "Running..." : "Run Diagnostics"}
               </Button>
-              <Button variant="outline" disabled>
-                Run Diagnostics
+              <Button
+                variant="outline"
+                onClick={handleClearCache}
+                disabled={isClearingCache || cacheNotConfigured}
+                title={
+                  cacheNotConfigured
+                    ? "Redis is not configured on this deployment"
+                    : "Flush Redis cache and the in-memory fallback"
+                }
+                className="gap-2"
+              >
+                {isClearingCache ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                {isClearingCache ? "Clearing..." : "Clear Cache"}
               </Button>
-              <Button variant="outline" disabled>
-                Export Logs
-              </Button>
-              <Button variant="outline" disabled>
-                Backup Database
+              <Button
+                variant="outline"
+                onClick={handleExportLogs}
+                disabled={isExportingLogs}
+                className="gap-2"
+              >
+                {isExportingLogs ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                {isExportingLogs ? "Exporting..." : "Export Logs"}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              System actions are temporarily disabled. Full functionality coming
-              soon.
+              Diagnostics pings the database and checks memory/cache health. Logs
+              are captured in an in-memory ring buffer (last 1000 entries) and
+              reset when the backend restarts. Restart Server and Backup Database
+              are handled by the hosting platform.
             </p>
+
+            {diagnostics && (
+              <div className="mt-5 rounded-lg border p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  {diagnostics.status === "healthy" ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ) : diagnostics.status === "degraded" ? (
+                    <Activity className="h-5 w-5 text-yellow-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  )}
+                  <p className="font-medium capitalize">
+                    Diagnostics: {diagnostics.status}
+                  </p>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {new Date(diagnostics.generatedAt).toLocaleString()}
+                  </span>
+                </div>
+                <ul className="space-y-2">
+                  {diagnostics.checks.map((check) => (
+                    <li
+                      key={check.name}
+                      className="flex items-start gap-2 text-sm"
+                    >
+                      {check.status === "healthy" ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                      )}
+                      <div>
+                        <span className="font-medium">{check.name}</span>
+                        <span className="text-muted-foreground">
+                          {" "}
+                          — {check.detail}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm pt-1">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Heap Used</p>
+                    <p className="font-medium">{diagnostics.memory.heapUsedMB}MB</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">RSS</p>
+                    <p className="font-medium">{diagnostics.memory.rssMB}MB</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">DB Ping</p>
+                    <p className="font-medium">
+                      {diagnostics.database.responseTime}ms
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pool</p>
+                    <p className="font-medium">
+                      {diagnostics.database.activeConnections}/
+                      {diagnostics.database.maxConnections}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
     </div>
