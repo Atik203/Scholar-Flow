@@ -19,6 +19,10 @@ import {
   captureStripeRawBody,
   isStripeWebhookPath,
 } from "./app/utils/stripeWebhook";
+import { installLogCapture } from "./app/shared/logBuffer";
+
+// Capture console output into the admin log ring buffer (max 1000 entries)
+installLogCapture();
 
 // Initialize queue processing (lazy on Vercel to avoid cold start issues)
 if (process.env.VERCEL !== "1") {

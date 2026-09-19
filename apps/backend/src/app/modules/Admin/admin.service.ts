@@ -18,10 +18,16 @@ import {
   IRoleDistribution,
   ISystemDiagnostics,
   ISystemHealth,
+  ISystemLogsResult,
   ISystemMetrics,
   ISystemStats,
   IUserGrowthData,
 } from "./admin.interface";
+import {
+  countLogEntries,
+  getLogEntries,
+  getLogsAsText,
+} from "../../shared/logBuffer";
 
 class AdminService {
   /**
@@ -767,6 +773,26 @@ class AdminService {
       memoryEntriesCleared,
       clearedAt: new Date(),
     };
+  }
+
+  /**
+   * Recent backend logs captured by the in-memory ring buffer
+   */
+  getSystemLogs(level?: string, limit = 200): ISystemLogsResult {
+    const entries = getLogEntries({ level, limit });
+
+    return {
+      entries,
+      total: countLogEntries(level),
+      returned: entries.length,
+    };
+  }
+
+  /**
+   * Captured backend logs as a plain-text file body
+   */
+  exportSystemLogs(level?: string): string {
+    return getLogsAsText(level);
   }
 }
 
