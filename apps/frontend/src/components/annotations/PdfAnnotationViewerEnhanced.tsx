@@ -51,7 +51,7 @@ export function PdfAnnotationViewerEnhanced({
     useState<AnnotationType>("HIGHLIGHT");
   const [annotationColor, setAnnotationColor] = useState<string>("#FFEB3B");
   const [showAnnotations, setShowAnnotations] = useState(true);
-  const [showAnnotationList, setShowAnnotationList] = useState(true);
+  const [showAnnotationList, setShowAnnotationList] = useState(false);
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [drawingPoints, setDrawingPoints] = useState<
     Array<{ x: number; y: number }>
@@ -64,11 +64,15 @@ export function PdfAnnotationViewerEnhanced({
 
   const pageRef = useRef<HTMLDivElement>(null);
 
-  const { data: annotationsData, isLoading: annotationsLoading } =
-    useGetPaperAnnotationsQuery({
-      paperId,
-      includeReplies: true,
-    });
+  const {
+    data: annotationsData,
+    isLoading: annotationsLoading,
+    isError: annotationsError,
+    refetch: refetchAnnotations,
+  } = useGetPaperAnnotationsQuery({
+    paperId,
+    includeReplies: true,
+  });
 
   const [createAnnotation] = useCreateAnnotationMutation();
   const [updateAnnotation] = useUpdateAnnotationMutation();
@@ -205,6 +209,13 @@ export function PdfAnnotationViewerEnhanced({
     []
   );
 
+  // Open the annotation list by default only when there is room for it.
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 1280px)").matches) {
+      setShowAnnotationList(true);
+    }
+  }, []);
+
   useEffect(() => {
     const el = pageRef.current;
     if (!el) return;
@@ -253,6 +264,20 @@ export function PdfAnnotationViewerEnhanced({
           showSidebar={showAnnotationList}
           onToggleSidebar={() => setShowAnnotationList((v) => !v)}
         />
+
+        {annotationsError && (
+          <div className="flex items-center justify-between gap-2 border-b border-destructive/20 bg-destructive/10 px-4 py-1.5 text-xs text-destructive">
+            <span>Failed to load annotations.</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => void refetchAnnotations()}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
 
         <div className="flex-1 overflow-auto bg-muted/30 p-6">
           <div className="flex justify-center">
