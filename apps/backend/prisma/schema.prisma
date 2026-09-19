@@ -235,6 +235,7 @@ model User {
   contentReportsFiled    ContentReport[]  @relation("ContentReporter")
   contentReportsAssigned ContentReport[]  @relation("ContentReportAssignee")
   contentReportsResolved ContentReport[]  @relation("ContentReportResolver")
+  systemSettingsUpdated  SystemSetting[]  @relation("SystemSettingUpdater")
 
   // Optimized indexes for common query patterns
   @@index([isDeleted, createdAt]) // For listing active users sorted by creation
@@ -1648,4 +1649,18 @@ model ContentReport {
   @@index([contentType, contentId])
   @@index([reporterId, createdAt])
   @@index([assignedToId, status])
+}
+
+// -------- Platform System Settings --------
+
+model SystemSetting {
+  key         String   @id
+  value       Json     @db.JsonB
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  updatedBy User? @relation("SystemSettingUpdater", fields: [updatedById], references: [id])
+
+  @@index([updatedById])
 }
