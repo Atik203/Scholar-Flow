@@ -11,7 +11,7 @@ services:
         value: production
       - key: PORT
         value: "5001"
-      - key: JWT_SECRET
+      - key: NEXTAUTH_SECRET
         sync: false
       - key: FRONTEND_URL
         sync: false
