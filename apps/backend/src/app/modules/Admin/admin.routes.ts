@@ -230,6 +230,31 @@ router.get(
 
 /**
  * @swagger
+ * /api/admin/system/diagnostics:
+ *   post:
+ *     summary: Run System Diagnostics
+ *     description: On-demand diagnostics - database ping, connection pool, memory and cache checks. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Diagnostics completed successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       500:
+ *         description: Server error
+ */
+router.post(
+  "/system/diagnostics",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemDiagnostics
+);
+
+/**
+ * @swagger
  * /api/admin/analytics/revenue:
  *   get:
  *     summary: Get Revenue Analytics

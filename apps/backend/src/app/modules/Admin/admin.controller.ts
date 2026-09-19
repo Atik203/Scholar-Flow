@@ -190,6 +190,23 @@ class AdminController {
   );
 
   /**
+   * Run system diagnostics
+   * POST /api/admin/system/diagnostics
+   */
+  getSystemDiagnostics: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const diagnostics = await adminService.runSystemDiagnostics();
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: ADMIN_SUCCESS_MESSAGES.DIAGNOSTICS_SUCCESS,
+        data: diagnostics,
+      });
+    }
+  );
+
+  /**
    * Get revenue analytics for admin dashboard
    * GET /api/admin/analytics/revenue
    */
