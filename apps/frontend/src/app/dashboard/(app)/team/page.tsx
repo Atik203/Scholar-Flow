@@ -10,6 +10,7 @@ import { StatusDot } from "@/components/team/StatusDot";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import {
   useGetTeamMembersQuery,
+  useGetTeamSettingsQuery,
   useGetTeamStatsQuery,
   useRemoveTeamMemberMutation,
   useSendTeamInvitationMutation,
@@ -36,7 +37,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type TeamInviteRole = "RESEARCHER" | "PRO_RESEARCHER" | "TEAM_LEAD";
@@ -443,6 +444,20 @@ function InviteModal({
 }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamInviteRole>("RESEARCHER");
+  const { data: settingsData } = useGetTeamSettingsQuery(undefined, {
+    skip: !isOpen,
+  });
+
+  // Pre-select the role saved in team settings (per-account default)
+  useEffect(() => {
+    const defaultRole = settingsData?.general?.defaultRole;
+    if (
+      defaultRole === "PRO_RESEARCHER" ||
+      defaultRole === "TEAM_LEAD"
+    ) {
+      setRole(defaultRole);
+    }
+  }, [settingsData, isOpen]);
 
   return (
     <AnimatePresence>
