@@ -11,27 +11,12 @@ import {
   Award,
   BookOpen,
   Building,
-  Check,
   Clock,
   Copy,
-  ExternalLink,
-  Eye,
   FileText,
-  Flag,
   Folder,
-  Globe,
   Mail,
-  MapPin,
-  MessageSquare,
-  MoreHorizontal,
-  Send,
-  Share2,
-  Star,
-  TrendingUp,
-  UserCheck,
-  UserPlus,
   Users,
-  X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -51,11 +36,7 @@ export default function CollaboratorProfilePage() {
   const shouldFetch = !!accessToken && accessToken.length > 0;
 
   const [activeTab, setActiveTab] = useState<Tab>("papers");
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [message, setMessage] = useState("");
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   const { data: member, isLoading } = useGetTeamMemberQuery(userId, {
     skip: !shouldFetch,
@@ -149,61 +130,10 @@ export default function CollaboratorProfilePage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => setIsFollowing(!isFollowing)}
-                      className={
-                        isFollowing
-                          ? "bg-muted text-foreground"
-                          : "bg-indigo-600 hover:bg-indigo-700"
-                      }
-                    >
-                      {isFollowing ? (
-                        <>
-                          <UserCheck className="w-4 h-4 mr-1" />
-                          Following
-                        </>
-                      ) : (
-                        <>
-                          <UserPlus className="w-4 h-4 mr-1" />
-                          Follow
-                        </>
-                      )}
+                    <Button variant="outline" size="sm" onClick={handleCopyEmail}>
+                      <Mail className="w-4 h-4 mr-1" />
+                      {copiedEmail ? "Copied!" : "Copy Email"}
                     </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowMessageModal(true)}
-                    >
-                      <MessageSquare className="w-4 h-4 mr-1" />
-                      Message
-                    </Button>
-                    <div className="relative">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setShowMoreMenu(!showMoreMenu)}
-                      >
-                        <MoreHorizontal className="w-5 h-5" />
-                      </Button>
-                      <AnimatePresence>
-                        {showMoreMenu && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="absolute right-0 top-full mt-2 w-48 bg-card rounded-lg shadow-lg border py-1 z-10"
-                          >
-                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted">
-                              <Share2 className="w-4 h-4" />
-                              Share Profile
-                            </button>
-                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-muted">
-                              <Flag className="w-4 h-4" />
-                              Report
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
                   </div>
                 </div>
 
@@ -232,8 +162,7 @@ export default function CollaboratorProfilePage() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-6 pt-6 border-t">
-              <StatTile label="Papers" value={0} icon={FileText} />
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t">
               <StatTile label="Collections" value={member._count?.memberships ?? 0} icon={BookOpen} />
               <StatTile label="Workspaces" value={member._count?.memberships ?? 0} icon={Users} />
               <StatTile label="Joined" value={new Date(member.createdAt).getFullYear()} icon={Clock} />
@@ -314,53 +243,6 @@ export default function CollaboratorProfilePage() {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Message Modal */}
-      <AnimatePresence>
-        {showMessageModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowMessageModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-card rounded-xl border w-full max-w-lg p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-xl font-semibold mb-4">
-                Send Message to {name}
-              </h3>
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Write your message…"
-                rows={4}
-                className="w-full px-4 py-3 bg-muted border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <div className="flex justify-end gap-3 mt-4">
-                <Button variant="outline" onClick={() => setShowMessageModal(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-indigo-600 hover:bg-indigo-700"
-                  onClick={() => {
-                    setShowMessageModal(false);
-                    setMessage("");
-                  }}
-                >
-                  <Send className="w-4 h-4 mr-1" />
-                  Send Message
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
