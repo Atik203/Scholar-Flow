@@ -30,12 +30,14 @@ function PaperCitationLines({
   paperId,
   nodesById,
   onEdges,
+  onError,
 }: {
   paperId: string;
   nodesById: Record<string, GraphNode>;
   onEdges: (count: number) => void;
+  onError: () => void;
 }) {
-  const { data: citations } = useGetPaperCitationsQuery(paperId, {
+  const { data: citations, isError } = useGetPaperCitationsQuery(paperId, {
     skip: !paperId,
   });
 
@@ -44,6 +46,10 @@ function PaperCitationLines({
       onEdges(citations.length);
     }
   }, [citations, onEdges]);
+
+  useEffect(() => {
+    if (isError) onError();
+  }, [isError, onError]);
 
   const source = nodesById[paperId];
   if (!source) return null;
@@ -81,13 +87,20 @@ export default function CitationGraphPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [edgeCount, setEdgeCount] = useState(0);
+  const [errorCount, setErrorCount] = useState(0);
 
   useEffect(() => {
     setEdgeCount(0);
+    setErrorCount(0);
   }, [selectedIds]);
 
   const onEdges = useMemo(
     () => (count: number) => setEdgeCount((prev) => prev + count),
+    []
+  );
+
+  const onCitationError = useMemo(
+    () => () => setErrorCount((prev) => prev + 1),
     []
   );
 
@@ -139,7 +152,11 @@ export default function CitationGraphPage() {
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
@@ -284,6 +301,7 @@ export default function CitationGraphPage() {
                   paperId={node.id}
                   nodesById={nodesById}
                   onEdges={onEdges}
+                  onError={onCitationError}
                 />
               ))}
             </svg>
@@ -319,6 +337,12 @@ export default function CitationGraphPage() {
               {nodes.length} papers in graph
               {edgeCount > 0 && ` · ${edgeCount} citation links`}
             </Badge>
+          </div>
+        )}
+
+        {errorCount > 0 && (
+          <div className="absolute top-4 left-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
+            Some citation links could not be loaded. Try again in a moment.
           </div>
         )}
       </div>
