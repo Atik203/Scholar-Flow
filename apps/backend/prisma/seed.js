@@ -21,7 +21,7 @@ async function main() {
   // Create admin user if not exists
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@scholarflow.com' },
-    update: {},
+    update: { password: hashedPassword, role: 'ADMIN', isDeleted: false },
     create: {
       email: 'admin@scholarflow.com',
       name: 'ScholarFlow Admin',
@@ -38,7 +38,7 @@ async function main() {
   // Create sample users for different roles
   const researcherUser = await prisma.user.upsert({
     where: { email: 'researcher@scholarflow.com' },
-    update: {},
+    update: { password: hashedPassword, role: 'RESEARCHER', isDeleted: false },
     create: {
       email: 'researcher@scholarflow.com',
       name: 'John Researcher',
@@ -54,7 +54,7 @@ async function main() {
 
   const proResearcherUser = await prisma.user.upsert({
     where: { email: 'pro.researcher@scholarflow.com' },
-    update: {},
+    update: { password: hashedPassword, role: 'PRO_RESEARCHER', isDeleted: false },
     create: {
       email: 'pro.researcher@scholarflow.com',
       name: 'Jane Pro Researcher',
@@ -70,7 +70,7 @@ async function main() {
 
   const teamLeadUser = await prisma.user.upsert({
     where: { email: 'teamlead@scholarflow.com' },
-    update: {},
+    update: { password: hashedPassword, role: 'TEAM_LEAD', isDeleted: false },
     create: {
       email: 'teamlead@scholarflow.com',
       name: 'Bob Team Lead',
