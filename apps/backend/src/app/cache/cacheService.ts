@@ -24,11 +24,19 @@ class CacheService {
   private readonly MAX_MEMORY_CACHE_SIZE = 100; // Conservative limit for in-memory
   private readonly MAX_CACHE_VALUE_SIZE = 1024 * 50; // 50KB max per cached value
 
+  // Namespace so bounded cache flushes never touch other Redis users
+  // (Bull queue keys live in the same Redis database).
+  private readonly KEY_PREFIX = "sf:cache:";
+
   // Track cache hits for smart eviction (LRU-like behavior)
   private cacheHits: Map<string, number> = new Map();
 
   // Miss counter for real hit-rate reporting in admin health
   private cacheMisses: number = 0;
+
+  private prefixed(key: string): string {
+    return this.KEY_PREFIX + key;
+  }
 
   constructor() {
     this.initializeRedis();
@@ -102,27 +110,28 @@ class CacheService {
    * Track hits for smart eviction
    */
   public async get<T>(key: string): Promise<T | null> {
+    const cacheKey = this.prefixed(key);
     try {
       // Try Redis first
       if (this.isRedisEnabled && this.client) {
-        const value = await this.client.get(key);
+        const value = await this.client.get(cacheKey);
         if (value) {
-          this.cacheHits.set(key, (this.cacheHits.get(key) || 0) + 1);
+          this.cacheHits.set(cacheKey, (this.cacheHits.get(cacheKey) || 0) + 1);
           return JSON.parse(value) as T;
         }
       }
 
       // Fallback to in-memory cache
-      const cached = this.memoryCache.get(key);
+      const cached = this.memoryCache.get(cacheKey);
       if (cached) {
         // Check if expired
         if (cached.expiry < Date.now()) {
-          this.memoryCache.delete(key);
-          this.cacheHits.delete(key);
+          this.memoryCache.delete(cacheKey);
+          this.cacheHits.delete(cacheKey);
           this.cacheMisses += 1;
           return null;
         }
-        this.cacheHits.set(key, (this.cacheHits.get(key) || 0) + 1);
+        this.cacheHits.set(cacheKey, (this.cacheHits.get(cacheKey) || 0) + 1);
         return JSON.parse(cached.value) as T;
       }
 
@@ -154,7 +163,7 @@ class CacheService {
       // Try Redis first (for critical data)
       if (this.isRedisEnabled && this.client) {
         try {
-          await this.client.setEx(key, ttl, stringValue);
+          await this.client.setEx(this.prefixed(key), ttl, stringValue);
         } catch (redisError: any) {
           // If Redis is full or has error, fallback to memory cache
           if (
@@ -168,7 +177,7 @@ class CacheService {
       }
 
       // Always maintain in-memory cache as backup
-      this.memoryCache.set(key, {
+      this.memoryCache.set(this.prefixed(key), {
         value: stringValue,
         expiry: Date.now() + ttl * 1000,
       });
@@ -199,12 +208,13 @@ class CacheService {
    * Delete a value from cache
    */
   public async delete(key: string): Promise<void> {
+    const cacheKey = this.prefixed(key);
     try {
       if (this.isRedisEnabled && this.client) {
-        await this.client.del(key);
+        await this.client.del(cacheKey);
       }
-      this.memoryCache.delete(key);
-      this.cacheHits.delete(key);
+      this.memoryCache.delete(cacheKey);
+      this.cacheHits.delete(cacheKey);
     } catch (error) {
       console.error(`Cache delete error for key ${key}:`, error);
     }
@@ -215,9 +225,10 @@ class CacheService {
    * Note: Pattern matching only works with Redis, not in-memory cache
    */
   public async deletePattern(pattern: string): Promise<void> {
+    const prefixedPattern = this.prefixed(pattern);
     try {
       if (this.isRedisEnabled && this.client) {
-        const keys = await this.client.keys(pattern);
+        const keys = await this.client.keys(prefixedPattern);
         if (keys.length > 0) {
           await this.client.del(keys);
         }
@@ -225,7 +236,7 @@ class CacheService {
 
       // For in-memory cache, delete all matching keys
       const memoryKeys = Array.from(this.memoryCache.keys()).filter((key) =>
-        this.matchPattern(key, pattern)
+        this.matchPattern(key, prefixedPattern)
       );
       memoryKeys.forEach((key) => this.memoryCache.delete(key));
     } catch (error) {
@@ -248,12 +259,30 @@ class CacheService {
   }
 
   /**
-   * Clear all cache entries
+   * Clear all cache entries.
+   * Only deletes keys under the sf:cache: namespace — never FLUSHDB, because
+   * Bull queue keys share the same Redis database.
    */
   public async clear(): Promise<void> {
     try {
       if (this.isRedisEnabled && this.client) {
-        await this.client.flushDb();
+        const iterator = this.client.scanIterator({
+          MATCH: `${this.KEY_PREFIX}*`,
+          COUNT: 100,
+        });
+
+        let batch: string[] = [];
+        for await (const scanned of iterator) {
+          const keys = Array.isArray(scanned) ? scanned : [scanned];
+          batch.push(...keys);
+          if (batch.length >= 100) {
+            await this.client.del(batch);
+            batch = [];
+          }
+        }
+        if (batch.length > 0) {
+          await this.client.del(batch);
+        }
       }
       this.memoryCache.clear();
       this.cacheHits.clear();
