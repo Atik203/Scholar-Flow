@@ -163,6 +163,17 @@ export const teamApi = apiSlice.injectEndpoints({
     }),
 
     // -------------------------------------------------------------------------
+    // Access (derived: lead+ OR active workspace collaboration)
+    // -------------------------------------------------------------------------
+    getTeamAccess: builder.query<
+      { hasAccess: boolean; isTeamLead: boolean },
+      void
+    >({
+      query: () => "/team/access",
+      providesTags: [{ type: "Team", id: "ACCESS" }],
+    }),
+
+    // -------------------------------------------------------------------------
     // Stats
     // -------------------------------------------------------------------------
     getTeamStats: builder.query<TeamStats, void>({
@@ -313,6 +324,7 @@ export const {
   useGetTeamMemberQuery,
   useUpdateTeamMemberMutation,
   useRemoveTeamMemberMutation,
+  useGetTeamAccessQuery,
   useGetTeamStatsQuery,
   useGetTeamActivityQuery,
   useLazyGetTeamActivityQuery,
