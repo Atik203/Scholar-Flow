@@ -20,7 +20,9 @@ import {
   type TeamInvitation,
 } from "@/redux/api/teamApi";
 import { selectAccessToken } from "@/redux/auth/authSlice";
+import { useAuth } from "@/redux/auth/useAuth";
 import { useAppSelector } from "@/redux/hooks";
+import { USER_ROLES, hasRoleAccess } from "@/lib/auth/roles";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Check,
@@ -120,6 +122,11 @@ const getStatusBadge = (status: string) => {
 export default function TeamInvitationsPage() {
   const accessToken = useAppSelector(selectAccessToken);
   const shouldFetch = !!accessToken && accessToken.length > 0;
+  const { session } = useAuth();
+  const canManageTeam = hasRoleAccess(
+    session?.user?.role,
+    USER_ROLES.TEAM_LEAD
+  );
 
   const [filter, setFilter] = useState<FilterKey>("all");
   const [statusFilter, setStatusFilter] = useState<StatusKey>("all");
@@ -238,13 +245,15 @@ export default function TeamInvitationsPage() {
             Manage your workspace invitations and team collaborations
           </p>
         </div>
-        <Button
-          onClick={() => setShowInviteModal(true)}
-          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite Member
-        </Button>
+        {canManageTeam && (
+          <Button
+            onClick={() => setShowInviteModal(true)}
+            className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Invite Member
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -329,13 +338,15 @@ export default function TeamInvitationsPage() {
                 ? "Try adjusting your search or filters"
                 : "You don't have any invitations yet"}
             </p>
-            <Button
-              onClick={() => setShowInviteModal(true)}
-              className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Invite Someone
-            </Button>
+            {canManageTeam && (
+              <Button
+                onClick={() => setShowInviteModal(true)}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invite Someone
+              </Button>
+            )}
           </div>
         ) : (
           <AnimatePresence>
