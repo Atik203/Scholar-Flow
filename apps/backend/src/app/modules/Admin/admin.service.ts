@@ -11,14 +11,23 @@ import prisma from "../../shared/prisma";
 import { ADMIN_ERROR_MESSAGES } from "./admin.constant";
 import {
   IAdminFilters,
+  ICacheClearResult,
+  IDiagnosticCheck,
   IPaperStats,
   IRecentUser,
   IRoleDistribution,
+  ISystemDiagnostics,
   ISystemHealth,
+  ISystemLogsResult,
   ISystemMetrics,
   ISystemStats,
   IUserGrowthData,
 } from "./admin.interface";
+import {
+  countLogEntries,
+  getLogEntries,
+  getLogsAsText,
+} from "../../shared/logBuffer";
 
 class AdminService {
   /**
@@ -624,6 +633,166 @@ class AdminService {
       console.error("Error fetching system metrics:", error);
       throw new ApiError(500, ADMIN_ERROR_MESSAGES.STATS_FETCH_FAILED);
     }
+  }
+
+  /**
+   * Run on-demand system diagnostics
+   * Database ping + connection pool, memory footprint, cache status and
+   * runtime info aggregated into pass/fail checks.
+   */
+  async runSystemDiagnostics(): Promise<ISystemDiagnostics> {
+    try {
+      const startTime = Date.now();
+      await prisma.$queryRaw`SELECT 1`;
+      const dbResponseTime = Date.now() - startTime;
+
+      const dbConnections = await prisma.$queryRaw<
+        Array<{ active: number; max: number }>
+      >`
+        SELECT 
+          COUNT(*)::int as active,
+          (SELECT setting::int FROM pg_settings WHERE name = 'max_connections') as max
+        FROM pg_stat_activity 
+        WHERE datname = current_database()
+      `;
+      const activeConnections = dbConnections[0]?.active || 0;
+      const maxConnections = dbConnections[0]?.max || 100;
+      const connectionPoolUsage = (activeConnections / maxConnections) * 100;
+
+      const memory = process.memoryUsage();
+      const totalMemory = os.totalmem();
+      const freeMemory = os.freemem();
+      const systemUsagePercentage =
+        ((totalMemory - freeMemory) / totalMemory) * 100;
+
+      const cacheStats = cacheService.getStats();
+
+      const dbStatus: IDiagnosticCheck["status"] =
+        dbResponseTime < 100
+          ? "healthy"
+          : dbResponseTime < 500
+            ? "degraded"
+            : "unhealthy";
+      const memoryStatus: IDiagnosticCheck["status"] =
+        systemUsagePercentage < 90
+          ? "healthy"
+          : systemUsagePercentage < 97
+            ? "degraded"
+            : "unhealthy";
+      const cacheStatus: IDiagnosticCheck["status"] = cacheStats.redisEnabled
+        ? "healthy"
+        : "degraded";
+
+      const checks: IDiagnosticCheck[] = [
+        {
+          name: "Database",
+          status: dbStatus,
+          detail: `Ping ${dbResponseTime}ms, ${activeConnections}/${maxConnections} connections`,
+        },
+        {
+          name: "Memory",
+          status: memoryStatus,
+          detail: `${systemUsagePercentage.toFixed(1)}% system, heap ${Math.round(
+            memory.heapUsed / 1024 / 1024
+          )}MB`,
+        },
+        {
+          name: "Cache",
+          status: cacheStatus,
+          detail: cacheStats.redisEnabled
+            ? `Redis connected, ${
+                cacheStats.hitRate != null
+                  ? `${(cacheStats.hitRate * 100).toFixed(1)}% hit rate`
+                  : "no lookups yet"
+              }`
+            : cacheStats.configured
+              ? "Redis configured but unavailable; using in-memory fallback"
+              : "Redis not configured; using in-memory fallback",
+        },
+      ];
+
+      const status: ISystemDiagnostics["status"] = checks.some(
+        (check) => check.status === "unhealthy"
+      )
+        ? "unhealthy"
+        : checks.some((check) => check.status === "degraded")
+          ? "degraded"
+          : "healthy";
+
+      return {
+        status,
+        checks,
+        memory: {
+          rssMB: Math.round(memory.rss / 1024 / 1024),
+          heapUsedMB: Math.round(memory.heapUsed / 1024 / 1024),
+          heapTotalMB: Math.round(memory.heapTotal / 1024 / 1024),
+          systemUsagePercentage: Math.round(systemUsagePercentage * 100) / 100,
+        },
+        database: {
+          responseTime: dbResponseTime,
+          activeConnections,
+          maxConnections,
+          connectionPoolUsage: Math.round(connectionPoolUsage * 100) / 100,
+        },
+        cache: {
+          configured: cacheStats.configured,
+          redisEnabled: cacheStats.redisEnabled,
+          hitRate: cacheStats.hitRate,
+          memoryCacheSize: cacheStats.memoryCacheSize,
+        },
+        system: {
+          platform: `${os.platform()} ${os.arch()}`,
+          nodeVersion: process.version,
+          uptimeSeconds: Math.floor(process.uptime()),
+          loadAverage: os.loadavg().map((l) => Math.round(l * 100) / 100),
+        },
+        generatedAt: new Date(),
+      };
+    } catch (error) {
+      console.error("Error running system diagnostics:", error);
+      throw new ApiError(500, ADMIN_ERROR_MESSAGES.HEALTH_CHECK_FAILED);
+    }
+  }
+
+  /**
+   * Flush the system cache (Redis + in-memory fallback)
+   * Refuses with 409 when no active Redis connection exists.
+   */
+  async clearSystemCache(): Promise<ICacheClearResult> {
+    const stats = cacheService.getStats();
+
+    if (!stats.redisEnabled) {
+      throw new ApiError(409, ADMIN_ERROR_MESSAGES.CACHE_NOT_ENABLED);
+    }
+
+    const memoryEntriesCleared = stats.memoryCacheSize;
+    await cacheService.clear();
+
+    return {
+      redisFlushed: true,
+      memoryEntriesCleared,
+      clearedAt: new Date(),
+    };
+  }
+
+  /**
+   * Recent backend logs captured by the in-memory ring buffer
+   */
+  getSystemLogs(level?: string, limit = 200): ISystemLogsResult {
+    const entries = getLogEntries({ level, limit });
+
+    return {
+      entries,
+      total: countLogEntries(level),
+      returned: entries.length,
+    };
+  }
+
+  /**
+   * Captured backend logs as a plain-text file body
+   */
+  exportSystemLogs(level?: string): string {
+    return getLogsAsText(level);
   }
 }
 
