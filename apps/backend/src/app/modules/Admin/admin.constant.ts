@@ -12,6 +12,7 @@ export const ADMIN_SUCCESS_MESSAGES = {
   PAPER_STATS_RETRIEVED: "Paper statistics retrieved successfully",
   DIAGNOSTICS_SUCCESS: "System diagnostics completed successfully",
   CACHE_CLEARED: "System cache cleared successfully",
+  LOGS_RETRIEVED: "System logs retrieved successfully",
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {

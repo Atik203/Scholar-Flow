@@ -3,6 +3,8 @@
  * Type definitions for admin dashboard operations
  */
 
+import type { LogEntry } from "../../shared/logBuffer";
+
 export interface ISystemStats {
   totalUsers: number;
   totalPapers: number;
@@ -172,4 +174,10 @@ export interface ICacheClearResult {
   redisFlushed: boolean;
   memoryEntriesCleared: number;
   clearedAt: Date;
+}
+
+export interface ISystemLogsResult {
+  entries: LogEntry[];
+  total: number;
+  returned: number;
 }
