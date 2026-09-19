@@ -1,6 +1,11 @@
 import httpStatus from "http-status";
 import ApiError from "../../errors/ApiError";
-import prisma from "../../shared/prisma";
+import prisma, { Prisma } from "../../shared/prisma";
+
+const csvCell = (value: unknown): string => {
+  const text = value == null ? "" : String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
 
 export const userManagementService = {
   /**
@@ -640,6 +645,112 @@ export const userManagementService = {
     return {
       message: "User permanently deleted",
       userId,
+    };
+  },
+
+  /**
+   * Export filtered users as CSV
+   * Capped at 10k rows to keep memory bounded; filters mirror GET /admin/users.
+   */
+  async exportUsersCsv(
+    searchQuery?: string,
+    role?: string,
+    status?: string
+  ): Promise<{ csv: string; count: number }> {
+    const hasSearchQuery = searchQuery && searchQuery.trim() !== "";
+    const hasRoleFilter = role && role !== "all";
+    const hasStatusFilter = status && status !== "all";
+
+    const conditions: Prisma.Sql[] = [
+      hasStatusFilter
+        ? status === "active"
+          ? Prisma.sql`u."isDeleted" = false`
+          : Prisma.sql`u."isDeleted" = true`
+        : Prisma.sql`u."isDeleted" = false`,
+    ];
+
+    if (hasRoleFilter) {
+      conditions.push(Prisma.sql`u.role = ${role}::"Role"`);
+    }
+
+    if (hasSearchQuery) {
+      conditions.push(
+        Prisma.sql`(u.name ILIKE ${`%${searchQuery}%`} OR u.email ILIKE ${`%${searchQuery}%`})`
+      );
+    }
+
+    const users = await prisma.$queryRaw<
+      Array<{
+        id: string;
+        name: string | null;
+        email: string;
+        role: string;
+        isDeleted: boolean;
+        emailVerified: boolean;
+        createdAt: Date;
+        paperCount: bigint;
+        subscriptionStatus: string | null;
+        planName: string | null;
+      }>
+    >`
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.role::text as role,
+        u."isDeleted",
+        u."emailVerified",
+        u."createdAt",
+        COUNT(DISTINCT p.id)::bigint as "paperCount",
+        s.status::text as "subscriptionStatus",
+        pl.name as "planName"
+      FROM "User" u
+      LEFT JOIN "Paper" p ON u.id = p."uploaderId" AND p."isDeleted" = false
+      LEFT JOIN LATERAL (
+        SELECT s2.status, s2."planId"
+        FROM "Subscription" s2
+        WHERE s2."userId" = u.id
+          AND s2."isDeleted" = false
+          AND s2.status = 'ACTIVE'
+        ORDER BY s2."createdAt" DESC
+        LIMIT 1
+      ) s ON true
+      LEFT JOIN "Plan" pl ON s."planId" = pl.id
+      WHERE ${Prisma.join(conditions, " AND ")}
+      GROUP BY u.id, u.name, u.email, u.role, u."isDeleted", u."emailVerified", u."createdAt", s.status, pl.name
+      ORDER BY u."createdAt" DESC
+      LIMIT 10000
+    `;
+
+    const header = [
+      "Name",
+      "Email",
+      "Role",
+      "Status",
+      "Email Verified",
+      "Papers",
+      "Subscription",
+      "Plan",
+      "Joined At",
+    ].join(",");
+
+    const rows = users.map((u) =>
+      [
+        csvCell(u.name),
+        csvCell(u.email),
+        csvCell(u.role),
+        csvCell(u.isDeleted ? "Deactivated" : "Active"),
+        csvCell(u.emailVerified ? "Yes" : "No"),
+        csvCell(Number(u.paperCount)),
+        csvCell(u.subscriptionStatus ?? ""),
+        csvCell(u.planName ?? ""),
+        csvCell(new Date(u.createdAt).toISOString()),
+      ].join(",")
+    );
+
+    return {
+      csv: [header, ...rows].join("\r\n"),
+      count: users.length,
     };
   },
 };

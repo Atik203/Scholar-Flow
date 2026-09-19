@@ -507,6 +507,47 @@ router.get(
 
 /**
  * @swagger
+ * /api/admin/users/export:
+ *   get:
+ *     summary: Export Users as CSV
+ *     description: Download filtered user list as CSV (mirrors GET /admin/users filters, capped at 10k rows). Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name or email
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN, all]
+ *         description: Filter by role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, all]
+ *         description: Filter by account status
+ *     responses:
+ *       200:
+ *         description: CSV file download
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users/export",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.exportUsers
+);
+
+/**
+ * @swagger
  * /api/admin/users/stats:
  *   get:
  *     summary: Get User Statistics
