@@ -107,13 +107,25 @@ export interface AdminPayment {
   };
 }
 
+export interface AdminPaymentSummary {
+  succeededCount: number;
+  totalRevenueCents: number;
+  currency: string;
+}
+
 export const adminPaymentsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     listPayments: builder.query<
       {
         success: boolean;
         data: AdminPayment[];
-        meta: { page: number; limit: number; total: number; totalPage: number };
+        meta: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPage: number;
+          summary?: AdminPaymentSummary;
+        };
       },
       { page?: number; limit?: number; status?: string; provider?: string; search?: string }
     >({
@@ -635,3 +647,168 @@ export const {
   useResolveAlertMutation,
   useCreateAlertMutation,
 } = systemAlertsApi;
+
+// ============================================================================
+// System actions (diagnostics / cache / logs)
+// ============================================================================
+
+export interface DiagnosticCheck {
+  name: string;
+  status: "healthy" | "degraded" | "unhealthy";
+  detail: string;
+}
+
+export interface SystemDiagnostics {
+  status: "healthy" | "degraded" | "unhealthy";
+  checks: DiagnosticCheck[];
+  memory: {
+    rssMB: number;
+    heapUsedMB: number;
+    heapTotalMB: number;
+    systemUsagePercentage: number;
+  };
+  database: {
+    responseTime: number;
+    activeConnections: number;
+    maxConnections: number;
+    connectionPoolUsage: number;
+  };
+  cache: {
+    configured: boolean;
+    redisEnabled: boolean;
+    hitRate: number | null;
+    memoryCacheSize: number;
+  };
+  system: {
+    platform: string;
+    nodeVersion: string;
+    uptimeSeconds: number;
+    loadAverage: number[];
+  };
+  generatedAt: string;
+}
+
+export interface CacheClearResult {
+  redisFlushed: boolean;
+  memoryEntriesCleared: number;
+  clearedAt: string;
+}
+
+export interface SystemLogEntry {
+  timestamp: string;
+  level: "info" | "warn" | "error";
+  message: string;
+}
+
+export const adminSystemApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    runSystemDiagnostics: builder.mutation<
+      { success: boolean; data: SystemDiagnostics },
+      void
+    >({
+      query: () => ({
+        url: "/admin/system/diagnostics",
+        method: "POST",
+      }),
+    }),
+
+    clearSystemCache: builder.mutation<
+      { success: boolean; data: CacheClearResult },
+      void
+    >({
+      query: () => ({
+        url: "/admin/system/clear-cache",
+        method: "POST",
+      }),
+    }),
+
+    listSystemLogs: builder.query<
+      {
+        success: boolean;
+        data: { entries: SystemLogEntry[]; total: number; returned: number };
+      },
+      { level?: string; limit?: number } | void
+    >({
+      query: (params) => ({ url: "/admin/system/logs", params: params ?? {} }),
+      providesTags: [{ type: "Admin", id: "SYSTEM-LOGS" }],
+    }),
+
+    exportSystemLogs: builder.mutation<Blob, { level?: string } | void>({
+      query: (params) => ({
+        url: "/admin/system/logs/export",
+        params: params ?? {},
+        responseHandler: (response) => response.blob(),
+        cache: "no-cache",
+      }),
+    }),
+
+    exportUsers: builder.mutation<
+      Blob,
+      { search?: string; role?: string; status?: string } | void
+    >({
+      query: (params) => ({
+        url: "/admin/users/export",
+        params: params ?? {},
+        responseHandler: (response) => response.blob(),
+        cache: "no-cache",
+      }),
+    }),
+  }),
+});
+
+export const {
+  useRunSystemDiagnosticsMutation,
+  useClearSystemCacheMutation,
+  useListSystemLogsQuery,
+  useExportSystemLogsMutation,
+  useExportUsersMutation,
+} = adminSystemApi;
+
+// ============================================================================
+// System settings
+// ============================================================================
+
+export interface SystemSettings {
+  platformName: string;
+  supportEmail: string;
+  sessionTimeoutMinutes: number;
+  emailNotificationsEnabled: boolean;
+  registrationAlertsEnabled: boolean;
+  storageQuotaGb: number;
+  twoFactorRequired: boolean;
+}
+
+export interface SystemSettingsResponse {
+  settings: SystemSettings;
+  updatedAt: string | null;
+  updatedBy: { id: string; name: string | null; email: string } | null;
+}
+
+export const adminSettingsApi = apiSlice.injectEndpoints({
+  endpoints: (builder) => ({
+    getSystemSettings: builder.query<
+      { success: boolean; data: SystemSettingsResponse },
+      void
+    >({
+      query: () => "/admin/settings",
+      providesTags: [{ type: "Admin", id: "SETTINGS" }],
+    }),
+
+    updateSystemSettings: builder.mutation<
+      { success: boolean; data: SystemSettingsResponse },
+      Partial<SystemSettings>
+    >({
+      query: (body) => ({
+        url: "/admin/settings",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [{ type: "Admin", id: "SETTINGS" }],
+    }),
+  }),
+});
+
+export const {
+  useGetSystemSettingsQuery,
+  useUpdateSystemSettingsMutation,
+} = adminSettingsApi;
