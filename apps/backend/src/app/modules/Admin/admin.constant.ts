@@ -10,6 +10,7 @@ export const ADMIN_SUCCESS_MESSAGES = {
   HEALTH_CHECK_SUCCESS: "System health check completed",
   ROLE_DISTRIBUTION_RETRIEVED: "Role distribution retrieved successfully",
   PAPER_STATS_RETRIEVED: "Paper statistics retrieved successfully",
+  DIAGNOSTICS_SUCCESS: "System diagnostics completed successfully",
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {
