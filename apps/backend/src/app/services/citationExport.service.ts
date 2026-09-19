@@ -38,6 +38,15 @@ export class CitationExportService {
       throw new ApiError(401, "User not authenticated");
     }
 
+    // ENDNOTE is the only premium format (see getFormats below).
+    const PREMIUM_FORMATS = new Set(["ENDNOTE"]);
+    const role = req.user?.role;
+    const hasPremiumAccess =
+      role === "PRO_RESEARCHER" || role === "TEAM_LEAD" || role === "ADMIN";
+    if (PREMIUM_FORMATS.has(data.format) && !hasPremiumAccess) {
+      throw new ApiError(403, `${data.format} export requires a Pro plan`);
+    }
+
     try {
       let papers: any[] = [];
 
