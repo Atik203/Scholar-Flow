@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { useProtectedRoute } from "@/hooks/useAuthGuard";
 import { hasRoleAccess, USER_ROLES } from "@/lib/auth/roles";
-import { FileText, Highlighter, Quote, TextCursor, MessageSquare, Activity, Download, Calendar, BookOpen, GitGraph, Globe, type LucideIcon } from "lucide-react";
+import { FileText, Highlighter, Quote, TextCursor, MessageSquare, Activity, Download, Users, GitGraph, Globe, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 interface ResearchTool {
@@ -30,16 +30,11 @@ export default function ResearchPage() {
   const researchTools: ResearchTool[] = [
     {
       title: "Citations & References",
-      description: "Export citations in 7 academic formats, manage export history",
+      description: "Export citations in 9 academic formats, manage export history, and visualize citation links",
       icon: Quote,
-      href: "/dashboard/research/citations",
+      href: "/dashboard/citations",
       color: "bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-900",
-      features: ["7 Formats", "Export History", "Batch Export"],
-      subRoutes: [
-        { title: "Export Citations", href: "/dashboard/research/citations/export", icon: Download },
-        { title: "Export History", href: "/dashboard/research/citations/history", icon: Calendar },
-        { title: "Format Guide", href: "/dashboard/research/citations/formats", icon: BookOpen },
-      ],
+      features: ["9 Formats", "Export History", "Live Graph"],
     },
     {
       title: "PDF Text Extraction",
@@ -55,7 +50,10 @@ export default function ResearchPage() {
       icon: FileText,
       href: "/dashboard/research/editor",
       color: "bg-indigo-50 border-indigo-200 dark:bg-indigo-950/30 dark:border-indigo-900",
-      features: ["Rich Text", "Auto-save", "Collaboration"],
+      features: ["Rich Text", "Auto-save", "Version History"],
+      subRoutes: [
+        { title: "Collaborate on a Paper", href: "/dashboard/papers", icon: Users },
+      ],
     },
     {
       title: "PDF Annotations",
@@ -215,7 +213,7 @@ export default function ResearchPage() {
                     <span>Citation Export System</span>
                   </CardTitle>
                   <CardDescription>
-                    Export citations in 7 academic formats with batch processing and history tracking
+                    Export citations in 9 academic formats with batch processing and history tracking
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -223,7 +221,7 @@ export default function ResearchPage() {
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded-md text-xs">BibTeX</span>
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded-md text-xs">APA</span>
                     <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded-md text-xs">MLA</span>
-                    <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded-md text-xs">+4 more</span>
+                    <span className="px-2 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 rounded-md text-xs">+6 more</span>
                   </div>
                 </CardContent>
               </Card>
