@@ -9,8 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { editorTemplates, type EditorTemplate } from "@/lib/editorTemplates";
 import { useListEditorPapersQuery } from "@/redux/api/paperApi";
-import { Download, FileText, Plus, Save } from "lucide-react";
+import { LayoutTemplate, Download, FileText, Plus, Save } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -41,6 +42,7 @@ export function TextEditorDashboard() {
     searchParams.get("paper")
   );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<EditorTemplate | null>(null);
 
   // Fetch all papers to calculate stats
   const { data: allPapersResponse } = useListEditorPapersQuery({});
@@ -52,6 +54,12 @@ export function TextEditorDashboard() {
   const published = allPapers.filter((paper: any) => !paper.isDraft).length;
 
   const handleCreateNew = () => {
+    setSelectedTemplate(null);
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleUseTemplate = (template: EditorTemplate) => {
+    setSelectedTemplate(template);
     setIsCreateDialogOpen(true);
   };
 
@@ -59,6 +67,7 @@ export function TextEditorDashboard() {
     setCurrentPaper(paperId);
     setActiveTab("editor");
     setIsCreateDialogOpen(false);
+    setSelectedTemplate(null);
   };
 
   const handlePaperSelected = (paperId: string) => {
@@ -159,11 +168,55 @@ export function TextEditorDashboard() {
             <CardHeader>
               <CardTitle>Paper Templates</CardTitle>
               <CardDescription>
-                Choose from our collection of research paper templates.
+                Choose a template to start a new paper with the standard
+                section structure already in place.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Templates coming soon...</p>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {editorTemplates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="flex flex-col rounded-xl border p-4 transition-colors hover:border-primary/40 hover:bg-muted/40"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-sm">{template.name}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {template.description}
+                        </p>
+                      </div>
+                      <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {template.citationStyle}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {template.sections.slice(0, 4).map((section) => (
+                        <span
+                          key={section}
+                          className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                        >
+                          {section}
+                        </span>
+                      ))}
+                      {template.sections.length > 4 && (
+                        <span className="px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                          +{template.sections.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4 w-full"
+                      onClick={() => handleUseTemplate(template)}
+                    >
+                      <LayoutTemplate className="mr-2 h-4 w-4" />
+                      Use Template
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -186,8 +239,12 @@ export function TextEditorDashboard() {
       {/* Create Paper Dialog */}
       <CreatePaperDialog
         isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
+        onClose={() => {
+          setIsCreateDialogOpen(false);
+          setSelectedTemplate(null);
+        }}
         onPaperCreated={handlePaperCreated}
+        template={selectedTemplate}
       />
     </div>
   );
