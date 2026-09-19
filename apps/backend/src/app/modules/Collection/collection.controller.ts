@@ -545,6 +545,7 @@ export const collectionController = {
       await notificationService.createNotification({
         userId: user.id,
         type: "INVITE",
+        category: "COLLECTIONS",
         title: "Collection invitation",
         message: `${collection.name} — accept or decline from your dashboard.`,
         actionUrl: "/dashboard/collections/shared",
@@ -754,6 +755,7 @@ export const collectionController = {
         await notificationService.createNotification({
           userId: member.invitedById,
           type: "INVITE",
+          category: "COLLECTIONS",
           title: "Collection invitation accepted",
           message: "A user accepted your collection invitation.",
           actionUrl: `/dashboard/collections/${id}`,

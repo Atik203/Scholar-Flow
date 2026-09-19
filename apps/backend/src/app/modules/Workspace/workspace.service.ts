@@ -376,6 +376,7 @@ export class WorkspaceService {
       await notificationService.createNotification({
         userId: targetUserId,
         type: "INVITE",
+        category: "WORKSPACE",
         title: "Added to workspace",
         message: "You were added to a workspace on ScholarFlow.",
         actionUrl: `/dashboard/workspaces/${id}`,
@@ -550,6 +551,7 @@ export class WorkspaceService {
       await notificationService.createNotification({
         userId: targetUser.id,
         type: "INVITE",
+        category: "WORKSPACE",
         title: "Workspace invitation",
         message: `${ws.name || "A workspace"} invitation — accept or decline from your dashboard.`,
         actionUrl: "/dashboard/workspaces/shared",
@@ -645,6 +647,7 @@ export class WorkspaceService {
           await notificationService.createNotification({
             userId: invitation[0].invitedById,
             type: "INVITE",
+            category: "WORKSPACE",
             title: "Invitation accepted",
             message: "A user accepted your workspace invitation.",
             actionUrl: `/dashboard/workspaces/${workspaceId}`,
@@ -698,6 +701,7 @@ export class WorkspaceService {
         await notificationService.createNotification({
           userId: invitation[0].invitedById,
           type: "INVITE",
+          category: "WORKSPACE",
           title: "Invitation declined",
           message: "A user declined your team invitation.",
           actionUrl: "/dashboard/team/invitations",
@@ -1219,6 +1223,7 @@ export class WorkspaceService {
         await notificationService.createNotification({
           userId: inv[0].invitedById,
           type: "INVITE",
+          category: "WORKSPACE",
           title: "Invitation accepted",
           message: "A user accepted your workspace invitation.",
           actionUrl: `/dashboard/workspaces/${inv[0].workspaceId}`,
