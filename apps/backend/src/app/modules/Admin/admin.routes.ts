@@ -14,6 +14,7 @@ import {
   adminModerationController,
   adminPaymentsController,
   adminPlansController,
+  adminSettingsController,
   adminSubscribersController,
   systemAlertsController,
 } from "./extendedControllers";
@@ -946,6 +947,26 @@ router.post(
   requireAdmin,
   rateLimiter,
   systemAlertsController.create as any
+);
+
+/**
+ * System settings (persisted platform configuration)
+ */
+router.get(
+  "/settings",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSettingsController.get as any
+);
+
+router.patch(
+  "/settings",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.updateSystemSettingsSchema),
+  rateLimiter,
+  adminSettingsController.update as any
 );
 
 const adminRoutes: import("express").Router = router;
