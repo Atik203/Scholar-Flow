@@ -163,6 +163,7 @@ export class TeamService {
           image: true,
           role: true,
           createdAt: true,
+          updatedAt: true,
           memberships: {
             where: { isDeleted: false },
             select: {
@@ -186,25 +187,56 @@ export class TeamService {
     const hasMore = users.length > limit;
     const sliced = hasMore ? users.slice(0, -1) : users;
 
-    const formatted = sliced.map((u) => ({
-      id: u.id,
-      name: u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email,
-      email: u.email,
-      image: u.image,
-      role: u.role,
-      joinedAt: u.createdAt,
-      lastActive: u.createdAt, // approximate; updatedAt is closer but we use createdAt for now
-      status: "active" as const, // status derivation is best-effort; we have no lastActiveAt field
-      workspaces: u.memberships.map((wm) => ({
-        id: wm.workspace.id,
-        name: wm.workspace.name,
-        role: wm.role,
-      })),
-      workspaceCount: u._count.memberships,
-    }));
+    // Real last-active: most recent ActivityLog entry per member. Falls back
+    // to the user's updatedAt/createdAt when the member has no activity yet.
+    const memberIds = sliced.map((u) => u.id);
+    const activityRows = memberIds.length
+      ? await prisma.activityLog.groupBy({
+          by: ["userId"],
+          where: { userId: { in: memberIds }, isDeleted: false },
+          _max: { createdAt: true },
+        })
+      : [];
+    const lastActivityByUser = new Map<string, Date>();
+    for (const row of activityRows) {
+      if (row.userId && row._max.createdAt) {
+        lastActivityByUser.set(row.userId, row._max.createdAt);
+      }
+    }
+
+    const INACTIVE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
+
+    const formatted = sliced.map((u) => {
+      const lastActive =
+        lastActivityByUser.get(u.id) || u.updatedAt || u.createdAt;
+      const status: "active" | "inactive" =
+        Date.now() - new Date(lastActive).getTime() > INACTIVE_AFTER_MS
+          ? "inactive"
+          : "active";
+      return {
+        id: u.id,
+        name: u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email,
+        email: u.email,
+        image: u.image,
+        role: u.role,
+        joinedAt: u.createdAt,
+        lastActive,
+        status,
+        workspaces: u.memberships.map((wm) => ({
+          id: wm.workspace.id,
+          name: wm.workspace.name,
+          role: wm.role,
+        })),
+        workspaceCount: u._count.memberships,
+      };
+    });
+
+    const result = filters.status
+      ? formatted.filter((member) => member.status === filters.status)
+      : formatted;
 
     return {
-      result: formatted,
+      result,
       meta: { total, limit, hasMore, nextCursor: hasMore ? sliced[sliced.length - 1].id : null },
     };
   }

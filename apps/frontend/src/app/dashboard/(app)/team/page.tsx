@@ -63,7 +63,7 @@ export default function TeamMembersPage() {
   const isAdmin = session?.user?.role === USER_ROLES.ADMIN;
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "pending" | "inactive">(
+  const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "inactive">(
     "all"
   );
   const [selectedRole, setSelectedRole] = useState<
@@ -269,7 +269,6 @@ export default function TeamMembersPage() {
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
-                <option value="pending">Pending</option>
                 <option value="inactive">Inactive</option>
               </select>
               <select
