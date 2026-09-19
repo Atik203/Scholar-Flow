@@ -34,6 +34,18 @@ export const reportController = {
     );
   }),
 
+  getStats: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const q = listReportsQuerySchema.parse(req.query);
+    const stats = await reportService.getReportStats({
+      type: q.type,
+      search: q.search,
+    });
+    sendSuccessResponse(res, stats, "Report statistics retrieved successfully");
+  }),
+
   get: catchAsync(async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
     if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
