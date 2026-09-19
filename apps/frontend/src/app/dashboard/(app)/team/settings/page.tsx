@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Eye,
   Globe,
+  Info,
   Link as LinkIcon,
   Lock,
   Mail,
@@ -173,7 +174,7 @@ export default function TeamSettingsPage() {
             Team Settings
           </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your team&apos;s configuration and permissions
+            Configure your team defaults and preferences
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -203,6 +204,18 @@ export default function TeamSettingsPage() {
             {saving ? "Saving…" : "Save Changes"}
           </Button>
         </div>
+      </div>
+
+      {/* Scope notice — these settings persist per account until a shared
+          team entity exists, so be explicit about what they affect. */}
+      <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50/60 p-4 text-sm dark:border-blue-900 dark:bg-blue-950/30">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+        <p className="text-muted-foreground">
+          These preferences are stored on your account and apply to your own
+          experience — for example, the default role pre-selected when you
+          invite members. Workspace-level roles are set per invitation, and a
+          shared team-wide policy layer is on the roadmap.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
