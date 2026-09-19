@@ -122,6 +122,10 @@ export default function AdminAIPage() {
           inputCostPer1k: form.inputCostPer1k ?? null,
           outputCostPer1k: form.outputCostPer1k ?? null,
         }).unwrap();
+        // PATCH ignores isDefault — promote separately via the dedicated endpoint
+        if (form.isDefault && !editing.isDefault) {
+          await setDefault(editing.id).unwrap();
+        }
         showSuccessToast("Model updated");
       } else {
         await createProvider(form).unwrap();
