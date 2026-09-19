@@ -87,6 +87,7 @@ export const adminAuditApi = apiSlice
         {
           startDate?: string;
           endDate?: string;
+          severity?: AuditSeverity;
           format?: "csv" | "json";
         }
       >({
