@@ -3,10 +3,14 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { NotificationStreamProvider } from "@/components/providers/NotificationStreamProvider";
 import { useOnboardingGuard } from "@/hooks/useAuthGuard";
+import { useSocketKeepAlive } from "@/hooks/useSocketKeepAlive";
 import { PropsWithChildren, Suspense } from "react";
 
 export default function ModulesDashboardLayout({ children }: PropsWithChildren) {
   const { isLoading } = useOnboardingGuard();
+  // Research pages live under this layout — keep the Render socket server warm
+  // here too, not just in the (app) group.
+  useSocketKeepAlive();
 
   if (isLoading) {
     return (
