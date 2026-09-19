@@ -1,6 +1,6 @@
 SCHOLAR-FLOW — MEMBER FEATURE CONTRIBUTIONS
 ===========================================
-Latest Update — Release 1.3.5
+Latest Update — Release 1.3.6
 
 1. MD. ATIKUR RAHMAN (ATIK)
 ---------------------------
