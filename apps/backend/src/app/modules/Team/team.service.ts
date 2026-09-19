@@ -1,6 +1,7 @@
 import ApiError from "../../errors/ApiError";
 import prisma, { Prisma } from "../../shared/prisma";
 import { ROLE_HIERARCHY, USER_ROLES } from "../Auth/auth.constant";
+import { notificationService } from "../Notification/notification.service";
 
 // TeamSettings is a virtual aggregate stored as JSON in a single column on a sentinel User row
 // of the requesting team_lead. In Phase 5 we don't have a dedicated Team model — the team is the
@@ -347,6 +348,22 @@ export class TeamService {
       where: { id: targetUserId },
       data: { role: data.role as any },
     });
+
+    // Notify the member about the role change (best-effort, instant via SSE)
+    try {
+      const roleLabel = data.role.replace(/_/g, " ");
+      await notificationService.createNotification({
+        userId: targetUserId,
+        type: "SYSTEM",
+        title: "Role updated",
+        message: `Your team role was changed to ${roleLabel}.`,
+        actionUrl: "/dashboard/team",
+        actorId: requestorId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
@@ -416,6 +433,29 @@ export class TeamService {
       });
     } catch {
       // Logging must never break the primary flow.
+    }
+
+    // Tell the removed member (best-effort) so the bell reflects it instantly.
+    try {
+      const requestor = await prisma.user.findUnique({
+        where: { id: requestorId },
+        select: { name: true, firstName: true, lastName: true, email: true },
+      });
+      const requestorName =
+        requestor?.name ||
+        `${requestor?.firstName || ""} ${requestor?.lastName || ""}`.trim() ||
+        requestor?.email ||
+        "A team lead";
+      await notificationService.createNotification({
+        userId: targetUserId,
+        type: "SYSTEM",
+        title: "Removed from team",
+        message: `${requestorName} removed you from their team. You no longer have access to its shared workspaces.`,
+        actionUrl: "/dashboard/workspaces",
+        actorId: requestorId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
     }
 
     return {
@@ -824,6 +864,26 @@ export class TeamService {
       }
     }
 
+    // In-app notification (best-effort) — delivered instantly over SSE
+    try {
+      const inviterName =
+        inviter?.name ||
+        `${inviter?.firstName || ""} ${inviter?.lastName || ""}`.trim() ||
+        inviter?.email ||
+        "A team lead";
+      await notificationService.createNotification({
+        userId: user.id,
+        type: "INVITE",
+        title: "Team invitation",
+        message: `${inviterName} invited you to join their team. Review and accept it from your invitations.`,
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invitation.id,
+      });
+    } catch {
+      // Notification failures must never break the invite flow.
+    }
+
     return { invitationId: invitation.id };
   }
 
@@ -842,6 +902,22 @@ export class TeamService {
       where: { id: invitationId },
       data: { isDeleted: true, status: "DECLINED" },
     });
+
+    // Best-effort heads-up to the invitee so the bell reflects the cancellation
+    try {
+      await notificationService.createNotification({
+        userId: invite.userId,
+        type: "INVITE",
+        title: "Invitation cancelled",
+        message: "A team invitation sent to you was cancelled.",
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invitationId,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
@@ -886,6 +962,23 @@ export class TeamService {
         console.error("Resend team invitation email failed:", (err as any)?.message || err);
       }
     }
+
+    // In-app reminder (best-effort)
+    try {
+      await notificationService.createNotification({
+        userId: invite.userId,
+        type: "INVITE",
+        title: "Invitation reminder",
+        message:
+          "Your team invitation is still pending. Accept or decline it from your invitations.",
+        actionUrl: "/dashboard/team/invitations",
+        actorId: inviterId,
+        resourceId: invite.id,
+      });
+    } catch {
+      // Notification failures must never break the flow.
+    }
+
     return { success: true };
   }
 
@@ -1022,31 +1115,45 @@ export class TeamService {
     const isTeamLead =
       (ROLE_HIERARCHY[role] ?? 0) >= ROLE_HIERARCHY[USER_ROLES.TEAM_LEAD];
 
-    const [memberOfOthersWorkspace, ownerWithMembers] = await Promise.all([
-      prisma.workspaceMember.findFirst({
-        where: {
-          userId,
-          isDeleted: false,
-          workspace: { isDeleted: false, ownerId: { not: userId } },
-        },
-        select: { id: true },
-      }),
-      prisma.workspace.findFirst({
-        where: {
-          ownerId: userId,
-          isDeleted: false,
-          members: { some: { isDeleted: false, userId: { not: userId } } },
-        },
-        select: { id: true },
-      }),
-    ]);
+    const [memberOfOthersWorkspace, ownerWithMembers, pendingInvitation] =
+      await Promise.all([
+        prisma.workspaceMember.findFirst({
+          where: {
+            userId,
+            isDeleted: false,
+            workspace: { isDeleted: false, ownerId: { not: userId } },
+          },
+          select: { id: true },
+        }),
+        prisma.workspace.findFirst({
+          where: {
+            ownerId: userId,
+            isDeleted: false,
+            members: { some: { isDeleted: false, userId: { not: userId } } },
+          },
+          select: { id: true },
+        }),
+        // A pending (non-expired) invitation also opens the Team section so
+        // the invitee can review and accept it there.
+        prisma.workspaceInvitation.findFirst({
+          where: {
+            userId,
+            status: "PENDING",
+            isDeleted: false,
+            OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+          },
+          select: { id: true },
+        }),
+      ]);
 
     return {
       hasAccess:
         isTeamLead ||
         Boolean(memberOfOthersWorkspace) ||
-        Boolean(ownerWithMembers),
+        Boolean(ownerWithMembers) ||
+        Boolean(pendingInvitation),
       isTeamLead,
+      hasPendingInvitation: Boolean(pendingInvitation),
     };
   }
 
