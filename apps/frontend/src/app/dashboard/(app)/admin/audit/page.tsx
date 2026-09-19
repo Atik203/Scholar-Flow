@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Download,
   Info,
+  Loader2,
   Search,
   Shield,
 } from "lucide-react";
@@ -23,7 +24,16 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/customUI/PageHeader";
-import { useGetAuditSummaryQuery, useListAuditEntriesQuery, type AuditSeverity } from "@/redux/api/adminAuditApi";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
+import {
+  useGetAuditSummaryQuery,
+  useLazyExportAuditLogQuery,
+  useListAuditEntriesQuery,
+  type AuditSeverity,
+} from "@/redux/api/adminAuditApi";
 
 const SEVERITY_ICON: Record<AuditSeverity, typeof Info> = {
   INFO: Info,
@@ -51,17 +61,36 @@ export default function AdminAuditLogPage() {
     severity: severity === "all" ? undefined : severity,
   });
   const { data: summaryData } = useGetAuditSummaryQuery({});
+  const [exportAuditLog, { isLoading: isExporting }] =
+    useLazyExportAuditLogQuery();
 
   const entries = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = data?.meta?.totalPage ?? 1;
   const summary = summaryData?.data;
 
-  const handleExport = (format: "csv" | "json") => {
-    const params = new URLSearchParams({ format });
-    if (severity !== "all") params.set("severity", severity);
-    if (search) params.set("search", search);
-    window.open(`/api/admin/audit-log/export?${params.toString()}`, "_blank");
+  const handleExport = async (format: "csv" | "json") => {
+    try {
+      const blob = await exportAuditLog({
+        format,
+        severity: severity === "all" ? undefined : severity,
+      }).unwrap();
+
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `scholar-flow-audit-${new Date()
+        .toISOString()
+        .slice(0, 10)}.${format}`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+
+      showSuccessToast("Export complete", `Audit log ${format.toUpperCase()} downloaded`);
+    } catch {
+      showErrorToast("Export failed", "Could not export the audit log.");
+    }
   };
 
   return (
@@ -72,12 +101,30 @@ export default function AdminAuditLogPage() {
         description="System-wide activity and security events"
         actions={
           <>
-            <Button variant="outline" onClick={() => handleExport("csv")} className="gap-2">
-              <Download className="h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={() => handleExport("csv")}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
               Export CSV
             </Button>
-            <Button variant="outline" onClick={() => handleExport("json")} className="gap-2">
-              <Download className="h-4 w-4" />
+            <Button
+              variant="outline"
+              onClick={() => handleExport("json")}
+              disabled={isExporting}
+              className="gap-2"
+            >
+              {isExporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
               Export JSON
             </Button>
           </>
