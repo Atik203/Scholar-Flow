@@ -1,5 +1,100 @@
 # Scholar-Flow Release Notes
 
+## Release 1.3.5 — Team Collaboration Access, Real-Time Notification Delivery & Annotations UX (2026-09-19)
+
+**Release date:** 2026-09-19
+**Theme:** Derived team access for invited collaborators, push notifications for
+every team/invite/share event, revocable workspace-scoped membership, annotations
+UX overhaul, citation persistence, and realtime stack hardening.
+
+---
+
+### Team — collaboration access without role escalation
+- **Derived Team access** (`GET /team/access`): the Team section now opens for
+  TEAM_LEAD+ **or** an active member of someone else's workspace **or** an owner
+  whose workspace has other members **or** anyone with a pending invitation.
+  Invited RESEARCHER / PRO users get the sidebar on invite and lose it when the
+  lead removes them — no global role promotion, no billing-side effects.
+- **Members/Invitations/Activity** allow that derived access; role changes,
+  settings and removal stay TEAM_LEAD+. Sidebar items and action buttons gate
+  themselves by the same rule (settings page shows a lead-only notice).
+- **Member removal is now workspace-scoped revocation**: soft-deletes the
+  target's memberships + pending invitations in workspaces the lead owns and
+  writes an activity-log entry. It no longer soft-deletes the whole user
+  account (account deletion stays in the admin panel).
+- Invitations: workspace-targeted sends (`workspaceId` verified against owned
+  workspaces), Viewer/Editor/Manager labels mapped to workspace roles, page
+  pagination, and the "Admin" invite that silently sent TEAM_LEAD is gone.
+- Members list shows **real status + lastActive** derived from
+  `ActivityLogEntry` (30-day inactivity window) instead of a hardcoded "active".
+- ActivityLog `?userId=` horizontal-read closed (self or admin only); offset +
+  cursor pagination now accepted and applied.
+- Activity page: server-side member/date filters, cursor "load older" paging,
+  accurate stat labels, 30s polling that pauses while reading older pages.
+
+### Notifications — real-time push for every team event
+- **New SSE pushes**: team invite sent / resent / cancelled, invite declined
+  (workspace + team), role changed, removed from team, and paper-shared-by-email
+  for registered recipients. Accept already pushed to the inviter.
+- **Delivery preferences enforced at creation time** (`notificationSettingsService`):
+  mute-all, in-app channel and per-category toggles are honored; all call sites
+  now pass a category (PAPERS / DISCUSSIONS / COLLECTIONS / WORKSPACE / TEAM /
+  BILLING / SECURITY / SYSTEM / ACHIEVEMENT). BILLING and SECURITY are
+  transactional and always deliver; preference reads fail open and never create
+  rows for recipients.
+- **Instant read UX**: mark-as-read, mark-all, star and delete mutations are now
+  optimistic (badge + lists update in the same frame, rollback on failure,
+  filter-aware for read/starred views). The bell keeps a 15s poll as an
+  offline/reconnect fallback behind SSE.
+- SSE `notification.created` also invalidates derived Team access, so a new
+  invitation opens the Team sidebar in the same second.
+
+### Research — annotations, editor, citations
+- **PDF Annotations overhaul**: collapsible "Your Papers" panel (300px ↔ 56px
+  icon rail, persisted, search + PDF-ready filter, mobile Sheet drawer), notes
+  are optional on every mark (empty text is valid and clearable), compact
+  icon-only type picker with tooltips, viewport-clamped popup, edit-dialog state
+  fix, confirmation dialogs for deletes, annotations query retry, and the
+  annotations side panel defaults open only on xl screens.
+- **Editor**: Templates tab creates papers pre-filled from the 7 templates;
+  Settings tab persists autosave delay / font size / spellcheck and applies them
+  live; a Collaborate button opens the collab route (after flushing pending
+  saves); ShareModal has a working team-member picker and no more dead "Team" TODO.
+- **Citations**: editor inserts now persist `Citation` rows through the
+  access-checked `/citations/insert`; the citations page graph renders real
+  citation links; export dialog downloads real files; history rows download and
+  delete with toasts; ENDNOTE export requires Pro (enforced server-side); the
+  duplicate `/dashboard/research/citations/*` subtree was deleted in favor of
+  307 redirects to `/dashboard/citations`.
+
+### Realtime & Sockets
+- Fixed the dead socket hooks: `useCollabSync` and `useDiscussionSocket` now read
+  auth via `getAppStore()` (the legacy `window.__REDUX_STORE__` was never set, so
+  every realtime feature silently no-op'd).
+- Collaboration: seeds the shared doc from saved HTML exactly once (skipped when
+  peers are present), awareness returned via state with clientId-keyed cursors,
+  presence cleanup by userId, and debounced persistence to
+  `PATCH /editor/:id/autosave` so collaborative work is durable.
+- Both socket servers: emit-side `guardRoom` (must have joined), room-scoped
+  `editor:sync-request` (was a global broadcast), sync events added to the
+  in-process server for parity, discussion message validation.
+- Keep-alive now runs on the `(modules)` Research layout too; `render.yaml` uses
+  `NEXTAUTH_SECRET` (the old `JWT_SECRET` key was dead config); the socket server
+  joined the `turbo type-check` pipeline.
+
+### Data & Infra
+- Migrations: added then removed a redundant `ActivityLog` index after moving
+  member lastActive to `ActivityLogEntry` (which already indexes userId+createdAt).
+- Redis/Bull document queue actually runs: `REDIS_ENABLED` added to env files,
+  `REDIS_URL` protocol typo fixed, and Bull v4 readiness now uses `isReady()`
+  (Bull never emits a queue-level `ready` event, so the queue flag stayed false
+  forever).
+- Verification: backend + frontend lint 0 errors, `yarn type-check` green for all
+  three packages, production builds succeed; member access, invite/decline
+  notifications and preference enforcement verified live against the shared DB.
+
+---
+
 ## Release 1.3.4 — Discover Live Research, Editor Alignment & Working Email Sharing (2026-09-08)
 
 **Release date:** 2026-09-08
