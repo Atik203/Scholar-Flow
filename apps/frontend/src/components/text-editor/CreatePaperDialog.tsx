@@ -32,6 +32,7 @@ import {
 import { useCreateEditorPaperMutation } from "@/redux/api/paperApi";
 import { useListWorkspacesQuery } from "@/redux/api/workspaceApi";
 import { useAuth } from "@/redux/auth/useAuth";
+import { templateToHtml, type EditorTemplate } from "@/lib/editorTemplates";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, Loader2, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -65,12 +66,14 @@ interface CreatePaperDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onPaperCreated: (paperId: string) => void;
+  template?: EditorTemplate | null;
 }
 
 export function CreatePaperDialog({
   isOpen,
   onClose,
   onPaperCreated,
+  template = null,
 }: CreatePaperDialogProps) {
   const [createPaper] = useCreateEditorPaperMutation();
   const { session } = useAuth();
@@ -171,6 +174,8 @@ export function CreatePaperDialog({
         return;
       }
 
+      const templateHtml = template ? templateToHtml(template) : "";
+
       const response = await createPaper({
         workspaceId: data.workspaceId,
         title: data.title,
@@ -178,7 +183,8 @@ export function CreatePaperDialog({
           "<h1>" +
           data.title +
           "</h1>" +
-          (data.abstract ? "<p>" + data.abstract + "</p>" : ""),
+          (data.abstract ? "<p>" + data.abstract + "</p>" : "") +
+          templateHtml,
         isDraft: true,
         authors: authors.filter((author) => author.trim() !== ""),
       }).unwrap();
@@ -251,9 +257,13 @@ export function CreatePaperDialog({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Paper</DialogTitle>
+          <DialogTitle>
+            {template ? `Create from "${template.name}"` : "Create New Paper"}
+          </DialogTitle>
           <DialogDescription>
-            Start writing your research paper with our rich text editor.
+            {template
+              ? "The template structure will be added to your new draft."
+              : "Start writing your research paper with our rich text editor."}
           </DialogDescription>
         </DialogHeader>
 
