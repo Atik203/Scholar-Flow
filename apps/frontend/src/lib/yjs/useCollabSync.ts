@@ -236,9 +236,9 @@ export function useCollabSync({
       // Flush any offline queue
       flushPending(ydoc);
 
-      // Request fresh state from peers after reconnect
+      // Request fresh state from peers after reconnect (room-scoped)
       if (syncedRef.current) {
-        socket.emit("editor:sync-request");
+        socket.emit("editor:sync-request", { room });
       }
     });
 
