@@ -83,14 +83,19 @@ export const adminAuditApi = apiSlice
       }),
 
       exportAuditLog: builder.query<
-        { content: string; filename: string },
+        Blob,
         {
           startDate?: string;
           endDate?: string;
           format?: "csv" | "json";
         }
       >({
-        query: (params) => ({ url: "/admin/audit-log/export", params }),
+        query: (params) => ({
+          url: "/admin/audit-log/export",
+          params,
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
+        }),
       }),
     }),
   });
