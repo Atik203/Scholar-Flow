@@ -90,6 +90,33 @@ export const reportService = {
     };
   },
 
+  /**
+   * Status counts for the current filter (search/type), independent of pagination
+   */
+  async getReportStats(params: {
+    type?: "USAGE" | "FINANCIAL" | "USER" | "CONTENT" | "SYSTEM";
+    search?: string;
+  }) {
+    const base: Prisma.AdminReportWhereInput = { isDeleted: false };
+    if (params.type) base.type = params.type;
+    if (params.search) {
+      base.OR = [
+        { name: { contains: params.search, mode: "insensitive" } },
+        { description: { contains: params.search, mode: "insensitive" } },
+      ];
+    }
+
+    const [total, ready, generating, scheduled, failed] = await Promise.all([
+      prisma.adminReport.count({ where: base }),
+      prisma.adminReport.count({ where: { ...base, status: "READY" } }),
+      prisma.adminReport.count({ where: { ...base, status: "GENERATING" } }),
+      prisma.adminReport.count({ where: { ...base, status: "SCHEDULED" } }),
+      prisma.adminReport.count({ where: { ...base, status: "FAILED" } }),
+    ]);
+
+    return { total, ready, generating, scheduled, failed };
+  },
+
   async getReport(id: string) {
     const report = await prisma.adminReport.findFirst({
       where: { id, isDeleted: false },

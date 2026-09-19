@@ -29,7 +29,7 @@ export const adminPaymentsService = {
       ];
     }
 
-    const [total, items] = await Promise.all([
+    const [total, items, summary] = await Promise.all([
       prisma.payment.count({ where }),
       prisma.payment.findMany({
         where,
@@ -43,6 +43,11 @@ export const adminPaymentsService = {
           },
         },
       }),
+      prisma.payment.aggregate({
+        where: { ...where, status: "SUCCEEDED" },
+        _sum: { amountCents: true },
+        _count: { _all: true },
+      }),
     ]);
 
     return {
@@ -52,6 +57,11 @@ export const adminPaymentsService = {
         limit: params.limit,
         total,
         totalPage: Math.max(1, Math.ceil(total / params.limit)),
+      },
+      summary: {
+        succeededCount: summary._count._all,
+        totalRevenueCents: summary._sum.amountCents ?? 0,
+        currency: items[0]?.currency ?? "usd",
       },
     };
   },

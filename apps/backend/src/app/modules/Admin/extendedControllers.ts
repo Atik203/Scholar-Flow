@@ -7,9 +7,11 @@ import { adminApiKeysService } from "./adminApiKeys.service";
 import { adminModerationService } from "./adminModeration.service";
 import { adminPaymentsService } from "./adminPayments.service";
 import { adminPlansService } from "./adminPlans.service";
+import { adminSettingsService } from "./adminSettings.service";
 import { adminSubscribersService } from "./adminSubscribers.service";
 import { systemAlertsService } from "./systemAlerts.service";
 import { CACHE_DURATIONS } from "./admin.constant";
+import { updateSystemSettingsSchema } from "./admin.validation";
 import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 
 // Plans
@@ -141,7 +143,7 @@ export const adminPaymentsController = {
     sendPaginatedResponse(
       res,
       result.items,
-      result.meta,
+      { ...result.meta, summary: result.summary },
       "Payments retrieved"
     );
   }),
@@ -355,10 +357,38 @@ export const systemAlertsController = {
   }),
 };
 
+// System settings
+export const adminSettingsController = {
+  get: catchAsync(async (_req: Request, res: Response) => {
+    const result = await adminSettingsService.getSettings();
+    res.set({
+      "Cache-Control": `private, max-age=30`,
+    });
+    sendSuccessResponse(res, result, "System settings retrieved");
+  }),
+
+  update: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+
+    const patch = updateSystemSettingsSchema.parse(req.body);
+    if (Object.keys(patch).length === 0) {
+      throw new ApiError(400, "At least one setting must be provided");
+    }
+
+    const result = await adminSettingsService.updateSettings(
+      patch,
+      authReq.user.id
+    );
+    sendSuccessResponse(res, result, "System settings updated");
+  }),
+};
+
 export default {
   adminPlansController,
   adminPaymentsController,
   adminApiKeysController,
   adminModerationController,
+  adminSettingsController,
   systemAlertsController,
 };

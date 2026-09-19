@@ -96,53 +96,57 @@ export default function AdminModerationPage() {
                   </div>
                 </div>
               </CardHeader>
-              {r.contentPreview && (
-                <CardContent>
+              <CardContent>
+                {r.contentPreview ? (
                   <p className="text-sm text-muted-foreground line-clamp-3">
                     {r.contentPreview}
                   </p>
-                  {r.description && (
-                    <p className="text-sm mt-2">
-                      <span className="font-medium">Reporter note:</span>{" "}
-                      {r.description}
-                    </p>
-                  )}
-                  {r.status === "PENDING" || r.status === "UNDER_REVIEW" ? (
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            await resolve({ id: r.id, action: "removed" }).unwrap();
-                            showSuccessToast("Resolved", "Report resolved");
-                            refetch();
-                          } catch {
-                            showErrorToast("Failed", "Could not resolve");
-                          }
-                        }}
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        Resolve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          try {
-                            await dismiss(r.id).unwrap();
-                            showSuccessToast("Dismissed", "Report dismissed");
-                            refetch();
-                          } catch {
-                            showErrorToast("Failed", "Could not dismiss");
-                          }
-                        }}
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  ) : null}
-                </CardContent>
-              )}
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">
+                    No content preview available for this report.
+                  </p>
+                )}
+                {r.description && (
+                  <p className="text-sm mt-2">
+                    <span className="font-medium">Reporter note:</span>{" "}
+                    {r.description}
+                  </p>
+                )}
+                {r.status === "PENDING" || r.status === "UNDER_REVIEW" ? (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await resolve({ id: r.id, action: "removed" }).unwrap();
+                          showSuccessToast("Resolved", "Report resolved");
+                          refetch();
+                        } catch {
+                          showErrorToast("Failed", "Could not resolve");
+                        }
+                      }}
+                      className="bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      Resolve
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await dismiss(r.id).unwrap();
+                          showSuccessToast("Dismissed", "Report dismissed");
+                          refetch();
+                        } catch {
+                          showErrorToast("Failed", "Could not dismiss");
+                        }
+                      }}
+                    >
+                      Dismiss
+                    </Button>
+                  </div>
+                ) : null}
+              </CardContent>
             </Card>
           ))}
         </div>

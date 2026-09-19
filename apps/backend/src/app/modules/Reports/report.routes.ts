@@ -8,6 +8,7 @@ const router: import("express").Router = express.Router();
 router.use(authMiddleware as any, requireAdmin as any, rateLimiter as any);
 
 router.get("/", reportController.list as any);
+router.get("/stats", reportController.getStats as any);
 router.get("/:id", reportController.get as any);
 router.post("/", reportController.create as any);
 router.patch("/:id", reportController.update as any);

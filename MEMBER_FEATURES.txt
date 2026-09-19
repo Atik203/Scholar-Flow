@@ -1,51 +1,64 @@
 SCHOLAR-FLOW — MEMBER FEATURE CONTRIBUTIONS
 ===========================================
+Latest Update — Release 1.3.6
 
 1. MD. ATIKUR RAHMAN (ATIK)
 ---------------------------
 
-PAPER MODULES
-- Paper upload (PDF, DOI, arXiv ID, URL/Smart URL, BibTeX/RIS file import)
-- Paper details (metadata, tags, AI-generated metadata, versions)
-- AI Summary
-- AI Tools (rewrite, compare, literature review)
-- Key Points
-- Paper Search
-- Share (view/edit permission via email + share link)
+RESEARCH Modules
+- Research Hub — all research tools in one hub with role-based access
+- PDF Text Extraction — OCR/text extraction, live processing status, text viewer
+- Text Editor — TipTap editor: 7 templates, auto-save, PDF/DOCX export,
+  S3 image upload, real-time collaboration
+- Citations — 9 formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver, ACS,
+  BibTeX, EndNote), export history, editor inserts saved as citations
+- Citation Graph — visual map of real citation links between papers (Pro)
+- Research Map — topic cloud built from library tags, with filtering (Pro)
 
-WORKSPACE MODULES
-- Paper add
-- Collection add
-- Share using view/edit permission
-- Create workspace
-- Shared with members and get notification
+TEAMS Modules
+- Members — real status + last active, role changes, safe removal
+- Invitations — workspace invites (Viewer/Editor/Manager), resend/cancel,
+  accept/decline
+- Activity — audit trail with member/date filters + cursor pagination
+- Team Settings — lead-only team/workspace configuration
+- Derived Team Access — Team menu for invited collaborators/workspace members
+  without global role promotion
+- Real-time notifications — invite, decline, role-change and removal events
+  pushed via SSE with user preferences respected
 
-COLLECTION MODULES (KEY FEATURES)
-- Create / edit / delete collections
-- Add papers to collections
-- Share collections with view/edit permission
-- Browse shared collections
-- Suggested collections
-- Reading status tracking (to-read / reading / completed / archived)
+ADMIN (FULL)
+- Admin Overview — real-time CPU / memory / storage / database metrics (10s
+  refresh) with health thresholds
+- Users — user management, roles and account actions
+- Subscriptions — subscription monitoring and status
+- Subscribers — subscriber list and history
+- Plans — plan catalog management
+- Payments — payment records and status
+- Reports — platform reports with CSV / JSON generation
+- Audit Log — full audit trail with filters and export
+- AI Models — AI model management
+- AI API Keys — AI provider key management
+- API Keys — platform API key management
+- Webhooks — outbound endpoints with delivery logs
+- Moderation — flagged content review
+- Alerts — system alerting
+- System Health — health monitoring
+- System Settings — platform configuration
+- Security — admin-role middleware on every route, code-split admin panel
 
-ALSO
-- AI Assistant (floating chat assistant with context)
-- Authentication for all roles — email/password, Google/GitHub OAuth,
-  magic link, role-based access (researcher / pro / team lead / admin)
-- Discover (trending papers, personalized recommendations, explore live
-  research feeds from arXiv/OpenAlex, save to library)
+PAYMENT
+- Stripe Checkout — upgrade/downgrade via public price catalog
+- Billing Page — plan, subscription status, payment method, invoices
+- Customer Portal — Stripe-hosted subscription/invoice management
+- Webhooks — signature-verified, idempotent subscription source of truth
+- Cancel Flow — self-serve cancellation
+- Grace-period Sweeper — hourly downgrade after grace window
 
 2. MD. SALMAN RAHMAN NAYEEM (SALMAN)
 ------------------------------------
 
-- Workspace module (team members, invitations, roles, workspace activity)
-- Dashboard (frontend design fixes + testing)
-- Global Search
-- Profile
-- Settings
-
-3. SOUROV
----------
-
-- Mainly UI testing
-- Works with Salman on AI Insight frontend design
+ANNOTATIONS (RESEARCH MENU)
+- Collapsible "Your Papers" panel (persisted, search, PDF filter, mobile drawer)
+- Highlight / underline / strikethrough with optional notes
+- Icon-only type picker, clamped popup, edit dialog, confirmed deletes
+- Annotation query retry + persistence, side panel opens only on xl screens

@@ -14,6 +14,7 @@ import {
   adminModerationController,
   adminPaymentsController,
   adminPlansController,
+  adminSettingsController,
   adminSubscribersController,
   systemAlertsController,
 } from "./extendedControllers";
@@ -230,6 +231,122 @@ router.get(
 
 /**
  * @swagger
+ * /api/admin/system/diagnostics:
+ *   post:
+ *     summary: Run System Diagnostics
+ *     description: On-demand diagnostics - database ping, connection pool, memory and cache checks. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Diagnostics completed successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       500:
+ *         description: Server error
+ */
+router.post(
+  "/system/diagnostics",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemDiagnostics
+);
+
+/**
+ * @swagger
+ * /api/admin/system/clear-cache:
+ *   post:
+ *     summary: Clear System Cache
+ *     description: Flush Redis cache and in-memory fallback. Returns 409 when Redis is not connected. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cache cleared successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ *       409:
+ *         description: Redis is not connected
+ */
+router.post(
+  "/system/clear-cache",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.clearSystemCache
+);
+
+/**
+ * @swagger
+ * /api/admin/system/logs:
+ *   get:
+ *     summary: Get Recent System Logs
+ *     description: Recent backend logs from the in-memory ring buffer (resets on restart). Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: level
+ *         schema:
+ *           type: string
+ *           enum: [all, info, warn, error]
+ *         description: Filter by log level
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 200
+ *         description: Number of entries (max 1000)
+ *     responses:
+ *       200:
+ *         description: Logs retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/system/logs",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemLogs
+);
+
+/**
+ * @swagger
+ * /api/admin/system/logs/export:
+ *   get:
+ *     summary: Export System Logs
+ *     description: Download captured backend logs as a .log file. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: level
+ *         schema:
+ *           type: string
+ *           enum: [all, info, warn, error]
+ *         description: Filter by log level
+ *     responses:
+ *       200:
+ *         description: Log file download
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/system/logs/export",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.exportSystemLogs
+);
+
+/**
+ * @swagger
  * /api/admin/analytics/revenue:
  *   get:
  *     summary: Get Revenue Analytics
@@ -387,6 +504,47 @@ router.get(
   requireAdmin,
   rateLimiter,
   adminController.getAllUsers
+);
+
+/**
+ * @swagger
+ * /api/admin/users/export:
+ *   get:
+ *     summary: Export Users as CSV
+ *     description: Download filtered user list as CSV (mirrors GET /admin/users filters, capped at 10k rows). Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name or email
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [RESEARCHER, PRO_RESEARCHER, TEAM_LEAD, ADMIN, all]
+ *         description: Filter by role
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, inactive, all]
+ *         description: Filter by account status
+ *     responses:
+ *       200:
+ *         description: CSV file download
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/users/export",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.exportUsers
 );
 
 /**
@@ -789,6 +947,26 @@ router.post(
   requireAdmin,
   rateLimiter,
   systemAlertsController.create as any
+);
+
+/**
+ * System settings (persisted platform configuration)
+ */
+router.get(
+  "/settings",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminSettingsController.get as any
+);
+
+router.patch(
+  "/settings",
+  authMiddleware,
+  requireAdmin,
+  validateRequestBody(adminValidation.updateSystemSettingsSchema),
+  rateLimiter,
+  adminSettingsController.update as any
 );
 
 const adminRoutes: import("express").Router = router;

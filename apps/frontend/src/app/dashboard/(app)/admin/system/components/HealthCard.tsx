@@ -9,7 +9,13 @@ import { AlertCircle, CheckCircle, LucideIcon } from "lucide-react";
 
 interface HealthCardProps {
   title: string;
-  status: "healthy" | "degraded" | "unhealthy" | "warning" | "critical";
+  status:
+    | "healthy"
+    | "degraded"
+    | "unhealthy"
+    | "warning"
+    | "critical"
+    | "not_configured";
   detail: string;
   icon: LucideIcon;
   isLoading?: boolean;
@@ -32,6 +38,8 @@ export function HealthCard({
       case "unhealthy":
       case "critical":
         return "text-red-600";
+      case "not_configured":
+        return "text-gray-500 dark:text-gray-400";
       default:
         return "text-gray-600 dark:text-gray-400";
     }
@@ -49,6 +57,8 @@ export function HealthCard({
         return "Warning";
       case "critical":
         return "Critical";
+      case "not_configured":
+        return "Not Configured";
       default:
         return "Unknown";
     }

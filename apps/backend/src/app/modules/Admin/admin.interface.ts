@@ -3,6 +3,8 @@
  * Type definitions for admin dashboard operations
  */
 
+import type { LogEntry } from "../../shared/logBuffer";
+
 export interface ISystemStats {
   totalUsers: number;
   totalPapers: number;
@@ -58,8 +60,8 @@ export interface ISystemHealth {
     percentageUsed: number;
   };
   cache: {
-    status: "healthy" | "degraded" | "unhealthy";
-    hitRate: number;
+    status: "healthy" | "degraded" | "unhealthy" | "not_configured";
+    hitRate: number | null;
   };
   uptime: number;
   lastChecked: Date;
@@ -113,11 +115,6 @@ export interface ISystemMetrics {
       free: number; // bytes
       usagePercentage: number;
     };
-    network: {
-      bytesReceived: number;
-      bytesSent: number;
-      activeConnections: number;
-    };
   };
   systemInfo: {
     platform: string;
@@ -135,4 +132,52 @@ export interface ISystemMetrics {
     maxConnections: number;
     connectionPoolUsage: number; // percentage
   };
+}
+
+export interface IDiagnosticCheck {
+  name: string;
+  status: "healthy" | "degraded" | "unhealthy";
+  detail: string;
+}
+
+export interface ISystemDiagnostics {
+  status: "healthy" | "degraded" | "unhealthy";
+  checks: IDiagnosticCheck[];
+  memory: {
+    rssMB: number;
+    heapUsedMB: number;
+    heapTotalMB: number;
+    systemUsagePercentage: number;
+  };
+  database: {
+    responseTime: number;
+    activeConnections: number;
+    maxConnections: number;
+    connectionPoolUsage: number;
+  };
+  cache: {
+    configured: boolean;
+    redisEnabled: boolean;
+    hitRate: number | null;
+    memoryCacheSize: number;
+  };
+  system: {
+    platform: string;
+    nodeVersion: string;
+    uptimeSeconds: number;
+    loadAverage: number[];
+  };
+  generatedAt: Date;
+}
+
+export interface ICacheClearResult {
+  redisFlushed: boolean;
+  memoryEntriesCleared: number;
+  clearedAt: Date;
+}
+
+export interface ISystemLogsResult {
+  entries: LogEntry[];
+  total: number;
+  returned: number;
 }

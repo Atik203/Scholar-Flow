@@ -13,6 +13,8 @@ import {
   BarChart3,
   Calendar,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Download,
   FileSpreadsheet,
@@ -35,10 +37,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateReportMutation, useDeleteReportMutation, useListReportsQuery, type AdminReportType, type AdminReportFormat } from "@/redux/api/adminReportsApi";
+import {
+  useCreateReportMutation,
+  useDeleteReportMutation,
+  useGenerateReportMutation,
+  useGetReportStatsQuery,
+  useListReportsQuery,
+  type AdminReportType,
+  type AdminReportFormat,
+} from "@/redux/api/adminReportsApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
-import { API_BASE_URL } from "@/lib/apiUrl";
-import { useAppSelector } from "@/redux/hooks";
 
 const STATUS_COLOR: Record<string, string> = {
   READY: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -49,60 +57,58 @@ const STATUS_COLOR: Record<string, string> = {
 
 const TYPE_OPTIONS: AdminReportType[] = ["USAGE", "FINANCIAL", "USER", "CONTENT", "SYSTEM"];
 
+const PAGE_LIMIT = 20;
+
 export default function AdminReportsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<AdminReportType | "all">("all");
   const [showCreate, setShowCreate] = useState(false);
+  const [page, setPage] = useState(1);
 
-  const { data, isLoading, refetch } = useListReportsQuery({
+  const queryArgs = {
+    search: search || undefined,
+    type: typeFilter === "all" ? undefined : typeFilter,
+    page,
+    limit: PAGE_LIMIT,
+  };
+
+  const { data, isLoading, refetch } = useListReportsQuery(queryArgs);
+  const { data: statsData } = useGetReportStatsQuery({
     search: search || undefined,
     type: typeFilter === "all" ? undefined : typeFilter,
   });
   const [createReport, { isLoading: isCreating }] = useCreateReportMutation();
   const [deleteReport] = useDeleteReportMutation();
-  const accessToken = useAppSelector((s) => s.auth.accessToken);
+  const [generateReport] = useGenerateReportMutation();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   const reports = data?.data ?? [];
-  const total = data?.meta?.total ?? 0;
-  const ready = reports.filter((r) => r.status === "READY").length;
-  const failed = reports.filter((r) => r.status === "FAILED").length;
-  const scheduled = reports.filter((r) => r.status === "SCHEDULED").length;
+  const totalPages = data?.meta?.totalPage ?? 1;
+
+  const stats = statsData?.data;
+  const total = stats?.total ?? data?.meta?.total ?? 0;
+  const ready = stats?.ready ?? 0;
+  const failed = stats?.failed ?? 0;
+  const scheduled = stats?.scheduled ?? 0;
 
   /**
-   * Generate + download a report file. The backend endpoint returns the file
-   * itself (Content-Disposition: attachment), so this is a token-authenticated
-   * fetch that saves the blob — not a JSON mutation.
+   * Generate + download a report file through the RTK blob mutation.
+   * The backend streams the file with Content-Disposition: attachment.
    */
   const handleGenerate = async (reportId: string) => {
     setGeneratingId(reportId);
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/reports/${reportId}/generate`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken ?? ""}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error(`Generate failed (${res.status})`);
-      }
-
-      const disposition = res.headers.get("Content-Disposition") ?? "";
-      const match = /filename="?([^";]+)"?/.exec(disposition);
-      const blob = await res.blob();
+      const blob = await generateReport(reportId).unwrap();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = match?.[1] ?? `report-${reportId}.csv`;
+      link.download = `report-${reportId}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
       showSuccessToast("Report generated", "Download started");
-      setTimeout(() => refetch(), 1000);
     } catch {
       showErrorToast("Failed", "Could not generate report");
     } finally {
@@ -156,31 +162,46 @@ export default function AdminReportsPage() {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="flex-1 flex items-center gap-2 max-w-md">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search reports..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
-                />
+              <div className="flex-1 flex items-center gap-2 max-w-md">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search reports..."
+                    value={search}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+                <Select
+                  value={typeFilter}
+                  onValueChange={(v) => {
+                    setTypeFilter(v as AdminReportType | "all");
+                    setPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All types</SelectItem>
+                    {TYPE_OPTIONS.map((t) => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    refetch();
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
               </div>
-              <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as AdminReportType | "all")}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  {TYPE_OPTIONS.map((t) => (
-                    <SelectItem key={t} value={t}>{t}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="icon" onClick={() => refetch()}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -248,6 +269,34 @@ export default function AdminReportsPage() {
                   </Button>
                 </div>
               ))}
+            </div>
+          )}
+
+          {!isLoading && reports.length > 0 && totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t mt-4">
+              <p className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
             </div>
           )}
         </CardContent>
