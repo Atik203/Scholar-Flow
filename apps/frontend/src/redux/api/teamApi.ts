@@ -254,7 +254,7 @@ export const teamApi = apiSlice.injectEndpoints({
 
     sendTeamInvitation: builder.mutation<
       { invitationId: string },
-      { email: string; role?: string; message?: string }
+      { email: string; role?: string; message?: string; workspaceId?: string }
     >({
       query: (body) => ({
         url: "/team/invitations",
