@@ -280,6 +280,72 @@ router.post(
 
 /**
  * @swagger
+ * /api/admin/system/logs:
+ *   get:
+ *     summary: Get Recent System Logs
+ *     description: Recent backend logs from the in-memory ring buffer (resets on restart). Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: level
+ *         schema:
+ *           type: string
+ *           enum: [all, info, warn, error]
+ *         description: Filter by log level
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 200
+ *         description: Number of entries (max 1000)
+ *     responses:
+ *       200:
+ *         description: Logs retrieved successfully
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/system/logs",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.getSystemLogs
+);
+
+/**
+ * @swagger
+ * /api/admin/system/logs/export:
+ *   get:
+ *     summary: Export System Logs
+ *     description: Download captured backend logs as a .log file. Admin only.
+ *     tags: [Admin]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: level
+ *         schema:
+ *           type: string
+ *           enum: [all, info, warn, error]
+ *         description: Filter by log level
+ *     responses:
+ *       200:
+ *         description: Log file download
+ *       401:
+ *         description: Unauthorized - Admin access required
+ */
+router.get(
+  "/system/logs/export",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminController.exportSystemLogs
+);
+
+/**
+ * @swagger
  * /api/admin/analytics/revenue:
  *   get:
  *     summary: Get Revenue Analytics
