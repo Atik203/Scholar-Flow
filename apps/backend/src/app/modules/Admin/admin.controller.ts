@@ -190,6 +190,81 @@ class AdminController {
   );
 
   /**
+   * Run system diagnostics
+   * POST /api/admin/system/diagnostics
+   */
+  getSystemDiagnostics: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const diagnostics = await adminService.runSystemDiagnostics();
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: ADMIN_SUCCESS_MESSAGES.DIAGNOSTICS_SUCCESS,
+        data: diagnostics,
+      });
+    }
+  );
+
+  /**
+   * Clear system cache
+   * POST /api/admin/system/clear-cache
+   */
+  clearSystemCache: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const result = await adminService.clearSystemCache();
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: ADMIN_SUCCESS_MESSAGES.CACHE_CLEARED,
+        data: result,
+      });
+    }
+  );
+
+  /**
+   * Recent backend logs
+   * GET /api/admin/system/logs
+   */
+  getSystemLogs: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const level = (req.query.level as string | undefined) ?? "all";
+      const limit = toBoundedInt(req.query.limit, 200, 1000);
+
+      const logs = adminService.getSystemLogs(level, limit);
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: ADMIN_SUCCESS_MESSAGES.LOGS_RETRIEVED,
+        data: logs,
+      });
+    }
+  );
+
+  /**
+   * Export backend logs as a .log file
+   * GET /api/admin/system/logs/export
+   */
+  exportSystemLogs: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const level = (req.query.level as string | undefined) ?? "all";
+      const text = adminService.exportSystemLogs(level);
+      const filename = `scholar-flow-${level}-logs-${new Date()
+        .toISOString()
+        .slice(0, 10)}.log`;
+
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      res.status(200).send(text || "No log entries captured yet.");
+    }
+  );
+
+  /**
    * Get revenue analytics for admin dashboard
    * GET /api/admin/analytics/revenue
    */
