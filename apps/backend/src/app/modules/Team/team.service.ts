@@ -187,11 +187,11 @@ export class TeamService {
     const hasMore = users.length > limit;
     const sliced = hasMore ? users.slice(0, -1) : users;
 
-    // Real last-active: most recent ActivityLog entry per member. Falls back
-    // to the user's updatedAt/createdAt when the member has no activity yet.
+    // Real last-active: most recent ActivityLogEntry per member (the table the
+    // activity feed reads). Falls back to updatedAt/createdAt when no activity.
     const memberIds = sliced.map((u) => u.id);
     const activityRows = memberIds.length
-      ? await prisma.activityLog.groupBy({
+      ? await prisma.activityLogEntry.groupBy({
           by: ["userId"],
           where: { userId: { in: memberIds }, isDeleted: false },
           _max: { createdAt: true },
