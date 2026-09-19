@@ -196,6 +196,12 @@ export const teamApi = apiSlice.injectEndpoints({
           ...(endDate && { endDate }),
         },
       }),
+      // Backend paginated envelope is { data, meta }; map to the slice's
+      // declared { result, meta } shape.
+      transformResponse: (r: { data: TeamActivityItem[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
+      }),
       providesTags: [{ type: "Team", id: "ACTIVITY" }],
     }),
 
@@ -223,6 +229,10 @@ export const teamApi = apiSlice.injectEndpoints({
         params: { page, limit, ...(status && { status }) },
         headers: { "Cache-Control": "no-cache" },
       }),
+      transformResponse: (r: { data: TeamInvitation[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
+      }),
       providesTags: [{ type: "Team", id: "INVITATIONS_SENT" }],
     }),
 
@@ -234,6 +244,10 @@ export const teamApi = apiSlice.injectEndpoints({
         url: "/team/invitations/received",
         params: { page, limit, ...(status && { status }) },
         headers: { "Cache-Control": "no-cache" },
+      }),
+      transformResponse: (r: { data: TeamInvitation[]; meta: any }) => ({
+        result: r.data,
+        meta: r.meta,
       }),
       providesTags: [{ type: "Team", id: "INVITATIONS_RECEIVED" }],
     }),
