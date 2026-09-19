@@ -7,6 +7,9 @@ import {
   hasRoleAccess,
 } from "@/lib/auth/roles";
 import { useAuth } from "@/redux/auth/useAuth";
+import { selectAccessToken } from "@/redux/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
+import { useGetTeamAccessQuery } from "@/redux/api/teamApi";
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
@@ -73,6 +76,8 @@ type SidebarItem = {
   minRole: string;
   path?: string;
   badge?: string;
+  /** Visible only when the user has derived Team access (lead+ or shared workspace). */
+  requiresTeamAccess?: boolean;
   items?: SidebarLink[];
 };
 
@@ -159,11 +164,12 @@ const navigationItems: SidebarItem[] = [
   {
     title: "Team",
     icon: Users,
-    minRole: USER_ROLES.TEAM_LEAD,
+    minRole: USER_ROLES.RESEARCHER,
+    requiresTeamAccess: true,
     items: [
-      { title: "Members", path: "/dashboard/team", icon: Users, minRole: USER_ROLES.TEAM_LEAD },
-      { title: "Invitations", path: "/dashboard/team/invitations", icon: Mail, minRole: USER_ROLES.TEAM_LEAD },
-      { title: "Activity", path: "/dashboard/team/activity", icon: Clock, minRole: USER_ROLES.TEAM_LEAD },
+      { title: "Members", path: "/dashboard/team", icon: Users, minRole: USER_ROLES.RESEARCHER },
+      { title: "Invitations", path: "/dashboard/team/invitations", icon: Mail, minRole: USER_ROLES.RESEARCHER },
+      { title: "Activity", path: "/dashboard/team/activity", icon: Clock, minRole: USER_ROLES.RESEARCHER },
       { title: "Team Settings", path: "/dashboard/team/settings", icon: Settings, minRole: USER_ROLES.TEAM_LEAD },
     ],
   },
@@ -430,10 +436,16 @@ export function AppSidebar({
 
   const user = session?.user;
   const userRole = user?.role || USER_ROLES.RESEARCHER;
+  const accessToken = useAppSelector(selectAccessToken);
+  const { data: teamAccess } = useGetTeamAccessQuery(undefined, {
+    skip: !accessToken,
+  });
+  const hasTeamAccess = Boolean(teamAccess?.hasAccess);
 
   const resolvedNavigationItems = useMemo<ResolvedSidebarItem[]>(() => {
     return navigationItems
       .filter((item) => hasRoleAccess(userRole, item.minRole))
+      .filter((item) => !item.requiresTeamAccess || hasTeamAccess)
       .map<ResolvedSidebarItem>((item) => {
         const { path = "", items: rawItems, ...rest } = item;
         const href = path;
@@ -454,7 +466,7 @@ export function AppSidebar({
           items: resolvedItems,
         };
       });
-  }, [userRole]);
+  }, [userRole, hasTeamAccess]);
 
   const resolvedAdminFeatures = useMemo(() => {
     if (!hasRoleAccess(userRole, USER_ROLES.ADMIN)) {
