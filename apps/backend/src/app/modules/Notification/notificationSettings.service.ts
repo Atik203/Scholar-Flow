@@ -104,6 +104,45 @@ export const notificationSettingsService = {
   },
 
   /**
+   * Non-persisting read used on the delivery path (createNotification).
+   * Returns defaults when no preference row exists and never writes — a
+   * notification must not create preference rows for every recipient.
+   */
+  async getPreferencesLite(userId: string): Promise<NotificationPreferences> {
+    try {
+      const row = await prisma.userPreference.findUnique({
+        where: { userId },
+        select: { notificationPreferences: true },
+      });
+      const stored = row?.notificationPreferences as
+        | Partial<NotificationPreferences>
+        | null
+        | undefined;
+      if (!stored) return DEFAULT_PREFERENCES;
+
+      return {
+        ...DEFAULT_PREFERENCES,
+        ...stored,
+        channels: {
+          ...DEFAULT_PREFERENCES.channels,
+          ...(stored.channels ?? {}),
+        },
+        categories: {
+          ...DEFAULT_PREFERENCES.categories,
+          ...(stored.categories ?? {}),
+        } as NotificationPreferences["categories"],
+        quietHours: {
+          ...DEFAULT_PREFERENCES.quietHours,
+          ...(stored.quietHours ?? {}),
+        },
+      };
+    } catch {
+      // Fail-open: a preference read failure must never mute notifications.
+      return DEFAULT_PREFERENCES;
+    }
+  },
+
+  /**
    * Persist user notification preferences (partial update).
    * Accepts a loose shape (Zod has already validated the structure) and
    * deep-merges it on top of the existing preferences.
