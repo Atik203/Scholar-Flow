@@ -7,6 +7,16 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -140,6 +150,7 @@ export function AnnotationList({
   const [typeFilter, setTypeFilter] = useState<AnnotationType | null>(null);
   const [colorFilter, setColorFilter] = useState<string | null>(null);
   const [sort, setSort] = useState<SortMode>("page-asc");
+  const [pendingDelete, setPendingDelete] = useState<Annotation | null>(null);
 
   const hasActiveFilters = search.length > 0 || typeFilter !== null || colorFilter !== null;
 
@@ -377,7 +388,11 @@ export function AnnotationList({
                                 {/* Text */}
                                 <p className="text-xs leading-relaxed line-clamp-2">
                                   {annotation.text ||
-                                    annotation.anchor.selectedText}
+                                    annotation.anchor.selectedText || (
+                                      <span className="italic text-muted-foreground">
+                                        No note
+                                      </span>
+                                    )}
                                 </p>
 
                                 {/* Footer */}
@@ -415,7 +430,7 @@ export function AnnotationList({
                             className="text-destructive focus:text-destructive text-xs"
                             onClick={(e) => {
                               e.stopPropagation();
-                              onDelete(annotation.id);
+                              setPendingDelete(annotation);
                             }}
                           >
                             Delete
@@ -430,6 +445,35 @@ export function AnnotationList({
           </div>
         )}
       </ScrollArea>
+
+      <AlertDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete annotation?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This removes the annotation and its replies. This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (pendingDelete) onDelete(pendingDelete.id);
+                setPendingDelete(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

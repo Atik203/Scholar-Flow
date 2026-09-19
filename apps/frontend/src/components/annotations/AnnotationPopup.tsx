@@ -105,8 +105,18 @@ export function AnnotationPopup({
 
   if (!isOpen || !position) return null;
 
-  const popupX = Math.max(8, position.x);
-  const popupY = Math.max(8, position.y);
+  // Keep the popup inside the viewport (flip is unnecessary: clamping the
+  // anchor point is enough because the popup is small and fixed-size).
+  const POPUP_WIDTH = 336;
+  const POPUP_HEIGHT_ESTIMATE = 320;
+  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
+  const viewportHeight =
+    typeof window !== "undefined" ? window.innerHeight : 768;
+  const popupX = Math.max(8, Math.min(position.x, viewportWidth - POPUP_WIDTH));
+  const popupY = Math.max(
+    8,
+    Math.min(position.y, viewportHeight - POPUP_HEIGHT_ESTIMATE)
+  );
 
   return (
     <div
