@@ -20,6 +20,16 @@ import {
 } from "./team.validation";
 
 export const teamController = {
+  /**
+   * Derived Team section access for the current user (sidebar + route guard).
+   */
+  getAccess: catchAsync(async (req: Request, res: Response) => {
+    const authReq = req as AuthenticatedRequest;
+    if (!authReq.user?.id) throw new ApiError(401, "Authentication required");
+    const access = await TeamService.getAccessInfo(authReq.user.id);
+    sendSuccessResponse(res, access, "Team access retrieved");
+  }),
+
   // ==========================================================================
   // Members
   // ==========================================================================
