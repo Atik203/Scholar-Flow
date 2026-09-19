@@ -326,3 +326,8 @@ export type ApiKey = Prisma.ApiKeyModel
  * 
  */
 export type ContentReport = Prisma.ContentReportModel
+/**
+ * Model SystemSetting
+ * 
+ */
+export type SystemSetting = Prisma.SystemSettingModel
