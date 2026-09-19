@@ -1,6 +1,9 @@
 "use client";
 
-import { showSuccessToast } from "@/components/providers/ToastProvider";
+import {
+  showErrorToast,
+  showSuccessToast,
+} from "@/components/providers/ToastProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +30,8 @@ import {
   useRevokePaperShareMutation,
   useShareViaEmailMutation,
 } from "@/redux/api/paperApi";
-import { Copy, Link, Loader2, Mail, ShieldCheck, Share2, Trash2, Users } from "lucide-react";
+import { useGetTeamMembersQuery } from "@/redux/api/teamApi";
+import { Copy, Link, Loader2, Mail, ShieldCheck, Share2, Trash2, Users, X } from "lucide-react";
 import React, { useState } from "react";
 
 interface ShareModalProps {
@@ -60,6 +64,16 @@ export function ShareModal({
   const [revokeShare] = useRevokePaperShareMutation();
   const shares = sharesResponse ?? [];
 
+  // Team sharing
+  const [showTeamPicker, setShowTeamPicker] = useState(false);
+  const [sharingMemberId, setSharingMemberId] = useState<string | null>(null);
+  const { data: teamData, isLoading: teamLoading } = useGetTeamMembersQuery(
+    { limit: 50 },
+    { skip: !isOpen || !showTeamPicker }
+  );
+  const teamMembers = teamData?.data ?? [];
+  const sharedEmails = new Set(shares.map((share) => share.email.toLowerCase()));
+
   React.useEffect(() => {
     if (isOpen && isPublished) {
       const url = `${window.location.origin}/public-view/${paperId}`;
@@ -70,6 +84,7 @@ export function ShareModal({
       setPermission("view");
       setMessage("");
       setShareUrl("");
+      setShowTeamPicker(false);
     }
   }, [isOpen, isPublished, paperId]);
 
@@ -77,8 +92,8 @@ export function ShareModal({
     try {
       await navigator.clipboard.writeText(text);
       showSuccessToast("Copied to clipboard!");
-    } catch (error) {
-      console.error("Failed to copy:", error);
+    } catch {
+      showErrorToast("Failed to copy to clipboard");
     }
   };
 
@@ -88,8 +103,6 @@ export function ShareModal({
       const url = `${window.location.origin}/public-view/${paperId}`;
       setShareUrl(url);
       showSuccessToast("Share link generated!");
-    } catch (error) {
-      console.error("Failed to generate share link:", error);
     } finally {
       setIsGeneratingLink(false);
     }
@@ -117,8 +130,28 @@ export function ShareModal({
       setMessage("");
       setPermission("view");
     } catch (error: any) {
-      console.error("Share via email failed:", error);
       showApiErrorToast(error);
+    }
+  };
+
+  const handleTeamShare = async (member: {
+    id: string;
+    email: string;
+    name: string;
+  }) => {
+    setSharingMemberId(member.id);
+    try {
+      await shareViaEmail({
+        paperId,
+        recipientEmail: member.email,
+        permission,
+        message,
+      }).unwrap();
+      showSuccessToast(`Shared with ${member.name || member.email}`);
+    } catch (error: any) {
+      showApiErrorToast(error);
+    } finally {
+      setSharingMemberId(null);
     }
   };
 
@@ -326,17 +359,85 @@ export function ShareModal({
               </Button>
               <Button
                 variant="outline"
-                onClick={() => {
-                  // TODO: Implement team sharing
-                  console.log("Team sharing not implemented yet");
-                }}
+                onClick={() => setShowTeamPicker((prev) => !prev)}
                 className="flex items-center gap-2"
-                disabled
               >
                 <Users className="h-4 w-4" />
                 Team
               </Button>
             </div>
+
+            {showTeamPicker && (
+              <div className="space-y-3 rounded-lg border p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">
+                    Share with team members ({permission === "edit" ? "Can Edit" : "View Only"})
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => setShowTeamPicker(false)}
+                    aria-label="Close team picker"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                {teamLoading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-10 animate-pulse rounded bg-muted"
+                      />
+                    ))}
+                  </div>
+                ) : teamMembers.length === 0 ? (
+                  <p className="py-4 text-center text-sm text-muted-foreground">
+                    No team members yet. Invite people from the Team page.
+                  </p>
+                ) : (
+                  <div className="max-h-56 space-y-2 overflow-y-auto">
+                    {teamMembers.map((member) => {
+                      const alreadyShared = sharedEmails.has(
+                        member.email.toLowerCase()
+                      );
+                      return (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between gap-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {member.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {member.email}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant={alreadyShared ? "secondary" : "outline"}
+                            disabled={
+                              alreadyShared || sharingMemberId === member.id
+                            }
+                            onClick={() => void handleTeamShare(member)}
+                          >
+                            {sharingMemberId === member.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : alreadyShared ? (
+                              "Shared"
+                            ) : (
+                              "Share"
+                            )}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Actions */}
