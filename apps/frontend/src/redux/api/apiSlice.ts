@@ -52,7 +52,7 @@ type ApiBaseQuery = BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError,
-  {},
+  object,
   FetchBaseQueryMeta
 >;
 
