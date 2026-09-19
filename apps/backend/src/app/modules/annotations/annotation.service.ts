@@ -228,7 +228,7 @@ export class AnnotationService {
       }
 
       // Create version record if text is being updated
-      if (data.text) {
+      if (data.text !== undefined) {
         const versionId = randomUUID();
         const now = new Date();
 
@@ -246,10 +246,11 @@ export class AnnotationService {
 
       // Update annotation using $executeRaw
       const now = new Date();
-      const newVersion = data.text
+      const newVersion = data.text !== undefined
         ? currentAnnotation.version + 1
         : currentAnnotation.version;
-      const newText = data.text || currentAnnotation.text;
+      // Empty string is a valid value: it clears an optional note.
+      const newText = data.text !== undefined ? data.text : currentAnnotation.text;
       const newAnchor = data.anchor
         ? JSON.stringify(data.anchor)
         : JSON.stringify(currentAnnotation.anchor);
