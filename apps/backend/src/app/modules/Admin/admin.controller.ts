@@ -207,6 +207,23 @@ class AdminController {
   );
 
   /**
+   * Clear system cache
+   * POST /api/admin/system/clear-cache
+   */
+  clearSystemCache: AsyncAuthRequestHandler = catchAsync(
+    async (req: AuthRequest, res: Response) => {
+      const result = await adminService.clearSystemCache();
+
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: ADMIN_SUCCESS_MESSAGES.CACHE_CLEARED,
+        data: result,
+      });
+    }
+  );
+
+  /**
    * Get revenue analytics for admin dashboard
    * GET /api/admin/analytics/revenue
    */

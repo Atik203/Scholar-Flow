@@ -11,6 +11,7 @@ import prisma from "../../shared/prisma";
 import { ADMIN_ERROR_MESSAGES } from "./admin.constant";
 import {
   IAdminFilters,
+  ICacheClearResult,
   IDiagnosticCheck,
   IPaperStats,
   IRecentUser,
@@ -745,6 +746,27 @@ class AdminService {
       console.error("Error running system diagnostics:", error);
       throw new ApiError(500, ADMIN_ERROR_MESSAGES.HEALTH_CHECK_FAILED);
     }
+  }
+
+  /**
+   * Flush the system cache (Redis + in-memory fallback)
+   * Refuses with 409 when no active Redis connection exists.
+   */
+  async clearSystemCache(): Promise<ICacheClearResult> {
+    const stats = cacheService.getStats();
+
+    if (!stats.redisEnabled) {
+      throw new ApiError(409, ADMIN_ERROR_MESSAGES.CACHE_NOT_ENABLED);
+    }
+
+    const memoryEntriesCleared = stats.memoryCacheSize;
+    await cacheService.clear();
+
+    return {
+      redisFlushed: true,
+      memoryEntriesCleared,
+      clearedAt: new Date(),
+    };
   }
 }
 
