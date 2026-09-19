@@ -754,6 +754,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         open={isCitationDialogOpen}
         onOpenChange={setIsCitationDialogOpen}
         editor={editor}
+        sourcePaperId={paperId}
         existingPaperIds={
           editor
             ? (editor.getJSON().content as any[])
