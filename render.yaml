@@ -18,3 +18,11 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "5001"
+      # Must match the backend JWT signing secret (auth.controller signs with
+      # NEXTAUTH_SECRET) — the server verifies with this exact key.
+      - key: NEXTAUTH_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
