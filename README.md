@@ -16,10 +16,6 @@ ScholarFlow is a modern research paper management and collaboration platform des
 - **1.3.6 (2026-09-20)** — Admin console fully dynamic: real system diagnostics/cache-clear/log-export actions, persisted platform settings with audit, filter-aware CSV/JSON exports, server-side aggregates, and removal of mock/dead UI. See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.5 (2026-09-19)** — Team access for invited collaborators (derived from workspace membership, revocable per workspace), real-time push notifications for every invite/share/removal event with enforced delivery preferences, annotations UX overhaul (collapsible papers rail, optional notes), citation persistence, and realtime/socket hardening. See [CHANGELOG.md](./CHANGELOG.md).
 - **1.3.4 (2026-09-08)** — Discover live research feeds (trending/recommendations/explore), Google Docs-style text alignment, permission-backed email sharing with revoke. See [CHANGELOG.md](./CHANGELOG.md).
-- **1.3.1 (2026-06-28)** — AI architecture overhaul: context persistence, metadata generation, context-aware chat, inline paper Q&A, token optimization, Vercel crash fix (uuid ESM + outputDirectory). See [CHANGELOG.md](./CHANGELOG.md).
-- **1.3.0-rc1 (2026-10-01)** — Phase 10: AI assistant, WebSocket collab, editor templates, paper upload/import overhaul, smart URL import (IEEE/ResearchGate/Google Scholar/Semantic Scholar). See [CHANGELOG.md](./CHANGELOG.md).
-- **1.2.9** — Phase 9: WCAG 2.1 AA, code splitting, 8 final pages, invitation backend.
-- **1.2.8** — Phase 8: Architecture stabilization, 14 new pages, removed dead code.
 
 ## 🚀 Live Demo
 
