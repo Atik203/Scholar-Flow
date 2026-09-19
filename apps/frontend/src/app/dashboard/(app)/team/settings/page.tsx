@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { showApiErrorToast } from "@/lib/errorHandling";
 import {
+  useGetTeamAccessQuery,
   useGetTeamSettingsQuery,
   useUpdateTeamSettingsMutation,
   type TeamSettings,
@@ -83,6 +84,10 @@ export default function TeamSettingsPage() {
 
   const { data: serverSettings } = useGetTeamSettingsQuery(undefined, { skip: !shouldFetch });
   const [updateSettings, { isLoading: saving }] = useUpdateTeamSettingsMutation();
+  const { data: accessInfo, isLoading: accessLoading } = useGetTeamAccessQuery(
+    undefined,
+    { skip: !shouldFetch }
+  );
 
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [saved, setSaved] = useState(false);
@@ -152,6 +157,36 @@ export default function TeamSettingsPage() {
       showApiErrorToast(err as any);
     }
   };
+
+  if (accessLoading) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // Settings stay lead-only — invited members can read team pages but do not
+  // change team preferences.
+  if (accessInfo && !accessInfo.isTeamLead) {
+    return (
+      <div className="mx-auto max-w-md py-20">
+        <div className="rounded-xl border bg-card p-6 space-y-3">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <Shield className="h-5 w-5 text-muted-foreground" />
+            Team Settings
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Only team leads can change team settings. Ask your team lead if you
+            need a change.
+          </p>
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/dashboard/team">Back to Team</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const tabs: { id: TabId; label: string; icon: any }[] = [
     { id: "general", label: "General", icon: SettingsIcon },

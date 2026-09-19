@@ -193,6 +193,8 @@ export const workspaceApi = apiSlice.injectEndpoints({
         { type: "Workspace", id: "LIST" },
         { type: "Workspace", id: "SHARED" },
         { type: "Workspace", id: "INVITES" },
+        // Accepting a team invitation grants derived Team access
+        { type: "Team", id: "ACCESS" },
       ],
     }),
 
@@ -205,6 +207,7 @@ export const workspaceApi = apiSlice.injectEndpoints({
         { type: "Workspace", id: workspaceId },
         { type: "Workspace", id: "SHARED" },
         { type: "Workspace", id: "INVITES" },
+        { type: "Team", id: "ACCESS" },
       ],
     }),
 

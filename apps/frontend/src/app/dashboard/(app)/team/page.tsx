@@ -20,7 +20,7 @@ import {
 import { selectAccessToken } from "@/redux/auth/authSlice";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useAppSelector } from "@/redux/hooks";
-import { USER_ROLES } from "@/lib/auth/roles";
+import { USER_ROLES, hasRoleAccess } from "@/lib/auth/roles";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Activity,
@@ -62,6 +62,10 @@ export default function TeamMembersPage() {
   const shouldFetch = !!accessToken && accessToken.length > 0;
   const { session } = useAuth();
   const isAdmin = session?.user?.role === USER_ROLES.ADMIN;
+  const canManageTeam = hasRoleAccess(
+    session?.user?.role,
+    USER_ROLES.TEAM_LEAD
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "inactive">(
@@ -152,10 +156,12 @@ export default function TeamMembersPage() {
             Manage your team members and their permissions
           </p>
         </div>
-        <Button onClick={() => setShowInviteModal(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          Invite Member
-        </Button>
+        {canManageTeam && (
+          <Button onClick={() => setShowInviteModal(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Invite Member
+          </Button>
+        )}
       </div>
 
       {/* Quick Navigation */}
@@ -172,12 +178,14 @@ export default function TeamMembersPage() {
             Activity
           </Link>
         </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/dashboard/team/settings">
-            <Shield className="h-4 w-4 mr-2" />
-            Team Settings
-          </Link>
-        </Button>
+        {canManageTeam && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/team/settings">
+              <Shield className="h-4 w-4 mr-2" />
+              Team Settings
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -418,6 +426,7 @@ export default function TeamMembersPage() {
       <MemberActionsModal
         member={selectedMember}
         isAdmin={isAdmin}
+        canManageTeam={canManageTeam}
         onClose={() => setSelectedMember(null)}
         onChangeRole={handleChangeRole}
         onRemove={handleRemove}
@@ -544,6 +553,7 @@ function MemberActionsModal({
   onChangeRole,
   onRemove,
   isAdmin,
+  canManageTeam,
 }: {
   member: TeamMember | null;
   onClose: () => void;
@@ -553,10 +563,13 @@ function MemberActionsModal({
   ) => void;
   onRemove: (member: TeamMember) => void;
   isAdmin: boolean;
+  canManageTeam: boolean;
 }) {
   if (!member) return null;
-  // Mirrors the backend rule: only admins can manage other admins.
-  const canManageThisMember = isAdmin || member.role !== "ADMIN";
+  // Mirrors the backend rules: TEAM_LEAD+ can manage members, and only admins
+  // can manage other admins.
+  const canManageThisMember =
+    canManageTeam && (isAdmin || member.role !== "ADMIN");
   return (
     <AnimatePresence>
       {member && (
@@ -622,7 +635,7 @@ function MemberActionsModal({
                 <Tag className="h-4 w-4 text-muted-foreground" />
                 Manage Workspaces
               </Link>
-              {isAdmin && (
+              {canManageTeam && (
                 <button
                   onClick={() => onRemove(member)}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-muted text-left text-destructive transition-colors"
