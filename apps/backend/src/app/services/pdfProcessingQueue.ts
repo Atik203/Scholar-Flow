@@ -69,11 +69,19 @@ if (isRedisConfigured) {
     });
 
     // Add Redis connection event listeners
-    pdfProcessingQueue.on("ready", () => {
-      queueReady = true;
-      queueDisabledReason = null;
-      console.log("✅ [PDFQueue] Redis connection established successfully");
-    });
+    // Bull v4 has no queue-level "ready" event — isReady() resolves once the
+    // connection is established and Lua scripts are loaded.
+    void pdfProcessingQueue
+      .isReady()
+      .then(() => {
+        queueReady = true;
+        queueDisabledReason = null;
+        console.log("✅ [PDFQueue] Redis connection established successfully");
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        disableQueue(`Connection failed: ${message}`);
+      });
 
     pdfProcessingQueue.on("error", (error) => {
       const message = error instanceof Error ? error.message : String(error);
