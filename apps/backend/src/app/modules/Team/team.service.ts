@@ -620,7 +620,7 @@ export class TeamService {
    */
   static async inviteMember(
     inviterId: string,
-    payload: { email: string; role?: string; message?: string }
+    payload: { email: string; role?: string; message?: string; workspaceId?: string }
   ) {
     // Find user by email
     const user = await prisma.user.findFirst({
@@ -665,20 +665,27 @@ export class TeamService {
       );
     }
 
-    // Find an existing shared membership
+    // Target the requested workspace (must be owned by the inviter) or fall
+    // back to the inviter's first owned workspace.
+    const targetWorkspaceId = payload.workspaceId || inviterWorkspaces[0].id;
+    if (
+      payload.workspaceId &&
+      !inviterWorkspaces.some((w) => w.id === payload.workspaceId)
+    ) {
+      throw new ApiError(403, "You do not own the selected workspace");
+    }
+
+    // Find an existing membership in the target workspace
     const existingMembership = await prisma.workspaceMember.findFirst({
       where: {
         userId: user.id,
-        workspaceId: { in: inviterWorkspaces.map((w) => w.id) },
+        workspaceId: targetWorkspaceId,
         isDeleted: false,
       },
     });
     if (existingMembership) {
-      throw new ApiError(400, "User is already a member of one of your workspaces");
+      throw new ApiError(400, "User is already a member of this workspace");
     }
-
-    // Reuse first owned workspace for the invitation record
-    const targetWorkspaceId = inviterWorkspaces[0].id;
 
     // Upsert invitation
     const invitation = await prisma.workspaceInvitation.upsert({
