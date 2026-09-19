@@ -2,6 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { AnnotationType } from "@/redux/api/annotationApi";
 import {
   Check,
@@ -77,7 +82,8 @@ export function AnnotationPopup({
   }, [isOpen, defaultColor, defaultType]);
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
+    // Notes are optional: an empty text still creates the highlight,
+    // underline, strikethrough, area, or drawing annotation.
     onSubmit({ text: text.trim(), color, type });
     onClose();
   };
@@ -120,7 +126,7 @@ export function AnnotationPopup({
         {/* Header */}
         <div className="flex items-center justify-between border-b px-3 py-2">
           <span className="text-xs font-semibold text-muted-foreground">
-            Add Annotation
+            Add {TYPE_LABELS[type]}
           </span>
           <Button
             variant="ghost"
@@ -139,17 +145,22 @@ export function AnnotationPopup({
               const Icon = t.icon;
               const isActive = type === t.value;
               return (
-                <Button
-                  key={t.value}
-                  type="button"
-                  size="sm"
-                  variant={isActive ? "default" : "outline"}
-                  className="h-8 flex-1 gap-1.5 px-2 text-xs"
-                  onClick={() => setType(t.value)}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {TYPE_LABELS[t.value]}
-                </Button>
+                <Tooltip key={t.value}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={isActive ? "default" : "outline"}
+                      className="h-8 flex-1 px-0"
+                      onClick={() => setType(t.value)}
+                      aria-label={TYPE_LABELS[t.value]}
+                      aria-pressed={isActive}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{TYPE_LABELS[t.value]}</TooltipContent>
+                </Tooltip>
               );
             })}
           </div>
@@ -168,6 +179,8 @@ export function AnnotationPopup({
                 }`}
                 style={{ backgroundColor: c.value }}
                 onClick={() => setColor(c.value)}
+                aria-label={`${c.label} color`}
+                aria-pressed={color === c.value}
               />
             ))}
           </div>
@@ -179,12 +192,12 @@ export function AnnotationPopup({
             </div>
           )}
 
-          {/* Text input */}
+          {/* Text input (optional) */}
           <Textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Add note..."
+            placeholder="Add note (optional)..."
             className="min-h-[60px] resize-none text-sm"
             rows={2}
           />
@@ -197,11 +210,10 @@ export function AnnotationPopup({
             <Button
               size="sm"
               onClick={handleSubmit}
-              disabled={!text.trim()}
               className="h-8 gap-1 text-xs"
             >
               <Check className="h-3.5 w-3.5" />
-              Save
+              {text.trim() ? "Save Note" : `Save ${TYPE_LABELS[type]}`}
             </Button>
           </div>
         </div>
