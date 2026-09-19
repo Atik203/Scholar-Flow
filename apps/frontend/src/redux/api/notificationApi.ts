@@ -116,6 +116,57 @@ export const notificationApi = apiSlice
           url: `/notifications/${id}/read`,
           method: "PUT",
         }),
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          // Optimistic: the bell/count update instantly, then the server
+          // refetch from invalidatesTags reconciles.
+          const patches: Array<{ undo: () => void }> = [];
+          let wasUnread = false;
+          for (const arg of notificationApi.util.selectCachedArgsForQuery(
+            getState(),
+            "getNotifications"
+          )) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getNotifications",
+                  arg,
+                  (draft) => {
+                    if (!draft?.data) return;
+                    if (arg?.read === "unread") {
+                      draft.data = draft.data.filter((n) => n.id !== id);
+                      return;
+                    }
+                    const item = draft.data.find((n) => n.id === id);
+                    if (item && !item.read) {
+                      wasUnread = true;
+                      item.read = true;
+                    }
+                  }
+                )
+              )
+            );
+          }
+          if (wasUnread) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getUnreadCount",
+                  undefined,
+                  (draft) => {
+                    if (draft?.data && draft.data.count > 0) {
+                      draft.data.count -= 1;
+                    }
+                  }
+                )
+              )
+            );
+          }
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: (result, error, id) => [
           { type: "Notification", id },
           { type: "Notification", id: "LIST" },
@@ -128,6 +179,48 @@ export const notificationApi = apiSlice
           url: "/notifications/read-all",
           method: "PUT",
         }),
+        async onQueryStarted(_arg, { dispatch, getState, queryFulfilled }) {
+          const patches: Array<{ undo: () => void }> = [];
+          patches.push(
+            dispatch(
+              notificationApi.util.updateQueryData(
+                "getUnreadCount",
+                undefined,
+                (draft) => {
+                  if (draft?.data) draft.data.count = 0;
+                }
+              )
+            )
+          );
+          for (const arg of notificationApi.util.selectCachedArgsForQuery(
+            getState(),
+            "getNotifications"
+          )) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getNotifications",
+                  arg,
+                  (draft) => {
+                    if (!draft?.data) return;
+                    if (arg?.read === "unread") {
+                      draft.data = [];
+                      return;
+                    }
+                    draft.data.forEach((n) => {
+                      n.read = true;
+                    });
+                  }
+                )
+              )
+            );
+          }
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: ["Notification"],
       }),
 
@@ -136,6 +229,37 @@ export const notificationApi = apiSlice
           url: `/notifications/${id}/star`,
           method: "PUT",
         }),
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          const patches: Array<{ undo: () => void }> = [];
+          for (const arg of notificationApi.util.selectCachedArgsForQuery(
+            getState(),
+            "getNotifications"
+          )) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getNotifications",
+                  arg,
+                  (draft) => {
+                    if (!draft?.data) return;
+                    const item = draft.data.find((n) => n.id === id);
+                    if (!item) return;
+                    if (arg?.starred === "true" && item.starred) {
+                      draft.data = draft.data.filter((n) => n.id !== id);
+                      return;
+                    }
+                    item.starred = !item.starred;
+                  }
+                )
+              )
+            );
+          }
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: (result, error, id) => [
           { type: "Notification", id },
           { type: "Notification", id: "LIST" },
@@ -147,6 +271,49 @@ export const notificationApi = apiSlice
           url: `/notifications/${id}`,
           method: "DELETE",
         }),
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          const patches: Array<{ undo: () => void }> = [];
+          let removedUnread = false;
+          for (const arg of notificationApi.util.selectCachedArgsForQuery(
+            getState(),
+            "getNotifications"
+          )) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getNotifications",
+                  arg,
+                  (draft) => {
+                    if (!draft?.data) return;
+                    const item = draft.data.find((n) => n.id === id);
+                    if (item && !item.read) removedUnread = true;
+                    draft.data = draft.data.filter((n) => n.id !== id);
+                  }
+                )
+              )
+            );
+          }
+          if (removedUnread) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getUnreadCount",
+                  undefined,
+                  (draft) => {
+                    if (draft?.data && draft.data.count > 0) {
+                      draft.data.count -= 1;
+                    }
+                  }
+                )
+              )
+            );
+          }
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: (result, error, id) => [
           { type: "Notification", id },
           { type: "Notification", id: "LIST" },
@@ -160,6 +327,54 @@ export const notificationApi = apiSlice
           method: "DELETE",
           body: { ids },
         }),
+        async onQueryStarted(ids, { dispatch, getState, queryFulfilled }) {
+          const idSet = new Set(ids);
+          const patches: Array<{ undo: () => void }> = [];
+          let removedUnread = 0;
+          for (const arg of notificationApi.util.selectCachedArgsForQuery(
+            getState(),
+            "getNotifications"
+          )) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getNotifications",
+                  arg,
+                  (draft) => {
+                    if (!draft?.data) return;
+                    removedUnread += draft.data.filter(
+                      (n) => idSet.has(n.id) && !n.read
+                    ).length;
+                    draft.data = draft.data.filter((n) => !idSet.has(n.id));
+                  }
+                )
+              )
+            );
+          }
+          if (removedUnread > 0) {
+            patches.push(
+              dispatch(
+                notificationApi.util.updateQueryData(
+                  "getUnreadCount",
+                  undefined,
+                  (draft) => {
+                    if (draft?.data) {
+                      draft.data.count = Math.max(
+                        0,
+                        draft.data.count - removedUnread
+                      );
+                    }
+                  }
+                )
+              )
+            );
+          }
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: ["Notification"],
       }),
 
