@@ -11,6 +11,7 @@ export const ADMIN_SUCCESS_MESSAGES = {
   ROLE_DISTRIBUTION_RETRIEVED: "Role distribution retrieved successfully",
   PAPER_STATS_RETRIEVED: "Paper statistics retrieved successfully",
   DIAGNOSTICS_SUCCESS: "System diagnostics completed successfully",
+  CACHE_CLEARED: "System cache cleared successfully",
 } as const;
 
 export const ADMIN_ERROR_MESSAGES = {
@@ -19,6 +20,8 @@ export const ADMIN_ERROR_MESSAGES = {
   USERS_FETCH_FAILED: "Failed to fetch recent users",
   GROWTH_DATA_FAILED: "Failed to fetch growth data",
   HEALTH_CHECK_FAILED: "System health check failed",
+  CACHE_NOT_ENABLED:
+    "Redis is not connected. Cache flushing requires an active Redis connection.",
   INVALID_DATE_RANGE: "Invalid date range provided",
   INVALID_FILTERS: "Invalid filter parameters",
 } as const;
