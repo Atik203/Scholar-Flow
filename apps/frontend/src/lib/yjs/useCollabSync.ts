@@ -4,12 +4,13 @@ import { useCallback, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
+import { getAppStore } from "@/redux/storeAccess";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
 
 function getAuthToken(): string | null {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.accessToken || null;
   } catch {}
   return null;
@@ -17,7 +18,7 @@ function getAuthToken(): string | null {
 
 function getUserName(): string {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.user?.name || "Anonymous";
   } catch {}
   return "Anonymous";
@@ -25,7 +26,7 @@ function getUserName(): string {
 
 function getUserId(): string {
   try {
-    const store = (window as any).__REDUX_STORE__;
+    const store = getAppStore();
     if (store) return store.getState().auth?.user?.id || "unknown";
   } catch {}
   return "unknown";
@@ -224,6 +225,12 @@ export function useCollabSync({
     socket.on("disconnect", () => {
       // Save snapshot for offline recovery
       saveSnapshot();
+    });
+
+    socket.on("connect_error", (error: Error) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[CollabSync] connect error:", error.message);
+      }
     });
 
     // Handle Y.js document updates from peers
