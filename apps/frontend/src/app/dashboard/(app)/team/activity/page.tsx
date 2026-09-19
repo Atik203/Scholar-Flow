@@ -9,6 +9,7 @@ import {
   useGetTeamActivitySummaryQuery,
   useGetTeamMembersQuery,
   useGetTeamStatsQuery,
+  useLazyGetTeamActivityQuery,
   type TeamActivityItem,
   type TeamMember,
 } from "@/redux/api/teamApi";
@@ -28,6 +29,7 @@ import {
   Eye,
   FileText,
   FolderOpen,
+  Loader2,
   Medal,
   MessageSquare,
   MoreHorizontal,
@@ -44,7 +46,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 type ActivityType =
@@ -147,6 +149,48 @@ const getActivityDescription = (activity: TeamActivityItem) => {
   return <>{activity.action} {target}</>;
 };
 
+const matchesActivityType = (
+  activity: TeamActivityItem,
+  type: ActivityType
+): boolean => {
+  const action = (activity.action || "").toLowerCase();
+  const entity = (activity.entity || "").toLowerCase();
+  switch (type) {
+    case "paper_upload":
+      return action.includes("upload") || (entity === "paper" && action.includes("create"));
+    case "paper_view":
+      return action.includes("view");
+    case "paper_edit":
+      return action.includes("edit") || action.includes("update");
+    case "paper_delete":
+      return action.includes("delete");
+    case "paper_share":
+      return action.includes("share");
+    case "collection_create":
+      return entity === "collection" && action.includes("create");
+    case "collection_edit":
+      return entity === "collection" && (action.includes("edit") || action.includes("update"));
+    case "collection_share":
+      return entity === "collection" && action.includes("share");
+    case "member_join":
+      return action.includes("join") || (entity === "member" && action.includes("create"));
+    case "member_leave":
+      return action.includes("leave") || (entity === "member" && action.includes("delete"));
+    case "member_role_change":
+      return action.includes("role");
+    case "comment_add":
+      return entity === "comment" || action.includes("comment") || action.includes("message");
+    case "annotation_add":
+      return entity === "annotation" || action.includes("annotation");
+    case "export":
+      return action.includes("export");
+    case "ai_insight":
+      return action.includes("ai") || action.includes("insight");
+    default:
+      return true;
+  }
+};
+
 export default function TeamActivityPage() {
   const accessToken = useAppSelector(selectAccessToken);
   const shouldFetch = !!accessToken && accessToken.length > 0;
@@ -156,36 +200,94 @@ export default function TeamActivityPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeChartView, setActiveChartView] = useState<"bar" | "heatmap">("bar");
+  const [rangeDays, setRangeDays] = useState(30);
+  const [rangeStart, setRangeStart] = useState<string | undefined>(undefined);
+  const [moreItems, setMoreItems] = useState<TeamActivityItem[]>([]);
+  const [cursorState, setCursorState] = useState<{
+    current: string | null;
+    hasMore: boolean;
+  }>({ current: null, hasMore: false });
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  useEffect(() => {
+    setRangeStart(
+      rangeDays > 0
+        ? new Date(Date.now() - rangeDays * 86400000).toISOString()
+        : undefined
+    );
+  }, [rangeDays]);
 
   const { data: activityData, isLoading, refetch } = useGetTeamActivityQuery(
-    { limit: 50 },
-    { skip: !shouldFetch }
+    {
+      limit: 50,
+      memberId: selectedMember || undefined,
+      startDate: rangeStart,
+    },
+    {
+      skip: !shouldFetch,
+      // Pause polling while the user is reading older pages so accumulated
+      // results are not reset under them.
+      pollingInterval: moreItems.length > 0 ? 0 : 30000,
+    }
   );
+  const [loadMoreActivity] = useLazyGetTeamActivityQuery();
   const { data: summary } = useGetTeamActivitySummaryQuery({ days: 7 }, { skip: !shouldFetch });
   const { data: stats } = useGetTeamStatsQuery(undefined, { skip: !shouldFetch });
   const { data: membersData } = useGetTeamMembersQuery({ limit: 50 }, { skip: !shouldFetch });
 
-  const activities = activityData?.result || [];
   const members: TeamMember[] = membersData?.data || [];
+
+  // Keep the cursor in sync with the freshest first page (poll or filter change).
+  useEffect(() => {
+    setMoreItems([]);
+    setCursorState({
+      current: activityData?.meta?.nextCursor ?? null,
+      hasMore: Boolean(activityData?.meta?.nextCursor),
+    });
+  }, [activityData]);
+
+  const activities: TeamActivityItem[] = [
+    ...(activityData?.result || []),
+    ...moreItems,
+  ];
+
+  const handleLoadMore = async () => {
+    if (!cursorState.current) return;
+    setIsLoadingMore(true);
+    try {
+      const res = await loadMoreActivity({
+        limit: 50,
+        cursor: cursorState.current,
+        memberId: selectedMember || undefined,
+        startDate: rangeStart,
+      }).unwrap();
+      setMoreItems((prev) => [...prev, ...res.result]);
+      setCursorState({
+        current: res.meta?.nextCursor ?? null,
+        hasMore: Boolean(res.meta?.nextCursor),
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refetch();
-    setTimeout(() => setIsRefreshing(false), 500);
+    try {
+      await refetch();
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
   };
 
   const filtered = activities.filter((a) => {
-    if (selectedMember && a.userId !== selectedMember) return false;
-    if (selectedType !== "all" && !a.action.toLowerCase().includes(selectedType.replace("_", ""))) {
-      // simple type filter: just look at action/entity
-      if (selectedType === "paper_upload" && a.entity !== "Paper") return false;
-      if (selectedType === "collection_create" && a.entity !== "Collection") return false;
-      // ... other filters via substring; lenient for now
+    if (selectedType !== "all" && !matchesActivityType(a, selectedType)) {
+      return false;
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (
-        a.user?.name?.toLowerCase().includes(q) ||
+        Boolean(a.user?.name?.toLowerCase().includes(q)) ||
         a.entity.toLowerCase().includes(q) ||
         a.action.toLowerCase().includes(q)
       );
@@ -231,9 +333,9 @@ export default function TeamActivityPage() {
           color="purple"
         />
         <StatCard
-          label="Comments & Discussions"
+          label="Activities"
           value={summary?.totalActivities ?? 0}
-          subValue="This week"
+          subValue="Last 7 days"
           change={0}
           icon={MessageSquare}
           color="blue"
@@ -241,7 +343,7 @@ export default function TeamActivityPage() {
         <StatCard
           label="Active Members"
           value={`${stats?.activeMembers ?? 0}/${stats?.totalMembers ?? 0}`}
-          subValue="Last 7 days"
+          subValue="Active in last 30 days"
           change={0}
           icon={Users}
           color="green"
@@ -327,14 +429,26 @@ export default function TeamActivityPage() {
               </div>
               <select
                 value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value as any)}
+                onChange={(e) => setSelectedType(e.target.value as ActivityType | "all")}
                 className="h-10 px-3 rounded-md border bg-background text-sm"
+                aria-label="Activity type"
               >
                 {ACTIVITY_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
                     {t.label}
                   </option>
                 ))}
+              </select>
+              <select
+                value={rangeDays}
+                onChange={(e) => setRangeDays(Number(e.target.value))}
+                className="h-10 px-3 rounded-md border bg-background text-sm"
+                aria-label="Date range"
+              >
+                <option value={7}>Last 7 days</option>
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+                <option value={0}>All time</option>
               </select>
             </div>
           </div>
@@ -411,6 +525,21 @@ export default function TeamActivityPage() {
               </AnimatePresence>
             )}
           </div>
+
+          {cursorState.hasMore && filtered.length > 0 && (
+            <div className="border-t p-4 text-center">
+              <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Load older activity
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
