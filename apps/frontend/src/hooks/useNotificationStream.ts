@@ -94,6 +94,9 @@ const ensureConnection = () => {
       // Invalidate RTK cache so lists refetch
       _dispatchRef?.(notificationApi.util.invalidateTags(["Notification"]));
       _dispatchRef?.(apiSlice.util.invalidateTags([{ type: "Notification", id: "UNREAD_COUNT" }]));
+      // Team invitations change derived Team access (a pending invite opens
+      // the Team section), so refresh the sidebar probe too.
+      _dispatchRef?.(apiSlice.util.invalidateTags([{ type: "Team", id: "ACCESS" }]));
       // Show toast
       showSuccessToast(data.title ?? "New notification", data.message);
       // Forward to all registered consumers
