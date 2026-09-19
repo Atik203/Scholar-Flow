@@ -1006,6 +1006,7 @@ model ActivityLog {
   isDeleted Boolean  @default(false)
 
   @@index([workspaceId, createdAt])
+  @@index([userId, createdAt])
 }
 
 // -------- Auth.js (NextAuth) models --------
