@@ -665,7 +665,7 @@ export class WorkspaceService {
   // Decline workspace invitation
   static async declineInvitation(userId: string, workspaceId: string) {
     const invitation = await prisma.$queryRaw<any[]>`
-      SELECT wi.id, wi.status, wi."expiresAt"
+      SELECT wi.id, wi.status, wi."expiresAt", wi."invitedById"
       FROM "WorkspaceInvitation" wi
       WHERE wi."workspaceId" = ${workspaceId} AND wi."userId" = ${userId} AND wi."isDeleted" = false
     `;
@@ -691,6 +691,23 @@ export class WorkspaceService {
       SET status = 'DECLINED'::"MembershipStatus", "declinedAt" = now(), "updatedAt" = now()
       WHERE id = ${invitation[0].id}
     `;
+
+    // Notify the inviter (best-effort)
+    if (invitation[0].invitedById) {
+      try {
+        await notificationService.createNotification({
+          userId: invitation[0].invitedById,
+          type: "INVITE",
+          title: "Invitation declined",
+          message: "A user declined your team invitation.",
+          actionUrl: "/dashboard/team/invitations",
+          actorId: userId,
+          resourceId: workspaceId,
+        });
+      } catch {
+        // notification failures never break the main flow
+      }
+    }
 
     return { success: true };
   }
