@@ -20,6 +20,21 @@ const ROOM_RE = new RegExp(
 );
 
 /**
+ * Emit-side guard: a socket may only emit into rooms it has joined. Joining
+ * is access-checked, so membership implies authorization.
+ */
+const guardRoom = (socket: Socket, room: unknown): room is string => {
+  if (typeof room === "string" && ROOM_RE.test(room) && socket.rooms.has(room)) {
+    return true;
+  }
+  socket.emit("room:error", {
+    room,
+    message: "Access denied: join the room first",
+  });
+  return false;
+};
+
+/**
  * Membership check for live rooms. The REST layer enforces access on every
  * endpoint, but socket rooms were previously joinable by ANY authenticated
  * user — a caller could join `paper:<id>` or `discussion:<id>` rooms and
@@ -230,7 +245,8 @@ export function setupWebSocket(server: HttpServer): Server {
 
     socket.on(
       "typing:start",
-      ({ room, context }: { room: string; context?: string }) => {
+      ({ room, context }: { room: string; context?: string } = {} as { room: string; context?: string }) => {
+        if (!guardRoom(socket, room)) return;
         socket.to(room).emit("typing:update", {
           userId,
           userName,
@@ -241,7 +257,8 @@ export function setupWebSocket(server: HttpServer): Server {
       }
     );
 
-    socket.on("typing:stop", ({ room }: { room: string }) => {
+    socket.on("typing:stop", ({ room }: { room: string } = {} as { room: string }) => {
+      if (!guardRoom(socket, room)) return;
       socket.to(room).emit("typing:update", {
         userId,
         userName,
@@ -254,19 +271,34 @@ export function setupWebSocket(server: HttpServer): Server {
 
     socket.on(
       "editor:update",
-      ({ room, update }: { room: string; update: Uint8Array }) => {
+      ({ room, update }: { room: string; update: Uint8Array } = {} as { room: string; update: Uint8Array }) => {
+        if (!guardRoom(socket, room)) return;
         socket.to(room).emit("editor:update", { userId, update });
       }
     );
 
     socket.on(
       "editor:awareness",
-      ({ room, state }: { room: string; state: any }) => {
+      ({ room, state }: { room: string; state: any } = {} as { room: string; state: any }) => {
+        if (!guardRoom(socket, room)) return;
         socket.to(room).emit("editor:awareness", {
           userId,
           userName,
           state,
         });
+      }
+    );
+
+    socket.on("editor:sync-request", ({ room }: { room?: string } = {}) => {
+      if (!guardRoom(socket, room)) return;
+      socket.to(room).emit("editor:sync-request", { room });
+    });
+
+    socket.on(
+      "editor:sync-response",
+      ({ room, update }: { room: string; update: Uint8Array } = {} as { room: string; update: Uint8Array }) => {
+        if (!guardRoom(socket, room)) return;
+        socket.to(room).emit("editor:sync-response", { update });
       }
     );
 
@@ -282,12 +314,15 @@ export function setupWebSocket(server: HttpServer): Server {
         room: string;
         content: string;
         threadId?: string;
-      }) => {
+      } = {} as { room: string; content: string; threadId?: string }) => {
+        if (!guardRoom(socket, room)) return;
+        if (typeof content !== "string" || !content.trim()) return;
+
         const message = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           userId,
           userName,
-          content,
+          content: content.slice(0, 5000),
           threadId,
           timestamp: new Date().toISOString(),
         };
