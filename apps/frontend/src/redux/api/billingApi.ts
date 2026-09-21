@@ -159,7 +159,11 @@ export const billingApi = apiSlice.injectEndpoints({
      * so the pricing page reflects admin panel plan changes.
      */
     getBillingCatalog: builder.query<BillingCatalog, void>({
-      query: () => "/billing/catalog",
+      query: () => ({
+        url: "/billing/catalog",
+        // Never trust a cached catalog — admin plan edits must show on reload
+        cache: "no-cache",
+      }),
       transformResponse: (response: { data: BillingCatalog }) => response.data,
       keepUnusedDataFor: 30,
     }),
