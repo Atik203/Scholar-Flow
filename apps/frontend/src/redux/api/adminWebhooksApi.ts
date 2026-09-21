@@ -146,7 +146,11 @@ export const adminWebhooksApi = apiSlice
           url: `/admin/webhooks/endpoints/${id}/test`,
           method: "POST",
         }),
-        invalidatesTags: [{ type: "AdminWebhook", id: "LIST" }],
+        // A test fires a delivery — refresh the endpoint list and its log
+        invalidatesTags: (result, error, id) => [
+          { type: "AdminWebhook", id: "LIST" },
+          { type: "AdminWebhook", id: `DELIVERIES-${id}` },
+        ],
       }),
 
       listDeliveries: builder.query<

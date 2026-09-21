@@ -705,7 +705,10 @@ export const systemAlertsApi = apiSlice
           method: "POST",
           body,
         }),
-        invalidatesTags: [{ type: "SystemAlert", id: "LIST" }],
+        invalidatesTags: [
+          { type: "SystemAlert", id: "LIST" },
+          { type: "SystemAlert", id: "COUNTS" },
+        ],
       }),
     }),
   });
