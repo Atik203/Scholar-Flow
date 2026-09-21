@@ -123,6 +123,9 @@ const transformErrorResponse = (
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
+  // Never let the browser HTTP cache serve stale API data. Tag invalidation
+  // refetches (and mount refetches) must always reach the server.
+  fetchFn: (input, init) => fetch(input, { ...init, cache: "no-store" }),
   prepareHeaders: (headers, { getState, endpoint }) => {
     // Get token from Redux auth state
     const token = (getState() as RootState).auth.accessToken;
@@ -190,7 +193,9 @@ export const apiSlice = createApi({
   ],
   // Performance optimizations
   keepUnusedDataFor: 300, // Keep data for 5 minutes (stable data like user profiles, papers)
-  refetchOnMountOrArgChange: 60, // Only refetch if data is older than 1 minute
+  // Always refetch on remount so cross-tab/external changes are visible
+  // without a hard reload (RTK still dedupes concurrent requests)
+  refetchOnMountOrArgChange: true,
   refetchOnFocus: false, // Disable expensive refetch on window focus
   refetchOnReconnect: true, // Refetch when internet reconnects
   endpoints: () => ({}),
