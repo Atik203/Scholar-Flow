@@ -32,6 +32,14 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/customUI/PageHeader";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -51,6 +59,7 @@ import {
   useGenerateReportMutation,
   useGetReportStatsQuery,
   useListReportsQuery,
+  type AdminReport,
   type AdminReportType,
   type AdminReportFormat,
 } from "@/redux/api/adminReportsApi";
@@ -81,6 +90,7 @@ export default function AdminReportsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<AdminReportType>("USAGE");
+  const [deleteTarget, setDeleteTarget] = useState<AdminReport | null>(null);
 
   const queryArgs = {
     search: search || undefined,
@@ -130,6 +140,20 @@ export default function AdminReportsPage() {
       showErrorToast("Failed", "Could not generate report");
     } finally {
       setGeneratingId(null);
+    }
+  };
+
+  /**
+   * Delete a saved report (confirm dialog, optimistic list removal)
+   */
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteReport(deleteTarget.id).unwrap();
+      showSuccessToast("Report deleted", `${deleteTarget.name} was removed`);
+      setDeleteTarget(null);
+    } catch {
+      showErrorToast("Delete failed", "Could not delete report");
     }
   };
 
@@ -326,12 +350,8 @@ export default function AdminReportsPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={async () => {
-                      if (confirm("Delete this report?")) {
-                        await deleteReport(r.id);
-                        refetch();
-                      }
-                    }}
+                    onClick={() => setDeleteTarget(r)}
+                    aria-label={`Delete report ${r.name}`}
                   >
                     <Trash2 className="h-3 w-3 text-red-500" />
                   </Button>
@@ -369,6 +389,31 @@ export default function AdminReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete confirm dialog */}
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete report</DialogTitle>
+            <DialogDescription>
+              {deleteTarget
+                ? `"${deleteTarget.name}" (${deleteTarget.type}) will be removed. Its schedule stops immediately.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {showCreate && (
         <CreateReportDialog
