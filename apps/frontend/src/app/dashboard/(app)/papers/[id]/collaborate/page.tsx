@@ -18,6 +18,7 @@ import { use, useEffect, useRef, useState } from "react";
 
 import { useCollabSync } from "@/lib/yjs/useCollabSync";
 import { CollaborationCursor } from "@/lib/yjs/collaborationCursor";
+import { useAppSelector } from "@/redux/hooks";
 import {
   useAutoSaveEditorContentMutation,
   useGetEditorPaperQuery,
@@ -54,6 +55,8 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
     initialContent: paper.contentHtml ?? null,
     enabled: true,
   });
+  const currentUserName =
+    useAppSelector((state) => state.auth.user?.name) || "Anonymous";
 
   const remoteUsers =
     Array.from(awareness.getStates()).map(([clientId, state]) => ({
@@ -95,7 +98,7 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
         CollaborationCursor.configure({
           provider: { awareness },
           user: {
-            name: "Me",
+            name: currentUserName,
             color: getUserColor(ydoc.clientID.toString()),
           },
         }),
