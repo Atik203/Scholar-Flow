@@ -54,6 +54,20 @@ export interface AdminReportStats {
   failed: number;
 }
 
+export interface ReportColumn {
+  key: string;
+  label: string;
+  format?: "text" | "date" | "number" | "boolean";
+}
+
+export type ReportCellValue = string | number | boolean | null;
+
+export interface ReportPreviewData {
+  columns: ReportColumn[];
+  rows: Array<Record<string, ReportCellValue>>;
+  meta: { page: number; limit: number; total: number; totalPage: number };
+}
+
 export const adminReportsApi = apiSlice
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -87,6 +101,34 @@ export const adminReportsApi = apiSlice
       >({
         query: (params) => ({ url: "/admin/reports/stats", params }),
         providesTags: [{ type: "AdminReport", id: "STATS" }],
+      }),
+
+      getReportPreview: builder.query<
+        { success: boolean; data: ReportPreviewData },
+        {
+          type: AdminReportType;
+          page?: number;
+          limit?: number;
+          search?: string;
+        }
+      >({
+        query: (params) => ({ url: "/admin/reports/preview", params }),
+        providesTags: (result, error, arg) => [
+          { type: "AdminReport", id: `PREVIEW-${arg.type}` },
+        ],
+        keepUnusedDataFor: 30,
+      }),
+
+      exportReport: builder.mutation<
+        Blob,
+        { type: AdminReportType; format: AdminReportFormat }
+      >({
+        query: ({ type, format }) => ({
+          url: "/admin/reports/export",
+          params: { type, format },
+          responseHandler: (response) => response.blob(),
+          cache: "no-cache",
+        }),
       }),
 
       getReport: builder.query<
@@ -146,16 +188,17 @@ export const adminReportsApi = apiSlice
 
       generateReport: builder.mutation<
         Blob,
-        string
+        { id: string; format?: AdminReportFormat }
       >({
-        query: (id) => ({
+        query: ({ id, format }) => ({
           url: `/admin/reports/${id}/generate`,
           method: "POST",
+          params: format ? { format } : undefined,
           responseHandler: (response) => response.blob(),
           cache: "no-cache",
         }),
-        invalidatesTags: (result, error, id) => [
-          { type: "AdminReport", id },
+        invalidatesTags: (result, error, arg) => [
+          { type: "AdminReport", id: arg.id },
           { type: "AdminReport", id: "LIST" },
           { type: "AdminReport", id: "STATS" },
         ],
@@ -167,6 +210,8 @@ export const {
   useListReportsQuery,
   useGetReportQuery,
   useGetReportStatsQuery,
+  useGetReportPreviewQuery,
+  useExportReportMutation,
   useCreateReportMutation,
   useUpdateReportMutation,
   useDeleteReportMutation,
