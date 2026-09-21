@@ -14,9 +14,75 @@ const MAX_ROWS = 10000;
 
 export type ReportRow = Record<string, string | number | boolean | null>;
 
-const buildCsv = (rows: ReportRow[]): string => {
-  if (rows.length === 0) return "";
-  const headers = Object.keys(rows[0]);
+export type ReportType = "USAGE" | "FINANCIAL" | "USER" | "CONTENT" | "SYSTEM";
+
+export interface ReportColumn {
+  key: string;
+  label: string;
+  format?: "text" | "date" | "number" | "boolean";
+}
+
+/**
+ * Column registry per report type — single source of truth for preview tables
+ * and CSV/JSON exports. Exports deliberately omit internal IDs and surface
+ * user names/emails for readability.
+ */
+export const REPORT_COLUMNS: Record<ReportType, ReportColumn[]> = {
+  USAGE: [
+    { key: "createdAt", label: "Date", format: "date" },
+    { key: "userName", label: "User Name" },
+    { key: "userEmail", label: "User Email" },
+    { key: "kind", label: "Kind" },
+    { key: "units", label: "Units", format: "number" },
+  ],
+  FINANCIAL: [
+    { key: "createdAt", label: "Date", format: "date" },
+    { key: "userName", label: "User Name" },
+    { key: "userEmail", label: "User Email" },
+    { key: "amount", label: "Amount" },
+    { key: "currency", label: "Currency" },
+    { key: "status", label: "Status" },
+    { key: "provider", label: "Provider" },
+    { key: "transactionId", label: "Transaction ID" },
+  ],
+  USER: [
+    { key: "createdAt", label: "Joined", format: "date" },
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+    { key: "role", label: "Role" },
+    { key: "emailVerified", label: "Email Verified", format: "boolean" },
+  ],
+  CONTENT: [
+    { key: "createdAt", label: "Created", format: "date" },
+    { key: "title", label: "Title" },
+    { key: "uploaderName", label: "Uploader Name" },
+    { key: "uploaderEmail", label: "Uploader Email" },
+    { key: "processingStatus", label: "Processing" },
+    { key: "citationCount", label: "Citations", format: "number" },
+  ],
+  SYSTEM: [
+    { key: "createdAt", label: "Created", format: "date" },
+    { key: "userName", label: "User Name" },
+    { key: "userEmail", label: "User Email" },
+    { key: "expires", label: "Expires", format: "date" },
+    { key: "tokenPrefix", label: "Token Prefix" },
+  ],
+};
+
+interface ReportQueryOptions {
+  limit: number;
+  skip?: number;
+  search?: string;
+}
+
+const insensitive = (
+  value: string
+): { contains: string; mode: "insensitive" } => ({
+  contains: value,
+  mode: "insensitive",
+});
+
+const buildCsv = (rows: ReportRow[], columns: ReportColumn[]): string => {
   const escape = (v: unknown) => {
     if (v === null || v === undefined) return "";
     let s = String(v);
@@ -31,9 +97,9 @@ const buildCsv = (rows: ReportRow[]): string => {
     return s;
   };
   const lines: string[] = [];
-  lines.push(headers.join(","));
+  lines.push(columns.map((c) => escape(c.label)).join(","));
   for (const row of rows) {
-    lines.push(headers.map((h) => escape(row[h])).join(","));
+    lines.push(columns.map((c) => escape(row[c.key])).join(","));
   }
   return lines.join("\n");
 };
@@ -213,7 +279,10 @@ export const reportService = {
    * string (CSV or JSON) plus metadata. The caller can stream the content
    * to the client as a file download.
    */
-  async generateReport(id: string): Promise<{
+  async generateReport(
+    id: string,
+    formatOverride?: "CSV" | "JSON"
+  ): Promise<{
     filename: string;
     mimeType: string;
     content: string;
@@ -231,16 +300,16 @@ export const reportService = {
     });
 
     try {
-      const rows = await this.fetchReportRows(report.type, MAX_ROWS);
-      const capped = rows.length > MAX_ROWS ? rows.slice(0, MAX_ROWS) : rows;
+      const format = formatOverride ?? report.format;
+      const rows = await this.fetchReportRows(report.type, { limit: MAX_ROWS });
       const filename = `${this.slugify(report.name)}-${
         new Date().toISOString().split("T")[0]
-      }.${report.format.toLowerCase()}`;
-      const mimeType = report.format === "JSON" ? "application/json" : "text/csv";
+      }.${format.toLowerCase()}`;
+      const mimeType = format === "JSON" ? "application/json" : "text/csv";
       const content =
-        report.format === "JSON"
-          ? JSON.stringify(capped, null, 2)
-          : buildCsv(capped);
+        format === "JSON"
+          ? JSON.stringify(rows, null, 2)
+          : buildCsv(rows, REPORT_COLUMNS[report.type]);
 
       // Mark ready
       await prisma.adminReport.update({
@@ -267,18 +336,148 @@ export const reportService = {
     }
   },
 
-  async fetchReportRows(
-    type: "USAGE" | "FINANCIAL" | "USER" | "CONTENT" | "SYSTEM",
-    limit: number
-  ): Promise<ReportRow[]> {
+  /**
+   * Preview a report type as paginated table data (no saved report needed)
+   */
+  async previewReport(params: {
+    type: ReportType;
+    page: number;
+    limit: number;
+    search?: string;
+  }): Promise<{
+    columns: ReportColumn[];
+    rows: ReportRow[];
+    meta: { page: number; limit: number; total: number; totalPage: number };
+  }> {
+    const skip = (params.page - 1) * params.limit;
+    const [total, rows] = await Promise.all([
+      this.countReportRows(params.type, params.search),
+      this.fetchReportRows(params.type, {
+        limit: params.limit,
+        skip,
+        search: params.search,
+      }),
+    ]);
+
+    return {
+      columns: REPORT_COLUMNS[params.type],
+      rows,
+      meta: {
+        page: params.page,
+        limit: params.limit,
+        total,
+        totalPage: Math.max(1, Math.ceil(total / params.limit)),
+      },
+    };
+  },
+
+  /**
+   * One-off export of a report type (no saved report required)
+   */
+  async exportReport(params: {
+    type: ReportType;
+    format: "CSV" | "JSON";
+  }): Promise<{
+    filename: string;
+    mimeType: string;
+    content: string;
+    size: number;
+  }> {
+    const rows = await this.fetchReportRows(params.type, { limit: MAX_ROWS });
+    const filename = `scholar-flow-${params.type.toLowerCase()}-${
+      new Date().toISOString().split("T")[0]
+    }.${params.format.toLowerCase()}`;
+    const mimeType =
+      params.format === "JSON" ? "application/json" : "text/csv";
+    const content =
+      params.format === "JSON"
+        ? JSON.stringify(rows, null, 2)
+        : buildCsv(rows, REPORT_COLUMNS[params.type]);
+
+    return { filename, mimeType, content, size: content.length };
+  },
+
+  async countReportRows(type: ReportType, search?: string): Promise<number> {
     switch (type) {
       case "USER": {
+        const where: Prisma.UserWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { name: insensitive(search) },
+            { email: insensitive(search) },
+          ];
+        }
+        return prisma.user.count({ where });
+      }
+      case "FINANCIAL": {
+        const where: Prisma.PaymentWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { transactionId: insensitive(search) },
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
+        return prisma.payment.count({ where });
+      }
+      case "CONTENT": {
+        const where: Prisma.PaperWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { title: insensitive(search) },
+            { uploader: { email: insensitive(search) } },
+            { uploader: { name: insensitive(search) } },
+          ];
+        }
+        return prisma.paper.count({ where });
+      }
+      case "USAGE": {
+        const where: Prisma.UsageEventWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { kind: insensitive(search) },
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
+        return prisma.usageEvent.count({ where });
+      }
+      case "SYSTEM": {
+        const where: Prisma.SessionWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
+        return prisma.session.count({ where });
+      }
+      default:
+        return 0;
+    }
+  },
+
+  async fetchReportRows(
+    type: ReportType,
+    options: ReportQueryOptions
+  ): Promise<ReportRow[]> {
+    const { limit, skip = 0, search } = options;
+
+    switch (type) {
+      case "USER": {
+        const where: Prisma.UserWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { name: insensitive(search) },
+            { email: insensitive(search) },
+          ];
+        }
         const users = await prisma.user.findMany({
-          where: { isDeleted: false },
+          where,
           take: limit,
+          skip,
           orderBy: { createdAt: "desc" },
           select: {
-            id: true,
             email: true,
             name: true,
             role: true,
@@ -287,99 +486,133 @@ export const reportService = {
           },
         });
         return users.map((u) => ({
-          id: u.id,
           email: u.email,
           name: u.name,
           role: u.role,
-          emailVerified: u.emailVerified ? "yes" : "no",
+          emailVerified: Boolean(u.emailVerified),
           createdAt: u.createdAt.toISOString(),
         }));
       }
       case "FINANCIAL": {
+        const where: Prisma.PaymentWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { transactionId: insensitive(search) },
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
         const payments = await prisma.payment.findMany({
-          where: { isDeleted: false },
+          where,
           take: limit,
+          skip,
           orderBy: { createdAt: "desc" },
           select: {
-            id: true,
-            userId: true,
             amountCents: true,
             currency: true,
             status: true,
             createdAt: true,
             provider: true,
+            transactionId: true,
+            user: { select: { name: true, email: true } },
           },
         });
         return payments.map((p) => ({
-          id: p.id,
-          userId: p.userId,
+          userName: p.user?.name ?? "",
+          userEmail: p.user?.email ?? "",
           amount: (p.amountCents / 100).toFixed(2),
           currency: p.currency,
           status: p.status,
           provider: p.provider,
+          transactionId: p.transactionId,
           createdAt: p.createdAt.toISOString(),
         }));
       }
       case "CONTENT": {
+        const where: Prisma.PaperWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { title: insensitive(search) },
+            { uploader: { email: insensitive(search) } },
+            { uploader: { name: insensitive(search) } },
+          ];
+        }
         const papers = await prisma.paper.findMany({
-          where: { isDeleted: false },
+          where,
           take: limit,
+          skip,
           orderBy: { createdAt: "desc" },
           select: {
-            id: true,
             title: true,
-            uploaderId: true,
             processingStatus: true,
             citationCount: true,
             createdAt: true,
+            uploader: { select: { name: true, email: true } },
           },
         });
         return papers.map((p) => ({
-          id: p.id,
           title: p.title,
-          uploaderId: p.uploaderId,
+          uploaderName: p.uploader?.name ?? "",
+          uploaderEmail: p.uploader?.email ?? "",
           processingStatus: p.processingStatus,
           citationCount: p.citationCount,
           createdAt: p.createdAt.toISOString(),
         }));
       }
       case "USAGE": {
+        const where: Prisma.UsageEventWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { kind: insensitive(search) },
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
         const events = await prisma.usageEvent.findMany({
-          where: { isDeleted: false },
+          where,
           take: limit,
+          skip,
           orderBy: { createdAt: "desc" },
           select: {
-            id: true,
-            userId: true,
             kind: true,
             units: true,
             createdAt: true,
+            user: { select: { name: true, email: true } },
           },
         });
         return events.map((e) => ({
-          id: e.id,
-          userId: e.userId,
+          userName: e.user?.name ?? "",
+          userEmail: e.user?.email ?? "",
           kind: e.kind,
           units: e.units,
           createdAt: e.createdAt.toISOString(),
         }));
       }
       case "SYSTEM": {
+        const where: Prisma.SessionWhereInput = { isDeleted: false };
+        if (search) {
+          where.OR = [
+            { user: { email: insensitive(search) } },
+            { user: { name: insensitive(search) } },
+          ];
+        }
         const sessions = await prisma.session.findMany({
-          where: { isDeleted: false },
+          where,
           take: limit,
+          skip,
           orderBy: { createdAt: "desc" },
           select: {
-            id: true,
-            userId: true,
             sessionToken: true,
             expires: true,
+            createdAt: true,
+            user: { select: { name: true, email: true } },
           },
         });
         return sessions.map((s) => ({
-          id: s.id,
-          userId: s.userId,
-          expiresAt: s.expires.toISOString(),
+          userName: s.user?.name ?? "",
+          userEmail: s.user?.email ?? "",
+          expires: s.expires.toISOString(),
+          createdAt: s.createdAt.toISOString(),
           // Truncated session token, not the raw token
           tokenPrefix: s.sessionToken.slice(0, 12) + "...",
         }));
