@@ -9,13 +9,25 @@ interface Props {
 
 async function getPublishedPaper(id: string) {
   try {
+    // no-store: a transient API failure (429/5xx) must never be cached as a
+    // "paper not found" result — published papers always render fresh.
     const res = await fetch(`${apiUrl}/public/editor/${id}`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error(
+          `[public-view] ${id}: API responded ${res.status}`
+        );
+      }
+      return null;
+    }
     const json = await res.json();
     return json.data || json;
-  } catch {
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error(`[public-view] ${id}: fetch failed`, error);
+    }
     return null;
   }
 }

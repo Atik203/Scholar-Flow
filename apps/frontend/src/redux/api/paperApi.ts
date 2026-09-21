@@ -246,6 +246,9 @@ export interface EditorPaper {
   citationCount?: number;
   createdAt: string;
   updatedAt: string;
+  accessType?: "owned" | "workspace" | "shared";
+  sharedPermission?: "view" | "edit" | null;
+  sharedByName?: string | null;
 }
 
 export interface ProcessingStatusResponse {
