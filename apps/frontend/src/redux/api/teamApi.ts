@@ -166,10 +166,21 @@ export const teamApi = apiSlice.injectEndpoints({
     // Access (derived: lead+ OR active workspace collaboration)
     // -------------------------------------------------------------------------
     getTeamAccess: builder.query<
-      { hasAccess: boolean; isTeamLead: boolean },
+      {
+        hasAccess: boolean;
+        isTeamLead: boolean;
+        hasPendingInvitation: boolean;
+      },
       void
     >({
       query: () => "/team/access",
+      transformResponse: (r: {
+        data: {
+          hasAccess: boolean;
+          isTeamLead: boolean;
+          hasPendingInvitation: boolean;
+        };
+      }) => r.data,
       providesTags: [{ type: "Team", id: "ACCESS" }],
     }),
 
