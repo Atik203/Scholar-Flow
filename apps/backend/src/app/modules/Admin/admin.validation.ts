@@ -29,8 +29,19 @@ export const updateUserRoleSchema = z.object({
   role: z.enum(["RESEARCHER", "PRO_RESEARCHER", "TEAM_LEAD", "ADMIN"]),
 });
 
+// Plan codes are the stable tier key: checkout derives the plan tier and
+// webhooks derive the granted role from the prefix before the underscore.
+const planCodeSchema = z
+  .string()
+  .min(1)
+  .max(50)
+  .regex(
+    /^(pro|team|enterprise)_(monthly|annual)$/,
+    "Plan code must be {tier}_{interval} — tier: pro|team|enterprise, interval: monthly|annual"
+  );
+
 export const createPlanSchema = z.object({
-  code: z.string().min(1).max(50),
+  code: planCodeSchema,
   name: z.string().min(1).max(100),
   priceCents: z.number().int().min(0),
   currency: z.string().length(3).default("USD"),
@@ -40,7 +51,7 @@ export const createPlanSchema = z.object({
 });
 
 export const updatePlanSchema = z.object({
-  code: z.string().min(1).max(50).optional(),
+  code: planCodeSchema.optional(),
   name: z.string().min(1).max(100).optional(),
   priceCents: z.number().int().min(0).optional(),
   currency: z.string().length(3).optional(),
