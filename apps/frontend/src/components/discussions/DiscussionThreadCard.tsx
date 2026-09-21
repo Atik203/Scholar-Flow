@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import type { DiscussionThread } from "@/redux/api/discussionApi";
 import {
   useTogglePinMutation,
@@ -106,14 +108,13 @@ export function DiscussionThreadCard({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this discussion? This action cannot be undone.')) {
-      return;
-    }
+  const [showDelete, setShowDelete] = useState(false);
 
+  const handleDelete = async () => {
     try {
       await deleteThread(thread.id).unwrap();
       showSuccessToast('Discussion deleted successfully');
+      setShowDelete(false);
       onThreadDelete?.();
     } catch (error: unknown) {
       showErrorToast('Failed to delete discussion. Please try again.');
@@ -172,7 +173,7 @@ export function DiscussionThreadCard({
                   <Pin className="h-4 w-4 mr-2" />
                   {thread.isPinned ? 'Unpin' : 'Pin'} Discussion
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDelete} disabled={isUpdating} className="text-destructive">
+                <DropdownMenuItem onClick={() => setShowDelete(true)} disabled={isUpdating} className="text-destructive">
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete
                 </DropdownMenuItem>
@@ -242,6 +243,16 @@ export function DiscussionThreadCard({
           </div>
         )}
       </CardContent>
+
+      <ConfirmDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title="Delete discussion"
+        description="This discussion and all of its replies will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete discussion"
+        destructive
+        onConfirm={handleDelete}
+      />
     </Card>
   );
 }
