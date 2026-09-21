@@ -1,10 +1,23 @@
 import cors from "cors";
 import express from "express";
+import fs from "node:fs";
 import http from "http";
+import path from "node:path";
 import jwt from "jsonwebtoken";
 import { Server, Socket } from "socket.io";
 
+// Load apps/socket-server/.env for local development. Node's built-in loader
+// keeps the deployment dependency-free; real environment variables (Render)
+// take precedence over the file, so this is a no-op there.
+const envFile = path.resolve(__dirname, "..", ".env");
+if (fs.existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+}
+
 const PORT = parseInt(process.env.PORT || "5001", 10);
+// Access tokens are signed by the backend with NEXTAUTH_SECRET (see
+// apps/backend/src/app/middleware/auth.ts). JWT_SECRET is a different key and
+// must never be used to verify these tokens.
 const JWT_SECRET = process.env.NEXTAUTH_SECRET;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
