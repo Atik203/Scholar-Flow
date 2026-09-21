@@ -16,6 +16,7 @@ import {
   Save,
   Send,
   Share2,
+  UserPlus,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -153,6 +154,9 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
   );
 
   const paper = paperResponse?.data;
+  const isInvited = paper?.accessType === "shared";
+  const isReadOnly = isInvited && paper?.sharedPermission === "view";
+  const readOnlyRef = useRef(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -214,6 +218,8 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     ],
     content: "",
     onUpdate: () => {
+      // View-only invited papers must never mark content dirty or autosave.
+      if (readOnlyRef.current) return;
       // Dirty tracking lives in refs so the debounced callback never
       // reads a stale `hasUnsavedChanges` closure (the old code could
       // skip the first autosave entirely).
@@ -239,6 +245,16 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     autosaveMsRef.current = editorSettings.autosaveIntervalMs;
   }, [editorSettings]);
 
+  // View-only invited papers render read-only (no editing, no autosave).
+  useEffect(() => {
+    readOnlyRef.current = isReadOnly;
+    if (editor) editor.setEditable(!isReadOnly);
+    if (isReadOnly) {
+      dirtyRef.current = false;
+      setHasUnsavedChanges(false);
+    }
+  }, [editor, isReadOnly]);
+
   useEffect(() => {
     const handler = (event: Event) => {
       const detail = (event as CustomEvent<EditorSettings>).detail;
@@ -256,7 +272,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       // Flush any pending edits on unmount so navigation never loses up to
       // 2s of typing (state updates are skipped — component is gone).
-      if (dirtyRef.current && editorRef.current) {
+      if (!readOnlyRef.current && dirtyRef.current && editorRef.current) {
         void autoSaveEditorContent({
           id: paperId,
           content: editorRef.current.getHTML(),
@@ -280,7 +296,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
 
   // Auto-save: PATCH /autosave — persists content WITHOUT a version snapshot
   const handleAutoSave = useCallback(async () => {
-    if (!editor || !dirtyRef.current || savingRef.current) return;
+    if (isReadOnly || !editor || !dirtyRef.current || savingRef.current) return;
     savingRef.current = true;
     try {
       const content = editor.getHTML();
@@ -304,12 +320,12 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     } finally {
       savingRef.current = false;
     }
-  }, [editor, paperId, autoSaveEditorContent]);
+  }, [editor, paperId, autoSaveEditorContent, isReadOnly]);
 
   // Manual save: PUT /content — creates a version snapshot (Ctrl+S / button)
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleSave = useCallback(async () => {
-    if (!editor) return;
+    if (isReadOnly || !editor) return;
     savingRef.current = true;
     try {
       const content = editor.getHTML();
@@ -331,7 +347,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
     } finally {
       savingRef.current = false;
     }
-  }, [editor, paperId, title, updateContent, paper?.isDraft]);
+  }, [editor, paperId, title, updateContent, paper?.isDraft, isReadOnly]);
 
   // Track initialization to avoid repeated setContent that can reset alignment/selection
   const hasInitializedRef = useRef(false);
@@ -545,6 +561,7 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
           <input
             type="text"
             value={title}
+            readOnly={isReadOnly}
             onChange={(e) => {
               setTitle(e.target.value);
               setHasUnsavedChanges(true);
@@ -552,10 +569,24 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
             className="text-2xl font-bold bg-transparent border-none outline-none focus:bg-background focus:border focus:border-border focus:rounded px-2 py-1 w-full max-w-2xl"
             placeholder="Untitled Paper"
           />
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             <Badge variant={paper.isDraft ? "secondary" : "default"}>
               {paper.isDraft ? "Draft" : "Published"}
             </Badge>
+            {isInvited && (
+              <Badge
+                variant="outline"
+                className="border-primary/40 text-primary bg-primary/5"
+              >
+                <UserPlus className="h-3 w-3 mr-1" />
+                Invited
+              </Badge>
+            )}
+            {isReadOnly && (
+              <Badge variant="outline" className="text-muted-foreground">
+                View only
+              </Badge>
+            )}
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
               {lastSaved
@@ -569,17 +600,19 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !hasUnsavedChanges}
-            variant="outline"
-            size="sm"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
+          {!isReadOnly && (
+            <Button
+              onClick={handleSave}
+              disabled={isSaving || !hasUnsavedChanges}
+              variant="outline"
+              size="sm"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          )}
 
-          {paper.isDraft && (
+          {!isInvited && paper.isDraft && (
             <Button onClick={handlePublish} size="sm">
               <Send className="h-4 w-4 mr-2" />
               Publish
@@ -629,14 +662,16 @@ export function ScholarFlowEditor({ paperId, onBack }: ScholarFlowEditorProps) {
             </Link>
           </Button>
 
-          <Button
-            onClick={() => setIsShareModalOpen(true)}
-            variant="outline"
-            size="sm"
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
+          {!isInvited && (
+            <Button
+              onClick={() => setIsShareModalOpen(true)}
+              variant="outline"
+              size="sm"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          )}
 
           <Button
             onClick={() => setIsFullscreen((f) => !f)}
