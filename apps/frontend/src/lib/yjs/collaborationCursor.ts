@@ -2,11 +2,7 @@
 
 import { Extension } from "@tiptap/core";
 import type { DecorationAttrs } from "@tiptap/pm/view";
-import {
-  defaultCursorBuilder,
-  defaultSelectionBuilder,
-  yCursorPlugin,
-} from "@tiptap/y-tiptap";
+import { defaultSelectionBuilder, yCursorPlugin } from "@tiptap/y-tiptap";
 import type { Awareness } from "y-protocols/awareness";
 
 /**
@@ -19,6 +15,20 @@ import type { Awareness } from "y-protocols/awareness";
  * undefined and crashes. This extension uses the same `@tiptap/y-tiptap`
  * plugin so the binding is found.
  */
+
+const renderCursor = (user: Record<string, unknown>): HTMLElement => {
+  const cursor = document.createElement("span");
+  cursor.classList.add("collaboration-cursor__caret");
+  cursor.setAttribute("style", `border-color: ${user.color}`);
+
+  const label = document.createElement("div");
+  label.classList.add("collaboration-cursor__label");
+  label.setAttribute("style", `background-color: ${user.color}`);
+  label.insertBefore(document.createTextNode(String(user.name ?? "")), null);
+  cursor.insertBefore(label, null);
+
+  return cursor;
+};
 
 export interface CollaborationCursorOptions {
   provider: { awareness: Awareness } | null;
@@ -35,7 +45,7 @@ export const CollaborationCursor = Extension.create<CollaborationCursorOptions>(
       return {
         provider: null,
         user: { name: null, color: null },
-        render: defaultCursorBuilder,
+        render: renderCursor,
         selectionRender: defaultSelectionBuilder,
       };
     },
