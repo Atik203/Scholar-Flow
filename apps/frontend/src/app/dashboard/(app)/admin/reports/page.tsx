@@ -91,6 +91,25 @@ const STATUS_OPTIONS: Array<{ value: AdminReportStatus | "all"; label: string }>
   { value: "FAILED", label: "Failed" },
 ];
 
+const formatSchedule = (schedule: string): string => {
+  switch (schedule) {
+    case "0 9 * * *":
+      return "Daily at 09:00";
+    case "0 9 * * 1":
+      return "Weekly · Monday 09:00";
+    case "0 9 1 * *":
+      return "Monthly · 1st at 09:00";
+    default:
+      return schedule;
+  }
+};
+
+const formatRecipients = (recipients: string[]): string => {
+  if (recipients.length === 0) return "none";
+  if (recipients.length <= 2) return recipients.join(", ");
+  return `${recipients.slice(0, 2).join(", ")} +${recipients.length - 2}`;
+};
+
 export default function AdminReportsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<AdminReportType | "all">("all");
@@ -400,11 +419,32 @@ export default function AdminReportsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{r.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {r.type} · {r.format} ·{" "}
+                      {TYPE_LABELS[r.type]} · {r.format} ·{" "}
                       {r.generatedAt
-                        ? new Date(r.generatedAt).toLocaleString()
+                        ? `Generated ${new Date(r.generatedAt).toLocaleString()}`
                         : "Not generated"}
                       {r.fileSize ? ` · ${r.fileSize}` : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+                      <span>
+                        {r.schedule
+                          ? `Schedule: ${formatSchedule(r.schedule)}`
+                          : "Manual"}
+                      </span>
+                      {r.nextRunAt && (
+                        <span>
+                          Next run: {new Date(r.nextRunAt).toLocaleString()}
+                        </span>
+                      )}
+                      <span title={r.recipients.join(", ")}>
+                        Recipients: {formatRecipients(r.recipients)}
+                      </span>
+                      {r.createdBy && (
+                        <span>
+                          Created by:{" "}
+                          {r.createdBy.name ?? r.createdBy.email}
+                        </span>
+                      )}
                     </p>
                   </div>
                   <span
@@ -538,102 +578,30 @@ export default function AdminReportsPage() {
       </Dialog>
 
       {showCreate && (
-        <CreateReportDialog
+        <ReportFormDialog
+          open={showCreate}
           onClose={() => setShowCreate(false)}
-          onCreate={async (payload) => {
+          mode="create"
+          isLoading={isCreating}
+          onSubmit={async (values) => {
             try {
-              await createReport(payload).unwrap();
+              await createReport({
+                name: values.name,
+                description: values.description,
+                type: values.type,
+                format: values.format,
+                schedule: values.schedule,
+                recipients: values.recipients,
+                enabled: values.enabled,
+              }).unwrap();
               showSuccessToast("Created", "Report created successfully");
               setShowCreate(false);
-              refetch();
             } catch {
               showErrorToast("Failed", "Could not create report");
             }
           }}
-          isLoading={isCreating}
         />
       )}
-    </div>
-  );
-}
-
-function CreateReportDialog({
-  onClose,
-  onCreate,
-  isLoading,
-}: {
-  onClose: () => void;
-  onCreate: (payload: {
-    name: string;
-    type: AdminReportType;
-    format: AdminReportFormat;
-  }) => void;
-  isLoading: boolean;
-}) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState<AdminReportType>("USAGE");
-  const [format, setFormat] = useState<AdminReportFormat>("CSV");
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card rounded-xl shadow-xl p-6 max-w-md w-full"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-xl font-bold mb-4">Create report</h2>
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm font-medium">Name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Monthly User Activity"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Type</label>
-            <Select value={type} onValueChange={(v) => setType(v as AdminReportType)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TYPE_OPTIONS.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Format</label>
-            <Select value={format} onValueChange={(v) => setFormat(v as AdminReportFormat)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="CSV">CSV</SelectItem>
-                <SelectItem value="JSON">JSON</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
-            Cancel
-          </Button>
-          <Button
-            disabled={!name || isLoading}
-            onClick={() => onCreate({ name, type, format })}
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            {isLoading ? "Creating..." : "Create"}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }
