@@ -3,6 +3,7 @@
  */
 
 import { apiSlice } from "./apiSlice";
+import type { RootState } from "@/redux/store";
 
 export type AdminReportType = "USAGE" | "FINANCIAL" | "USER" | "CONTENT" | "SYSTEM";
 export type AdminReportStatus = "READY" | "GENERATING" | "SCHEDULED" | "FAILED";
@@ -180,6 +181,29 @@ export const adminReportsApi = apiSlice
           url: `/admin/reports/${id}`,
           method: "DELETE",
         }),
+        // Remove the row from every cached list instantly; roll back on error
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          const entries = adminReportsApi.util.selectInvalidatedBy(
+            getState() as RootState,
+            [{ type: "AdminReport", id: "LIST" }]
+          );
+          const patches = entries.map(({ originalArgs }) =>
+            dispatch(
+              adminReportsApi.util.updateQueryData(
+                "listReports",
+                originalArgs,
+                (draft) => {
+                  draft.data = draft.data.filter((report) => report.id !== id);
+                }
+              )
+            )
+          );
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: [
           { type: "AdminReport", id: "LIST" },
           { type: "AdminReport", id: "STATS" },
