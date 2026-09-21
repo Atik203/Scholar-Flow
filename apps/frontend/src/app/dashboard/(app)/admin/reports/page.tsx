@@ -133,6 +133,16 @@ export default function AdminReportsPage() {
     }
   };
 
+  /**
+   * Jump to the live data table for a report's type
+   */
+  const handleViewData = (type: AdminReportType) => {
+    setActiveTab(type);
+    document
+      .getElementById("live-data")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="space-y-6 pb-12">
       <PageHeader
@@ -289,6 +299,16 @@ export default function AdminReportsPage() {
                   >
                     {r.status}
                   </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleViewData(r.type)}
+                    className="gap-1"
+                    aria-label={`View ${r.type} data for ${r.name}`}
+                  >
+                    <Table2 className="h-3 w-3" />
+                    View data
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
