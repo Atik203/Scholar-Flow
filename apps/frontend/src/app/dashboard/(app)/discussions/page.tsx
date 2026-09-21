@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import { useListMyDiscussionsQuery, useTogglePinMutation, useToggleResolveMutation, useDeleteDiscussionMutation } from "@/redux/api/discussionApi";
 import { useAppSelector } from "@/redux/hooks";
 import { selectAccessToken } from "@/redux/auth/authSlice";
@@ -42,6 +43,7 @@ export default function DiscussionsPage() {
   const [pinnedFilter, setPinnedFilter] = useState<"" | "pinned" | "unpinned">("");
   const [tagFilter, setTagFilter] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   const { data, isLoading, isFetching, refetch } = useListMyDiscussionsQuery(
     {
@@ -86,11 +88,15 @@ export default function DiscussionsPage() {
       showSuccessToast("Updated");
     } catch (e: any) { showErrorToast(e?.data?.message || "Failed"); }
   };
-  const onDelete = async (id: string) => {
-    if (!confirm("Delete this discussion? This cannot be undone.")) return;
+  const onDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
     try {
-      await deleteThread(id).unwrap();
+      await deleteThread(deleteTargetId).unwrap();
       showSuccessToast("Deleted");
+      setDeleteTargetId(null);
       refetch();
     } catch (e: any) { showErrorToast(e?.data?.message || "Failed"); }
   };
@@ -263,6 +269,16 @@ export default function DiscussionsPage() {
           </div>
         </div>
       </motion.div>
+
+      <ConfirmDialog
+        open={Boolean(deleteTargetId)}
+        onOpenChange={(open) => !open && setDeleteTargetId(null)}
+        title="Delete discussion"
+        description="This discussion and all of its replies will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete discussion"
+        destructive
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
