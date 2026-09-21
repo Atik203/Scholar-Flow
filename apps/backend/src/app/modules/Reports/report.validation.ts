@@ -50,3 +50,23 @@ export const updateReportSchema = z.object({
 export const reportIdSchema = z.object({
   id: z.string().uuid("Invalid report ID"),
 });
+
+const reportTypeEnum = z.enum([
+  "USAGE",
+  "FINANCIAL",
+  "USER",
+  "CONTENT",
+  "SYSTEM",
+]);
+
+export const previewReportsQuerySchema = z.object({
+  type: reportTypeEnum,
+  page: z.string().optional().transform((v) => toPositiveInt(v, 1)),
+  limit: z.string().optional().transform((v) => toBoundedInt(v, 25, 100)),
+  search: z.string().max(200).optional(),
+});
+
+export const exportReportQuerySchema = z.object({
+  type: reportTypeEnum,
+  format: z.enum(["CSV", "JSON"]).default("CSV"),
+});
