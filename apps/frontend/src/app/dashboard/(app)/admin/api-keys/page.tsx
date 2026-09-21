@@ -126,7 +126,7 @@ export default function AdminApiKeysPage() {
   const [revealedKeys, setRevealedKeys] = useState<Record<string, string>>({});
   const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set());
 
-  const keys = data?.data ?? [];
+  const keys = useMemo(() => data?.data ?? [], [data]);
 
   const filteredKeys = useMemo(() => {
     const query = search.trim().toLowerCase();
