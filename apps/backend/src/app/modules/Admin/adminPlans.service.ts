@@ -8,6 +8,7 @@
  */
 
 import prisma from "../../shared/prisma";
+import config from "../../config";
 import ApiError from "../../errors/ApiError";
 import stripe, { isStripeError, logStripeError } from "../../shared/stripe";
 
@@ -359,8 +360,9 @@ export const adminPlansService = {
   },
 
   /**
-   * Link a plan to Stripe: verify the stored price or provision a fresh
-   * product + price when the ID is missing or stale (placeholder).
+   * Link a plan to Stripe: verify the stored price, relink to the configured
+   * STRIPE_PRICE_* ID when available, or provision a fresh product + price
+   * when the ID is missing or stale (placeholder).
    */
   async syncPlanToStripe(id: string) {
     const plan = await prisma.plan.findFirst({
@@ -382,7 +384,41 @@ export const adminPlansService = {
             `Stripe price lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`
           );
         }
-        // Placeholder/stale — provision below
+        // Placeholder/stale — try the configured env price next
+      }
+    }
+
+    // Prefer the env-configured price for {tier}_{interval} codes so we reuse
+    // the original Stripe products instead of creating duplicates.
+    const [tier, interval] = plan.code.split("_");
+    const tierPrices = (
+      config.stripe.prices as Record<
+        string,
+        { monthly?: string; annual?: string } | undefined
+      >
+    )[tier];
+    const configuredPriceId =
+      interval === "annual" ? tierPrices?.annual : tierPrices?.monthly;
+
+    if (configuredPriceId) {
+      try {
+        const price = await stripe.prices.retrieve(configuredPriceId);
+        const updated = await prisma.plan.update({
+          where: { id },
+          data: { stripePriceId: price.id },
+        });
+        return { plan: updated, stripePriceId: price.id, created: false };
+      } catch (error) {
+        if (!isMissingStripeResource(error)) {
+          if (isStripeError(error)) {
+            logStripeError(error, "plan sync: retrieve configured price");
+          }
+          throw new ApiError(
+            400,
+            `Configured Stripe price lookup failed: ${error instanceof Error ? error.message : "Unknown error"}`
+          );
+        }
+        // Configured ID is stale too — provision a fresh price below
       }
     }
 
