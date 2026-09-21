@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/customUI/PageHeader";
 import { useListPaymentsQuery, useRefundPaymentMutation } from "@/redux/api/adminExtendedApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 
 const STATUS_COLOR: Record<string, string> = {
   SUCCEEDED: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
@@ -29,6 +30,10 @@ export default function AdminPaymentsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [refundTarget, setRefundTarget] = useState<{
+    id: string;
+    label: string;
+  } | null>(null);
   const [refundingId, setRefundingId] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -54,12 +59,14 @@ export default function AdminPaymentsPage() {
   const total = data?.meta?.total ?? 0;
   const totalPages = data?.meta?.totalPage ?? 1;
 
-  const handleRefund = async (paymentId: string) => {
-    if (!confirm("Refund this payment through Stripe?")) return;
+  const handleRefund = async () => {
+    if (!refundTarget) return;
+    const paymentId = refundTarget.id;
     setRefundingId(paymentId);
     try {
       await refund(paymentId).unwrap();
       showSuccessToast("Refunded", "Payment refunded");
+      setRefundTarget(null);
       // RTK invalidates PAYMENTS (and revenue) tags — no manual refetch needed
     } catch {
       showErrorToast("Failed", "Could not refund payment");
@@ -174,7 +181,12 @@ export default function AdminPaymentsPage() {
                             variant="outline"
                             className="gap-1"
                             disabled={refundingId === p.id}
-                            onClick={() => handleRefund(p.id)}
+                            onClick={() =>
+                              setRefundTarget({
+                                id: p.id,
+                                label: `${p.user.name ?? p.user.email} · ${formatAmount(p.amountCents, p.currency)}`,
+                              })
+                            }
                           >
                             {refundingId === p.id ? (
                               <RefreshCw className="h-3 w-3 animate-spin" />
@@ -215,6 +227,21 @@ export default function AdminPaymentsPage() {
           </Button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(refundTarget)}
+        onOpenChange={(open) => !open && setRefundTarget(null)}
+        title="Refund payment"
+        description={
+          refundTarget
+            ? `${refundTarget.label} will be refunded through Stripe. This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Refund via Stripe"
+        destructive
+        isLoading={refundingId === refundTarget?.id}
+        onConfirm={handleRefund}
+      />
     </div>
   );
 }
