@@ -4,6 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
+import {
+  Awareness,
+  applyAwarenessUpdate,
+  encodeAwarenessUpdate,
+  removeAwarenessStates,
+} from "y-protocols/awareness";
 import { getAppStore } from "@/redux/storeAccess";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:5001";
@@ -41,107 +47,15 @@ interface UseCollabSyncOptions {
 interface UseCollabSyncResult {
   ydoc: Y.Doc;
   provider: Socket | null;
-  awareness: AwarenessBridge | null;
+  awareness: Awareness;
   /** True once any peer update or sync response has been received. */
   hasRemoteState: boolean;
 }
 
-class AwarenessBridge {
-  private states = new Map<number, any>();
-  private listeners: Array<{ event: string; cb: (...args: any[]) => void }> = [];
-  private localState: any = { cursor: null, user: { name: getUserName(), color: "#666" } };
-  private clientId: number;
-  private socket: Socket | null = null;
-  private room: string = "";
-
-  constructor(ydoc: Y.Doc) {
-    this.clientId = ydoc.clientID;
-  }
-
-  setSocket(socket: Socket) {
-    this.socket = socket;
-  }
-
-  setRoom(room: string) {
-    this.room = room;
-  }
-
-  getStates(): Map<number, any> {
-    return this.states;
-  }
-
-  setLocalState(state: any) {
-    this.localState = { ...this.localState, ...state };
-    this.states.set(this.clientId, this.localState);
-    this.emit("change", [{ added: [], updated: [this.clientId], removed: [] }]);
-    this.broadcast();
-  }
-
-  setLocalStateField(field: string, value: any) {
-    this.setLocalState({ [field]: value });
-  }
-
-  getLocalState() {
-    return this.localState;
-  }
-
-  applyRemoteState(clientId: number, state: any) {
-    if (clientId === this.clientId) return;
-    const prev = this.states.get(clientId);
-    this.states.set(clientId, state);
-    const updated = prev ? [clientId] : [];
-    const added = prev ? [] : [clientId];
-    this.emit("change", [{ added, updated, removed: [] }]);
-  }
-
-  removeClient(clientId: number) {
-    this.states.delete(clientId);
-    this.emit("change", [{ added: [], updated: [], removed: [clientId] }]);
-  }
-
-  removeByUserId(userId: string) {
-    for (const [clientId, state] of Array.from(this.states.entries())) {
-      if (state?.userId === userId) {
-        this.states.delete(clientId);
-        this.emit("change", [{ added: [], updated: [], removed: [clientId] }]);
-      }
-    }
-  }
-
-  private broadcast() {
-    if (!this.socket?.connected) return;
-    this.socket.emit("editor:awareness", {
-      room: this.room,
-      // clientId + userId let peers key cursors correctly and clean up
-      // disconnected users without relying on socket ids.
-      state: {
-        ...this.localState,
-        clientId: this.clientId,
-        userId: getUserId(),
-      },
-    });
-  }
-
-  private emit(event: string, args: any[]) {
-    this.listeners
-      .filter((l) => l.event === event)
-      .forEach((l) => l.cb(...args));
-  }
-
-  on(event: string, cb: (...args: any[]) => void) {
-    this.listeners.push({ event, cb });
-  }
-
-  off(event: string, cb: (...args: any[]) => void) {
-    this.listeners = this.listeners.filter(
-      (l) => !(l.event === event && l.cb === cb)
-    );
-  }
-
-  destroy() {
-    this.listeners = [];
-    this.states.clear();
-  }
+interface AwarenessChange {
+  added: number[];
+  updated: number[];
+  removed: number[];
 }
 
 // y-indexeddb document name for offline persistence
@@ -155,10 +69,10 @@ export function useCollabSync({
   enabled,
 }: UseCollabSyncOptions): UseCollabSyncResult {
   const ydocRef = useRef<Y.Doc>(new Y.Doc());
+  const [awareness] = useState(() => new Awareness(ydocRef.current));
   const socketRef = useRef<Socket | null>(null);
   const syncedRef = useRef(false);
   const pendingUpdatesRef = useRef<Uint8Array[]>([]);
-  const [awareness, setAwareness] = useState<AwarenessBridge | null>(null);
   const [hasRemoteState, setHasRemoteState] = useState(false);
 
   const saveSnapshot = useCallback(() => {
@@ -198,10 +112,13 @@ export function useCollabSync({
     if (!token) return;
 
     const ydoc = ydocRef.current;
-    const awarenessBridge = new AwarenessBridge(ydoc);
     syncedRef.current = false;
     setHasRemoteState(false);
-    setAwareness(awarenessBridge);
+
+    // Seed the local awareness entry. The cursor extension overwrites `user`
+    // with the configured display name/color once the editor mounts.
+    awareness.setLocalStateField("user", { name: getUserName(), color: "#666" });
+    awareness.setLocalStateField("userId", getUserId());
 
     const socket = io(SOCKET_URL, {
       auth: { token },
@@ -228,9 +145,6 @@ export function useCollabSync({
       Y.applyUpdate(ydoc, snapshot);
     }
 
-    awarenessBridge.setSocket(socket);
-    awarenessBridge.setRoom(room);
-
     socket.on("connect", () => {
       socket.emit("room:join", room);
       // Flush any offline queue
@@ -240,11 +154,29 @@ export function useCollabSync({
       if (syncedRef.current) {
         socket.emit("editor:sync-request", { room });
       }
+
+      // Re-announce presence so peers render our cursor after (re)connect
+      if (awareness.getLocalState()) {
+        socket.emit("editor:awareness", {
+          room,
+          state: Array.from(
+            encodeAwarenessUpdate(awareness, [awareness.clientID])
+          ),
+        });
+      }
     });
 
     socket.on("disconnect", () => {
       // Save snapshot for offline recovery
       saveSnapshot();
+
+      // Drop stale remote cursors; peers re-announce on reconnect
+      const remoteClientIds = Array.from(awareness.getStates().keys()).filter(
+        (clientId) => clientId !== awareness.clientID
+      );
+      if (remoteClientIds.length > 0) {
+        removeAwarenessStates(awareness, remoteClientIds, "disconnect");
+      }
     });
 
     socket.on("connect_error", (error: Error) => {
@@ -291,18 +223,43 @@ export function useCollabSync({
       });
     });
 
-    // Awareness relay — keyed by the sender's Yjs clientId
-    socket.on("editor:awareness", ({ state }: { state: any }) => {
-      const clientId =
-        typeof state?.clientId === "number" ? state.clientId : null;
-      if (clientId === null) return;
-      awarenessBridge.applyRemoteState(clientId, state);
+    // Awareness relay — y-protocols binary update carried in `state`
+    const awarenessUpdateHandler = (
+      change: AwarenessChange,
+      origin: unknown
+    ) => {
+      if (origin === "remote" || origin === "presence") return;
+      if (!socket.connected) return;
+
+      const changed = [...change.added, ...change.updated, ...change.removed];
+      if (changed.length === 0) return;
+
+      socket.emit("editor:awareness", {
+        room,
+        state: Array.from(encodeAwarenessUpdate(awareness, changed)),
+      });
+    };
+
+    socket.on("editor:awareness", ({ state }: { state: number[] }) => {
+      try {
+        applyAwarenessUpdate(awareness, new Uint8Array(state), "remote");
+      } catch {}
     });
 
     // Presence tracking for awareness cleanup
     socket.on("presence:left", ({ userId }: { userId: string }) => {
-      awarenessBridge.removeByUserId(userId);
+      const clientIds: number[] = [];
+      awareness.getStates().forEach((state, clientId) => {
+        if (clientId !== awareness.clientID && state?.userId === userId) {
+          clientIds.push(clientId);
+        }
+      });
+      if (clientIds.length > 0) {
+        removeAwarenessStates(awareness, clientIds, "presence");
+      }
     });
+
+    awareness.on("update", awarenessUpdateHandler);
 
     // Broadcast local Y.js updates to peers with offline queue
     const updateHandler = (update: Uint8Array, origin: any) => {
@@ -323,17 +280,24 @@ export function useCollabSync({
 
     return () => {
       ydoc.off("update", updateHandler);
+      awareness.off("update", awarenessUpdateHandler);
       socket.emit("room:leave", room);
-      awarenessBridge.destroy();
       if (indexeddbProvider) {
         indexeddbProvider.destroy();
       }
       socket.disconnect();
       socketRef.current = null;
       syncedRef.current = false;
-      setAwareness(null);
     };
-  }, [paperId, initialContent, enabled, saveSnapshot, restoreSnapshot, flushPending]);
+  }, [
+    paperId,
+    initialContent,
+    enabled,
+    awareness,
+    saveSnapshot,
+    restoreSnapshot,
+    flushPending,
+  ]);
 
   return {
     ydoc: ydocRef.current,
