@@ -7,6 +7,7 @@
 import { useState } from "react";
 import {
   AlertTriangle,
+  Copy,
   Crown,
   DollarSign,
   Link2,
@@ -225,6 +226,15 @@ export default function AdminPlansPage() {
     }
   };
 
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showSuccessToast("Copied", `${label} copied to clipboard`);
+    } catch {
+      showErrorToast("Copy failed", "Could not copy to clipboard");
+    }
+  };
+
   const handleToggle = async (p: AdminPlan) => {
     setBusyId(p.id);
     try {
@@ -285,6 +295,7 @@ export default function AdminPlansPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {plans.map((p) => {
             const visual = getPlanVisual(p.code);
+            const priceId = p.stripePriceId;
             return (
               <Card key={p.id} className="overflow-hidden">
                 <div className={`h-2 ${visual.accent}`} />
@@ -296,12 +307,34 @@ export default function AdminPlansPage() {
                         {p.name}
                       </CardTitle>
                       <CardDescription>
-                        <Badge variant="outline" className="mt-1">
-                          {p.code}
-                        </Badge>
-                        {p.stripePriceId && (
-                          <span className="ml-2 font-mono text-xs">
-                            {p.stripePriceId.slice(0, 12)}…
+                        <span className="inline-flex items-center gap-1 mt-1">
+                          <Badge variant="outline">{p.code}</Badge>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-5 w-5"
+                            onClick={() =>
+                              copyToClipboard(p.code, "Plan code")
+                            }
+                            aria-label={`Copy plan code ${p.code}`}
+                          >
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </span>
+                        {priceId && (
+                          <span className="ml-2 inline-flex items-center gap-1 font-mono text-xs">
+                            {priceId.slice(0, 12)}…
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-5 w-5"
+                              onClick={() =>
+                                copyToClipboard(priceId, "Stripe price ID")
+                              }
+                              aria-label={`Copy Stripe price ID for ${p.name}`}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
                           </span>
                         )}
                       </CardDescription>
