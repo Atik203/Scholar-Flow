@@ -4,6 +4,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +69,10 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
   const [deletePaper] = useDeletePaperMutation();
 
   const papers = papersResponse?.data || [];
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Refetch when filter changes and session is ready
   useEffect(() => {
@@ -77,12 +82,13 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
   }, [activeFilter, session, refetch]);
 
   // Delete paper
-  const handleDelete = async (paperId: string) => {
-    if (!confirm("Are you sure you want to delete this paper?")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      await deletePaper(paperId).unwrap();
+      await deletePaper(deleteTarget.id).unwrap();
       showSuccessToast("Paper deleted successfully");
+      setDeleteTarget(null);
       refetch(); // Refresh the list
     } catch (error: any) {
       console.error("Error deleting paper:", error);
@@ -209,7 +215,9 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-red-600"
-                        onClick={() => handleDelete(paper.id)}
+                        onClick={() =>
+                          setDeleteTarget({ id: paper.id, title: paper.title })
+                        }
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete
@@ -241,6 +249,20 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete paper"
+        description={
+          deleteTarget
+            ? `"${deleteTarget.title}" will be deleted permanently. This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete paper"
+        destructive
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
