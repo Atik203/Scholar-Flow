@@ -238,14 +238,16 @@ export function ReportFormDialog({
             )}
           </div>
 
-          <label className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-sm">
             <Checkbox
+              id="report-enabled"
               checked={enabled}
               onCheckedChange={(checked) => setEnabled(checked === true)}
-              aria-label="Enable report"
             />
-            Enabled (schedule can run)
-          </label>
+            <Label htmlFor="report-enabled" className="font-normal">
+              Enabled (schedule can run)
+            </Label>
+          </div>
         </div>
 
         <DialogFooter>
