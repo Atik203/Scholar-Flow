@@ -319,21 +319,17 @@ export default function OnboardingPage() {
                               }`}
                               onClick={() => setDemoStep(index)}
                             >
-                              <motion.div
-                                animate={{
-                                  backgroundColor:
-                                    index === demoStep ? "hsl(var(--primary))" : "transparent",
-                                }}
-                                className={`h-10 w-10 rounded-full border-2 flex items-center justify-center ${
+                              <div
+                                className={`h-10 w-10 rounded-full border-2 flex items-center justify-center transition-colors ${
                                   index === demoStep
-                                    ? "border-primary"
-                                    : "border-muted-foreground/30"
+                                    ? "border-primary bg-primary"
+                                    : "border-muted-foreground/30 bg-transparent"
                                 }`}
                               >
                                 <step.icon
                                   className={`h-5 w-5 ${index === demoStep ? "text-primary-foreground" : "text-muted-foreground"}`}
                                 />
-                              </motion.div>
+                              </div>
                             </div>
                           ))}
                         </div>
