@@ -75,6 +75,16 @@ export function useCollabSync({
   const pendingUpdatesRef = useRef<Uint8Array[]>([]);
   const [hasRemoteState, setHasRemoteState] = useState(false);
 
+  // Dev-only handle so collaboration state can be inspected from the console.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const debugWindow = window as unknown as { __collabAwareness?: Awareness };
+    debugWindow.__collabAwareness = awareness;
+    return () => {
+      delete debugWindow.__collabAwareness;
+    };
+  }, [awareness]);
+
   const saveSnapshot = useCallback(() => {
     const ydoc = ydocRef.current;
     const snapshot = Y.encodeStateAsUpdate(ydoc);
