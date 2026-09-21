@@ -1412,6 +1412,34 @@ const sanitizeOptions = {
 };
 
 // Editor-specific paper service functions
+type EditorPaperAccessRow = {
+  id: string;
+  title: string;
+  contentHtml: string | null;
+  isDraft: boolean;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  uploaderId: string;
+  accessType: "owned" | "workspace" | "shared";
+  sharedPermission: string | null;
+  sharedByName: string | null;
+};
+
+type EditorPaperListRow = {
+  id: string;
+  title: string;
+  abstract: string | null;
+  isDraft: boolean;
+  isPublished: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  workspaceId: string | null;
+  accessType: "owned" | "shared";
+  sharedPermission: string | null;
+  sharedByName: string | null;
+};
+
 export const editorPaperService = {
   // Create a new editor-based paper (draft by default)
   async createEditorPaper(input: CreateEditorPaperInput, uploaderId: string) {
@@ -1480,24 +1508,21 @@ export const editorPaperService = {
     return result[0]; // Return the first (and only) result
   },
 
-  // Get editor paper content
-  async getEditorPaperContent(paperId: string, userId: string) {
+  // Get editor paper content (uploader, workspace member, or invited via
+  // PaperShare). accessType lets the UI decide read-only vs editable.
+  async getEditorPaperContent(
+    paperId: string,
+    userId: string,
+    email?: string
+  ): Promise<EditorPaperAccessRow | null> {
     // First try: user is uploader (covers null workspaceId)
-    let result = await prisma.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        contentHtml: string | null;
-        isDraft: boolean;
-        isPublished: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        uploaderId: string;
-      }>
-    >`
+    let result = await prisma.$queryRaw<EditorPaperAccessRow[]>`
       SELECT 
         p.id, p.title, p."contentHtml", p."isDraft", p."isPublished",
-        p."createdAt", p."updatedAt", p."uploaderId"
+        p."createdAt", p."updatedAt", p."uploaderId",
+        'owned' AS "accessType",
+        NULL::text AS "sharedPermission",
+        NULL::text AS "sharedByName"
       FROM "Paper" p
       WHERE p.id = ${paperId}
         AND p."uploaderId" = ${userId}
@@ -1508,21 +1533,13 @@ export const editorPaperService = {
     if (result[0]) return result[0];
 
     // Second try: user is workspace member
-    result = await prisma.$queryRaw<
-      Array<{
-        id: string;
-        title: string;
-        contentHtml: string | null;
-        isDraft: boolean;
-        isPublished: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-        uploaderId: string;
-      }>
-    >`
+    result = await prisma.$queryRaw<EditorPaperAccessRow[]>`
       SELECT 
         p.id, p.title, p."contentHtml", p."isDraft", p."isPublished",
-        p."createdAt", p."updatedAt", p."uploaderId"
+        p."createdAt", p."updatedAt", p."uploaderId",
+        'workspace' AS "accessType",
+        NULL::text AS "sharedPermission",
+        NULL::text AS "sharedByName"
       FROM "Paper" p
       INNER JOIN "WorkspaceMember" wm ON wm."workspaceId" = p."workspaceId"
       WHERE p.id = ${paperId}
@@ -1531,8 +1548,31 @@ export const editorPaperService = {
         AND p.source = 'editor'
       LIMIT 1
     `;
+    if (result[0]) return result[0];
 
-    return result[0] || null;
+    // Third try: invited by email via an active PaperShare row
+    if (email) {
+      result = await prisma.$queryRaw<EditorPaperAccessRow[]>`
+        SELECT
+          p.id, p.title, p."contentHtml", p."isDraft", p."isPublished",
+          p."createdAt", p."updatedAt", p."uploaderId",
+          'shared' AS "accessType",
+          ps.permission AS "sharedPermission",
+          sharer.name AS "sharedByName"
+        FROM "Paper" p
+        INNER JOIN "PaperShare" ps
+          ON ps."paperId" = p.id AND ps."isDeleted" = false
+        LEFT JOIN "User" sharer ON sharer.id = ps."sharedById"
+        WHERE p.id = ${paperId}
+          AND ps.email = ${email}
+          AND p."isDeleted" = false
+          AND p.source = 'editor'
+        LIMIT 1
+      `;
+      if (result[0]) return result[0];
+    }
+
+    return null;
   },
 
   /**
@@ -1685,78 +1725,76 @@ export const editorPaperService = {
   // Get user's editor papers (drafts and published)
   async getUserEditorPapers(
     userId: string,
+    email?: string,
     isDraft?: boolean,
     limit: number = 10,
     offset: number = 0
   ) {
-    if (isDraft !== undefined) {
-      const [papers, countRows] = await Promise.all([
-        prisma.$queryRaw<
-          Array<{
-            id: string;
-            title: string;
-            abstract: string | null;
-            isDraft: boolean;
-            isPublished: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            workspaceId: string;
-          }>
-        >`
-          SELECT
-            p.id, p.title, p.abstract, p."isDraft", p."isPublished",
-            p."createdAt", p."updatedAt", p."workspaceId"
-          FROM "Paper" p
-          WHERE p."uploaderId" = ${userId}
-            AND p."isDeleted" = false
-            AND p.source = 'editor'
-            AND p."isDraft" = ${isDraft}
-          ORDER BY p."updatedAt" DESC
-          LIMIT ${limit} OFFSET ${offset}
-        `,
-        prisma.$queryRaw<Array<{ total: number }>>`
-          SELECT COUNT(*)::int AS total
-          FROM "Paper" p
-          WHERE p."uploaderId" = ${userId}
-            AND p."isDeleted" = false
-            AND p.source = 'editor'
-            AND p."isDraft" = ${isDraft}
-        `,
-      ]);
-      return { papers, total: countRows[0]?.total ?? 0 };
-    }
+    // NULL means "all drafts" — keeps owned + invited papers in one query.
+    const draftFilter = isDraft === undefined ? null : isDraft;
 
     const [papers, countRows] = await Promise.all([
-      prisma.$queryRaw<
-        Array<{
-          id: string;
-          title: string;
-          abstract: string | null;
-          isDraft: boolean;
-          isPublished: boolean;
-          createdAt: Date;
-          updatedAt: Date;
-          workspaceId: string;
-        }>
-      >`
-        SELECT
-          p.id, p.title, p.abstract, p."isDraft", p."isPublished",
-          p."createdAt", p."updatedAt", p."workspaceId"
-        FROM "Paper" p
-        WHERE p."uploaderId" = ${userId}
-          AND p."isDeleted" = false
-          AND p.source = 'editor'
-        ORDER BY p."updatedAt" DESC
+      prisma.$queryRaw<EditorPaperListRow[]>`
+        SELECT combined.* FROM (
+          SELECT
+            p.id, p.title, p.abstract, p."isDraft", p."isPublished",
+            p."createdAt", p."updatedAt", p."workspaceId",
+            'owned' AS "accessType",
+            NULL::text AS "sharedPermission",
+            NULL::text AS "sharedByName"
+          FROM "Paper" p
+          WHERE p."uploaderId" = ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND (${draftFilter}::boolean IS NULL OR p."isDraft" = ${draftFilter})
+
+          UNION ALL
+
+          SELECT
+            p.id, p.title, p.abstract, p."isDraft", p."isPublished",
+            p."createdAt", p."updatedAt", p."workspaceId",
+            'shared' AS "accessType",
+            ps.permission AS "sharedPermission",
+            sharer.name AS "sharedByName"
+          FROM "Paper" p
+          INNER JOIN "PaperShare" ps
+            ON ps."paperId" = p.id AND ps."isDeleted" = false
+          LEFT JOIN "User" sharer ON sharer.id = ps."sharedById"
+          WHERE ${email}::text IS NOT NULL
+            AND ps.email = ${email}
+            AND p."uploaderId" <> ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND (${draftFilter}::boolean IS NULL OR p."isDraft" = ${draftFilter})
+        ) combined
+        ORDER BY combined."updatedAt" DESC
         LIMIT ${limit} OFFSET ${offset}
       `,
       prisma.$queryRaw<Array<{ total: number }>>`
-        SELECT COUNT(*)::int AS total
-        FROM "Paper" p
-        WHERE p."uploaderId" = ${userId}
-          AND p."isDeleted" = false
-          AND p.source = 'editor'
+        SELECT COUNT(*)::int AS total FROM (
+          SELECT p.id
+          FROM "Paper" p
+          WHERE p."uploaderId" = ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND (${draftFilter}::boolean IS NULL OR p."isDraft" = ${draftFilter})
+
+          UNION ALL
+
+          SELECT p.id
+          FROM "Paper" p
+          INNER JOIN "PaperShare" ps
+            ON ps."paperId" = p.id AND ps."isDeleted" = false
+          WHERE ${email}::text IS NOT NULL
+            AND ps.email = ${email}
+            AND p."uploaderId" <> ${userId}
+            AND p."isDeleted" = false
+            AND p.source = 'editor'
+            AND (${draftFilter}::boolean IS NULL OR p."isDraft" = ${draftFilter})
+        ) combined
       `,
     ]);
+
     return { papers, total: countRows[0]?.total ?? 0 };
   },
 
@@ -1870,11 +1908,16 @@ const PDF_RENDER_TIMEOUT_MS = 60_000;
 
 export const exportService = {
   // Generate PDF from HTML content
-  async generatePDF(paperId: string, userId: string): Promise<Buffer> {
+  async generatePDF(
+    paperId: string,
+    userId: string,
+    email?: string
+  ): Promise<Buffer> {
     // Get paper content
     const paper = await editorPaperService.getEditorPaperContent(
       paperId,
-      userId
+      userId,
+      email
     );
     if (!paper) {
       throw new Error("Paper not found or access denied");
@@ -2025,11 +2068,16 @@ export const exportService = {
   },
 
   // Generate DOCX from HTML content (using html-docx-js)
-  async generateDOCX(paperId: string, userId: string): Promise<Buffer> {
+  async generateDOCX(
+    paperId: string,
+    userId: string,
+    email?: string
+  ): Promise<Buffer> {
     // Get paper content
     const paper = await editorPaperService.getEditorPaperContent(
       paperId,
-      userId
+      userId,
+      email
     );
     if (!paper) {
       throw new Error("Paper not found or access denied");
