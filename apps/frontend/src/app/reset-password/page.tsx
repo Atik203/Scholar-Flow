@@ -247,6 +247,8 @@ export default function ResetPasswordPage() {
                   {...register("newPassword")}
                   label="New Password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  id="new-password"
                   required
                   error={!!errors.newPassword}
                   helperText={errors.newPassword?.message || "At least 8 characters with one lowercase letter and one number"}
@@ -267,6 +269,7 @@ export default function ResetPasswordPage() {
                   {...register("confirmPassword")}
                   label="Confirm New Password"
                   type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   required
                   error={!!errors.confirmPassword}
                   helperText={errors.confirmPassword?.message}
