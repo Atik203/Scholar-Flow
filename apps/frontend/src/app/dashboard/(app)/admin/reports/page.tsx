@@ -23,6 +23,7 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Table2,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/customUI/PageHeader";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { ReportDataTable } from "./ReportDataTable";
 import {
   Select,
   SelectContent,
@@ -57,6 +65,14 @@ const STATUS_COLOR: Record<string, string> = {
 
 const TYPE_OPTIONS: AdminReportType[] = ["USAGE", "FINANCIAL", "USER", "CONTENT", "SYSTEM"];
 
+const TYPE_LABELS: Record<AdminReportType, string> = {
+  USAGE: "Usage",
+  FINANCIAL: "Financial",
+  USER: "Users",
+  CONTENT: "Content",
+  SYSTEM: "System",
+};
+
 const PAGE_LIMIT = 20;
 
 export default function AdminReportsPage() {
@@ -64,6 +80,7 @@ export default function AdminReportsPage() {
   const [typeFilter, setTypeFilter] = useState<AdminReportType | "all">("all");
   const [showCreate, setShowCreate] = useState(false);
   const [page, setPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<AdminReportType>("USAGE");
 
   const queryArgs = {
     search: search || undefined,
@@ -158,6 +175,37 @@ export default function AdminReportsPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Live data preview — one table per report type */}
+      <Card id="live-data">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Table2 className="h-5 w-5" />
+            Live Data
+          </CardTitle>
+          <CardDescription>
+            Preview the underlying data for each report type — download CSV or
+            JSON only when you need a file.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as AdminReportType)}
+          >
+            <TabsList className="flex h-auto flex-wrap gap-1">
+              {TYPE_OPTIONS.map((t) => (
+                <TabsTrigger key={t} value={t}>
+                  {TYPE_LABELS[t]}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <TabsContent value={activeTab} className="mt-4">
+              <ReportDataTable key={activeTab} type={activeTab} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
