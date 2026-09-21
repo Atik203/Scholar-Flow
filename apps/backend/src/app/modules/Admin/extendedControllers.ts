@@ -10,7 +10,6 @@ import { adminPlansService } from "./adminPlans.service";
 import { adminSettingsService } from "./adminSettings.service";
 import { adminSubscribersService } from "./adminSubscribers.service";
 import { systemAlertsService } from "./systemAlerts.service";
-import { CACHE_DURATIONS } from "./admin.constant";
 import { updateSystemSettingsSchema } from "./admin.validation";
 import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 
@@ -152,9 +151,6 @@ export const adminPaymentsController = {
       search,
     });
     // Short TTL — refunds flip payment status, so stale caches mislead admins
-    res.set({
-      "Cache-Control": `private, max-age=30`,
-    });
     sendPaginatedResponse(
       res,
       result.items,
@@ -376,9 +372,6 @@ export const systemAlertsController = {
 export const adminSettingsController = {
   get: catchAsync(async (_req: Request, res: Response) => {
     const result = await adminSettingsService.getSettings();
-    res.set({
-      "Cache-Control": `private, max-age=30`,
-    });
     sendSuccessResponse(res, result, "System settings retrieved");
   }),
 
