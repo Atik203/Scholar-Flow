@@ -30,6 +30,7 @@ import {
   MoreVertical,
   Search,
   Trash2,
+  UserPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -185,13 +186,29 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                     >
                       {paper.title || "Untitled Paper"}
                     </CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Badge
                         variant={paper.isDraft ? "secondary" : "default"}
                         className="text-xs"
                       >
                         {paper.isDraft ? "Draft" : "Published"}
                       </Badge>
+                      {paper.accessType === "shared" && (
+                        <>
+                          <Badge
+                            variant="outline"
+                            className="text-xs border-primary/40 text-primary bg-primary/5"
+                          >
+                            <UserPlus className="h-3 w-3 mr-1" />
+                            Invited
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {paper.sharedPermission === "edit"
+                              ? "Can edit"
+                              : "View only"}
+                          </Badge>
+                        </>
+                      )}
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {formatDistanceToNow(new Date(paper.updatedAt), {
@@ -199,6 +216,11 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                         })}
                       </div>
                     </div>
+                    {paper.accessType === "shared" && paper.sharedByName && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Shared by {paper.sharedByName}
+                      </p>
+                    )}
                   </div>
 
                   <DropdownMenu>
@@ -210,18 +232,25 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onPaperSelect(paper.id)}>
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        {paper.accessType === "shared" ? "Open" : "Edit"}
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() =>
-                          setDeleteTarget({ id: paper.id, title: paper.title })
-                        }
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
+                      {paper.accessType !== "shared" && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() =>
+                              setDeleteTarget({
+                                id: paper.id,
+                                title: paper.title,
+                              })
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>

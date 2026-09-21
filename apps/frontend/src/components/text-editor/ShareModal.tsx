@@ -31,7 +31,7 @@ import {
   useShareViaEmailMutation,
 } from "@/redux/api/paperApi";
 import { useGetTeamMembersQuery } from "@/redux/api/teamApi";
-import { Copy, Link, Loader2, Mail, ShieldCheck, Share2, Trash2, Users, X } from "lucide-react";
+import { Copy, Loader2, Mail, ShieldCheck, Share2, Trash2, Users, X } from "lucide-react";
 import React, { useState } from "react";
 
 interface ShareModalProps {
@@ -50,7 +50,6 @@ export function ShareModal({
   isPublished,
 }: ShareModalProps) {
   const [shareUrl, setShareUrl] = useState("");
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
   // Email sharing states
   const [recipientEmail, setRecipientEmail] = useState("");
@@ -94,17 +93,6 @@ export function ShareModal({
       showSuccessToast("Copied to clipboard!");
     } catch {
       showErrorToast("Failed to copy to clipboard");
-    }
-  };
-
-  const generateShareLink = async () => {
-    setIsGeneratingLink(true);
-    try {
-      const url = `${window.location.origin}/public-view/${paperId}`;
-      setShareUrl(url);
-      showSuccessToast("Share link generated!");
-    } finally {
-      setIsGeneratingLink(false);
     }
   };
 
@@ -211,31 +199,13 @@ export function ShareModal({
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <Label>Generate Share Link</Label>
-              <div className="text-sm text-muted-foreground mb-3">
-                Create a temporary shareable link for this draft paper.
-              </div>
-              <Button
-                onClick={generateShareLink}
-                disabled={isGeneratingLink}
-                className="w-full"
-              >
-                <Link className="mr-2 h-4 w-4" />
-                {isGeneratingLink ? "Generating..." : "Generate Share Link"}
-              </Button>
-              {shareUrl && (
-                <div className="flex gap-2 mt-3">
-                  <Input value={shareUrl} readOnly className="flex-1" />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(shareUrl)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+            <div className="space-y-2 rounded-md border border-muted/60 bg-muted/30 p-3">
+              <Label>Public link unavailable</Label>
+              <p className="text-sm text-muted-foreground">
+                This paper is a draft, so it has no public page yet. Publish it
+                to get a shareable public link — email invitations below work
+                for drafts too.
+              </p>
             </div>
           )}
 
