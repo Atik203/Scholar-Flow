@@ -22,6 +22,7 @@ import {
   Loader2,
   Pencil,
   Plus,
+  Power,
   RefreshCw,
   Search,
   Table2,
@@ -69,6 +70,7 @@ import {
   type AdminReport,
   type AdminReportType,
   type AdminReportFormat,
+  type AdminReportStatus,
 } from "@/redux/api/adminReportsApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 
@@ -81,18 +83,30 @@ const STATUS_COLOR: Record<string, string> = {
 
 const PAGE_LIMIT = 20;
 
+const STATUS_OPTIONS: Array<{ value: AdminReportStatus | "all"; label: string }> = [
+  { value: "all", label: "All statuses" },
+  { value: "READY", label: "Ready" },
+  { value: "SCHEDULED", label: "Scheduled" },
+  { value: "GENERATING", label: "Generating" },
+  { value: "FAILED", label: "Failed" },
+];
+
 export default function AdminReportsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<AdminReportType | "all">("all");
   const [showCreate, setShowCreate] = useState(false);
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<AdminReportType>("USAGE");
+  const [statusFilter, setStatusFilter] = useState<AdminReportStatus | "all">(
+    "all"
+  );
   const [deleteTarget, setDeleteTarget] = useState<AdminReport | null>(null);
   const [editTarget, setEditTarget] = useState<AdminReport | null>(null);
 
   const queryArgs = {
     search: search || undefined,
     type: typeFilter === "all" ? undefined : typeFilter,
+    status: statusFilter === "all" ? undefined : statusFilter,
     page,
     limit: PAGE_LIMIT,
   };
@@ -167,6 +181,24 @@ export default function AdminReportsPage() {
   };
 
   /**
+   * Enable or disable a saved report without opening the edit dialog
+   */
+  const handleToggleEnabled = async (report: AdminReport) => {
+    try {
+      await updateReport({
+        id: report.id,
+        patch: { enabled: !report.enabled },
+      }).unwrap();
+      showSuccessToast(
+        report.enabled ? "Report disabled" : "Report enabled",
+        report.name
+      );
+    } catch {
+      showErrorToast("Update failed", "Could not change report status");
+    }
+  };
+
+  /**
    * Delete a saved report (confirm dialog, optimistic list removal)
    */
   const handleDelete = async () => {
@@ -209,10 +241,10 @@ export default function AdminReportsPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Reports", value: total, icon: FileText, color: "from-indigo-500 to-purple-600" },
-          { label: "Ready", value: ready, icon: CheckCircle, color: "from-emerald-500 to-teal-600" },
-          { label: "Scheduled", value: scheduled, icon: Calendar, color: "from-amber-500 to-orange-600" },
-          { label: "Failed", value: failed, icon: Clock, color: "from-red-500 to-rose-600" },
+          { label: "Total Reports", value: total, icon: FileText, color: "from-indigo-500 to-purple-600", status: "all" as const },
+          { label: "Ready", value: ready, icon: CheckCircle, color: "from-emerald-500 to-teal-600", status: "READY" as const },
+          { label: "Scheduled", value: scheduled, icon: Calendar, color: "from-amber-500 to-orange-600", status: "SCHEDULED" as const },
+          { label: "Failed", value: failed, icon: Clock, color: "from-red-500 to-rose-600", status: "FAILED" as const },
         ].map((s, i) => (
           <motion.div
             key={s.label}
@@ -220,14 +252,31 @@ export default function AdminReportsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${s.color} text-white`}>
-                  <s.icon className="h-5 w-5" />
+            <Card
+              className={`p-5 transition-all hover:shadow-md ${
+                statusFilter === s.status ? "ring-2 ring-indigo-500" : ""
+              }`}
+            >
+              <button
+                type="button"
+                className="w-full text-left"
+                onClick={() => {
+                  setStatusFilter((prev) =>
+                    prev === s.status ? "all" : s.status
+                  );
+                  setPage(1);
+                }}
+                aria-pressed={statusFilter === s.status}
+                aria-label={`Filter reports by ${s.label}`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${s.color} text-white`}>
+                    <s.icon className="h-5 w-5" />
+                  </div>
                 </div>
-              </div>
-              <p className="text-2xl font-bold">{s.value}</p>
-              <p className="text-sm text-muted-foreground">{s.label}</p>
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="text-sm text-muted-foreground">{s.label}</p>
+              </button>
             </Card>
           </motion.div>
         ))}
@@ -310,6 +359,23 @@ export default function AdminReportsPage() {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            {STATUS_OPTIONS.map((option) => (
+              <Button
+                key={option.value}
+                size="sm"
+                variant={statusFilter === option.value ? "default" : "outline"}
+                onClick={() => {
+                  setStatusFilter(option.value);
+                  setPage(1);
+                }}
+                aria-pressed={statusFilter === option.value}
+              >
+                {option.label}
+              </Button>
+            ))}
+          </div>
+
           {isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -346,6 +412,21 @@ export default function AdminReportsPage() {
                   >
                     {r.status}
                   </span>
+                  {!r.enabled && (
+                    <span className="text-xs font-medium px-2 py-1 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      Inactive
+                    </span>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleToggleEnabled(r)}
+                    aria-label={`${r.enabled ? "Disable" : "Enable"} report ${r.name}`}
+                  >
+                    <Power
+                      className={`h-3 w-3 ${r.enabled ? "text-emerald-600" : "text-muted-foreground"}`}
+                    />
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"
