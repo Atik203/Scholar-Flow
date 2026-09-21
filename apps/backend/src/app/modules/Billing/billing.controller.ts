@@ -136,8 +136,10 @@ const getPrices = catchAsync(async (_req: AuthRequest, res: Response) => {
 const getCatalog = catchAsync(async (_req: AuthRequest, res: Response) => {
   const catalog = await billingService.getPublicCatalog();
 
+  // Revalidate on every request (ETag/304 keeps it cheap) so admin plan
+  // edits show up on the pricing page without a hard reload.
   res.set({
-    "Cache-Control": "public, max-age=60",
+    "Cache-Control": "public, max-age=0, must-revalidate",
   });
 
   res.status(200).json({
