@@ -122,6 +122,7 @@ export default function AdminPlansPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<PlanFormState>(EMPTY_FORM);
+  const [deleteTarget, setDeleteTarget] = useState<AdminPlan | null>(null);
 
   const plans = data?.data ?? [];
 
@@ -236,20 +237,19 @@ export default function AdminPlansPage() {
     }
   };
 
-  const handleDelete = async (p: AdminPlan) => {
-    if (
-      !confirm(
-        `Delete plan "${p.name}"? Plans with active subscribers cannot be deleted.`
-      )
-    ) {
-      return;
-    }
-    setBusyId(p.id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setBusyId(deleteTarget.id);
     try {
-      await deletePlan(p.id).unwrap();
-      showSuccessToast("Plan deleted");
-    } catch {
-      showErrorToast("Failed", "Could not delete plan");
+      await deletePlan(deleteTarget.id).unwrap();
+      showSuccessToast("Plan deleted", `${deleteTarget.name} was removed`);
+      setDeleteTarget(null);
+    } catch (err) {
+      const message = (err as { data?: { message?: string } })?.data?.message;
+      showErrorToast(
+        "Delete failed",
+        typeof message === "string" ? message : "Could not delete plan"
+      );
     } finally {
       setBusyId(null);
     }
@@ -385,7 +385,7 @@ export default function AdminPlansPage() {
                       variant="ghost"
                       className="gap-1 text-destructive"
                       disabled={busyId === p.id}
-                      onClick={() => handleDelete(p)}
+                      onClick={() => setDeleteTarget(p)}
                     >
                       <Trash2 className="h-3 w-3" />
                       Delete
@@ -514,6 +514,38 @@ export default function AdminPlansPage() {
             </Button>
             <Button onClick={handleSave}>
               {form.id ? "Save changes" : "Create plan"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Delete confirm dialog */}
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete plan</DialogTitle>
+            <DialogDescription>
+              {deleteTarget
+                ? `"${deleteTarget.name}" (${deleteTarget.code}) will be removed from the plan catalog. Plans with active subscribers cannot be deleted — deactivate them instead.`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={busyId === deleteTarget?.id}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={busyId === deleteTarget?.id}
+            >
+              {busyId === deleteTarget?.id ? "Deleting..." : "Delete plan"}
             </Button>
           </DialogFooter>
         </DialogContent>
