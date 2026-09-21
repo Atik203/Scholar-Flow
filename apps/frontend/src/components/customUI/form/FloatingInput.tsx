@@ -12,8 +12,11 @@ export const FloatingInput = React.forwardRef<
   HTMLInputElement,
   FloatingInputProps
 >(({ className, label, error, helperText, required, id, ...props }, ref) => {
+  // Stable ids matter for browser autofill/password managers — a random id
+  // regenerated per render breaks Chrome's form classification.
+  const generatedId = React.useId();
   const inputId =
-    id || `floating-input-${Math.random().toString(36).substr(2, 9)}`;
+    id || (props.name ? `floating-input-${props.name}` : generatedId);
 
   return (
     <div className="relative">

@@ -413,6 +413,7 @@ export default function LoginPage() {
                       {...register("email")}
                       label="Email address"
                       type="email"
+                      autoComplete="username"
                       required
                       error={!!errors.email}
                       helperText={errors.email?.message}
@@ -423,6 +424,8 @@ export default function LoginPage() {
                         {...register("password")}
                         label="Password"
                         type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        id="current-password"
                         required
                         error={!!errors.password}
                         helperText={errors.password?.message}
@@ -498,6 +501,8 @@ export default function LoginPage() {
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                           <input
                             type="email"
+                            name="email"
+                            autoComplete="email"
                             value={magicLinkEmail}
                             onChange={(e) => setMagicLinkEmail(e.target.value)}
                             placeholder="name@example.com"
