@@ -150,10 +150,10 @@ export function useCollabSync({
       // Flush any offline queue
       flushPending(ydoc);
 
-      // Request fresh state from peers after reconnect (room-scoped)
-      if (syncedRef.current) {
-        socket.emit("editor:sync-request", { room });
-      }
+      // Always pull the room's current state on (re)connect — a peer joining
+      // after content was seeded must receive the existing document, not only
+      // future updates.
+      socket.emit("editor:sync-request", { room });
 
       // Re-announce presence so peers render our cursor after (re)connect
       if (awareness.getLocalState()) {
@@ -204,10 +204,10 @@ export function useCollabSync({
       } catch {}
     });
 
-    // Handle initial sync
+    // Handle initial sync — Yjs merges every response, so applying all of
+    // them is safe and ensures peers with divergent local state converge.
     socket.on("editor:sync-response", ({ update }: { update: number[] }) => {
       setHasRemoteState(true);
-      if (syncedRef.current) return;
       syncedRef.current = true;
       try {
         const u8 = new Uint8Array(update);
