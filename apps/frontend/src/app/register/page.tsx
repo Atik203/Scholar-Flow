@@ -608,6 +608,8 @@ export default function RegisterPage() {
                           <FloatingInput
                             label="Email address"
                             type="email"
+                            name="email"
+                            autoComplete="username"
                             required
                             value={watchedFields.email}
                             onChange={(e) => {
@@ -785,6 +787,9 @@ export default function RegisterPage() {
                             <FloatingInput
                               label="Password"
                               type={showPassword ? "text" : "password"}
+                              name="password"
+                              autoComplete="new-password"
+                              id="new-password"
                               required
                               value={watchedFields.password}
                               onChange={(e) => {
@@ -811,6 +816,8 @@ export default function RegisterPage() {
                           <FloatingInput
                             label="Confirm password"
                             type={showConfirmPassword ? "text" : "password"}
+                            name="confirmPassword"
+                            autoComplete="new-password"
                             required
                             value={watchedFields.confirmPassword}
                             onChange={(e) => {
