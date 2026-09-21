@@ -49,6 +49,19 @@ export const adminPlansController = {
     const plan = await adminPlansService.toggleActive(id);
     sendSuccessResponse(res, plan, "Plan availability toggled");
   }),
+
+  syncStripe: catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Plan id is required");
+    const result = await adminPlansService.syncPlanToStripe(id);
+    sendSuccessResponse(
+      res,
+      result,
+      result.created
+        ? "Plan linked to Stripe (new product + price created)"
+        : "Plan already linked to a valid Stripe price"
+    );
+  }),
 };
 
 // Subscribers (admin subscription management)
