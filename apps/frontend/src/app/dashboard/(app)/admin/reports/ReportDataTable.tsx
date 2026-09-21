@@ -176,6 +176,7 @@ export function ReportDataTable({ type }: { type: AdminReportType }) {
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <Table>
+            <caption className="sr-only">{type} report data</caption>
             <TableHeader>
               <TableRow>
                 {columns.map((column) => (
