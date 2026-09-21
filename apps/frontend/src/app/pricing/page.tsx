@@ -19,7 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -74,10 +74,13 @@ export default function PricingPage() {
       return;
     }
 
-    const variant =
-      planKey === "pro" || planKey === "team"
-        ? catalog?.[planKey]?.[isAnnual ? "annual" : "monthly"]
-        : null;
+    // Resolve the variant for the selected interval, falling back to the
+    // other interval when only one side is configured (avoids dead CTAs).
+    const variants =
+      planKey === "pro" || planKey === "team" ? catalog?.[planKey] : null;
+    const preferred = isAnnual ? variants?.annual : variants?.monthly;
+    const fallback = isAnnual ? variants?.monthly : variants?.annual;
+    const variant = preferred ?? fallback ?? null;
     const priceId = variant?.stripePriceId ?? null;
 
     if (!priceId) {
@@ -158,11 +161,49 @@ export default function PricingPage() {
   ];
 
   // Pro/Team cards are driven by the admin-managed plan catalog — name,
-  // price, and availability reflect admin panel changes (null = unavailable).
+  // price, availability, and features reflect admin panel changes
+  // (null = unavailable).
   const proMonthly = catalog?.pro?.monthly ?? null;
   const proAnnual = catalog?.pro?.annual ?? null;
   const teamMonthly = catalog?.team?.monthly ?? null;
   const teamAnnual = catalog?.team?.annual ?? null;
+
+  const hasMonthly = Boolean(proMonthly || teamMonthly);
+  const hasAnnual = Boolean(proAnnual || teamAnnual);
+
+  // If annual prices are not configured, default the toggle to monthly
+  useEffect(() => {
+    if (!isCatalogLoading && !hasAnnual && hasMonthly) {
+      setIsAnnual(false);
+    }
+  }, [isCatalogLoading, hasAnnual, hasMonthly]);
+
+  const defaultProFeatures = [
+    "Unlimited papers",
+    "Advanced AI insights",
+    "Team collaboration (up to 5)",
+    "Semantic search",
+    "Priority support",
+    "Advanced annotations",
+    "Citation management",
+    "API access",
+  ];
+
+  const defaultTeamFeatures = [
+    "Everything in Pro",
+    "Unlimited team members",
+    "Advanced collaboration",
+    "Team analytics",
+    "SSO integration",
+    "Admin controls",
+    "Custom workflows",
+    "Dedicated support",
+  ];
+
+  const proFeatures =
+    proMonthly?.features?.list ?? proAnnual?.features?.list ?? defaultProFeatures;
+  const teamFeatures =
+    teamMonthly?.features?.list ?? teamAnnual?.features?.list ?? defaultTeamFeatures;
 
   const plans = [
     {
@@ -193,16 +234,7 @@ export default function PricingPage() {
       monthlyPrice: proMonthly ? proMonthly.priceCents / 100 : null,
       annualPrice: proAnnual ? proAnnual.priceCents / 100 : null,
       icon: Zap,
-      features: [
-        "Unlimited papers",
-        "Advanced AI insights",
-        "Team collaboration (up to 5)",
-        "Semantic search",
-        "Priority support",
-        "Advanced annotations",
-        "Citation management",
-        "API access",
-      ],
+      features: proFeatures,
       limitations: [],
       color: "chart-1",
       popular: true,
@@ -216,16 +248,7 @@ export default function PricingPage() {
       monthlyPrice: teamMonthly ? teamMonthly.priceCents / 100 : null,
       annualPrice: teamAnnual ? teamAnnual.priceCents / 100 : null,
       icon: Users,
-      features: [
-        "Everything in Pro",
-        "Unlimited team members",
-        "Advanced collaboration",
-        "Team analytics",
-        "SSO integration",
-        "Admin controls",
-        "Custom workflows",
-        "Dedicated support",
-      ],
+      features: teamFeatures,
       limitations: [],
       color: "chart-2",
       popular: false,
@@ -308,21 +331,23 @@ export default function PricingPage() {
                 <div className="bg-muted/50 p-1 rounded-xl border border-border/50">
                   <button
                     onClick={() => setIsAnnual(false)}
+                    disabled={!isCatalogLoading && !hasMonthly}
                     className={`px-6 py-2 rounded-lg transition-all duration-300 ${
                       !isAnnual
                         ? "bg-background shadow-sm text-foreground"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    } ${!isCatalogLoading && !hasMonthly ? "opacity-40 cursor-not-allowed" : ""}`}
                   >
                     Monthly
                   </button>
                   <button
                     onClick={() => setIsAnnual(true)}
+                    disabled={!isCatalogLoading && !hasAnnual}
                     className={`px-6 py-2 rounded-lg transition-all duration-300 relative ${
                       isAnnual
                         ? "bg-background shadow-sm text-foreground"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    } ${!isCatalogLoading && !hasAnnual ? "opacity-40 cursor-not-allowed" : ""}`}
                   >
                     Annual
                     <span className="absolute -top-2 -right-2 bg-gradient-to-r from-primary to-chart-1 text-primary-foreground text-xs px-2 py-0.5 rounded-full">
@@ -338,7 +363,15 @@ export default function PricingPage() {
         <section className="py-24 relative">
           <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-4">
-              {plans.map((plan, index) => (
+              {plans.map((plan, index) => {
+                // Fall back to the configured interval when one side is missing
+                const resolvedPrice = isAnnual
+                  ? plan.annualPrice ?? plan.monthlyPrice
+                  : plan.monthlyPrice ?? plan.annualPrice;
+                const resolvedInterval =
+                  isAnnual && plan.annualPrice != null ? "year" : "mo";
+
+                return (
                 <motion.div
                   key={plan.name}
                   initial={{ opacity: 0, y: 30 }}
@@ -376,11 +409,11 @@ export default function PricingPage() {
                       <div className="text-4xl font-bold">
                         {plan.unavailable ? (
                           "—"
-                        ) : plan.monthlyPrice !== null ? (
+                        ) : resolvedPrice !== null ? (
                           <>
-                            ${isAnnual ? plan.annualPrice : plan.monthlyPrice}
+                            ${resolvedPrice}
                             <span className="text-lg font-normal text-muted-foreground">
-                              /{isAnnual ? "year" : "mo"}
+                              /{resolvedInterval}
                             </span>
                           </>
                         ) : (
@@ -389,11 +422,12 @@ export default function PricingPage() {
                       </div>
                       {!plan.unavailable &&
                         isAnnual &&
-                        plan.monthlyPrice !== null &&
+                        plan.annualPrice != null &&
+                        plan.monthlyPrice != null &&
                         plan.monthlyPrice > 0 && (
                           <div className="text-sm text-muted-foreground mt-1">
-                            ${Math.round((plan.annualPrice ?? 0) / 12)}/month
-                            billed annually
+                            ${Math.round(plan.annualPrice / 12)}/month billed
+                            annually
                           </div>
                         )}
                       {plan.unavailable && (
@@ -447,7 +481,8 @@ export default function PricingPage() {
                     )}
                   </CardWithVariants>
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
