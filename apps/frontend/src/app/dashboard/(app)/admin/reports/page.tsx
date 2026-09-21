@@ -20,6 +20,7 @@ import {
   FileSpreadsheet,
   FileText,
   Loader2,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
@@ -46,6 +47,11 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { ReportDataTable } from "./ReportDataTable";
+import { ReportFormDialog, type ReportFormValues } from "./ReportFormDialog";
+import {
+  REPORT_TYPE_LABELS as TYPE_LABELS,
+  REPORT_TYPE_OPTIONS as TYPE_OPTIONS,
+} from "./constants";
 import {
   Select,
   SelectContent,
@@ -59,6 +65,7 @@ import {
   useGenerateReportMutation,
   useGetReportStatsQuery,
   useListReportsQuery,
+  useUpdateReportMutation,
   type AdminReport,
   type AdminReportType,
   type AdminReportFormat,
@@ -72,16 +79,6 @@ const STATUS_COLOR: Record<string, string> = {
   FAILED: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
 
-const TYPE_OPTIONS: AdminReportType[] = ["USAGE", "FINANCIAL", "USER", "CONTENT", "SYSTEM"];
-
-const TYPE_LABELS: Record<AdminReportType, string> = {
-  USAGE: "Usage",
-  FINANCIAL: "Financial",
-  USER: "Users",
-  CONTENT: "Content",
-  SYSTEM: "System",
-};
-
 const PAGE_LIMIT = 20;
 
 export default function AdminReportsPage() {
@@ -91,6 +88,7 @@ export default function AdminReportsPage() {
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState<AdminReportType>("USAGE");
   const [deleteTarget, setDeleteTarget] = useState<AdminReport | null>(null);
+  const [editTarget, setEditTarget] = useState<AdminReport | null>(null);
 
   const queryArgs = {
     search: search || undefined,
@@ -105,6 +103,7 @@ export default function AdminReportsPage() {
     type: typeFilter === "all" ? undefined : typeFilter,
   });
   const [createReport, { isLoading: isCreating }] = useCreateReportMutation();
+  const [updateReport, { isLoading: isUpdating }] = useUpdateReportMutation();
   const [deleteReport] = useDeleteReportMutation();
   const [generateReport] = useGenerateReportMutation();
   const [generatingId, setGeneratingId] = useState<string | null>(null);
@@ -140,6 +139,30 @@ export default function AdminReportsPage() {
       showErrorToast("Failed", "Could not generate report");
     } finally {
       setGeneratingId(null);
+    }
+  };
+
+  /**
+   * Save edits to a saved report definition
+   */
+  const handleEditSubmit = async (values: ReportFormValues) => {
+    if (!editTarget) return;
+    try {
+      await updateReport({
+        id: editTarget.id,
+        patch: {
+          name: values.name,
+          description: values.description,
+          format: values.format,
+          schedule: values.schedule,
+          recipients: values.recipients,
+          enabled: values.enabled,
+        },
+      }).unwrap();
+      showSuccessToast("Report updated", `${values.name} saved`);
+      setEditTarget(null);
+    } catch {
+      showErrorToast("Update failed", "Could not update report");
     }
   };
 
@@ -350,6 +373,14 @@ export default function AdminReportsPage() {
                   <Button
                     size="sm"
                     variant="ghost"
+                    onClick={() => setEditTarget(r)}
+                    aria-label={`Edit report ${r.name}`}
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
                     onClick={() => setDeleteTarget(r)}
                     aria-label={`Delete report ${r.name}`}
                   >
@@ -389,6 +420,16 @@ export default function AdminReportsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit report dialog */}
+      <ReportFormDialog
+        open={Boolean(editTarget)}
+        onClose={() => setEditTarget(null)}
+        mode="edit"
+        initial={editTarget}
+        isLoading={isUpdating}
+        onSubmit={handleEditSubmit}
+      />
 
       {/* Delete confirm dialog */}
       <Dialog
