@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/customUI/PageHeader";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import {
   useCancelSubscriberAtPeriodEndMutation,
   useCancelSubscriberNowMutation,
@@ -79,6 +80,10 @@ export default function AdminSubscribersPage() {
     name: string;
   } | null>(null);
   const [newPriceId, setNewPriceId] = useState<string>("");
+  const [cancelTarget, setCancelTarget] = useState<{
+    id: string;
+    email: string;
+  } | null>(null);
 
   const { data, isLoading, refetch } = useListSubscribersQuery({
     page,
@@ -115,6 +120,17 @@ export default function AdminSubscribersPage() {
     } finally {
       setActionId(null);
     }
+  };
+
+  const handleCancelNow = async () => {
+    if (!cancelTarget) return;
+    const target = cancelTarget;
+    await runAction(
+      target.id,
+      () => cancelNow(target.id).unwrap(),
+      "Subscription canceled"
+    );
+    setCancelTarget(null);
   };
 
   const handleChangePlan = async () => {
@@ -294,19 +310,12 @@ export default function AdminSubscribersPage() {
                                 variant="destructive"
                                 disabled={busy}
                                 title="Cancel immediately"
-                                onClick={() => {
-                                  if (
-                                    confirm(
-                                      `Cancel ${s.userEmail}'s subscription immediately?`
-                                    )
-                                  ) {
-                                    runAction(
-                                      s.subscriptionId,
-                                      () => cancelNow(s.subscriptionId).unwrap(),
-                                      "Subscription canceled"
-                                    );
-                                  }
-                                }}
+                                onClick={() =>
+                                  setCancelTarget({
+                                    id: s.subscriptionId,
+                                    email: s.userEmail,
+                                  })
+                                }
                               >
                                 <XCircle className="h-3 w-3" />
                               </Button>
@@ -398,6 +407,21 @@ export default function AdminSubscribersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={Boolean(cancelTarget)}
+        onOpenChange={(open) => !open && setCancelTarget(null)}
+        title="Cancel subscription immediately"
+        description={
+          cancelTarget
+            ? `${cancelTarget.email}'s subscription will end now instead of at the period end. Access is revoked right away.`
+            : ""
+        }
+        confirmLabel="Cancel now"
+        destructive
+        isLoading={actionId === cancelTarget?.id}
+        onConfirm={handleCancelNow}
+      />
     </div>
   );
 }
