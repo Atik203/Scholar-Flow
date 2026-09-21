@@ -66,7 +66,8 @@ function PaperCitationLines({
               y1={source.y}
               x2={target.x}
               y2={target.y}
-              stroke="hsl(var(--primary) / 0.35)"
+              stroke="var(--primary)"
+              strokeOpacity={0.35}
               strokeWidth={2}
               markerEnd="url(#arrow)"
             />
@@ -291,7 +292,8 @@ export default function CitationGraphPage() {
                 >
                   <path
                     d="M0,0 L0,10 L10,5 z"
-                    fill="hsl(var(--primary) / 0.5)"
+                    fill="var(--primary)"
+                    fillOpacity={0.5}
                   />
                 </marker>
               </defs>
