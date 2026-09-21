@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import {
   useCreateNotebookMutation,
   useCreateNoteInNotebookMutation,
@@ -154,11 +155,19 @@ export default function NotesPage() {
     }
   };
 
-  const onDeleteNotebook = async (id: string) => {
-    if (!confirm("Delete this notebook? Notes will be preserved.")) return;
+  const [deleteNotebookTarget, setDeleteNotebookTarget] = useState<
+    string | null
+  >(null);
+
+  const onDeleteNotebook = (id: string) => {
+    setDeleteNotebookTarget(id);
+  };
+  const handleConfirmDeleteNotebook = async () => {
+    if (!deleteNotebookTarget) return;
     try {
-      await deleteNotebook(id).unwrap();
+      await deleteNotebook(deleteNotebookTarget).unwrap();
       showSuccessToast("Notebook deleted");
+      setDeleteNotebookTarget(null);
       setActiveNotebookId(null);
       setSelectedNoteId(null);
       refetchNotebooks();
@@ -445,6 +454,16 @@ export default function NotesPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(deleteNotebookTarget)}
+        onOpenChange={(open) => !open && setDeleteNotebookTarget(null)}
+        title="Delete notebook"
+        description="The notebook will be deleted. Its notes are preserved and remain available."
+        confirmLabel="Delete notebook"
+        destructive
+        onConfirm={handleConfirmDeleteNotebook}
+      />
     </div>
   );
 }
