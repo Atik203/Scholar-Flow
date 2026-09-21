@@ -19,6 +19,15 @@ export default function AuthDebugPage() {
   const [testPassword, setTestPassword] = useState("test123");
   const [testResult, setTestResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [actionResult, setActionResult] = useState<{
+    label: string;
+    content: string;
+    ok: boolean;
+  } | null>(null);
+
+  const reportResult = (label: string, content: string, ok: boolean) => {
+    setActionResult({ label, content, ok });
+  };
 
   const testCredentialsLogin = async () => {
     setIsLoading(true);
@@ -47,11 +56,13 @@ export default function AuthDebugPage() {
       const apiUrl = getApiBaseUrl();
       const response = await fetch(`${apiUrl.replace("/api", "")}/health`);
       const data = await response.json();
-      alert(
-        `Backend Health: ${response.ok ? "✅ OK" : "❌ Failed"}\n${JSON.stringify(data, null, 2)}`
+      reportResult(
+        "Backend Health",
+        `${response.ok ? "OK" : "Failed"}\n${JSON.stringify(data, null, 2)}`,
+        response.ok
       );
     } catch (error) {
-      alert(`Backend Connection Failed: ${error}`);
+      reportResult("Backend Connection", String(error), false);
     }
   };
 
@@ -68,11 +79,13 @@ export default function AuthDebugPage() {
       });
 
       const data = await response.json();
-      alert(
-        `Backend Auth Test: ${response.ok ? "✅ Success" : "❌ Failed"}\n${JSON.stringify(data, null, 2)}`
+      reportResult(
+        "Backend Auth Test",
+        `${response.ok ? "Success" : "Failed"}\n${JSON.stringify(data, null, 2)}`,
+        response.ok
       );
     } catch (error) {
-      alert(`Backend Auth Test Failed: ${error}`);
+      reportResult("Backend Auth Test", String(error), false);
     }
   };
 
@@ -80,11 +93,13 @@ export default function AuthDebugPage() {
     setIsLoading(true);
     try {
       // Session is automatically synced from Redux Persist
-      alert(
-        "Session state is automatically managed by Redux Persist. Check the session data below."
+      reportResult(
+        "Session",
+        "Session state is automatically managed by Redux Persist. Check the session data below.",
+        true
       );
     } catch (error) {
-      alert(`Failed to refresh session: ${error}`);
+      reportResult("Session", String(error), false);
     } finally {
       setIsLoading(false);
     }
@@ -95,10 +110,12 @@ export default function AuthDebugPage() {
     const sessionCookie = cookies.find((c) =>
       c.startsWith("better-auth.session_token") || c.startsWith("sf_auth=1")
     );
-    alert(
+    reportResult(
+      "Cookies",
       sessionCookie
-        ? `✅ Session cookie found:\n${sessionCookie}`
-        : "❌ No session cookie found!"
+        ? `Session cookie found:\n${sessionCookie}`
+        : "No session cookie found!",
+      Boolean(sessionCookie)
     );
   };
 
@@ -110,6 +127,40 @@ export default function AuthDebugPage() {
           Back to Home
         </Button>
       </div>
+
+      {/* Action result (replaces native alert popups) */}
+      {actionResult && (
+        <Card
+          className={
+            actionResult.ok
+              ? "border-green-500/50"
+              : "border-destructive/50"
+          }
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="flex items-center gap-2 text-base">
+              {actionResult.ok ? (
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )}
+              {actionResult.label}
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActionResult(null)}
+            >
+              Clear
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <pre className="p-4 bg-muted rounded-lg overflow-auto max-h-64 text-xs">
+              {actionResult.content}
+            </pre>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Session Status */}
       <Card>
