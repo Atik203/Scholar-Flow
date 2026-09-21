@@ -8,6 +8,11 @@ import { apiSlice } from "./apiSlice";
 // Plans
 // ============================================================================
 
+export interface AdminPlanFeatures {
+  list?: string[];
+  limits?: Record<string, number>;
+}
+
 export interface AdminPlan {
   id: string;
   code: string;
@@ -16,7 +21,7 @@ export interface AdminPlan {
   currency: string;
   interval: string;
   stripePriceId: string | null;
-  features: unknown;
+  features: AdminPlanFeatures | null;
   active: boolean;
   activeSubscribers: number;
   canceledSubscribers: number;
@@ -43,6 +48,7 @@ export const adminPlansApi = apiSlice.injectEndpoints({
         currency: string;
         interval: "month" | "year";
         active?: boolean;
+        features?: AdminPlanFeatures;
       }
     >({
       query: (body) => ({ url: "/admin/plans", method: "POST", body }),
@@ -51,7 +57,18 @@ export const adminPlansApi = apiSlice.injectEndpoints({
 
     updatePlan: builder.mutation<
       { success: boolean; data: AdminPlan },
-      { id: string; patch: Partial<{ code: string; name: string; priceCents: number; currency: string; interval: string; active: boolean }> }
+      {
+        id: string;
+        patch: Partial<{
+          code: string;
+          name: string;
+          priceCents: number;
+          currency: string;
+          interval: string;
+          active: boolean;
+          features: AdminPlanFeatures;
+        }>;
+      }
     >({
       query: ({ id, patch }) => ({
         url: `/admin/plans/${id}`,
@@ -76,6 +93,20 @@ export const adminPlansApi = apiSlice.injectEndpoints({
       query: (id) => ({ url: `/admin/plans/${id}/toggle`, method: "POST" }),
       invalidatesTags: [{ type: "Admin", id: "PLANS" }],
     }),
+
+    syncStripePlan: builder.mutation<
+      {
+        success: boolean;
+        data: { plan: AdminPlan; stripePriceId: string; created: boolean };
+      },
+      string
+    >({
+      query: (id) => ({
+        url: `/admin/plans/${id}/sync-stripe`,
+        method: "POST",
+      }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
   }),
 });
 
@@ -85,6 +116,7 @@ export const {
   useUpdatePlanMutation,
   useDeletePlanMutation,
   useTogglePlanMutation,
+  useSyncStripePlanMutation,
 } = adminPlansApi;
 
 // ============================================================================

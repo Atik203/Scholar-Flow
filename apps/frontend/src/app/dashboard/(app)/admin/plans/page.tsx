@@ -6,8 +6,10 @@
 
 import { useState } from "react";
 import {
+  AlertTriangle,
   Crown,
   DollarSign,
+  Link2,
   Pencil,
   Plus,
   Power,
@@ -48,6 +50,7 @@ import {
   useCreatePlanMutation,
   useDeletePlanMutation,
   useListPlansQuery,
+  useSyncStripePlanMutation,
   useTogglePlanMutation,
   useUpdatePlanMutation,
   type AdminPlan,
@@ -59,6 +62,33 @@ const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 const formatInterval = (interval: string) =>
   interval === "year" ? "year" : interval === "month" ? "month" : interval;
 
+const getPlanVisual = (code: string) => {
+  const tier = code.split("_")[0];
+  switch (tier) {
+    case "pro":
+      return {
+        accent: "bg-indigo-500",
+        Icon: Zap,
+        iconClass: "text-indigo-500",
+      };
+    case "team":
+      return {
+        accent: "bg-gradient-to-r from-emerald-500 to-teal-500",
+        Icon: Users,
+        iconClass: "text-emerald-500",
+      };
+    case "enterprise":
+      return {
+        accent: "bg-gradient-to-r from-purple-500 to-pink-500",
+        Icon: Crown,
+        iconClass: "text-purple-500",
+      };
+    case "free":
+    default:
+      return { accent: "bg-slate-300", Icon: Star, iconClass: "" };
+  }
+};
+
 interface PlanFormState {
   id?: string;
   code: string;
@@ -67,6 +97,8 @@ interface PlanFormState {
   currency: string;
   interval: "month" | "year";
   active: boolean;
+  featuresText: string;
+  stripeLinked: boolean;
 }
 
 const EMPTY_FORM: PlanFormState = {
@@ -76,6 +108,8 @@ const EMPTY_FORM: PlanFormState = {
   currency: "USD",
   interval: "month",
   active: true,
+  featuresText: "",
+  stripeLinked: false,
 };
 
 export default function AdminPlansPage() {
@@ -84,6 +118,7 @@ export default function AdminPlansPage() {
   const [updatePlan] = useUpdatePlanMutation();
   const [deletePlan] = useDeletePlanMutation();
   const [togglePlan] = useTogglePlanMutation();
+  const [syncStripe] = useSyncStripePlanMutation();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<PlanFormState>(EMPTY_FORM);
@@ -104,6 +139,8 @@ export default function AdminPlansPage() {
       currency: p.currency,
       interval: p.interval === "year" ? "year" : "month",
       active: p.active,
+      featuresText: (p.features?.list ?? []).join("\n"),
+      stripeLinked: Boolean(p.stripePriceId),
     });
     setFormOpen(true);
   };
@@ -120,17 +157,25 @@ export default function AdminPlansPage() {
       return;
     }
 
+    const features = {
+      list: form.featuresText
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean),
+    };
+
     try {
       if (form.id) {
         await updatePlan({
           id: form.id,
           patch: {
-            code: form.code.trim(),
+            ...(form.stripeLinked ? {} : { code: form.code.trim() }),
             name: form.name.trim(),
             priceCents,
             currency: form.currency,
             interval: form.interval,
             active: form.active,
+            features,
           },
         }).unwrap();
         showSuccessToast("Plan updated");
@@ -142,12 +187,40 @@ export default function AdminPlansPage() {
           currency: form.currency,
           interval: form.interval,
           active: form.active,
+          features,
         }).unwrap();
         showSuccessToast("Plan created");
       }
       setFormOpen(false);
-    } catch {
-      showErrorToast("Failed", "Could not save plan");
+    } catch (err) {
+      const message = (err as { data?: { message?: string } })?.data?.message;
+      showErrorToast(
+        "Failed",
+        typeof message === "string" ? message : "Could not save plan"
+      );
+    }
+  };
+
+  const handleSyncStripe = async (p: AdminPlan) => {
+    setBusyId(p.id);
+    try {
+      const result = await syncStripe(p.id).unwrap();
+      showSuccessToast(
+        result.data.created ? "Linked to Stripe" : "Already linked",
+        result.data.created
+          ? "Stripe product and price created for this plan"
+          : "Existing Stripe price is valid"
+      );
+    } catch (err) {
+      const message = (err as { data?: { message?: string } })?.data?.message;
+      showErrorToast(
+        "Link failed",
+        typeof message === "string"
+          ? message
+          : "Could not link plan to Stripe"
+      );
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -210,106 +283,118 @@ export default function AdminPlansPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {plans.map((p, i) => (
-            <Card key={p.id} className="overflow-hidden">
-              <div
-                className={`h-2 ${
-                  i === 0
-                    ? "bg-slate-300"
-                    : i === 1
-                      ? "bg-indigo-500"
-                      : "bg-gradient-to-r from-purple-500 to-pink-500"
-                }`}
-              />
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {i === 0 ? (
-                        <Star className="h-5 w-5" />
-                      ) : i === 1 ? (
-                        <Zap className="h-5 w-5 text-indigo-500" />
-                      ) : (
-                        <Crown className="h-5 w-5 text-purple-500" />
-                      )}
-                      {p.name}
-                    </CardTitle>
-                    <CardDescription>
-                      <Badge variant="outline" className="mt-1">
-                        {p.code}
-                      </Badge>
-                      {p.stripePriceId && (
-                        <span className="ml-2 font-mono text-xs">
-                          {p.stripePriceId.slice(0, 12)}…
-                        </span>
-                      )}
-                    </CardDescription>
-                  </div>
-                  {!p.active && <Badge variant="secondary">Inactive</Badge>}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-3xl font-bold">
-                    {formatPrice(p.priceCents)}
-                    <span className="text-sm text-muted-foreground font-normal">
-                      /{formatInterval(p.interval)}
-                    </span>
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-                  <div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      Paying
+          {plans.map((p) => {
+            const visual = getPlanVisual(p.code);
+            return (
+              <Card key={p.id} className="overflow-hidden">
+                <div className={`h-2 ${visual.accent}`} />
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <visual.Icon className={`h-5 w-5 ${visual.iconClass}`} />
+                        {p.name}
+                      </CardTitle>
+                      <CardDescription>
+                        <Badge variant="outline" className="mt-1">
+                          {p.code}
+                        </Badge>
+                        {p.stripePriceId && (
+                          <span className="ml-2 font-mono text-xs">
+                            {p.stripePriceId.slice(0, 12)}…
+                          </span>
+                        )}
+                      </CardDescription>
                     </div>
-                    <p className="text-xl font-bold">{p.activeSubscribers}</p>
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <DollarSign className="h-3 w-3" />
-                      MRR
+                    <div className="flex flex-col items-end gap-1">
+                      {!p.active && <Badge variant="secondary">Inactive</Badge>}
+                      {!p.stripePriceId && (
+                        <Badge
+                          variant="outline"
+                          className="gap-1 border-amber-500/50 text-amber-600 dark:text-amber-400"
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                          No Stripe price
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-xl font-bold">
-                      {formatPrice(p.monthlyRevenueCents)}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="text-3xl font-bold">
+                      {formatPrice(p.priceCents)}
+                      <span className="text-sm text-muted-foreground font-normal">
+                        /{formatInterval(p.interval)}
+                      </span>
                     </p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 pt-1">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1"
-                    disabled={busyId === p.id}
-                    onClick={() => openEdit(p)}
-                  >
-                    <Pencil className="h-3 w-3" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-1"
-                    disabled={busyId === p.id}
-                    onClick={() => handleToggle(p)}
-                  >
-                    <Power className="h-3 w-3" />
-                    {p.active ? "Deactivate" : "Activate"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="gap-1 text-destructive"
-                    disabled={busyId === p.id}
-                    onClick={() => handleDelete(p)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                    <div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Users className="h-3 w-3" />
+                        Paying
+                      </div>
+                      <p className="text-xl font-bold">{p.activeSubscribers}</p>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <DollarSign className="h-3 w-3" />
+                        MRR
+                      </div>
+                      <p className="text-xl font-bold">
+                        {formatPrice(p.monthlyRevenueCents)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {!p.stripePriceId && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 border-amber-500/50 text-amber-700 dark:text-amber-400"
+                        disabled={busyId === p.id}
+                        onClick={() => handleSyncStripe(p)}
+                      >
+                        <Link2 className="h-3 w-3" />
+                        Link to Stripe
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      disabled={busyId === p.id}
+                      onClick={() => openEdit(p)}
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      disabled={busyId === p.id}
+                      onClick={() => handleToggle(p)}
+                    >
+                      <Power className="h-3 w-3" />
+                      {p.active ? "Deactivate" : "Activate"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="gap-1 text-destructive"
+                      disabled={busyId === p.id}
+                      onClick={() => handleDelete(p)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -319,9 +404,10 @@ export default function AdminPlansPage() {
           <DialogHeader>
             <DialogTitle>{form.id ? "Edit plan" : "New plan"}</DialogTitle>
             <DialogDescription>
-              Changing the price creates a new Stripe price — existing
-              subscribers renew at their current price until the next cycle.
-              Name changes sync to the Stripe product.
+              Priced plans are provisioned in Stripe automatically (product +
+              price). Changing the price creates a new Stripe price and archives
+              the old one; name changes sync to the Stripe product. Codes are
+              locked once a plan is linked to Stripe.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -332,8 +418,15 @@ export default function AdminPlansPage() {
                   id="plan-code"
                   placeholder="pro_monthly"
                   value={form.code}
+                  disabled={form.stripeLinked}
                   onChange={(e) => setForm({ ...form, code: e.target.value })}
                 />
+                {form.stripeLinked && (
+                  <p className="text-xs text-muted-foreground">
+                    Locked — the code is the tier key used by checkout and
+                    webhooks.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="plan-name">Name</Label>
@@ -398,6 +491,22 @@ export default function AdminPlansPage() {
               />
               Active (available for checkout)
             </label>
+            <div className="space-y-2">
+              <Label htmlFor="plan-features">Features (one per line)</Label>
+              <textarea
+                id="plan-features"
+                rows={5}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                placeholder={"Unlimited papers\nAdvanced AI insights\nPriority support"}
+                value={form.featuresText}
+                onChange={(e) =>
+                  setForm({ ...form, featuresText: e.target.value })
+                }
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown on the public pricing cards for Pro and Team plans.
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setFormOpen(false)}>
