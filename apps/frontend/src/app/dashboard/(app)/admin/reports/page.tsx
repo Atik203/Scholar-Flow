@@ -98,7 +98,7 @@ export default function AdminReportsPage() {
   const handleGenerate = async (reportId: string) => {
     setGeneratingId(reportId);
     try {
-      const blob = await generateReport(reportId).unwrap();
+      const blob = await generateReport({ id: reportId }).unwrap();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
