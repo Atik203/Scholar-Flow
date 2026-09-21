@@ -83,6 +83,19 @@ export const adminPlansApi = apiSlice.injectEndpoints({
       string
     >({
       query: (id) => ({ url: `/admin/plans/${id}`, method: "DELETE" }),
+      // Remove the card instantly; roll back if the server rejects
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          adminPlansApi.util.updateQueryData("listPlans", undefined, (draft) => {
+            draft.data = draft.data.filter((plan) => plan.id !== id);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
       invalidatesTags: [{ type: "Admin", id: "PLANS" }],
     }),
 
