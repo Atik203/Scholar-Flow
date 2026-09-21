@@ -165,10 +165,14 @@ if (config.env !== "production") {
 import { performanceMonitor } from "./app/middleware/performanceMonitor";
 app.use(performanceMonitor as unknown as RequestHandler);
 
-// Cache control for GET API responses (Phase 9 Lighthouse optimization)
+// Cache control for API responses.
+// Authenticated API data is dynamic and user-scoped — never let the browser
+// serve a stale list after a mutation (this caused "hard reload required"
+// bugs across admin pages). Public endpoints that benefit from caching set
+// their own Cache-Control headers (e.g. billing catalog revalidation).
 const cacheControlMiddleware: import("express").RequestHandler = (req, res, next) => {
   if (req.method === "GET" && req.path.startsWith("/api/")) {
-    res.set("Cache-Control", "private, max-age=30");
+    res.set("Cache-Control", "private, no-store");
     res.set("Vary", "Authorization");
   }
   next();
