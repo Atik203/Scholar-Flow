@@ -1459,7 +1459,8 @@ export const editorPaperController = {
 
     const paper = await editorPaperService.getEditorPaperContent(
       parsed.data.id,
-      authReq.user.id
+      authReq.user.id,
+      authReq.user.email
     );
 
     if (!paper) {
@@ -1572,6 +1573,7 @@ export const editorPaperController = {
 
     const result = await editorPaperService.getUserEditorPapers(
       authReq.user.id,
+      authReq.user.email,
       draftFilter,
       limitNum,
       offset
@@ -1613,13 +1615,15 @@ export const editorPaperController = {
     try {
       const pdfBuffer = await exportService.generatePDF(
         parsed.data.id,
-        authReq.user.id
+        authReq.user.id,
+        authReq.user.email
       );
 
       // Get paper title for filename
       const paper = await editorPaperService.getEditorPaperContent(
         parsed.data.id,
-        authReq.user.id
+        authReq.user.id,
+        authReq.user.email
       );
 
       const filename = paper
@@ -1658,13 +1662,15 @@ export const editorPaperController = {
     try {
       const docxBuffer = await exportService.generateDOCX(
         parsed.data.id,
-        authReq.user.id
+        authReq.user.id,
+        authReq.user.email
       );
 
       // Get paper title for filename
       const paper = await editorPaperService.getEditorPaperContent(
         parsed.data.id,
-        authReq.user.id
+        authReq.user.id,
+        authReq.user.email
       );
 
       const filename = paper
