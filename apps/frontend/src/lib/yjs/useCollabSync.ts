@@ -156,14 +156,7 @@ export function useCollabSync({
       socket.emit("editor:sync-request", { room });
 
       // Re-announce presence so peers render our cursor after (re)connect
-      if (awareness.getLocalState()) {
-        socket.emit("editor:awareness", {
-          room,
-          state: Array.from(
-            encodeAwarenessUpdate(awareness, [awareness.clientID])
-          ),
-        });
-      }
+      announceAwareness();
     });
 
     socket.on("disconnect", () => {
@@ -224,6 +217,22 @@ export function useCollabSync({
     });
 
     // Awareness relay — y-protocols binary update carried in `state`
+    const announceAwareness = () => {
+      if (!socket.connected || !awareness.getLocalState()) return;
+      socket.emit("editor:awareness", {
+        room,
+        state: Array.from(
+          encodeAwarenessUpdate(awareness, [awareness.clientID])
+        ),
+      });
+    };
+
+    // A joining peer only receives awareness broadcasts that happen after it
+    // connects — re-announce our state so late joiners see existing cursors.
+    socket.on("presence:joined", () => {
+      announceAwareness();
+    });
+
     const awarenessUpdateHandler = (
       change: AwarenessChange,
       origin: unknown
@@ -247,7 +256,7 @@ export function useCollabSync({
     });
 
     // Presence tracking for awareness cleanup
-    socket.on("presence:left", ({ userId }: { userId: string }) => {
+    const removeAwarenessForUser = (userId: string) => {
       const clientIds: number[] = [];
       awareness.getStates().forEach((state, clientId) => {
         if (clientId !== awareness.clientID && state?.userId === userId) {
@@ -257,6 +266,17 @@ export function useCollabSync({
       if (clientIds.length > 0) {
         removeAwarenessStates(awareness, clientIds, "presence");
       }
+    };
+
+    socket.on("presence:left", ({ userId }: { userId: string }) => {
+      removeAwarenessForUser(userId);
+    });
+
+    // A tab that closes abruptly never sends room:leave — the server announces
+    // it globally as presence:offline, which is the only signal to drop the
+    // stale cursor/awareness state for that user.
+    socket.on("presence:offline", ({ userId }: { userId?: string }) => {
+      if (userId) removeAwarenessForUser(userId);
     });
 
     awareness.on("update", awarenessUpdateHandler);
