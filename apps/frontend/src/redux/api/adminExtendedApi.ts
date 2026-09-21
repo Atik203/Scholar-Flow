@@ -3,6 +3,7 @@
  */
 
 import { apiSlice } from "./apiSlice";
+import type { RootState } from "@/redux/store";
 
 // ============================================================================
 // Plans
@@ -415,6 +416,29 @@ export const adminApiKeysApi = apiSlice
           url: `/admin/api-keys/${id}`,
           method: "DELETE",
         }),
+        // Remove the row from the cached list instantly; roll back on error
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          const entries = adminApiKeysApi.util.selectInvalidatedBy(
+            getState() as RootState,
+            [{ type: "AdminApiKey", id: "LIST" }]
+          );
+          const patches = entries.map(({ originalArgs }) =>
+            dispatch(
+              adminApiKeysApi.util.updateQueryData(
+                "listApiKeys",
+                originalArgs,
+                (draft) => {
+                  draft.data = draft.data.filter((key) => key.id !== id);
+                }
+              )
+            )
+          );
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: [{ type: "AdminApiKey", id: "LIST" }],
       }),
     }),
