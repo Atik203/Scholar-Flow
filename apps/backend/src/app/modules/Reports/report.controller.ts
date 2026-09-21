@@ -28,6 +28,9 @@ export const reportController = {
       limit: q.limit ?? 20,
     });
 
+    // Admin CRUD list — never HTTP-cache or deletes/edits look stale
+    res.set({ "Cache-Control": "private, no-store" });
+
     sendPaginatedResponse(
       res,
       result.items,
@@ -45,6 +48,7 @@ export const reportController = {
       type: q.type,
       search: q.search,
     });
+    res.set({ "Cache-Control": "private, no-store" });
     sendSuccessResponse(res, stats, "Report statistics retrieved successfully");
   }),
 
@@ -59,6 +63,7 @@ export const reportController = {
       limit: q.limit ?? 25,
       search: q.search,
     });
+    res.set({ "Cache-Control": "private, no-store" });
     sendSuccessResponse(res, result, "Report preview retrieved successfully");
   }),
 
