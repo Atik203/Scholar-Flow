@@ -18,8 +18,10 @@ import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 export const adminPlansController = {
   list: catchAsync(async (_req: Request, res: Response) => {
     const items = await adminPlansService.listPlansWithStats();
+    // Admin CRUD list — must never be HTTP-cached or deletes/edits appear
+    // stale in the browser for the cache lifetime.
     res.set({
-      "Cache-Control": `private, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+      "Cache-Control": "private, no-store",
     });
     sendSuccessResponse(res, items, "Plans retrieved");
   }),
