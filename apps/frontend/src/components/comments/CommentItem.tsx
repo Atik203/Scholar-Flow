@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CommentForm } from "./CommentForm";
 import { useUpdateAnnotationMutation, useDeleteAnnotationMutation } from "@/redux/api/annotationApi";
 import { showErrorToast, showSuccessToast } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import { formatDistanceToNow } from "date-fns";
 import { 
   Edit, 
@@ -41,6 +42,7 @@ export function CommentItem({
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [editText, setEditText] = useState(comment.text);
+  const [showDelete, setShowDelete] = useState(false);
 
   const [updateAnnotation] = useUpdateAnnotationMutation();
   const [deleteAnnotation] = useDeleteAnnotationMutation();
@@ -70,13 +72,12 @@ export function CommentItem({
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this comment?")) {
-      try {
-        await deleteAnnotation(comment.id).unwrap();
-        showSuccessToast("Comment deleted successfully");
-      } catch (error: any) {
-        showErrorToast(error.data?.message || "Failed to delete comment");
-      }
+    try {
+      await deleteAnnotation(comment.id).unwrap();
+      showSuccessToast("Comment deleted successfully");
+      setShowDelete(false);
+    } catch (error: any) {
+      showErrorToast(error.data?.message || "Failed to delete comment");
     }
   };
 
@@ -161,7 +162,7 @@ export function CommentItem({
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            onClick={handleDelete}
+                            onClick={() => setShowDelete(true)}
                             className="text-destructive"
                           >
                             <Trash2 className="h-3 w-3 mr-2" />
@@ -204,6 +205,16 @@ export function CommentItem({
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={showDelete}
+        onOpenChange={setShowDelete}
+        title="Delete comment"
+        description="This comment will be permanently deleted. This cannot be undone."
+        confirmLabel="Delete comment"
+        destructive
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
