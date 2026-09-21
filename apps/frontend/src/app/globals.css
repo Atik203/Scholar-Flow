@@ -866,6 +866,34 @@ html {
   margin-bottom: 0.75rem;
 }
 
+/* TipTap collaboration cursors (y-prosemirror default cursor builder) */
+.collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  border-color: inherit;
+  word-break: normal;
+  pointer-events: none;
+}
+
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+}
+
 /* Prevent iOS zoom on mobile form inputs */
 @media (max-width: 767px) {
   input[type="text"],
