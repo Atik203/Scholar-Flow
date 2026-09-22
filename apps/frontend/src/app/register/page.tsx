@@ -505,15 +505,11 @@ export default function RegisterPage() {
                           initial={{ scale: 0.8 }}
                           animate={{
                             scale: currentStep >= step.id ? 1 : 0.8,
-                            backgroundColor:
-                              currentStep >= step.id
-                                ? "hsl(var(--primary))"
-                                : "transparent",
                           }}
                           className={`relative flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors ${
                             currentStep >= step.id
-                              ? "border-primary text-primary-foreground"
-                              : "border-muted-foreground/30 text-muted-foreground"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-muted-foreground/30 bg-transparent text-muted-foreground"
                           }`}
                         >
                           {currentStep > step.id ? (
@@ -612,6 +608,8 @@ export default function RegisterPage() {
                           <FloatingInput
                             label="Email address"
                             type="email"
+                            name="email"
+                            autoComplete="username"
                             required
                             value={watchedFields.email}
                             onChange={(e) => {
@@ -789,6 +787,9 @@ export default function RegisterPage() {
                             <FloatingInput
                               label="Password"
                               type={showPassword ? "text" : "password"}
+                              name="password"
+                              autoComplete="new-password"
+                              id="new-password"
                               required
                               value={watchedFields.password}
                               onChange={(e) => {
@@ -815,6 +816,8 @@ export default function RegisterPage() {
                           <FloatingInput
                             label="Confirm password"
                             type={showConfirmPassword ? "text" : "password"}
+                            name="confirmPassword"
+                            autoComplete="new-password"
                             required
                             value={watchedFields.confirmPassword}
                             onChange={(e) => {

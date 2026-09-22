@@ -763,6 +763,17 @@ router.post(
 );
 
 /**
+ * Link a plan to Stripe (provisions a product + price when missing/stale)
+ */
+router.post(
+  "/plans/:id/sync-stripe",
+  authMiddleware,
+  requireAdmin,
+  rateLimiter,
+  adminPlansController.syncStripe as any
+);
+
+/**
  * Subscribers (admin subscription management)
  */
 router.get(

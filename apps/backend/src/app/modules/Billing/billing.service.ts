@@ -74,12 +74,23 @@ type CatalogPlan = {
   currency: string;
   interval: string;
   stripePriceId: string | null;
+  features: { list: string[] } | null;
+};
+
+const normalizeFeatures = (features: unknown): { list: string[] } | null => {
+  if (!features || typeof features !== "object") return null;
+  const list = (features as { list?: unknown }).list;
+  if (!Array.isArray(list)) return null;
+  const strings = list.filter(
+    (item): item is string => typeof item === "string" && item.trim() !== ""
+  );
+  return strings.length > 0 ? { list: strings } : null;
 };
 
 /**
  * Public plan catalog for the pricing page — derived from the Plan table so
- * admin edits (name, price, active toggle) show up immediately. Only ACTIVE
- * plans are listed; enterprise stays contact-sales only.
+ * admin edits (name, price, active toggle, features) show up immediately.
+ * Only ACTIVE plans are listed; enterprise stays contact-sales only.
  */
 export const getPublicCatalog = async (): Promise<{
   free: CatalogPlan;
@@ -95,9 +106,10 @@ export const getPublicCatalog = async (): Promise<{
       interval: string;
       active: boolean;
       stripePriceId: string | null;
+      features: unknown;
     }>
   >`
-    SELECT code, name, "priceCents", currency, interval, active, "stripePriceId"
+    SELECT code, name, "priceCents", currency, interval, active, "stripePriceId", features
     FROM "Plan"
     WHERE "isDeleted" = false
       AND active = true
@@ -113,6 +125,7 @@ export const getPublicCatalog = async (): Promise<{
       currency: plan.currency,
       interval: plan.interval,
       stripePriceId: plan.stripePriceId,
+      features: normalizeFeatures(plan.features),
     };
   };
 
@@ -123,6 +136,7 @@ export const getPublicCatalog = async (): Promise<{
       currency: "USD",
       interval: "month",
       stripePriceId: null,
+      features: null,
     },
     pro: {
       monthly: pick("pro_monthly"),

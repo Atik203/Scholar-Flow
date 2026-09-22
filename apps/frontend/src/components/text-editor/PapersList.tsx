@@ -4,6 +4,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ import {
   MoreVertical,
   Search,
   Trash2,
+  UserPlus,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -68,6 +70,10 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
   const [deletePaper] = useDeletePaperMutation();
 
   const papers = papersResponse?.data || [];
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Refetch when filter changes and session is ready
   useEffect(() => {
@@ -77,12 +83,13 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
   }, [activeFilter, session, refetch]);
 
   // Delete paper
-  const handleDelete = async (paperId: string) => {
-    if (!confirm("Are you sure you want to delete this paper?")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      await deletePaper(paperId).unwrap();
+      await deletePaper(deleteTarget.id).unwrap();
       showSuccessToast("Paper deleted successfully");
+      setDeleteTarget(null);
       refetch(); // Refresh the list
     } catch (error: any) {
       console.error("Error deleting paper:", error);
@@ -179,13 +186,29 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                     >
                       {paper.title || "Untitled Paper"}
                     </CardTitle>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Badge
                         variant={paper.isDraft ? "secondary" : "default"}
                         className="text-xs"
                       >
                         {paper.isDraft ? "Draft" : "Published"}
                       </Badge>
+                      {paper.accessType === "shared" && (
+                        <>
+                          <Badge
+                            variant="outline"
+                            className="text-xs border-primary/40 text-primary bg-primary/5"
+                          >
+                            <UserPlus className="h-3 w-3 mr-1" />
+                            Invited
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {paper.sharedPermission === "edit"
+                              ? "Can edit"
+                              : "View only"}
+                          </Badge>
+                        </>
+                      )}
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {formatDistanceToNow(new Date(paper.updatedAt), {
@@ -193,6 +216,11 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                         })}
                       </div>
                     </div>
+                    {paper.accessType === "shared" && paper.sharedByName && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Shared by {paper.sharedByName}
+                      </p>
+                    )}
                   </div>
 
                   <DropdownMenu>
@@ -204,16 +232,25 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onPaperSelect(paper.id)}>
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        {paper.accessType === "shared" ? "Open" : "Edit"}
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onClick={() => handleDelete(paper.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
+                      {paper.accessType !== "shared" && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() =>
+                              setDeleteTarget({
+                                id: paper.id,
+                                title: paper.title,
+                              })
+                            }
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -241,6 +278,20 @@ export function PapersList({ onPaperSelect }: PapersListProps) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete paper"
+        description={
+          deleteTarget
+            ? `"${deleteTarget.title}" will be deleted permanently. This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete paper"
+        destructive
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

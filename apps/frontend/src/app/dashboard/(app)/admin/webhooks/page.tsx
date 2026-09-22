@@ -4,15 +4,38 @@
  * Admin Webhooks Page
  */
 
-import { useState } from "react";
-import { Activity, Copy, Key, Plus, RefreshCw, RotateCcw, Trash2, Webhook, Zap } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  Activity,
+  Copy,
+  Eye,
+  EyeOff,
+  Loader2,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Trash2,
+  Webhook,
+  Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/customUI/PageHeader";
-import { useCreateEndpointMutation, useDeleteEndpointMutation, useListEndpointsQuery, useListEventTypesQuery, useRotateSecretMutation, useTestEndpointMutation } from "@/redux/api/adminWebhooksApi";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
+import { useCreateEndpointMutation, useDeleteEndpointMutation, useListEndpointsQuery, useListEventTypesQuery, useRotateSecretMutation, useTestEndpointMutation, type WebhookEndpoint } from "@/redux/api/adminWebhooksApi";
 import { showSuccessToast, showErrorToast } from "@/components/providers/ToastProvider";
 
 const STATUS_COLOR: Record<string, string> = {
@@ -20,6 +43,11 @@ const STATUS_COLOR: Record<string, string> = {
   INACTIVE: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400",
   ERROR: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
 };
+
+const maskSecret = (secret: string): string =>
+  secret.length > 14
+    ? `${secret.slice(0, 10)}${"•".repeat(16)}${secret.slice(-4)}`
+    : "•".repeat(secret.length);
 
 export default function AdminWebhooksPage() {
   const [showCreate, setShowCreate] = useState(false);
@@ -29,11 +57,66 @@ export default function AdminWebhooksPage() {
     isError: eventTypesError,
     refetch: refetchEventTypes,
   } = useListEventTypesQuery();
-  const [create] = useCreateEndpointMutation();
-  const [remove] = useDeleteEndpointMutation();
+  const [create, { isLoading: isCreating }] = useCreateEndpointMutation();
+  const [remove, { isLoading: isDeleting }] = useDeleteEndpointMutation();
   const [rotate] = useRotateSecretMutation();
   const [test] = useTestEndpointMutation();
-  const endpoints = data?.data ?? [];
+  const endpoints = useMemo(() => data?.data ?? [], [data]);
+
+  const [deleteTarget, setDeleteTarget] = useState<WebhookEndpoint | null>(
+    null
+  );
+  // Session-only raw secrets for endpoints created/rotated on this visit
+  const [revealedSecrets, setRevealedSecrets] = useState<
+    Record<string, string>
+  >({});
+  const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set());
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showSuccessToast("Copied", `${label} copied to clipboard`);
+    } catch {
+      showErrorToast("Copy failed", "Could not copy to clipboard");
+    }
+  };
+
+  const toggleVisible = (id: string) => {
+    setVisibleIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleRotate = async (endpoint: WebhookEndpoint) => {
+    try {
+      const result = await rotate(endpoint.id).unwrap();
+      setRevealedSecrets((prev) => ({
+        ...prev,
+        [endpoint.id]: result.data._secret,
+      }));
+      setVisibleIds((prev) => new Set(prev).add(endpoint.id));
+      showSuccessToast(
+        "Secret rotated",
+        "Copy the new secret from the list before leaving this page"
+      );
+    } catch {
+      showErrorToast("Failed", "Could not rotate secret");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await remove(deleteTarget.id).unwrap();
+      showSuccessToast("Deleted", "Webhook endpoint removed");
+      setDeleteTarget(null);
+    } catch {
+      showErrorToast("Failed", "Could not delete endpoint");
+    }
+  };
 
   const handleOpenCreate = () => {
     if (!eventTypes) {
@@ -128,9 +211,50 @@ export default function AdminWebhooksPage() {
                     <p className="text-xs text-muted-foreground">Events</p>
                     <p className="text-sm font-medium">{ep.events.length}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">Secret</p>
-                    <p className="text-sm font-mono">{ep.secretPrefix}…</p>
+                    {revealedSecrets[ep.id] ? (
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-mono truncate max-w-[200px]">
+                          {visibleIds.has(ep.id)
+                            ? revealedSecrets[ep.id]
+                            : maskSecret(revealedSecrets[ep.id])}
+                        </span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={() => toggleVisible(ep.id)}
+                          aria-label={
+                            visibleIds.has(ep.id)
+                              ? "Hide webhook secret"
+                              : "Show webhook secret"
+                          }
+                        >
+                          {visibleIds.has(ep.id) ? (
+                            <EyeOff className="h-3.5 w-3.5" />
+                          ) : (
+                            <Eye className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={() =>
+                            copyToClipboard(
+                              revealedSecrets[ep.id],
+                              `${ep.name} secret`
+                            )
+                          }
+                          aria-label={`Copy webhook secret for ${ep.name}`}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <p className="text-sm font-mono">{ep.secretPrefix}…</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -153,15 +277,7 @@ export default function AdminWebhooksPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={async () => {
-                      try {
-                        const result = await rotate(ep.id).unwrap();
-                        await navigator.clipboard.writeText(result.data._secret);
-                        showSuccessToast("Rotated", "New secret copied to clipboard");
-                      } catch {
-                        showErrorToast("Failed", "Could not rotate secret");
-                      }
-                    }}
+                    onClick={() => handleRotate(ep)}
                     className="gap-1"
                   >
                     <RotateCcw className="h-3 w-3" />
@@ -170,17 +286,9 @@ export default function AdminWebhooksPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={async () => {
-                      if (!confirm("Delete this webhook?")) return;
-                      try {
-                        await remove(ep.id).unwrap();
-                        showSuccessToast("Deleted", "Webhook endpoint removed");
-                        refetch();
-                      } catch {
-                        showErrorToast("Failed", "Could not delete endpoint");
-                      }
-                    }}
+                    onClick={() => setDeleteTarget(ep)}
                     className="text-red-600"
+                    aria-label={`Delete webhook ${ep.name}`}
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete
@@ -194,34 +302,60 @@ export default function AdminWebhooksPage() {
 
       {showCreate && eventTypes && (
         <CreateEndpointDialog
+          open={showCreate}
           events={eventTypes.data.events}
+          isLoading={isCreating}
           onClose={() => setShowCreate(false)}
           onCreate={async (payload) => {
             try {
               const result = await create(payload).unwrap();
-              showSuccessToast("Created", "Webhook endpoint created");
-              setShowCreate(false);
               if (result.data._secret) {
-                alert(
-                  `Save this secret now — you will not see it again:\n\n${result.data._secret}`
-                );
+                setRevealedSecrets((prev) => ({
+                  ...prev,
+                  [result.data.id]: result.data._secret,
+                }));
+                setVisibleIds((prev) => new Set(prev).add(result.data.id));
               }
+              setShowCreate(false);
+              showSuccessToast(
+                "Endpoint created",
+                "Copy the secret from the list before leaving this page"
+              );
             } catch {
               showErrorToast("Failed", "Could not create endpoint");
             }
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete webhook endpoint"
+        description={
+          deleteTarget
+            ? `"${deleteTarget.name}" and its delivery history will be removed.`
+            : ""
+        }
+        confirmLabel="Delete endpoint"
+        destructive
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
 
 function CreateEndpointDialog({
+  open,
   events,
+  isLoading,
   onClose,
   onCreate,
 }: {
+  open: boolean;
   events: Array<{ id: string; name: string; category: string }>;
+  isLoading: boolean;
   onClose: () => void;
   onCreate: (p: { name: string; url: string; events: string[] }) => void;
 }) {
@@ -229,74 +363,88 @@ function CreateEndpointDialog({
   const [url, setUrl] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
 
+  const toggleEvent = (id: string, checked: boolean) => {
+    setSelected((prev) =>
+      checked ? [...prev, id] : prev.filter((value) => value !== id)
+    );
+  };
+
+  const handleClose = () => {
+    setName("");
+    setUrl("");
+    setSelected([]);
+    onClose();
+  };
+
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card rounded-xl shadow-xl p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-xl font-bold mb-4">New webhook endpoint</h2>
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm font-medium">Name</label>
+    <Dialog open={open} onOpenChange={(next) => !next && handleClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>New webhook endpoint</DialogTitle>
+          <DialogDescription>
+            We will send signed POST requests to this URL for the selected
+            events.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="webhook-name">Name</Label>
             <Input
+              id="webhook-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Production API"
             />
           </div>
-          <div>
-            <label className="text-sm font-medium">URL</label>
+          <div className="space-y-2">
+            <Label htmlFor="webhook-url">URL</Label>
             <Input
+              id="webhook-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com/webhook"
             />
           </div>
-          <div>
-            <label className="text-sm font-medium">Events</label>
-            <div className="max-h-40 overflow-y-auto border rounded-md p-2 space-y-1 mt-1">
-              {events.map((e) => (
+          <div className="space-y-2">
+            <Label>Events</Label>
+            <div className="max-h-40 overflow-y-auto border rounded-md p-2 space-y-1">
+              {events.map((event) => (
                 <label
-                  key={e.id}
+                  key={event.id}
                   className="flex items-center gap-2 text-sm p-1.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(e.id)}
-                    onChange={(ev) =>
-                      setSelected(
-                        ev.target.checked
-                          ? [...selected, e.id]
-                          : selected.filter((s) => s !== e.id)
-                      )
+                  <Checkbox
+                    checked={selected.includes(event.id)}
+                    onCheckedChange={(checked) =>
+                      toggleEvent(event.id, checked === true)
                     }
+                    aria-label={`Toggle ${event.name}`}
                   />
-                  <span>{e.name}</span>
+                  <span>{event.name}</span>
                   <span className="text-xs text-muted-foreground ml-auto">
-                    {e.category}
+                    {event.category}
                   </span>
                 </label>
               ))}
             </div>
           </div>
         </div>
-        <div className="flex justify-end gap-2 mt-6">
-          <Button variant="outline" onClick={onClose}>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
-            disabled={!name || !url || selected.length === 0}
+            disabled={!name || !url || selected.length === 0 || isLoading}
             onClick={() => onCreate({ name, url, events: selected })}
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            Create
+            {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            Create endpoint
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

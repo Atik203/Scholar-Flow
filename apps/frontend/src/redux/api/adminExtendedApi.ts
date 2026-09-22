@@ -3,10 +3,16 @@
  */
 
 import { apiSlice } from "./apiSlice";
+import type { RootState } from "@/redux/store";
 
 // ============================================================================
 // Plans
 // ============================================================================
+
+export interface AdminPlanFeatures {
+  list?: string[];
+  limits?: Record<string, number>;
+}
 
 export interface AdminPlan {
   id: string;
@@ -16,7 +22,7 @@ export interface AdminPlan {
   currency: string;
   interval: string;
   stripePriceId: string | null;
-  features: unknown;
+  features: AdminPlanFeatures | null;
   active: boolean;
   activeSubscribers: number;
   canceledSubscribers: number;
@@ -43,6 +49,7 @@ export const adminPlansApi = apiSlice.injectEndpoints({
         currency: string;
         interval: "month" | "year";
         active?: boolean;
+        features?: AdminPlanFeatures;
       }
     >({
       query: (body) => ({ url: "/admin/plans", method: "POST", body }),
@@ -51,7 +58,18 @@ export const adminPlansApi = apiSlice.injectEndpoints({
 
     updatePlan: builder.mutation<
       { success: boolean; data: AdminPlan },
-      { id: string; patch: Partial<{ code: string; name: string; priceCents: number; currency: string; interval: string; active: boolean }> }
+      {
+        id: string;
+        patch: Partial<{
+          code: string;
+          name: string;
+          priceCents: number;
+          currency: string;
+          interval: string;
+          active: boolean;
+          features: AdminPlanFeatures;
+        }>;
+      }
     >({
       query: ({ id, patch }) => ({
         url: `/admin/plans/${id}`,
@@ -66,6 +84,19 @@ export const adminPlansApi = apiSlice.injectEndpoints({
       string
     >({
       query: (id) => ({ url: `/admin/plans/${id}`, method: "DELETE" }),
+      // Remove the card instantly; roll back if the server rejects
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          adminPlansApi.util.updateQueryData("listPlans", undefined, (draft) => {
+            draft.data = draft.data.filter((plan) => plan.id !== id);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
       invalidatesTags: [{ type: "Admin", id: "PLANS" }],
     }),
 
@@ -74,6 +105,20 @@ export const adminPlansApi = apiSlice.injectEndpoints({
       string
     >({
       query: (id) => ({ url: `/admin/plans/${id}/toggle`, method: "POST" }),
+      invalidatesTags: [{ type: "Admin", id: "PLANS" }],
+    }),
+
+    syncStripePlan: builder.mutation<
+      {
+        success: boolean;
+        data: { plan: AdminPlan; stripePriceId: string; created: boolean };
+      },
+      string
+    >({
+      query: (id) => ({
+        url: `/admin/plans/${id}/sync-stripe`,
+        method: "POST",
+      }),
       invalidatesTags: [{ type: "Admin", id: "PLANS" }],
     }),
   }),
@@ -85,6 +130,7 @@ export const {
   useUpdatePlanMutation,
   useDeletePlanMutation,
   useTogglePlanMutation,
+  useSyncStripePlanMutation,
 } = adminPlansApi;
 
 // ============================================================================
@@ -370,6 +416,29 @@ export const adminApiKeysApi = apiSlice
           url: `/admin/api-keys/${id}`,
           method: "DELETE",
         }),
+        // Remove the row from the cached list instantly; roll back on error
+        async onQueryStarted(id, { dispatch, getState, queryFulfilled }) {
+          const entries = adminApiKeysApi.util.selectInvalidatedBy(
+            getState() as RootState,
+            [{ type: "AdminApiKey", id: "LIST" }]
+          );
+          const patches = entries.map(({ originalArgs }) =>
+            dispatch(
+              adminApiKeysApi.util.updateQueryData(
+                "listApiKeys",
+                originalArgs,
+                (draft) => {
+                  draft.data = draft.data.filter((key) => key.id !== id);
+                }
+              )
+            )
+          );
+          try {
+            await queryFulfilled;
+          } catch {
+            patches.forEach((patch) => patch.undo());
+          }
+        },
         invalidatesTags: [{ type: "AdminApiKey", id: "LIST" }],
       }),
     }),
@@ -636,7 +705,10 @@ export const systemAlertsApi = apiSlice
           method: "POST",
           body,
         }),
-        invalidatesTags: [{ type: "SystemAlert", id: "LIST" }],
+        invalidatesTags: [
+          { type: "SystemAlert", id: "LIST" },
+          { type: "SystemAlert", id: "COUNTS" },
+        ],
       }),
     }),
   });

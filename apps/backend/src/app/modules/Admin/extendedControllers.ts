@@ -10,7 +10,6 @@ import { adminPlansService } from "./adminPlans.service";
 import { adminSettingsService } from "./adminSettings.service";
 import { adminSubscribersService } from "./adminSubscribers.service";
 import { systemAlertsService } from "./systemAlerts.service";
-import { CACHE_DURATIONS } from "./admin.constant";
 import { updateSystemSettingsSchema } from "./admin.validation";
 import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 
@@ -18,8 +17,10 @@ import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 export const adminPlansController = {
   list: catchAsync(async (_req: Request, res: Response) => {
     const items = await adminPlansService.listPlansWithStats();
+    // Admin CRUD list — must never be HTTP-cached or deletes/edits appear
+    // stale in the browser for the cache lifetime.
     res.set({
-      "Cache-Control": `private, max-age=${CACHE_DURATIONS.USER_ACTIVITY}`,
+      "Cache-Control": "private, no-store",
     });
     sendSuccessResponse(res, items, "Plans retrieved");
   }),
@@ -48,6 +49,19 @@ export const adminPlansController = {
     if (!id) throw new ApiError(400, "Plan id is required");
     const plan = await adminPlansService.toggleActive(id);
     sendSuccessResponse(res, plan, "Plan availability toggled");
+  }),
+
+  syncStripe: catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+    if (!id) throw new ApiError(400, "Plan id is required");
+    const result = await adminPlansService.syncPlanToStripe(id);
+    sendSuccessResponse(
+      res,
+      result,
+      result.created
+        ? "Plan linked to Stripe (new product + price created)"
+        : "Plan already linked to a valid Stripe price"
+    );
   }),
 };
 
@@ -137,9 +151,6 @@ export const adminPaymentsController = {
       search,
     });
     // Short TTL — refunds flip payment status, so stale caches mislead admins
-    res.set({
-      "Cache-Control": `private, max-age=30`,
-    });
     sendPaginatedResponse(
       res,
       result.items,
@@ -361,9 +372,6 @@ export const systemAlertsController = {
 export const adminSettingsController = {
   get: catchAsync(async (_req: Request, res: Response) => {
     const result = await adminSettingsService.getSettings();
-    res.set({
-      "Cache-Control": `private, max-age=30`,
-    });
     sendSuccessResponse(res, result, "System settings retrieved");
   }),
 

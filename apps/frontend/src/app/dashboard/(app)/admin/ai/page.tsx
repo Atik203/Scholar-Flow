@@ -46,6 +46,7 @@ import {
   showErrorToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
+import { ConfirmDialog } from "@/components/customUI/ConfirmDialog";
 import {
   useCreateAIProviderMutation,
   useDeleteAIProviderMutation,
@@ -78,6 +79,7 @@ export default function AdminAIPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [editing, setEditing] = useState<AIProviderRow | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AIProviderRow | null>(null);
   const [form, setForm] = useState<CreateAIProviderRequest>(emptyForm);
 
   const providers = data?.providers ?? [];
@@ -158,11 +160,12 @@ export default function AdminAIPage() {
     }
   };
 
-  const handleDelete = async (row: AIProviderRow) => {
-    if (!confirm(`Delete model "${row.displayName}"? This is a soft delete.`)) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteProvider(row.id).unwrap();
+      await deleteProvider(deleteTarget.id).unwrap();
       showSuccessToast("Model removed");
+      setDeleteTarget(null);
       refetch();
     } catch (err: any) {
       showErrorToast(err?.data?.message ?? "Failed to delete model");
@@ -346,7 +349,7 @@ export default function AdminAIPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(row)}
+                      onClick={() => setDeleteTarget(row)}
                       disabled={deleting || row.isDefault}
                       title={
                         row.isDefault
@@ -499,6 +502,20 @@ export default function AdminAIPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete AI model"
+        description={
+          deleteTarget
+            ? `"${deleteTarget.displayName}" will be removed from the catalog (soft delete). Users will no longer see it.`
+            : ""
+        }
+        confirmLabel="Delete model"
+        destructive
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import morgan from "morgan";
 import config from "./app/config";
 import { setupSwagger } from "./app/config/swagger";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
+import { rateLimitMax } from "./app/middleware/rateLimiter";
 import { healthCheck, routeNotFound } from "./app/middleware/routeHandler";
 import router from "./app/routes";
 import {
@@ -119,7 +120,7 @@ app.use(
 // Rate limiting (typing relaxed for dev boot)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
+  max: rateLimitMax(300),
   message: "Too many requests from this IP, please try again later.",
 });
 // Cast to any to avoid TS overload mismatch while bootstrapping
@@ -165,10 +166,14 @@ if (config.env !== "production") {
 import { performanceMonitor } from "./app/middleware/performanceMonitor";
 app.use(performanceMonitor as unknown as RequestHandler);
 
-// Cache control for GET API responses (Phase 9 Lighthouse optimization)
+// Cache control for API responses.
+// Authenticated API data is dynamic and user-scoped — never let the browser
+// serve a stale list after a mutation (this caused "hard reload required"
+// bugs across admin pages). Public endpoints that benefit from caching set
+// their own Cache-Control headers (e.g. billing catalog revalidation).
 const cacheControlMiddleware: import("express").RequestHandler = (req, res, next) => {
   if (req.method === "GET" && req.path.startsWith("/api/")) {
-    res.set("Cache-Control", "private, max-age=30");
+    res.set("Cache-Control", "private, no-store");
     res.set("Vary", "Authorization");
   }
   next();

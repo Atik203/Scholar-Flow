@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { Collaboration } from "@tiptap/extension-collaboration";
-import { CollaborationCursor } from "@tiptap/extension-collaboration-cursor";
 import { Highlight } from "@tiptap/extension-highlight";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { CharacterCount } from "@tiptap/extension-character-count";
@@ -18,6 +17,8 @@ import Link from "next/link";
 import { use, useEffect, useRef, useState } from "react";
 
 import { useCollabSync } from "@/lib/yjs/useCollabSync";
+import { CollaborationCursor } from "@/lib/yjs/collaborationCursor";
+import { useAppSelector } from "@/redux/hooks";
 import {
   useAutoSaveEditorContentMutation,
   useGetEditorPaperQuery,
@@ -54,13 +55,29 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
     initialContent: paper.contentHtml ?? null,
     enabled: true,
   });
+  const currentUserName =
+    useAppSelector((state) => state.auth.user?.name) || "Anonymous";
 
   const remoteUsers =
-    Array.from(awareness?.getStates?.() ?? []).map(([clientId, state]) => ({
+    Array.from(awareness.getStates()).map(([clientId, state]) => ({
       clientId,
       name: state?.user?.name || "Anonymous",
       color: state?.user?.color || "#666",
-    })).filter((u) => u.clientId !== ydoc?.clientID);
+    })).filter((u) => u.clientId !== ydoc.clientID);
+
+  // Awareness is not reactive on its own — bump a revision counter so the
+  // collaborator list re-renders when peers join/leave or move cursors.
+  const [, setAwarenessRevision] = useState(0);
+
+  useEffect(() => {
+    const handleAwarenessChange = () => {
+      setAwarenessRevision((revision) => revision + 1);
+    };
+    awareness.on("update", handleAwarenessChange);
+    return () => {
+      awareness.off("update", handleAwarenessChange);
+    };
+  }, [awareness]);
 
   const editor = useEditor(
     {
@@ -79,10 +96,10 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
         CharacterCount,
         Collaboration.configure({ document: ydoc }),
         CollaborationCursor.configure({
-          provider: awareness || undefined,
+          provider: { awareness },
           user: {
-            name: "Me",
-            color: getUserColor(ydoc?.clientID?.toString() ?? "0"),
+            name: currentUserName,
+            color: getUserColor(ydoc.clientID.toString()),
           },
         }),
       ],
@@ -179,7 +196,7 @@ function CollaborativeEditor({ paperId, paper }: { paperId: string; paper: { id:
         <div className="flex items-center -space-x-1.5">
           <div
             className="w-6 h-6 rounded-full border-2 border-background flex items-center justify-center text-[10px] font-bold text-white"
-            style={{ backgroundColor: getUserColor(ydoc?.clientID?.toString() ?? "0") }}
+            style={{ backgroundColor: getUserColor(ydoc.clientID.toString()) }}
             title="You"
           >
             M

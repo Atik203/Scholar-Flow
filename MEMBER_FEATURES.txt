@@ -1,6 +1,5 @@
 SCHOLAR-FLOW — MEMBER FEATURE CONTRIBUTIONS
-===========================================
-Latest Update — Release 1.3.6
+=
 
 1. MD. ATIKUR RAHMAN (ATIK)
 ---------------------------
@@ -62,3 +61,30 @@ ANNOTATIONS (RESEARCH MENU)
 - Highlight / underline / strikethrough with optional notes
 - Icon-only type picker, clamped popup, edit dialog, confirmed deletes
 - Annotation query retry + persistence, side panel opens only on xl screens
+
+
+3. Prottoy
+
+TEAM Menu
+- Team Members — member list with roles, lead-only role changes, safe removal
+- Team Invitations — invite with role (Viewer/Editor/Manager), sent/received
+  lists, resend/cancel, accept/decline
+- Team Activity — activity log + summary with member/date filters and cursor
+  pagination
+- Team Settings — lead-only team/workspace configuration
+- Team Access Gate — invited collaborators and workspace members get the Team
+  menu without global role promotion
+- Team Stats — member and workspace counters for the dashboard
+
+
+4. Sourov
+
+NOTIFICATIONS Menu
+- Real-time SSE stream — instant push of new notifications to the browser
+- Notification Bell — header bell with live unread count and popover list
+- Notifications List — read/unread states, star/unstar, delete and bulk delete
+- Mark as Read — single mark-as-read and mark-all-as-read
+- Notification Settings — channels, categories and quiet hours, persisted per
+  user
+- Team event notifications — invites, role changes, removals and workspace
+  events delivered in real time

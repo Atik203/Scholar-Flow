@@ -9,15 +9,11 @@ import catchAsync from "../../shared/catchAsync";
 import { toBoundedInt, toPositiveInt } from "../../shared/parseIntSafe";
 import sendResponse from "../../shared/sendResponse";
 import { AsyncAuthRequestHandler } from "../../types/express";
-import { ADMIN_SUCCESS_MESSAGES, CACHE_DURATIONS } from "./admin.constant";
+import { ADMIN_SUCCESS_MESSAGES } from "./admin.constant";
 import { IAdminFilters } from "./admin.interface";
 import { adminService } from "./admin.service";
 import { analyticsService } from "./analytics.service";
 import { userManagementService } from "./userManagement.service";
-
-// Admin responses carry user PII (emails, payments) — never shareable
-// via public caches, so Cache-Control must always be private.
-const privateCache = (maxAge: number) => `private, max-age=${maxAge}`;
 
 class AdminController {
   /**
@@ -27,13 +23,6 @@ class AdminController {
   getSystemStats: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const stats = await adminService.getSystemStats();
-
-      // Set cache headers for performance
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
-        "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -57,13 +46,6 @@ class AdminController {
       };
 
       const result = await adminService.getRecentUsers(filters);
-
-      // Set cache headers
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.RECENT_USERS),
-        "X-Cache-Duration": `${CACHE_DURATIONS.RECENT_USERS}s`,
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -86,13 +68,6 @@ class AdminController {
   getUserGrowthData: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const growthData = await adminService.getUserGrowthData();
-
-      // Set cache headers
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.GROWTH_DATA),
-        "X-Cache-Duration": `${CACHE_DURATIONS.GROWTH_DATA}s`,
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -109,10 +84,6 @@ class AdminController {
   getRoleDistribution: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const distribution = await adminService.getRoleDistribution();
-
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
-      });
 
       sendResponse(res, {
         statusCode: 200,
@@ -131,10 +102,6 @@ class AdminController {
     async (req: AuthRequest, res: Response) => {
       const paperStats = await adminService.getPaperStats();
 
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -152,11 +119,6 @@ class AdminController {
     async (req: AuthRequest, res: Response) => {
       const health = await adminService.getSystemHealth();
 
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.HEALTH_CHECK),
-        "X-Cache-Duration": `${CACHE_DURATIONS.HEALTH_CHECK}s`,
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -173,13 +135,6 @@ class AdminController {
   getSystemMetrics: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const metrics = await adminService.getSystemMetrics();
-
-      // Set aggressive cache for real-time monitoring (10 seconds)
-      res.set({
-        "Cache-Control": `private, max-age=10`,
-        "X-Cache-Duration": "10s",
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -275,13 +230,6 @@ class AdminController {
         ? (rawRange as "7d" | "30d" | "90d" | "1y")
         : "30d";
       const analytics = await analyticsService.getRevenueAnalytics(timeRange);
-
-      // Cache for 5 minutes - revenue data doesn't change frequently
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
-        "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
-      });
-
       sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -299,11 +247,6 @@ class AdminController {
     async (req: AuthRequest, res: Response) => {
       const limit = toBoundedInt(req.query.limit, 10, 50);
       const customers = await analyticsService.getTopCustomers(limit);
-
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.USER_ACTIVITY),
-        "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
-      });
 
       sendResponse(res, {
         statusCode: 200,
@@ -331,11 +274,6 @@ class AdminController {
         status,
         planId
       );
-
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.USER_ACTIVITY),
-        "X-Cache-Duration": `${CACHE_DURATIONS.USER_ACTIVITY}s`,
-      });
 
       sendResponse(res, {
         statusCode: 200,
@@ -371,11 +309,6 @@ class AdminController {
         role,
         status
       );
-
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.RECENT_USERS),
-        "X-Cache-Duration": `${CACHE_DURATIONS.RECENT_USERS}s`,
-      });
 
       sendResponse(res, {
         statusCode: 200,
@@ -431,11 +364,6 @@ class AdminController {
   getUserStats: AsyncAuthRequestHandler = catchAsync(
     async (req: AuthRequest, res: Response) => {
       const stats = await userManagementService.getUserStats();
-
-      res.set({
-        "Cache-Control": privateCache(CACHE_DURATIONS.SYSTEM_STATS),
-        "X-Cache-Duration": `${CACHE_DURATIONS.SYSTEM_STATS}s`,
-      });
 
       sendResponse(res, {
         statusCode: 200,

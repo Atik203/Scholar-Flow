@@ -297,16 +297,16 @@ export default function AdminSubscriptionsPage() {
                     }))}
                     margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground) / 0.15)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                       tickLine={false}
                       axisLine={false}
                       interval="preserveStartEnd"
                     />
                     <YAxis
-                      tick={{ fontSize: 11 }}
+                      tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                       tickLine={false}
                       axisLine={false}
                       width={56}
@@ -315,7 +315,15 @@ export default function AdminSubscriptionsPage() {
                       }
                     />
                     <Tooltip
-                      cursor={{ fill: "hsl(var(--muted) / 0.4)" }}
+                      cursor={{ fill: "var(--muted)", fillOpacity: 0.4 }}
+                      contentStyle={{
+                        fontSize: 12,
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        background: "var(--background)",
+                      }}
+                      labelStyle={{ color: "var(--muted-foreground)" }}
+                      itemStyle={{ color: "var(--foreground)" }}
                       formatter={(value, name) => [
                         `$${Number(value).toLocaleString(undefined, {
                           minimumFractionDigits: 2,
@@ -327,7 +335,7 @@ export default function AdminSubscriptionsPage() {
                     />
                     <Bar
                       dataKey="revenue"
-                      fill="hsl(var(--chart-1))"
+                      fill="var(--primary)"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
