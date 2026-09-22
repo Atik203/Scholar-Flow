@@ -1,27 +1,15 @@
 SCHOLAR-FLOW — MEMBER FEATURE CONTRIBUTIONS
-=
+-------------------------------------------
 
 1. MD. ATIKUR RAHMAN (ATIK)
 ---------------------------
 
 RESEARCH Modules
-- Research Hub — all research tools in one hub with role-based access
-- PDF Text Extraction — OCR/text extraction, live processing status, text viewer
 - Text Editor — TipTap editor: 7 templates, auto-save, PDF/DOCX export,
   S3 image upload, real-time collaboration
-- Citations — 9 formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver, ACS,
-  BibTeX, EndNote), export history, editor inserts saved as citations
-- Citation Graph — visual map of real citation links between papers (Pro)
-- Research Map — topic cloud built from library tags, with filtering (Pro)
+
 
 TEAMS Modules
-- Members — real status + last active, role changes, safe removal
-- Invitations — workspace invites (Viewer/Editor/Manager), resend/cancel,
-  accept/decline
-- Activity — audit trail with member/date filters + cursor pagination
-- Team Settings — lead-only team/workspace configuration
-- Derived Team Access — Team menu for invited collaborators/workspace members
-  without global role promotion
 - Real-time notifications — invite, decline, role-change and removal events
   pushed via SSE with user preferences respected
 
@@ -53,17 +41,33 @@ PAYMENT
 - Cancel Flow — self-serve cancellation
 - Grace-period Sweeper — hourly downgrade after grace window
 
+
+
+
+
 2. MD. SALMAN RAHMAN NAYEEM (SALMAN)
 ------------------------------------
 
-ANNOTATIONS (RESEARCH MENU)
+RESEARCH MENUS
+
 - Collapsible "Your Papers" panel (persisted, search, PDF filter, mobile drawer)
 - Highlight / underline / strikethrough with optional notes
 - Icon-only type picker, clamped popup, edit dialog, confirmed deletes
 - Annotation query retry + persistence, side panel opens only on xl screens
+- Research Hub — all research tools in one hub with role-based access
+- Citation Graph — visual map of real citation links between papers (Pro)
+- Research Map — topic cloud built from library tags, with filtering (Pro)
+- Citations — 9 formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver, ACS,
+  BibTeX, EndNote), export history, editor inserts saved as citations
+- PDF Text Extraction — OCR/text extraction, live processing status, text viewer
+
+UI TESTING
+
+
 
 
 3. Prottoy
+-------------
 
 TEAM Menu
 - Team Members — member list with roles, lead-only role changes, safe removal
@@ -77,7 +81,10 @@ TEAM Menu
 - Team Stats — member and workspace counters for the dashboard
 
 
+
+
 4. Sourov
+-------------
 
 NOTIFICATIONS Menu
 - Real-time SSE stream — instant push of new notifications to the browser
