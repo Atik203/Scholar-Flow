@@ -1239,56 +1239,17 @@ real data and real actions.
 
 ```mermaid
 flowchart TB
-    subgraph Client["Client Layer"]
-        B[Browser / PWA]
-    end
-
-    subgraph Frontend["Frontend — Next.js 16 (Vercel)"]
-        SSR[Server Components & Routes]
-        RTK[Redux Toolkit Query State]
-        ED[TipTap Editor + Y.js]
-    end
-
-    subgraph Backend["Backend — Express REST API"]
-        AUTH[Auth & RBAC Middleware]
-        MOD[30 Feature Modules]
-        JOBS[Background Jobs: PDF queue, sweeper, cron]
-    end
-
-    subgraph Realtime["Real-Time — Socket.io Server (Render)"]
-        ROOMS[Rooms: paper / discussion / workspace]
-        AW[Awareness & Presence]
-    end
-
-    subgraph Data["Data Layer"]
-        PG[(PostgreSQL + pgvector)]
-        REDIS[(Redis — queues & cache)]
-        S3[(AWS S3 — files)]
-    end
-
-    subgraph External["External Services"]
-        STRIPE[Stripe — billing]
-        AI[AI Providers — OpenAI / Gemini / Claude / DeepSeek]
-        FEEDS[Scholarly APIs — OpenAlex / arXiv]
-        MAIL[Email — Resend / SMTP]
-    end
-
-    B -->|HTTPS| SSR
-    SSR --> RTK
-    ED -->|WebSocket| ROOMS
-    RTK -->|REST /api| AUTH
-    AUTH --> MOD
-    MOD --> PG
-    MOD --> REDIS
-    MOD --> S3
-    MOD --> STRIPE
-    MOD --> AI
-    MOD --> FEEDS
-    MOD --> MAIL
-    JOBS --> PG
-    JOBS --> REDIS
-    ROOMS --> AW
-    MOD -.->|internal sync| ROOMS
+    B[Browser / PWA] -->|HTTPS| F[Next.js Frontend — Vercel]
+    F -->|REST /api| A[Express REST API]
+    F -->|WebSocket| R[Socket.io Real-Time Server — Render]
+    A --> DB[(PostgreSQL + pgvector)]
+    A --> RD[(Redis — queues and cache)]
+    A --> S3[(AWS S3 — files)]
+    A --> ST[Stripe — billing]
+    A --> AI[AI Providers — OpenAI / Gemini / Claude / DeepSeek]
+    A --> FD[Scholarly APIs — OpenAlex / arXiv]
+    A --> EM[Email — Resend / SMTP]
+    A -.->|sync| R
 ```
 
 ### 10.3 Frontend Architecture
