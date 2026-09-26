@@ -13,6 +13,10 @@ following section. Read it as continuous speech, not as separate blocks.
 visual, so slow, deliberate cursor movement matters more than ever — and the narration
 should sound warm and energetic to compensate for the missing face.
 
+**Talk through the loads.** When a page or panel is loading, keep speaking — the plan
+leaves only about a minute and a half of total silence, and that time belongs mostly to
+the realtime beat.
+
 ---
 
 ## 1. Before you record
@@ -79,8 +83,9 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 17 | GitHub — repository tour | 0:25 | 9:50 |
 | 18 | Close | 0:10 | 10:00 |
 
-Spoken words total ≈ **740**. At 1.73 words/second that is about **7:10 of speech**; the
-remaining **2:50** is clicks, loads, and deliberate silence while panels appear.
+Spoken words total ≈ **890**. At 1.73 words/second that is about **8:35 of speech**; the
+remaining **~1:25** is clicks, loads, and brief pauses — keep talking while panels load,
+and that time is covered.
 
 ---
 
@@ -113,7 +118,7 @@ second before and after the claim line — it is the promise of the video.)*
 
 *(End the scroll on the pricing/features area of the Home page.)*
 
-> ScholarFlow is more than a paper library.
+> And ScholarFlow is more than a paper library.
 > It is the reading tool, the writing tool, the citation manager, the AI assistant,
 > and the shared workspace — working together in one product.
 > And because research must be trusted, correctness, permissions, and payment safety
@@ -135,12 +140,13 @@ second before and after the claim line — it is the promise of the video.)*
 
 **[Action:** open the Upload page, drag one PDF in, let the metadata panel fill.**]**
 
-> This is the upload page. I drop a research paper here.
-> Watch the metadata panel.
-> The title, the authors, and the abstract appear on their own — extracted by AI from the
-> document.
-> I change nothing. I click publish.
-> The paper is now in my library, stored in secure cloud storage.
+> This is the upload page, and the paper is ready on my desktop.
+> I drop it here — and while it uploads, ScholarFlow reads the document in the
+> background.
+> Watch the metadata panel: the title, the authors, and the abstract appear on their
+> own, extracted by AI from the PDF.
+> I change nothing. I click publish, and the paper joins my library in secure cloud
+> storage.
 
 **Transition:** *Let me find it the way a researcher would — by meaning.*
 
@@ -148,32 +154,36 @@ second before and after the claim line — it is the promise of the video.)*
 
 **[Action:** open the library, type "language models hallucinate" in search.**]**
 
-> This is my library — every paper, with tags, status, and collections.
-> Now I search by meaning, not by exact words.
-> I type "language models hallucinate", and the system finds the relevant paper — even
+> This is my library — papers, tags, status, and collections.
+> But now I do not search by exact words; I search by meaning.
+> I type "language models hallucinate", and the system finds the relevant paper, even
 > though those words are not in its title.
-> That is semantic search, powered by vector embeddings.
+> That is semantic search, powered by vector embeddings — and it only searches papers I
+> am allowed to see.
 
 ### [3:10 – 3:50] Core 3 — Reading, highlighting, and notes
 
 **[Action:** open the paper, wait for the text view, highlight one sentence, add a short
 note. Pause while the popup appears.**]**
 
-> Here is the paper. The extracted text is ready, and the PDF preview is right here.
-> I select a sentence and highlight it. I add a short note.
+> Found it. Now let me read it.
+> The extracted text is ready, and the PDF preview is right here.
+> I select a sentence, highlight it, and add a short note.
 > I can also keep my own research notes beside the paper.
-> Everything I mark stays attached to this paper — for me, and for my team.
+> Everything I mark is saved instantly and stays attached — for me, and for my team.
 
 ### [3:50 – 4:50] Core 4 — AI summary, key points, and questions
 
 **[Action:** click Generate summary; let the card appear. Scroll to key points. Then ask
 "Which method did they use?" and let the answer stream.**]**
 
-> Now the AI layer. I click generate summary.
-> In a few seconds I get the key findings — in the tone and length I chose.
-> Below it, the key points: the main claims of the paper, extracted one by one.
-> And I can ask questions. For example: which method did they use?
-> The answer is grounded in this paper — not in the open internet.
+> Reading is only half the work; the hard part is understanding.
+> So let me open the AI layer. I click generate summary.
+> In a few seconds I get the key findings, in the tone and length I chose.
+> Below it are the key points — the main claims of the paper, extracted one by one.
+> And I can ask questions, like: which method did they use?
+> The answer comes from this paper's own text, not from the open internet.
+> That is the difference between a chatbot and a research assistant.
 
 ### [4:50 – 5:50] Core 5 — Writing: template, citation, export
 
@@ -181,12 +191,14 @@ note. Pause while the popup appears.**]**
 indicator. Insert a citation from the library. Open the export dialog and show the PDF
 download completing.**]**
 
-> Next, writing. I create a new paper from a template — this one is IEEE.
+> Understanding leads to writing — so let me write with it.
+> I create a new paper from a template; this one is IEEE.
 > The editor supports tables, images, and LaTeX math, and it saves automatically — watch
-> the save indicator.
-> I insert a citation from my library. It is added in the format I choose — one of nine
-> formats, including APA, IEEE, and BibTeX.
-> Finally, export. One click, and the paper becomes a real PDF, ready to share.
+> the save indicator. I never pressed save.
+> I insert a citation from my library, in the format I choose — one of nine formats,
+> including APA, IEEE, and BibTeX.
+> And when the draft is ready, one click exports a clean PDF.
+> Writing, references, and export — in one place.
 
 ### [5:50 – 6:55] Core 6 — Real-time co-editing (centerpiece)
 
@@ -194,22 +206,23 @@ download completing.**]**
 Move both cursors so both name labels are visible. Keep silent for two seconds after her
 text lands.**]**
 
-> This is the part I am most proud of — two people, one paper, at the same time.
+> A paper is rarely written alone — so let me show you the part I am most proud of.
 > On the left is my screen. On the right, my teammate Emily, in another browser.
-> When she types, I see it instantly. Her cursor carries her name; mine carries mine.
-> This is real-time co-editing, built directly into the research workflow.
-
-**Transition:** *And the same live system runs everything around the paper.*
+> Watch: when she types, the text appears on my screen instantly — no refresh, no
+> conflicts.
+> Her cursor carries her name; mine carries mine, so we always know who is where.
+> Two people, one paper, at the same time — real-time co-editing, built into the
+> research workflow.
 
 ### [6:55 – 7:30] Core 7 — Team invite and live notification
 
 **[Action:** open Team, send the prepared invite with the Editor role. Switch to the
 notification bell; the new notification arrives on its own.**]**
 
-> Collaboration also means management. I invite a new member and choose a role — Viewer,
-> Editor, or Manager.
+> And the same live system runs everything around the paper.
+> For example, I invite a new member and choose a role — Viewer, Editor, or Manager.
 > The moment I send it, the notification arrives in the bell, in real time.
-> Invitations, role changes, and removals all flow through the same live channel.
+> Invitations, role changes, and removals all flow through this same channel.
 
 ### [7:30 – 8:15] Core 8 — Payments and admin proof
 
@@ -217,12 +230,13 @@ notification bell; the new notification arrives on its own.**]**
 Return to Billing. Then switch to the admin tab and show the same payment in the admin
 payments list.**]**
 
-> Finally, the business side. I upgrade to the Pro plan.
-> This is Stripe Checkout — hosted by Stripe, so no card data touches our servers.
-> I use a test card. The payment succeeds.
+> Features like these need a business model, so here is the last piece — payments.
+> I upgrade to the Pro plan. This is Stripe Checkout, hosted by Stripe, so no card data
+> touches our servers.
+> I use a test card, and the payment succeeds.
 > The billing page shows my plan and my invoices.
-> And in the admin console, the same payment appears — because our backend processes
-> Stripe webhooks.
+> And in the admin console, the same payment appears instantly, because our backend
+> processes Stripe webhooks.
 
 ---
 
@@ -236,15 +250,16 @@ Supertest (API end-to-end). Access control and payment safety are quick live che
 
 **[Action:** open the tests terminal.**]**
 
-> That is the product. Now — how do we know it works? We test it.
+> That is the product. But how do we know it works? We test it.
 
 ### [8:20 – 8:55] Testing 1 — Automated tests (Jest + Supertest)
 
 **[Action:** show the test files (backend `src/__tests__`, frontend `src/__tests__`), then
 run `yarn test` and let the green summary land before speaking again.**]**
 
-> These are our automated tests. Jest for unit and integration, Supertest for API
-> end-to-end. They cover billing, payments, papers, validation, and access control.
+> We test it in two ways. These are the automated tests — Jest for unit and
+> integration, Supertest for API end-to-end.
+> They already cover billing, payments, papers, validation, and access control.
 > Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
 ### [8:55 – 9:10] Testing 2 — Access control
@@ -252,16 +267,16 @@ run `yarn test` and let the green summary land before speaking again.**]**
 **[Action:** as Michael, open the view-only paper and attempt an edit — show the
 refusal.**]**
 
-> Now one security check: a view-only colleague tries to edit — the server refuses.
-> Four oh three.
+> Next, one live security check: a view-only colleague tries to edit — the server
+> refuses. Four oh three.
 
 ### [9:10 – 9:25] Testing 3 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
 
-> For payments, webhooks are the source of truth. I replay the same event twice — the
-> subscription changes once, because handlers are idempotent.
+> And money deserves the same care: for payments, webhooks are the source of truth.
+> I replay the same event twice — the subscription changes only once.
 
 ---
 
@@ -276,10 +291,10 @@ contribution, proper versioned releases, and the live deployment.**
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
 deployment link. Move the cursor slowly; let each page land before speaking.**]**
 
-> Before we finish, one last look — our GitHub.
+> Before we finish, one last look — our GitHub — because the process matters too.
 > Sprint-based development, contributions from every member, and every version
-> properly released.
-> The product is deployed live.
+> released properly.
+> And the product is deployed live.
 
 ### [9:50 – 10:00] Close
 
@@ -315,7 +330,8 @@ Pause for one full second after every number.
 - Drop the last sentence of: Core 1, Core 3, Core 7, Testing 3 (payment safety). **Never
   shorten Core 6 (realtime).**
 - Never speed up; keep the 1.73 words/second pace. A calm pause reads as confidence.
-- If a panel loads slowly, stay silent and let it land. Do not fill the silence.
+- If a panel loads slowly, keep speaking — describe what is loading. The only planned
+  silence is the realtime beat, where the sync speaks for itself.
 
 ## 9. Delivery tips
 
@@ -323,8 +339,8 @@ Pause for one full second after every number.
   deliberately, and let every panel land before you speak.
 - In editing, add short on-screen captions for the three key numbers
   (9 citation formats · 59 automated tests · 0 lint errors) so they are unmissable.
-- In the automated-tests beat, let the green summary land before you speak again — the
-  passing suites are the message.
+- In the automated-tests beat, keep talking while the suite runs, then let the green
+  summary land as your closing line.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
 - In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
   live deployment — one page per sentence.
