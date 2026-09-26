@@ -60,7 +60,7 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | - | ------- | ---- | ------- |
 | 1 | Intro — hook (Home page) | 0:20 | 0:20 |
 | 2 | Intro — what it is | 0:25 | 0:45 |
-| 3 | Intro — what you will see | 0:40 | 1:25 |
+| 3 | Intro — built to be trusted | 0:40 | 1:25 |
 | 4 | Intro — setup line | 0:15 | 1:40 |
 | 5 | Core 1 — upload + AI metadata | 0:45 | 2:25 |
 | 6 | Core 2 — library + semantic search | 0:35 | 3:00 |
@@ -83,7 +83,7 @@ remaining **2:25** is clicks, loads, and deliberate silence while panels appear.
 
 ## 3. Introduction (0:00 – 1:40)
 
-**Purpose: this is the first thing judges see. Hook first, explain second, promise third.**
+**Purpose: this is the first thing faculty see. Hook first, explain second, build trust third.**
 
 ### [0:00 – 0:20] Hook — open on the ScholarFlow Home page
 
@@ -105,15 +105,15 @@ through the hero section while speaking, calm and deliberate.)*
 > and collaborate on it in real time.
 > One platform, instead of four or more tools.
 
-### [0:45 – 1:25] What you will see — finish the Home page scroll
+### [0:45 – 1:25] Built to be trusted — finish the Home page scroll
 
 *(End the scroll on the pricing/features area of the Home page.)*
 
-> In the next ten minutes, I will show you three things.
-> First, the product — the research workflow, from upload to export.
-> Second, the teamwork — live co-editing, notifications, and payments.
-> Third, the testing — how we verify that all of this is correct, safe, and fast.
-> There are no slides. Everything you will see is the real system.
+> ScholarFlow is more than a paper library.
+> It is the reading tool, the writing tool, the citation manager, the AI assistant,
+> and the shared workspace — working together in one product.
+> And because research must be trusted, correctness, permissions, and payment safety
+> are engineered in from the start.
 
 ### [1:25 – 1:40] Setup line — switch to the app
 
