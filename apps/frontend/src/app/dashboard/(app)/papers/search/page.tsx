@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SemanticMatches } from "@/components/search/SemanticMatches";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGlobalSearchQuery } from "@/redux/api/searchApi";
 import { motion } from "motion/react";
@@ -55,6 +56,9 @@ export default function SearchPapersPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Semantic (meaning) matches — vector search over paper chunks */}
+      {activeQuery && <SemanticMatches query={activeQuery} />}
 
       {/* Results */}
       {activeQuery && (
