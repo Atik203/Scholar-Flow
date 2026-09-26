@@ -115,8 +115,10 @@ yarn db:seed             → seed database
 yarn db:reset            → prisma migrate reset --force
 yarn setup               → install + generate (use for fresh setup)
 
-Note: `yarn test` was removed (test suites deleted by decision — tests are
-not used; CI runs lint + type-check + build only).
+Note: `yarn test` runs the Jest suites — backend (unit + integration +
+Supertest API E2E) and frontend (helpers, reducers, validators — mocked, no
+DB): 21 suites / 59 tests, all green. Keep it green; CI runs test + lint +
+type-check + build.
 
 ---
 
