@@ -223,7 +223,17 @@ export const searchApi = apiSlice.injectEndpoints({
     }),
 
     semanticSearch: builder.query<
-      { results: Array<{ id: string; paperId: string; content: string; title: string | null; distance: number }>; fallback: string | null },
+      {
+        results: Array<{
+          id: string;
+          paperId: string;
+          content: string;
+          title: string | null;
+          page: number | null;
+          distance: number;
+        }>;
+        fallback: string | null;
+      },
       { q: string; limit?: number; workspaceId?: string }
     >({
       query: (params) => {
@@ -232,6 +242,19 @@ export const searchApi = apiSlice.injectEndpoints({
         if (params.workspaceId) queryParams.append('workspaceId', params.workspaceId);
         return `/search/semantic?${queryParams.toString()}`;
       },
+      transformResponse: (response: {
+        data: {
+          results: Array<{
+            id: string;
+            paperId: string;
+            content: string;
+            title: string | null;
+            page: number | null;
+            distance: number;
+          }>;
+          fallback: string | null;
+        };
+      }) => response.data,
     }),
 
     // Phase D.2 — Perplexity-style AI summary
