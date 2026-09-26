@@ -99,12 +99,13 @@ through the hero section while speaking, calm and deliberate.)*
 ### [0:20 – 0:45] What it is — Home page feature sections
 
 *(Keep a slow scroll through the Home page sections. Add one small caption overlay:
-**ScholarFlow — AI-Powered Research Collaboration · Team Phantom Devs**.)*
+**ScholarFlow — AI-Powered Research Collaboration · Team Phantom Devs**. Pause for one
+second before and after the claim line — it is the promise of the video.)*
 
 > Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow.
 > Upload a paper, understand it with AI, annotate it, write with it, cite it,
 > and collaborate on it in real time.
-> One platform, instead of four or more tools.
+> No existing tool combines all of these. ScholarFlow is the first.
 
 ### [0:45 – 1:25] Built to be trusted — finish the Home page scroll
 
