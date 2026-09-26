@@ -45,6 +45,7 @@ import {
   type SearchResults,
   type SearchTabType,
 } from "@/redux/api/searchApi";
+import { SemanticMatches } from "@/components/search/SemanticMatches";
 import { useAuth } from "@/redux/auth/useAuth";
 import { USER_ROLES } from "@/lib/auth/roles";
 
@@ -232,6 +233,11 @@ export default function GlobalSearchPage() {
           sources={citationSources}
           fallback={aiResult?.fallback}
         />
+      )}
+
+      {/* Semantic (meaning) matches — vector search over paper chunks */}
+      {activeQuery && (tab === "all" || tab === "papers") && (
+        <SemanticMatches query={activeQuery} />
       )}
 
       {/* Results */}
