@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Script (10:00, Solo Narration)
 
-Total time: **10:00**. Introduction: **1:40** · Core features demo: **6:10** · Testing demo: **2:10**.
+Total time: **10:00**. Introduction: **1:35** · Core features demo: **6:00** · Testing demo: **1:50** · GitHub & close: **0:35**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
 minute**) — the measured pace from the HaluRISC recording pass. All timings below come from
@@ -60,29 +60,29 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | - | ------- | ---- | ------- |
 | 1 | Intro — hook (Home page) | 0:20 | 0:20 |
 | 2 | Intro — what it is | 0:25 | 0:45 |
-| 3 | Intro — built to be trusted | 0:40 | 1:25 |
-| 4 | Intro — setup line | 0:15 | 1:40 |
-| 5 | Core 1 — upload + AI metadata | 0:45 | 2:25 |
-| 6 | Core 2 — library + semantic search | 0:35 | 3:00 |
-| 7 | Core 3 — PDF + annotations | 0:40 | 3:40 |
-| 8 | Core 4 — AI summary, key points, Q&A | 0:55 | 4:35 |
-| 9 | Core 5 — editor + citation + export | 0:55 | 5:30 |
-| 10 | Core 6 — realtime co-editing (two windows) | 1:00 | 6:30 |
-| 11 | Core 7 — team invite + live notification | 0:35 | 7:05 |
-| 12 | Core 8 — Stripe checkout + admin proof | 0:45 | 7:50 |
-| 13 | Testing 0 — transition | 0:10 | 8:00 |
-| 14 | Testing 1 — quality gates | 0:20 | 8:20 |
-| 15 | Testing 2 — health + query budget | 0:25 | 8:45 |
-| 16 | Testing 3 — access control (403 / 404 / revoke) | 0:40 | 9:25 |
-| 17 | Testing 4 — webhook idempotency + sweeper | 0:25 | 9:50 |
-| 18 | Close | 0:10 | 10:00 |
+| 3 | Intro — built to be trusted | 0:35 | 1:20 |
+| 4 | Intro — setup line | 0:15 | 1:35 |
+| 5 | Core 1 — upload + AI metadata | 0:40 | 2:15 |
+| 6 | Core 2 — library + semantic search | 0:35 | 2:50 |
+| 7 | Core 3 — PDF + annotations | 0:35 | 3:25 |
+| 8 | Core 4 — AI summary, key points, Q&A | 0:55 | 4:20 |
+| 9 | Core 5 — editor + citation + export | 0:55 | 5:15 |
+| 10 | Core 6 — realtime co-editing (two windows) | 1:00 | 6:15 |
+| 11 | Core 7 — team invite + live notification | 0:35 | 6:50 |
+| 12 | Core 8 — Stripe checkout + admin proof | 0:45 | 7:35 |
+| 13 | Testing 0 — transition | 0:10 | 7:45 |
+| 14 | Testing 1 — quality gates | 0:20 | 8:05 |
+| 15 | Testing 2 — health + query budget | 0:20 | 8:25 |
+| 16 | Testing 3 — access control (403 / 404 / revoke) | 0:40 | 9:05 |
+| 17 | Testing 4 — webhook idempotency + sweeper | 0:20 | 9:25 |
+| 18 | GitHub & engineering practice — repo tour + close | 0:35 | 10:00 |
 
-Spoken words total ≈ **790**. At 1.73 words/second that is about **7:35 of speech**; the
-remaining **2:25** is clicks, loads, and deliberate silence while panels appear.
+Spoken words total ≈ **840**. At 1.73 words/second that is about **8:05 of speech**; the
+remaining **1:55** is clicks, loads, and deliberate silence while panels appear.
 
 ---
 
-## 3. Introduction (0:00 – 1:40)
+## 3. Introduction (0:00 – 1:35)
 
 **Purpose: this is the first thing faculty see. Hook first, explain second, build trust third.**
 
@@ -107,7 +107,7 @@ second before and after the claim line — it is the promise of the video.)*
 > and collaborate on it in real time.
 > No existing tool combines all of these. ScholarFlow is the first.
 
-### [0:45 – 1:25] Built to be trusted — finish the Home page scroll
+### [0:45 – 1:20] Built to be trusted — finish the Home page scroll
 
 *(End the scroll on the pricing/features area of the Home page.)*
 
@@ -117,7 +117,7 @@ second before and after the claim line — it is the promise of the video.)*
 > And because research must be trusted, correctness, permissions, and payment safety
 > are engineered in from the start.
 
-### [1:25 – 1:40] Setup line — switch to the app
+### [1:20 – 1:35] Setup line — switch to the app
 
 *(Switch to the logged-in dashboard as Bob.)*
 
@@ -127,9 +127,9 @@ second before and after the claim line — it is the promise of the video.)*
 
 ---
 
-## 4. Core Features Demo (1:40 – 7:50)
+## 4. Core Features Demo (1:35 – 7:35)
 
-### [1:40 – 2:25] Core 1 — Upload and automatic metadata
+### [1:35 – 2:15] Core 1 — Upload and automatic metadata
 
 **[Action:** open the Upload page, drag one PDF in, let the metadata panel fill.**]**
 
@@ -142,7 +142,7 @@ second before and after the claim line — it is the promise of the video.)*
 
 **Transition:** *Let me find it the way a researcher would — by meaning.*
 
-### [2:25 – 3:00] Core 2 — Library and semantic search
+### [2:15 – 2:50] Core 2 — Library and semantic search
 
 **[Action:** open the library, type "language models hallucinate" in search.**]**
 
@@ -152,7 +152,7 @@ second before and after the claim line — it is the promise of the video.)*
 > though those words are not in its title.
 > That is semantic search, powered by vector embeddings.
 
-### [3:00 – 3:40] Core 3 — Reading, highlighting, and notes
+### [2:50 – 3:25] Core 3 — Reading, highlighting, and notes
 
 **[Action:** open the paper, wait for the text view, highlight one sentence, add a short
 note. Pause while the popup appears.**]**
@@ -162,7 +162,7 @@ note. Pause while the popup appears.**]**
 > I can also keep my own research notes beside the paper.
 > Everything I mark stays attached to this paper — for me, and for my team.
 
-### [3:40 – 4:35] Core 4 — AI summary, key points, and questions
+### [3:25 – 4:20] Core 4 — AI summary, key points, and questions
 
 **[Action:** click Generate summary; let the card appear. Scroll to key points. Then ask
 "Which method did they use?" and let the answer stream.**]**
@@ -173,7 +173,7 @@ note. Pause while the popup appears.**]**
 > And I can ask questions. For example: which method did they use?
 > The answer is grounded in this paper — not in the open internet.
 
-### [4:35 – 5:30] Core 5 — Writing: template, citation, export
+### [4:20 – 5:15] Core 5 — Writing: template, citation, export
 
 **[Action:** create a new paper from the IEEE template. Type two lines. Show the save
 indicator. Insert a citation from the library. Open the export dialog and show the PDF
@@ -186,7 +186,7 @@ download completing.**]**
 > formats, including APA, IEEE, and BibTeX.
 > Finally, export. One click, and the paper becomes a real PDF, ready to share.
 
-### [5:30 – 6:30] Core 6 — Real-time co-editing (centerpiece)
+### [5:15 – 6:15] Core 6 — Real-time co-editing (centerpiece)
 
 **[Action:** show both windows side by side. Emily types; the text appears on Bob's screen.
 Move both cursors so both name labels are visible. Keep silent for two seconds after her
@@ -199,7 +199,7 @@ text lands.**]**
 
 **Transition:** *And the same live system runs everything around the paper.*
 
-### [6:30 – 7:05] Core 7 — Team invite and live notification
+### [6:15 – 6:50] Core 7 — Team invite and live notification
 
 **[Action:** open Team, send the prepared invite with the Editor role. Switch to the
 notification bell; the new notification arrives on its own.**]**
@@ -209,7 +209,7 @@ notification bell; the new notification arrives on its own.**]**
 > The moment I send it, the notification arrives in the bell, in real time.
 > Invitations, role changes, and removals all flow through the same live channel.
 
-### [7:05 – 7:50] Core 8 — Payments and admin proof
+### [6:50 – 7:35] Core 8 — Payments and admin proof
 
 **[Action:** open Pricing, choose Pro, land on Stripe Checkout, pay with the test card.
 Return to Billing. Then switch to the admin tab and show the same payment in the admin
@@ -224,16 +224,16 @@ payments list.**]**
 
 ---
 
-## 5. Testing Demo (7:50 – 10:00)
+## 5. Testing Demo (7:35 – 9:25)
 
-### [7:50 – 8:00] Transition — Why testing matters
+### [7:35 – 7:45] Transition — Why testing matters
 
 **[Action:** open the gates terminal.**]**
 
 > That is the product. Now — how do we know it is correct?
 > We test in three layers: automated gates, live system health, and security.
 
-### [8:00 – 8:20] Testing 1 — Quality gates
+### [7:45 – 8:05] Testing 1 — Quality gates
 
 **[Action:** run `yarn type-check && yarn lint`. Let the green summary lines sit on screen
 before speaking.**]**
@@ -244,16 +244,16 @@ before speaking.**]**
 > errors.
 > This runs before anything ships.
 
-### [8:20 – 8:45] Testing 2 — Health and query budget
+### [8:05 – 8:25] Testing 2 — Health and query budget
 
 **[Action:** open `/api/health/detailed` (or the admin health page). Then switch to the
 backend log and scroll to show there are no slow-query warnings.**]**
 
 > This is the health endpoint — database, memory, and services, all green.
 > The backend log tracks every slow database query.
-> Our budget is fifty milliseconds, and right now, nothing exceeds it.
+> Our budget is fifty milliseconds, and nothing exceeds it.
 
-### [8:45 – 9:25] Testing 3 — Access control
+### [8:25 – 9:05] Testing 3 — Access control
 
 **[Action:** as Michael, open the view-only paper and attempt an edit — show the refusal.
 Open the draft's public link — show the friendly not-found page. Back as Bob, revoke a
@@ -266,28 +266,44 @@ share and show access dropping immediately.**]**
 > no data leaks.
 > Three: when I revoke a share, access disappears immediately.
 
-### [9:25 – 9:50] Testing 4 — Payment safety
+### [9:05 – 9:25] Testing 4 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
 
 > For payments, webhooks are the source of truth.
-> I replay the same event twice — the subscription changes once, because every handler is
-> idempotent.
-> And a scheduled sweeper handles failed payments after a grace period.
+> I replay the same event twice — the subscription changes once. Handlers are idempotent,
+> and a sweeper handles failed payments after a grace period.
 
-### [9:50 – 10:00] Close
+---
 
-**[Action:** return to the dashboard and let it sit on screen. Pause for one beat before
-the last two lines.**]**
+## 6. GitHub & Engineering Practice (9:25 – 10:00)
 
-> That is ScholarFlow: one platform for the whole research workflow — built, tested, and
-> ready.
+**Purpose: show the process behind the product — sprint workflow, every team member's
+contribution, proper versioned releases, and the live deployment.**
+
+### [9:25 – 9:55] The repository tour
+
+**[Action:** switch to the browser and open the GitHub repository. Scroll the README
+slowly, then open **Insights → Contributors**, then **Releases**, then the live
+deployment link from the repo description. Move the cursor slowly; let each page land
+before speaking.**]**
+
+> Before we finish, one last look — our GitHub.
+> Sprint-based development: every feature in its own branch and pull request, with
+> contributions from every member.
+> Every version was released properly, and the product is deployed live.
+
+### [9:55 – 10:00] Close
+
+**[Action:** return to the dashboard and let it sit on screen.**]**
+
+> That is ScholarFlow — built by a team, released step by step, and running today.
 > Thank you for watching.
 
 ---
 
-## 6. Number cheat sheet
+## 7. Number cheat sheet
 
 | Item | Value |
 | ---- | ----- |
@@ -306,20 +322,22 @@ Pause for one full second after every number.
 
 ---
 
-## 7. If you fall behind
+## 8. If you fall behind
 
 - Drop the last sentence of: Core 1, Core 3, Core 7, Testing 2. **Never shorten Core 6
   (realtime).**
 - Never speed up; keep the 1.73 words/second pace. A calm pause reads as confidence.
 - If a panel loads slowly, stay silent and let it land. Do not fill the silence.
 
-## 8. Delivery tips
+## 9. Delivery tips
 
 - Camera is off, so the screen is the only visual: move the cursor slowly and
   deliberately, and let every panel land before you speak.
 - In editing, add short on-screen captions for the three key numbers
   (9 citation formats · 50 ms query budget · 0 lint errors) so they are unmissable.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
+- In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
+  live deployment — one page per sentence.
 - Keep Zoom at 110% so every label is readable.
 - The intro is the real Home page — rehearse one slow scroll pass so the sections line up
   with your three sentences. There is no montage to cut.
