@@ -70,11 +70,12 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 10 | Core 6 — realtime co-editing (two windows) | 1:00 | 6:30 |
 | 11 | Core 7 — team invite + live notification | 0:35 | 7:05 |
 | 12 | Core 8 — Stripe checkout + admin proof | 0:45 | 7:50 |
-| 13 | Testing 1 — quality gates | 0:30 | 8:20 |
-| 14 | Testing 2 — health + query budget | 0:25 | 8:45 |
-| 15 | Testing 3 — access control (403 / 404 / revoke) | 0:40 | 9:25 |
-| 16 | Testing 4 — webhook idempotency + sweeper | 0:25 | 9:50 |
-| 17 | Close | 0:10 | 10:00 |
+| 13 | Testing 0 — transition | 0:10 | 8:00 |
+| 14 | Testing 1 — quality gates | 0:20 | 8:20 |
+| 15 | Testing 2 — health + query budget | 0:25 | 8:45 |
+| 16 | Testing 3 — access control (403 / 404 / revoke) | 0:40 | 9:25 |
+| 17 | Testing 4 — webhook idempotency + sweeper | 0:25 | 9:50 |
+| 18 | Close | 0:10 | 10:00 |
 
 Spoken words total ≈ **790**. At 1.73 words/second that is about **7:35 of speech**; the
 remaining **2:25** is clicks, loads, and deliberate silence while panels appear.
@@ -224,12 +225,14 @@ payments list.**]**
 
 ## 5. Testing Demo (7:50 – 10:00)
 
-**Transition — open the gates terminal:**
+### [7:50 – 8:00] Transition — Why testing matters
+
+**[Action:** open the gates terminal.**]**
 
 > That is the product. Now — how do we know it is correct?
 > We test in three layers: automated gates, live system health, and security.
 
-### [7:50 – 8:20] Testing 1 — Quality gates
+### [8:00 – 8:20] Testing 1 — Quality gates
 
 **[Action:** run `yarn type-check && yarn lint`. Let the green summary lines sit on screen
 before speaking.**]**
