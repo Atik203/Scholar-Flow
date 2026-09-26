@@ -17,6 +17,7 @@
     "build": "corepack enable 2>/dev/null; turbo run build",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
+    "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
     "format": "prettier --write \"**/*.{js,ts,tsx,md,json}\"",
     "setup": "yarn install --immutable && yarn workspace @scholar-flow/backend prisma generate --sql",
