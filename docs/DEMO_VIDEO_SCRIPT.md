@@ -9,6 +9,10 @@ that rate, so they hold without rushing.
 Every sentence connects to the next, and each section ends on a line that sets up the
 following section. Read it as continuous speech, not as separate blocks.
 
+**Camera is off.** This is a voice-over + screen recording. The screen carries every
+visual, so slow, deliberate cursor movement matters more than ever — and the narration
+should sound warm and energetic to compensate for the missing face.
+
 ---
 
 ## 1. Before you record
@@ -35,15 +39,18 @@ following section. Read it as continuous speech, not as separate blocks.
 
 ### Screens and terminals to open before recording
 
-1. Frontend at 110% zoom, bookmarks bar hidden, notifications off (Do Not Disturb on).
+1. Home page open in the first tab at 110% zoom; bookmarks bar hidden, notifications off
+   (Do Not Disturb on). The logged-in dashboard open in the next tab.
 2. Terminal A — repo root, for the quality gates (`yarn type-check`, `yarn lint`).
 3. Terminal B — backend log (`yarn dev:backend` output), for the slow-query check.
 4. Terminal C — `stripe listen` output, for the webhook replay.
 5. Browser window 1 — Bob (main). Window 2 — Emily (realtime). Tab — Michael, plus an
    admin tab.
 6. A second monitor or a side-by-side layout for the realtime beat — both windows visible.
+7. Recorder: screen-only capture at 1920×1080, **webcam off**, microphone on — all
+   narration is voice-over.
 
-Tip: never open `.env` files on camera. Keep every terminal scrolled to a clean spot.
+Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean spot.
 
 ---
 
@@ -51,7 +58,7 @@ Tip: never open `.env` files on camera. Keep every terminal scrolled to a clean 
 
 | # | Segment | Time | Running |
 | - | ------- | ---- | ------- |
-| 1 | Intro — hook (montage) | 0:20 | 0:20 |
+| 1 | Intro — hook (Home page) | 0:20 | 0:20 |
 | 2 | Intro — what it is | 0:25 | 0:45 |
 | 3 | Intro — what you will see | 0:40 | 1:25 |
 | 4 | Intro — setup line | 0:15 | 1:40 |
@@ -78,26 +85,29 @@ remaining **2:25** is clicks, loads, and deliberate silence while panels appear.
 
 **Purpose: this is the first thing judges see. Hook first, explain second, promise third.**
 
-### [0:00 – 0:20] Hook — play the montage
+### [0:00 – 0:20] Hook — open on the ScholarFlow Home page
 
-*(Pre-edit 4 fast cuts: dashboard → editor auto-saving → two cursors moving → AI summary
-appearing. Speak over it, calm and slow.)*
+*(The real Home page is on screen from frame one — no montage, no cuts. Scroll slowly
+through the hero section while speaking, calm and deliberate.)*
 
 > Every researcher knows this feeling.
 > Papers live in one app. Notes in another. Citations somewhere else.
 > And the AI knows nothing about your actual work.
 > This is the problem ScholarFlow solves.
 
-### [0:20 – 0:45] What it is — title card on screen
+### [0:20 – 0:45] What it is — Home page feature sections
 
-*(Title card: **ScholarFlow — AI-Powered Research Collaboration** · **Team Phantom Devs**.)*
+*(Keep a slow scroll through the Home page sections. Add one small caption overlay:
+**ScholarFlow — AI-Powered Research Collaboration · Team Phantom Devs**.)*
 
 > Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow.
 > Upload a paper, understand it with AI, annotate it, write with it, cite it,
 > and collaborate on it in real time.
 > One platform, instead of four or more tools.
 
-### [0:45 – 1:25] What you will see — slow dashboard pan
+### [0:45 – 1:25] What you will see — finish the Home page scroll
+
+*(End the scroll on the pricing/features area of the Home page.)*
 
 > In the next ten minutes, I will show you three things.
 > First, the product — the research workflow, from upload to export.
@@ -105,7 +115,9 @@ appearing. Speak over it, calm and slow.)*
 > Third, the testing — how we verify that all of this is correct, safe, and fast.
 > There are no slides. Everything you will see is the real system.
 
-### [1:25 – 1:40] Setup line — transition into the demo
+### [1:25 – 1:40] Setup line — switch to the app
+
+*(Switch to the logged-in dashboard as Bob.)*
 
 > I am logged in as Bob, a team lead.
 > My library already has papers, and my team is active.
@@ -262,7 +274,8 @@ subscription changing only once.**]**
 
 ### [9:50 – 10:00] Close
 
-**[Action:** return to the dashboard. Look at the camera for the last two lines.**]**
+**[Action:** return to the dashboard and let it sit on screen. Pause for one beat before
+the last two lines.**]**
 
 > That is ScholarFlow: one platform for the whole research workflow — built, tested, and
 > ready.
@@ -298,10 +311,14 @@ Pause for one full second after every number.
 
 ## 8. Delivery tips
 
-- Speak to the camera on the first line and the last line; point at the screen in between.
+- Camera is off, so the screen is the only visual: move the cursor slowly and
+  deliberately, and let every panel land before you speak.
+- In editing, add short on-screen captions for the three key numbers
+  (9 citation formats · 50 ms query budget · 0 lint errors) so they are unmissable.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
 - Keep Zoom at 110% so every label is readable.
-- Record the intro montage separately and cut it in during editing.
+- The intro is the real Home page — rehearse one slow scroll pass so the sections line up
+  with your three sentences. There is no montage to cut.
 - Rehearse only the transitions; they are what make the video feel connected:
   - Into core: *"Let me start with the most common task: adding a new paper."*
   - Into realtime: *"This is the part I am most proud of…"*
