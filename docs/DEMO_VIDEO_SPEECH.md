@@ -14,9 +14,9 @@ Every researcher knows this feeling. Papers live in one app. Notes in another. C
 
 Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow. Upload a paper, understand it with AI, annotate it, write with it, cite it, and collaborate on it in real time. One platform, instead of four or more tools.
 
-### What You Will See
+### Built to Be Trusted
 
-In the next ten minutes, I will show you three things. First, the product — the research workflow, from upload to export. Second, the teamwork — live co-editing, notifications, and payments. Third, the testing — how we verify that all of this is correct, safe, and fast. There are no slides. Everything you will see is the real system.
+ScholarFlow is more than a paper library. It is the reading tool, the writing tool, the citation manager, the AI assistant, and the shared workspace — working together in one product. And because research must be trusted, correctness, permissions, and payment safety are engineered in from the start.
 
 ### Setup
 
