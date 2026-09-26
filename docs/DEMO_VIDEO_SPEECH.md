@@ -12,7 +12,7 @@ Every researcher knows this feeling. Papers live in one app. Notes in another. C
 
 ### What ScholarFlow Is (0:20 – 0:45)
 
-Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow. Upload a paper, understand it with AI, annotate it, write with it, cite it, and collaborate on it in real time. One platform, instead of four or more tools.
+Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow. Upload a paper, understand it with AI, annotate it, write with it, cite it, and collaborate on it in real time. No existing tool combines all of these. ScholarFlow is the first.
 
 ### Built to Be Trusted (0:45 – 1:25)
 
