@@ -2,8 +2,6 @@
 
 **Team Phantom Devs** · Total duration: **10:00** (Introduction 1:40 · Core Features Demo 6:35 · Testing + GitHub 1:45)
 
-*Keep talking while pages load — only about a minute and a half of this video is silence.*
-
 ---
 
 ## Introduction (0:00 – 1:40)
