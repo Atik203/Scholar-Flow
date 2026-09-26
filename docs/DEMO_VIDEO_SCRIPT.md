@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Script (10:00, Solo Narration)
 
-Total time: **10:00**. Introduction: **1:40** · Core features demo: **6:10** · Testing demo: **1:30** · GitHub & close: **0:40**.
+Total time: **10:00**. Introduction: **1:40** · Core features demo: **6:35** · Testing + GitHub: **1:45**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
 minute**) — the measured pace from the HaluRISC recording pass. All timings below come from
@@ -64,23 +64,23 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 2 | Intro — what it is | 0:25 | 0:45 |
 | 3 | Intro — built to be trusted | 0:40 | 1:25 |
 | 4 | Intro — setup line | 0:15 | 1:40 |
-| 5 | Core 1 — upload + AI metadata | 0:45 | 2:25 |
-| 6 | Core 2 — library + semantic search | 0:35 | 3:00 |
-| 7 | Core 3 — PDF + annotations | 0:40 | 3:40 |
-| 8 | Core 4 — AI summary, key points, Q&A | 0:55 | 4:35 |
-| 9 | Core 5 — editor + citation + export | 0:55 | 5:30 |
-| 10 | Core 6 — realtime co-editing (two windows) | 1:00 | 6:30 |
-| 11 | Core 7 — team invite + live notification | 0:35 | 7:05 |
-| 12 | Core 8 — Stripe checkout + admin proof | 0:45 | 7:50 |
-| 13 | Testing 0 — transition | 0:10 | 8:00 |
-| 14 | Testing 1 — automated tests (Jest + Supertest) | 0:35 | 8:35 |
-| 15 | Testing 2 — access control (403 / 404) | 0:25 | 9:00 |
-| 16 | Testing 3 — webhook idempotency + sweeper | 0:20 | 9:20 |
-| 17 | GitHub & engineering practice — repo tour | 0:30 | 9:50 |
+| 5 | Core 1 — upload + AI metadata | 0:50 | 2:30 |
+| 6 | Core 2 — library + semantic search | 0:40 | 3:10 |
+| 7 | Core 3 — PDF + annotations | 0:40 | 3:50 |
+| 8 | Core 4 — AI summary, key points, Q&A | 1:00 | 4:50 |
+| 9 | Core 5 — editor + citation + export | 1:00 | 5:50 |
+| 10 | Core 6 — realtime co-editing (two windows) | 1:05 | 6:55 |
+| 11 | Core 7 — team invite + live notification | 0:35 | 7:30 |
+| 12 | Core 8 — Stripe checkout + admin proof | 0:45 | 8:15 |
+| 13 | Testing 0 — transition | 0:05 | 8:20 |
+| 14 | Testing 1 — automated tests (Jest + Supertest) | 0:35 | 8:55 |
+| 15 | Testing 2 — access control (403) | 0:15 | 9:10 |
+| 16 | Testing 3 — payment safety (replay) | 0:15 | 9:25 |
+| 17 | GitHub — repository tour | 0:25 | 9:50 |
 | 18 | Close | 0:10 | 10:00 |
 
-Spoken words total ≈ **780**. At 1.73 words/second that is about **7:30 of speech**; the
-remaining **2:30** is clicks, loads, and deliberate silence while panels appear.
+Spoken words total ≈ **740**. At 1.73 words/second that is about **7:10 of speech**; the
+remaining **2:50** is clicks, loads, and deliberate silence while panels appear.
 
 ---
 
@@ -129,9 +129,9 @@ second before and after the claim line — it is the promise of the video.)*
 
 ---
 
-## 4. Core Features Demo (1:40 – 7:50)
+## 4. Core Features Demo (1:40 – 8:15)
 
-### [1:40 – 2:25] Core 1 — Upload and automatic metadata
+### [1:40 – 2:30] Core 1 — Upload and automatic metadata
 
 **[Action:** open the Upload page, drag one PDF in, let the metadata panel fill.**]**
 
@@ -144,7 +144,7 @@ second before and after the claim line — it is the promise of the video.)*
 
 **Transition:** *Let me find it the way a researcher would — by meaning.*
 
-### [2:25 – 3:00] Core 2 — Library and semantic search
+### [2:30 – 3:10] Core 2 — Library and semantic search
 
 **[Action:** open the library, type "language models hallucinate" in search.**]**
 
@@ -154,7 +154,7 @@ second before and after the claim line — it is the promise of the video.)*
 > though those words are not in its title.
 > That is semantic search, powered by vector embeddings.
 
-### [3:00 – 3:40] Core 3 — Reading, highlighting, and notes
+### [3:10 – 3:50] Core 3 — Reading, highlighting, and notes
 
 **[Action:** open the paper, wait for the text view, highlight one sentence, add a short
 note. Pause while the popup appears.**]**
@@ -164,7 +164,7 @@ note. Pause while the popup appears.**]**
 > I can also keep my own research notes beside the paper.
 > Everything I mark stays attached to this paper — for me, and for my team.
 
-### [3:40 – 4:35] Core 4 — AI summary, key points, and questions
+### [3:50 – 4:50] Core 4 — AI summary, key points, and questions
 
 **[Action:** click Generate summary; let the card appear. Scroll to key points. Then ask
 "Which method did they use?" and let the answer stream.**]**
@@ -175,7 +175,7 @@ note. Pause while the popup appears.**]**
 > And I can ask questions. For example: which method did they use?
 > The answer is grounded in this paper — not in the open internet.
 
-### [4:35 – 5:30] Core 5 — Writing: template, citation, export
+### [4:50 – 5:50] Core 5 — Writing: template, citation, export
 
 **[Action:** create a new paper from the IEEE template. Type two lines. Show the save
 indicator. Insert a citation from the library. Open the export dialog and show the PDF
@@ -188,7 +188,7 @@ download completing.**]**
 > formats, including APA, IEEE, and BibTeX.
 > Finally, export. One click, and the paper becomes a real PDF, ready to share.
 
-### [5:30 – 6:30] Core 6 — Real-time co-editing (centerpiece)
+### [5:50 – 6:55] Core 6 — Real-time co-editing (centerpiece)
 
 **[Action:** show both windows side by side. Emily types; the text appears on Bob's screen.
 Move both cursors so both name labels are visible. Keep silent for two seconds after her
@@ -201,7 +201,7 @@ text lands.**]**
 
 **Transition:** *And the same live system runs everything around the paper.*
 
-### [6:30 – 7:05] Core 7 — Team invite and live notification
+### [6:55 – 7:30] Core 7 — Team invite and live notification
 
 **[Action:** open Team, send the prepared invite with the Editor role. Switch to the
 notification bell; the new notification arrives on its own.**]**
@@ -211,7 +211,7 @@ notification bell; the new notification arrives on its own.**]**
 > The moment I send it, the notification arrives in the bell, in real time.
 > Invitations, role changes, and removals all flow through the same live channel.
 
-### [7:05 – 7:50] Core 8 — Payments and admin proof
+### [7:30 – 8:15] Core 8 — Payments and admin proof
 
 **[Action:** open Pricing, choose Pro, land on Stripe Checkout, pay with the test card.
 Return to Billing. Then switch to the admin tab and show the same payment in the admin
@@ -226,15 +226,19 @@ payments list.**]**
 
 ---
 
-## 5. Testing Demo (7:50 – 9:20)
+## 5. Testing Demo (8:15 – 9:25)
 
-### [7:50 – 8:00] Transition — Why testing matters
+**Purpose: the automated test suite is the main part — billing, payments, papers,
+validation, and access control are all covered by Jest (unit + integration) and
+Supertest (API end-to-end). Access control and payment safety are quick live checks.**
+
+### [8:15 – 8:20] Transition — Why testing matters
 
 **[Action:** open the tests terminal.**]**
 
 > That is the product. Now — how do we know it works? We test it.
 
-### [8:00 – 8:35] Testing 1 — Automated tests (Jest + Supertest)
+### [8:20 – 8:55] Testing 1 — Automated tests (Jest + Supertest)
 
 **[Action:** show the test files (backend `src/__tests__`, frontend `src/__tests__`), then
 run `yarn test` and let the green summary land before speaking again.**]**
@@ -242,50 +246,47 @@ run `yarn test` and let the green summary land before speaking again.**]**
 > These are our automated tests. Jest for unit and integration, Supertest for API
 > end-to-end. They cover billing, payments, papers, validation, and access control.
 > Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
-> The same pipeline checks the build, the types, and zero lint errors.
 
-### [8:35 – 9:00] Testing 2 — Access control
+### [8:55 – 9:10] Testing 2 — Access control
 
-**[Action:** as Michael, open the view-only paper and attempt an edit — show the refusal.
-Then open the draft's public link — show the friendly not-found page.**]**
+**[Action:** as Michael, open the view-only paper and attempt an edit — show the
+refusal.**]**
 
-> Now security. A view-only colleague tries to edit — the server refuses. Four oh three.
-> And a draft paper's public link gives a clean not-found page — no data leaks.
+> Now one security check: a view-only colleague tries to edit — the server refuses.
+> Four oh three.
 
-### [9:00 – 9:20] Testing 3 — Payment safety
+### [9:10 – 9:25] Testing 3 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
 
-> For payments, webhooks are the source of truth.
-> I replay the same event twice — the subscription changes once. Handlers are idempotent,
-> and a sweeper handles failed payments after a grace period.
+> For payments, webhooks are the source of truth. I replay the same event twice — the
+> subscription changes once, because handlers are idempotent.
 
 ---
 
-## 6. GitHub & Engineering Practice (9:20 – 10:00)
+## 6. GitHub & Engineering Practice (9:25 – 10:00)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
 contribution, proper versioned releases, and the live deployment.**
 
-### [9:20 – 9:50] The repository tour
+### [9:25 – 9:50] The repository tour
 
 **[Action:** switch to the browser and open the GitHub repository. Scroll the README
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
-deployment link from the repo description. Move the cursor slowly; let each page land
-before speaking.**]**
+deployment link. Move the cursor slowly; let each page land before speaking.**]**
 
 > Before we finish, one last look — our GitHub.
-> Sprint-based development: every feature in its own branch and pull request, with
-> contributions from every member.
-> Every version was released properly, and the product is deployed live.
+> Sprint-based development, contributions from every member, and every version
+> properly released.
+> The product is deployed live.
 
 ### [9:50 – 10:00] Close
 
 **[Action:** return to the dashboard and let it sit on screen.**]**
 
-> That is ScholarFlow — built by a team, released step by step, and running today.
-> Thank you for watching.
+> That is ScholarFlow — built by a team and released step by step. Thank you for
+> watching.
 
 ---
 
