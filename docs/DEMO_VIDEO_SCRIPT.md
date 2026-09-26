@@ -90,9 +90,9 @@ appearing. Speak over it, calm and slow.)*
 
 ### [0:20 – 0:45] What it is — title card on screen
 
-*(Title card: **ScholarFlow — AI-Powered Research Collaboration**.)*
+*(Title card: **ScholarFlow — AI-Powered Research Collaboration** · **Team Phantom Devs**.)*
 
-> ScholarFlow is one place for the full research workflow.
+> Our team is Phantom Devs, and ScholarFlow is one place for the full research workflow.
 > Upload a paper, understand it with AI, annotate it, write with it, cite it,
 > and collaborate on it in real time.
 > One platform, instead of four or more tools.
