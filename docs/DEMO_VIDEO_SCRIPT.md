@@ -21,14 +21,18 @@ the realtime beat.
 
 ## 1. Before you record
 
-### Accounts (all passwords: `password123`)
+### Accounts (password: `password123` for all)
 
-| Role | Account | Used for |
-| ---- | ------- | -------- |
-| Main presenter | `teamlead@scholarflow.com` (Bob) | Entire core demo |
-| Co-editor | `emily.carter@scholarflow.com` (Emily) | Realtime scene (second browser) |
-| View-only colleague | `michael.chen@scholarflow.com` (Michael) | Access-control test (403) |
-| Administrator | `admin@scholarflow.com` | Admin console tour (metrics, reports, audit) |
+| Role | Account | Password | Used for |
+| ---- | ------- | -------- | -------- |
+| Main presenter | `teamlead@scholarflow.com` (Bob) | `password123` | Entire core demo |
+| Co-editor | `emily.carter@scholarflow.com` (Emily) | `password123` | Realtime scene (second browser) |
+| View-only colleague | `michael.chen@scholarflow.com` (Michael) | `password123` | Access-control test (403) |
+| Administrator | `admin@scholarflow.com` | `password123` | Admin console tour (metrics, reports, audit) |
+
+Other demo accounts (same password `password123`): `pro.researcher@scholarflow.com`,
+`researcher@scholarflow.com`, `sofia.rodriguez@scholarflow.com`,
+`david.okafor@scholarflow.com`, `aisha.khan@scholarflow.com`, `lucas.meyer@scholarflow.com`.
 
 ### Data to prepare
 
@@ -109,7 +113,43 @@ load, and that time is covered.
 
 ---
 
-## 3. Introduction (0:00 – 1:40)
+## 3. Cue cards — what to do, in this order
+
+*(Quick operational reference for recording. The full speech is in the numbered
+sections below — these cards tell you which screen, which action, and how each beat
+starts.)*
+
+| # | At | On screen | Do this | Start saying |
+| - | -- | --------- | ------- | ------------ |
+| 1 | 0:00 | Home page (tab 1) | Slow scroll through the hero | "Every researcher knows this feeling…" |
+| 2 | 0:20 | Home page | Keep scrolling the feature sections | "Our team is Phantom Devs…" |
+| 3 | 0:45 | Home page | End the scroll on pricing/features | "And ScholarFlow is more than a paper library…" |
+| 4 | 1:25 | Dashboard (tab 2, logged in as Bob) | Switch to the app tab | "I am logged in as Bob…" |
+| 5 | 1:40 | Upload page | Drag **ASB.pdf** in → wait for the metadata panel → Publish | "This is the upload page…" |
+| 6 | 2:30 | Library | Type **"language models hallucinate"** | "This is my library…" |
+| 7 | 3:10 | Search result | Add the paper to **"Agent Security"** | "Search finds the paper…" |
+| 8 | 3:35 | Import → Discover | Paste the prepared arXiv link → open Discover → Save to Library | "And where do new papers come from?" |
+| 9 | 4:15 | ASB paper | Wait for the text view → highlight a sentence → add a short note | "Found it. Now let me read it." |
+| 10 | 4:55 | Paper AI panel | Generate summary (cached) → key points → ask **"Which method did they use?"** | "Reading is only half the work…" |
+| 11 | 5:55 | Comparator → Literature Review | Compare **ASB + ToolGate** → generate review over **"Agent Security"** | "And the AI works across papers…" |
+| 12 | 6:30 | Editor | New paper from the **IEEE** template → type two lines → insert a citation → Export PDF | "Understanding leads to writing…" |
+| 13 | 7:30 | Two browser windows | Emily types → move both cursors so names show → stay silent for two seconds | "A paper is rarely written alone…" |
+| 14 | 8:35 | Team → bell | Send the prepared invite (**Editor** role) → open the bell | "And the same live system…" |
+| 15 | 9:10 | Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Features like these need a business model…" |
+| 16 | 9:55 | Admin tab | Metrics → Reports → Audit Log → Settings (quick) | "And behind the product is the operator view." |
+| 17 | 10:25 | Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
+| 18 | 11:10 | Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
+| 19 | 11:25 | Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
+| 20 | 11:40 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
+| 21 | 12:05 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
+
+**Rules while recording:** keep the cursor slow; one numbered row at a time; keep
+talking while anything loads; if a step fails, move on to the next row — do not restart
+the whole take.
+
+---
+
+## 4. Introduction (0:00 – 1:40)
 
 **Purpose: this is the first thing faculty see. Hook first, explain second, build trust third.**
 
@@ -154,7 +194,7 @@ second before and after the claim line — it is the promise of the video.)*
 
 ---
 
-## 4. Core Features Demo (1:40 – 10:25)
+## 5. Core Features Demo (1:40 – 10:25)
 
 ### [1:40 – 2:30] Core 1 — Upload and automatic metadata
 
@@ -311,7 +351,7 @@ database), then open Reports, the Audit Log, and Settings quickly.**]**
 
 ---
 
-## 5. Testing Demo (10:25 – 11:40)
+## 6. Testing Demo (10:25 – 11:40)
 
 **Purpose: the automated test suite is the main part — billing, payments, papers,
 validation, and access control are all covered by Jest (unit + integration) and
@@ -351,7 +391,7 @@ subscription changing only once.**]**
 
 ---
 
-## 6. GitHub & Engineering Practice (11:40 – 12:15)
+## 7. GitHub & Engineering Practice (11:40 – 12:15)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
 contribution, proper versioned releases, and the live deployment.**
@@ -378,7 +418,7 @@ deployment link. Move the cursor slowly; let each page land before speaking.**]*
 
 ---
 
-## 7. Number cheat sheet
+## 8. Number cheat sheet
 
 | Item | Value |
 | ---- | ----- |
@@ -399,7 +439,7 @@ Pause for one full second after every number.
 
 ---
 
-## 8. If you fall behind
+## 9. If you fall behind
 
 - Drop the last sentence of: Core 1, Core 5, Core 10, Testing 3 (payment safety).
   **Never shorten Core 9 (realtime).**
@@ -407,7 +447,7 @@ Pause for one full second after every number.
 - If a panel loads slowly, keep speaking — describe what is loading. The only planned
   silence is the realtime beat, where the sync speaks for itself.
 
-## 9. Delivery tips
+## 10. Delivery tips
 
 - Camera is off, so the screen is the only visual: move the cursor slowly and
   deliberately, and let every panel land before you speak.
