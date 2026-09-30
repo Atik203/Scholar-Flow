@@ -24,7 +24,7 @@ I am logged in as Bob, a team lead. My library already has papers, and my team i
 
 ---
 
-## Core Features Demo (1:40 – 10:25)
+## Papers (1:40 – 4:30)
 
 ### 1. Upload and Automatic Metadata (1:40 – 2:30)
 
@@ -36,45 +36,85 @@ Let me find it the way a researcher would — by meaning.
 
 This is my library — papers, tags, status, and collections. But now I do not search by exact words; I search by meaning. I type "language models hallucinate", and the system finds the relevant paper, even though those words are not in its title. That is semantic search, powered by vector embeddings — and it only searches papers I am allowed to see.
 
-### 3. Collections (3:10 – 3:35)
+### 3. Reading and Annotating (3:10 – 3:40)
 
-Search finds the paper; collections keep it organized. I add it to a collection — or create a new one, like "Thesis Reading". And collections carry permissions, so I can share a whole collection with my team. Every paper keeps its own tags and status, so a collection stays a clean, curated list.
+Here is one of those papers. The extracted text is ready, and the PDF preview is right here. I highlight a sentence, and add a short note. Everything I mark stays attached to the paper — for me, and for my team.
 
-### 4. Discover and Import (3:35 – 4:15)
+### 4. Ask the Paper (3:40 – 4:05)
+
+You saw the summary and the key points when this paper was uploaded — so let me ask it a real question instead. Which method did they use? The answer comes from this paper's own text, not from the open internet — that is the difference between a chatbot and a research assistant.
+
+### 5. Compare Two Papers (4:05 – 4:30)
+
+And for two papers, I can ask for a comparison: ASB against ToolGate — where do they agree, and where do they differ? This is exactly what a related-work section needs.
+
+That is the Papers module — now let me organize what I found.
+
+---
+
+## Collections (4:30 – 5:30)
+
+### 1. Organize and Share (4:30 – 5:00)
+
+This is the Collections module, where papers become organized projects. I add this paper to "Agent Security" — or create a new collection, like "Thesis Reading". Collections carry permissions, so I can share a whole collection with my team. Every paper keeps its own tags and status, so a collection stays a clean, curated list.
+
+### 2. Literature Review over a Collection (5:00 – 5:30)
+
+And a whole collection can work as one input. I select "Agent Security" and ask for a literature review draft. The AI synthesises all of these papers into one structured overview — a first draft of the related-work section, in seconds.
+
+Collections stay organized; Discover brings new papers in.
+
+---
+
+## Discover (5:30 – 6:10)
 
 And where do new papers come from? Two ways. First, import: I paste a DOI or an arXiv link, and the paper and its metadata are fetched automatically. Second, discovery: this is the Discover feed — live trending papers and recommendations based on my reading. One click saves it to my library. And the import runs the same AI metadata extraction, so a new paper arrives ready to read.
 
-### 5. Reading, Highlighting, and Notes (4:15 – 4:55)
+That is research work — now the team.
 
-Found it. Now let me read it. The extracted text is ready, and the PDF preview is right here. I select a sentence, highlight it, and add a short note. I can also keep my own research notes beside the paper. Everything I mark is saved instantly and stays attached — for me, and for my team.
+---
 
-### 6. AI Summary, Key Points, and Questions (4:55 – 5:55)
+## Workspace (6:10 – 7:05)
 
-Reading is only half the work; the hard part is understanding. So let me open the AI layer. I click generate summary. In a few seconds I get the key findings, in the tone and length I chose. I can also regenerate it with a different tone — for a general audience, or a technical one. Below it are the key points — the main claims of the paper, extracted one by one. And I can ask questions, like: which method did they use? The answer comes from this paper's own text, not from the open internet. That is the difference between a chatbot and a research assistant.
+### 1. Members and Roles (6:10 – 6:35)
 
-### 7. AI Compare and Literature Review (5:55 – 6:30)
+Now the Workspace module — where the team lives. This is our ML workspace: the members, their roles, and the papers we share. Everyone sees exactly what their role allows.
 
-And the AI works across papers, not just inside one. I select two papers and compare them — the model shows where they agree and where they disagree. Over a whole collection, I can generate a literature review draft — a synthesis of many papers in seconds. This is the part that saves days of reading: instead of opening fifty tabs, I get one structured overview — and I can still open every source behind it.
+### 2. Invite and Live Notification (6:35 – 7:05)
 
-### 8. Writing: Template, Citation, Export (6:30 – 7:30)
+I invite a new member and choose a role — Viewer, Editor, or Manager. The moment I send it, the notification arrives in the bell, in real time. Invitations, role changes, and removals all flow through the same live channel.
 
-Understanding leads to writing — so let me write with it. I create a new paper from a template; this one is IEEE. The editor supports tables, images, and LaTeX math, and it saves automatically — watch the save indicator. I never pressed save. I insert a citation from my library, in the format I choose — one of nine formats, including APA, IEEE, and BibTeX. And when the draft is ready, one click exports a clean PDF. Writing, references, and export — in one place.
+And the same live system runs the writing itself.
 
-### 9. Real-Time Co-Editing (7:30 – 8:35)
+---
+
+## Research (7:05 – 9:25)
+
+### 1. Editor: Template, Citation, Export (7:05 – 7:55)
+
+Now the Research module — this is where the writing happens. I create a new paper from a template; this one is IEEE. The editor supports tables, images, and LaTeX math, and it saves automatically — watch the save indicator. I never pressed save. I insert a citation from my library, in the format I choose — one of nine formats, including APA, IEEE, and BibTeX. And when the draft is ready, one click exports a clean PDF.
+
+### 2. Real-Time Co-Editing (7:55 – 8:50)
 
 A paper is rarely written alone — so let me show you the part I am most proud of. On the left is my screen. On the right, my teammate Emily, in another browser. Watch: when she types, the text appears on my screen instantly — no refresh, no conflicts. Her cursor carries her name; mine carries mine, so we always know who is where. Two people, one paper, at the same time — real-time co-editing, built into the research workflow.
 
-### 10. Team Invite and Live Notification (8:35 – 9:10)
+### 3. Citation Graph and Research Map (8:50 – 9:25)
 
-And the same live system runs everything around the paper. For example, I invite a new member and choose a role — Viewer, Editor, or Manager. The moment I send it, the notification arrives in the bell, in real time. Invitations, role changes, and removals all flow through this same channel.
+The Research module also maps the literature. This is the citation graph: every arrow is a real reference between papers in my library — ASB cites ToolGate. And the research map turns my tags into a topic cloud, so I can see where the literature is dense.
 
-### 11. Payments and Billing (9:10 – 9:55)
+Every module you saw is the product; payments keep it running.
 
-Features like these need a business model, so here is the last piece — payments. I upgrade to the Pro plan. This is Stripe Checkout, hosted by Stripe, so no card data touches our servers. I use a test card, and the payment succeeds. The billing page shows my plan and my invoices. And in the admin console, the same payment appears instantly, because our backend processes Stripe webhooks.
+---
 
-### 12. Admin Console (9:55 – 10:25)
+## Payments (9:25 – 10:05)
 
-And behind the product is the operator view. This is the admin console: real-time system metrics — CPU, memory, storage, and database. Reports with exports, the audit log, and platform settings. And every action is recorded, so nothing happens silently. Everything an operator needs, on real data.
+I upgrade to the Pro plan. This is Stripe Checkout, hosted by Stripe, so no card data touches our servers. I use a test card, and the payment succeeds. The billing page shows my plan and my invoices. And the admin console picks the payment up instantly, through webhooks.
+
+---
+
+## Admin (10:05 – 10:25)
+
+And behind the product is the operator view: live system metrics, reports, the audit log, and platform settings. Everything an admin needs, on real data.
 
 ---
 
