@@ -1,10 +1,11 @@
 # ScholarFlow — Demo Video Script (12:15, Solo Narration)
 
-Total time: **12:15**. Introduction: **1:40** · Core features demo: **8:45** · Testing demo: **1:15** · GitHub & close: **0:35**.
+Total time: **12:15**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
+far: **to 5:40** (Papers + Collections + Discover) · Remaining: **5:40 → 12:15**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
-minute**) — the measured pace from the HaluRISC recording pass. All timings below come from
-that rate, so they hold without rushing.
+minute**) — the measured pace from the HaluRISC recording pass. All timings below come
+from that rate, so they hold without rushing.
 
 Every sentence connects to the next, and each section ends on a line that sets up the
 following section. Read it as continuous speech, not as separate blocks.
@@ -14,17 +15,17 @@ visual, so slow, deliberate cursor movement matters more than ever — and the n
 should sound warm and energetic to compensate for the missing face.
 
 **Talk through the loads.** When a page or panel is loading, keep speaking — the plan
-leaves only about a minute and a half of total silence, and that time belongs mostly to
-the realtime beat.
+leaves only about a minute of total silence, and that time belongs mostly to the realtime
+beat.
 
 **Structure: the core demo follows the sidebar modules** — Papers → Collections →
 Discover → Workspace → Research → Payments → Admin — so each feature group plays as one
 continuous segment.
 
-**Recorded so far:** Papers 1–2 (upload, library), Collections 1 (organize), Discover
-(import + feeds) — rows 5, 6, 10, 12 of the cue cards. If your upload recording already
-shows Key Insights + AI Summary, keep it: rows 7–9 do not repeat those, they move straight
-to reading, questions, and comparison.
+**Recorded (rows 5–14, ends 5:40):** Upload + metadata · Key Points + AI Summary · AI
+Insights · AI tools · Papers list + tag filter · Vector + global search · Collections
+view/grid-list/create/invite · Discover. The next recording starts at **5:40** with
+**Papers — reading + annotations** (row 15).
 
 ---
 
@@ -53,12 +54,14 @@ Other demo accounts (same password `password123`): `pro.researcher@scholarflow.c
 > for every demo role (Bob 10 papers · pro 6 · emily 5 · michael 4 · researcher 3 ·
 > admin 3 · sofia/david/aisha/lucas 2 each).
 
-- **Published papers with pre-warmed AI summaries** (ASB + InjecAgent are already
+- **Published papers with pre-warmed AI summaries** (the demo papers are already
   generated) so the demo doesn't wait on first-time processing.
 - **One draft paper** with no public link (for the 404 test) — seeded as
   "Thesis Draft — Multi-Agent Security Survey".
 - **One paper shared with Michael as view-only** (for the 403 test).
 - **A pending invite ready to send** in the Workspace module (for the notification beat).
+- **Cached citations between papers** — the citation graph draws edges only when two
+  linked papers are selected.
 - **Stripe test mode** ready. Test card: `4242 4242 4242 4242`, any future date, any CVC.
   Start `stripe listen --forward-to http://localhost:5000/webhooks/stripe` **before**
   recording (it prints a secret once — never show that terminal during the video).
@@ -84,80 +87,90 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 
 ## 2. Timing plan (running clock)
 
-| # | Segment | Time | Running |
-| - | ------- | ---- | ------- |
-| 1 | Intro — hook (Home page) | 0:20 | 0:20 |
-| 2 | Intro — what it is | 0:25 | 0:45 |
-| 3 | Intro — built to be trusted | 0:40 | 1:25 |
-| 4 | Intro — setup line | 0:15 | 1:40 |
-| 5 | **Papers** 1 — upload + AI metadata | 0:50 | 2:30 |
-| 6 | **Papers** 2 — library + semantic search | 0:40 | 3:10 |
-| 7 | **Papers** 3 — reading + annotations | 0:30 | 3:40 |
-| 8 | **Papers** 4 — ask the paper (Q&A) | 0:25 | 4:05 |
-| 9 | **Papers** 5 — compare two papers | 0:25 | 4:30 |
-| 10 | **Collections** 1 — organize + visibility | 0:30 | 5:00 |
-| 11 | **Collections** 2 — literature review over a collection | 0:30 | 5:30 |
-| 12 | **Discover** — import + feeds + save | 0:40 | 6:10 |
-| 13 | **Workspace** 1 — members and roles | 0:25 | 6:35 |
-| 14 | **Workspace** 2 — invite + live notification | 0:30 | 7:05 |
-| 15 | **Research** 1 — editor: template, citation, export | 0:50 | 7:55 |
-| 16 | **Research** 2 — realtime co-editing (two windows) | 0:55 | 8:50 |
-| 17 | **Research** 3 — citation graph + research map | 0:35 | 9:25 |
-| 18 | **Payments** — Stripe checkout + billing | 0:40 | 10:05 |
-| 19 | **Admin** — console tour | 0:20 | 10:25 |
-| 20 | Testing 0 — transition | 0:05 | 10:30 |
-| 21 | Testing 1 — automated tests (Jest + Supertest) | 0:40 | 11:10 |
-| 22 | Testing 2 — access control (403) | 0:15 | 11:25 |
-| 23 | Testing 3 — payment safety (replay) | 0:15 | 11:40 |
-| 24 | GitHub — repository tour | 0:25 | 12:05 |
-| 25 | Close | 0:10 | 12:15 |
+| # | Segment | Window |
+| - | ------- | ------ |
+| 1 | Intro — hook (Home page) | 0:00 – 0:20 |
+| 2 | Intro — what it is | 0:20 – 0:45 |
+| 3 | Intro — built to be trusted | 0:45 – 1:25 |
+| 4 | Intro — setup line | 1:25 – 1:35 |
+| — | *transition to the app* | 1:35 – 1:40 |
+| 5 | **Papers** 1 — upload + metadata ✅ | 1:40 – 2:05 |
+| 6 | **Papers** 2 — Key Points + AI Summary ✅ | 2:05 – 2:30 |
+| — | *pause* | 2:30 – 2:35 |
+| 7 | **Papers** 3 — AI Insights (model + question) ✅ | 2:35 – 2:50 |
+| 8 | **Papers** 4 — AI tools: rewrite, compare, literature review ✅ | 2:50 – 3:31 |
+| 9 | **Papers** 5 — all papers + tag filter ✅ | 3:31 – 3:45 |
+| 10 | **Papers** 6 — vector search + global search ✅ | 3:45 – 4:15 |
+| — | *transition* | 4:15 – 4:25 |
+| 11 | **Collections** 1 — view collections (grid/list) ✅ | 4:25 – 4:40 |
+| — | *pause* | 4:40 – 4:45 |
+| 12 | **Collections** 2 — create collection ✅ | 4:45 – 5:00 |
+| 13 | **Collections** 3 — invite user + invited email ✅ | 5:00 – 5:15 |
+| 14 | **Discover** — trending, recommendations, explore ✅ | 5:15 – 5:40 |
+| 15 | **Papers** 7 — reading + annotations | 5:40 – 6:00 |
+| 16 | **Workspace** 1 — members and roles | 6:00 – 6:25 |
+| 17 | **Workspace** 2 — invite + live notification | 6:25 – 6:55 |
+| 18 | **Research** 1 — editor: template, citation, export | 6:55 – 7:45 |
+| 19 | **Research** 2 — realtime co-editing (two windows) | 7:45 – 8:40 |
+| 20 | **Research** 3 — citation graph + research map | 8:40 – 9:15 |
+| 21 | **Payments** — Stripe checkout + billing | 9:15 – 9:55 |
+| 22 | **Admin** — console tour | 9:55 – 10:15 |
+| 23 | Testing 0 — transition | 10:15 – 10:20 |
+| 24 | Testing 1 — automated tests (Jest + Supertest) | 10:20 – 11:00 |
+| 25 | Testing 2 — access control (403) | 11:00 – 11:15 |
+| 26 | Testing 3 — payment safety (replay) | 11:15 – 11:30 |
+| 27 | GitHub — repository tour | 11:30 – 12:05 |
+| 28 | Close | 12:05 – 12:15 |
 
-Spoken words total ≈ **1,155**. At 1.73 words/second that is about **11:05 of speech**;
-the remaining **~1:10** is clicks, loads, and brief pauses — keep talking while panels
-load, and that time is covered.
+Spoken words total ≈ **1,035**. At 1.73 words/second that is about **10:00 of speech**;
+the rest is clicks, loads, and the transitions marked in the table (the recorded section
+already has its own pacing). Keep talking while panels load, and the remaining takes will
+match their windows.
 
 ---
 
 ## 3. Cue cards — what to do, in this order
 
-*(Quick operational reference for recording. The full speech is in the numbered
-sections below — these cards tell you which screen, which action, and how each beat
-starts. Rows 5, 6, 10, 12 are already recorded.)*
+*(Quick operational reference for recording. Rows 1–14 are recorded; the next take
+starts at row 15, 5:40.)*
 
 | # | At | On screen | Do this | Start saying |
 | - | -- | --------- | ------- | ------------ |
 | 1 | 0:00 | Home page (tab 1) | Slow scroll through the hero | "Every researcher knows this feeling…" |
 | 2 | 0:20 | Home page | Keep scrolling the feature sections | "Our team is Phantom Devs…" |
 | 3 | 0:45 | Home page | End the scroll on pricing/features | "And ScholarFlow is more than a paper library…" |
-| 4 | 1:25 | Dashboard (tab 2, logged in as Bob) | Switch to the app tab | "I am logged in as Bob…" |
-| 5 | 1:40 | **Papers** — Upload page | Drag **ASB.pdf** in → wait for metadata → Publish | "This is the upload page…" **(recorded)** |
-| 6 | 2:30 | **Papers** — Library | Type **"language models hallucinate"** | "This is my library…" **(recorded)** |
-| 7 | 3:10 | **Papers** — paper detail | Wait for the text view → highlight a sentence → add a note | "Here is one of those papers…" |
-| 8 | 3:40 | **Papers** — AI panel on the paper | Ask **"Which method did they use?"** (summary/key points already shown in row 5) | "You saw the summary and key points…" |
-| 9 | 4:05 | **Papers** — Comparator | Compare **ASB + ToolGate** | "And for two papers, I ask for a comparison…" |
-| 10 | 4:30 | **Collections** — Add to collection | Add the paper to **"Agent Security"** + show visibility | "That is the Papers module…" **(recorded)** |
-| 11 | 5:00 | **Collections** — collection detail | Generate a **literature review** over "Agent Security" | "And a whole collection can work as one input…" |
-| 12 | 5:30 | **Discover** (+ Import) | Trending feed → Save to Library | "Collections stay organized; Discover brings new papers in." **(recorded)** |
-| 13 | 6:10 | **Workspace** — workspaces | Open the ML workspace → members + roles | "Now the Workspace module — where the team lives." |
-| 14 | 6:35 | **Workspace** — Team → bell | Send the prepared invite (**Editor** role) → open the bell | "I invite a new member…" |
-| 15 | 7:05 | **Research** — Editor | New paper from the **IEEE** template → type two lines → insert a citation → Export PDF | "Now the Research module — this is where the writing happens." |
-| 16 | 7:55 | **Research** — two browser windows | Emily types → move both cursors so names show → stay silent for two seconds | "A paper is rarely written alone…" |
-| 17 | 8:50 | **Research** — Citation Graph → Research Map | Select **ASB + ToolGate** (show the edge) → open the map | "The Research module also maps the literature…" |
-| 18 | 9:25 | **Payments** — Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Every module you saw is product; payments keep it running." |
-| 19 | 10:05 | **Admin** — admin tab | Metrics → Reports → Audit Log → Settings (quick) | "And behind the product is the operator view…" |
-| 20 | 10:25 | Testing — Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
-| 21 | 11:10 | Testing — Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
-| 22 | 11:25 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
-| 23 | 11:40 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
-| 24 | 12:05 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
+| 4 | 1:25 | Dashboard (tab 2, Bob) | Switch to the app tab | "I am logged in as Bob…" |
+| 5 | 1:40 | **Papers** — Upload page | Drag the PDF in → metadata → Publish | ✅ recorded |
+| 6 | 2:05 | **Papers** — paper detail | Show Key Points → generate/show AI Summary | ✅ recorded |
+| 7 | 2:35 | **Papers** — AI Insights | Select the model → ask "what is this paper about?" | ✅ recorded |
+| 8 | 2:50 | **Papers** — AI tools | Show Rewrite → Comparator → Literature Review on two papers | ✅ recorded |
+| 9 | 3:31 | **Papers** — list page | Switch the tag tabs to filter | ✅ recorded |
+| 10 | 3:45 | Search | Semantic search, then the global search box | ✅ recorded |
+| 11 | 4:25 | **Collections** — list | Open Collections → toggle grid / list | ✅ recorded |
+| 12 | 4:45 | **Collections** — create | Create a collection (name, description, visibility) | ✅ recorded |
+| 13 | 5:00 | **Collections** — invite | Invite a user → show the invited email row | ✅ recorded |
+| 14 | 5:15 | **Discover** | Trending → Recommendations → Explore | ✅ recorded |
+| 15 | 5:40 | **Papers** — a paper | Highlight a sentence → add a short note | "Back to a paper — the extracted text and PDF sit side by side…" |
+| 16 | 6:00 | **Workspace** — workspaces | Open the ML workspace → members + roles | "That is the research side — now the Workspace module…" |
+| 17 | 6:25 | **Workspace** — Team → bell | Send the prepared invite (**Editor** role) → open the bell | "I invite a new member…" |
+| 18 | 6:55 | **Research** — Editor | New paper from the **IEEE** template → type two lines → insert a citation → Export PDF | "Now the Research module — this is where the writing happens." |
+| 19 | 7:45 | **Research** — two browser windows | Emily types → move both cursors so names show → stay silent for two seconds | "A paper is rarely written alone…" |
+| 20 | 8:40 | **Research** — Citation Graph → Research Map | Select two linked papers (edge appears) → open the map | "The Research module also maps the literature…" |
+| 21 | 9:15 | **Payments** — Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Every module you saw is the product; payments keep it running." |
+| 22 | 9:55 | **Admin** — admin tab | Metrics → Reports → Audit Log → Settings (quick) | "And behind the product is the operator view…" |
+| 23 | 10:15 | Testing — Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
+| 24 | 11:00 | Testing — Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
+| 25 | 11:15 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
+| 26 | 11:30 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
+| 27 | 12:05 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
 
 **Rules while recording:** keep the cursor slow; one numbered row at a time; keep
 talking while anything loads; if a step fails, move on to the next row — do not restart
-the whole take. Rows 7–9 are new (the earlier recording already covered 5, 6, 10, 12).
+the whole take. **Next take starts at row 15 (5:40).**
 
 ---
 
-## 4. Introduction (0:00 – 1:40)
+## 4. Introduction (0:00 – 1:35)
 
 **Purpose: this is the first thing faculty see. Hook first, explain second, build trust third.**
 
@@ -192,7 +205,7 @@ second before and after the claim line — it is the promise of the video.)*
 > And because research must be trusted, correctness, permissions, and payment safety
 > are engineered in from the start.
 
-### [1:25 – 1:40] Setup line — switch to the app
+### [1:25 – 1:35] Setup line — switch to the app
 
 *(Switch to the logged-in dashboard as Bob.)*
 
@@ -202,120 +215,112 @@ second before and after the claim line — it is the promise of the video.)*
 
 ---
 
-## 5. Core Features Demo (1:40 – 10:25)
+## 5. Core Features Demo (1:40 – 10:15)
 
 *Organized by sidebar module: Papers → Collections → Discover → Workspace → Research →
-Payments → Admin.*
+Payments → Admin. Never name specific papers in the narration — always say "this paper"
+or "two papers", so the words match whatever is on screen.*
 
-### Papers — 1. Upload and automatic metadata [1:40 – 2:30] *(recorded)*
-
-**[Action:** open the Upload page, drag one PDF in, let the metadata panel fill.**]**
+### Papers — 1. Upload + metadata [1:40 – 2:05] ✅ recorded
 
 > This is the upload page, and the paper is ready on my desktop.
-> I drop it here — and while it uploads, ScholarFlow reads the document in the
-> background.
-> Watch the metadata panel: the title, the authors, and the abstract appear on their
-> own, extracted by AI from the PDF.
-> I change nothing. I click publish, and the paper joins my library in secure cloud
-> storage.
+> I drop it here — the metadata panel fills on its own: title, authors, abstract,
+> extracted by AI from the PDF.
+> I click publish, and the paper joins my library, in secure cloud storage.
 
-**Transition:** *Let me find it the way a researcher would — by meaning.*
+### Papers — 2. Key Points + AI Summary [2:05 – 2:30] ✅ recorded
 
-### Papers — 2. Library and semantic search [2:30 – 3:10] *(recorded)*
+**[Action:** in the paper, open the Key Points card, then the AI summary.**]**
 
-**[Action:** open the library, type "language models hallucinate" in search.**]**
+> And the AI has already read it for me.
+> These are the key points — the main claims, one by one.
+> And below, a summary of the findings, in the length and tone I chose.
 
-> This is my library — papers, tags, status, and collections.
-> But now I do not search by exact words; I search by meaning.
-> I type "language models hallucinate", and the system finds the relevant paper, even
-> though those words are not in its title.
-> That is semantic search, powered by vector embeddings — and it only searches papers I
-> am allowed to see.
+### Papers — 3. AI Insights [2:35 – 2:50] ✅ recorded
 
-### Papers — 3. Reading and annotating [3:10 – 3:40] *(new)*
+**[Action:** open AI Insights, select the model, ask **"what is this paper about?"** and
+let the answer stream.**]**
 
-**[Action:** open one of the results (ASB). Wait for the text view, highlight a sentence,
-add a short note. Pause while the popup appears.**]**
+> I can also switch the model and ask the simplest question: what is this paper about?
+> The answer is grounded in this paper's own text — not in the open internet.
 
-> Here is one of those papers. The extracted text is ready, and the PDF preview is right
-> here.
+### Papers — 4. AI tools [2:50 – 3:31] ✅ recorded
+
+**[Action:** show Rewrite on a paragraph, then the Comparator with two papers, then the
+Literature Review over both.**]**
+
+> The AI also works on my drafts.
+> I can rewrite a paragraph to improve clarity.
+> I can compare two papers side by side, to see where they agree and where they differ.
+> Or I can generate a literature review from both together — a first draft of the
+> related-work section, in seconds.
+
+### Papers — 5. All papers + tag filter [3:31 – 3:45] ✅ recorded
+
+**[Action:** open the papers list and switch the tag tabs to filter.**]**
+
+> Back in the library, the tag tabs filter everything instantly — one click, and I see
+> only the papers on that topic.
+
+### Papers — 6. Vector search + global search [3:45 – 4:15] ✅ recorded
+
+**[Action:** run the semantic search, then use the global search box.**]**
+
+> And search works two ways.
+> Semantic search finds papers by meaning — even when the exact words are not in the
+> title.
+> And the global search box looks across papers, collections, and notes at once — always
+> limited to what I am allowed to see.
+
+### Collections — 1. View (grid and list) [4:25 – 4:40] ✅ recorded
+
+**[Action:** open Collections and toggle grid / list.**]**
+
+> Papers live in collections.
+> I can browse them as a grid or as a list — whichever is faster for the moment.
+
+### Collections — 2. Create [4:45 – 5:00] ✅ recorded
+
+**[Action:** create a collection: name, description, visibility.**]**
+
+> Creating one takes a name, a description, and a visibility rule — private, team, or
+> public — and it is ready.
+
+### Collections — 3. Invite a user [5:00 – 5:15] ✅ recorded
+
+**[Action:** invite a teammate into the collection with a permission, and show the
+invited email row.**]**
+
+> I can invite a teammate straight into the collection and set their permission — and
+> the invited email appears right here.
+
+### Discover — live research feeds [5:15 – 5:40] ✅ recorded
+
+**[Action:** open Discover; show Trending, then Recommendations, then Explore.**]**
+
+> And when I need something new, Discover brings live research in: trending papers,
+> recommendations based on my reading, and a topic explorer — all from live scholarly
+> sources.
+
+### Papers — 7. Reading + annotations [5:40 – 6:00] ⏺ next
+
+**[Action:** open a paper. Wait for the text view; highlight one sentence and add a short
+note. Pause while the popup appears.**]**
+
+> Back to a paper — the extracted text and the PDF preview sit side by side.
 > I highlight a sentence, and add a short note.
-> Everything I mark stays attached to the paper — for me, and for my team.
+> Everything I mark stays attached to the paper.
 
-### Papers — 4. Ask the paper [3:40 – 4:05] *(new)*
+### Workspace — 1. Members and roles [6:00 – 6:25] ⏺ next
 
-**[Action:** in the paper's AI panel, ask **"Which method did they use?"** and let the
-answer stream. The summary and key points were already shown during upload — do not
-scroll back to them.**]**
-
-> You saw the summary and the key points when this paper was uploaded — so let me ask it
-> a real question instead.
-> Which method did they use?
-> The answer comes from this paper's own text, not from the open internet — that is the
-> difference between a chatbot and a research assistant.
-
-### Papers — 5. Compare two papers [4:05 – 4:30] *(new)*
-
-**[Action:** open the Comparator with **ASB + ToolGate** and let the comparison appear.**]**
-
-> And for two papers, I can ask for a comparison: ASB against ToolGate — where do they
-> agree, and where do they differ?
-> This is exactly what a related-work section needs.
-
-**Transition into Collections:** *That is the Papers module — now let me organize what I
-found.*
-
-### Collections — 1. Organize and share [4:30 – 5:00] *(recorded)*
-
-**[Action:** add the paper to a collection; show the collection picker and the
-visibility options briefly.**]**
-
-> This is the Collections module, where papers become organized projects.
-> I add this paper to "Agent Security" — or create a new collection, like "Thesis
-> Reading".
-> Collections carry permissions, so I can share a whole collection with my team.
-> Every paper keeps its own tags and status, so a collection stays a clean, curated
-> list.
-
-### Collections — 2. Literature review over a collection [5:00 – 5:30] *(new)*
-
-**[Action:** open the "Agent Security" collection and generate a literature review; let
-the draft appear.**]**
-
-> And a whole collection can work as one input.
-> I select "Agent Security" and ask for a literature review draft.
-> The AI synthesises all of these papers into one structured overview — a first draft
-> of the related-work section, in seconds.
-
-**Transition into Discover:** *Collections stay organized; Discover brings new papers
-in.*
-
-### Discover — Import and research feeds [5:30 – 6:10] *(recorded)*
-
-**[Action:** open Import and paste the prepared DOI or arXiv link; let the fetch start.
-Then open Discover (trending) and click Save to Library on one card.**]**
-
-> And where do new papers come from? Two ways.
-> First, import: I paste a DOI or an arXiv link, and the paper and its metadata are
-> fetched automatically.
-> Second, discovery: this is the Discover feed — live trending papers and
-> recommendations based on my reading.
-> One click saves it to my library.
-> And the import runs the same AI metadata extraction, so a new paper arrives ready to
-> read.
-
-**Transition into Workspace:** *That is research work — now the team.*
-
-### Workspace — 1. Members and roles [6:10 – 6:35] *(new)*
-
-**[Action:** open Workspaces, then the ML workspace — show the members list with roles
+**[Action:** open Workspaces, then the ML workspace — show the members with their roles
 and the shared papers.**]**
 
-> Now the Workspace module — where the team lives.
-> This is our ML workspace: the members, their roles, and the papers we share.
+> That is the research side — now the Workspace module, where the team lives.
+> This is our ML workspace: its members, their roles, and the papers we share.
 > Everyone sees exactly what their role allows.
 
-### Workspace — 2. Invite and live notification [6:35 – 7:05] *(new)*
+### Workspace — 2. Invite + live notification [6:25 – 6:55] ⏺ next
 
 **[Action:** open Team, send the prepared invite with the Editor role. Switch to the
 notification bell; the new notification arrives on its own.**]**
@@ -324,9 +329,7 @@ notification bell; the new notification arrives on its own.**]**
 > The moment I send it, the notification arrives in the bell, in real time.
 > Invitations, role changes, and removals all flow through the same live channel.
 
-**Transition into Research:** *And the same live system runs the writing itself.*
-
-### Research — 1. Editor: template, citation, export [7:05 – 7:55] *(new)*
+### Research — 1. Editor: template, citation, export [6:55 – 7:45] ⏺ next
 
 **[Action:** create a new paper from the IEEE template. Type two lines. Show the save
 indicator. Insert a citation from the library. Open the export dialog and show the PDF
@@ -335,12 +338,12 @@ download completing.**]**
 > Now the Research module — this is where the writing happens.
 > I create a new paper from a template; this one is IEEE.
 > The editor supports tables, images, and LaTeX math, and it saves automatically — watch
-> the save indicator. I never pressed save.
+> the save indicator; I never pressed save.
 > I insert a citation from my library, in the format I choose — one of nine formats,
 > including APA, IEEE, and BibTeX.
-> And when the draft is ready, one click exports a clean PDF.
+> And one click exports a clean PDF.
 
-### Research — 2. Real-time co-editing [7:55 – 8:50] *(new)*
+### Research — 2. Real-time co-editing [7:45 – 8:40] ⏺ next
 
 **[Action:** show both windows side by side. Emily types; the text appears on Bob's screen.
 Move both cursors so both name labels are visible. Keep silent for two seconds after her
@@ -354,32 +357,29 @@ text lands.**]**
 > Two people, one paper, at the same time — real-time co-editing, built into the
 > research workflow.
 
-### Research — 3. Citation graph and research map [8:50 – 9:25] *(new)*
+### Research — 3. Citation graph + research map [8:40 – 9:15] ⏺ next
 
-**[Action:** open the Citation Graph and select **ASB + ToolGate** so the arrow between
+**[Action:** open the Citation Graph and select two linked papers so the arrow between
 them appears. Then open the Research Map and hover two topic bubbles.**]**
 
 > The Research module also maps the literature.
-> This is the citation graph: every arrow is a real reference between papers in my
-> library — ASB cites ToolGate.
+> This is the citation graph: every arrow is a real reference between two papers in my
+> library.
 > And the research map turns my tags into a topic cloud, so I can see where the
 > literature is dense.
 
-**Transition into Payments:** *Every module you saw is the product; payments keep it
-running.*
-
-### Payments — Stripe checkout and billing [9:25 – 10:05] *(new)*
+### Payments — Stripe checkout + billing [9:15 – 9:55] ⏺ next
 
 **[Action:** open Pricing, choose Pro, land on Stripe Checkout, pay with the test card.
 Return to the Billing page.**]**
 
-> I upgrade to the Pro plan. This is Stripe Checkout, hosted by Stripe, so no card data
-> touches our servers.
-> I use a test card, and the payment succeeds.
-> The billing page shows my plan and my invoices.
+> Every module you saw is the product; payments keep it running.
+> I upgrade to Pro — Stripe Checkout, hosted by Stripe, so no card data touches our
+> servers.
+> I use a test card, and it succeeds; the billing page shows my plan and invoices.
 > And the admin console picks the payment up instantly, through webhooks.
 
-### Admin — Console tour [10:05 – 10:25] *(new)*
+### Admin — Console tour [9:55 – 10:15] ⏺ next
 
 **[Action:** switch to the admin tab. Show the overview metrics (CPU, memory, storage,
 database), then open Reports, the Audit Log, and Settings quickly.**]**
@@ -390,19 +390,19 @@ database), then open Reports, the Audit Log, and Settings quickly.**]**
 
 ---
 
-## 6. Testing Demo (10:25 – 11:40)
+## 6. Testing Demo (10:15 – 11:30)
 
 **Purpose: the automated test suite is the main part — billing, payments, papers,
 validation, and access control are all covered by Jest (unit + integration) and
 Supertest (API end-to-end). Access control and payment safety are quick live checks.**
 
-### [10:25 – 10:30] Transition — Why testing matters
+### [10:15 – 10:20] Transition — Why testing matters
 
 **[Action:** open the tests terminal.**]**
 
 > That is the product. But how do we know it works? We test it.
 
-### [10:30 – 11:10] Testing 1 — Automated tests (Jest + Supertest)
+### [10:20 – 11:00] Testing 1 — Automated tests (Jest + Supertest)
 
 **[Action:** show the test files (backend `src/__tests__`, frontend `src/__tests__`), then
 run `yarn test` and let the green summary land before speaking again.**]**
@@ -412,7 +412,7 @@ run `yarn test` and let the green summary land before speaking again.**]**
 > They already cover billing, payments, papers, validation, and access control.
 > Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### [11:10 – 11:25] Testing 2 — Access control
+### [11:00 – 11:15] Testing 2 — Access control
 
 **[Action:** as Michael, open the view-only paper and attempt an edit — show the
 refusal.**]**
@@ -420,7 +420,7 @@ refusal.**]**
 > Next, one live security check: a view-only colleague tries to edit — the server
 > refuses. Four oh three.
 
-### [11:25 – 11:40] Testing 3 — Payment safety
+### [11:15 – 11:30] Testing 3 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
@@ -430,12 +430,12 @@ subscription changing only once.**]**
 
 ---
 
-## 7. GitHub & Engineering Practice (11:40 – 12:15)
+## 7. GitHub & Engineering Practice (11:30 – 12:15)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
 contribution, proper versioned releases, and the live deployment.**
 
-### [11:40 – 12:05] The repository tour
+### [11:30 – 12:05] The repository tour
 
 **[Action:** switch to the browser and open the GitHub repository. Scroll the README
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
@@ -480,7 +480,7 @@ Pause for one full second after every number.
 
 ## 9. If you fall behind
 
-- Drop the last sentence of: Papers 1, Papers 3, Workspace 2, Testing 3 (payment
+- Drop the last sentence of: Papers 2, Papers 4, Workspace 2, Testing 3 (payment
   safety). **Never shorten Research 2 (realtime).**
 - Never speed up; keep the 1.73 words/second pace. A calm pause reads as confidence.
 - If a panel loads slowly, keep speaking — describe what is loading. The only planned
@@ -490,14 +490,15 @@ Pause for one full second after every number.
 
 - Camera is off, so the screen is the only visual: move the cursor slowly and
   deliberately, and let every panel land before you speak.
+- Never name a paper in the narration — "this paper" and "two papers" always match the
+  screen, whichever papers you click.
 - In editing, add short on-screen captions for the three key numbers
   (9 citation formats · 59 automated tests · 0 lint errors) so they are unmissable.
 - In the automated-tests beat, keep talking while the suite runs, then let the green
   summary land as your closing line.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
-- The unrecorded beats (Papers 3–5, Collections 2, Workspace, Research, Payments,
-  Admin) start with a one-line module intro — say it as you open the first screen of
-  the module.
+- The unrecorded beats (rows 15–22: reading, Workspace, Research, Payments, Admin) start
+  with a one-line module intro — say it as you open the first screen of the module.
 - In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
   live deployment — one page per sentence.
 - Keep Zoom at 110% so every label is readable.
