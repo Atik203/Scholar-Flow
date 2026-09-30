@@ -1,8 +1,7 @@
 # ScholarFlow — Demo Video Script (12:15, Solo Narration)
 
-Total time: **12:55**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
-far: **to 7:35** (Papers + Collections + Discover + reading + Workspace/Team) · Remaining:
-**7:35 → 12:55**.
+Total time: **12:42**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
+far: **to 9:42** (everything through the Research module) · Remaining: **9:42 → 12:42**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
 minute**) — the measured pace from the HaluRISC recording pass. All timings below come
@@ -23,11 +22,10 @@ beat.
 Discover → Workspace → Research → Payments → Admin — so each feature group plays as one
 continuous segment.
 
-**Recorded (rows 5–17, ends 7:35):** Upload + metadata · Key Points + AI Summary · AI
-Insights · AI tools · Papers list + tag filter · Vector + global search · Collections
-view/grid-list/create/invite · Discover · reading + annotations + comments + notes ·
-Workspace members · full Team sidebar tour. The next recording starts at **7:35** with
-**Research — editor** (row 18).
+**Recorded (rows 5–20, ends 9:42):** everything through the Research module — upload,
+AI features, search, collections, Discover, reading, Workspace/Team, and all three
+Research beats (editor, realtime, graph + map). The next recording starts at **9:42**
+with **Payments** (row 21).
 
 ---
 
@@ -112,17 +110,17 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 15 | **Papers** 7 — reading, annotations, comments, notes ✅ | 5:40 – 6:20 |
 | 16 | **Workspace** 1 — members and roles ✅ | 6:20 – 7:00 |
 | 17 | **Team sidebar tour** — all menus and pages ✅ | 7:00 – 7:35 |
-| 18 | **Research** 1 — editor: template, citation, export | 7:35 – 8:25 |
-| 19 | **Research** 2 — realtime co-editing (two windows) | 8:25 – 9:20 |
-| 20 | **Research** 3 — citation graph + research map | 9:20 – 9:55 |
-| 21 | **Payments** — Stripe checkout + billing | 9:55 – 10:35 |
-| 22 | **Admin** — console tour | 10:35 – 10:55 |
-| 23 | Testing 0 — transition | 10:55 – 11:00 |
-| 24 | Testing 1 — automated tests (Jest + Supertest) | 11:00 – 11:40 |
-| 25 | Testing 2 — access control (403) | 11:40 – 11:55 |
-| 26 | Testing 3 — payment safety (replay) | 11:55 – 12:10 |
-| 27 | GitHub — repository tour | 12:10 – 12:45 |
-| 28 | Close | 12:45 – 12:55 |
+| 18 | **Research** 1 — editor: template, citation, export ✅ | 7:35 – 8:25 |
+| 19 | **Research** 2 — realtime co-editing (two windows) ✅ | 8:25 – 9:10 |
+| 20 | **Research** 3 — citation graph + research map ✅ | 9:10 – 9:42 |
+| 21 | **Payments** — Stripe checkout + billing | 9:42 – 10:22 |
+| 22 | **Admin** — console tour | 10:22 – 10:42 |
+| 23 | Testing 0 — transition | 10:42 – 10:47 |
+| 24 | Testing 1 — automated tests (Jest + Supertest) | 10:47 – 11:27 |
+| 25 | Testing 2 — access control (403) | 11:27 – 11:42 |
+| 26 | Testing 3 — payment safety (replay) | 11:42 – 11:57 |
+| 27 | GitHub — repository tour | 11:57 – 12:32 |
+| 28 | Close | 12:32 – 12:42 |
 
 Spoken words total ≈ **1,075**. At 1.73 words/second that is about **10:25 of speech**;
 the rest is clicks, loads, and the transitions marked in the table (the recorded section
@@ -133,8 +131,8 @@ load, and the remaining takes will match their windows.
 
 ## 3. Cue cards — what to do, in this order
 
-*(Quick operational reference for recording. Rows 1–17 are recorded; the next take
-starts at row 18, 7:35.)*
+*(Quick operational reference for recording. Rows 1–20 are recorded; the next take
+starts at row 21, 9:42.)*
 
 | # | At | On screen | Do this | Start saying |
 | - | -- | --------- | ------- | ------------ |
@@ -155,20 +153,20 @@ starts at row 18, 7:35.)*
 | 15 | 5:40 | **Papers** — reading | Highlight → note → comment → research notes | "Back to a paper — the extracted text and PDF sit side by side…" ✅ recorded |
 | 16 | 6:20 | **Workspace** — members | Show all members, roles, shared papers | "That is the research side — now the Workspace module…" ✅ recorded |
 | 17 | 7:00 | **Team sidebar** — tour | Open every Team menu/page (invitations, activity, settings) | "The Team area holds everything around the members…" ✅ recorded |
-| 18 | 7:35 | **Research** — Editor | New paper from the **IEEE** template → type two lines → insert a citation → Export PDF | "Now the Research module — this is where the writing happens." |
-| 19 | 8:25 | **Research** — two browser windows | Emily types → move both cursors so names show → stay silent for two seconds | "A paper is rarely written alone…" |
-| 20 | 9:20 | **Research** — Citation Graph → Research Map | Select two linked papers (edge appears) → open the map | "The Research module also maps the literature…" |
-| 21 | 9:55 | **Payments** — Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Every module you saw is the product; payments keep it running." |
-| 22 | 10:35 | **Admin** — admin tab | Metrics → Reports → Audit Log → Settings (quick) | "And behind the product is the operator view…" |
-| 23 | 10:55 | Testing — Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
-| 24 | 11:40 | Testing — Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
-| 25 | 11:55 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
-| 26 | 12:10 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
-| 27 | 12:45 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
+| 18 | 7:35 | **Research** — Editor | New paper from the **IEEE** template → type two lines → insert a citation → Export PDF | "Now the Research module — this is where the writing happens." ✅ recorded |
+| 19 | 8:25 | **Research** — two browser windows | Emily types → move both cursors so names show → stay silent for two seconds | "A paper is rarely written alone…" ✅ recorded |
+| 20 | 9:10 | **Research** — Citation Graph → Research Map | Select two linked papers (edge appears) → open the map | "The Research module also maps the literature…" ✅ recorded |
+| 21 | 9:42 | **Payments** — Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Every module you saw is the product; payments keep it running." |
+| 22 | 10:22 | **Admin** — admin tab | Metrics → Reports → Audit Log → Settings (quick) | "And behind the product is the operator view…" |
+| 23 | 10:42 | Testing — Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
+| 24 | 11:27 | Testing — Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
+| 25 | 11:42 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
+| 26 | 11:57 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
+| 27 | 12:32 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
 
 **Rules while recording:** keep the cursor slow; one numbered row at a time; keep
 talking while anything loads; if a step fails, move on to the next row — do not restart
-the whole take. **Next take starts at row 18 (7:35).**
+the whole take. **Next take starts at row 21 (9:42).**
 
 ---
 
@@ -217,7 +215,7 @@ second before and after the claim line — it is the promise of the video.)*
 
 ---
 
-## 5. Core Features Demo (1:40 – 10:55)
+## 5. Core Features Demo (1:40 – 10:42)
 
 *Organized by sidebar module: Papers → Collections → Discover → Workspace → Research →
 Payments → Admin. Never name specific papers in the narration — always say "this paper"
@@ -335,7 +333,7 @@ settings.**]**
 > settings control how the team works.
 > All of it updates in real time — the same live system as the bell.
 
-### Research — 1. Editor: template, citation, export [7:35 – 8:25] ⏺ next
+### Research — 1. Editor: template, citation, export [7:35 – 8:25] ✅ recorded
 
 **[Action:** create a new paper from the IEEE template. Type two lines. Show the save
 indicator. Insert a citation from the library. Open the export dialog and show the PDF
@@ -349,7 +347,7 @@ download completing.**]**
 > including APA, IEEE, and BibTeX.
 > And one click exports a clean PDF.
 
-### Research — 2. Real-time co-editing [8:25 – 9:20] ⏺ next
+### Research — 2. Real-time co-editing [8:25 – 9:10] ✅ recorded
 
 **[Action:** show both windows side by side. Emily types; the text appears on Bob's screen.
 Move both cursors so both name labels are visible. Keep silent for two seconds after her
@@ -363,7 +361,7 @@ text lands.**]**
 > Two people, one paper, at the same time — real-time co-editing, built into the
 > research workflow.
 
-### Research — 3. Citation graph + research map [9:20 – 9:55] ⏺ next
+### Research — 3. Citation graph + research map [9:10 – 9:42] ✅ recorded
 
 **[Action:** open the Citation Graph and select two linked papers so the arrow between
 them appears. Then open the Research Map and hover two topic bubbles.**]**
@@ -374,7 +372,7 @@ them appears. Then open the Research Map and hover two topic bubbles.**]**
 > And the research map turns my tags into a topic cloud, so I can see where the
 > literature is dense.
 
-### Payments — Stripe checkout + billing [9:55 – 10:35] ⏺ next
+### Payments — Stripe checkout + billing [9:42 – 10:22] ⏺ next
 
 **[Action:** open Pricing, choose Pro, land on Stripe Checkout, pay with the test card.
 Return to the Billing page.**]**
@@ -385,7 +383,7 @@ Return to the Billing page.**]**
 > I use a test card, and it succeeds; the billing page shows my plan and invoices.
 > And the admin console picks the payment up instantly, through webhooks.
 
-### Admin — Console tour [10:35 – 10:55] ⏺ next
+### Admin — Console tour [10:22 – 10:42] ⏺ next
 
 **[Action:** switch to the admin tab. Show the overview metrics (CPU, memory, storage,
 database), then open Reports, the Audit Log, and Settings quickly.**]**
@@ -396,19 +394,19 @@ database), then open Reports, the Audit Log, and Settings quickly.**]**
 
 ---
 
-## 6. Testing Demo (10:55 – 12:10)
+## 6. Testing Demo (10:42 – 11:57)
 
 **Purpose: the automated test suite is the main part — billing, payments, papers,
 validation, and access control are all covered by Jest (unit + integration) and
 Supertest (API end-to-end). Access control and payment safety are quick live checks.**
 
-### [10:55 – 11:00] Transition — Why testing matters
+### [10:42 – 10:47] Transition — Why testing matters
 
 **[Action:** open the tests terminal.**]**
 
 > That is the product. But how do we know it works? We test it.
 
-### [11:00 – 11:40] Testing 1 — Automated tests (Jest + Supertest)
+### [10:47 – 11:27] Testing 1 — Automated tests (Jest + Supertest)
 
 **[Action:** show the test files (backend `src/__tests__`, frontend `src/__tests__`), then
 run `yarn test` and let the green summary land before speaking again.**]**
@@ -418,7 +416,7 @@ run `yarn test` and let the green summary land before speaking again.**]**
 > They already cover billing, payments, papers, validation, and access control.
 > Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### [11:40 – 11:55] Testing 2 — Access control
+### [11:27 – 11:42] Testing 2 — Access control
 
 **[Action:** as Michael, open the view-only paper and attempt an edit — show the
 refusal.**]**
@@ -426,7 +424,7 @@ refusal.**]**
 > Next, one live security check: a view-only colleague tries to edit — the server
 > refuses. Four oh three.
 
-### [11:55 – 12:10] Testing 3 — Payment safety
+### [11:42 – 11:57] Testing 3 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
@@ -436,12 +434,12 @@ subscription changing only once.**]**
 
 ---
 
-## 7. GitHub & Engineering Practice (12:10 – 12:55)
+## 7. GitHub & Engineering Practice (11:57 – 12:42)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
 contribution, proper versioned releases, and the live deployment.**
 
-### [12:10 – 12:45] The repository tour
+### [11:57 – 12:32] The repository tour
 
 **[Action:** switch to the browser and open the GitHub repository. Scroll the README
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
@@ -454,7 +452,7 @@ deployment link. Move the cursor slowly; let each page land before speaking.**]*
 > all here.
 > And the product is deployed live.
 
-### [12:45 – 12:55] Close
+### [12:32 – 12:42] Close
 
 **[Action:** return to the dashboard and let it sit on screen.**]**
 
@@ -503,7 +501,7 @@ Pause for one full second after every number.
 - In the automated-tests beat, keep talking while the suite runs, then let the green
   summary land as your closing line.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
-- The unrecorded beats (rows 18–22: Research, Payments, Admin) start
+- The unrecorded beats (rows 21–22: Payments, Admin) start
   with a one-line module intro — say it as you open the first screen of the module.
 - In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
   live deployment — one page per sentence.

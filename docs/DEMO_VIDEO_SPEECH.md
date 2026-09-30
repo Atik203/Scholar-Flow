@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Speech
 
-**Team Phantom Devs** · Total duration: **12:55** (Introduction to 1:35 · Core Features Demo to 10:55 · Testing Demo to 12:10 · GitHub & Close to 12:55)
+**Team Phantom Devs** · Total duration: **12:42** (Introduction to 1:35 · Core Features Demo to 10:42 · Testing Demo to 11:57 · GitHub & Close to 12:42)
 
 ---
 
@@ -80,7 +80,7 @@ Back to a paper — the extracted text and the PDF preview sit side by side. I h
 
 ---
 
-## Workspace (6:00 – 6:55)
+## Workspace (6:20 – 7:35)
 
 ### 1. Members and Roles (6:20 – 7:00)
 
@@ -92,60 +92,60 @@ The Team area holds everything around the members: invitations, the activity log
 
 ---
 
-## Research (6:55 – 9:15)
+## Research (7:35 – 9:42)
 
 ### 1. Editor: Template, Citation, Export (7:35 – 8:25)
 
 Now the Research module — this is where the writing happens. I create a new paper from a template; this one is IEEE. The editor supports tables, images, and LaTeX math, and it saves automatically — watch the save indicator; I never pressed save. I insert a citation from my library, in the format I choose — one of nine formats, including APA, IEEE, and BibTeX. And one click exports a clean PDF.
 
-### 2. Real-Time Co-Editing (8:25 – 9:20)
+### 2. Real-Time Co-Editing (8:25 – 9:10)
 
 A paper is rarely written alone — so let me show you the part I am most proud of. On the left is my screen. On the right, my teammate Emily, in another browser. Watch: when she types, the text appears on my screen instantly — no refresh, no conflicts. Her cursor carries her name; mine carries mine, so we always know who is where. Two people, one paper, at the same time — real-time co-editing, built into the research workflow.
 
-### 3. Citation Graph + Research Map (9:20 – 9:55)
+### 3. Citation Graph + Research Map (9:10 – 9:42)
 
 The Research module also maps the literature. This is the citation graph: every arrow is a real reference between two papers in my library. And the research map turns my tags into a topic cloud, so I can see where the literature is dense.
 
 ---
 
-## Payments (9:55 – 10:35)
+## Payments (9:42 – 10:22)
 
 Every module you saw is the product; payments keep it running. I upgrade to Pro — Stripe Checkout, hosted by Stripe, so no card data touches our servers. I use a test card, and it succeeds; the billing page shows my plan and invoices. And the admin console picks the payment up instantly, through webhooks.
 
 ---
 
-## Admin (10:35 – 10:55)
+## Admin (10:22 – 10:42)
 
 And behind the product is the operator view: live system metrics, reports, the audit log, and platform settings. Everything an admin needs, on real data.
 
 ---
 
-## Testing Demo (10:55 – 12:10)
+## Testing Demo (10:42 – 11:57)
 
-### Why Testing Matters (10:55 – 11:00)
+### Why Testing Matters (10:42 – 10:47)
 
 That is the product. But how do we know it works? We test it.
 
-### 1. Automated Tests — Jest and Supertest (11:00 – 11:40)
+### 1. Automated Tests — Jest and Supertest (10:47 – 11:27)
 
 We test it in two ways. These are the automated tests — Jest for unit and integration, Supertest for API end-to-end. They already cover billing, payments, papers, validation, and access control. Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### 2. Access Control (11:40 – 11:55)
+### 2. Access Control (11:27 – 11:42)
 
 Next, one live security check: a view-only colleague tries to edit — the server refuses. Four oh three.
 
-### 3. Payment Safety (11:55 – 12:10)
+### 3. Payment Safety (11:42 – 11:57)
 
 And money deserves the same care: for payments, webhooks are the source of truth. I replay the same event twice — the subscription changes only once.
 
 ---
 
-## GitHub & Engineering Practice (12:10 – 12:55)
+## GitHub & Engineering Practice (11:57 – 12:42)
 
-### Built with Industry Practice (12:10 – 12:45)
+### Built with Industry Practice (11:57 – 12:32)
 
 Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. Every feature was reviewed before it merged — the pull requests and the history are all here. And the product is deployed live.
 
-### Closing (12:45 – 12:55)
+### Closing (12:32 – 12:42)
 
 That is ScholarFlow — built by a team and released step by step. Thank you for watching.
