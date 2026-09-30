@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Speech
 
-**Team Phantom Devs** · Total duration: **12:42** (Introduction to 1:35 · Core Features Demo to 10:42 · Testing Demo to 11:57 · GitHub & Close to 12:42)
+**Team Phantom Devs** · Total duration: **13:16** (Introduction to 1:35 · Core Features Demo to 11:16 · Testing Demo to 12:31 · GitHub & Close to 13:16)
 
 ---
 
@@ -114,38 +114,38 @@ Every module you saw is the product; payments keep it running. I upgrade to Pro 
 
 ---
 
-## Admin (10:22 – 10:42)
+## Admin (10:22 – 11:16)
 
-And behind the product is the operator view: live system metrics, reports, the audit log, and platform settings. Everything an admin needs, on real data.
+And behind the product is the operator view — the Admin console. Every page is real: live system metrics, users and roles, plans and payments, subscribers, reports, and the audit log. Then the AI models and keys, webhooks, moderation, alerts, and system health — and the platform settings that control it all. Everything an operator needs, on real data.
 
 ---
 
-## Testing Demo (10:42 – 11:57)
+## Testing Demo (11:16 – 12:31)
 
-### Why Testing Matters (10:42 – 10:47)
+### Why Testing Matters (11:16 – 11:21)
 
 That is the product. But how do we know it works? We test it.
 
-### 1. Automated Tests — Jest and Supertest (10:47 – 11:27)
+### 1. Automated Tests — Jest and Supertest (11:21 – 12:01)
 
 We test it in two ways. These are the automated tests — Jest for unit and integration, Supertest for API end-to-end. They already cover billing, payments, papers, validation, and access control. Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### 2. Access Control (11:27 – 11:42)
+### 2. Access Control (12:01 – 12:16)
 
 Next, one live security check: a view-only colleague tries to edit — the server refuses. Four oh three.
 
-### 3. Payment Safety (11:42 – 11:57)
+### 3. Payment Safety (12:16 – 12:31)
 
 And money deserves the same care: for payments, webhooks are the source of truth. I replay the same event twice — the subscription changes only once.
 
 ---
 
-## GitHub & Engineering Practice (11:57 – 12:42)
+## GitHub & Engineering Practice (12:31 – 13:16)
 
-### Built with Industry Practice (11:57 – 12:32)
+### Built with Industry Practice (12:31 – 13:06)
 
 Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. Every feature was reviewed before it merged — the pull requests and the history are all here. And the product is deployed live.
 
-### Closing (12:32 – 12:42)
+### Closing (13:06 – 13:16)
 
 That is ScholarFlow — built by a team and released step by step. Thank you for watching.
