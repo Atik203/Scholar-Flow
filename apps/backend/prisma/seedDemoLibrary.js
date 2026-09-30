@@ -619,7 +619,13 @@ async function seedContent(usersByEmail, paperIndex) {
           description: `Curated by ${user.name || email}`,
           visibility: spec.visibility,
           color: spec.color,
-          tags: spec.files.slice(0, 2).map((f) => PDF_BY_KEY.get(normalize(f))?.cluster || 'research'),
+          tags: [
+            ...new Set(
+              spec.files
+                .slice(0, 2)
+                .map((f) => PDF_BY_KEY.get(normalize(f))?.cluster || 'research')
+            ),
+          ],
         },
       });
       let i = 0;
