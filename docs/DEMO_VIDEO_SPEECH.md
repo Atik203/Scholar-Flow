@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Speech
 
-**Team Phantom Devs** · Total duration: **12:48** (Introduction to 1:35 · Core Features Demo to 11:16 · Testing Demo to 12:03 · GitHub & Close to 12:48)
+**Team Phantom Devs** · Total duration: **12:41** (Introduction to 1:35 · Core Features Demo to 11:16 · Testing Demo to 12:03 · GitHub & Close to 12:41)
 
 ---
 
@@ -132,12 +132,12 @@ And money deserves the same care: for payments, webhooks are the source of truth
 
 ---
 
-## GitHub & Engineering Practice (12:03 – 12:48)
+## GitHub & Engineering Practice (12:03 – 12:41)
 
-### Built with Industry Practice (12:03 – 12:38)
+### Built with Industry Practice (12:03 – 12:31)
 
-Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. Every feature was reviewed before it merged — the pull requests and the history are all here. And the product is deployed live.
+Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. And the product is deployed live. Every issue and pull request is here too — that is how each feature was reviewed before it merged.
 
-### Closing (12:38 – 12:48)
+### Closing (12:31 – 12:41)
 
 That is ScholarFlow — built by a team and released step by step. Thank you for watching.
