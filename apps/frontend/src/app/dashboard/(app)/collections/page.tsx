@@ -100,7 +100,7 @@ export default function CollectionsPage() {
                     <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(collection.createdAt).toLocaleDateString()}</span>
                     {collection._count?.members ? <span className="flex items-center gap-1"><Users className="h-3 w-3" />{collection._count.members}</span> : null}
                   </div>
-                  {(collection.tags || []).length > 0 && <div className="flex flex-wrap gap-1 mt-3">{(collection.tags || []).slice(0, 3).map((t) => (<Badge key={t} variant="secondary" className="text-xs">{t}</Badge>))}</div>}
+                  {(collection.tags || []).length > 0 && <div className="flex flex-wrap gap-1 mt-3">{(collection.tags || []).slice(0, 3).map((t, tIdx) => (<Badge key={`${t}-${tIdx}`} variant="secondary" className="text-xs">{t}</Badge>))}</div>}
                   <div className="flex justify-end mt-3">
                     <Button size="sm" variant="outline" asChild><Link href={`/dashboard/collections/${collection.id}`}><Eye className="mr-1 h-3 w-3" />View</Link></Button>
                   </div>
