@@ -1,7 +1,7 @@
 # ScholarFlow — Demo Video Script (12:15, Solo Narration)
 
-Total time: **13:16**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
-far: **to 11:16** (everything through the Admin console) · Remaining: **11:16 → 13:16**.
+Total time: **12:48**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
+far: **to 12:03** (everything through Testing) · Remaining: **12:03 → 12:48**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
 minute**) — the measured pace from the HaluRISC recording pass. All timings below come
@@ -22,8 +22,8 @@ beat.
 Discover → Workspace → Research → Payments → Admin — so each feature group plays as one
 continuous segment.
 
-**Recorded (rows 5–22, ends 11:16):** everything through Payments and the full Admin
-console tour. The next recording starts at **11:16** with **Testing** (row 23).
+**Recorded (rows 5–24, ends 12:03):** everything through Testing (Jest suite + Stripe
+payment-safety replay). The next recording starts at **12:03** with **GitHub** (row 25).
 
 ---
 
@@ -113,14 +113,12 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 20 | **Research** 3 — citation graph + research map ✅ | 9:10 – 9:42 |
 | 21 | **Payments** — Stripe checkout + billing ✅ | 9:42 – 10:22 |
 | 22 | **Admin** — full sidebar tour (every page) ✅ | 10:22 – 11:16 |
-| 23 | Testing 0 — transition | 11:16 – 11:21 |
-| 24 | Testing 1 — automated tests (Jest + Supertest) | 11:21 – 12:01 |
-| 25 | Testing 2 — access control (403) | 12:01 – 12:16 |
-| 26 | Testing 3 — payment safety (replay) | 12:16 – 12:31 |
-| 27 | GitHub — repository tour | 12:31 – 13:06 |
-| 28 | Close | 13:06 – 13:16 |
+| 23 | Testing 1 — automated tests (Jest + Supertest) ✅ | 11:16 – 11:48 |
+| 24 | Testing 2 — payment safety (Stripe CLI replay) ✅ | 11:48 – 12:03 |
+| 25 | GitHub — repository tour | 12:03 – 12:38 |
+| 26 | Close | 12:38 – 12:48 |
 
-Spoken words total ≈ **1,110**. At 1.73 words/second that is about **10:40 of speech**;
+Spoken words total ≈ **1,085**. At 1.73 words/second that is about **10:30 of speech**;
 the rest is clicks, loads, and the transitions marked in the table (the recorded section
 and the longer tours have their own pacing). Keep talking while panels load, and the
 remaining takes will match their windows.
@@ -129,8 +127,8 @@ remaining takes will match their windows.
 
 ## 3. Cue cards — what to do, in this order
 
-*(Quick operational reference for recording. Rows 1–22 are recorded; the next take
-starts at row 23, 11:16.)*
+*(Quick operational reference for recording. Rows 1–24 are recorded; the next take
+starts at row 25, 12:03.)*
 
 | # | At | On screen | Do this | Start saying |
 | - | -- | --------- | ------- | ------------ |
@@ -156,15 +154,14 @@ starts at row 23, 11:16.)*
 | 20 | 9:10 | **Research** — Citation Graph → Research Map | Select two linked papers (edge appears) → open the map | "The Research module also maps the literature…" ✅ recorded |
 | 21 | 9:42 | **Payments** — Pricing → Stripe Checkout | Choose **Pro** → card `4242 4242 4242 4242` → return to Billing | "Every module you saw is the product; payments keep it running." ✅ recorded |
 | 22 | 10:22 | **Admin** — sidebar tour | Every admin page: overview, users, subscriptions, plans, payments, reports, audit, AI keys, webhooks, moderation, alerts, health, settings | "And behind the product is the operator view…" ✅ recorded |
-| 23 | 11:16 | Testing — Terminal A | Run `yarn test` and keep talking over it | "That is the product…" |
-| 24 | 12:01 | Testing — Michael's window | Open the view-only paper → try to edit → show the 403 | "Next, one live security check…" |
-| 25 | 12:16 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" |
-| 26 | 12:31 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
-| 27 | 13:06 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
+| 23 | 11:16 | Testing — Terminal A | Open the `src/__tests__` folder → run `yarn test` | "That is the product…" ✅ recorded |
+| 24 | 11:48 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" ✅ recorded |
+| 25 | 12:03 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
+| 26 | 12:38 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
 
 **Rules while recording:** keep the cursor slow; one numbered row at a time; keep
 talking while anything loads; if a step fails, move on to the next row — do not restart
-the whole take. **Next take starts at row 23 (11:16).**
+the whole take. **Next take starts at row 25 (12:03).**
 
 ---
 
@@ -396,37 +393,25 @@ Moderation, Alerts, System Health, Settings.**]**
 
 ---
 
-## 6. Testing Demo (11:16 – 12:31)
+## 6. Testing Demo (11:16 – 12:03)
 
 **Purpose: the automated test suite is the main part — billing, payments, papers,
 validation, and access control are all covered by Jest (unit + integration) and
-Supertest (API end-to-end). Access control and payment safety are quick live checks.**
+Supertest (API end-to-end). Payment safety is the quick live check at the end; the
+on-camera access-control check was skipped because the suite already covers it.**
 
-### [11:16 – 11:21] Transition — Why testing matters
+### [11:16 – 11:48] Testing 1 — Automated tests (Jest + Supertest)
 
-**[Action:** open the tests terminal.**]**
+**[Action:** open the `src/__tests__` folder to show the test files, then run `yarn test`
+and let the green summary land before speaking again.**]**
 
 > That is the product. But how do we know it works? We test it.
-
-### [11:21 – 12:01] Testing 1 — Automated tests (Jest + Supertest)
-
-**[Action:** show the test files (backend `src/__tests__`, frontend `src/__tests__`), then
-run `yarn test` and let the green summary land before speaking again.**]**
-
-> We test it in two ways. These are the automated tests — Jest for unit and
-> integration, Supertest for API end-to-end.
+> These are the automated tests — Jest for unit and integration, Supertest for API
+> end-to-end.
 > They already cover billing, payments, papers, validation, and access control.
 > Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### [12:01 – 12:16] Testing 2 — Access control
-
-**[Action:** as Michael, open the view-only paper and attempt an edit — show the
-refusal.**]**
-
-> Next, one live security check: a view-only colleague tries to edit — the server
-> refuses. Four oh three.
-
-### [12:16 – 12:31] Testing 3 — Payment safety
+### [11:48 – 12:03] Testing 2 — Payment safety
 
 **[Action:** in the `stripe listen` terminal, replay the same event twice; show the
 subscription changing only once.**]**
@@ -436,12 +421,12 @@ subscription changing only once.**]**
 
 ---
 
-## 7. GitHub & Engineering Practice (12:31 – 13:16)
+## 7. GitHub & Engineering Practice (12:03 – 12:48)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
 contribution, proper versioned releases, and the live deployment.**
 
-### [12:31 – 13:06] The repository tour
+### [12:03 – 12:38] The repository tour
 
 **[Action:** switch to the browser and open the GitHub repository. Scroll the README
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
@@ -454,7 +439,7 @@ deployment link. Move the cursor slowly; let each page land before speaking.**]*
 > all here.
 > And the product is deployed live.
 
-### [13:06 – 13:16] Close
+### [12:38 – 12:48] Close
 
 **[Action:** return to the dashboard and let it sit on screen.**]**
 
@@ -503,7 +488,7 @@ Pause for one full second after every number.
 - In the automated-tests beat, keep talking while the suite runs, then let the green
   summary land as your closing line.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
-- The unrecorded beats (rows 23–27: Testing, GitHub and close) start
+- The unrecorded beats (rows 25–26: GitHub and close) start
   with a one-line intro — say it as you open the first screen of the module.
 - In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
   live deployment — one page per sentence.
