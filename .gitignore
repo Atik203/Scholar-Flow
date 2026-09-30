@@ -27,8 +27,6 @@ yarn-error.log*
 
 # Environment files — NEVER commit secrets
 # (keep .env.example tracked for documentation)
-.env
-.env.*
 !.env.example
 !*.env.example
 apps/**/.env
@@ -43,7 +41,6 @@ apps/**/.env.development
 .turbo
 
 # IDE
-.vscode/
 
 # Database
 *.db
