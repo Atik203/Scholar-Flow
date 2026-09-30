@@ -32,9 +32,18 @@ the realtime beat.
 
 ### Data to prepare
 
-- **One published paper** with the AI summary and key points already generated once
-  (so the demo doesn't wait on first-time processing).
-- **One draft paper** with no public link (for the 404 test).
+> **The demo library is already seeded.** Run from `apps/backend`:
+> `yarn ts-node --transpile-only prisma/seedDemoLibrary.js`
+> (flags: `--cleanup`, `--cleanup-e2e`, `--skip-extraction`, `--extract-only`, `--limit=N`).
+> It uploads the 10 curated PDFs to S3, runs real extraction + embeddings, and builds
+> workspaces, collections, citations, annotations, notes, discussions and notifications
+> for every demo role (Bob 10 papers · pro 6 · emily 5 · michael 4 · researcher 3 ·
+> admin 3 · sofia/david/aisha/lucas 2 each).
+
+- **Published papers with pre-warmed AI summaries** (ASB + InjecAgent are already
+  generated) so the demo doesn't wait on first-time processing.
+- **One draft paper** with no public link (for the 404 test) — seeded as
+  "Thesis Draft — Multi-Agent Security Survey".
 - **One paper shared with Michael as view-only** (for the 403 test).
 - **One collection** ready to add a paper into (e.g., "Thesis Reading") — for the
   Collections beat.
