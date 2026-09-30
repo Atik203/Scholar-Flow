@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Speech
 
-**Team Phantom Devs** · Total duration: **12:15** (Introduction to 1:35 · Core Features Demo to 10:15 · Testing Demo to 11:30 · GitHub & Close to 12:15)
+**Team Phantom Devs** · Total duration: **12:35** (Introduction to 1:35 · Core Features Demo to 10:35 · Testing Demo to 11:50 · GitHub & Close to 12:35)
 
 ---
 
@@ -74,19 +74,19 @@ And when I need something new, Discover brings live research in: trending papers
 
 ---
 
-## Papers — Reading and Annotations (5:40 – 6:00)
+## Papers — Reading, Annotations, Comments and Notes (5:40 – 6:20)
 
-Back to a paper — the extracted text and the PDF preview sit side by side. I highlight a sentence, and add a short note. Everything I mark stays attached to the paper.
+Back to a paper — the extracted text and the PDF preview sit side by side. I highlight a sentence and add a note. I can also drop a comment mark, for a discussion with my team. And on the side, I keep my own research notes, linked to this paper. Everything I mark stays attached — for me, and for my team.
 
 ---
 
 ## Workspace (6:00 – 6:55)
 
-### 1. Members and Roles (6:00 – 6:25)
+### 1. Members and Roles (6:20 – 6:45)
 
 That is the research side — now the Workspace module, where the team lives. This is our ML workspace: its members, their roles, and the papers we share. Everyone sees exactly what their role allows.
 
-### 2. Invite + Live Notification (6:25 – 6:55)
+### 2. Invite + Live Notification (6:45 – 7:15)
 
 I invite a new member and choose a role — Viewer, Editor, or Manager. The moment I send it, the notification arrives in the bell, in real time. Invitations, role changes, and removals all flow through the same live channel.
 
@@ -94,58 +94,58 @@ I invite a new member and choose a role — Viewer, Editor, or Manager. The mome
 
 ## Research (6:55 – 9:15)
 
-### 1. Editor: Template, Citation, Export (6:55 – 7:45)
+### 1. Editor: Template, Citation, Export (7:15 – 8:05)
 
 Now the Research module — this is where the writing happens. I create a new paper from a template; this one is IEEE. The editor supports tables, images, and LaTeX math, and it saves automatically — watch the save indicator; I never pressed save. I insert a citation from my library, in the format I choose — one of nine formats, including APA, IEEE, and BibTeX. And one click exports a clean PDF.
 
-### 2. Real-Time Co-Editing (7:45 – 8:40)
+### 2. Real-Time Co-Editing (8:05 – 9:00)
 
 A paper is rarely written alone — so let me show you the part I am most proud of. On the left is my screen. On the right, my teammate Emily, in another browser. Watch: when she types, the text appears on my screen instantly — no refresh, no conflicts. Her cursor carries her name; mine carries mine, so we always know who is where. Two people, one paper, at the same time — real-time co-editing, built into the research workflow.
 
-### 3. Citation Graph + Research Map (8:40 – 9:15)
+### 3. Citation Graph + Research Map (9:00 – 9:35)
 
 The Research module also maps the literature. This is the citation graph: every arrow is a real reference between two papers in my library. And the research map turns my tags into a topic cloud, so I can see where the literature is dense.
 
 ---
 
-## Payments (9:15 – 9:55)
+## Payments (9:35 – 10:15)
 
 Every module you saw is the product; payments keep it running. I upgrade to Pro — Stripe Checkout, hosted by Stripe, so no card data touches our servers. I use a test card, and it succeeds; the billing page shows my plan and invoices. And the admin console picks the payment up instantly, through webhooks.
 
 ---
 
-## Admin (9:55 – 10:15)
+## Admin (10:15 – 10:35)
 
 And behind the product is the operator view: live system metrics, reports, the audit log, and platform settings. Everything an admin needs, on real data.
 
 ---
 
-## Testing Demo (10:15 – 11:30)
+## Testing Demo (10:35 – 11:50)
 
-### Why Testing Matters (10:15 – 10:20)
+### Why Testing Matters (10:35 – 10:40)
 
 That is the product. But how do we know it works? We test it.
 
-### 1. Automated Tests — Jest and Supertest (10:20 – 11:00)
+### 1. Automated Tests — Jest and Supertest (10:40 – 11:20)
 
 We test it in two ways. These are the automated tests — Jest for unit and integration, Supertest for API end-to-end. They already cover billing, payments, papers, validation, and access control. Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### 2. Access Control (11:00 – 11:15)
+### 2. Access Control (11:20 – 11:35)
 
 Next, one live security check: a view-only colleague tries to edit — the server refuses. Four oh three.
 
-### 3. Payment Safety (11:15 – 11:30)
+### 3. Payment Safety (11:35 – 11:50)
 
 And money deserves the same care: for payments, webhooks are the source of truth. I replay the same event twice — the subscription changes only once.
 
 ---
 
-## GitHub & Engineering Practice (11:30 – 12:15)
+## GitHub & Engineering Practice (11:50 – 12:35)
 
-### Built with Industry Practice (11:30 – 12:05)
+### Built with Industry Practice (11:50 – 12:25)
 
 Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. Every feature was reviewed before it merged — the pull requests and the history are all here. And the product is deployed live.
 
-### Closing (12:05 – 12:15)
+### Closing (12:25 – 12:35)
 
 That is ScholarFlow — built by a team and released step by step. Thank you for watching.
