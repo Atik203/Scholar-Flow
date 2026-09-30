@@ -1,6 +1,6 @@
 # ScholarFlow — Demo Video Speech
 
-**Team Phantom Devs** · Total duration: **13:16** (Introduction to 1:35 · Core Features Demo to 11:16 · Testing Demo to 12:31 · GitHub & Close to 13:16)
+**Team Phantom Devs** · Total duration: **12:48** (Introduction to 1:35 · Core Features Demo to 11:16 · Testing Demo to 12:03 · GitHub & Close to 12:48)
 
 ---
 
@@ -120,32 +120,24 @@ And behind the product is the operator view — the Admin console. Every page is
 
 ---
 
-## Testing Demo (11:16 – 12:31)
+## Testing Demo (11:16 – 12:03)
 
-### Why Testing Matters (11:16 – 11:21)
+### 1. Automated Tests — Jest and Supertest (11:16 – 11:48)
 
-That is the product. But how do we know it works? We test it.
+That is the product. But how do we know it works? We test it. These are the automated tests — Jest for unit and integration, Supertest for API end-to-end. They already cover billing, payments, papers, validation, and access control. Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
 
-### 1. Automated Tests — Jest and Supertest (11:21 – 12:01)
-
-We test it in two ways. These are the automated tests — Jest for unit and integration, Supertest for API end-to-end. They already cover billing, payments, papers, validation, and access control. Watch the suite run — twenty-one suites, fifty-nine tests, all passing.
-
-### 2. Access Control (12:01 – 12:16)
-
-Next, one live security check: a view-only colleague tries to edit — the server refuses. Four oh three.
-
-### 3. Payment Safety (12:16 – 12:31)
+### 2. Payment Safety (11:48 – 12:03)
 
 And money deserves the same care: for payments, webhooks are the source of truth. I replay the same event twice — the subscription changes only once.
 
 ---
 
-## GitHub & Engineering Practice (12:31 – 13:16)
+## GitHub & Engineering Practice (12:03 – 12:48)
 
-### Built with Industry Practice (12:31 – 13:06)
+### Built with Industry Practice (12:03 – 12:38)
 
 Before we finish, one last look — our GitHub — because the process matters too. Sprint-based development, contributions from every member, and every version released properly. Every feature was reviewed before it merged — the pull requests and the history are all here. And the product is deployed live.
 
-### Closing (13:06 – 13:16)
+### Closing (12:38 – 12:48)
 
 That is ScholarFlow — built by a team and released step by step. Thank you for watching.
