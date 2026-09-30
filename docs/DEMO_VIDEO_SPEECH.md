@@ -24,7 +24,7 @@ I am logged in as Bob, a team lead. My library already has papers, and my team i
 
 ---
 
-## Papers (1:40 – 5:40)
+## Papers (1:40 – 4:15)
 
 ### 1. Upload + Metadata (1:40 – 2:05)
 
