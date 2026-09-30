@@ -1,7 +1,7 @@
 # ScholarFlow — Demo Video Script (12:15, Solo Narration)
 
-Total time: **12:48**. Introduction: **1:35** (to 1:40 with the app switch) · Recorded so
-far: **to 12:03** (everything through Testing) · Remaining: **12:03 → 12:48**.
+Total time: **12:41**. Introduction: **1:35** (to 1:40 with the app switch) · Recording:
+**complete ✅ — all 26 cue-card rows are recorded**.
 
 Written for a slow, careful speaker at **1.73 words per second** (about **104 words per
 minute**) — the measured pace from the HaluRISC recording pass. All timings below come
@@ -22,8 +22,8 @@ beat.
 Discover → Workspace → Research → Payments → Admin — so each feature group plays as one
 continuous segment.
 
-**Recorded (rows 5–24, ends 12:03):** everything through Testing (Jest suite + Stripe
-payment-safety replay). The next recording starts at **12:03** with **GitHub** (row 25).
+**Recorded (rows 5–26, ends 12:41):** the full video is recorded — nothing left on
+camera. Use this script only for the edit (captions, cuts) and the voice-over pass.
 
 ---
 
@@ -115,20 +115,19 @@ Tip: never open `.env` files on screen. Keep every terminal scrolled to a clean 
 | 22 | **Admin** — full sidebar tour (every page) ✅ | 10:22 – 11:16 |
 | 23 | Testing 1 — automated tests (Jest + Supertest) ✅ | 11:16 – 11:48 |
 | 24 | Testing 2 — payment safety (Stripe CLI replay) ✅ | 11:48 – 12:03 |
-| 25 | GitHub — repository tour | 12:03 – 12:38 |
-| 26 | Close | 12:38 – 12:48 |
+| 25 | GitHub — repository tour ✅ | 12:03 – 12:31 |
+| 26 | Close ✅ | 12:31 – 12:41 |
 
-Spoken words total ≈ **1,085**. At 1.73 words/second that is about **10:30 of speech**;
+Spoken words total ≈ **1,090**. At 1.73 words/second that is about **10:30 of speech**;
 the rest is clicks, loads, and the transitions marked in the table (the recorded section
-and the longer tours have their own pacing). Keep talking while panels load, and the
-remaining takes will match their windows.
+and the longer tours have their own pacing).
 
 ---
 
 ## 3. Cue cards — what to do, in this order
 
-*(Quick operational reference for recording. Rows 1–24 are recorded; the next take
-starts at row 25, 12:03.)*
+*(Quick operational reference for recording. All 26 rows are recorded — the video is
+complete ✅.)*
 
 | # | At | On screen | Do this | Start saying |
 | - | -- | --------- | ------- | ------------ |
@@ -156,12 +155,12 @@ starts at row 25, 12:03.)*
 | 22 | 10:22 | **Admin** — sidebar tour | Every admin page: overview, users, subscriptions, plans, payments, reports, audit, AI keys, webhooks, moderation, alerts, health, settings | "And behind the product is the operator view…" ✅ recorded |
 | 23 | 11:16 | Testing — Terminal A | Open the `src/__tests__` folder → run `yarn test` | "That is the product…" ✅ recorded |
 | 24 | 11:48 | Testing — Terminal C (`stripe listen`) | Replay the same event twice | "And money deserves the same care…" ✅ recorded |
-| 25 | 12:03 | GitHub (browser) | README → Insights → Contributors → Releases → live link | "Before we finish…" |
-| 26 | 12:38 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" |
+| 25 | 12:03 | GitHub (browser) | README → Insights → Contributors → Releases → issues/pulls → live link | "Before we finish…" ✅ recorded |
+| 26 | 12:31 | Dashboard | Return to the dashboard, pause, deliver the close | "That is ScholarFlow…" ✅ recorded |
 
 **Rules while recording:** keep the cursor slow; one numbered row at a time; keep
 talking while anything loads; if a step fails, move on to the next row — do not restart
-the whole take. **Next take starts at row 25 (12:03).**
+the whole take. **All rows recorded ✅ — the video is complete.**
 
 ---
 
@@ -421,25 +420,26 @@ subscription changing only once.**]**
 
 ---
 
-## 7. GitHub & Engineering Practice (12:03 – 12:48)
+## 7. GitHub & Engineering Practice (12:03 – 12:41)
 
 **Purpose: show the process behind the product — sprint workflow, every team member's
-contribution, proper versioned releases, and the live deployment.**
+contribution, proper versioned releases, the live deployment, and the issues/pull
+requests at the end.**
 
-### [12:03 – 12:38] The repository tour
+### [12:03 – 12:31] The repository tour
 
 **[Action:** switch to the browser and open the GitHub repository. Scroll the README
 slowly, then open **Insights → Contributors**, then **Releases**, then the live
-deployment link. Move the cursor slowly; let each page land before speaking.**]**
+deployment link, and finish on the **Issues / Pull requests** pages.**]**
 
 > Before we finish, one last look — our GitHub — because the process matters too.
 > Sprint-based development, contributions from every member, and every version
 > released properly.
-> Every feature was reviewed before it merged — the pull requests and the history are
-> all here.
 > And the product is deployed live.
+> Every issue and pull request is here too — that is how each feature was reviewed
+> before it merged.
 
-### [12:38 – 12:48] Close
+### [12:31 – 12:41] Close
 
 **[Action:** return to the dashboard and let it sit on screen.**]**
 
@@ -488,8 +488,8 @@ Pause for one full second after every number.
 - In the automated-tests beat, keep talking while the suite runs, then let the green
   summary land as your closing line.
 - In the realtime beat, say nothing while Emily's text appears — let the audience see it.
-- The unrecorded beats (rows 25–26: GitHub and close) start
-  with a one-line intro — say it as you open the first screen of the module.
+- The video is fully recorded — use this script for the edit (captions, cuts) and the
+  voice-over pass.
 - In the GitHub beat, scroll slowly: README, then contributors, then releases, then the
   live deployment — one page per sentence.
 - Keep Zoom at 110% so every label is readable.
