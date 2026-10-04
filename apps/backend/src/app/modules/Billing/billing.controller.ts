@@ -149,6 +149,39 @@ const getCatalog = catchAsync(async (_req: AuthRequest, res: Response) => {
   });
 });
 
+/**
+ * GET /billing/invoices
+ * List the current user's payment history (for invoice downloads)
+ */
+const getInvoices = catchAsync(async (req: AuthRequest, res: Response) => {
+  const invoices = await billingService.getUserInvoices(req.user!.id);
+
+  res.status(200).json({
+    success: true,
+    message: "Invoices retrieved successfully",
+    data: invoices,
+  });
+});
+
+/**
+ * GET /billing/invoices/:paymentId/download
+ * Resolve a Stripe-hosted download URL for one of the user's invoices
+ */
+const downloadInvoice = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { paymentId } = req.params;
+
+  const invoice = await billingService.getInvoiceDownloadUrl(
+    req.user!.id,
+    paymentId
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Invoice download link generated",
+    data: invoice,
+  });
+});
+
 export const billingController = {
   createCheckoutSession,
   createPortalSession,
@@ -156,4 +189,6 @@ export const billingController = {
   managePlan,
   getPrices,
   getCatalog,
+  getInvoices,
+  downloadInvoice,
 };

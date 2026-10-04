@@ -547,6 +547,96 @@ export const reactivateSubscription = async (
   }
 };
 
+/**
+ * List the user's payment history with a per-row download capability flag.
+ */
+export const getUserInvoices = async (userId: string) => {
+  const payments = await prismaClient.payment.findMany({
+    where: { userId, isDeleted: false },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: {
+      id: true,
+      amountCents: true,
+      currency: true,
+      status: true,
+      transactionId: true,
+      createdAt: true,
+      subscription: {
+        select: { plan: { select: { name: true, code: true } } },
+      },
+    },
+  });
+
+  return payments.map((payment) => ({
+    id: payment.id,
+    amountCents: payment.amountCents,
+    currency: payment.currency,
+    status: payment.status,
+    invoiceNumber: payment.transactionId,
+    planName: payment.subscription?.plan?.name ?? null,
+    createdAt: payment.createdAt,
+    // Only finalized Stripe invoices have a PDF. Local demo/failed rows and
+    // non-invoice transaction ids cannot be downloaded.
+    canDownload:
+      typeof payment.transactionId === "string" &&
+      payment.transactionId.startsWith("in_"),
+  }));
+};
+
+/**
+ * Resolve the Stripe-hosted download URL for one of the user's invoices.
+ * The PDF itself stays on Stripe; we only hand the owner a signed link.
+ */
+export const getInvoiceDownloadUrl = async (
+  userId: string,
+  paymentId: string
+) => {
+  const payment = await prismaClient.payment.findFirst({
+    where: { id: paymentId, userId, isDeleted: false },
+    select: { transactionId: true },
+  });
+
+  if (!payment) {
+    throw new BillingError(404, "Invoice not found", "INVOICE_NOT_FOUND");
+  }
+
+  if (!payment.transactionId || !payment.transactionId.startsWith("in_")) {
+    throw new BillingError(
+      400,
+      "This payment has no downloadable invoice",
+      "INVOICE_NOT_AVAILABLE"
+    );
+  }
+
+  try {
+    const invoice = await stripe.invoices.retrieve(payment.transactionId);
+    const url = invoice.invoice_pdf || invoice.hosted_invoice_url || null;
+
+    if (!url) {
+      throw new BillingError(
+        404,
+        "Stripe has not generated a PDF for this invoice yet",
+        "INVOICE_PDF_PENDING"
+      );
+    }
+
+    return { url, invoiceNumber: invoice.number || invoice.id };
+  } catch (error) {
+    if (error instanceof BillingError) {
+      throw error;
+    }
+    if (isStripeError(error)) {
+      logStripeError(error, "getInvoiceDownloadUrl");
+    }
+    throw new BillingError(
+      502,
+      "Could not fetch the invoice from Stripe",
+      "INVOICE_FETCH_FAILED"
+    );
+  }
+};
+
 export const billingService = {
   createCheckoutSession,
   createPortalSession,
@@ -556,4 +646,6 @@ export const billingService = {
   getOrCreateStripeCustomer,
   getAvailablePrices,
   getPublicCatalog,
+  getUserInvoices,
+  getInvoiceDownloadUrl,
 };

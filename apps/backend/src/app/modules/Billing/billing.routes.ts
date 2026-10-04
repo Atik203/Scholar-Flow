@@ -64,6 +64,24 @@ router.get(
   billingController.getSubscription
 );
 
+// List payment history (invoice downloads)
+router.get(
+  "/invoices",
+  authMiddleware,
+  billingSubscriptionLimiter,
+  performanceMonitor,
+  billingController.getInvoices
+);
+
+// Resolve a Stripe-hosted invoice download URL (owner only)
+router.get(
+  "/invoices/:paymentId/download",
+  authMiddleware,
+  billingSubscriptionLimiter,
+  performanceMonitor,
+  billingController.downloadInvoice
+);
+
 // Manage plan (admin/team lead only)
 router.post(
   "/manage-plan",
