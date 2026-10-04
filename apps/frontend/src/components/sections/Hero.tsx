@@ -167,7 +167,7 @@ export const Hero: React.FC = () => {
     ? user?.onboardingCompleted
       ? "Go to Dashboard"
       : "Finish Onboarding"
-    : "Start Free Trial";
+    : "Start Free";
   const CtaIcon = isAuthenticated && user?.onboardingCompleted ? LayoutDashboard : Sparkles;
 
   useEffect(() => {
@@ -385,7 +385,7 @@ export const Hero: React.FC = () => {
             </motion.span>
             <motion.span className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-              14-day free trial
+              Free plan available
             </motion.span>
             <motion.span className="flex items-center gap-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.0 }}>
               <CheckCircle2 className="h-4 w-4 text-green-500" />

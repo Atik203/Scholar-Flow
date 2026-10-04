@@ -139,15 +139,6 @@ export class BillingError extends ApiError {
     );
   }
 
-  static trialAlreadyUsed(userId: string) {
-    return new BillingError(
-      400,
-      "Trial period already used for this account",
-      "TRIAL_ALREADY_USED",
-      { userId }
-    );
-  }
-
   static alreadySubscribed(userId: string) {
     return new BillingError(
       400,
