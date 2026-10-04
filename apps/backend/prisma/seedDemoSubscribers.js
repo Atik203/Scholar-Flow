@@ -1,13 +1,18 @@
 /**
  * Demo subscribers with real Stripe test-mode subscriptions.
  *
- * Each demo user gets a test-clock simulation: clock frozen 15 days ago ->
- * 14-day trial -> clock advanced to now -> trial ends, invoice finalized and
- * charged -> subscription active with a paid invoice. The DB rows mirror
+ * Each demo user gets a test-clock simulation: clock frozen back
+ * (trial + N monthly cycles) -> advanced through every billing boundary ->
+ * each cycle finalizes and charges a real invoice. The DB rows mirror
  * exactly what webhook.controller.ts writes on checkout.session.completed +
- * invoice.paid, so admin subscribers/payments pages show real data.
+ * invoice.paid, so admin subscribers/payments/revenue pages show real data.
  *
- * Run:     yarn ts-node prisma/seedDemoSubscribers.js
+ * --cycles=N  number of paid monthly invoices per subscriber (default 1).
+ * Flags on individual demo users: cancelAfter (CANCELED + churn),
+ * refundFirstPayment (REFUNDED payment), failLastCycle (FAILED payment +
+ * PAST_DUE subscription).
+ *
+ * Run:     yarn ts-node prisma/seedDemoSubscribers.js --cycles=4
  * Cleanup: yarn ts-node prisma/seedDemoSubscribers.js --cleanup
  */
 
@@ -27,9 +32,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const DEFAULT_PASSWORD = 'password123';
 const TRIAL_PERIOD_DAYS = 14;
-const CLOCK_BACKDATE_DAYS = 15;
+const CYCLE_DAYS = 30;
 const CLOCK_NAME_PREFIX = 'demo-sub-';
 const DEMO_METADATA_KEY = 'demoSeed';
+
+const cyclesArg = process.argv.find((arg) => arg.startsWith('--cycles='));
+const CYCLES = cyclesArg
+  ? Math.min(Math.max(parseInt(cyclesArg.split('=')[1], 10) || 1, 1), 12)
+  : 1;
 
 const ROLE_BY_TIER = {
   pro: 'PRO_RESEARCHER',
@@ -81,6 +91,7 @@ const DEMO_USERS = [
     institution: 'ETH Zurich',
     fieldOfStudy: 'Quantum Computing',
     planCode: 'team_monthly',
+    cancelAfter: true,
   },
   {
     email: 'lucas.meyer@scholarflow.com',
@@ -90,6 +101,17 @@ const DEMO_USERS = [
     institution: 'Max Planck Institute',
     fieldOfStudy: 'Neuroscience',
     planCode: 'team_annual',
+    refundFirstPayment: true,
+  },
+  {
+    email: 'pro.researcher@scholarflow.com',
+    name: 'Pro Researcher',
+    firstName: 'Pro',
+    lastName: 'Researcher',
+    institution: 'University of Dhaka',
+    fieldOfStudy: 'Machine Learning',
+    planCode: 'pro_monthly',
+    failLastCycle: true,
   },
 ];
 
@@ -172,6 +194,46 @@ async function ensureDefaultCard(customer) {
   return paymentMethodId;
 }
 
+async function attachDeclinedCard(customerId) {
+  try {
+    const paymentMethod = await stripe.paymentMethods.attach(
+      'pm_card_visa_chargeDeclined',
+      { customer: customerId }
+    );
+    return paymentMethod.id;
+  } catch (error) {
+    console.warn(`   declined token rejected (${error.message}); creating 4000...0002`);
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: '4000000000000002',
+        exp_month: 12,
+        exp_year: 2036,
+        cvc: '314',
+      },
+    });
+    await stripe.paymentMethods.attach(paymentMethod.id, {
+      customer: customerId,
+    });
+    return paymentMethod.id;
+  }
+}
+
+function mapSubscriptionStatus(stripeStatus) {
+  switch (stripeStatus) {
+    case 'active':
+    case 'trialing':
+      return 'ACTIVE';
+    case 'past_due':
+      return 'PAST_DUE';
+    case 'canceled':
+    case 'unpaid':
+      return 'CANCELED';
+    default:
+      return 'EXPIRED';
+  }
+}
+
 async function waitForClockReady(clockId) {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     const clock = await stripe.testHelpers.testClocks.retrieve(clockId);
@@ -194,64 +256,35 @@ async function advanceClockTo(clock, targetTime) {
   return waitForClockReady(clock.id);
 }
 
-async function resolvePaidInvoice(subscriptionId, clockId) {
-  let subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-    expand: ['latest_invoice'],
-  });
-  let invoice = subscription.latest_invoice;
-
-  if (!invoice || invoice.status !== 'paid') {
-    // Subscription invoices stay in draft for ~1 hour after creation; push
-    // the clock past that window so Stripe finalizes and charges the card.
-    await stripe.testHelpers.testClocks.advance(clockId, {
-      frozen_time: unixNow() + 3600,
-    });
-    await waitForClockReady(clockId);
-
-    subscription = await stripe.subscriptions.retrieve(subscriptionId, {
-      expand: ['latest_invoice'],
-    });
-    invoice = subscription.latest_invoice;
-  }
-
-  if (!invoice || invoice.status !== 'paid') {
-    throw new Error(
-      `Invoice for ${subscriptionId} is not paid (status: ${
-        invoice ? invoice.status : 'missing'
-      })`
-    );
-  }
-
-  return { subscription, invoice };
-}
-
-async function syncToDatabase({
-  demo,
-  plan,
+async function upsertSubscriptionRow({
   userId,
-  subscription,
-  invoice,
+  planId,
   customerId,
+  subscription,
+  status,
 }) {
-  const item = subscription.items.data[0];
-  const periodStart = item.current_period_start
+  const item = subscription.items?.data?.[0];
+  const periodStart = item?.current_period_start
     ? new Date(item.current_period_start * 1000)
     : null;
-  const periodEnd = item.current_period_end
+  const periodEnd = item?.current_period_end
     ? new Date(item.current_period_end * 1000)
     : null;
 
-  const subscriptionData = {
+  const data = {
     userId,
     workspaceId: null,
-    planId: plan.id,
-    status: 'ACTIVE',
+    planId,
+    status,
     provider: 'STRIPE',
     providerCustomerId: customerId,
     providerSubscriptionId: subscription.id,
-    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
     currentPeriodStart: periodStart,
     currentPeriodEnd: periodEnd,
+    canceledAt: subscription.canceled_at
+      ? new Date(subscription.canceled_at * 1000)
+      : null,
     trialStart: subscription.trial_start
       ? new Date(subscription.trial_start * 1000)
       : null,
@@ -263,45 +296,58 @@ async function syncToDatabase({
     expiresAt: periodEnd,
   };
 
-  const existingSubscription = await prisma.subscription.findFirst({
+  const existing = await prisma.subscription.findFirst({
     where: { providerSubscriptionId: subscription.id },
   });
 
-  const localSubscription = existingSubscription
-    ? await prisma.subscription.update({
-        where: { id: existingSubscription.id },
-        data: subscriptionData,
-      })
-    : await prisma.subscription.create({ data: subscriptionData });
+  return existing
+    ? prisma.subscription.update({ where: { id: existing.id }, data })
+    : prisma.subscription.create({ data });
+}
 
+async function upsertInvoicePayment({
+  userId,
+  subscriptionId,
+  invoice,
+  status,
+}) {
   const paidAt = invoice.status_transitions?.paid_at
     ? new Date(invoice.status_transitions.paid_at * 1000)
-    : new Date();
+    : null;
+  const createdAt = paidAt || new Date(invoice.created * 1000);
 
-  const paymentData = {
+  const data = {
     userId,
-    subscriptionId: localSubscription.id,
+    subscriptionId,
     provider: 'STRIPE',
-    amountCents: invoice.amount_paid,
+    amountCents: status === 'SUCCEEDED' ? invoice.amount_paid : invoice.amount_due || 0,
     currency: (invoice.currency || 'usd').toUpperCase(),
     transactionId: invoice.id,
-    status: 'SUCCEEDED',
+    status,
     raw: JSON.parse(JSON.stringify(invoice)),
-    createdAt: paidAt,
+    createdAt,
   };
 
-  const existingPayment = await prisma.payment.findUnique({
+  const existing = await prisma.payment.findUnique({
     where: { transactionId: invoice.id },
   });
 
-  if (existingPayment) {
-    await prisma.payment.update({
-      where: { id: existingPayment.id },
-      data: paymentData,
-    });
-  } else {
-    await prisma.payment.create({ data: paymentData });
-  }
+  return existing
+    ? prisma.payment.update({ where: { id: existing.id }, data })
+    : prisma.payment.create({ data });
+}
+
+async function updateUserStripeFields({
+  userId,
+  demo,
+  plan,
+  customerId,
+  subscription,
+}) {
+  const item = subscription.items?.data?.[0];
+  const periodEnd = item?.current_period_end
+    ? new Date(item.current_period_end * 1000)
+    : null;
 
   await prisma.user.update({
     where: { id: userId },
@@ -313,8 +359,46 @@ async function syncToDatabase({
       stripeCurrentPeriodEnd: periodEnd,
     },
   });
+}
 
-  return localSubscription;
+async function refundOldestPayment(userId, invoices) {
+  const existingRefund = await prisma.payment.findFirst({
+    where: { userId, status: 'REFUNDED' },
+  });
+  if (existingRefund) return existingRefund.transactionId;
+
+  const paid = invoices
+    .filter((invoice) => invoice.status === 'paid')
+    .sort((a, b) => a.created - b.created);
+  if (paid.length === 0) return null;
+
+  const target = paid[0];
+  const payment = await prisma.payment.findUnique({
+    where: { transactionId: target.id },
+  });
+  if (!payment) return null;
+
+  const rawIntent = target.payment_intent;
+  const paymentIntentId =
+    typeof rawIntent === 'string' ? rawIntent : rawIntent?.id || null;
+
+  if (paymentIntentId) {
+    try {
+      await stripe.refunds.create({ payment_intent: paymentIntentId });
+    } catch (error) {
+      console.warn(`   refund API failed (${error.message}); marking locally`);
+    }
+  }
+
+  await prisma.payment.update({
+    where: { id: payment.id },
+    data: {
+      status: 'REFUNDED',
+      raw: { ...(payment.raw || {}), refundedAt: new Date().toISOString() },
+    },
+  });
+
+  return target.id;
 }
 
 async function seedUser(demo, hashedPassword) {
@@ -350,12 +434,16 @@ async function seedUser(demo, hashedPassword) {
     },
   });
 
+  const cycles = CYCLES;
   const clockName = `${CLOCK_NAME_PREFIX}${demo.email}`;
   let clock = await findClockByName(clockName);
 
   if (!clock) {
+    // End the last cycle ~5 days ago so the mirrored current period runs
+    // into the future (the next renewal shows as upcoming, not overdue).
+    const backdateDays = TRIAL_PERIOD_DAYS + (cycles - 1) * CYCLE_DAYS + 5;
     clock = await stripe.testHelpers.testClocks.create({
-      frozen_time: unixNow() - CLOCK_BACKDATE_DAYS * 24 * 60 * 60,
+      frozen_time: unixNow() - backdateDays * 24 * 60 * 60,
       name: clockName,
     });
   }
@@ -371,12 +459,12 @@ async function seedUser(demo, hashedPassword) {
     });
   }
 
-  const paymentMethodId = await ensureDefaultCard(customer);
+  const goodCardId = await ensureDefaultCard(customer);
 
   const existingSubscriptions = await stripe.subscriptions.list({
     customer: customer.id,
     status: 'all',
-    limit: 10,
+    limit: 100,
   });
 
   let subscription = existingSubscriptions.data.find(
@@ -388,7 +476,7 @@ async function seedUser(demo, hashedPassword) {
       customer: customer.id,
       items: [{ price: plan.stripePriceId }],
       trial_period_days: TRIAL_PERIOD_DAYS,
-      default_payment_method: paymentMethodId,
+      default_payment_method: goodCardId,
       metadata: {
         userId: user.id,
         planTier: demo.planCode.split('_')[0],
@@ -397,32 +485,113 @@ async function seedUser(demo, hashedPassword) {
     });
   }
 
-  await advanceClockTo(clock, unixNow());
+  // Walk the clock across every billing boundary so each cycle finalizes a
+  // real invoice. Draft invoices get a one-hour nudge to attempt payment.
+  for (let index = 0; index < cycles; index += 1) {
+    const isLastCycle = index === cycles - 1;
 
-  const { subscription: activeSubscription, invoice } = await resolvePaidInvoice(
-    subscription.id,
-    clock.id
-  );
+    if (demo.failLastCycle && isLastCycle) {
+      const declinedCardId = await attachDeclinedCard(customer.id);
+      await stripe.customers.update(customer.id, {
+        invoice_settings: { default_payment_method: declinedCardId },
+      });
+    }
 
-  await syncToDatabase({
+    const boundary =
+      subscription.start_date +
+      (TRIAL_PERIOD_DAYS + index * CYCLE_DAYS) * 24 * 60 * 60;
+    clock = await advanceClockTo(clock, Math.min(boundary, unixNow() + 3600));
+
+    const current = await stripe.subscriptions.retrieve(subscription.id, {
+      expand: ['latest_invoice'],
+    });
+    const latestInvoice = current.latest_invoice;
+    if (!latestInvoice || latestInvoice.status === 'draft') {
+      clock = await advanceClockTo(
+        clock,
+        Math.min(boundary + 3600, unixNow() + 7200)
+      );
+    }
+  }
+
+  if (demo.failLastCycle) {
+    await stripe.customers.update(customer.id, {
+      invoice_settings: { default_payment_method: goodCardId },
+    });
+  }
+
+  // Cancel one subscription so churn and CANCELED state are real data.
+  let finalSubscription = await stripe.subscriptions.retrieve(subscription.id);
+  if (demo.cancelAfter && finalSubscription.status !== 'canceled') {
+    finalSubscription = await stripe.subscriptions.cancel(subscription.id);
+  }
+
+  const status = mapSubscriptionStatus(finalSubscription.status);
+
+  const localSubscription = await upsertSubscriptionRow({
+    userId: user.id,
+    planId: plan.id,
+    customerId: customer.id,
+    subscription: finalSubscription,
+    status,
+  });
+
+  // Mirror every invoice (paid + failed) into Payment rows.
+  const invoiceList = await stripe.invoices.list({
+    subscription: subscription.id,
+    limit: 100,
+  });
+
+  let paidCount = 0;
+  let failedInvoiceId = null;
+
+  for (const invoice of invoiceList.data.slice().reverse()) {
+    if (invoice.status === 'paid') {
+      await upsertInvoicePayment({
+        userId: user.id,
+        subscriptionId: localSubscription.id,
+        invoice,
+        status: 'SUCCEEDED',
+      });
+      paidCount += 1;
+    } else if (
+      invoice.status !== 'draft' &&
+      invoice.status !== 'void' &&
+      (invoice.amount_due || 0) > 0
+    ) {
+      failedInvoiceId = invoice.id;
+      await upsertInvoicePayment({
+        userId: user.id,
+        subscriptionId: localSubscription.id,
+        invoice,
+        status: 'FAILED',
+      });
+    }
+  }
+
+  const refundedInvoiceId = demo.refundFirstPayment
+    ? await refundOldestPayment(user.id, invoiceList.data)
+    : null;
+
+  await updateUserStripeFields({
+    userId: user.id,
     demo,
     plan,
-    userId: user.id,
-    subscription: activeSubscription,
-    invoice,
     customerId: customer.id,
+    subscription: finalSubscription,
   });
 
   return {
     email: demo.email,
     plan: plan.name,
     role: roleForPlanCode(demo.planCode),
-    subscriptionId: activeSubscription.id,
-    invoiceId: invoice.id,
-    amount: `$${(invoice.amount_paid / 100).toFixed(2)}`,
-    trialEnd: formatDate(activeSubscription.trial_end),
+    status,
+    subscriptionId: finalSubscription.id,
+    paidInvoices: paidCount,
+    failedInvoiceId: failedInvoiceId || '-',
+    refundedInvoiceId: refundedInvoiceId || '-',
     periodEnd: formatDate(
-      activeSubscription.items.data[0]?.current_period_end
+      finalSubscription.items?.data?.[0]?.current_period_end
     ),
   };
 }
@@ -481,7 +650,9 @@ async function main() {
     return;
   }
 
-  console.log('🌱 Seeding demo subscribers with paid-after-trial subscriptions...');
+  console.log(
+    `🌱 Seeding demo subscribers with real paid invoices (${CYCLES} cycle(s))...`
+  );
 
   const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 12);
   const results = [];
@@ -492,7 +663,9 @@ async function main() {
     try {
       const result = await seedUser(demo, hashedPassword);
       results.push(result);
-      console.log(`   ✅ ${result.plan} — ${result.invoiceId} ${result.amount}`);
+      console.log(
+        `   ✅ ${result.plan} [${result.status}] — ${result.paidInvoices} paid invoice(s)`
+      );
     } catch (error) {
       failures.push({ email: demo.email, error: error.message });
       console.error(`   ❌ ${error.message}`);
