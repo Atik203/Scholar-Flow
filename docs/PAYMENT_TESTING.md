@@ -36,26 +36,26 @@
       with 400 PLAN_UNAVAILABLE.
 - [ ] Unauthenticated → click a paid plan CTA → lands on `/login` with
       `callbackUrl=/pricing` → after login returns to `/pricing`.
-- [ ] Authenticated → Pro CTA → Stripe hosted checkout opens (14-day trial,
-      $0 first invoice, no card required).
+- [ ] Authenticated → Pro CTA → Stripe hosted checkout opens (charges
+      immediately, no trial period).
 - [ ] Cancel checkout → redirected to `/dashboard/billing/cancel` (not 404).
 - [ ] Monthly/Annual toggle changes the price shown and the price ID used.
 - [ ] Enterprise CTA → `/contact` (never checkout).
 - [ ] Free CTA → `/dashboard`.
-- [ ] FAQ copy consistent: free plan = 10 papers, 14-day trial on all paid
-      plans (pricing, `/faq`, landing-page FAQ section).
+- [ ] FAQ copy consistent: free plan = 10 papers, no trial on paid plans
+      (pricing, `/faq`, landing-page FAQ section).
 
 ## 2. Checkout → role grant (THE critical flow)
 
 - [ ] As `researcher@...` (free): buy **Pro monthly** with `4242...`.
 - [ ] Return to `/dashboard/billing?session_id=...` → "Syncing…" indicator →
       success toast → URL cleaned to `/dashboard/billing`.
-- [ ] Billing page shows: plan **Pro**, badge **Active**, "Trial ends"
-      (≈14 days), **Manage Subscription** button.
+- [ ] Billing page shows: plan **Pro**, badge **Active**,
+      **Manage Subscription** button.
 - [ ] Sidebar now shows Pro-only items (Citation Graph, Research Map).
 - [ ] Analytics usage page (`/dashboard/(app)/analytics/usage`) unlocked.
 - [ ] DB check: `User.role = PRO_RESEARCHER`, `Subscription` row ACTIVE with
-      `trialEnd` set, `WebhookEvent` checkout.session.completed = processed.
+      no `trialEnd`, `WebhookEvent` checkout.session.completed = processed.
 - [ ] **Buy Team monthly** as a NEW free user → role becomes TEAM_LEAD,
       TEAM_LEAD dashboard sections appear.
 - [ ] **Double-buy guard**: while a Pro subscription is ACTIVE, clicking a
@@ -104,8 +104,9 @@
 ## 6. Admin panel — Subscriptions & Revenue (`/dashboard/admin/subscriptions`)
 
 - [ ] Loads as ADMIN; MRR / ARR / Total Revenue / Active Subscribers cards.
-- [ ] **Trial exclusion**: a user in a 14-day trial is NOT in MRR/ARPU/
-      Active Subscribers (trial shows only in "Subscriptions by Status").
+- [ ] **Trial removal**: new checkouts never create a trial — a fresh
+      `Subscription` has `trialEnd = NULL` and counts immediately in MRR /
+      ARPU / Active Subscribers.
 - [ ] **Revenue Trend chart** renders daily bars; tooltip shows date +
       amount; empty state when no payments in range.
 - [ ] Time range selector (7d/30d/90d/1y) + Refresh button work.

@@ -6,11 +6,7 @@ import stripe, {
   isValidPriceId,
   logStripeError,
 } from "../../shared/stripe";
-import {
-  PLAN_FEATURES,
-  PLAN_TIERS,
-  TRIAL_PERIOD_DAYS,
-} from "./billing.constant";
+import { PLAN_FEATURES, PLAN_TIERS } from "./billing.constant";
 import { BillingError } from "./billing.error";
 import type {
   CreateCheckoutSessionInput,
@@ -286,19 +282,6 @@ export const createCheckoutSession = async (
     }
   }
 
-  // Determine trial eligibility
-  const hasUsedTrial = await prismaClient.$queryRaw<Array<{ count: bigint }>>`
-    SELECT COUNT(*)::int as count
-    FROM "Subscription"
-    WHERE "userId" = ${userId}
-      AND "trialEnd" IS NOT NULL
-      AND "isDeleted" = false
-  `;
-
-  const allowTrial =
-    Number(hasUsedTrial[0]?.count || 0) === 0 &&
-    existingSubscription.length === 0;
-
   try {
     // Create Checkout session with stable idempotency key
     // (unique per user+price+workspace — retries reuse it, preventing duplicates)
@@ -321,22 +304,13 @@ export const createCheckoutSession = async (
         cancel_url:
           cancelUrl ||
           `${(config.reset_pass_link || config.frontend_url || "http://localhost:3000").replace("/reset-password", "")}/dashboard/billing/cancel`,
-        subscription_data: allowTrial
-          ? {
-              trial_period_days: TRIAL_PERIOD_DAYS,
-              metadata: {
-                userId,
-                workspaceId: workspaceId || "",
-                planTier,
-              },
-            }
-          : {
-              metadata: {
-                userId,
-                workspaceId: workspaceId || "",
-                planTier,
-              },
-            },
+        subscription_data: {
+          metadata: {
+            userId,
+            workspaceId: workspaceId || "",
+            planTier,
+          },
+        },
         metadata: {
           userId,
           workspaceId: workspaceId || "",
