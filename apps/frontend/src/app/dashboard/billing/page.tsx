@@ -3,6 +3,7 @@
 import { ManageSubscriptionButton } from "@/components/billing/ManageSubscriptionButton";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import {
+  showErrorToast,
   showInfoToast,
   showSuccessToast,
 } from "@/components/providers/ToastProvider";
@@ -18,7 +19,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubscriptionSync } from "@/hooks/useSubscriptionSync";
 import { apiSlice } from "@/redux/api/apiSlice";
-import { useGetSubscriptionQuery } from "@/redux/api/billingApi";
+import {
+  useGetInvoicesQuery,
+  useGetSubscriptionQuery,
+  useLazyGetInvoiceDownloadUrlQuery,
+} from "@/redux/api/billingApi";
 import { useAuth } from "@/redux/auth/useAuth";
 import { useAppDispatch } from "@/redux/hooks";
 import {
@@ -26,6 +31,8 @@ import {
   CheckCircle,
   CreditCard,
   Crown,
+  Download,
+  FileText,
   RefreshCw,
   Users,
   Zap,
@@ -104,6 +111,12 @@ export default function BillingPage() {
   const [shouldSync, setShouldSync] = useState(false);
   const [hasShownSuccessToast, setHasShownSuccessToast] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<
+    string | null
+  >(null);
+
+  const { data: invoices, isLoading: invoicesLoading } = useGetInvoicesQuery();
+  const [getInvoiceUrl] = useLazyGetInvoiceDownloadUrlQuery();
 
   // Smart subscription sync hook
   const { isPolling, attemptCount, maxAttempts } = useSubscriptionSync({
@@ -223,6 +236,31 @@ export default function BillingPage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const formatAmount = (amountCents: number, currency: string) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: (currency || "USD").toUpperCase(),
+    }).format((amountCents || 0) / 100);
+
+  const handleDownloadInvoice = async (invoiceId: string) => {
+    try {
+      setDownloadingInvoiceId(invoiceId);
+      const result = await getInvoiceUrl(invoiceId).unwrap();
+      window.open(result.url, "_blank", "noopener,noreferrer");
+    } catch (error: unknown) {
+      const message =
+        typeof error === "object" && error !== null && "data" in error
+          ? ((error as { data?: { message?: string } }).data?.message ?? "")
+          : "";
+      showErrorToast(
+        "Download failed",
+        message || "Could not generate the invoice link. Please try again."
+      );
+    } finally {
+      setDownloadingInvoiceId(null);
+    }
   };
 
   const userRole = user.role || "RESEARCHER";
@@ -556,6 +594,91 @@ export default function BillingPage() {
               </CardContent>
             </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Invoices
+              </CardTitle>
+              <CardDescription>
+                Download receipts for your subscription payments
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {invoicesLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-12 w-full" />
+                  ))}
+                </div>
+              ) : !invoices || invoices.length === 0 ? (
+                <p className="py-6 text-center text-sm text-muted-foreground">
+                  No payments yet — invoices appear here after your first
+                  charge.
+                </p>
+              ) : (
+                <div className="divide-y">
+                  {invoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium">
+                          {formatAmount(invoice.amountCents, invoice.currency)}
+                          {invoice.planName ? ` · ${invoice.planName}` : ""}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {formatDate(invoice.createdAt)} ·{" "}
+                          {invoice.invoiceNumber}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge
+                          variant="outline"
+                          className={
+                            invoice.status === "SUCCEEDED"
+                              ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                              : invoice.status === "PAST_DUE" ||
+                                  invoice.status === "FAILED"
+                                ? "border-amber-500/40 text-amber-600 dark:text-amber-400"
+                                : "text-muted-foreground"
+                          }
+                        >
+                          {invoice.status}
+                        </Badge>
+                        {invoice.canDownload ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            onClick={() => handleDownloadInvoice(invoice.id)}
+                            disabled={downloadingInvoiceId === invoice.id}
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            {downloadingInvoiceId === invoice.id
+                              ? "Preparing..."
+                              : "Download"}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5"
+                            disabled
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            No PDF
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {showUpgradeCard && (
             <Card className="border-primary/40 bg-primary/5">
