@@ -77,6 +77,17 @@ export interface Subscription {
   features: Record<string, any>;
 }
 
+export interface Invoice {
+  id: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  invoiceNumber: string;
+  planName: string | null;
+  createdAt: string;
+  canDownload: boolean;
+}
+
 export interface ManagePlanRequest {
   action: "cancel" | "reactivate" | "update_seats";
   workspaceId?: string;
@@ -155,6 +166,31 @@ export const billingApi = apiSlice.injectEndpoints({
     }),
 
     /**
+     * Payment history for the current user (invoice downloads)
+     */
+    getInvoices: builder.query<Invoice[], void>({
+      query: () => ({ url: "/billing/invoices" }),
+      transformResponse: (response: { data: Invoice[] }) => response.data,
+      providesTags: ["User"],
+      keepUnusedDataFor: 60,
+    }),
+
+    /**
+     * Resolve a Stripe-hosted download URL for one invoice (owner only)
+     */
+    getInvoiceDownloadUrl: builder.query<
+      { url: string; invoiceNumber: string },
+      string
+    >({
+      query: (paymentId) => ({
+        url: `/billing/invoices/${paymentId}/download`,
+      }),
+      transformResponse: (response: {
+        data: { url: string; invoiceNumber: string };
+      }) => response.data,
+    }),
+
+    /**
      * Public plan catalog — active plans with name/price/interval/priceId
      * so the pricing page reflects admin panel plan changes.
      */
@@ -219,4 +255,6 @@ export const {
   useLazyGetSubscriptionQuery,
   useManagePlanMutation,
   useGetBillingCatalogQuery,
+  useGetInvoicesQuery,
+  useLazyGetInvoiceDownloadUrlQuery,
 } = billingApi;

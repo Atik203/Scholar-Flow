@@ -82,6 +82,7 @@ const DEMO_USERS = [
     institution: 'Harvard University',
     fieldOfStudy: 'Data Science',
     planCode: 'team_monthly',
+    refundFirstPayment: true,
   },
   {
     email: 'aisha.khan@scholarflow.com',
@@ -101,7 +102,6 @@ const DEMO_USERS = [
     institution: 'Max Planck Institute',
     fieldOfStudy: 'Neuroscience',
     planCode: 'team_annual',
-    refundFirstPayment: true,
   },
   {
     email: 'pro.researcher@scholarflow.com',
@@ -195,27 +195,27 @@ async function ensureDefaultCard(customer) {
 }
 
 async function attachDeclinedCard(customerId) {
+  // Raw card numbers are blocked on this account; the classic test token
+  // tok_chargeDeclined maps to a Visa that fails at charge time.
+  let paymentMethod;
   try {
-    const paymentMethod = await stripe.paymentMethods.attach(
-      'pm_card_visa_chargeDeclined',
-      { customer: customerId }
-    );
-    return paymentMethod.id;
-  } catch (error) {
-    console.warn(`   declined token rejected (${error.message}); creating 4000...0002`);
-    const paymentMethod = await stripe.paymentMethods.create({
+    paymentMethod = await stripe.paymentMethods.create({
       type: 'card',
-      card: {
-        number: '4000000000000002',
-        exp_month: 12,
-        exp_year: 2036,
-        cvc: '314',
-      },
+      card: { token: 'tok_chargeDeclined' },
     });
-    await stripe.paymentMethods.attach(paymentMethod.id, {
+  } catch (error) {
+    console.warn(`   declined token rejected (${error.message})`);
+    return null;
+  }
+
+  try {
+    const attached = await stripe.paymentMethods.attach(paymentMethod.id, {
       customer: customerId,
     });
-    return paymentMethod.id;
+    return attached.id;
+  } catch (error) {
+    console.warn(`   declined card attach rejected (${error.message})`);
+    return null;
   }
 }
 
@@ -368,7 +368,7 @@ async function refundOldestPayment(userId, invoices) {
   if (existingRefund) return existingRefund.transactionId;
 
   const paid = invoices
-    .filter((invoice) => invoice.status === 'paid')
+    .filter((invoice) => invoice.status === 'paid' && invoice.amount_paid > 0)
     .sort((a, b) => a.created - b.created);
   if (paid.length === 0) return null;
 
@@ -399,6 +399,38 @@ async function refundOldestPayment(userId, invoices) {
   });
 
   return target.id;
+}
+
+async function upsertLocalFailedPayment({
+  userId,
+  subscriptionId,
+  transactionId,
+  amountCents,
+  currency,
+}) {
+  const data = {
+    userId,
+    subscriptionId,
+    provider: 'STRIPE',
+    amountCents,
+    currency,
+    transactionId,
+    status: 'FAILED',
+    raw: {
+      demoSeed: true,
+      reason:
+        'card_declined (simulated locally — Stripe account blocks decline tokens)',
+    },
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+  };
+
+  const existing = await prisma.payment.findUnique({
+    where: { transactionId },
+  });
+
+  return existing
+    ? prisma.payment.update({ where: { id: existing.id }, data })
+    : prisma.payment.create({ data });
 }
 
 async function seedUser(demo, hashedPassword) {
@@ -487,14 +519,22 @@ async function seedUser(demo, hashedPassword) {
 
   // Walk the clock across every billing boundary so each cycle finalizes a
   // real invoice. Draft invoices get a one-hour nudge to attempt payment.
+  let declinedCardApplied = false;
   for (let index = 0; index < cycles; index += 1) {
     const isLastCycle = index === cycles - 1;
 
     if (demo.failLastCycle && isLastCycle) {
       const declinedCardId = await attachDeclinedCard(customer.id);
-      await stripe.customers.update(customer.id, {
-        invoice_settings: { default_payment_method: declinedCardId },
-      });
+      if (declinedCardId) {
+        declinedCardApplied = true;
+        await stripe.customers.update(customer.id, {
+          invoice_settings: { default_payment_method: declinedCardId },
+        });
+      } else {
+        console.warn(
+          '   decline simulation blocked by Stripe — marking the failure locally'
+        );
+      }
     }
 
     const boundary =
@@ -520,13 +560,27 @@ async function seedUser(demo, hashedPassword) {
     });
   }
 
+  // Mirror a healthy upcoming renewal: cross the next boundary once if the
+  // current period already ended (calendar-month billing drifts past 30 days).
+  if (!demo.failLastCycle && !demo.cancelAfter) {
+    for (let guard = 0; guard < 2; guard += 1) {
+      const current = await stripe.subscriptions.retrieve(subscription.id);
+      const end = current.items?.data?.[0]?.current_period_end;
+      if (!end || end * 1000 > Date.now()) break;
+      clock = await advanceClockTo(clock, end + 3600);
+    }
+  }
+
   // Cancel one subscription so churn and CANCELED state are real data.
   let finalSubscription = await stripe.subscriptions.retrieve(subscription.id);
   if (demo.cancelAfter && finalSubscription.status !== 'canceled') {
     finalSubscription = await stripe.subscriptions.cancel(subscription.id);
   }
 
-  const status = mapSubscriptionStatus(finalSubscription.status);
+  const status =
+    demo.failLastCycle && !declinedCardApplied
+      ? 'PAST_DUE'
+      : mapSubscriptionStatus(finalSubscription.status);
 
   const localSubscription = await upsertSubscriptionRow({
     userId: user.id,
@@ -545,15 +599,30 @@ async function seedUser(demo, hashedPassword) {
   let paidCount = 0;
   let failedInvoiceId = null;
 
+  // Fallback when the account blocks decline simulation: record the failed
+  // renewal and PAST_DUE state locally instead of via Stripe.
+  if (demo.failLastCycle && !declinedCardApplied) {
+    failedInvoiceId = `demo_failed_invoice_${subscription.id}`;
+    await upsertLocalFailedPayment({
+      userId: user.id,
+      subscriptionId: localSubscription.id,
+      transactionId: failedInvoiceId,
+      amountCents: plan.priceCents,
+      currency: (plan.currency || 'usd').toUpperCase(),
+    });
+  }
+
   for (const invoice of invoiceList.data.slice().reverse()) {
     if (invoice.status === 'paid') {
-      await upsertInvoicePayment({
-        userId: user.id,
-        subscriptionId: localSubscription.id,
-        invoice,
-        status: 'SUCCEEDED',
-      });
-      paidCount += 1;
+      if (invoice.amount_paid > 0) {
+        await upsertInvoicePayment({
+          userId: user.id,
+          subscriptionId: localSubscription.id,
+          invoice,
+          status: 'SUCCEEDED',
+        });
+        paidCount += 1;
+      }
     } else if (
       invoice.status !== 'draft' &&
       invoice.status !== 'void' &&
