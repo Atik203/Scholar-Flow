@@ -588,7 +588,7 @@ export const HowItWorks: React.FC = () => {
               href="/register"
               className="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl transition-all"
             >
-              Start Your Free Trial
+              Start Free
             </Link>
             <Link
               href="/demo"
