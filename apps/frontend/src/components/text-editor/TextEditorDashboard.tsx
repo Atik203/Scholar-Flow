@@ -27,7 +27,7 @@ import {
 } from "@/redux/api/userApi";
 import { LayoutTemplate, Download, FileText, Loader2, Plus, Save } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CreatePaperDialog } from "./CreatePaperDialog";
 import { EditorSkeleton } from "./EditorSkeleton";
@@ -199,18 +199,19 @@ function EditorSettingsPanel() {
   );
 }
 
-export function TextEditorDashboard() {
-  // Deep link support: /dashboard/research/editor?paper=<id> opens that
-  // paper in the editor directly.
+export function TextEditorDashboard({ paperId }: { paperId?: string } = {}) {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() =>
-    searchParams.get("paper") ? "editor" : "papers"
-  );
-  const [currentPaper, setCurrentPaper] = useState<string | null>(() =>
-    searchParams.get("paper")
-  );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<EditorTemplate | null>(null);
+
+  // Back-compat: /dashboard/research/editor?paper=<id> → /editor/<id>
+  useEffect(() => {
+    const legacyPaper = searchParams.get("paper");
+    if (!paperId && legacyPaper) {
+      router.replace(`/dashboard/research/editor/${legacyPaper}`);
+    }
+  }, [paperId, searchParams, router]);
 
   // Fetch all papers to calculate stats
   const { data: allPapersResponse } = useListEditorPapersQuery({});
@@ -231,31 +232,28 @@ export function TextEditorDashboard() {
     setIsCreateDialogOpen(true);
   };
 
-  const handlePaperCreated = (paperId: string) => {
-    setCurrentPaper(paperId);
-    setActiveTab("editor");
+  const handlePaperCreated = (createdPaperId: string) => {
     setIsCreateDialogOpen(false);
     setSelectedTemplate(null);
+    router.push(`/dashboard/research/editor/${createdPaperId}`);
   };
 
-  const handlePaperSelected = (paperId: string) => {
-    setCurrentPaper(paperId);
-    setActiveTab("editor");
+  const handlePaperSelected = (selectedPaperId: string) => {
+    router.push(`/dashboard/research/editor/${selectedPaperId}`);
   };
 
-  if (activeTab === "editor" && currentPaper) {
+  if (paperId) {
+    const backToList = () => router.push("/dashboard/research/editor");
+
     return (
       <div className="min-h-screen">
         <div className="flex items-center justify-between mb-6">
-          <Button variant="outline" onClick={() => setActiveTab("papers")}>
+          <Button variant="outline" onClick={backToList}>
             ← Back to Papers
           </Button>
         </div>
 
-        <ScholarFlowEditor
-          paperId={currentPaper}
-          onBack={() => setActiveTab("papers")}
-        />
+        <ScholarFlowEditor paperId={paperId} onBack={backToList} />
       </div>
     );
   }
