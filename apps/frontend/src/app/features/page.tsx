@@ -308,7 +308,7 @@ export default function FeaturesPage() {
                 size="lg"
                 className="px-8 py-4 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
               >
-                <Link href="/login">Start Free Trial</Link>
+                <Link href="/login">Start Free</Link>
               </Button>
               <Button
                 asChild

@@ -272,7 +272,7 @@ export default function ResourcesDocsPage() {
                     className="bg-gradient-to-r from-primary to-chart-1 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
                   >
                     <Rocket className="h-5 w-5 mr-2" />
-                    Start Free Trial
+                    Start Free
                   </Button>
                 </Link>
                 <Link href="/resources/tutorials">

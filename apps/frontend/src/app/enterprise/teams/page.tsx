@@ -47,7 +47,7 @@ export default function EnterpriseTeamsPage() {
                     className="bg-gradient-to-r from-chart-1 to-chart-2 hover:opacity-90 text-primary-foreground"
                   >
                     <Rocket className="h-5 w-5 mr-2" />
-                    Start Free Trial
+                    Start Free
                   </Button>
                   <Link href="/company/contact">
                     <Button
@@ -313,7 +313,7 @@ export default function EnterpriseTeamsPage() {
                 Ready to empower your team?
               </h2>
               <p className="text-xl text-muted-foreground mb-8">
-                Start a free trial and see how ScholarFlow transforms team
+                Get started free and see how ScholarFlow transforms team
                 collaboration.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -323,7 +323,7 @@ export default function EnterpriseTeamsPage() {
                     className="bg-gradient-to-r from-chart-1 to-chart-2 hover:opacity-90 text-primary-foreground"
                   >
                     <Rocket className="h-5 w-5 mr-2" />
-                    Start Free Trial
+                    Start Free
                   </Button>
                 </Link>
                 <Link href="/enterprise">

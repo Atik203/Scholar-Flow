@@ -24,7 +24,6 @@ import { useAppDispatch } from "@/redux/hooks";
 import {
   AlertTriangle,
   CheckCircle,
-  Clock,
   CreditCard,
   Crown,
   RefreshCw,
@@ -254,10 +253,6 @@ export default function BillingPage() {
   const nextRenewalLabel = nextPeriodEnd
     ? formatDate(nextPeriodEnd)
     : "No upcoming renewal";
-  const trialEndsAt = subscription?.trialEnd ?? null;
-  const trialEndsLabel = trialEndsAt
-    ? formatDate(trialEndsAt)
-    : "No active trial";
   const seatsLabel =
     subscription?.seats && subscription.seats > 1
       ? `${subscription.seats} seats`
@@ -376,12 +371,6 @@ export default function BillingPage() {
                           : "No upcoming renewal scheduled"}
                       </span>
                     </div>
-                    {isSubscriptionActive && trialEndsAt && (
-                      <div className="flex items-center gap-2 md:justify-end">
-                        <Clock className="h-4 w-4 text-primary" />
-                        <span>Trial ends • {trialEndsLabel}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -493,14 +482,6 @@ export default function BillingPage() {
                               {subscription?.cancelAtPeriodEnd
                                 ? "Scheduled"
                                 : "Not scheduled"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">
-                              Trial period
-                            </span>
-                            <span className="font-medium">
-                              {trialEndsLabel}
                             </span>
                           </div>
                         </>

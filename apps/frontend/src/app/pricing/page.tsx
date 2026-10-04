@@ -238,7 +238,7 @@ export default function PricingPage() {
       limitations: [],
       color: "chart-1",
       popular: true,
-      cta: "Start Pro Trial",
+      cta: "Upgrade to Pro",
       unavailable: !proMonthly && !proAnnual,
     },
     {
@@ -252,7 +252,7 @@ export default function PricingPage() {
       limitations: [],
       color: "chart-2",
       popular: false,
-      cta: "Start Team Trial",
+      cta: "Upgrade to Team",
       unavailable: !teamMonthly && !teamAnnual,
     },
     {
@@ -283,7 +283,7 @@ export default function PricingPage() {
   const faqs = [
     {
       question: "Can I try ScholarFlow before committing?",
-      answer: "Yes! We offer a 14-day free trial on all paid plans. No credit card required to start.",
+      answer: "Yes! You can start on the Free plan with no credit card. Upgrade to a paid plan whenever you are ready.",
     },
     {
       question: "What happens when I exceed my paper limit?",
@@ -315,7 +315,7 @@ export default function PricingPage() {
             >
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm text-primary">
                 <Sparkles className="h-4 w-4" />
-                14-day free trial
+                Free plan available
               </div>
               <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">
                 Simple, Transparent{" "}
