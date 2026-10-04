@@ -323,7 +323,7 @@ export default function EnterprisePage() {
                         >
                           {price === "Custom" || price === "Special"
                             ? "Contact Sales"
-                            : "Start Free Trial"}
+                            : "Start Free"}
                         </Button>
                       </CardContent>
                     </Card>

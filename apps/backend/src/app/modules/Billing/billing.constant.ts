@@ -79,11 +79,6 @@ export const PLAN_FEATURES = {
 } as const;
 
 /**
- * Trial configuration
- */
-export const TRIAL_PERIOD_DAYS = 14;
-
-/**
  * Subscription status constants aligned with Prisma enum
  */
 export const SUBSCRIPTION_STATUS = {
