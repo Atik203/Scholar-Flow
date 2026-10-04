@@ -602,7 +602,7 @@ export default function HowItWorksPage() {
                 className="px-8 py-4 bg-gradient-to-r from-primary to-chart-1 hover:from-primary/90 hover:to-chart-1/90 font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all duration-300 hover:-translate-y-0.5"
               >
                 <Link href="/login">
-                  Start Free Trial
+                  Start Free
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
@@ -619,7 +619,7 @@ export default function HowItWorksPage() {
             <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                14-day free trial
+                Free plan available
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />

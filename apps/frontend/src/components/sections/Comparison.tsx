@@ -300,11 +300,11 @@ export const Comparison: React.FC = () => {
             href="/register"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-chart-1 text-white font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl transition-all"
           >
-            Start Free Trial
+            Start Free
             <ArrowRight className="h-5 w-5" />
           </Link>
           <p className="mt-4 text-sm text-muted-foreground">
-            14 days free • No credit card required • Cancel anytime
+            Free plan available • No credit card required • Cancel anytime
           </p>
         </motion.div>
       </div>
