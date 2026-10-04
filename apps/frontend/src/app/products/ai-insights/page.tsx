@@ -324,7 +324,7 @@ export default function ProductsAIInsightsPage() {
                   className="bg-gradient-to-r from-chart-3 to-chart-4 hover:opacity-90 text-primary-foreground btn-hover-glow btn-shine"
                 >
                   <Rocket className="h-5 w-5 mr-2" />
-                  Start Free Trial
+                  Start Free
                 </Button>
               </Link>
               <Link href="/pricing">

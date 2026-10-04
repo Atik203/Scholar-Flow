@@ -297,7 +297,7 @@ export default function ProductsPapersPage() {
                   className="btn-hover-glow btn-shine"
                 >
                   <Rocket className="h-5 w-5 mr-2" />
-                  Start Free Trial
+                  Start Free
                 </Button>
               </Link>
               <Link href="/pricing">
