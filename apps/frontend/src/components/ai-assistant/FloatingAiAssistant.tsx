@@ -37,6 +37,7 @@ import {
   ListOrdered,
   MessageCircle,
   Minimize2,
+  PanelLeft,
   Pencil,
   Plus,
   Quote,
@@ -48,7 +49,14 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { cn } from "@/lib/utils";
 import { streamingFetch } from "@/lib/api/streamingFetch";
 import ReactMarkdown from "react-markdown";
@@ -80,6 +88,14 @@ const LEGACY_MODEL_LABELS: Record<string, string> = {
   "deepseek-chat": "DeepSeek V3",
   "deepseek-reasoner": "DeepSeek R1",
 };
+
+const AI_SIDEBAR_DEFAULT_WIDTH = 176;
+const AI_SIDEBAR_MIN_WIDTH = 160;
+const AI_SIDEBAR_MAX_WIDTH = 340;
+const AI_SIDEBAR_STORAGE_KEY = "sf-ai-sidebar-width";
+
+const clampSidebarWidth = (width: number) =>
+  Math.min(Math.max(width, AI_SIDEBAR_MIN_WIDTH), AI_SIDEBAR_MAX_WIDTH);
 
 function CopyButton({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
@@ -126,10 +142,18 @@ function FloatingAiAssistantInner() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [convSearch, setConvSearch] = useState("");
+  const [sidebarWidth, setSidebarWidth] = useState(AI_SIDEBAR_DEFAULT_WIDTH);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isResizingSidebar, setIsResizingSidebar] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const sendingRef = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const sidebarWidthRef = useRef(AI_SIDEBAR_DEFAULT_WIDTH);
+  const resizeStartRef = useRef<{ startX: number; startWidth: number } | null>(
+    null
+  );
+  const wasMobileRef = useRef<boolean | null>(null);
   const dispatch = useAppDispatch();
 
   // Small screens get the full viewport automatically — a floating 480px
@@ -139,11 +163,37 @@ function FloatingAiAssistantInner() {
       const mobile = window.innerWidth < 640;
       setIsMobile(mobile);
       if (mobile) setFullscreen(true);
+      // Collapse the conversation sidebar by default on phones; restore it
+      // when returning to desktop. Only reacts to breakpoint crossings so
+      // the user can still toggle it manually on either side.
+      if (wasMobileRef.current !== mobile) {
+        setSidebarCollapsed(mobile);
+        wasMobileRef.current = mobile;
+      }
     };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  // Restore the persisted conversation-sidebar width (client-only).
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(AI_SIDEBAR_STORAGE_KEY);
+      if (stored) {
+        const parsed = Number(stored);
+        if (Number.isFinite(parsed)) {
+          setSidebarWidth(clampSidebarWidth(parsed));
+        }
+      }
+    } catch {
+      // ignore storage failures
+    }
+  }, []);
+
+  useEffect(() => {
+    sidebarWidthRef.current = sidebarWidth;
+  }, [sidebarWidth]);
 
   const { showFloatingButton } = useAIVisibility();
   const { currentContext } = useAiContext();
@@ -585,6 +635,74 @@ function FloatingAiAssistantInner() {
           "What should I focus on next?",
         ]; 
 
+  const persistSidebarWidth = (width: number) => {
+    try {
+      window.localStorage.setItem(AI_SIDEBAR_STORAGE_KEY, String(width));
+    } catch {
+      // ignore storage failures
+    }
+  };
+
+  const handleSidebarResizeStart = (
+    event: ReactPointerEvent<HTMLDivElement>
+  ) => {
+    event.preventDefault();
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // synthetic or unsupported pointer — resize still works via move events
+    }
+    resizeStartRef.current = {
+      startX: event.clientX,
+      startWidth: sidebarWidthRef.current,
+    };
+    setIsResizingSidebar(true);
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+  };
+
+  const handleSidebarResizeMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!resizeStartRef.current) return;
+    const next = clampSidebarWidth(
+      resizeStartRef.current.startWidth +
+        (event.clientX - resizeStartRef.current.startX)
+    );
+    setSidebarWidth(next);
+  };
+
+  const handleSidebarResizeEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!resizeStartRef.current) return;
+    resizeStartRef.current = null;
+    setIsResizingSidebar(false);
+    document.body.style.userSelect = "";
+    document.body.style.cursor = "";
+    persistSidebarWidth(sidebarWidthRef.current);
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    } catch {
+      // ignore release failures on synthetic pointers
+    }
+  };
+
+  const handleSidebarResizeKeyDown = (
+    event: ReactKeyboardEvent<HTMLDivElement>
+  ) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const next = clampSidebarWidth(
+      sidebarWidthRef.current + (event.key === "ArrowRight" ? 8 : -8)
+    );
+    setSidebarWidth(next);
+    persistSidebarWidth(next);
+  };
+
+  const resetSidebarWidth = () => {
+    setSidebarWidth(AI_SIDEBAR_DEFAULT_WIDTH);
+    persistSidebarWidth(AI_SIDEBAR_DEFAULT_WIDTH);
+  };
+
   if (!showFloatingButton && !open) return null;
 
   const panelWidth = fullscreen ? "min(100vw, 100%)" : "min(480px, calc(100vw - 24px))";
@@ -632,6 +750,16 @@ function FloatingAiAssistantInner() {
                   variant="ghost"
                   size="sm"
                   className="h-7 w-7 p-0"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Show chats" : "Hide chats"}
+                  aria-label={sidebarCollapsed ? "Show chats" : "Hide chats"}
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0"
                   onClick={() => setFullscreen(!fullscreen)}
                   title={fullscreen ? "Exit fullscreen" : "Fullscreen"}
                 >
@@ -655,74 +783,110 @@ function FloatingAiAssistantInner() {
             {/* Body */}
             <div className="flex flex-1 min-h-0">
               {/* Sidebar */}
-              <div className="w-44 border-r bg-muted/20 flex flex-col shrink-0">
-                <div className="p-2 border-b space-y-1">
-                  <Select value={selectedModel} onValueChange={setSelectedModel}>
-                    <SelectTrigger className="h-7 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableModels.map((m) => (
-                        <SelectItem key={m.value} value={m.value} className="text-xs">
-                          {m.label.split("(")[0].trim()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button size="sm" className="w-full h-7 text-xs" onClick={() => void startNewChat()}>
-                    <Plus className="h-3 w-3 mr-1" /> New Chat
-                  </Button>
-                </div>
-                <div className="p-2 border-b">
-                  <div className="relative">
-                    <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={convSearch}
-                      onChange={(e) => setConvSearch(e.target.value)}
-                      placeholder="Search chats..."
-                      className="h-7 text-xs pl-6"
-                    />
-                  </div>
-                </div>
-                <ScrollArea className="flex-1">
-                  {loadingConvs ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="p-2"><Skeleton className="h-4 w-full" /></div>
-                    ))
-                  ) : filteredConversations.length === 0 ? (
-                    <div className="p-3 text-xs text-muted-foreground text-center">
-                      {convSearch ? "No matching chats" : "No conversations yet"}
+              {!sidebarCollapsed && (
+                <>
+                  <div
+                    className="border-r bg-muted/20 flex flex-col shrink-0"
+                    style={{ width: sidebarWidth }}
+                  >
+                    <div className="p-2 border-b space-y-1">
+                      <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <SelectTrigger className="h-7 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map((m) => (
+                            <SelectItem key={m.value} value={m.value} className="text-xs">
+                              {m.label.split("(")[0].trim()}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button size="sm" className="w-full h-7 text-xs" onClick={() => void startNewChat()}>
+                        <Plus className="h-3 w-3 mr-1" /> New Chat
+                      </Button>
                     </div>
-                  ) : (
-                    filteredConversations.map((c) => (
-                      <div
-                        key={c.id}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => setActiveConvId(c.id)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveConvId(c.id); } }}
-                        className={cn(
-                          "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-start justify-between border-b border-border/40 cursor-pointer",
-                          activeConvId === c.id && "bg-accent"
-                        )}
-                      >
-                        <div className="truncate flex-1 min-w-0">
-                          <span className="truncate block">{c.title || "New Chat"}</span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {c._count?.messages ?? 0} msgs
-                          </span>
-                        </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id, e); }}
-                          className="opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0 p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
+                    <div className="p-2 border-b">
+                      <div className="relative">
+                        <Search className="h-3 w-3 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          value={convSearch}
+                          onChange={(e) => setConvSearch(e.target.value)}
+                          placeholder="Search chats..."
+                          className="h-7 text-xs pl-6"
+                        />
                       </div>
-                    ))
+                    </div>
+                    {/* Plain scroll container: Radix ScrollArea wraps content in
+                        a display:table element, which defeats truncation for
+                        long nowrap titles and pushes the delete button off-panel. */}
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden">
+                      {loadingConvs ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <div key={i} className="p-2"><Skeleton className="h-4 w-full" /></div>
+                        ))
+                      ) : filteredConversations.length === 0 ? (
+                        <div className="p-3 text-xs text-muted-foreground text-center">
+                          {convSearch ? "No matching chats" : "No conversations yet"}
+                        </div>
+                      ) : (
+                        filteredConversations.map((c) => (
+                          <div
+                            key={c.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setActiveConvId(c.id)}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveConvId(c.id); } }}
+                            className={cn(
+                              "w-full text-left p-2 text-xs hover:bg-accent transition-colors group flex items-center gap-1.5 min-w-0 border-b border-border/40 cursor-pointer",
+                              activeConvId === c.id && "bg-accent"
+                            )}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <span className="block truncate" title={c.title || "New Chat"}>
+                                {c.title || "New Chat"}
+                              </span>
+                              <span className="block truncate text-[10px] text-muted-foreground">
+                                {c._count?.messages ?? 0} msgs
+                              </span>
+                            </div>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleDeleteConversation(c.id, e); }}
+                              aria-label="Delete conversation"
+                              title="Delete conversation"
+                              className="shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  {!isMobile && (
+                    <div
+                      role="separator"
+                      aria-orientation="vertical"
+                      aria-label="Resize chat sidebar"
+                      aria-valuenow={sidebarWidth}
+                      aria-valuemin={AI_SIDEBAR_MIN_WIDTH}
+                      aria-valuemax={AI_SIDEBAR_MAX_WIDTH}
+                      tabIndex={0}
+                      onPointerDown={handleSidebarResizeStart}
+                      onPointerMove={handleSidebarResizeMove}
+                      onPointerUp={handleSidebarResizeEnd}
+                      onPointerCancel={handleSidebarResizeEnd}
+                      onDoubleClick={resetSidebarWidth}
+                      onKeyDown={handleSidebarResizeKeyDown}
+                      className={cn(
+                        "relative w-1.5 shrink-0 cursor-col-resize transition-colors hover:bg-primary/30 focus-visible:bg-primary/40 focus-visible:outline-none",
+                        isResizingSidebar && "bg-primary/40"
+                      )}
+                      style={{ touchAction: "none" }}
+                    />
                   )}
-                </ScrollArea>
-              </div>
+                </>
+              )}
 
               {/* Main chat area */}
               <div className="flex-1 flex flex-col min-w-0">
