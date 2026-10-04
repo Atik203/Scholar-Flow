@@ -15,19 +15,11 @@ import {
   AlignRight,
   Copy,
   GripHorizontal,
-  Image as ImageIcon,
-  Move,
   Trash2,
   Type,
   WrapText,
 } from "lucide-react";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useState } from "react";
 import {
   ResizableImage,
   ResizableImageComponent,
@@ -38,8 +30,6 @@ type WrapMode = "inline" | "break";
 
 const NodeView = (props: ResizableImageNodeViewRendererProps) => {
   const editor = (props as any).editor;
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [caption, setCaption] = useState<string>(
     (props.node.attrs["data-caption"] as string) || ""
   );
@@ -47,16 +37,10 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
     (props.node.attrs["data-wrap"] as WrapMode) || "inline"
   );
 
-  const posX = Number(props.node.attrs["data-position-x"] ?? 0) || 0;
-  const posY = Number(props.node.attrs["data-position-y"] ?? 0) || 0;
-  const align =
-    (props.node.attrs["data-align"] as string) || "center";
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dragFrameRef = useRef<number>(0);
+  const align = (props.node.attrs["data-align"] as string) || "center";
 
   // ================================================================
-  // Attribute update helper — persists all image metadata
+  // Attribute update helper — persists caption/align/wrap metadata
   // ================================================================
   const updateAttrs = useCallback(
     (attrs: Record<string, unknown>) => {
@@ -80,61 +64,6 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
     [editor, props]
   );
 
-  // ================================================================
-  // Drag handlers — GPU-accelerated with requestAnimationFrame
-  // ================================================================
-  const handleDragStart = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(true);
-      setDragOffset({
-        x: e.clientX - posX,
-        y: e.clientY - posY,
-      });
-    },
-    [posX, posY]
-  );
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleDrag = (e: MouseEvent) => {
-      if (dragFrameRef.current) return; // throttle to 60fps
-      dragFrameRef.current = requestAnimationFrame(() => {
-        const nx = Math.max(-200, Math.min(e.clientX - dragOffset.x, window.innerWidth - 200));
-        const ny = Math.max(-200, Math.min(e.clientY - dragOffset.y, window.innerHeight - 200));
-        updateAttrs({
-          "data-position-x": Math.round(nx),
-          "data-position-y": Math.round(ny),
-        });
-        dragFrameRef.current = 0;
-      });
-    };
-
-    const handleUp = () => {
-      setIsDragging(false);
-      if (dragFrameRef.current) {
-        cancelAnimationFrame(dragFrameRef.current);
-        dragFrameRef.current = 0;
-      }
-    };
-
-    document.addEventListener("mousemove", handleDrag, { passive: true });
-    document.addEventListener("mouseup", handleUp, { once: true });
-
-    return () => {
-      document.removeEventListener("mousemove", handleDrag);
-      document.removeEventListener("mouseup", handleUp);
-      if (dragFrameRef.current) {
-        cancelAnimationFrame(dragFrameRef.current);
-      }
-    };
-  }, [isDragging, dragOffset, updateAttrs]);
-
-  // ================================================================
-  // Alignment, caption, wrap
-  // ================================================================
   const setAlignment = useCallback(
     (value: string) => {
       updateAttrs({ "data-align": value });
@@ -162,123 +91,161 @@ const NodeView = (props: ResizableImageNodeViewRendererProps) => {
     }
   }, [props.node.attrs.src]);
 
+  // Delete the image node by position. deleteSelection() only removes the
+  // current text selection and silently does nothing once the popover has
+  // focus — the classic "delete button does nothing" bug.
   const deleteImage = useCallback(() => {
-    requestAnimationFrame(() => {
-      editor.chain().focus().deleteSelection().run();
-    });
-  }, [editor]);
+    const { getPos } = props as any;
+    const pos = typeof getPos === "function" ? getPos() : null;
+    if (typeof pos !== "number") return;
 
-  const resetPosition = useCallback(() => {
-    updateAttrs({ "data-position-x": 0, "data-position-y": 0 });
-  }, [updateAttrs]);
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: pos, to: pos + props.node.nodeSize })
+      .run();
+  }, [editor, props]);
 
-  // Build style
+  // Images stay in the document flow; alignment and wrap only affect layout.
   const imageStyle: React.CSSProperties = {
     display: wrapMode === "break" ? "block" : "inline-block",
     marginLeft: align === "center" && wrapMode === "break" ? "auto" : undefined,
     marginRight: align === "center" && wrapMode === "break" ? "auto" : undefined,
-    transform: `translate(${posX}px, ${posY}px)`,
-    transition: isDragging ? "none" : "transform 0.15s ease-out",
-    willChange: isDragging ? "transform" : "auto",
     position: "relative",
-    cursor: isDragging ? "grabbing" : "grab",
-    zIndex: isDragging ? 1000 : 1,
-    textAlign: wrapMode === "break" ? (align as React.CSSProperties["textAlign"]) : undefined,
+    textAlign:
+      wrapMode === "break"
+        ? (align as React.CSSProperties["textAlign"])
+        : undefined,
   };
 
   return (
     <NodeViewWrapper
-      className={`scholar-image ${isDragging ? "is-dragging" : ""} wrap-${wrapMode}`}
-      data-drag-handle
-      ref={containerRef}
+      className={`scholar-image wrap-${wrapMode}`}
       style={imageStyle}
     >
-      <Popover>
-        <PopoverTrigger asChild>
-          <div
-            className="image-body"
-            onMouseDown={handleDragStart}
-            style={{ display: "inline-block", position: "relative", outline: "none" }}
+      <div
+        className="image-body"
+        style={{ display: "inline-block", position: "relative" }}
+      >
+        {/* Resize handles come from ResizableImageComponent. The
+            `.image-component` wrapper is required by the package CSS —
+            without it the handles render unstyled (the package targets
+            `.image-component .image-resizer`). */}
+        <div className="image-component">
+          <ResizableImageComponent {...props} />
+        </div>
+
+        {/* Caption */}
+        {caption && (
+          <figcaption className="image-caption-display">{caption}</figcaption>
+        )}
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="image-options-button"
+              title="Image options"
+              aria-label="Image options"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
+              <GripHorizontal className="h-3.5 w-3.5" />
+            </button>
+          </PopoverTrigger>
+
+          <PopoverContent
+            className="w-64 p-3"
+            side="bottom"
+            align="center"
+            sideOffset={8}
           >
-            {/* Drag indicator overlay */}
-            <div className="image-drag-overlay">
-              <GripHorizontal className="h-4 w-4" />
+            <div className="space-y-2">
+              {/* Caption input */}
+              <div className="flex items-center gap-1.5">
+                <Type className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                <input
+                  type="text"
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  onBlur={saveCaption}
+                  onKeyDown={(e) => e.key === "Enter" && saveCaption()}
+                  placeholder="Add caption..."
+                  className="flex-1 text-xs border rounded px-2 py-1 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              {/* Alignment */}
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1 w-10">
+                  Align:
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setAlignment("left")}
+                  title="Left"
+                >
+                  <AlignLeft className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setAlignment("center")}
+                  title="Center"
+                >
+                  <AlignCenter className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                  onClick={() => setAlignment("right")}
+                  title="Right"
+                >
+                  <AlignRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+              {/* Wrap mode */}
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground mr-1 w-10">
+                  Wrap:
+                </span>
+                <Button
+                  variant={wrapMode === "inline" ? "default" : "outline"}
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={toggleWrap}
+                >
+                  <WrapText className="h-3.5 w-3.5 mr-1" />
+                  {wrapMode === "inline" ? "Inline" : "Break"}
+                </Button>
+              </div>
+
+              <div className="border-t pt-2 flex items-center gap-1 flex-wrap">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={copyImageUrl}
+                >
+                  <Copy className="h-3 w-3 mr-1" /> Copy
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={deleteImage}
+                >
+                  <Trash2 className="h-3 w-3 mr-1" /> Delete
+                </Button>
+              </div>
             </div>
-
-            {/* Resize handles are provided by ResizableImageComponent */}
-            <ResizableImageComponent {...props} />
-
-            {/* Caption */}
-            {caption && (
-              <figcaption
-                className="image-caption-display"
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                {caption}
-              </figcaption>
-            )}
-          </div>
-        </PopoverTrigger>
-
-        <PopoverContent className="w-64 p-3" side="bottom" align="center" sideOffset={8}>
-          <div className="space-y-2">
-            {/* Caption input */}
-            <div className="flex items-center gap-1.5">
-              <Type className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-              <input
-                type="text"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                onBlur={saveCaption}
-                onKeyDown={(e) => e.key === "Enter" && saveCaption()}
-                placeholder="Add caption..."
-                className="flex-1 text-xs border rounded px-2 py-1 bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-                onMouseDown={(e) => e.stopPropagation()}
-              />
-            </div>
-
-            {/* Alignment */}
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground mr-1 w-10">Align:</span>
-              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("left")} title="Left">
-                <AlignLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("center")} title="Center">
-                <AlignCenter className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 w-7 p-0" onClick={() => setAlignment("right")} title="Right">
-                <AlignRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            {/* Wrap mode */}
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground mr-1 w-10">Wrap:</span>
-              <Button
-                variant={wrapMode === "inline" ? "default" : "outline"}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={toggleWrap}
-              >
-                <WrapText className="h-3.5 w-3.5 mr-1" />
-                {wrapMode === "inline" ? "Inline" : "Break"}
-              </Button>
-            </div>
-
-            <div className="border-t pt-2 flex items-center gap-1 flex-wrap">
-              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={copyImageUrl}>
-                <Copy className="h-3 w-3 mr-1" /> Copy
-              </Button>
-              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={resetPosition}>
-                <Move className="h-3 w-3 mr-1" /> Reset
-              </Button>
-              <Button variant="destructive" size="sm" className="h-7 text-xs" onClick={deleteImage}>
-                <Trash2 className="h-3 w-3 mr-1" /> Delete
-              </Button>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+          </PopoverContent>
+        </Popover>
+      </div>
     </NodeViewWrapper>
   );
 };
