@@ -34,7 +34,10 @@ export const updateEndpointSchema = z.object({
 });
 
 export const endpointIdSchema = z.object({
-  id: z.string().uuid("Invalid endpoint ID"),
+  // Endpoint ids are Prisma String @id (uuid by default). Accept any
+  // non-empty id so seeded or imported endpoints with readable ids also
+  // work; unknown ids still surface as 404 from the service layer.
+  id: z.string().trim().min(1).max(100),
 });
 
 export const listDeliveriesQuerySchema = z.object({
