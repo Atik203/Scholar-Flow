@@ -243,6 +243,13 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex gap-2 mt-4 pt-4 border-t">
+          {paper.source === "editor" && (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/research/editor/${paper.id}`}>
+                <Edit className="mr-2 h-4 w-4" /> Edit in Editor
+              </Link>
+            </Button>
+          )}
           {paper.file && <Button variant="outline" size="sm" onClick={() => { setShowPreview(!showPreview); setPreviewError(false); }}><Eye className="mr-2 h-4 w-4" />{showPreview ? "Hide Preview" : "Preview PDF"}</Button>}
           {paper.file && isDocx && (
             <Button variant="outline" size="sm" onClick={handleDownloadOriginal} disabled={downloading}>
