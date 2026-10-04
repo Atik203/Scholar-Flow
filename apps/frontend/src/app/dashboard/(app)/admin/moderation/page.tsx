@@ -41,7 +41,7 @@ export default function AdminModerationPage() {
         description="Review flagged content and user reports"
       />
 
-      <div className="flex gap-1 p-1 bg-muted rounded-md max-w-md">
+      <div className="flex gap-1 p-1 bg-muted rounded-md max-w-2xl">
         {(["PENDING", "UNDER_REVIEW", "RESOLVED", "DISMISSED", "all"] as const).map(
           (s) => (
             <button
