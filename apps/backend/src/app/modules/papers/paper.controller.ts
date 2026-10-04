@@ -923,7 +923,7 @@ export const paperController = {
             } access.`,
             actionUrl:
               permission === "edit"
-                ? `/dashboard/research/editor?paper=${paperId}`
+                ? `/dashboard/research/editor/${paperId}`
                 : `/dashboard/papers/${paperId}`,
             actorId: authReq.user.id,
             resourceId: paperId,
@@ -937,7 +937,7 @@ export const paperController = {
       const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
       const paperLink =
         permission === "edit"
-          ? `${baseUrl}/dashboard/research/editor?paper=${paperId}`
+          ? `${baseUrl}/dashboard/research/editor/${paperId}`
           : `${baseUrl}/dashboard/papers/${paperId}`;
 
       // Import and use email service
