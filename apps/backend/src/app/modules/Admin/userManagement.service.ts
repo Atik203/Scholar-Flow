@@ -442,7 +442,7 @@ export const userManagementService = {
         ) as "proUsers",
         COUNT(*) FILTER (WHERE role = 'ADMIN' AND "isDeleted" = false)::bigint as "adminUsers",
         COUNT(*) FILTER (WHERE "isDeleted" = true)::bigint as "deletedUsers",
-        COUNT(*) FILTER (WHERE "emailVerified" = true AND "isDeleted" = false)::bigint as "verifiedUsers"
+        COUNT(*) FILTER (WHERE "emailVerified" IS NOT NULL AND "isDeleted" = false)::bigint as "verifiedUsers"
       FROM "User"
     `;
 
