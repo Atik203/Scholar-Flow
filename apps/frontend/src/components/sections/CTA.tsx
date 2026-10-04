@@ -19,14 +19,14 @@ export const CTA: React.FC = () => {
     ? user?.onboardingCompleted
       ? "Go to Dashboard"
       : "Finish Onboarding"
-    : "Start Free Trial";
+    : "Start Free";
   const CtaIcon =
     isAuthenticated && user?.onboardingCompleted ? LayoutDashboard : Zap;
   const ctaSubtext = isAuthenticated
     ? user?.onboardingCompleted
       ? "Pick up where you left off. Your research workspace is ready."
       : "A few quick steps to personalize your experience."
-    : "Join thousands of researchers who have transformed their workflow. Start your 14-day free trial today — no credit card required.";
+    : "Join thousands of researchers who have transformed their workflow. Start free today — no credit card required.";
 
   return (
     <section className="py-32 relative overflow-hidden">
