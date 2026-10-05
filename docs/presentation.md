@@ -1,250 +1,241 @@
 # ScholarFlow — Final Presentation Speech Script
+### 🎯 Specially Designed for Non-Native English Speakers
 
-> **Simple words. Short sentences. High confidence.**
-> Each member's speaking time = **exactly 2 to 2.5 minutes** (Total presentation = ~10 minutes).
-> Paced for non-native speakers at ~80–90 words/minute with clear pauses.
-> Structure: **4 members · 3 slides each**.
-
----
-
-## 👥 Member Assignment & Timing Breakdown
-
-| Order | Speaker | Slides | Route / Topic | Focus & Keywords | Target Time |
-| :---: | :--- | :---: | :--- | :--- | :---: |
-| **1st** | **Pratay** | **1 · 2 · 3** | `Title` · `Delta Update` · `Notes` | Team Intro, Milestone Roadmap, Research Notes | **2.5 min** (~195 words) |
-| **2nd** | **Atikur** | **4 · 5 · 6** | `Discussions` · `Notifications` · `Security` | Live Feed, SSE Real-Time Stream, 2FA & Sessions | **2.5 min** (~205 words) |
-| **3rd** | **Salman** | **7 · 8 · 9** | `Analytics` · `Admin Alerts` · `Moderation` | Reading Stats, Triage Console, Community Safety | **2.5 min** (~200 words) |
-| **4th** | **Sourov** | **10 · 11 · 12** | `Admin Cockpit` · `Conclusion` · `Q&A` | 6 Consoles, 4 Pillars Shipped, Demo & Q&A | **2.5 min** (~200 words) |
+> **Rules for Success:**
+> 1. **Speak slowly and calmly.** Do not rush. Fast speaking loses marks.
+> 2. **Take a breath at every `[PAUSE]`.** Count "one" in your mind.
+> 3. **Short, simple sentences.** Easy to read. No difficult tongue-twisters.
+> 4. **Timing:** Exactly **2.5 minutes per person** (Total = 10 minutes).
+> 5. **Order:** **Pratay (1–3) → Atikur (4–6) → Salman (7–9) → Sourov (10–12)**.
 
 ---
 
----
+## 👥 Speaker Breakdown & Timing
 
-# 🅟 1. PRATAY — Slides 1–3 · ~2.5 min total
-
----
-
-### Slide 1 — Title & Introduction _(~45 sec · ~55 words)_
-
-> 👉 **Action:** Stand confidently, smile at the evaluators, and point to the ScholarFlow logo and team card.
-
-Good morning, respected faculty and everyone present.  
-We are **Team Phantom Devs**.  
-Today, we are proud to present our final software engineering project: **ScholarFlow**.  
-
-ScholarFlow is an **AI-powered research collaboration platform**.  
-It transforms research from solo, messy file management into a structured, collaborative team workspace.  
+| Speaker | Order | Slides | Topic | Target Time & Words |
+| :--- | :---: | :---: | :--- | :---: |
+| **Pratay** | **1st** | **1, 2, 3** | Intro, What's New, Research Notes | **2.5 min** (~190 words) |
+| **Atikur** | **2nd** | **4, 5, 6** | Discussions, Live Alerts, Security | **2.5 min** (~200 words) |
+| **Salman** | **3rd** | **7, 8, 9** | Analytics, Admin Alerts, Moderation | **2.5 min** (~195 words) |
+| **Sourov** | **4th** | **10, 11, 12** | Admin Cockpit, Conclusion, Q&A | **2.5 min** (~195 words) |
 
 ---
 
-### Slide 2 — Since the Last Update _(~55 sec · ~75 words)_
+---
 
-> 👉 **Action:** Point first to the gray "Delivered" card on the left, then emphasize the green "New in This Update" card on the right.
+# 🅟 1. PRATAY — Slides 1, 2, 3
+*(Total time: ~2 min 20 sec · ~190 words)*
 
-In our first two updates, we delivered the core platform:  
-Smart paper upload with S3 storage, AI summaries, the TipTap rich-text editor, and Stripe subscriptions.  
+---
 
-Today, for our final defense, we present **Phase Three**.  
-We built the complete collaboration and governance layer:  
-Research Notes, live threaded discussions, real-time push notifications, two-factor authentication, analytics, and dedicated admin operations consoles.  
+### Slide 1 — Title & Welcome _(~45 sec · ~55 words)_
+
+👉 **[Action:** Stand tall, smile at the teachers, and point to the ScholarFlow logo.**]**
+
+* "Good morning, respected teachers and friends." `[PAUSE]`
+* "We are **Team Phantom Devs**." `[PAUSE]`
+* "Today, we present our final project: **ScholarFlow**." `[PAUSE]`
+* "ScholarFlow is an **AI-powered research collaboration platform**." `[PAUSE]`
+* "Academic research is often messy and disorganized." `[PAUSE]`
+* "ScholarFlow brings papers, notes, discussions, and AI tools into one single workspace." `[PAUSE]`
+
+---
+
+### Slide 2 — Since the Last Update _(~50 sec · ~70 words)_
+
+👉 **[Action:** Point left to the gray "Delivered" card, then right to the green "New" card.**]**
+
+* "In our first two updates, we finished the core platform." `[PAUSE]`
+* "We shipped paper uploads to AWS S3, AI summaries, the rich-text editor, and Stripe payments." `[PAUSE]`
+* "Today, for our final defense, we present **Phase Three**." `[PAUSE]`
+* "We completed the whole collaboration system:" `[PAUSE]`
+* "Research notes, live discussions, real-time notifications, two-factor security, analytics, and admin consoles." `[PAUSE]`
+* "Everything planned is now fully built." `[PAUSE]`
 
 ---
 
 ### Slide 3 — Research Notes Workspace _(~50 sec · ~65 words)_
 
-> 👉 **Action:** Point to the screenshot showing the notes editor tied directly to the research paper.
+👉 **[Action:** Point to the screenshot showing notes linked to the research paper.**]**
 
-Our first major new feature is the **Research Notes Workspace** at `/dashboard/notes`.  
+* "Our first big feature is the **Research Notes Workspace**." `[PAUSE]`
+* "Usually, students take notes in Notepad or Google Docs and lose context." `[PAUSE]`
+* "In ScholarFlow, every research paper has its own living notebook." `[PAUSE]`
+* "Notes are organized into sections, support rich text, and stay linked to the paper." `[PAUSE]`
+* "This turns simple reading into long-term knowledge." `[PAUSE]`
 
-Researchers usually take notes in separate apps and lose context.  
-In ScholarFlow, every paper has its own living notebook.  
-Notes are hierarchical, support full rich-text formatting, and stay permanently linked to the source paper.  
-Passive reading becomes organized, searchable knowledge.  
-
-> 🎙️ **Handoff Cue:**  
-> *"Now, I hand over to **Atikur** to present our real-time collaboration and security features."*
-
----
-
-> **Pratay Total:** ~195 words · ~2 min 20 sec
+🎙️ **[Handoff Cue — Speak clearly:**]**  
+> *"Now, I invite **Atikur** to present our real-time collaboration and security features."*
 
 ---
 
 ---
 
-# 🅐 2. ATIKUR — Slides 4–6 · ~2.5 min total
+# 🅐 2. ATIKUR — Slides 4, 5, 6
+*(Total time: ~2 min 25 sec · ~200 words)*
 
 ---
 
-### Slide 4 — Live Discussions _(~50 sec · ~65 words)_
+### Slide 4 — Live Threaded Discussions _(~50 sec · ~65 words)_
 
-> 👉 **Action:** Point to the discussion board and the "Live Thread View" screenshot on the right.
+👉 **[Action:** Point to the discussion threads on the screen.**]**
 
-Thank you, Pratay.  
-
-At `/dashboard/discussions`, we introduced **Live Threaded Discussions**.  
-Research requires constant debate and feedback.  
-Instead of scattering questions across external chat apps, teams debate right where the papers live.  
-
-Replies are organized in clean threads, scoped to the workspace, and update in real time with zero delay.  
+* "Thank you, Pratay." `[PAUSE]`
+* "Next is **Live Threaded Discussions** at `/dashboard/discussions`." `[PAUSE]`
+* "Research needs debate and feedback." `[PAUSE]`
+* "Instead of chatting in external apps like WhatsApp, teams talk right where their papers live." `[PAUSE]`
+* "Questions and answers are grouped in clean threads." `[PAUSE]`
+* "Every reply appears instantly in real time." `[PAUSE]`
 
 ---
 
-### Slide 5 — Real-Time Notifications _(~50 sec · ~70 words)_
+### Slide 5 — Real-Time Notifications _(~50 sec · ~65 words)_
 
-> 👉 **Action:** Point to the notification center screenshot and the settings panel on the right.
+👉 **[Action:** Point to the notification center and settings toggle buttons.**]**
 
-To keep everyone aligned without noise, we built **Real-time Notifications** at `/dashboard/notifications`.  
-
-We use **Server-Sent Events** — or S-S-E.  
-When a teammate mentions you, shares a collection, or replies to your note, it pushes instantly to your screen without continuous polling.  
-Users also have fine-grained notification settings to control exactly what alerts they receive.  
+* "To keep team members updated, we built **Real-time Notifications**." `[PAUSE]`
+* "We use a technology called **Server-Sent Events**, or **S-S-E**." `[PAUSE]`
+* "When a teammate mentions you, shares a paper, or replies to your note, you see it instantly." `[PAUSE]`
+* "You do not need to refresh your browser page." `[PAUSE]`
+* "Users can also customize their notification alerts in settings." `[PAUSE]`
 
 ---
 
 ### Slide 6 — Account Security & Trust _(~50 sec · ~70 words)_
 
-> 👉 **Action:** Point to the 2FA badge and the active sessions table in the security screenshot.
+👉 **[Action:** Point to the 2FA badge and the active devices table.**]**
 
-Research data is highly sensitive.  
-At `/dashboard/security`, we implemented **Institutional-grade Security**.  
+* "Academic research data is very valuable." `[PAUSE]`
+* "At `/dashboard/security`, we added **enterprise-level security**." `[PAUSE]`
+* "First, users can turn on **Two-Factor Authentication** using Google Authenticator." `[PAUSE]`
+* "Second, users can view all logged-in devices and IP addresses." `[PAUSE]`
+* "If you see a strange device, you can log it out with one click." `[PAUSE]`
+* "Every login attempt is recorded in a safe security log." `[PAUSE]`
 
-Users can enable **Two-Factor Authentication** using standard authenticator apps like Google Authenticator.  
-They can see all active login sessions with IP addresses and revoke any session in one click.  
-Every authentication event is recorded in a tamper-proof audit trail.  
-
-> 🎙️ **Handoff Cue:**  
-> *"Now, **Salman** will show our analytics and operational administration tools."*
-
----
-
-> **Atikur Total:** ~205 words · ~2 min 25 sec
+🎙️ **[Handoff Cue — Speak clearly:**]**  
+> *"Now, **Salman** will show our analytics and operations consoles."*
 
 ---
 
 ---
 
-# 🅢 3. SALMAN — Slides 7–9 · ~2.5 min total
+# 🅢 3. SALMAN — Slides 7, 8, 9
+*(Total time: ~2 min 20 sec · ~195 words)*
 
 ---
 
 ### Slide 7 — Multi-Tier Analytics _(~50 sec · ~65 words)_
 
-> 👉 **Action:** Point to the personal reading stats chart on the left, then the workspace usage breakdown on the right.
+👉 **[Action:** Point to the reading charts on the left, then the team stats on the right.**]**
 
-Thank you, Atikur.  
-
-At `/dashboard/analytics`, ScholarFlow provides **data-driven research insights**.  
-For individual researchers, it tracks papers read, notes created, and weekly reading progress.  
-For team leads and supervisors, it measures workspace activity and tool adoption.  
-All metrics can be exported as structured reports for evaluation.  
+* "Thank you, Atikur." `[PAUSE]`
+* "At `/dashboard/analytics`, ScholarFlow shows **smart research data**." `[PAUSE]`
+* "For students, it tracks how many papers you read, notes written, and weekly goals." `[PAUSE]`
+* "For supervisors, it shows team activity and workspace progress." `[PAUSE]`
+* "You can also export clean reports as CSV or JSON files." `[PAUSE]`
 
 ---
 
 ### Slide 8 — Admin Operations: Alerts Console _(~50 sec · ~65 words)_
 
-> 👉 **Action:** Point to the red/amber severity badges and the alerts queue screenshot.
+👉 **[Action:** Point to the red and yellow warning badges on the screen.**]**
 
-For system administrators, we built the **Central Alerts Console** at `/dashboard/admin/alerts`.  
-
-Instead of finding out about errors after users complain, admins see live system warnings and service failures in one queue.  
-Each alert includes severity, timestamps, and actionable triage steps.  
-This moves our platform operations from reactive firefighting to proactive management.  
-
----
-
-### Slide 9 — Admin Operations: Community Moderation _(~50 sec · ~70 words)_
-
-> 👉 **Action:** Point to the moderation queue screenshot and the action buttons (Review, Dismiss, Ban).
-
-Healthy academic collaboration requires safety and trust.  
-At `/dashboard/admin/moderation`, we built a dedicated **Moderation Queue**.  
-
-Admins can review reported papers, flagged discussions, and suspicious user behavior in a single workflow.  
-They can warn users, take down offending content, or suspend accounts with full audit tracking.  
-Safety is built directly into the system architecture.  
-
-> 🎙️ **Handoff Cue:**  
-> *"Now, **Sourov** will walk through our complete admin cockpit and conclude our presentation."*
+* "For platform administrators, we built the **Central Alerts Console**." `[PAUSE]`
+* "Admins should not wait for users to report bugs." `[PAUSE]`
+* "This console shows system warnings and server errors in real time." `[PAUSE]`
+* "Each alert shows the exact error, the time it happened, and fix steps." `[PAUSE]`
+* "This keeps ScholarFlow fast, stable, and reliable." `[PAUSE]`
 
 ---
 
-> **Salman Total:** ~200 words · ~2 min 20 sec
+### Slide 9 — Admin Operations: Community Moderation _(~50 sec · ~65 words)_
+
+👉 **[Action:** Point to the moderation queue and the action buttons.**]**
+
+* "Next, academic communities need safety and rules." `[PAUSE]`
+* "At `/dashboard/admin/moderation`, we created a **Moderation Queue**." `[PAUSE]`
+* "Admins can review reported papers, spam comments, and reported users in one place." `[PAUSE]`
+* "Admins can dismiss reports, remove bad content, or ban bad accounts." `[PAUSE]`
+* "Everything is logged so there is full transparency." `[PAUSE]`
+
+🎙️ **[Handoff Cue — Speak clearly:**]**  
+> *"Now, **Sourov** will show our complete admin cockpit and conclude our presentation."*
 
 ---
 
 ---
 
-# 🅮 4. SOUROV — Slides 10–12 · ~2.5 min total
+# 🅮 4. SOUROV — Slides 10, 11, 12
+*(Total time: ~2 min 20 sec · ~195 words)*
 
 ---
 
-### Slide 10 — Admin Consoles Roundup _(~55 sec · ~75 words)_
+### Slide 10 — Admin Consoles Roundup _(~50 sec · ~70 words)_
 
-> 👉 **Action:** Sweep your hand across the 6 colorful console cards (Users, Reports, Audit, System, Billing, Keys).
+👉 **[Action:** Point to the six colored cards across the screen.**]**
 
-Thank you, Salman.  
-
-Beyond alerts and moderation, ScholarFlow provides a complete **Operations Cockpit** across six dedicated consoles:  
-**Users and RBAC** for permission control;  
-**Reports** with instant CSV and JSON export;  
-**Security Audit Log** for traceable governance;  
-**System Health** with live ten-second CPU, memory, and database metrics;  
-**Billing** with Stripe webhooks; and **API Keys** for AI providers.  
-It is a fully production-ready back-office.  
-
----
-
-### Slide 11 — Conclusion & 4 Core Pillars _(~55 sec · ~75 words)_
-
-> 👉 **Action:** Point to the four pillars: 100% Shipped, Collaboration, Security, and Scalability.
-
-To conclude our defense, ScholarFlow delivers on all **four core pillars**:  
-
-One — **Feature-Complete Platform**: All twelve planned modules are fully built, tested, and integrated.  
-Two — **End-to-End Collaboration**: Notes, discussions, and real-time feeds make research a team sport.  
-Three — **Institutional Trust**: 2FA, session security, and audit logs protect every user.  
-Four — **Scalability**: Decoupled Next.js and Express architecture ready to grow.  
+* "Thank you, Salman." `[PAUSE]`
+* "ScholarFlow includes a complete **Operations Cockpit** with six consoles:" `[PAUSE]`
+* "One: **Users and Roles** — to manage accounts and permissions." `[PAUSE]`
+* "Two: **Reports** — for downloading data files." `[PAUSE]`
+* "Three: **Audit Log** — for security tracking." `[PAUSE]`
+* "Four: **System Health** — live CPU, memory, and database stats every ten seconds." `[PAUSE]`
+* "Five: **Billing** — for Stripe subscription tiers." `[PAUSE]`
+* "And Six: **API Keys** — for managing AI connections." `[PAUSE]`
 
 ---
 
-### Slide 12 — Thank You & Defense Q&A _(~40 sec · ~50 words)_
+### Slide 11 — Conclusion & Four Pillars _(~50 sec · ~70 words)_
 
-> 👉 **Action:** Look directly at the panel, smile, and gesture toward the screen and GitHub link.
+👉 **[Action:** Point to the four pillar boxes on the slide.**]**
 
-ScholarFlow is fully implemented, verified, and ready for production.  
-
-Our entire codebase, documentation, and commit history are open on GitHub at **github.com/Atik203/Scholar-Flow**.  
-
-We thank our respected teachers for their continuous guidance throughout this semester.  
-We are now ready for your questions and our live product demonstration.  
+* "To conclude, ScholarFlow delivers on all **four core pillars**:" `[PAUSE]`
+* "First: **Feature Complete** — all twelve planned modules are finished and tested." `[PAUSE]`
+* "Second: **True Collaboration** — papers, notes, and discussions work together." `[PAUSE]`
+* "Third: **Institutional Trust** — 2FA and security logs protect research data." `[PAUSE]`
+* "Fourth: **Modern Scale** — built with Next.js 16 and PostgreSQL, ready for production." `[PAUSE]`
 
 ---
 
-> **Sourov Total:** ~200 words · ~2 min 20 sec
+### Slide 12 — Thank You & Defense Q&A _(~40 sec · ~55 words)_
+
+👉 **[Action:** Look at the evaluators, smile, and make an open hand gesture.**]**
+
+* "ScholarFlow is fully built, live, and ready." `[PAUSE]`
+* "Our entire codebase and commit history are public on GitHub at **github.com/Atik203/Scholar-Flow**." `[PAUSE]`
+* "We thank our respected teachers for their guidance throughout this semester." `[PAUSE]`
+* "We are now ready for your questions and our live software demonstration." `[PAUSE]`
+* "Thank you very much." `[PAUSE]`
 
 ---
 
 ---
 
-## 💡 Practical Rehearsal & Delivery Guidelines
+## 🎙️ Golden Tips for Non-Native Speakers
 
-### 1. Pronunciation Guide for Technical Words
-* **ScholarFlow**: *"SKOL-ar Flow"*
-* **SSE**: Say each letter clearly: *"S - S - E"* (Server-Sent Events)
-* **2FA**: *"Two-Factor Auth"*
-* **RBAC**: *"Role-Based Access Control"*
-* **TipTap**: *"Tip-Tap"*
-* **pgvector**: *"P-G Vector"*
+### 1. Simple Pronunciation Guide
+| Word | How to Say It Easily |
+| :--- | :--- |
+| **ScholarFlow** | *"SKOL-ar Flow"* (rhymes with "Dollar Flow") |
+| **SSE** | Say the 3 letters: *"S - S - E"* |
+| **2FA** | *"Two - F - A"* or *"Two-Factor Auth"* |
+| **RBAC** | *"R-Back"* or just say *"Roles and Permissions"* |
+| **TipTap** | *"Tip-Tap"* |
+| **PostgreSQL** | *"Post-Gres"* |
+| **AWS S3** | *"A-W-S, S-Three"* |
 
-### 2. Pacing Rules
-* **Pause 1 second** between sentences. Do not rush.
-* When changing slides, wait for the slide to appear, look at the screen for 1 second, then speak to the evaluators.
-* If you make a mistake, don't say sorry — just take a breath, repeat the point clearly, and continue.
+### 2. If You Forget a Word During Defense
+* **Don't panic and don't say sorry.**
+* Just pause, take a breath, look at the screen bullet, and say the simple point in your own words.
+* Evaluators care about **confidence, clear voice, and working software**, not fancy English.
 
-### 3. Transition Handshake
-* Always name the next speaker clearly:  
-  * Pratay $\to$ *"Over to Atikur."*
-  * Atikur $\to$ *"Over to Salman."*
-  * Salman $\to$ *"Over to Sourov."*
-* The next speaker starts with: *"Thank you, [Name]."* This gives the evaluators a clear signal that the speaker has changed.
+### 3. Body Language Cheatsheet
+* **Slide change:** Press the right arrow key, count "one" in your mind, then start speaking.
+* **Keep hands above the table:** Point at the card or screenshot when mentioning a feature.
+* **Eye contact:** Look at one teacher for one sentence, then another teacher for the next sentence.
+
+### 4. Transition Handshake
+* **Pratay** $\to$ *"Now, I invite **Atikur** to present our real-time collaboration and security features."*
+* **Atikur** starts with: *"Thank you, Pratay."* $\to$ ends with: *"Now, **Salman** will show our analytics and operations consoles."*
+* **Salman** starts with: *"Thank you, Atikur."* $\to$ ends with: *"Now, **Sourov** will show our complete admin cockpit and conclude our presentation."*
+* **Sourov** starts with: *"Thank you, Salman."* $\to$ concludes with: *"Thank you very much."*
