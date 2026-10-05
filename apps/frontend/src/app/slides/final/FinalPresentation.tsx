@@ -164,7 +164,7 @@ export default function FinalPresentation() {
             "relative bg-white rounded-lg shadow-2xl overflow-hidden",
             "w-full max-w-[1200px] aspect-[16/9]",
             isFullscreen &&
-              "fixed inset-0 z-50 !max-w-none !rounded-none !w-screen !h-screen !aspect-auto pb-14"
+              "fixed inset-0 z-50 !max-w-none !rounded-none !w-screen !h-screen !aspect-auto"
           )}
           tabIndex={0}
           id="slide-container"
@@ -173,42 +173,6 @@ export default function FinalPresentation() {
           {!isFullscreen && (
             <div className="absolute bottom-4 right-4 text-xs text-slate-700 bg-white/80 border border-slate-200 rounded-full px-3 py-1 shadow-sm pointer-events-none">
               {currentSlide + 1} / {slides.length}
-            </div>
-          )}
-
-          {/* Floating Controls in Fullscreen Mode */}
-          {isFullscreen && (
-            <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full shadow-2xl border border-slate-700/60 z-50 transition-opacity opacity-85 hover:opacity-100">
-              <button
-                onClick={goToPrevious}
-                disabled={currentSlide === 0}
-                className="p-1.5 hover:bg-white/20 rounded-full disabled:opacity-30 transition"
-                title="Previous Slide (←)"
-                id="floating-prev-btn"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <span className="text-xs font-mono font-bold tracking-wider px-2 text-slate-200">
-                {currentSlide + 1} / {slides.length}
-              </span>
-              <button
-                onClick={goToNext}
-                disabled={currentSlide === slides.length - 1}
-                className="p-1.5 hover:bg-white/20 rounded-full disabled:opacity-30 transition"
-                title="Next Slide (→)"
-                id="floating-next-btn"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-              <div className="w-px h-4 bg-slate-700 mx-1" />
-              <button
-                onClick={toggleFullscreen}
-                className="p-1.5 hover:bg-white/20 rounded-full transition text-slate-300 hover:text-white"
-                title="Exit Fullscreen (Esc)"
-                id="floating-exit-fullscreen-btn"
-              >
-                <Minimize2 className="w-4 h-4" />
-              </button>
             </div>
           )}
         </div>
