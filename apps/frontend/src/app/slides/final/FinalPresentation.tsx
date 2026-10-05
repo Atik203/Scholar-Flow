@@ -62,14 +62,19 @@ export default function FinalPresentation() {
 
     try {
       if (!document.fullscreenElement) {
-        await slideContainerRef.current.requestFullscreen();
+        if (slideContainerRef.current.requestFullscreen) {
+          await slideContainerRef.current.requestFullscreen();
+        }
         setIsFullscreen(true);
       } else {
-        await document.exitFullscreen();
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
         setIsFullscreen(false);
       }
-    } catch (err) {
-      console.error("Fullscreen error:", err);
+    } catch {
+      // Fallback: toggle CSS fullscreen
+      setIsFullscreen((prev) => !prev);
     }
   };
 
@@ -83,6 +88,36 @@ export default function FinalPresentation() {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
+
+  // Global presentation keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input or textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        goToNext();
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        goToPrevious();
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === "Escape" && isFullscreen && !document.fullscreenElement) {
+        e.preventDefault();
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen]);
 
   const CurrentSlideComponent = slides[currentSlide].component;
 
@@ -110,7 +145,8 @@ export default function FinalPresentation() {
           <button
             onClick={toggleFullscreen}
             className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            title={isFullscreen ? "Exit Fullscreen (Esc)" : "Fullscreen (F)"}
+            id="fullscreen-toggle-btn"
           >
             {isFullscreen ? (
               <Minimize2 className="w-5 h-5 text-slate-600" />
@@ -127,24 +163,18 @@ export default function FinalPresentation() {
           className={cn(
             "relative bg-white rounded-lg shadow-2xl overflow-hidden",
             "w-full max-w-[1200px] aspect-[16/9]",
-            isFullscreen && "!max-w-none !rounded-none w-screen h-screen"
+            isFullscreen &&
+              "fixed inset-0 z-50 !max-w-none !rounded-none !w-screen !h-screen !aspect-auto"
           )}
           tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowRight" || e.key === " ") {
-              e.preventDefault();
-              goToNext();
-            } else if (e.key === "ArrowLeft") {
-              e.preventDefault();
-              goToPrevious();
-            }
-          }}
           id="slide-container"
         >
           <CurrentSlideComponent />
-          <div className="absolute bottom-4 right-4 text-xs text-slate-700 bg-white/80 border border-slate-200 rounded-full px-3 py-1 shadow-sm pointer-events-none">
-            {currentSlide + 1} / {slides.length}
-          </div>
+          {!isFullscreen && (
+            <div className="absolute bottom-4 right-4 text-xs text-slate-700 bg-white/80 border border-slate-200 rounded-full px-3 py-1 shadow-sm pointer-events-none">
+              {currentSlide + 1} / {slides.length}
+            </div>
+          )}
         </div>
       </div>
 
