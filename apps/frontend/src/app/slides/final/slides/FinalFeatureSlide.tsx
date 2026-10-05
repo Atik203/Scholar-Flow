@@ -90,7 +90,7 @@ export default function FinalFeatureSlide({
         className={cn(
           "flex-1 relative z-10 my-2 min-h-0",
           twoUp
-            ? "grid grid-cols-2 gap-4 items-center justify-center max-w-[1500px] mx-auto w-full my-auto"
+            ? "grid grid-cols-2 gap-4 lg:gap-6 items-center justify-center max-w-[1260px] xl:max-w-[1320px] mx-auto w-full my-auto"
             : "flex justify-center"
         )}
       >
@@ -100,44 +100,81 @@ export default function FinalFeatureSlide({
             className={cn(
               "bg-white rounded-2xl border-2 border-slate-200 shadow-xl flex flex-col overflow-hidden min-h-0 min-w-0",
               twoUp
-                ? "flex-1 w-full max-h-[500px] h-full"
+                ? "w-full max-w-[630px] mx-auto shadow-lg"
                 : "w-full max-w-[1240px] xl:max-w-[1300px] mx-auto flex-1"
             )}
           >
             {/* Desktop browser mockup header */}
-            <div className="bg-slate-950 border-b border-slate-800 px-3.5 py-1.5 flex items-center justify-between flex-shrink-0">
+            <div
+              className={cn(
+                "bg-slate-950 border-b border-slate-800 flex items-center justify-between flex-shrink-0",
+                twoUp ? "px-3 py-1" : "px-3.5 py-1.5"
+              )}
+            >
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                <div className={cn("rounded-full bg-rose-500/80", twoUp ? "w-2 h-2" : "w-2.5 h-2.5")} />
+                <div className={cn("rounded-full bg-amber-500/80", twoUp ? "w-2 h-2" : "w-2.5 h-2.5")} />
+                <div className={cn("rounded-full bg-emerald-500/80", twoUp ? "w-2 h-2" : "w-2.5 h-2.5")} />
               </div>
-              <div className="bg-slate-900 border border-slate-800 rounded px-2.5 py-0.5 text-xs font-mono font-medium text-slate-300 truncate max-w-[280px]">
+              <div
+                className={cn(
+                  "bg-slate-900 border border-slate-800 rounded font-mono font-medium text-slate-300 truncate",
+                  twoUp ? "px-2 py-0.5 text-[11px] max-w-[230px]" : "px-2.5 py-0.5 text-xs max-w-[280px]"
+                )}
+              >
                 scholarflow.com/{route}
               </div>
-              <div className="w-10" />
+              <div className={twoUp ? "w-8" : "w-10"} />
             </div>
 
-            <div className="relative flex-1 bg-[#0B0F17] min-h-0 overflow-hidden flex items-center justify-center p-1">
+            <div
+              className={cn(
+                "relative bg-[#0B0F17] overflow-hidden flex items-center justify-center",
+                twoUp
+                  ? "w-full aspect-[2.08/1]"
+                  : "flex-1 min-h-0 p-1"
+              )}
+            >
               <Image
                 src={s.src}
                 alt={s.title}
                 fill
-                className="object-contain p-1"
+                className={cn("object-contain", twoUp ? "p-0.5" : "p-1")}
                 sizes={twoUp ? "50vw" : "90vw"}
                 priority
               />
             </div>
-            <div className="px-4 py-2.5 border-t border-slate-100 flex-shrink-0 bg-white">
-              <div className="flex items-center justify-between gap-3">
+            <div
+              className={cn(
+                "border-t border-slate-100 flex-shrink-0 bg-white",
+                twoUp ? "px-3.5 py-2" : "px-4 py-2.5"
+              )}
+            >
+              <div className="flex items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                  <span
+                    className={cn(
+                      "font-black uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-300 rounded-full flex-shrink-0",
+                      twoUp ? "text-[11px] px-2 py-0.5" : "text-xs px-2 py-0.5"
+                    )}
+                  >
                     {s.badge}
                   </span>
-                  <h3 className="text-base md:text-lg font-black text-slate-900 truncate">
+                  <h3
+                    className={cn(
+                      "font-black text-slate-900 truncate",
+                      twoUp ? "text-sm md:text-base" : "text-base md:text-lg"
+                    )}
+                  >
                     {s.title}
                   </h3>
                 </div>
-                <p className="text-xs md:text-sm font-semibold text-slate-600 truncate flex-1 text-right">
+                <p
+                  className={cn(
+                    "font-medium text-slate-600 truncate text-right",
+                    twoUp ? "text-xs max-w-[50%]" : "text-xs md:text-sm flex-1"
+                  )}
+                >
                   {s.description}
                 </p>
               </div>
