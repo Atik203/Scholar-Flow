@@ -4,9 +4,9 @@
   "description": "Scholar-Flow Backend API",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
+    "dev": "node api.js && ts-node-dev --respawn --transpile-only --no-notify --watch src src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node api.js && node dist/server.js",
     "postinstall": "node -e \"if(process.env.VERCEL){console.log('[postinstall] Skipping prisma generate on Vercel (handled by buildCommand)')}else{try{require('child_process').execSync(process.env.npm_execpath?'npx prisma generate --sql':'prisma generate --sql',{stdio:'inherit',timeout:60000})}catch(e){console.log('[postinstall] prisma generate skipped:',e.message)}}\"",
     "lint": "eslint src",
     "type-check": "tsc --noEmit",
