@@ -1,286 +1,250 @@
-h# ScholarFlow — SE Lab Presentation Speech Script
+# ScholarFlow — Final Presentation Speech Script
 
-> **Simple words. Short sentences. Easy to remember.**
-> Each member's TOTAL speaking time = **2 to 2.5 minutes max**.
-> At non-native speaker pace (~90 words/min) — keep each slide to ~50–60 words.
-
----
-
-## 👥 Member Assignment
-
-| Order | Member     | Slides            | Topics                                              |
-| ----- | ---------- | ----------------- | --------------------------------------------------- |
-| 1st   | **Pratay** | 1 · 2 · 3 · 4          | Title, Problem, Motivation, Objectives              |
-| 2nd   | **Salman** | 5 · 6 · 7 · 8          | Scope, Features (1/2), Features (2/2), Benchmark    |
-| 3rd   | **Atikur** | 9 · 10 · 11            | Comparison, Tech Stack, Architecture                |
-| 4th   | **Sourov** | 12 · 13 · 14 · 15 · 16 | UI (1/2), UI (2/2), Timeline, Conclusion, Thank You |
+> **Simple words. Short sentences. High confidence.**
+> Each member's speaking time = **exactly 2 to 2.5 minutes** (Total presentation = ~10 minutes).
+> Paced for non-native speakers at ~80–90 words/minute with clear pauses.
+> Structure: **4 members · 3 slides each**.
 
 ---
 
----
+## 👥 Member Assignment & Timing Breakdown
 
-# 🅟 PRATAY — Slides 1–4 · ~2 min total
-
----
-
-### Slide 1 — Title _(~30 sec)_
-
-Good morning everyone.
-We are Team Phantom Devs.
-Our project is **ScholarFlow** — an AI-powered research collaboration platform.
-It helps researchers upload papers, get AI summaries, annotate, and collaborate — all in one place.
-
----
-
-### Slide 2 — Problem _(~35 sec)_
-
-Researchers today have **four big problems**.
-
-One — they use four or more separate apps. No single place for everything.
-Two — no AI help. They read every paper by hand.
-Three — teams cannot collaborate easily.
-Four — existing tools cost fifty to two-fifty dollars per month. Students cannot afford this.
-
-ScholarFlow solves all four problems — in one affordable platform.
-
----
-
-### Slide 3 — Motivation _(~35 sec)_
-
-Why are we building ScholarFlow?
-
-Because we face these problems ourselves — as students.
-
-Switching apps wastes three or more hours every week.
-Ninety-one percent of researchers get zero AI help.
-Most tools are too expensive for students.
-
-Our goal is one unified platform — with AI, affordable pricing, and team collaboration built in.
-
----
-
-### Slide 4 — Objectives _(~35 sec)_
-
-ScholarFlow has five objectives.
-
-One — one platform for all papers.
-Two — AI summaries, Q&A, and literature reviews.
-Three — automatic metadata extraction on upload.
-Four — shared workspaces with role-based access.
-Five — a free tier for students, with affordable team plans.
-
-These five objectives guide our entire development plan.
-
----
-
-> **Pratay total: ~135 words → approx 1 min 30 sec to 2 min**
+| Order | Speaker | Slides | Route / Topic | Focus & Keywords | Target Time |
+| :---: | :--- | :---: | :--- | :--- | :---: |
+| **1st** | **Pratay** | **1 · 2 · 3** | `Title` · `Delta Update` · `Notes` | Team Intro, Milestone Roadmap, Research Notes | **2.5 min** (~195 words) |
+| **2nd** | **Atikur** | **4 · 5 · 6** | `Discussions` · `Notifications` · `Security` | Live Feed, SSE Real-Time Stream, 2FA & Sessions | **2.5 min** (~205 words) |
+| **3rd** | **Salman** | **7 · 8 · 9** | `Analytics` · `Admin Alerts` · `Moderation` | Reading Stats, Triage Console, Community Safety | **2.5 min** (~200 words) |
+| **4th** | **Sourov** | **10 · 11 · 12** | `Admin Cockpit` · `Conclusion` · `Q&A` | 6 Consoles, 4 Pillars Shipped, Demo & Q&A | **2.5 min** (~200 words) |
 
 ---
 
 ---
 
-# 🅢 SALMAN — Slides 5–8 · ~2 min total
+# 🅟 1. PRATAY — Slides 1–3 · ~2.5 min total
 
 ---
 
-### Slide 5 — Project Scope _(~35 sec)_
+### Slide 1 — Title & Introduction _(~45 sec · ~55 words)_
 
-Thank you. Now let me explain what ScholarFlow will deliver.
+> 👉 **Action:** Stand confidently, smile at the evaluators, and point to the ScholarFlow logo and team card.
 
-We have **four modules**.
+Good morning, respected faculty and everyone present.  
+We are **Team Phantom Devs**.  
+Today, we are proud to present our final software engineering project: **ScholarFlow**.  
 
-One — Paper Upload with AI metadata extraction, stored on AWS S3.
-Two — AI features: summaries, chat Q&A, and literature reviews.
-Three — Team Workspaces with role-based access and annotations.
-Four — Rich Text Editor with auto-save, export, and Stripe billing.
-
----
-
-### Slide 6 — Features (1 of 2) _(~35 sec)_
-
-Our first six features:
-
-One — Smart Paper Upload — AI fills in all details automatically.
-Two — AI Summarization — key findings in one click.
-Three — AI Chat Q&A — ask questions about any paper.
-Four — Rich Text Editor — auto-save, export PDF or DOCX.
-Five — Smart Collections — organize with tags and search.
-Six — Team Workspaces — shared library with role management.
+ScholarFlow is an **AI-powered research collaboration platform**.  
+It transforms research from solo, messy file management into a structured, collaborative team workspace.  
 
 ---
 
-### Slide 7 — Features (2 of 2) _(~35 sec)_
+### Slide 2 — Since the Last Update _(~55 sec · ~75 words)_
 
-Six more features:
+> 👉 **Action:** Point first to the gray "Delivered" card on the left, then emphasize the green "New in This Update" card on the right.
 
-Seven — Citation Generator — APA, MLA, IEEE, BibTeX automatically.
-Eight — PDF Annotations — highlight, add notes, bookmark, share with team.
-Nine — Analytics Dashboard — usage and activity charts.
-Ten — Subscription Billing — Stripe, free and pro plans.
-Eleven — Admin Panel — user management and system metrics.
-Twelve — Enterprise Security — JWT, OAuth, rate limiting, HTTPS.
+In our first two updates, we delivered the core platform:  
+Smart paper upload with S3 storage, AI summaries, the TipTap rich-text editor, and Stripe subscriptions.  
 
-All twelve are in our development roadmap.
+Today, for our final defense, we present **Phase Three**.  
+We built the complete collaboration and governance layer:  
+Research Notes, live threaded discussions, real-time push notifications, two-factor authentication, analytics, and dedicated admin operations consoles.  
 
 ---
 
-### Slide 8 — Benchmark _(~30 sec)_
+### Slide 3 — Research Notes Workspace _(~50 sec · ~65 words)_
 
-We compared with Paperpal, EndNote, Mendeley, and Zotero.
+> 👉 **Action:** Point to the screenshot showing the notes editor tied directly to the research paper.
 
-Paperpal — AI writing only, no reference management or team features.
-EndNote — two hundred seventy-five dollars, zero AI.
-Mendeley and Zotero — free, but no AI at all.
+Our first major new feature is the **Research Notes Workspace** at `/dashboard/notes`.  
 
-ScholarFlow plans to support all six benchmark features — at an affordable price.
-This is a clear market gap we are targeting.
+Researchers usually take notes in separate apps and lose context.  
+In ScholarFlow, every paper has its own living notebook.  
+Notes are hierarchical, support full rich-text formatting, and stay permanently linked to the source paper.  
+Passive reading becomes organized, searchable knowledge.  
+
+> 🎙️ **Handoff Cue:**  
+> *"Now, I hand over to **Atikur** to present our real-time collaboration and security features."*
 
 ---
 
-> **Salman total: ~135 words → approx 1 min 30 sec to 2 min**
+> **Pratay Total:** ~195 words · ~2 min 20 sec
 
 ---
 
 ---
 
-# 🅐 ATIKUR — Slides 9–11 · ~2 min total
+# 🅐 2. ATIKUR — Slides 4–6 · ~2.5 min total
 
 ---
 
-### Slide 9 — Comparison Matrix _(~35 sec)_
+### Slide 4 — Live Discussions _(~50 sec · ~65 words)_
 
-Thank you. This table compares twelve features across five platforms.
+> 👉 **Action:** Point to the discussion board and the "Live Thread View" screenshot on the right.
 
-Green check — full support. Yellow dash — partial. Red cross — none.
+Thank you, Pratay.  
 
-ScholarFlow plans **twelve out of twelve**.
-Paperpal and others score five or fewer.
+At `/dashboard/discussions`, we introduced **Live Threaded Discussions**.  
+Research requires constant debate and feedback.  
+Instead of scattering questions across external chat apps, teams debate right where the papers live.  
 
-No existing tool combines reference management, AI, and real-time collaboration together.
-ScholarFlow will be the first.
-
----
-
-### Slide 10 — Tech Stack _(~40 sec)_
-
-Our technology stack has three layers.
-
-**Frontend** — Next.js 16, TypeScript, Tailwind CSS, Redux Toolkit, Better Auth.
-We chose Next.js for fast server rendering and full TypeScript support.
-
-**Backend** — Node.js 22, Express.js, Prisma ORM, JWT, Zod validation.
-Express works perfectly with Prisma for type-safe database queries.
-
-**Infrastructure** — PostgreSQL with pgvector, AWS S3, Redis, Stripe, Gemini 3.5 Flash, OpenAI GPT-5.5, Vercel.
-
-One full-stack TypeScript monorepo — type-safe from end to end.
+Replies are organized in clean threads, scoped to the workspace, and update in real time with zero delay.  
 
 ---
 
-### Slide 11 — Architecture _(~40 sec)_
+### Slide 5 — Real-Time Notifications _(~50 sec · ~70 words)_
 
-ScholarFlow uses a **three-tier decoupled architecture**.
+> 👉 **Action:** Point to the notification center screenshot and the settings panel on the right.
 
-**User layer** — researchers and students access via browser.
+To keep everyone aligned without noise, we built **Real-time Notifications** at `/dashboard/notifications`.  
 
-**Frontend layer** — Next.js on Vercel handles UI, auth, and state.
+We use **Server-Sent Events** — or S-S-E.  
+When a teammate mentions you, shares a collection, or replies to your note, it pushes instantly to your screen without continuous polling.  
+Users also have fine-grained notification settings to control exactly what alerts they receive.  
 
-**Backend layer** — Express REST API on Railway handles all business logic.
+---
 
-The backend connects to three service groups:
-PostgreSQL with pgvector and Redis for data.
-AWS S3 and Stripe for files and billing.
-Gemini 3.5 Flash and OpenAI GPT-5.5 for AI — with automatic fallback.
+### Slide 6 — Account Security & Trust _(~50 sec · ~70 words)_
 
-Frontend and backend communicate only through REST API. No shared code.
+> 👉 **Action:** Point to the 2FA badge and the active sessions table in the security screenshot.
 
-> **Atikur total: ~100 words → approx 1 min 10 sec to 1 min 40 sec**
+Research data is highly sensitive.  
+At `/dashboard/security`, we implemented **Institutional-grade Security**.  
+
+Users can enable **Two-Factor Authentication** using standard authenticator apps like Google Authenticator.  
+They can see all active login sessions with IP addresses and revoke any session in one click.  
+Every authentication event is recorded in a tamper-proof audit trail.  
+
+> 🎙️ **Handoff Cue:**  
+> *"Now, **Salman** will show our analytics and operational administration tools."*
+
+---
+
+> **Atikur Total:** ~205 words · ~2 min 25 sec
 
 ---
 
 ---
 
-# 🅮 SOUROV — Slides 12–16 · ~2.5 min total
+# 🅢 3. SALMAN — Slides 7–9 · ~2.5 min total
+
+---
+
+### Slide 7 — Multi-Tier Analytics _(~50 sec · ~65 words)_
+
+> 👉 **Action:** Point to the personal reading stats chart on the left, then the workspace usage breakdown on the right.
+
+Thank you, Atikur.  
+
+At `/dashboard/analytics`, ScholarFlow provides **data-driven research insights**.  
+For individual researchers, it tracks papers read, notes created, and weekly reading progress.  
+For team leads and supervisors, it measures workspace activity and tool adoption.  
+All metrics can be exported as structured reports for evaluation.  
+
+---
+
+### Slide 8 — Admin Operations: Alerts Console _(~50 sec · ~65 words)_
+
+> 👉 **Action:** Point to the red/amber severity badges and the alerts queue screenshot.
+
+For system administrators, we built the **Central Alerts Console** at `/dashboard/admin/alerts`.  
+
+Instead of finding out about errors after users complain, admins see live system warnings and service failures in one queue.  
+Each alert includes severity, timestamps, and actionable triage steps.  
+This moves our platform operations from reactive firefighting to proactive management.  
+
+---
+
+### Slide 9 — Admin Operations: Community Moderation _(~50 sec · ~70 words)_
+
+> 👉 **Action:** Point to the moderation queue screenshot and the action buttons (Review, Dismiss, Ban).
+
+Healthy academic collaboration requires safety and trust.  
+At `/dashboard/admin/moderation`, we built a dedicated **Moderation Queue**.  
+
+Admins can review reported papers, flagged discussions, and suspicious user behavior in a single workflow.  
+They can warn users, take down offending content, or suspend accounts with full audit tracking.  
+Safety is built directly into the system architecture.  
+
+> 🎙️ **Handoff Cue:**  
+> *"Now, **Sourov** will walk through our complete admin cockpit and conclude our presentation."*
+
+---
+
+> **Salman Total:** ~200 words · ~2 min 20 sec
 
 ---
 
 ---
 
-### Slide 12 — UI Preview (1 of 2) _(~30 sec)_
-
-Now let me show you what ScholarFlow will look like.
-
-**Screen one — Dashboard.** See all papers, recent uploads, and progress. Upload, share, or export in one click.
-
-**Screen two — Rich Text Editor.** Write research notes with full formatting. Auto-saves. Export to PDF or DOCX.
-
-Clean, modern, and simple for any researcher.
+# 🅮 4. SOUROV — Slides 10–12 · ~2.5 min total
 
 ---
 
-### Slide 13 — UI Preview (2 of 2) _(~30 sec)_
+### Slide 10 — Admin Consoles Roundup _(~55 sec · ~75 words)_
 
-Thank you Atikur. Two more screens.
+> 👉 **Action:** Sweep your hand across the 6 colorful console cards (Users, Reports, Audit, System, Billing, Keys).
 
-**Screen three — PDF Annotations.** Highlight text, add notes, bookmark — directly on the PDF. Saved and shareable with the team.
+Thank you, Salman.  
 
-**Screen four — AI Chat.** Ask any question about a paper. Gemini 3.5 Flash and GPT-5.5 give smart answers — with automatic fallback between providers.
-
----
-
-### Slide 14 — Timeline _(~40 sec)_
-
-Our **eight-week plan**:
-
-Week one — Project setup and database configuration.
-Week two — Authentication and role-based access.
-Week three — Paper upload with AI metadata extraction.
-Week four — AI core: summarization, Q&A, semantic search.
-Week five — Editor and collections.
-Week six — Team workspaces and collaboration.
-Week seven — Billing and admin dashboard.
-Week eight — Testing, optimization, and deployment.
-
-Eight weeks. Thirty-two deliverables. Turborepo monorepo with CI/CD from day one.
+Beyond alerts and moderation, ScholarFlow provides a complete **Operations Cockpit** across six dedicated consoles:  
+**Users and RBAC** for permission control;  
+**Reports** with instant CSV and JSON export;  
+**Security Audit Log** for traceable governance;  
+**System Health** with live ten-second CPU, memory, and database metrics;  
+**Billing** with Stripe webhooks; and **API Keys** for AI providers.  
+It is a fully production-ready back-office.  
 
 ---
 
-### Slide 15 — Conclusion _(~35 sec)_
+### Slide 11 — Conclusion & 4 Core Pillars _(~55 sec · ~75 words)_
 
-ScholarFlow solves four real problems that researchers face every day.
+> 👉 **Action:** Point to the four pillars: 100% Shipped, Collaboration, Security, and Scalability.
 
-The tech stack is modern, scalable, and cloud-native.
-The plan is clear — eight weeks with thirty-two concrete deliverables.
-The architecture is decoupled and can grow from students to large institutions.
+To conclude our defense, ScholarFlow delivers on all **four core pillars**:  
 
-Clear roadmap. Strong technical foundation. ScholarFlow is ready to be built.
-
----
-
-### Slide 16 — Thank You _(~20 sec)_
-
-Thank you for listening.
-
-We are Team Phantom Devs.
-This is ScholarFlow — an AI-powered research collaboration platform.
-
-We welcome your questions.
-
-GitHub: **github.com/Atik203/Scholar-Flow**
+One — **Feature-Complete Platform**: All twelve planned modules are fully built, tested, and integrated.  
+Two — **End-to-End Collaboration**: Notes, discussions, and real-time feeds make research a team sport.  
+Three — **Institutional Trust**: 2FA, session security, and audit logs protect every user.  
+Four — **Scalability**: Decoupled Next.js and Express architecture ready to grow.  
 
 ---
 
-> **Sourov total: ~125 words → approx 1 min 20 sec to 1 min 50 sec**
+### Slide 12 — Thank You & Defense Q&A _(~40 sec · ~50 words)_
+
+> 👉 **Action:** Look directly at the panel, smile, and gesture toward the screen and GitHub link.
+
+ScholarFlow is fully implemented, verified, and ready for production.  
+
+Our entire codebase, documentation, and commit history are open on GitHub at **github.com/Atik203/Scholar-Flow**.  
+
+We thank our respected teachers for their continuous guidance throughout this semester.  
+We are now ready for your questions and our live product demonstration.  
+
+---
+
+> **Sourov Total:** ~200 words · ~2 min 20 sec
 
 ---
 
 ---
 
-## 🗒️ Quick Tips for Non-Native Speakers
+## 💡 Practical Rehearsal & Delivery Guidelines
 
-- **Speak slowly and clearly.** Pause after every point.
-- **Use the slide as your guide.** Look at it, then say what it shows.
-- **Don't memorize word-for-word.** Know the main idea — speak naturally.
-- **If you forget a word — describe it simply.** Simple is always better.
-- **Practice your section 3 times.** You will feel confident on the day.
-- **Make eye contact with the audience** — not the screen.
+### 1. Pronunciation Guide for Technical Words
+* **ScholarFlow**: *"SKOL-ar Flow"*
+* **SSE**: Say each letter clearly: *"S - S - E"* (Server-Sent Events)
+* **2FA**: *"Two-Factor Auth"*
+* **RBAC**: *"Role-Based Access Control"*
+* **TipTap**: *"Tip-Tap"*
+* **pgvector**: *"P-G Vector"*
+
+### 2. Pacing Rules
+* **Pause 1 second** between sentences. Do not rush.
+* When changing slides, wait for the slide to appear, look at the screen for 1 second, then speak to the evaluators.
+* If you make a mistake, don't say sorry — just take a breath, repeat the point clearly, and continue.
+
+### 3. Transition Handshake
+* Always name the next speaker clearly:  
+  * Pratay $\to$ *"Over to Atikur."*
+  * Atikur $\to$ *"Over to Salman."*
+  * Salman $\to$ *"Over to Sourov."*
+* The next speaker starts with: *"Thank you, [Name]."* This gives the evaluators a clear signal that the speaker has changed.
