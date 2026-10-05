@@ -86,11 +86,42 @@ export default function FinalFeatureSlide({
       </div>
 
       {/* ── Screenshots (Maximized Height & Width) ── */}
-      <div className={cn("flex-1 relative z-10 my-2.5 min-h-0", twoUp ? "grid grid-cols-2 gap-4" : "flex")}>
+      <div className={cn("flex-1 relative z-10 my-2.5 min-h-0", twoUp ? "grid grid-cols-2 gap-4" : "flex justify-center")}>
         {shots.map((s, i) => (
-          <div key={i} className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg flex flex-col overflow-hidden min-h-0 min-w-0 flex-1">
-            <div className="relative flex-1 bg-slate-100 min-h-0">
-              <Image src={s.src} alt={s.title} fill className="object-contain p-1" sizes={twoUp ? "50vw" : "90vw"} priority />
+          <div
+            key={i}
+            className={cn(
+              "bg-white rounded-2xl border-2 border-slate-200 shadow-xl flex flex-col overflow-hidden min-h-0 min-w-0",
+              twoUp ? "flex-1" : "w-full max-w-[1240px] xl:max-w-[1300px] mx-auto flex-1"
+            )}
+          >
+            {/* Desktop browser mockup header for single-shot slides */}
+            {!twoUp && (
+              <div className="bg-slate-950 border-b border-slate-800 px-4 py-1.5 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                </div>
+                <div className="bg-slate-900 border border-slate-700/60 rounded-md px-3 py-0.5 text-xs font-mono font-medium text-slate-300">
+                  scholarflow.com/{route}
+                </div>
+                <div className="w-10" />
+              </div>
+            )}
+
+            <div className="relative flex-1 bg-slate-900 min-h-0 overflow-hidden">
+              <Image
+                src={s.src}
+                alt={s.title}
+                fill
+                className={cn(
+                  "p-0.5",
+                  twoUp ? "object-cover object-top" : "object-contain p-1"
+                )}
+                sizes={twoUp ? "50vw" : "90vw"}
+                priority
+              />
             </div>
             <div className="px-5 py-2.5 border-t border-slate-100 flex-shrink-0 bg-white">
               <div className="flex items-center justify-between gap-3">
