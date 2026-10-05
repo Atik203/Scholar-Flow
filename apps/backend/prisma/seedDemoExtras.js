@@ -12,14 +12,15 @@
  *     citation exports, research notes, annotations, discussions, AI chats,
  *     AI insight threads, audit entries, preferences.
  *
- * Idempotent: every row uses a deterministic `demo-*` id and is upserted.
- * Safe:   cleanup only deletes rows whose id starts with `demo-`.
+ * Idempotent: every row uses a deterministic UUID (fixed `de300000` prefix)
+ * and is upserted. Safe: cleanup only deletes rows whose id starts with that prefix.
  *
  * Run:     yarn ts-node --transpile-only prisma/seedDemoExtras.js
  * Cleanup: yarn ts-node --transpile-only prisma/seedDemoExtras.js --cleanup
  */
 
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const { PrismaClient } = require('../src/generated/prisma/client');
@@ -65,7 +66,13 @@ const DAY = 86400000;
 const daysAgo = (days, hours = 0) => new Date(Date.now() - days * DAY - hours * HOUR);
 const daysAhead = (days) => new Date(Date.now() + days * DAY);
 const slug = (email) => email.split('@')[0].replace(/[^a-z0-9]+/g, '-').toLowerCase();
-const did = (...parts) => `demo-${parts.join('-')}`;
+// Deterministic UUIDs: route validators require UUID params, and the fixed
+// prefix keeps demo rows discoverable for cleanup.
+const DEMO_ID_PREFIX = 'de300000';
+const did = (...parts) => {
+  const h = crypto.createHash('md5').update(`scholarflow-demo:${parts.join('-')}`).digest('hex');
+  return `${DEMO_ID_PREFIX}-${h.slice(0, 4)}-4${h.slice(4, 7)}-8${h.slice(7, 10)}-${h.slice(10, 22)}`;
+};
 const log = (msg) => console.log(`   ${msg}`);
 
 const USAGE_KINDS = [
@@ -119,7 +126,7 @@ async function upsertRow(model, id, data) {
 }
 
 async function cleanup() {
-  console.log('Cleaning up demo extras (ids starting with "demo-")...');
+  console.log(`Cleaning up demo extras (ids starting with "${DEMO_ID_PREFIX}")...`);
   const models = [
     ['webhookDelivery', prisma.webhookDelivery],
     ['webhookEndpoint', prisma.webhookEndpoint],
@@ -143,7 +150,7 @@ async function cleanup() {
   ];
   for (const [name, model] of models) {
     const result = await model.deleteMany({
-      where: { id: { startsWith: 'demo-' } },
+      where: { id: { startsWith: DEMO_ID_PREFIX } },
     });
     if (result.count > 0) console.log(`   removed ${result.count} × ${name}`);
   }
@@ -768,6 +775,7 @@ async function seedEngagement(ctx) {
         title: i0Title(email),
         content: i0Body(email),
         isPinned: email === 'teamlead@scholarflow.com',
+        isDeleted: false,
         tags: ['demo', 'planning'],
         createdAt: daysAgo(6.4),
       });
@@ -782,6 +790,7 @@ async function seedEngagement(ctx) {
           threadId,
           userId: ctx.byEmail[responders[i % responders.length]].id,
           content: replies[i],
+          isDeleted: false,
           createdAt: daysAgo(6.2 - i * 0.3),
         });
         totals.threads += 1;
