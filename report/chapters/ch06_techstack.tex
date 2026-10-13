@@ -19,10 +19,33 @@ traffic; no raw fetch in components), React Hook Form + Zod, TipTap with
 resizable-image, Y.js + socket.io client, Sonner toasts via provider helpers only.
 
 \subsection{Backend Technologies}
-Node.js $\geq$22, Express + TypeScript, Zod validation, thin controllers /
-service-layer logic, JWT + bcrypt + refresh tokens + rate limiting, Stripe SDK
-(checkout/portal/webhooks), Resend-first email service with SMTP fallback,
-node-cron subscription sweeper, Socket.IO rooms with JWT handshake.
+Node.js $\geq$22, Express with TypeScript, strict Zod request validation,
+thin controllers delegating to service-layer business logic, JWT with
+bcrypt and refresh token rotation, rate limiting on mutations, Stripe SDK
+for subscriptions and webhooks, Resend and SMTP email delivery, an hourly
+node-cron sweeper, and Socket.IO rooms with JWT authentication.
+
+\subsubsection{Backend File Structure}
+The backend follows a modular feature architecture under \texttt{src/app/modules/}, isolating controllers, services, routes, and validation schemas:
+
+\begin{verbatim}
+backend/src/app/
+|-- modules/
+|   |-- Auth/         % JWT auth, bcrypt hashing, token rotation
+|   |-- User/         % Profile management, credentials, preferences
+|   |-- papers/       % Upload, S3 presigned URLs, metadata extraction
+|   |-- annotations/  % PDF highlight marks, colors, and notes
+|   |-- Workspace/    % Multi-tenant spaces, member roles, invitations
+|   |-- Team/         % Lab collaborator management, role permissions
+|   |-- AI/           % Multi-model LLM routing (Gemini/OpenAI/Claude)
+|   |-- Search/       % pgvector HNSW cosine similarity search
+|   |-- Billing/      % Stripe checkout, webhooks, portal, sweeper
+|   |-- WebSocket/    % Socket.IO rooms, Y.js document synchronization
+|   |-- Notification/ % Real-time SSE push streams, quiet hours
+|   `-- Admin/        % System telemetry, user moderation, audit logs
+|-- middleware/       % JWT verification, RBAC guards, rate limiters
+`-- routes/           % Centralized REST route registration
+\end{verbatim}
 
 \subsection{Database Architecture}
 Single shared PostgreSQL (Prisma Cloud) for dev and production; Prisma 7.8.0
@@ -59,10 +82,11 @@ per-paper/discussion/workspace rooms, Y.js document sync, cursor presence,
 typing indicators, late-joiner state sync, REST fallback when offline.
 
 \subsection{Authentication and Security Architecture}
-better-auth (frontend) + backend JWT; OAuth never overwrites user-edited
-names/avatars; RBAC via \texttt{requireRole} after auth middleware; per-resource
-ownership checks in services; presigned S3 URLs only; verified Stripe webhooks;
-admin-gated metrics and people search.
+better-auth on the frontend paired with backend JWT authentication; OAuth
+never overwrites user-customized profile names or avatars; RBAC via
+\texttt{requireRole} after auth middleware; per-resource ownership checks in
+services; presigned S3 URLs only; verified Stripe webhooks; admin-gated
+metrics and team member search.
 
 \subsection{External Integrations}
 Google/GitHub OAuth, Gemini/OpenAI/Claude/DeepSeek AI, AWS S3, Stripe,
