@@ -6,8 +6,8 @@
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts",
+    "start": "node api.js && node dist/server.js",
+    "dev": "node api.js && ts-node src/server.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
