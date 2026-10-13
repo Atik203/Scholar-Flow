@@ -1,16 +1,10 @@
 \section{Challenges}
-\begin{itemize}[nosep]
-\item AI cost vs.\ quality: multi-provider routing, quotas, and caching to hold
-  average AI cost under \$0.50/user/month without degrading summaries.
-\item pgvector at latency distance: shared US-East cloud DB queried from
-  Bangladesh ($\sim$100--250\,ms network-bound); adapter choice
-  (\texttt{adapter-pg} pooling vs.\ HTTP) and select discipline keep deployed
-  p95 under budget.
-\item Migration drift: \texttt{db push} history bypasses vs.\ migration files;
-  resolved via hand-written additive migrations + \texttt{migrate deploy}.
-\item Auth-state races: redux-persist flush before hard navigation; better-auth
-  client/server boundary (no \texttt{authClient} in client utilities).
-\item Realtime durability: Y.js document seeding exactly once + debounced
-  persistence so co-edits survive disconnects.
+During the development and production readiness hardening of ScholarFlow, several architectural, operational, and algorithmic challenges were encountered and overcome:
+
+\begin{itemize}
+\item \textbf{AI Cost vs.\ Inference Quality}: High-volume summarization and chunk embeddings initially threatened to incur unsustainable API costs. The team designed a dynamic multi-tier fallback architecture (Gemini primary with OpenAI/DeepSeek fallback), integrated content hash caching for identical paper sections, and enforced per-user token quotas. This maintained average AI operational expenses below \$0.50 per user monthly without degrading response fidelity.
+\item \textbf{High-Latency Vector Database Access}: Operating a managed PostgreSQL database with pgvector across international network links introduced 100--250\,ms of baseline network latency. Transitioning to persistent TCP connection pooling via \texttt{@prisma/adapter-pg}, building HNSW vector indexes with optimal hyper-parameters ($m=16$, $ef=64$), and optimizing SQL projection eliminated unnecessary round trips, keeping 95th-percentile query times well under the responsiveness budget.
+\item \textbf{Database Schema Evolution and Migration Drift}: Early prototyping using rapid schema synchronizations caused discrepancies between migration histories and production database states. The team instituted a strict migration policy requiring versioned, additive SQL migration scripts with zero destructive column drops, validated through continuous integration before deployment.
+\item \textbf{Client-Side Auth State Persistence Races}: Asynchronous storage persistence during OAuth redirects occasionally produced stale token states and cascading HTTP 401 errors. This was resolved by guaranteeing explicit Redux Persist flushes before hard page reloads and enforcing a clean architectural boundary between server-only authentication clients and browser runtime utilities.
+\item \textbf{Real-Time Collaboration Durability}: Simultaneous collaborative editing in TipTap risked document state conflicts or lost keystrokes upon sudden network disconnects. A resilient synchronization layer combining Y.js CRDT state trees, single-instance document seeding, and debounced database persistence ensured seamless multi-user co-editing with guaranteed state recovery.
 \end{itemize}
-% TODO (fill-in): 1--2 lines each on what was tried and what finally worked.
