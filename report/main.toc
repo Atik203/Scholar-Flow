@@ -19,15 +19,16 @@
 \contentsline {subsection}{\numberline {6.1}Architecture Overview}{12}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Frontend Technologies}{12}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}Backend Technologies}{12}{subsection.6.3}%
+\contentsline {subsubsection}{\numberline {6.3.1}Backend File Structure}{13}{subsubsection.6.3.1}%
 \contentsline {subsection}{\numberline {6.4}Database Architecture}{13}{subsection.6.4}%
-\contentsline {subsection}{\numberline {6.5}AI and Machine Learning Integration}{13}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.5}AI and Machine Learning Integration}{14}{subsection.6.5}%
 \contentsline {subsection}{\numberline {6.6}Real-Time Communication Layer}{14}{subsection.6.6}%
-\contentsline {subsection}{\numberline {6.7}Authentication and Security Architecture}{14}{subsection.6.7}%
-\contentsline {subsection}{\numberline {6.8}External Integrations}{14}{subsection.6.8}%
-\contentsline {subsection}{\numberline {6.9}DevOps and Deployment Architecture}{14}{subsection.6.9}%
-\contentsline {subsection}{\numberline {6.10}Development and Testing Tools}{14}{subsection.6.10}%
-\contentsline {subsection}{\numberline {6.11}Key Technical Highlights}{14}{subsection.6.11}%
-\contentsline {section}{\numberline {7}System Testing and Validation}{14}{section.7}%
+\contentsline {subsection}{\numberline {6.7}Authentication and Security Architecture}{15}{subsection.6.7}%
+\contentsline {subsection}{\numberline {6.8}External Integrations}{15}{subsection.6.8}%
+\contentsline {subsection}{\numberline {6.9}DevOps and Deployment Architecture}{15}{subsection.6.9}%
+\contentsline {subsection}{\numberline {6.10}Development and Testing Tools}{15}{subsection.6.10}%
+\contentsline {subsection}{\numberline {6.11}Key Technical Highlights}{15}{subsection.6.11}%
+\contentsline {section}{\numberline {7}System Testing and Validation}{15}{section.7}%
 \contentsline {section}{\numberline {8}Challenges}{16}{section.8}%
-\contentsline {section}{\numberline {9}Future Enhancements}{16}{section.9}%
-\contentsline {section}{\numberline {10}Conclusion}{17}{section.10}%
+\contentsline {section}{\numberline {9}Future Enhancements}{17}{section.9}%
+\contentsline {section}{\numberline {10}Conclusion}{18}{section.10}%
