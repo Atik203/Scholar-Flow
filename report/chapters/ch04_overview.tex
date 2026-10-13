@@ -1,0 +1,10 @@
+\section{System Overview}
+ScholarFlow is a role-based web platform for four personas: Researcher, Pro
+Researcher, Team Lead, and Administrator. It follows a decoupled three-tier
+architecture: a Next.js frontend communicates with an Express REST API (plus a
+dedicated WebSocket server for presence/co-editing) over secure APIs;
+persistent data lives in PostgreSQL (+ pgvector), files in AWS S3, background
+jobs in Redis, and billing in Stripe. AI providers (Gemini/OpenAI) supply
+summarization, Q\&A, and embeddings with automatic fallback.
+
+% TODO: paste the system architecture diagram as Figure 1 (see ch06 for the file).
