@@ -3,9 +3,9 @@
   "version": "1.3.6",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
+    "dev": "node api.js && next dev -p 3000",
     "build": "next build",
-    "start": "next start",
+    "start": "node api.js && next start",
     "lint": "eslint .",
     "typegen": "next typegen",
     "type-check": "tsc --noEmit",
