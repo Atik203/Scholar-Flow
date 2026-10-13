@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="680" fill="#ffffff"/>
+  <text x="600" y="40" text-anchor="middle" font-size="26" font-weight="bold" fill="#0f172a">ScholarFlow System Architecture</text>
+
+  <!-- Client layer -->
+  <rect x="60" y="70" width="1080" height="110" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="80" y="98" font-size="15" font-weight="bold" fill="#2563eb">CLIENT</text>
+  <rect x="120" y="110" width="280" height="50" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="260" y="140" text-anchor="middle" font-size="16" fill="#0f172a">Browser (Next.js pages)</text>
+  <rect x="460" y="110" width="280" height="50" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="600" y="140" text-anchor="middle" font-size="16" fill="#0f172a">TipTap Editor + Y.js</text>
+  <rect x="800" y="110" width="280" height="50" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="940" y="140" text-anchor="middle" font-size="16" fill="#0f172a">RTK Query + SSE bell</text>
+
+  <!-- Frontend hosting -->
+  <rect x="60" y="200" width="1080" height="100" rx="12" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="80" y="228" font-size="15" font-weight="bold" fill="#16a34a">FRONTEND (Vercel)</text>
+  <rect x="330" y="240" width="540" height="45" rx="8" fill="#ffffff" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="600" y="268" text-anchor="middle" font-size="16" fill="#0f172a">Next.js 16 App Router + better-auth</text>
+
+  <!-- API layer -->
+  <rect x="60" y="320" width="1080" height="110" rx="12" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="80" y="348" font-size="15" font-weight="bold" fill="#ca8a04">API (Render)</text>
+  <rect x="120" y="360" width="330" height="50" rx="8" fill="#ffffff" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="285" y="390" text-anchor="middle" font-size="16" fill="#0f172a">Express REST API + JWT</text>
+  <rect x="480" y="360" width="330" height="50" rx="8" fill="#ffffff" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="645" y="390" text-anchor="middle" font-size="16" fill="#0f172a">Socket.IO server (rooms)</text>
+  <rect x="840" y="360" width="240" height="50" rx="8" fill="#ffffff" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="960" y="390" text-anchor="middle" font-size="16" fill="#0f172a">Stripe webhooks</text>
+
+  <!-- Data + external -->
+  <rect x="60" y="450" width="1080" height="190" rx="12" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="80" y="478" font-size="15" font-weight="bold" fill="#7c3aed">DATA + EXTERNAL SERVICES</text>
+  <rect x="100" y="495" width="240" height="55" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="220" y="518" text-anchor="middle" font-size="15" fill="#0f172a">PostgreSQL</text>
+  <text x="220" y="540" text-anchor="middle" font-size="15" fill="#0f172a">+ pgvector</text>
+  <rect x="370" y="495" width="200" height="55" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="470" y="528" text-anchor="middle" font-size="15" fill="#0f172a">AWS S3</text>
+  <rect x="600" y="495" width="200" height="55" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="700" y="528" text-anchor="middle" font-size="15" fill="#0f172a">Redis</text>
+  <rect x="830" y="495" width="280" height="55" rx="8" fill="#ffffff" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="970" y="528" text-anchor="middle" font-size="15" fill="#0f172a">Gemini / OpenAI / Stripe</text>
+  <text x="600" y="590" text-anchor="middle" font-size="14" fill="#475569">REST / WebSocket (TLS) between layers &#183; presigned S3 URLs &#183; Prisma ORM + raw SQL for vectors only</text>
+  <text x="600" y="616" text-anchor="middle" font-size="14" fill="#475569">Frontend never touches DB or S3 keys &#8212; all access via access-checked API</text>
+
+  <!-- Arrows -->
+  <line x1="600" y1="180" x2="600" y2="198" stroke="#334155" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="600" y1="300" x2="600" y2="318" stroke="#334155" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="600" y1="430" x2="600" y2="448" stroke="#334155" stroke-width="2" marker-end="url(#arr)"/>
+</svg>

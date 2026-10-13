@@ -1,0 +1,16 @@
+\section{Challenges}
+\begin{itemize}[nosep]
+\item AI cost vs.\ quality: multi-provider routing, quotas, and caching to hold
+  average AI cost under \$0.50/user/month without degrading summaries.
+\item pgvector at latency distance: shared US-East cloud DB queried from
+  Bangladesh ($\sim$100--250\,ms network-bound); adapter choice
+  (\texttt{adapter-pg} pooling vs.\ HTTP) and select discipline keep deployed
+  p95 under budget.
+\item Migration drift: \texttt{db push} history bypasses vs.\ migration files;
+  resolved via hand-written additive migrations + \texttt{migrate deploy}.
+\item Auth-state races: redux-persist flush before hard navigation; better-auth
+  client/server boundary (no \texttt{authClient} in client utilities).
+\item Realtime durability: Y.js document seeding exactly once + debounced
+  persistence so co-edits survive disconnects.
+\end{itemize}
+% TODO (fill-in): 1--2 lines each on what was tried and what finally worked.
