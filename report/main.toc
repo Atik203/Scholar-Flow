@@ -1,0 +1,33 @@
+\contentsline {section}{Mapped Program Outcomes}{iii}{section*.2}%
+\contentsline {section}{Abstract}{iv}{section*.3}%
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {section}{\numberline {2}Motivation}{2}{section.2}%
+\contentsline {section}{\numberline {3}Objectives of the System}{2}{section.3}%
+\contentsline {section}{\numberline {4}System Overview}{3}{section.4}%
+\contentsline {section}{\numberline {5}Feature Description}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Landing and Marketing Pages}{4}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Authentication and Onboarding}{4}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Dashboard Shell}{5}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Paper Management}{5}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Reading, Annotations, and Notes}{6}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Academic Editor}{6}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}AI Features}{7}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Workspaces and Collaboration}{7}{subsection.5.8}%
+\contentsline {subsection}{\numberline {5.9}Billing}{8}{subsection.5.9}%
+\contentsline {subsection}{\numberline {5.10}Admin Console}{8}{subsection.5.10}%
+\contentsline {section}{\numberline {6}Technology Stack}{9}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Architecture Overview}{9}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Frontend Technologies}{10}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Backend Technologies}{10}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}Database Architecture}{10}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}AI and Machine Learning Integration}{11}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}Real-Time Communication Layer}{11}{subsection.6.6}%
+\contentsline {subsection}{\numberline {6.7}Authentication and Security Architecture}{12}{subsection.6.7}%
+\contentsline {subsection}{\numberline {6.8}External Integrations}{12}{subsection.6.8}%
+\contentsline {subsection}{\numberline {6.9}DevOps and Deployment Architecture}{12}{subsection.6.9}%
+\contentsline {subsection}{\numberline {6.10}Development and Testing Tools}{12}{subsection.6.10}%
+\contentsline {subsection}{\numberline {6.11}Key Technical Highlights}{12}{subsection.6.11}%
+\contentsline {section}{\numberline {7}System Testing and Validation}{12}{section.7}%
+\contentsline {section}{\numberline {8}Challenges}{13}{section.8}%
+\contentsline {section}{\numberline {9}Future Enhancements}{13}{section.9}%
+\contentsline {section}{\numberline {10}Conclusion}{13}{section.10}%
