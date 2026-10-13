@@ -1,0 +1,16 @@
+\section{System Testing and Validation}
+\begin{itemize}[nosep]
+\item Auth: registration/login/logout, OAuth callbacks, JWT refresh, RBAC gates
+  (403 on insufficient role), rate limiting on mutations.
+\item Papers: upload validation (type/size), S3 presigned flow, metadata
+  extraction fallback, draft/publish visibility, access-checked reads/writes.
+\item Collaboration: invitations, role changes, email shares (view vs.\ edit),
+  discussion threading, Y.js late-joiner sync.
+\item Billing: CLI-forwarded webhooks (\texttt{checkout.session.completed},
+  subscription events), idempotent replay, portal flows, sweeper downgrade.
+\item AI: summary/Q\&A relevance review, 403 on unauthorized papers, escaped
+  HTML rendering, provider fallback under outage.
+\item API: Postman/Supertest contract checks; \texttt{yarn test} green
+  (21 suites / 59 tests); lint + type-check clean; build green.
+\end{itemize}
+% TODO (fill-in): paste measured results (pass counts, latency samples, coverage).
