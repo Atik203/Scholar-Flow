@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arr3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="360" fill="#ffffff"/>
+  <text x="600" y="36" text-anchor="middle" font-size="24" font-weight="bold" fill="#0f172a">Paper Lifecycle: Upload to AI Insights</text>
+
+  <g font-size="15" fill="#0f172a">
+    <rect x="30" y="120" width="180" height="110" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="120" y="158" text-anchor="middle" font-weight="bold">1. Upload</text>
+    <text x="120" y="184" text-anchor="middle">PDF + metadata</text>
+    <text x="120" y="206" text-anchor="middle">S3 presigned URL</text>
+
+    <rect x="260" y="120" width="180" height="110" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="350" y="158" text-anchor="middle" font-weight="bold">2. Extract</text>
+    <text x="350" y="184" text-anchor="middle">text, title, authors,</text>
+    <text x="350" y="206" text-anchor="middle">abstract (queued job)</text>
+
+    <rect x="490" y="120" width="180" height="110" rx="10" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+    <text x="580" y="158" text-anchor="middle" font-weight="bold">3. Chunk+Embed</text>
+    <text x="580" y="184" text-anchor="middle">chunks &#8594; vectors</text>
+    <text x="580" y="206" text-anchor="middle">pgvector HNSW</text>
+
+    <rect x="720" y="120" width="180" height="110" rx="10" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="810" y="158" text-anchor="middle" font-weight="bold">4. Ready</text>
+    <text x="810" y="184" text-anchor="middle">searchable, readable,</text>
+    <text x="810" y="206" text-anchor="middle">annotatable</text>
+
+    <rect x="950" y="120" width="220" height="110" rx="10" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+    <text x="1060" y="158" text-anchor="middle" font-weight="bold">5. AI Insights</text>
+    <text x="1060" y="184" text-anchor="middle">summary, Q&amp;A, compare,</text>
+    <text x="1060" y="206" text-anchor="middle">review (access-checked)</text>
+  </g>
+
+  <line x1="210" y1="175" x2="258" y2="175" stroke="#334155" stroke-width="2" marker-end="url(#arr3)"/>
+  <line x1="440" y1="175" x2="488" y2="175" stroke="#334155" stroke-width="2" marker-end="url(#arr3)"/>
+  <line x1="670" y1="175" x2="718" y2="175" stroke="#334155" stroke-width="2" marker-end="url(#arr3)"/>
+  <line x1="900" y1="175" x2="948" y2="175" stroke="#334155" stroke-width="2" marker-end="url(#arr3)"/>
+
+  <text x="600" y="290" text-anchor="middle" font-size="14" fill="#475569">Extraction failures never block upload &#183; embedding dimension validated before insert</text>
+  <text x="600" y="316" text-anchor="middle" font-size="14" fill="#475569">draft papers stay private until published</text>
+</svg>
