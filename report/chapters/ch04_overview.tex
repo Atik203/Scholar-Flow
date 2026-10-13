@@ -1,10 +1,10 @@
 \section{System Overview}
-ScholarFlow is a role-based web platform for four personas: Researcher, Pro
-Researcher, Team Lead, and Administrator. It follows a decoupled three-tier
-architecture: a Next.js frontend communicates with an Express REST API (plus a
-dedicated WebSocket server for presence/co-editing) over secure APIs;
-persistent data lives in PostgreSQL (+ pgvector), files in AWS S3, background
-jobs in Redis, and billing in Stripe. AI providers (Gemini/OpenAI) supply
-summarization, Q\&A, and embeddings with automatic fallback.
+ScholarFlow is a role-based web application designed for four primary user roles:
+\begin{itemize}[nosep]
+\item \textbf{Researcher}: Free-tier individual researchers who upload, organize, read, and annotate research papers with core AI-assisted summaries and semantic search.
+\item \textbf{Pro Researcher}: Advanced academic users requiring unlimited paper indexing, in-depth AI insights and Q\&A threads, citation graph exploration, and export capabilities.
+\item \textbf{Team Lead}: Principal investigators and lab managers who create and administer shared collaborative workspaces, manage team memberships and invitations, and coordinate group research projects.
+\item \textbf{Administrator}: System managers responsible for user accounts, subscription tier oversight, AI model configuration, content moderation, security audit logs, and real-time infrastructure health monitoring.
+\end{itemize}
 
-% TODO: paste the system architecture diagram as Figure 1 (see ch06 for the file).
+The system follows a modern decoupled client--server architecture where a Next.js 16 frontend communicates with an Express.js REST backend and a dedicated WebSocket real-time server via secure, authenticated APIs. Persistent domain entities are managed in PostgreSQL with the pgvector extension for high-performance vector similarity search. Research documents and asset uploads are securely stored in AWS S3 via presigned URLs, while automated background tasks and subscription lifecycles are coordinated with Stripe and scheduled node workers. AI services integrate multi-provider fallbacks to ensure continuous, high-availability academic assistance.
