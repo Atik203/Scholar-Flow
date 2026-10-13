@@ -1,0 +1,43 @@
+\section{Introduction}
+Effective research requires finding the right papers, understanding them
+quickly, organizing them reliably, and collaborating without friction. In
+practice, researchers juggle four to five disconnected tools --- reference
+managers, cloud drives, PDF readers, note-taking apps, and general chatbots
+--- losing context at every switch. Cognitive-load research and the
+ScholarFlow survey agree on the cost: the average researcher uses 4.2
+disconnected tools daily, context-switching overhead cuts productivity by
+30--50\%, and current tool satisfaction sits at only 3.28 out of 5.
+
+ScholarFlow was developed to consolidate this fragmented workflow into one
+AI-native hub: upload and organize papers, read and annotate them, write with
+integrated citations, and collaborate in shared workspaces with real-time
+co-editing. Unlike legacy tools that treat AI as an optional add-on,
+ScholarFlow makes AI a first-class capability of every workflow --- semantic
+search instead of keyword search, generated summaries and Q\&A instead of
+manual skimming, and contextual writing assistance instead of a detached
+chatbot window.
+
+This document serves four audiences. The \emph{development team} finds
+architectural blueprints and implementation rules for the multi-tier system
+(Next.js frontend, Express backend, PostgreSQL with pgvector). \emph{Project
+evaluators} find scope boundaries, phased delivery evidence, and measurable
+acceptance criteria. The \emph{quality assurance} view is covered by testable
+requirements and performance budgets (sub-300\,ms semantic search, $<$50\,ms
+per server-side query event, 99.9\% availability target). Finally,
+\emph{stakeholders} find market validation --- a 32-respondent survey with
+75\% need confirmation and 100\% AI-feature interest --- together with a
+freemium revenue model designed for student affordability.
+
+Development followed an Agile-iterative life cycle across phased rollouts:
+an MVP slice (authentication $\rightarrow$ upload $\rightarrow$ library
+$\rightarrow$ editor $\rightarrow$ sharing) first, then AI capabilities on
+top of the library, then collaboration and real-time features, then
+monetization and administration, closing with hardening and launch readiness.
+Each phase shipped a thin vertical slice rather than broad incomplete
+scaffolding, with continuous gates --- build, type-check, lint, and tests ---
+required green on every merge. The project applies core software engineering
+principles throughout: modularity (decoupled frontend/backend monorepo),
+scalability (pooled connections, paginated and access-scoped queries),
+maintainability (strict TypeScript, Zod contracts, migration discipline), and
+security (JWT sessions, RBAC, verified webhooks) --- making it suitable for
+real-world pilot deployment and iterative growth.

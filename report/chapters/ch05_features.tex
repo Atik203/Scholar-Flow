@@ -1,0 +1,104 @@
+\section{Feature Description}
+This section describes the core functional features with their user
+interfaces. Each figure below is wired through \texttt{\textbackslash
+uiscreenshot}: as long as the PNG is missing, a labeled placeholder box is
+rendered; dropping the capture into \texttt{figures/} under the stated name
+picks it up automatically with no \texttt{.tex} change.
+
+\subsection{Landing and Marketing Pages}
+The public entry point introduces the platform, compares plans, and routes
+visitors to registration. Product, resources, company, enterprise, and legal
+pages are included; pricing CTAs call the public plan catalog
+(\texttt{GET /billing/prices}) and start checkout via
+\texttt{POST /billing/checkout-session} --- price IDs are data, never
+hardcoded in the frontend.
+\uiscreenshot{ui_landing.png}{Landing page overview}{fig:ui-landing}
+
+\subsection{Authentication and Onboarding}
+Google/GitHub OAuth plus email/password with password-strength guidance,
+email verification, and time-limited password reset. Sessions use JWT access
+tokens with refresh rotation; auth state persists client-side and is flushed
+before hard navigation to avoid stale-state 401 cascades. First login runs a
+role-selection and workspace-bootstrap onboarding flow.
+\uiscreenshot{ui_auth.png}{Sign-in and onboarding}{fig:ui-auth}
+
+\subsection{Dashboard Shell}
+Role-aware collapsible sidebar, recent papers, quick actions, reading
+progress widgets, notification bell with unread count, and the global AI
+assistant entry point (Ctrl/Cmd+J). Layouts stream with Suspense skeletons
+and stay responsive from 375\,px mobile to desktop.
+\uiscreenshot{ui_dashboard.png}{Dashboard overview}{fig:ui-dashboard}
+
+\subsection{Paper Management}
+Multi-file drag-and-drop upload with progress feedback, import by DOI, arXiv
+ID, URL (IEEE/ResearchGate/Scholar/Semantic Scholar detection), and
+BibTeX/RIS plus Zotero/Mendeley/EndNote exports. AI metadata extraction
+(title, authors, abstract, year, venue, tags) never blocks upload on failure;
+the library offers search, filters (author, year, tags, status), sorting, and
+cursor pagination. Detail view shows metadata, abstract, file preview, AI
+panels, sharing controls, and version indicator; drafts are excluded from
+public and shared views, and deletion is soft with a restore window.
+\uiscreenshot{ui_upload.png}{Paper upload with AI metadata extraction}{fig:ui-upload}
+\uiscreenshot{ui_paper_detail.png}{Paper detail view}{fig:ui-paper-detail}
+
+\subsection{Reading, Annotations, and Notes}
+Secure iframe PDF preview with highlight/underline/strikethrough marks,
+per-mark notes and colors, type filtering, viewport-clamped popups, confirmed
+deletes, and a mobile drawer layout. Notebooks hold ordered sections of typed
+notes (general, summary, question, idea, reference, meeting) cross-linked to
+papers, collections, and discussions.
+% TODO screenshot (optional): \uiscreenshot{ui_annotations.png}{PDF annotations}{fig:ui-annotations}
+
+\subsection{Academic Editor}
+TipTap editor with full formatting, tables, lists, alignment, KaTeX inline and
+block math, seven paper templates (IEEE, ACM, Springer, arXiv, thesis,
+literature review, blank), drag-and-drop/paste image handling with S3 storage
+and captions, toolbar citation insertion, debounced auto-save with explicit
+save-state indicator, 50-snapshot version history with restore, word/character
+count, reading time, distraction-free full-screen mode, and server-rendered
+PDF/DOCX/Markdown export.
+\uiscreenshot{ui_editor.png}{Research editor}{fig:ui-editor}
+
+\subsection{AI Features}
+Floating assistant with streaming markdown answers, persisted per-user
+conversation history, dynamic model selector, and current-paper/workspace
+context awareness. Paper tools --- summarizer (tone/audience/length), key
+points, Q\&A insight threads, comparator, translator, literature review ---
+verify access to every referenced paper (403 otherwise), cache reusable
+outputs with invalidation on edit, and escape all rendered HTML. Semantic
+search runs cosine similarity over pgvector HNSW vectors, merged with keyword
+results and strictly access-scoped.
+\uiscreenshot{ui_search.png}{Semantic search across the library}{fig:ui-search}
+\uiscreenshot{ui_ai.png}{AI insights panel (summary + Q\&A)}{fig:ui-ai}
+
+\subsection{Workspaces and Collaboration}
+Workspaces (overview, papers, collections, members, settings tabs) with
+Owner/Manager/Editor/Viewer roles, workspace-scoped invitations with
+accept/decline tokens, team management with derived collaborator access,
+email-based paper sharing (view/edit, idempotent re-share, instant revoke),
+threaded plus live-socket discussions with typing indicators, and Y.js
+real-time co-editing with cursor presence and debounced persistence.
+Notifications arrive over SSE with reconnect/polling fallback, category and
+quiet-hour preferences, and transactional delivery for billing/security.
+\uiscreenshot{ui_workspace.png}{Shared workspace}{fig:ui-workspace}
+
+\subsection{Billing}
+Public plan catalog (Free/Pro/Team, monthly/annual), Stripe Checkout for
+upgrades, Customer Portal for payment methods/invoices/cancellation, billing
+page with renewal date and history, and end-of-period cancellation semantics.
+Webhooks are the sole source of subscription truth (signature-verified,
+idempotent); an hourly sweeper downgrades past-due accounts after a
+configurable grace window (default 7 days) independent of webhook timing.
+\uiscreenshot{ui_billing.png}{Billing plan selection}{fig:ui-billing}
+
+\subsection{Admin Console}
+Overview metrics with growth and role distribution, user search/inspect/role
+change/deactivate/delete with CSV export, subscription and subscriber views,
+plan catalog management, payment records with revenue summary, report
+generation (CSV/JSON), full audit trail with export, AI model catalog and
+provider keys, platform API keys, outbound webhook endpoints with delivery
+logs and retries, moderation queue, alert rules and history, live CPU/memory/
+storage/DB health (10\,s refresh), diagnostics, and log viewer --- all backed
+by real data and real actions, code-split behind admin role middleware.
+\uiscreenshot{ui_admin.png}{Admin overview}{fig:ui-admin}
+\uiscreenshot{ui_health.png}{System health monitoring}{fig:ui-health}

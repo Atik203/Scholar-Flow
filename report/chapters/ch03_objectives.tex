@@ -1,0 +1,35 @@
+\section{Objectives of the System}
+The primary objective is to design and develop a secure, scalable, and
+user-centric research hub that reduces administrative overhead by 40--50\%,
+raises tool satisfaction from the measured 3.28/5 baseline toward 4.5/5, and
+converts at least 5\% of free users to paid tiers within twelve months of
+launch. Specific objectives:
+
+\begin{itemize}
+\item \textbf{Unified research hub.} Single S3-backed source of truth with
+  automatic AI metadata extraction, collections/workspaces organization, and
+  full-text plus semantic search --- cutting the average 4.2-tool stack down
+  to one primary platform.
+\item \textbf{AI-powered knowledge discovery.} Sub-300\,ms semantic search,
+  configurable summaries, key points, grounded Q\&A threads, multi-paper
+  comparison, translation, and literature-review drafts --- all strictly
+  access-checked per paper and HTML-escaped before rendering.
+\item \textbf{Academic writing without lock-in.} TipTap editor with LaTeX
+  math, seven templates, debounced auto-save, 50-snapshot version history,
+  nine citation formats (APA, MLA, IEEE, Chicago, Harvard, Vancouver, ACS,
+  BibTeX, EndNote), and real server-rendered PDF/DOCX/Markdown export.
+\item \textbf{Real teamwork.} Five-tier workspace roles, invitations, email
+  sharing with view/edit permissions and instant revocation, threaded and live
+  discussions, SSE notifications with quiet hours, and Y.js real-time
+  co-editing with presence --- degrading gracefully to REST when the socket
+  service is unavailable.
+\item \textbf{Trustworthy monetization and operations.} Stripe Checkout,
+  Customer Portal, signature-verified idempotent webhooks as the sole
+  entitlement truth, an hourly grace-period downgrade sweeper (default 7
+  days), and an admin console covering users, plans, payments, reports,
+  audit, moderation, webhooks, and live system health at 10\,s refresh.
+\item \textbf{Production-grade engineering.} $<$50\,ms server-side query
+  budget with terminal slow-query visibility, additive-only migrations,
+  WCAG 2.1 AA compliance, 99.9\% availability target, and green gates (build,
+  type-check, lint, 21 suites / 59 tests) on every merge.
+\end{itemize}
