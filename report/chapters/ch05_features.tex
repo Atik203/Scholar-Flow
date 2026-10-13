@@ -30,9 +30,10 @@ and stay responsive from 375\,px mobile to desktop.
 \uiscreenshot{ui_dashboard.png}{Dashboard overview}{fig:ui-dashboard}
 
 \subsection{Paper Management}
-Multi-file drag-and-drop upload with progress feedback, import by DOI, arXiv
-ID, URL (IEEE/ResearchGate/Scholar/Semantic Scholar detection), and
-BibTeX/RIS plus Zotero/Mendeley/EndNote exports. AI metadata extraction
+Multi-file drag-and-drop upload with progress feedback, direct import via
+DOI, arXiv ID, or publisher URL (with IEEE, ResearchGate, Google Scholar, and
+Semantic Scholar detection), alongside BibTeX and RIS format exports with
+Zotero, Mendeley, and EndNote compatibility. AI metadata extraction
 (title, authors, abstract, year, venue, tags) never blocks upload on failure;
 the library offers search, filters (author, year, tags, status), sorting, and
 cursor pagination. Detail view shows metadata, abstract, file preview, AI
@@ -72,14 +73,15 @@ results and strictly access-scoped.
 \uiscreenshot{ui_ai.png}{AI insights panel (summary + Q\&A)}{fig:ui-ai}
 
 \subsection{Workspaces and Collaboration}
-Workspaces (overview, papers, collections, members, settings tabs) with
-Owner/Manager/Editor/Viewer roles, workspace-scoped invitations with
-accept/decline tokens, team management with derived collaborator access,
-email-based paper sharing (view/edit, idempotent re-share, instant revoke),
-threaded plus live-socket discussions with typing indicators, and Y.js
-real-time co-editing with cursor presence and debounced persistence.
-Notifications arrive over SSE with reconnect/polling fallback, category and
-quiet-hour preferences, and transactional delivery for billing/security.
+Workspaces (organized by overview, papers, collections, members, and settings
+tabs) support Owner, Manager, Editor, and Viewer roles, workspace-scoped
+invitations with accept or decline tokens, team management with derived
+collaborator access, email-based paper sharing (view or edit, idempotent
+re-share, instant revoke), threaded and live-socket discussions with typing
+indicators, and Y.js real-time co-editing with cursor presence and debounced
+persistence. Notifications arrive over SSE with reconnect and polling fallback,
+category and quiet-hour preferences, and transactional delivery for
+billing and security events.
 \uiscreenshot{ui_workspace.png}{Shared workspace}{fig:ui-workspace}
 
 \subsection{Billing}
@@ -92,13 +94,14 @@ configurable grace window (default 7 days) independent of webhook timing.
 \uiscreenshot{ui_billing.png}{Billing plan selection}{fig:ui-billing}
 
 \subsection{Admin Console}
-Overview metrics with growth and role distribution, user search/inspect/role
-change/deactivate/delete with CSV export, subscription and subscriber views,
-plan catalog management, payment records with revenue summary, report
-generation (CSV/JSON), full audit trail with export, AI model catalog and
-provider keys, platform API keys, outbound webhook endpoints with delivery
-logs and retries, moderation queue, alert rules and history, live CPU/memory/
-storage/DB health (10\,s refresh), diagnostics, and log viewer --- all backed
-by real data and real actions, code-split behind admin role middleware.
+Overview metrics with platform growth and role distribution, comprehensive user
+search, inspection, role modification, account deactivation, and deletion with
+CSV export, subscription and subscriber views, plan catalog management,
+payment records with revenue summaries, report generation (CSV/JSON), full
+audit trail with export, AI model catalog and provider keys, platform API
+keys, outbound webhook endpoints with delivery logs and retries, moderation
+queue, alert rules and history, live CPU, memory, storage, and database health
+(10\,s refresh), diagnostics, and log viewer --- all backed by real data and
+real actions, code-split behind admin role middleware.
 \uiscreenshot{ui_admin.png}{Admin overview}{fig:ui-admin}
 \uiscreenshot{ui_health.png}{System health monitoring}{fig:ui-health}
