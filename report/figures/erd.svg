@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arre" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#334155"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="1200" height="700" fill="#ffffff"/>
+  <text x="600" y="34" text-anchor="middle" font-size="24" font-weight="bold" fill="#0f172a">ScholarFlow Entity--Relationship Diagram (core domain)</text>
+
+  <!-- ROW 1 -->
+  <g font-size="13" fill="#0f172a">
+    <rect x="15" y="60" width="275" height="250" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="152" y="86" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e40af">Identity &amp; Auth</text>
+    <text x="30" y="112">User: id, email (unique)</text>
+    <text x="30" y="134">name, image, role enum</text>
+    <text x="30" y="156">(RESEARCHER/PRO/LEAD/ADMIN)</text>
+    <text x="30" y="178">plan, subscription status</text>
+    <text x="30" y="200">Account: OAuth link (userId)</text>
+    <text x="30" y="222">Session + UserToken (refresh)</text>
+    <text x="30" y="244">VerificationToken (reset/verify)</text>
+    <text x="30" y="266">LoginHistory: who/when/where</text>
+    <text x="30" y="288">UserPreference: editor, quiet hrs</text>
+
+    <rect x="310" y="60" width="270" height="250" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="445" y="86" text-anchor="middle" font-size="16" font-weight="bold" fill="#166534">Workspace &amp; Team</text>
+    <text x="325" y="112">Workspace: id, name</text>
+    <text x="325" y="134">ownerId &#8594; User, visibility</text>
+    <text x="325" y="156">WorkspaceMember:</text>
+    <text x="325" y="178">userId, role (4 levels)</text>
+    <text x="325" y="200">WorkspaceInvitation:</text>
+    <text x="325" y="222">email, role, token, state</text>
+    <text x="325" y="244">(pending/accept/decline/exp.)</text>
+    <text x="325" y="266">WorkspaceSettings: defaults</text>
+    <text x="325" y="288">ActivityLog: member actions</text>
+
+    <rect x="600" y="60" width="285" height="250" rx="8" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+    <text x="742" y="86" text-anchor="middle" font-size="16" font-weight="bold" fill="#854d0e">Paper Library</text>
+    <text x="615" y="112">Paper: id, uploaderId &#8594; User</text>
+    <text x="615" y="134">workspaceId (nullable)</text>
+    <text x="615" y="156">title, authors, abstract, tags</text>
+    <text x="615" y="178">status: draft / published, soft-del</text>
+    <text x="615" y="200">PaperFile: S3 key, version</text>
+    <text x="615" y="222">PaperChunk: content + vector</text>
+    <text x="615" y="244">(HNSW cosine index)</text>
+    <text x="615" y="266">PaperVersion: 50 snapshots</text>
+    <text x="615" y="288">PaperShare: email, view/edit, revoke</text>
+
+    <rect x="905" y="60" width="280" height="250" rx="8" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="1045" y="86" text-anchor="middle" font-size="16" font-weight="bold" fill="#5b21b6">Organize &amp; Notes</text>
+    <text x="920" y="112">Collection: id, workspaceId</text>
+    <text x="920" y="134">name, visibility, status</text>
+    <text x="920" y="156">CollectionPaper: paperId,</text>
+    <text x="920" y="178">status, starred</text>
+    <text x="920" y="200">CollectionMember: access list</text>
+    <text x="920" y="222">Notebook &#8594; Section &#8594; Note</text>
+    <text x="920" y="244">ResearchNote: typed, linked to</text>
+    <text x="920" y="266">papers/collections/threads</text>
+    <text x="920" y="288">Annotation (+Version): PDF marks</text>
+  </g>
+
+  <!-- ROW 2 -->
+  <g font-size="13" fill="#0f172a">
+    <rect x="15" y="340" width="330" height="270" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+    <text x="180" y="366" text-anchor="middle" font-size="16" font-weight="bold" fill="#9f1239">AI Layer</text>
+    <text x="30" y="392">AIProvider: catalog + keys, fallback</text>
+    <text x="30" y="414">AISummary: paperId + tone/</text>
+    <text x="30" y="436">audience/length config, cached</text>
+    <text x="30" y="458">AIKeyPoint: claims per paper</text>
+    <text x="30" y="480">AIInsightThread &#8594; Message:</text>
+    <text x="30" y="502">grounded paper Q&amp;A</text>
+    <text x="30" y="524">AIConversation &#8594; Message:</text>
+    <text x="30" y="546">global assistant history (private)</text>
+    <text x="30" y="568">AIMetadata: title/tag suggestions</text>
+    <text x="30" y="590">AIContextCache: token efficiency</text>
+
+    <rect x="365" y="340" width="250" height="270" rx="8" fill="#ecfdf5" stroke="#0d9488" stroke-width="2"/>
+    <text x="490" y="366" text-anchor="middle" font-size="16" font-weight="bold" fill="#0f766e">Billing</text>
+    <text x="380" y="392">Plan: catalog, Stripe price IDs</text>
+    <text x="380" y="414">Subscription: state, renewal,</text>
+    <text x="380" y="436">grace handling</text>
+    <text x="380" y="458">Payment: records, status</text>
+    <text x="380" y="480">WebhookEvent: idempotent log</text>
+    <text x="380" y="502">(sole entitlement truth)</text>
+    <text x="380" y="524">Citation + CitationExport:</text>
+    <text x="380" y="546">9 formats, history, re-download</text>
+
+    <rect x="635" y="340" width="245" height="270" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="757" y="366" text-anchor="middle" font-size="16" font-weight="bold" fill="#9a3412">Discuss &amp; Notify</text>
+    <text x="650" y="392">DiscussionThread: title, tags,</text>
+    <text x="650" y="414">pin / resolve states</text>
+    <text x="650" y="436">DiscussionMessage: author-</text>
+    <text x="650" y="458">validated, live via rooms</text>
+    <text x="650" y="480">Notification: category,</text>
+    <text x="650" y="502">read/star, quiet-hour aware</text>
+    <text x="650" y="524">SearchHistory: re-run/clear,</text>
+    <text x="650" y="546">trending queries</text>
+
+    <rect x="900" y="340" width="285" height="270" rx="8" fill="#f1f5f9" stroke="#475569" stroke-width="2"/>
+    <text x="1042" y="366" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e293b">Insight &amp; Ops</text>
+    <text x="915" y="392">UsageEvent: feature telemetry</text>
+    <text x="915" y="414">ActivityLogEntry: severity,</text>
+    <text x="915" y="436">filters, CSV/JSON export</text>
+    <text x="915" y="458">AdminReport: generated files</text>
+    <text x="915" y="480">AuditLog: admin trail</text>
+    <text x="915" y="502">SystemAlert + SystemSetting</text>
+    <text x="915" y="524">WebhookEndpoint &#8594; Delivery</text>
+    <text x="915" y="546">ApiKey: issue/rotate/revoke</text>
+    <text x="915" y="568">ContentReport: moderation queue</text>
+    <text x="915" y="590">Faq/Testimonial/PageContent</text>
+  </g>
+
+  <!-- Relations -->
+  <g font-size="12" fill="#475569">
+    <line x1="290" y1="150" x2="308" y2="150" stroke="#334155" stroke-width="2" marker-end="url(#arre)"/>
+    <text x="299" y="140" text-anchor="middle">owns</text>
+    <line x1="290" y1="220" x2="598" y2="220" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arre)"/>
+    <text x="444" y="210" text-anchor="middle">uploads / member of</text>
+    <line x1="742" y1="310" x2="742" y2="338" stroke="#334155" stroke-width="2" marker-end="url(#arre)"/>
+    <text x="800" y="330" text-anchor="start">analyzed</text>
+    <line x1="885" y1="180" x2="903" y2="180" stroke="#334155" stroke-width="2" marker-end="url(#arre)"/>
+    <text x="894" y="170" text-anchor="middle">groups</text>
+    <line x1="445" y1="310" x2="480" y2="338" stroke="#334155" stroke-width="1.5" marker-end="url(#arre)"/>
+    <text x="440" y="335" text-anchor="middle">contains</text>
+    <line x1="152" y1="310" x2="420" y2="360" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arre)"/>
+    <text x="270" y="348" text-anchor="middle">subscribes</text>
+    <line x1="1045" y1="310" x2="800" y2="338" stroke="#334155" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arre)"/>
+    <text x="930" y="332" text-anchor="middle">references</text>
+  </g>
+
+  <text x="600" y="646" text-anchor="middle" font-size="13" fill="#475569">Crow's-foot detail (FK columns, cardinalities) lives in Prisma schema + schema diagram; every paper/AI/search read is access-scoped (owner or workspace member).</text>
+  <text x="600" y="668" text-anchor="middle" font-size="13" fill="#475569">Vector ops use parameterized raw SQL only; vector columns/indexes are never dropped or resized in place.</text>
+</svg>
