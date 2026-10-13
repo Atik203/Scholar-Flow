@@ -1,0 +1,80 @@
+% ScholarFlow — Software Engineering Laboratory Project Report
+% Main driver file. Compile with: pdflatex main.tex (run twice for TOC)
+\documentclass[12pt,a4paper]{article}
+
+% ---------- Encoding & fonts ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+% ---------- Page layout ----------
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---------- Graphics & tables ----------
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+
+% ---------- Links & lists ----------
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+% ---------- Misc ----------
+\usepackage{xcolor}
+
+% ---------- UI screenshot helper ----------
+% \uiscreenshot{file}{caption}{label}: includes figures/<file> when present,
+% otherwise renders a labeled placeholder box. Drop the PNG in later and it
+% picks it up automatically — no .tex change needed.
+\newcommand{\uiscreenshot}[3]{%
+  \begin{figure}[H]
+  \centering
+  \IfFileExists{figures/#1}{%
+    \includegraphics[width=0.95\textwidth]{figures/#1}%
+  }{%
+    \fbox{\parbox[c][5cm]{0.93\textwidth}{\centering
+      \textbf{[TODO screenshot:] \url{figures/#1}}\\[0.3cm]
+      Capture at 280--320\,dpi PNG before submission.}}%
+  }%
+  \caption{#2}\label{#3}
+  \end{figure}
+}
+
+\graphicspath{{./}{./figures/}}
+
+\begin{document}
+
+% Title page (edit course/teacher/section placeholders in title.tex)
+\input{title}
+
+% Front matter
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\input{po_outcomes}
+\newpage
+\input{abstract}
+\newpage
+\pagenumbering{arabic}
+
+% Chapters (one file per chapter — fill in content, replace TODO figures)
+\input{chapters/ch01_introduction}
+\input{chapters/ch02_motivation}
+\input{chapters/ch03_objectives}
+\input{chapters/ch04_overview}
+\input{chapters/ch05_features}
+\input{chapters/ch06_techstack}
+\input{chapters/ch07_testing}
+\input{chapters/ch08_challenges}
+\input{chapters/ch09_future}
+\input{chapters/ch10_conclusion}
+
+% References
+\input{chapters/references}
+
+\end{document}
