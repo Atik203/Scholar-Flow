@@ -18,6 +18,30 @@ memoization), TypeScript strict, Tailwind CSS + shadcn/ui, RTK Query (all API
 traffic; no raw fetch in components), React Hook Form + Zod, TipTap with
 resizable-image, Y.js + socket.io client, Sonner toasts via provider helpers only.
 
+\subsubsection{Frontend File Structure}
+The frontend is architected under Next.js 16 App Router conventions with a clean separation of routing, components, state management, and utilities:
+
+\begin{verbatim}
+frontend/src/
+|-- app/             % Next.js 16 App Router pages and layouts
+|   |-- dashboard/   % Main dashboard, papers, workspaces, editor
+|   |-- (app)/admin/ % Admin console, telemetry, user management
+|   |-- login/       % Sign-in, registration, onboarding flows
+|   |-- pricing/     % Public plan catalog and checkout routes
+|   |-- api/         % Route handlers and better-auth sync endpoints
+|   |-- layout.tsx   % Global root layout and provider hierarchy
+|   `-- globals.css  % Theme design tokens, Tailwind utility layers
+|-- components/      % Reusable UI components (shadcn/ui, modals)
+|   |-- customUI/    % Floating inputs, custom toggle form controls
+|   |-- dashboard/   % Shell layout, sidebar, metric widgets
+|   `-- providers/   % Redux, theme, and toast provider contexts
+|-- hooks/           % Custom hooks (SSE stream, socket, auth)
+|-- lib/             % Utilities, better-auth client, API configs
+|-- redux/           % RTK Query API slices and Redux Persist store
+|-- types/           % TypeScript interface definitions and schemas
+`-- proxy.ts         % Edge auth guards and route protection
+\end{verbatim}
+
 \subsection{Backend Technologies}
 Node.js $\geq$22, Express with TypeScript, strict Zod request validation,
 thin controllers delegating to service-layer business logic, JWT with
