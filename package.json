@@ -14,7 +14,7 @@
     "dev:turbo": "node api.js && turbo run dev",
     "dev:backend": "node api.js && yarn workspace @scholar-flow/backend dev",
     "dev:frontend": "node api.js && yarn workspace @scholar-flow/frontend dev",
-    "build": "corepack enable 2>/dev/null; turbo run build",
+    "build": "node api.js && corepack enable 2>/dev/null; turbo run build",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "test": "turbo run test",
