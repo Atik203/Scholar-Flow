@@ -5,9 +5,9 @@
   "description": "Lightweight Socket.io server for real-time features (Render Free deployment)",
   "main": "dist/server.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node api.js && node dist/server.js",
-    "dev": "node api.js && ts-node src/server.ts",
+    "build": "node init && tsc",
+    "start": "node init && node dist/server.js",
+    "dev": "node init && ts-node src/server.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
