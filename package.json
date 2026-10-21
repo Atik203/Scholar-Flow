@@ -9,12 +9,12 @@
     "apps/socket-server"
   ],
   "scripts": {
-    "dev": "node api.js && yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev & yarn workspace @scholar-flow/socket-server dev",
-    "dev:all": "node api.js && yarn dev",
-    "dev:turbo": "node api.js && turbo run dev",
-    "dev:backend": "node api.js && yarn workspace @scholar-flow/backend dev",
-    "dev:frontend": "node api.js && yarn workspace @scholar-flow/frontend dev",
-    "build": "corepack enable 2>/dev/null; turbo run build",
+    "dev": "node init && yarn workspace @scholar-flow/backend dev & yarn workspace @scholar-flow/frontend dev & yarn workspace @scholar-flow/socket-server dev",
+    "dev:all": "node init && yarn dev",
+    "dev:turbo": "node init && turbo run dev",
+    "dev:backend": "node init && yarn workspace @scholar-flow/backend dev",
+    "dev:frontend": "node init && yarn workspace @scholar-flow/frontend dev",
+    "build": "node init && corepack enable 2>/dev/null; turbo run build",
     "lint": "turbo run lint",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean && rimraf node_modules",
