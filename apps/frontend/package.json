@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node api.js && next dev -p 3000",
-    "build": "next build",
+    "build": "node api.js && next build",
     "start": "node api.js && next start",
     "lint": "eslint .",
     "typegen": "next typegen",
